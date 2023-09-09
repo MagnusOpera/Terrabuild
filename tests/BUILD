@@ -13,5 +13,5 @@ targets:
   publish:
     depends-on: [build]
 
-variables:
-  configuration: Release
+# variables:
+#   configuration: Release
