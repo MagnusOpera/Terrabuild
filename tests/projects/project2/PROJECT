@@ -1,0 +1,3 @@
+targets:
+  build:
+    - echo "building project2"

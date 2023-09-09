@@ -1,0 +1,12 @@
+dependencies:
+  - ../../libraries/library1
+
+outputs:
+  - dist
+
+targets:
+  build:
+    - echo "building project1"
+
+  publish:
+    - echo "publishing project1"
