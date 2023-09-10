@@ -1,52 +1,39 @@
 module Configuration
 open Legivel.Attributes
-open Helpers.Collections
 open Helpers
 open System.IO
 
-type Dependencies = list<string>
+type Dependencies = List<string>
 
-type Outputs = list<string>
+type Outputs = List<string>
 
-type ProjectTargets = map<string, Dependencies>
+type ProjectTargets = Map<string, Dependencies>
 
-type DependsOns = list<string>
+type DependsOns = List<string>
 
 type ProjectConfiguration = {
-    [<YamlField("dependencies")>] Dependencies: Dependencies option
-    [<YamlField("outputs")>] Outputs: Outputs option
-    [<YamlField("targets")>] Targets: ProjectTargets option
-}
-
-type StoreType =
-    | [<YamlValue("local")>] Local
-
-type Store = {
-    [<YamlField("type")>] Type: StoreType
-    [<YamlField("url")>] Url: string
+    [<YamlField("dependencies")>] Dependencies: Dependencies
+    [<YamlField("outputs")>] Outputs: Outputs
+    [<YamlField("targets")>] Targets: ProjectTargets
 }
 
 type BuildTarget = {
-    [<YamlField("depends-on")>] DependsOn: DependsOns option
+    [<YamlField("depends-on")>] DependsOn: DependsOns
 }
 
-type BuildTargets = map<string, BuildTarget>
+type BuildTargets = Map<string, BuildTarget>
 
-type BuildVariables = map<string, string>
+type BuildVariables = Map<string, string>
 
 type BuildConfiguration = {
-    [<YamlField("store")>] Store: Store option
     [<YamlField("dependencies")>] Dependencies: Dependencies
-    [<YamlField("targets")>] Targets: BuildTargets option
-    [<YamlField("variables")>] Variables: BuildVariables option
+    [<YamlField("targets")>] Targets: BuildTargets
+    [<YamlField("variables")>] Variables: BuildVariables
 }
-
-
-
 
 type GlobalConfiguration = {
     Build: BuildConfiguration
-    Projects: map<string, ProjectConfiguration>
+    Projects: Map<string, ProjectConfiguration>
 }
 
 let read workspaceDirectory =
@@ -55,10 +42,9 @@ let read workspaceDirectory =
 
     let mutable projects = Map.empty
 
-    let rec scanDependencies cwd dependencies =
+    let rec scanDependencies dependencies =
         for dependency in dependencies do
-            let dependencyDirectory = Path.Combine(cwd, dependency)
-            let dependencyId = Path.GetRelativePath(workspaceDirectory, dependencyDirectory)
+            let dependencyDirectory = Path.Combine(workspaceDirectory, dependency)
 
             // process only unknown dependency
             if projects |> Map.containsKey dependency |> not then
@@ -67,11 +53,19 @@ let read workspaceDirectory =
                     if File.Exists(dependencyFile) then
                         Json.DeserializeFile<ProjectConfiguration> dependencyFile
                     else
-                        { Dependencies = None; Outputs = None; Targets = None }
-                projects <- projects |> Map.add dependencyId dependencyConfig
+                        { Dependencies = List.empty; Outputs = List.empty; Targets = Map.empty }
 
-                let dependencyRelativePathes = dependencyConfig.Dependencies |> Option.defaultValue List.empty
-                scanDependencies dependencyDirectory dependencyRelativePathes
+                // convert relative dependencies to absolute dependencies respective to workspaceDirectory
+                let dependencies =
+                    dependencyConfig.Dependencies
+                    |> List.map (fun dep -> let depDir = Path.Combine(dependencyDirectory, dep)
+                                            Path.GetRelativePath(workspaceDirectory, depDir))
 
-    scanDependencies workspaceDirectory buildConfig.Dependencies
+                let dependencyConfig = { dependencyConfig
+                                         with Dependencies = dependencies }
+                projects <- projects |> Map.add dependency dependencyConfig
+
+                scanDependencies dependencies
+
+    scanDependencies buildConfig.Dependencies
     { Build = buildConfig; Projects = projects }
