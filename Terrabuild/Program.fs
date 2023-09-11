@@ -3,6 +3,9 @@
 let config = Configuration.read "tests"
 printfn $"{config}"
 
+let graph = Graph.build config "publish"
+printfn $"{graph}"
+
 
 // let build = Json.DeserializeFile<Configuration.BuildConfiguration> "tests/BUILD"
 // printfn $"{build}"

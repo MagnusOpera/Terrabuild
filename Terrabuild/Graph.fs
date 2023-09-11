@@ -18,6 +18,7 @@ type WorkspaceGraph = {
 
 
 
+// NOTE: can be easily parallelized using ConcurrentHashSet and ConcurrentDictionary
 let build (wsConfig: Configuration.WorkspaceConfig) (target: string) =
     let processedNodes = HashSet<string>()
     let allNodes = Dictionary<string, Node>()
@@ -55,7 +56,6 @@ let build (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                                                  Children = children |> Set.ofSeq }
                                     allNodes.Add(nodeId, node)
         | _ -> ()
-
 
     for dependency in wsConfig.Build.Dependencies do
         buildTarget dependency target rootNodes
