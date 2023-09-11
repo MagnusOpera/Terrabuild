@@ -1,3 +1,0 @@
-targets:
-  build:
-    - echo "building library1"

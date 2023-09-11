@@ -3,42 +3,38 @@ open Legivel.Attributes
 open Helpers
 open System.IO
 
-type Dependencies = List<string>
+type ProjectTarget = {
+    [<YamlField("depends-on")>] DependsOn: List<string>
+    [<YamlField("steps")>] Steps: string list
+}
 
-type Outputs = List<string>
-
-type ProjectTargets = Map<string, Dependencies>
-
-type DependsOns = List<string>
-
-type ProjectConfiguration = {
-    [<YamlField("dependencies")>] Dependencies: Dependencies
-    [<YamlField("outputs")>] Outputs: Outputs
-    [<YamlField("targets")>] Targets: ProjectTargets
+type ProjectConfig = {
+    [<YamlField("dependencies")>] Dependencies: List<string>
+    [<YamlField("outputs")>] Outputs: List<string>
+    [<YamlField("targets")>] Targets: Map<string, ProjectTarget>
+    [<YamlField("tags")>] Tags: List<string>
 }
 
 type BuildTarget = {
-    [<YamlField("depends-on")>] DependsOn: DependsOns
+    [<YamlField("depends-on")>] DependsOn: List<string>
 }
-
-type BuildTargets = Map<string, BuildTarget>
 
 type BuildVariables = Map<string, string>
 
-type BuildConfiguration = {
-    [<YamlField("dependencies")>] Dependencies: Dependencies
-    [<YamlField("targets")>] Targets: BuildTargets
-    [<YamlField("variables")>] Variables: BuildVariables
+type BuildConfig = {
+    [<YamlField("dependencies")>] Dependencies: List<string>
+    [<YamlField("targets")>] Targets: Map<string, BuildTarget>
+    [<YamlField("variables")>] Variables: BuildVariables option
 }
 
-type GlobalConfiguration = {
-    Build: BuildConfiguration
-    Projects: Map<string, ProjectConfiguration>
+type WorkspaceConfig = {
+    Build: BuildConfig
+    Projects: Map<string, ProjectConfig>
 }
 
 let read workspaceDirectory =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
-    let buildConfig = Json.DeserializeFile<BuildConfiguration> buildFile
+    let buildConfig = Json.DeserializeFile<BuildConfig> buildFile
 
     let mutable projects = Map.empty
 
@@ -51,9 +47,9 @@ let read workspaceDirectory =
                 let dependencyFile = Path.Combine(dependencyDirectory, "PROJECT")
                 let dependencyConfig =
                     if File.Exists(dependencyFile) then
-                        Json.DeserializeFile<ProjectConfiguration> dependencyFile
+                        Json.DeserializeFile<ProjectConfig> dependencyFile
                     else
-                        { Dependencies = List.empty; Outputs = List.empty; Targets = Map.empty }
+                        { Dependencies = List.empty; Outputs = List.empty; Targets = Map.empty; Tags = List.empty }
 
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let dependencies =
@@ -67,5 +63,6 @@ let read workspaceDirectory =
 
                 scanDependencies dependencies
 
+    // initial dependency list is absolute respective to workspaceDirectory
     scanDependencies buildConfig.Dependencies
     { Build = buildConfig; Projects = projects }

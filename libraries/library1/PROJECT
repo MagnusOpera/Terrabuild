@@ -1,0 +1,4 @@
+targets:
+  build:
+    steps:
+      - echo "building library1"

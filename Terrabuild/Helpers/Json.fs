@@ -9,4 +9,4 @@ let DeserializeFile<'t> filename =
 
     match DeserializeWithOptions<'t> yamlOptions content with
     | [ Success x ] -> x.Data
-    | x -> failwith $"failed to deserialize {x}"
+    | x -> failwith $"failed to deserialize file '{filename}:\n{x}"

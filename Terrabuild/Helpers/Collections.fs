@@ -14,3 +14,9 @@ module Helpers.Collections
 //                                       | _ -> acc) Map.empty
 
 // let (?) (q: bool) (yes: 'a, no: 'a) = if q then yes else no
+
+module Map =
+    let ofDict dic = 
+        dic 
+        |> Seq.map (|KeyValue|)  
+        |> Map.ofSeq

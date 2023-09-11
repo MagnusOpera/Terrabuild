@@ -1,3 +1,4 @@
 targets:
   build:
-    - echo "building project2"
+    steps:
+      - echo "building project2"

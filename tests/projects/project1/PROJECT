@@ -1,12 +1,16 @@
 dependencies:
   - ../../libraries/library1
 
-outputs:
-  - dist
-
 targets:
   build:
-    - echo "building project1"
+    depends-on: [ ^build ]
+    steps:
+      - echo "building project1"
 
   publish:
-    - echo "publishing project1"
+    depends-on: [ build ]
+    steps:
+      - echo "publishing project1"
+
+tags:
+  - project

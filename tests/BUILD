@@ -9,5 +9,8 @@ targets:
   publish:
     depends-on: [build]
 
+  container:
+    depends-on: [publish]
+
 variables:
   configuration: Release

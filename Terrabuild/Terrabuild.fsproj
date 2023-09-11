@@ -9,6 +9,7 @@
     <Compile Include="Helpers/Collections.fs" />
     <Compile Include="Helpers/Json.fs" />
     <Compile Include="Configuration.fs" />
+    <Compile Include="Graph.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
