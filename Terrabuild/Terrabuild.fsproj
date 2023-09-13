@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Helpers/String.fs" />
     <Compile Include="Helpers/Collections.fs" />
     <Compile Include="Helpers/Json.fs" />
     <Compile Include="Configuration.fs" />

@@ -3,7 +3,6 @@ dependencies:
 
 targets:
   build:
-    depends-on: [ ^build ]
     steps:
       - echo "building project1"
 

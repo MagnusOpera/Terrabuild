@@ -1,12 +1,12 @@
 module Graph
 open System.Collections.Generic
 open Helpers.Collections
+open Helpers.String
 
 
 type Node = {
-    Id: string
-    TargetId: string
     ProjectId: string
+    TargetId: string
     Children: Set<string>
 }
 
@@ -16,8 +16,6 @@ type WorkspaceGraph = {
 }
 
 
-
-
 // NOTE: can be easily parallelized using ConcurrentHashSet and ConcurrentDictionary
 let build (wsConfig: Configuration.WorkspaceConfig) (target: string) =
     let processedNodes = HashSet<string>()
@@ -25,7 +23,7 @@ let build (wsConfig: Configuration.WorkspaceConfig) (target: string) =
     let rootNodes = HashSet<string>()
 
     let rec buildTarget projectId target (caller: HashSet<string>) =
-        let nodeId = $"{projectId}-{target}"
+        let nodeId = $"{projectId}-{target}" |> sha256
         let projectConfig = wsConfig.Projects[projectId]
         match projectConfig.Targets |> Map.tryFind target with
         | Some projectTarget -> if processedNodes.Contains(nodeId) |> not then
@@ -50,9 +48,8 @@ let build (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                                         else
                                             buildTarget projectId dependsOn children
 
-                                    let node = { Id = nodeId
+                                    let node = { ProjectId = projectId
                                                  TargetId = target
-                                                 ProjectId = projectId
                                                  Children = children |> Set.ofSeq }
                                     allNodes.Add(nodeId, node)
         | _ -> ()
