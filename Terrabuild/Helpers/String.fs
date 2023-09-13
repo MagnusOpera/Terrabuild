@@ -2,9 +2,8 @@ module Helpers.String
 
 open System
 open Microsoft.FSharp.Reflection
-open System.Text
-open System.Security.Cryptography
 open System.IO
+open System.Security.Cryptography
 
 let toLowerInvariant (s : string) =
     s.ToLowerInvariant()
