@@ -1,6 +1,7 @@
 module Build
 open Graph
 open Helpers
+open System
 open System.Collections.Generic
 
 
@@ -62,7 +63,7 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                 let beforeOutputs = enumerateFileInfos node.Configuration.Outputs
 
                 let target = node.Configuration.Targets[node.TargetId]
-                let stepLogs = List<string>()
+                let stepLogs = List<BuildCache.StepLog>()
                 let mutable lastExitCode = 0
                 let mutable stepIndex = 0
                 while stepIndex < target.Steps.Length && lastExitCode = 0 do
@@ -70,14 +71,14 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                     stepIndex <- stepIndex + 1                        
 
                     let command, args = extractCommandFromArgs step
-                    let execResult = Exec.execCaptureTimestampedOutput projectDirectory command args
-                    match execResult with
-                    | Exec.Success (logFile, exitCode) ->
-                        stepLogs.Add(logFile)
-                        lastExitCode <- exitCode
-                    | Exec.Error (logfile, exitCode) -> 
-                        stepLogs.Add(logfile)
-                        lastExitCode <- exitCode
+                    let beginExecution = System.Diagnostics.Stopwatch.StartNew()
+                    let exitCode, logFile = Exec.execCaptureTimestampedOutput projectDirectory command args
+                    let executionDuration = beginExecution.Elapsed
+                    let stepLog = { BuildCache.Command = step
+                                    BuildCache.Duration = executionDuration
+                                    BuildCache.Log = logFile }
+                    stepLog |> stepLogs.Add
+                    lastExitCode <- exitCode
 
                 let afterOutputs = enumerateFileInfos node.Configuration.Outputs
 

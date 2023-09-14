@@ -3,12 +3,18 @@ open System
 open System.IO
 open Helpers
 
+type StepLog = {
+    Command: string
+    Duration: TimeSpan
+    Log: string
+}
+
 type Summary = {
     ProjectId: string
     TargetId: string
-    StepLogs: List<string>
+    StepLogs: StepLog list
     Listing: string
-    Dependencies: List<string>
+    Dependencies: string list
     Outputs: string
     ExitCode: int
 }
@@ -29,8 +35,11 @@ let getBuildSummary (id: string) =
         | IO.File _ -> 
             let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<Summary>
             let summary = { summary
-                            with StepLogs = summary.StepLogs |> List.map (IO.combine entryDir)
-                                 Outputs = IO.combine entryDir summary.Outputs }
+                            with StepLogs = summary.StepLogs
+                                            |> List.map (fun stepLog -> { stepLog
+                                                                          with Log = IO.combine entryDir stepLog.Log })
+                                 Outputs = IO.combine entryDir summary.Outputs
+                                 Listing = IO.combine entryDir summary.Listing }
             Some summary
         | _ ->
             // cleanup the mess - it's not valid anyway
@@ -51,15 +60,20 @@ let writeBuildSummary (id: string) (summary: Summary) =
         filename
 
     // move log files to target storage
-    let newLogs = summary.StepLogs |> List.mapi moveFile 
+    let newLogs = summary.StepLogs |> List.mapi (fun idx stepLog -> { stepLog
+                                                                      with Log = moveFile idx stepLog.Log })
 
     let outputsFile = IO.combine entryDir "outputs.zip"
     IO.moveFile summary.Outputs outputsFile
 
+    let listing = IO.combine entryDir "listing.txt"
+    IO.writeTextFile listing summary.Listing
+
     // keep only filename (relative to storage)
     let summary = { summary
                     with StepLogs = newLogs
-                         Outputs = "outputs.zip" }
+                         Outputs = "outputs.zip"
+                         Listing = "listing.txt" }
 
     let summaryFile = Path.Combine(entryDir, summaryFilename)
     summary |> Json.Serialize |> IO.writeTextFile summaryFile

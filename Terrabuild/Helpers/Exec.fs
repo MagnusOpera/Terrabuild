@@ -46,6 +46,4 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
     proc.WaitForExit()
     logWriter.WriteLine($"END {DateTime.UtcNow}")
 
-    match proc.ExitCode with
-    | 0 -> Success (tmpFile, 0)
-    | _ -> Error (tmpFile, proc.ExitCode)
+    proc.ExitCode, tmpFile
