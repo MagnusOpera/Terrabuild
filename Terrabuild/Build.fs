@@ -79,17 +79,19 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                         stepLogs.Add(logfile)
                         lastExitCode <- exitCode
 
-                let mutable afterOutputs = enumerateFileInfos node.Configuration.Outputs
+                let afterOutputs = enumerateFileInfos node.Configuration.Outputs
 
                 // remove files that have not changed
-                for beforeOutput in beforeOutputs do
-                    match afterOutputs |> Map.tryFind beforeOutput.Key with
-                    | Some actualWriteDate when beforeOutput.Value = actualWriteDate -> afterOutputs <- afterOutputs |> Map.remove beforeOutput.Key
-                    | _ -> ()
+                let newOutputs =
+                    afterOutputs
+                    |> Seq.choose (fun afterOutput ->
+                        match beforeOutputs |> Map.tryFind afterOutput.Key with
+                        | Some prevWriteDate when afterOutput.Value = prevWriteDate -> None
+                        | _ -> Some afterOutput.Key)
+                    |> List.ofSeq
 
                 // create an archive with new files
-                let archiveFiles = beforeOutputs |> Map.keys |> List.ofSeq
-                let outputArchive = Zip.createArchive projectDirectory archiveFiles
+                let outputArchive = Zip.createArchive projectDirectory newOutputs
 
                 let summary = { BuildCache.ProjectId = node.ProjectId
                                 BuildCache.TargetId = node.TargetId
