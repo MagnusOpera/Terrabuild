@@ -8,8 +8,7 @@ targets:
   build:
     steps:
       - echo "building project1"
-      - mkdir dist
-      - touch dist/toto
+      - make build
 
   publish:
     depends-on: [ build ]

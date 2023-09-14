@@ -78,7 +78,7 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                         lastExitCode <- exitCode
                     | Exec.Error (logfile, exitCode) -> 
                         stepLogs.Add(logfile)
-                        lastExitCode <- 0
+                        lastExitCode <- exitCode
 
                 let mutable afterOutputs = enumerateFileInfos node.Configuration.Outputs
 
