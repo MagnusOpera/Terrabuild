@@ -42,7 +42,10 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                 printfn $"Reusing build cache for {node.TargetId}@{node.ProjectId}"
 
                 // cleanup before restoring outputs
-                node.Configuration.Outputs |> Seq.iter IO.deleteAny
+                node.Configuration.Outputs
+                |> Seq.map (IO.combine projectDirectory)
+                |> Seq.iter IO.deleteAny
+
                 Zip.restoreArchive summary.Outputs projectDirectory
                 summary
             | _ -> 
@@ -63,7 +66,7 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                 let beforeOutputs = enumerateFileInfos node.Configuration.Outputs
 
                 let target = node.Configuration.Targets[node.TargetId]
-                let stepLogs = List<BuildCache.StepLog>()
+                let stepLogs = List<BuildCache.StepInfo>()
                 let mutable lastExitCode = 0
                 let mutable stepIndex = 0
                 while stepIndex < target.Steps.Length && lastExitCode = 0 do
@@ -94,11 +97,11 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                 // create an archive with new files
                 let outputArchive = Zip.createArchive projectDirectory newOutputs
 
-                let summary = { BuildCache.ProjectId = node.ProjectId
-                                BuildCache.TargetId = node.TargetId
+                let summary = { BuildCache.Project = node.ProjectId
+                                BuildCache.Target = node.TargetId
                                 BuildCache.Listing = node.Listing
                                 BuildCache.Dependencies = dependenciesHashes
-                                BuildCache.StepLogs = stepLogs |> List.ofSeq
+                                BuildCache.Steps = stepLogs |> List.ofSeq
                                 BuildCache.Outputs = outputArchive
                                 BuildCache.ExitCode = lastExitCode }
                 BuildCache.writeBuildSummary nodeHash summary

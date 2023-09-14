@@ -3,16 +3,16 @@ open System
 open System.IO
 open Helpers
 
-type StepLog = {
+type StepInfo = {
     Command: string
     Duration: TimeSpan
     Log: string
 }
 
 type Summary = {
-    ProjectId: string
-    TargetId: string
-    StepLogs: StepLog list
+    Project: string
+    Target: string
+    Steps: StepInfo list
     Listing: string
     Dependencies: string list
     Outputs: string
@@ -35,7 +35,7 @@ let getBuildSummary (id: string) =
         | IO.File _ -> 
             let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<Summary>
             let summary = { summary
-                            with StepLogs = summary.StepLogs
+                            with Steps = summary.Steps
                                             |> List.map (fun stepLog -> { stepLog
                                                                           with Log = IO.combine entryDir stepLog.Log })
                                  Outputs = IO.combine entryDir summary.Outputs
@@ -60,7 +60,7 @@ let writeBuildSummary (id: string) (summary: Summary) =
         filename
 
     // move log files to target storage
-    let newLogs = summary.StepLogs |> List.mapi (fun idx stepLog -> { stepLog
+    let newLogs = summary.Steps |> List.mapi (fun idx stepLog -> { stepLog
                                                                       with Log = moveFile idx stepLog.Log })
 
     let outputsFile = IO.combine entryDir "outputs.zip"
@@ -71,7 +71,7 @@ let writeBuildSummary (id: string) (summary: Summary) =
 
     // keep only filename (relative to storage)
     let summary = { summary
-                    with StepLogs = newLogs
+                    with Steps = newLogs
                          Outputs = "outputs.zip"
                          Listing = "listing.txt" }
 

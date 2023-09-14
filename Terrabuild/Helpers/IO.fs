@@ -30,5 +30,5 @@ let (|File|Directory|None|) entry =
 let deleteAny entry =
     match entry with
     | File file -> File.Delete(file)
-    | Directory directory -> Directory.Delete(directory)
+    | Directory directory -> Directory.Delete(directory, true)
     | _ -> ()
