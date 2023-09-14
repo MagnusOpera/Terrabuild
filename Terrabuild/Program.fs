@@ -3,10 +3,12 @@
 let config = Configuration.read "tests"
 printfn $"{config}"
 
-let graph = Graph.buildGraph config "publish"
+let graph = Graph.buildGraph config "build"
 printfn $"{graph}"
 
-Build.run "tests" graph
+let buildInfo = Build.run "tests" graph
+printfn $"{buildInfo}"
+
 
 
 

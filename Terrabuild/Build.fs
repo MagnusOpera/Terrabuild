@@ -4,6 +4,11 @@ open Helpers
 open System.Collections.Generic
 
 
+type BuildInfo = {
+    Commit: string
+    Dependencies: string list
+}
+
 let extractCommandFromArgs (commandline: string) =
     let idx = commandline.IndexOf(' ')
     if idx = -1 then failwith $"Invalid command '{commandline}"
@@ -13,21 +18,17 @@ let extractCommandFromArgs (commandline: string) =
 
 let run (workspaceDirectory: string) (g: WorkspaceGraph) =
 
-    let rec buildDependencies (nodeIds: Set<string>) =
-        // ensure build is always done in same order
-        let nodeIds = nodeIds |> List.ofSeq |> List.sort
-        let nodeHashes = nodeIds |> List.map buildDependency
-        let hash = nodeHashes |> String.join "\n" |> String.sha256
-        hash
-            
+    let rec buildDependencies (nodeIds: string seq) =
+        nodeIds |> Seq.map buildDependency |> List.ofSeq
+
     and buildDependency nodeId =
         let node = g.Nodes[nodeId]
 
         // compute node hash:
         // - hash of dependencies
         // - listing
-        let dependenciesHash = buildDependencies node.Dependencies
-        let nodeHash = String.join "\n" [dependenciesHash; node.Listing] |> String.sha256
+        let dependenciesHashes = buildDependencies node.Dependencies
+        let nodeHash = node.Listing :: dependenciesHashes |> String.join "\n" |> String.sha256
 
         // check first if it's possible to restore previously built state
         let summary = BuildCache.getBuildSummary nodeHash
@@ -60,6 +61,7 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                 let summary = { BuildCache.ProjectId = node.ProjectId
                                 BuildCache.TargetId = node.TargetId
                                 BuildCache.Listing = node.Listing
+                                BuildCache.Dependencies = dependenciesHashes
                                 BuildCache.StepLogs = stepLogs |> List.ofSeq
                                 BuildCache.ExitCode = lastExitCode }
                 BuildCache.writeBuildSummary nodeHash summary
@@ -68,5 +70,10 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
         if summary.ExitCode = 0 then nodeHash
         else failwith "Build failure"
 
-    buildDependencies g.RootNodes |> ignore
+    let headCommit = Git.getHeadCommit workspaceDirectory
+    let dependencies = buildDependencies g.RootNodes
+
+    let buildInfo = { Commit = headCommit
+                      Dependencies = dependencies }
     printfn $"Build completed"
+    buildInfo

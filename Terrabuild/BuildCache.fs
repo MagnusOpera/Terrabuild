@@ -8,6 +8,7 @@ type Summary = {
     TargetId: string
     StepLogs: List<string>
     Listing: string
+    Dependencies: List<string>
     ExitCode: int
 }
 
