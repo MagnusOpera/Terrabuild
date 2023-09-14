@@ -25,13 +25,14 @@ let getBuildSummary (id: string) =
     let entryDir = Path.Combine(buildCacheDirectory, id)
     if Directory.Exists entryDir then
         let summaryFile = Path.Combine(entryDir, summaryFilename)
-        if summaryFile |> File.Exists then
+        match summaryFile with
+        | IO.File _ -> 
             let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<Summary>
             let summary = { summary
                             with StepLogs = summary.StepLogs |> List.map (IO.combine entryDir)
                                  Outputs = IO.combine entryDir summary.Outputs }
             Some summary
-        else
+        | _ ->
             // cleanup the mess - it's not valid anyway
             Directory.Delete(entryDir, true)
             None

@@ -2,7 +2,6 @@ module Build
 open Graph
 open Helpers
 open System.Collections.Generic
-open System.IO
 
 
 type BuildInfo = {
