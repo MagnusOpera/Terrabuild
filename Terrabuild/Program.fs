@@ -1,10 +1,10 @@
 ﻿open Helpers
 
 let config = Configuration.read "tests"
-// printfn $"{config}"
+printfn $"{config}"
 
 let graph = Graph.buildGraph config "publish"
-// printfn $"{graph}"
+printfn $"{graph}"
 
 Build.run "tests" graph
 

@@ -12,6 +12,7 @@
     <Compile Include="Helpers/Yaml.fs" />
     <Compile Include="Helpers/Json.fs" />
     <Compile Include="Helpers/Exec.fs" />
+    <Compile Include="Helpers/Git.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Graph.fs" />
     <Compile Include="BuildCache.fs" />

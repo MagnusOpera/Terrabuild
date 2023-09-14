@@ -19,19 +19,16 @@ type WorkspaceGraph = {
 }
 
 
-// NOTE: can be easily parallelized using ConcurrentHashSet and ConcurrentDictionary
 let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
     let processedNodes = HashSet<string>()
     let allNodes = Dictionary<string, Node>()
-    let rootNodes = HashSet<string>()
 
-    let rec buildTarget projectId target (caller: HashSet<string>) =
+    let rec buildTarget target projectId  =
         let nodeId = $"{projectId}-{target}"
         let projectConfig = wsConfig.Projects[projectId]
         match projectConfig.Targets |> Map.tryFind target with
         | Some projectTarget -> if processedNodes.Contains(nodeId) |> not then
                                     processedNodes.Add(nodeId) |> ignore
-                                    caller.Add(nodeId) |> ignore
 
                                     // merge targets rquirements
                                     let buildDependsOn = 
@@ -43,32 +40,31 @@ let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
                                     let dependsOns = buildDependsOn + projDependsOn
 
                                     // apply on each dependency
-                                    let children = HashSet<string>()
-                                    for dependsOn in dependsOns do
-                                        if dependsOn.StartsWith("^") then
-                                            let dependsOn = dependsOn.Substring(1)
-                                            for dependency in projectConfig.Dependencies do
-                                                buildTarget dependency dependsOn children
-                                        else
-                                            buildTarget projectId dependsOn children
+                                    let children =
+                                        dependsOns
+                                        |> Seq.collect (fun dependsOn -> 
+                                            if dependsOn.StartsWith("^") then
+                                                let dependsOn = dependsOn.Substring(1)
+                                                projectConfig.Dependencies |> List.choose (buildTarget dependsOn)
+                                            else
+                                                [ buildTarget dependsOn projectId ] |> List.choose id)
+                                        |> Set.ofSeq
 
                                     let projectDir = IO.combine wsConfig.Directory projectId
-                                    let listing =
-                                        match Exec.execCaptureOutput projectDir "git" "ls-tree -rl HEAD ." with
-                                        | Exec.Success (listing, _) -> listing
-                                        | _ -> failwith "Failed to get listing"
-
+                                    let listing = Git.listFiles projectDir
                                     let node = { ProjectId = projectId
                                                  TargetId = target
                                                  Configuration = projectConfig
                                                  Listing = listing
-                                                 Dependencies = children |> Set.ofSeq }
+                                                 Dependencies = children }
                                     allNodes.Add(nodeId, node)
-        | _ -> ()
+                                Some nodeId
+        | _ -> None
 
-    for dependency in wsConfig.Build.Dependencies do
-        buildTarget dependency target rootNodes
+    let rootNodes =
+        wsConfig.Build.Dependencies
+        |> Seq.choose (buildTarget target)
+        |> Set.ofSeq
 
     { Nodes = Map.ofDict allNodes 
-      RootNodes = Set.ofSeq rootNodes }
-
+      RootNodes = rootNodes }
