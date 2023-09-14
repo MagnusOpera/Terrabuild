@@ -41,22 +41,25 @@ let read workspaceDirectory =
 
     let rec scanDependencies dependencies =
         for dependency in dependencies do
-            let dependencyDirectory = Path.Combine(workspaceDirectory, dependency)
+            let dependencyDirectory = IO.combine workspaceDirectory dependency
 
             // process only unknown dependency
             if projects |> Map.containsKey dependency |> not then
-                let dependencyFile = Path.Combine(dependencyDirectory, "PROJECT")
                 let dependencyConfig =
-                    if File.Exists(dependencyFile) then
-                        Yaml.DeserializeFile<ProjectConfig> dependencyFile
-                    else
-                        { Dependencies = List.empty; Outputs = List.empty; Targets = Map.empty; Tags = List.empty }
+                    match IO.combine dependencyDirectory "PROJECT" with
+                    | IO.File projectFile ->
+                        Yaml.DeserializeFile<ProjectConfig> projectFile
+                    | _ ->
+                        { Dependencies = List.empty
+                          Outputs = List.empty
+                          Targets = Map.empty
+                          Tags = List.empty }
 
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let dependencies =
                     dependencyConfig.Dependencies
-                    |> List.map (fun dep -> let depDir = Path.Combine(dependencyDirectory, dep)
-                                            Path.GetRelativePath(workspaceDirectory, depDir))
+                    |> List.map (fun dep -> IO.combine dependencyDirectory dep
+                                            |> IO.relativePath workspaceDirectory)
 
                 let dependencyConfig = { dependencyConfig
                                          with Dependencies = dependencies }

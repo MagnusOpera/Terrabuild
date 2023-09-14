@@ -4,6 +4,9 @@ open System.IO
 let combine parent child =
     Path.Combine(parent, child)
 
+let relativePath fromDir toDir =
+    Path.GetRelativePath(fromDir, toDir)
+
 let readTextFile filename =
     filename |> File.ReadAllText
 
