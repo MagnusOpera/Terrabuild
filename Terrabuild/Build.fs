@@ -2,6 +2,7 @@ module Build
 open Graph
 open Helpers
 open System.Collections.Generic
+open System.IO
 
 
 type BuildInfo = {
@@ -19,10 +20,13 @@ let extractCommandFromArgs (commandline: string) =
 let run (workspaceDirectory: string) (g: WorkspaceGraph) =
 
     let rec buildDependencies (nodeIds: string seq) =
-        nodeIds |> Seq.map buildDependency |> List.ofSeq
+        nodeIds
+        |> Seq.map buildDependency
+        |> List.ofSeq
 
     and buildDependency nodeId =
         let node = g.Nodes[nodeId]
+        let projectDirectory = IO.combine workspaceDirectory node.ProjectId
 
         // compute node hash:
         // - hash of dependencies
@@ -36,9 +40,28 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
             match summary with
             | Some summary ->
                 printfn $"Reusing build cache for {node.TargetId}@{node.ProjectId}"
+
+                // cleanup before restoring outputs
+                node.Configuration.Outputs |> Seq.iter IO.deleteAny
+                Zip.restoreArchive summary.Outputs projectDirectory
                 summary
             | _ -> 
                 printfn $"Building {node.TargetId}@{node.ProjectId}:"
+
+                let enumerateFileInfos (outputs: string seq) =
+                    outputs
+                    |> Seq.map (IO.combine projectDirectory)
+                    |> Seq.collect (fun output ->
+                        match output with
+                        | IO.File _ -> [ output, System.IO.File.GetLastWriteTimeUtc output ]
+                        | IO.Directory _ -> System.IO.Directory.EnumerateFiles(output, "*", System.IO.SearchOption.AllDirectories)
+                                            |> Seq.map (fun file -> file, System.IO.File.GetLastWriteTimeUtc file)
+                                            |> List.ofSeq
+                        | _ -> [])
+                    |> Map.ofSeq
+
+                let beforeOutputs = enumerateFileInfos node.Configuration.Outputs
+
                 let target = node.Configuration.Targets[node.TargetId]
                 let stepLogs = List<string>()
                 let mutable lastExitCode = 0
@@ -47,7 +70,6 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                     let step = target.Steps[stepIndex]
                     stepIndex <- stepIndex + 1                        
 
-                    let projectDirectory = IO.combine workspaceDirectory node.ProjectId
                     let command, args = extractCommandFromArgs step
                     let execResult = Exec.execCaptureTimestampedOutput projectDirectory command args
                     match execResult with
@@ -56,13 +78,26 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                         lastExitCode <- exitCode
                     | Exec.Error (logfile, exitCode) -> 
                         stepLogs.Add(logfile)
-                        lastExitCode <- exitCode
+                        lastExitCode <- 0
+
+                let mutable afterOutputs = enumerateFileInfos node.Configuration.Outputs
+
+                // remove files that have not changed
+                for beforeOutput in beforeOutputs do
+                    match afterOutputs |> Map.tryFind beforeOutput.Key with
+                    | Some actualWriteDate when beforeOutput.Value = actualWriteDate -> afterOutputs <- afterOutputs |> Map.remove beforeOutput.Key
+                    | _ -> ()
+
+                // create an archive with new files
+                let archiveFiles = beforeOutputs |> Map.keys |> List.ofSeq
+                let outputArchive = Zip.createArchive projectDirectory archiveFiles
 
                 let summary = { BuildCache.ProjectId = node.ProjectId
                                 BuildCache.TargetId = node.TargetId
                                 BuildCache.Listing = node.Listing
                                 BuildCache.Dependencies = dependenciesHashes
                                 BuildCache.StepLogs = stepLogs |> List.ofSeq
+                                BuildCache.Outputs = outputArchive
                                 BuildCache.ExitCode = lastExitCode }
                 BuildCache.writeBuildSummary nodeHash summary
                 summary

@@ -9,6 +9,7 @@ type Summary = {
     StepLogs: List<string>
     Listing: string
     Dependencies: List<string>
+    Outputs: string
     ExitCode: int
 }
 
@@ -27,7 +28,8 @@ let getBuildSummary (id: string) =
         if summaryFile |> File.Exists then
             let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<Summary>
             let summary = { summary
-                            with StepLogs = summary.StepLogs |> List.map (IO.combine entryDir) }
+                            with StepLogs = summary.StepLogs |> List.map (IO.combine entryDir)
+                                 Outputs = IO.combine entryDir summary.Outputs }
             Some summary
         else
             // cleanup the mess - it's not valid anyway
@@ -50,9 +52,13 @@ let writeBuildSummary (id: string) (summary: Summary) =
     // move log files to target storage
     let newLogs = summary.StepLogs |> List.mapi moveFile 
 
+    let outputsFile = IO.combine entryDir "outputs.zip"
+    IO.moveFile summary.Outputs outputsFile
+
     // keep only filename (relative to storage)
     let summary = { summary
-                    with StepLogs = newLogs }
+                    with StepLogs = newLogs
+                         Outputs = "outputs.zip" }
 
     let summaryFile = Path.Combine(entryDir, summaryFilename)
     summary |> Json.Serialize |> IO.writeTextFile summaryFile

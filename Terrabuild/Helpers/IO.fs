@@ -18,3 +18,14 @@ let getFilename (p: string) =
 
 let moveFile source destination =
     File.Move(source, destination, true)
+
+let (|File|Directory|None|) entry =
+    if File.Exists(entry) then File entry
+    elif Directory.Exists(entry) then Directory entry
+    else None
+
+let deleteAny entry =
+    match entry with
+    | File file -> File.Delete(file)
+    | Directory directory -> Directory.Delete(directory)
+    | _ -> ()
