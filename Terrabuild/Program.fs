@@ -1,10 +1,13 @@
 ﻿open Helpers
 
 let config = Configuration.read "tests"
-printfn $"{config}"
+// printfn $"{config}"
 
 let graph = Graph.build config "publish"
-printfn $"{graph}"
+// printfn $"{graph}"
+
+Build.run "tests" graph
+
 
 
 // let build = Json.DeserializeFile<Configuration.BuildConfiguration> "tests/BUILD"

@@ -34,7 +34,7 @@ type WorkspaceConfig = {
 
 let read workspaceDirectory =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
-    let buildConfig = Json.DeserializeFile<BuildConfig> buildFile
+    let buildConfig = Yaml.DeserializeFile<BuildConfig> buildFile
 
     let mutable projects = Map.empty
 
@@ -47,7 +47,7 @@ let read workspaceDirectory =
                 let dependencyFile = Path.Combine(dependencyDirectory, "PROJECT")
                 let dependencyConfig =
                     if File.Exists(dependencyFile) then
-                        Json.DeserializeFile<ProjectConfig> dependencyFile
+                        Yaml.DeserializeFile<ProjectConfig> dependencyFile
                     else
                         { Dependencies = List.empty; Outputs = List.empty; Targets = Map.empty; Tags = List.empty }
 

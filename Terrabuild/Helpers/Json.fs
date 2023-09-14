@@ -1,12 +1,18 @@
 module Helpers.Json
-open System.IO
-open Legivel.Serialization
+open System.Text.Json
+open System.Text.Json.Serialization
 
-let private yamlOptions = [ MappingMode(MapYaml.AndRequireFullProjection) ]
+let Configure (options: JsonSerializerOptions) =
+    options.WriteIndented <- true
+    options.Converters.Add(JsonFSharpConverter(JsonUnionEncoding.FSharpLuLike, unionTagCaseInsensitive = true))
 
-let DeserializeFile<'t> filename =
-    let content = File.ReadAllText(filename)
+let Settings =
+    let options = JsonSerializerOptions()
+    Configure options
+    options
 
-    match DeserializeWithOptions<'t> yamlOptions content with
-    | [ Success x ] -> x.Data
-    | x -> failwith $"failed to deserialize file '{filename}:\n{x}"
+let Serialize (value: obj)=
+    JsonSerializer.Serialize(value, Settings)
+
+let Deserialize<'t> (json: string) =
+    JsonSerializer.Deserialize<'t>(json, Settings)

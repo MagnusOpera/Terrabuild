@@ -6,16 +6,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Helpers/IO.fs" />
     <Compile Include="Helpers/String.fs" />
     <Compile Include="Helpers/Collections.fs" />
+    <Compile Include="Helpers/Yaml.fs" />
     <Compile Include="Helpers/Json.fs" />
+    <Compile Include="Helpers/Exec.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Graph.fs" />
+    <Compile Include="BuildCache.fs" />
+    <Compile Include="Build.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Legivel" Version="0.4.6" />
+    <PackageReference Include="FSharp.SystemTextJson" Version="0.19.13" />
   </ItemGroup>
 
 </Project>
