@@ -1,8 +1,8 @@
 module Graph
 open System.Collections.Generic
 open Helpers.Collections
-open Helpers.String
 open Configuration
+open Helpers
 
 
 type Node = {
@@ -10,6 +10,7 @@ type Node = {
     TargetId: string
     Configuration: ProjectConfig
     Dependencies: Set<string>
+    Listing: string
 }
 
 type WorkspaceGraph = {
@@ -19,7 +20,7 @@ type WorkspaceGraph = {
 
 
 // NOTE: can be easily parallelized using ConcurrentHashSet and ConcurrentDictionary
-let build (wsConfig: WorkspaceConfig) (target: string) =
+let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
     let processedNodes = HashSet<string>()
     let allNodes = Dictionary<string, Node>()
     let rootNodes = HashSet<string>()
@@ -29,6 +30,7 @@ let build (wsConfig: WorkspaceConfig) (target: string) =
         let projectConfig = wsConfig.Projects[projectId]
         match projectConfig.Targets |> Map.tryFind target with
         | Some projectTarget -> if processedNodes.Contains(nodeId) |> not then
+                                    processedNodes.Add(nodeId) |> ignore
                                     caller.Add(nodeId) |> ignore
 
                                     // merge targets rquirements
@@ -50,9 +52,16 @@ let build (wsConfig: WorkspaceConfig) (target: string) =
                                         else
                                             buildTarget projectId dependsOn children
 
+                                    let projectDir = IO.combine wsConfig.Directory projectId
+                                    let listing =
+                                        match Exec.execCaptureOutput projectDir "git" "ls-tree -rl HEAD ." with
+                                        | Exec.Success (listing, _) -> listing
+                                        | _ -> failwith "Failed to get listing"
+
                                     let node = { ProjectId = projectId
                                                  TargetId = target
                                                  Configuration = projectConfig
+                                                 Listing = listing
                                                  Dependencies = children |> Set.ofSeq }
                                     allNodes.Add(nodeId, node)
         | _ -> ()
@@ -62,3 +71,4 @@ let build (wsConfig: WorkspaceConfig) (target: string) =
 
     { Nodes = Map.ofDict allNodes 
       RootNodes = Set.ofSeq rootNodes }
+

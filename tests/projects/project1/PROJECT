@@ -1,6 +1,9 @@
 dependencies:
   - ../../libraries/library1
 
+outputs:
+  - dist
+
 targets:
   build:
     steps:

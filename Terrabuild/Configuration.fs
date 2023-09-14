@@ -28,6 +28,7 @@ type BuildConfig = {
 }
 
 type WorkspaceConfig = {
+    Directory: string
     Build: BuildConfig
     Projects: Map<string, ProjectConfig>
 }
@@ -65,4 +66,4 @@ let read workspaceDirectory =
 
     // initial dependency list is absolute respective to workspaceDirectory
     scanDependencies buildConfig.Dependencies
-    { Build = buildConfig; Projects = projects }
+    { Directory = workspaceDirectory; Build = buildConfig; Projects = projects }

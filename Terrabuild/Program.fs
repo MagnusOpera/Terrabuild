@@ -3,7 +3,7 @@
 let config = Configuration.read "tests"
 // printfn $"{config}"
 
-let graph = Graph.build config "publish"
+let graph = Graph.buildGraph config "publish"
 // printfn $"{graph}"
 
 Build.run "tests" graph
