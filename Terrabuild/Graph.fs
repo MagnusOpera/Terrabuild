@@ -10,7 +10,8 @@ type Node = {
     TargetId: string
     Configuration: ProjectConfig
     Dependencies: Set<string>
-    Listing: string
+    TreeFiles: string
+    Changes: string
 }
 
 type WorkspaceGraph = {
@@ -52,11 +53,13 @@ let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
                     |> Set.ofSeq
 
                 let projectDir = IO.combine wsConfig.Directory projectId
-                let listing = Git.listFiles projectDir
+                let workingFiles = Git.listFiles projectDir
+                let changes = Git.listChanges projectDir
                 let node = { ProjectId = projectId
                              TargetId = target
                              Configuration = projectConfig
-                             Listing = listing
+                             TreeFiles = workingFiles
+                             Changes = changes
                              Dependencies = children }
                 allNodes.Add(nodeId, node)
             Some nodeId

@@ -32,7 +32,9 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
         // - hash of dependencies
         // - listing
         let dependenciesHashes = buildDependencies node.Dependencies
-        let nodeHash = node.Listing :: dependenciesHashes |> String.join "\n" |> String.sha256
+        let nodeHash =
+            dependenciesHashes @ [ node.TreeFiles ; node.Changes ]
+            |> String.join "\n" |> String.sha256
 
         // check first if it's possible to restore previously built state
         let summary = BuildCache.getBuildSummary nodeHash
@@ -99,7 +101,8 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
 
                 let summary = { BuildCache.Project = node.ProjectId
                                 BuildCache.Target = node.TargetId
-                                BuildCache.Listing = node.Listing
+                                BuildCache.TreeFiles = node.TreeFiles
+                                BuildCache.Changes = node.Changes
                                 BuildCache.Dependencies = dependenciesHashes
                                 BuildCache.Steps = stepLogs |> List.ofSeq
                                 BuildCache.Outputs = outputArchive
