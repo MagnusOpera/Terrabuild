@@ -6,4 +6,4 @@ targets:
   build:
     steps:
       - echo "building project2"
-      - dotnet build
+      - dotnet build --no-dependencies --configuration $(configuration)

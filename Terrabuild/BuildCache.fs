@@ -13,9 +13,10 @@ type Summary = {
     Project: string
     Target: string
     Steps: StepInfo list
+    Dependencies: string list
     TreeFiles: string
     Changes: string
-    Dependencies: string list
+    Variables: Map<string, string>
     Outputs: string
     ExitCode: int
 }

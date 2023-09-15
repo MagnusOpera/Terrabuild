@@ -6,7 +6,7 @@ let config = Configuration.read "tests"
 let graph = Graph.buildGraph config "build"
 // printfn $"{graph}"
 
-let buildInfo = Build.run "tests" graph
+let buildInfo = Build.run config graph
 printfn $"{buildInfo}"
 
 

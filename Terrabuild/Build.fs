@@ -3,6 +3,7 @@ open Graph
 open Helpers
 open System
 open System.Collections.Generic
+open Configuration
 
 
 type BuildInfo = {
@@ -17,7 +18,10 @@ let extractCommandFromArgs (commandline: string) =
     let args = commandline.Substring(idx)
     command, args
 
-let run (workspaceDirectory: string) (g: WorkspaceGraph) =
+let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
+
+    let variableContext =
+        workspaceConfig.Build.Variables |> Option.defaultValue Map.empty
 
     let rec buildDependencies (nodeIds: string seq) =
         nodeIds
@@ -26,14 +30,34 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
 
     and buildDependency nodeId =
         let node = g.Nodes[nodeId]
-        let projectDirectory = IO.combine workspaceDirectory node.ProjectId
+        let projectDirectory = IO.combine workspaceConfig.Directory node.ProjectId
+        let target = node.Configuration.Targets[node.TargetId]
 
         // compute node hash:
         // - hash of dependencies
-        // - listing
+        // - tree files (with hash)
+        // - local changes
+        // - variables dependencies
+
+        let variables =
+            let extractVariables s =
+                match s with
+                | String.Regex "\$\((\w+)\)" variables -> variables
+                | _ -> []
+
+            target.Steps
+            |> List.collect extractVariables
+            |> Seq.map (fun var -> var, variableContext[var])
+            |> Map.ofSeq
+
+        let variableHashes =
+            variables
+            |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
+            |> String.join "\n"
+
         let dependenciesHashes = buildDependencies node.Dependencies
         let nodeHash =
-            dependenciesHashes @ [ node.TreeFiles ; node.Changes ]
+            dependenciesHashes @ [ node.TreeFiles ; node.Changes; variableHashes ]
             |> String.join "\n" |> String.sha256
 
         // check first if it's possible to restore previously built state
@@ -67,13 +91,16 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
 
                 let beforeOutputs = enumerateFileInfos node.Configuration.Outputs
 
-                let target = node.Configuration.Targets[node.TargetId]
                 let stepLogs = List<BuildCache.StepInfo>()
                 let mutable lastExitCode = 0
                 let mutable stepIndex = 0
                 while stepIndex < target.Steps.Length && lastExitCode = 0 do
                     let step = target.Steps[stepIndex]
                     stepIndex <- stepIndex + 1                        
+
+                    let step =
+                        variables
+                        |> Map.fold (fun step key value -> step |> String.replace $"$({key})" value) step
 
                     let command, args = extractCommandFromArgs step
                     let beginExecution = System.Diagnostics.Stopwatch.StartNew()
@@ -103,6 +130,7 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
                                 BuildCache.Target = node.TargetId
                                 BuildCache.TreeFiles = node.TreeFiles
                                 BuildCache.Changes = node.Changes
+                                BuildCache.Variables = variables
                                 BuildCache.Dependencies = dependenciesHashes
                                 BuildCache.Steps = stepLogs |> List.ofSeq
                                 BuildCache.Outputs = outputArchive
@@ -113,7 +141,7 @@ let run (workspaceDirectory: string) (g: WorkspaceGraph) =
         if summary.ExitCode = 0 then nodeHash
         else failwith "Build failure"
 
-    let headCommit = Git.getHeadCommit workspaceDirectory
+    let headCommit = Git.getHeadCommit workspaceConfig.Directory
     let dependencies = buildDependencies g.RootNodes
 
     let buildInfo = { Commit = headCommit
