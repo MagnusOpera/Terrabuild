@@ -5,5 +5,5 @@ dependencies:
 targets:
   build:
     steps:
-      - echo "building project2"
+      - echo "building project3"
       - dotnet build --no-dependencies --configuration $(configuration)

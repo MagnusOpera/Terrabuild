@@ -9,5 +9,4 @@ dependencies:
 targets:
   build:
     steps:
-      - echo "building library2"
       - dotnet build --no-dependencies --configuration $(configuration)
