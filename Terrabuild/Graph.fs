@@ -1,4 +1,5 @@
 module Graph
+open System.Collections.Concurrent
 open System.Collections.Generic
 open Helpers.Collections
 open Configuration
@@ -21,17 +22,15 @@ type WorkspaceGraph = {
 
 
 let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
-    let processedNodes = HashSet<string>()
-    let allNodes = Dictionary<string, Node>()
+    let processedNodes = ConcurrentDictionary<string, bool>()
+    let allNodes = ConcurrentDictionary<string, Node>()
 
     let rec buildTarget target projectId  =
         let nodeId = $"{projectId}-{target}"
         let projectConfig = wsConfig.Projects[projectId]
         match projectConfig.Targets |> Map.tryFind target with
-        | Some projectTarget -> 
-            if processedNodes.Contains(nodeId) |> not then
-                processedNodes.Add(nodeId) |> ignore
-
+        | Some projectTarget ->
+            if processedNodes.TryAdd(nodeId, true) then
                 // merge targets rquirements
                 let buildDependsOn = 
                     wsConfig.Build.Targets
@@ -61,7 +60,8 @@ let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
                              TreeFiles = workingFiles
                              Changes = changes
                              Dependencies = children }
-                allNodes.Add(nodeId, node)
+                if allNodes.TryAdd(nodeId, node) |> not then
+                    failwith "Unexpected graph building race"
             Some nodeId
 
         | _ ->
