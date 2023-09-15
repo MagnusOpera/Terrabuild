@@ -1,0 +1,9 @@
+
+dependencies:
+  - dotnet:project3.csproj
+
+targets:
+  build:
+    steps:
+      - echo "building project2"
+      - dotnet build

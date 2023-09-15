@@ -1,7 +1,10 @@
 module Configuration
 open Legivel.Attributes
 open Helpers
+open Helpers.String
 open System.IO
+open System.Xml.Linq
+open Helpers.Xml
 
 type ProjectTarget = {
     [<YamlField("depends-on")>] DependsOn: List<string>
@@ -33,6 +36,28 @@ type WorkspaceConfig = {
     Projects: Map<string, ProjectConfig>
 }
 
+let parseDotnetDependencies workingDirectory arguments =
+    let projectFile = IO.combine workingDirectory arguments
+    let xdoc = XDocument.Load (projectFile)
+    let refs = xdoc.Descendants() 
+                    |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
+                    |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string)
+                    |> Seq.map IO.parentDirectory
+                    |> Seq.distinct
+                    |> List.ofSeq
+    refs 
+
+
+let addPluginDependencies workingDirectory dependency =
+    let additionalDependencies =
+        match dependency with
+        | Regex "^([a-z]+):(.*)$" [plugin; arguments] ->
+            match plugin with
+            | "dotnet" -> parseDotnetDependencies workingDirectory arguments
+            | _ -> failwith $"unknown dependency plugin {plugin}"
+        | _ -> []
+    additionalDependencies
+
 let read workspaceDirectory =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
     let buildConfig = Yaml.DeserializeFile<BuildConfig> buildFile
@@ -54,6 +79,13 @@ let read workspaceDirectory =
                           Outputs = List.empty
                           Targets = Map.empty
                           Tags = List.empty }
+
+                let additionalDependencies = 
+                    dependencyConfig.Dependencies
+                    |> List.collect (addPluginDependencies dependencyDirectory)
+
+                let dependencyConfig = { dependencyConfig
+                                         with Dependencies = additionalDependencies }
 
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let dependencies =

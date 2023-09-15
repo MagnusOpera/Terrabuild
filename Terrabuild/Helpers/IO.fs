@@ -7,6 +7,9 @@ let combine parent child =
 let relativePath fromDir toDir =
     Path.GetRelativePath(fromDir, toDir)
 
+let parentDirectory (path: string) =
+    Path.GetDirectoryName(path)
+
 let readTextFile filename =
     filename |> File.ReadAllText
 

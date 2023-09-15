@@ -1,0 +1,13 @@
+
+outputs:
+  - bin
+  - obj
+
+dependencies:
+  - dotnet:library2.csproj
+
+targets:
+  build:
+    steps:
+      - echo "building library2"
+      - dotnet build

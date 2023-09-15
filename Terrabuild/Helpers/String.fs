@@ -4,6 +4,8 @@ open System
 open Microsoft.FSharp.Reflection
 open System.IO
 open System.Security.Cryptography
+open System.Text.RegularExpressions
+
 
 let toLowerInvariant (s : string) =
     s.ToLowerInvariant()
@@ -43,3 +45,13 @@ let sha256 (s: string) =
     ms.Position <- 0L
     let hash = ms |> sha256.ComputeHash |> Convert.ToHexString
     hash
+
+let (|Regex|_|) pattern input =
+    let m = Regex.Match(input, pattern)
+    if m.Success then Some(List.tail [ for g in m.Groups -> g.Value ])
+    else None
+
+let (|Integer|_|) (s: string) =
+    match Int32.TryParse(s) with
+    | true, i -> Some i
+    | _ -> None
