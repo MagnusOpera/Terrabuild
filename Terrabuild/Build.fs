@@ -42,7 +42,7 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
         let variables =
             let extractVariables s =
                 match s with
-                | String.Regex "\$\((\w+)\)" variables -> variables
+                | String.Regex "\$\(([a-z]+)\)" variables -> variables
                 | _ -> []
 
             target.Steps
