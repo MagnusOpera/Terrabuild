@@ -31,7 +31,7 @@ let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
         match projectConfig.Targets |> Map.tryFind target with
         | Some projectTarget ->
             if processedNodes.TryAdd(nodeId, true) then
-                // merge targets rquirements
+                // merge targets requirements
                 let buildDependsOn = 
                     wsConfig.Build.Targets
                     |> Map.tryFind target
