@@ -70,7 +70,7 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
         let summary =
             match summary with
             | Some summary ->
-                printfn $"Reusing build cache for {node.TargetId}@{node.ProjectId}"
+                printfn $"Reusing build cache for {node.TargetId}@{node.ProjectId}: {nodeHash}"
 
                 // cleanup before restoring outputs
                 node.Configuration.Outputs
@@ -80,7 +80,7 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
                 Zip.restoreArchive summary.Outputs projectDirectory
                 summary
             | _ -> 
-                printfn $"Building {node.TargetId}@{node.ProjectId}:"
+                printfn $"Building {node.TargetId}@{node.ProjectId}: {nodeHash}"
 
                 let enumerateFileInfos (outputs: string seq) =
                     outputs
@@ -145,7 +145,6 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
                                 BuildCache.Outputs = outputArchive
                                 BuildCache.ExitCode = lastExitCode }
                 BuildCache.writeBuildSummary nodeHash summary
-                summary
 
         if summary.ExitCode = 0 then nodeHash
         else
