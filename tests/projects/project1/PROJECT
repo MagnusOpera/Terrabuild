@@ -17,6 +17,8 @@ steps:
   publish:
     - ^shell: echo
       args: "publishing project1"
+    - ^shell: make
+      args: publish
 
 tags:
   - project
