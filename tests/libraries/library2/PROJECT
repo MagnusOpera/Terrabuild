@@ -1,12 +1,12 @@
 
+dependencies:
+  - ^dotnet: library2.csproj
+
 outputs:
   - bin
   - obj
 
-dependencies:
-  - dotnet:library2.csproj
-
-targets:
+steps:
   build:
-    steps:
-      - dotnet build --no-dependencies --configuration $(configuration)
+    - ^dotnet: build
+      configuration: $(configuration)

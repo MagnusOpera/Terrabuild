@@ -11,17 +11,28 @@ type BuildInfo = {
     Dependencies: string list
 }
 
-let extractCommandFromArgs (commandline: string) =
-    let idx = commandline.IndexOf(' ')
-    if idx = -1 then failwith $"Invalid command '{commandline}"
-    let command = commandline.Substring(0, idx)
-    let args = commandline.Substring(idx)
-    command, args
+// let extractCommandFromArgs (commandline: string) =
+//     let idx = commandline.IndexOf(' ')
+//     if idx = -1 then failwith $"Invalid command '{commandline}"
+//     let command = commandline.Substring(0, idx)
+//     let args = commandline.Substring(idx)
+//     command, args
+
+
+let getExecInfo info =
+    if info |> Map.containsKey "^shell" then
+        info["^shell"], info["args"]
+    elif info |> Map.containsKey "^dotnet" then
+        let dotnetCommand = info["^dotnet"]
+        let dotnetConfig = info |> Map.tryFind "configuration" |> Option.defaultValue "Debug"
+        let args = info |> Map.tryFind "args" |> Option.defaultValue ""
+        "dotnet", $"{dotnetCommand} --no-dependencies --configuration {dotnetConfig} {args}"
+    else
+        failwith "Unknown step"
 
 let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
 
-    let variableContext =
-        workspaceConfig.Build.Variables |> Option.defaultValue Map.empty
+    let variableContext = workspaceConfig.Build.Variables
 
     let rec buildDependencies (nodeIds: string seq) =
         nodeIds
@@ -31,7 +42,7 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
     and buildDependency nodeId =
         let node = g.Nodes[nodeId]
         let projectDirectory = IO.combine workspaceConfig.Directory node.ProjectId
-        let target = node.Configuration.Targets[node.TargetId]
+        let steps = node.Configuration.Steps[node.TargetId]
 
         // compute node hash:
         // - hash of dependencies
@@ -45,8 +56,8 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
                 | String.Regex "\$\(([a-z]+)\)" variables -> variables
                 | _ -> []
 
-            target.Steps
-            |> List.collect extractVariables
+            steps
+            |> Seq.collect (fun kvp -> kvp.Values |> Seq.collect extractVariables )
             |> Seq.map (fun var -> var, variableContext[var])
             |> Map.ofSeq
 
@@ -94,19 +105,23 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
                 let stepLogs = List<BuildCache.StepInfo>()
                 let mutable lastExitCode = 0
                 let mutable stepIndex = 0
-                while stepIndex < target.Steps.Length && lastExitCode = 0 do
-                    let step = target.Steps[stepIndex]
+                while stepIndex < steps.Length && lastExitCode = 0 do
+                    let stepInfo = steps[stepIndex]
                     stepIndex <- stepIndex + 1                        
 
-                    let step =
+                    let setVariables s =
                         variables
-                        |> Map.fold (fun step key value -> step |> String.replace $"$({key})" value) step
+                        |> Map.fold (fun step key value -> step |> String.replace $"$({key})" value) s
 
-                    let command, args = extractCommandFromArgs step
+                    let stepInfo = stepInfo |> Map.map (fun _ v -> setVariables v)
+
+                    let command, args = getExecInfo stepInfo
+
                     let beginExecution = System.Diagnostics.Stopwatch.StartNew()
                     let exitCode, logFile = Exec.execCaptureTimestampedOutput projectDirectory command args
                     let executionDuration = beginExecution.Elapsed
-                    let stepLog = { BuildCache.Command = step
+                    let stepLog = { BuildCache.Command = command
+                                    BuildCache.Args = args
                                     BuildCache.Duration = executionDuration
                                     BuildCache.Log = logFile }
                     stepLog |> stepLogs.Add

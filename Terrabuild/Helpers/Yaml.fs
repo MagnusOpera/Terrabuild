@@ -1,11 +1,16 @@
 module Helpers.Yaml
-open Legivel.Serialization
+open YamlDotNet.Serialization
+open YamlDotNet.Serialization.NamingConventions
 
-let private yamlOptions = [ MappingMode(MapYaml.AndRequireFullProjection) ]
+let deserializer =
+    DeserializerBuilder()
+        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+        .Build()
+
 
 let DeserializeFile<'t> filename =
-    let content = filename |> IO.readTextFile
-
-    match DeserializeWithOptions<'t> yamlOptions content with
-    | [ Success x ] -> x.Data
-    | x -> failwith $"failed to deserialize file '{filename}:\n{x}"
+    try
+        let content = filename |> IO.readTextFile
+        deserializer.Deserialize<'t>(content)
+    with
+        exn -> failwith $"failed to deserialize file '{filename}:\n{exn}"

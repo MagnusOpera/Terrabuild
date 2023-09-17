@@ -5,6 +5,7 @@ open Helpers
 
 type StepInfo = {
     Command: string
+    Args: string
     Duration: TimeSpan
     Log: string
 }

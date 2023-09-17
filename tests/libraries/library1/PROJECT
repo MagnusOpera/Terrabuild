@@ -1,4 +1,4 @@
-targets:
+steps:
   build:
-    steps:
-      - echo "building library1"
+    - ^shell: echo
+      args: "building library1"

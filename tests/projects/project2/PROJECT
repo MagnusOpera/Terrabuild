@@ -1,4 +1,4 @@
-targets:
+steps:
   build:
-    steps:
-      - echo "building project2"
+    - ^shell: echo
+      args: "building project2"

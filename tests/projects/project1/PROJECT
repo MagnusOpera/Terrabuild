@@ -1,19 +1,22 @@
 dependencies:
-  - ../../libraries/library1
+  - ^path: ../../libraries/library1
 
 outputs:
   - dist
 
 targets:
+  publish: [ build ]
+
+steps:
   build:
-    steps:
-      - echo "building project1"
-      - make build
+    - ^shell: echo
+      args: "building project1"
+    - ^shell: make
+      args: build
 
   publish:
-    depends-on: [ build ]
-    steps:
-      - echo "publishing project1"
+    - ^shell: echo
+      args: "publishing project1"
 
 tags:
   - project

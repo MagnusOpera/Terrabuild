@@ -28,16 +28,21 @@ let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
     let rec buildTarget target projectId  =
         let nodeId = $"{projectId}-{target}"
         let projectConfig = wsConfig.Projects[projectId]
-        match projectConfig.Targets |> Map.tryFind target with
-        | Some projectTarget ->
+
+        // process only if a named step list exist
+        match projectConfig.Steps |> Map.tryFind target with
+        | Some _ ->
             if processedNodes.TryAdd(nodeId, true) then
                 // merge targets requirements
                 let buildDependsOn = 
                     wsConfig.Build.Targets
                     |> Map.tryFind target
-                    |> Option.map (fun x -> x.DependsOn |> Set.ofList)
-                    |> Option.defaultValue Set.empty
-                let projDependsOn = projectTarget.DependsOn |> Set.ofSeq
+                    |> Option.defaultValue List.empty
+                    |> Set.ofList
+                let projDependsOn = projectConfig.Targets
+                                    |> Map.tryFind target
+                                    |> Option.defaultValue List.empty
+                                    |> Set.ofList
                 let dependsOns = buildDependsOn + projDependsOn
 
                 // apply on each dependency

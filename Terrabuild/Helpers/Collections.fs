@@ -15,6 +15,10 @@ module Helpers.Collections
 
 // let (?) (q: bool) (yes: 'a, no: 'a) = if q then yes else no
 
+let emptyIfNull<'t when 't: null and 't : (new : unit -> 't)> (c: 't) =
+    if c |> isNull then new 't()
+    else c
+
 module Map =
     let ofDict dic = 
         dic 

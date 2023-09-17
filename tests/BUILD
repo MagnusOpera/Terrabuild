@@ -4,14 +4,9 @@ dependencies:
   - projects/project3
 
 targets:
-  build:
-    depends-on: [^build]
-
-  publish:
-    depends-on: [build]
-
-  container:
-    depends-on: [publish]
+  build: [^build]
+  publish: [build]
+  container: [publish]
 
 variables:
   configuration: Release

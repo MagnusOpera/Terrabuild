@@ -1,9 +1,12 @@
-
 dependencies:
-  - dotnet:project3.csproj
+  - ^dotnet: project3.csproj
 
 targets:
+  build: [^build]
+
+steps:
   build:
-    steps:
-      - echo "building project3"
-      - dotnet build --no-dependencies --configuration $(configuration)
+    - ^shell: echo
+      args: "building project3"
+    - ^dotnet: build
+      configuration: $(configuration)
