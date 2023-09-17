@@ -75,4 +75,6 @@ let writeBuildSummary (id: string) (summary: Summary) =
 
     let summaryFile = Path.Combine(entryDir, summaryFilename)
     summary |> Json.Serialize |> IO.writeTextFile summaryFile
-    summary
+    
+    id |> getBuildSummary |> Option.get
+
