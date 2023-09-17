@@ -10,3 +10,5 @@ steps:
   build:
     - ^dotnet: build
       configuration: $(configuration)
+    - ^shell: echo
+      args: "done lib2"

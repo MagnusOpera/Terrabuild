@@ -148,7 +148,10 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
                 summary
 
         if summary.ExitCode = 0 then nodeHash
-        else failwith $"Build failure for node hash {nodeHash}"
+        else
+            let content = summary.Steps |> List.last |> (fun x -> x.Log) |> IO.readTextFile 
+            printfn $"Build failure for node hash {nodeHash}:\n{content}"
+            failwith $"Build failure for node hash {nodeHash}"
 
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
     let dependencies = g.RootNodes |> Map.map (fun k v -> buildDependency v)
