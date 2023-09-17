@@ -16,8 +16,9 @@ type Node = {
 }
 
 type WorkspaceGraph = {
+    Target: string
     Nodes: Map<string, Node>
-    RootNodes: Set<string>
+    RootNodes: Map<string, string>
 }
 
 
@@ -74,8 +75,9 @@ let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
 
     let rootNodes =
         wsConfig.Build.Dependencies
-        |> Seq.choose (buildTarget target)
-        |> Set.ofSeq
+        |> Seq.choose (fun dependency -> buildTarget target dependency |> Option.map (fun r -> dependency, r))
+        |> Map.ofSeq
 
-    { Nodes = Map.ofDict allNodes 
+    { Target = target
+      Nodes = Map.ofDict allNodes 
       RootNodes = rootNodes }

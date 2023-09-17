@@ -8,15 +8,9 @@ open Configuration
 
 type BuildInfo = {
     Commit: string
-    Dependencies: string list
+    Target: string
+    Dependencies: Map<string, string>
 }
-
-// let extractCommandFromArgs (commandline: string) =
-//     let idx = commandline.IndexOf(' ')
-//     if idx = -1 then failwith $"Invalid command '{commandline}"
-//     let command = commandline.Substring(0, idx)
-//     let args = commandline.Substring(idx)
-//     command, args
 
 
 let getExecInfo info =
@@ -157,9 +151,9 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
         else failwith "Build failure"
 
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
-    let dependencies = buildDependencies g.RootNodes
-
+    let dependencies = g.RootNodes |> Map.map (fun k v -> buildDependency v)
     let buildInfo = { Commit = headCommit
+                      Target = g.Target
                       Dependencies = dependencies }
     printfn $"Build completed"
     buildInfo
