@@ -12,18 +12,18 @@ module Yaml =
 
     [<CLIMutable>]
     type ProjectConfig = {
-        [<YamlMember(Alias = "dependencies", ApplyNamingConventions = false)>] Dependencies: List<Dictionary<string, string>>
-        [<YamlMember(Alias = "outputs", ApplyNamingConventions = false)>] Outputs: List<string>
-        [<YamlMember(Alias = "targets", ApplyNamingConventions = false)>] Targets: Dictionary<string, List<string>>
-        [<YamlMember(Alias = "steps", ApplyNamingConventions = false)>] Steps: Dictionary<string, List<Dictionary<string, string>>>
-        [<YamlMember(Alias = "tags", ApplyNamingConventions = false)>] Tags: List<string>
+        [<YamlMember(Alias = "dependencies")>] Dependencies: List<Dictionary<string, string>>
+        [<YamlMember(Alias = "outputs")>] Outputs: List<string>
+        [<YamlMember(Alias = "targets")>] Targets: Dictionary<string, List<string>>
+        [<YamlMember(Alias = "steps")>] Steps: Dictionary<string, List<Dictionary<string, string>>>
+        [<YamlMember(Alias = "tags")>] Tags: List<string>
     }
 
     [<CLIMutable>]
     type BuildConfig = {
-        [<YamlMember(Alias = "dependencies", ApplyNamingConventions = false)>] Dependencies: List<string>
-        [<YamlMember(Alias = "targets", ApplyNamingConventions = false)>] Targets: Dictionary<string, List<string>>
-        [<YamlMember(Alias = "variables", ApplyNamingConventions = false)>] Variables: Dictionary<string, string>
+        [<YamlMember(Alias = "dependencies")>] Dependencies: List<string>
+        [<YamlMember(Alias = "targets")>] Targets: Dictionary<string, List<string>>
+        [<YamlMember(Alias = "variables")>] Variables: Dictionary<string, string>
     }
 
 
