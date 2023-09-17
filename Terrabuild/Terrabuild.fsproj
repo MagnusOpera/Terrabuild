@@ -15,6 +15,7 @@
     <Compile Include="Helpers/Exec.fs" />
     <Compile Include="Helpers/Git.fs" />
     <Compile Include="Helpers/Xml.fs" />
+    <Compile Include="Helpers/Hash.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Graph.fs" />
     <Compile Include="BuildCache.fs" />

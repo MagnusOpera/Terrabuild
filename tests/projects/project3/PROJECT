@@ -4,6 +4,10 @@ dependencies:
 targets:
   build: [^build]
 
+outputs:
+  - bin
+  - obj
+
 steps:
   build:
     - ^shell: echo

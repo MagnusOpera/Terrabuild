@@ -1,6 +1,5 @@
 module Graph
 open System.Collections.Concurrent
-open System.Collections.Generic
 open Helpers.Collections
 open Configuration
 open Helpers
@@ -11,8 +10,8 @@ type Node = {
     TargetId: string
     Configuration: ProjectConfig
     Dependencies: Set<string>
-    TreeFiles: string
-    Changes: string
+    Files: string list
+    FilesHash: string
 }
 
 type WorkspaceGraph = {
@@ -58,13 +57,21 @@ let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
                     |> Set.ofSeq
 
                 let projectDir = IO.combine wsConfig.Directory projectId
-                let workingFiles = Git.listFiles projectDir
-                let changes = Git.listChanges projectDir
+                let ignoreFiles =
+                    projectConfig.Outputs 
+                    |> Seq.map (fun output -> IO.combine projectDir output)
+                    |> Set.ofSeq
+                
+                let files = projectDir |> IO.enumerateFilesBut ignoreFiles |> List.ofSeq
+                let hash = files |> Hash.computeFilesSha
+
+                let files = files |> List.map (IO.relativePath wsConfig.Directory)
+
                 let node = { ProjectId = projectId
                              TargetId = target
                              Configuration = projectConfig
-                             TreeFiles = workingFiles
-                             Changes = changes
+                             Files = files
+                             FilesHash = hash
                              Dependencies = children }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     failwith "Unexpected graph building race"

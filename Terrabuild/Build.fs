@@ -40,8 +40,8 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
 
         // compute node hash:
         // - hash of dependencies
-        // - tree files (with hash)
-        // - local changes
+        // - list of files (without outputs)
+        // - files hash
         // - variables dependencies
 
         let variables =
@@ -62,7 +62,7 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
 
         let dependenciesHashes = buildDependencies node.Dependencies
         let nodeHash =
-            dependenciesHashes @ [ node.TreeFiles ; node.Changes; variableHashes ]
+            dependenciesHashes @ node.Files @ [ node.FilesHash ; variableHashes ]
             |> String.join "\n" |> String.sha256
 
         // check first if it's possible to restore previously built state
@@ -137,8 +137,8 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
 
                 let summary = { BuildCache.Project = node.ProjectId
                                 BuildCache.Target = node.TargetId
-                                BuildCache.TreeFiles = node.TreeFiles
-                                BuildCache.Changes = node.Changes
+                                BuildCache.Files = node.Files
+                                BuildCache.FilesHash = node.FilesHash
                                 BuildCache.Variables = variables
                                 BuildCache.Dependencies = dependenciesHashes
                                 BuildCache.Steps = stepLogs |> List.ofSeq

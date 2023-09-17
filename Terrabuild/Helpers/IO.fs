@@ -35,3 +35,21 @@ let deleteAny entry =
     | File file -> File.Delete(file)
     | Directory directory -> Directory.Delete(directory, true)
     | _ -> ()
+
+let enumerateFilesBut ignore dir =
+    let rec enumerateFilesBut dir =
+        seq {
+            if ignore |> Set.contains dir |> not then
+                let files = Directory.EnumerateFiles(dir)
+                for file in files do
+                    if ignore |> Set.contains file |> not then
+                        yield file
+
+                let dirs = Directory.EnumerateDirectories(dir)
+                for dir in dirs do
+                    yield! enumerateFilesBut dir                
+        }
+
+    let res = enumerateFilesBut dir |> List.ofSeq
+    res
+

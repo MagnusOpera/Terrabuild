@@ -15,8 +15,8 @@ type Summary = {
     Target: string
     Steps: StepInfo list
     Dependencies: string list
-    TreeFiles: string
-    Changes: string
+    Files: string list
+    FilesHash: string
     Variables: Map<string, string>
     Outputs: string
     ExitCode: int
@@ -41,9 +41,7 @@ let getBuildSummary (id: string) =
                             with Steps = summary.Steps
                                             |> List.map (fun stepLog -> { stepLog
                                                                           with Log = IO.combine entryDir stepLog.Log })
-                                 Outputs = IO.combine entryDir summary.Outputs
-                                 TreeFiles = IO.combine entryDir summary.TreeFiles
-                                 Changes = IO.combine entryDir summary.Changes }
+                                 Outputs = IO.combine entryDir summary.Outputs }
             Some summary
         | _ ->
             // cleanup the mess - it's not valid anyway
@@ -70,18 +68,10 @@ let writeBuildSummary (id: string) (summary: Summary) =
     let outputsFile = IO.combine entryDir "outputs.zip"
     IO.moveFile summary.Outputs outputsFile
 
-    let treefiles = IO.combine entryDir "treefiles.txt"
-    IO.writeTextFile treefiles summary.TreeFiles
-
-    let changes = IO.combine entryDir "changes.txt"
-    IO.writeTextFile changes summary.Changes
-
     // keep only filename (relative to storage)
     let summary = { summary
                     with Steps = newLogs
-                         Outputs = "outputs.zip"
-                         TreeFiles = "treefiles.txt"
-                         Changes = "changes.txt" }
+                         Outputs = "outputs.zip" }
 
     let summaryFile = Path.Combine(entryDir, summaryFilename)
     summary |> Json.Serialize |> IO.writeTextFile summaryFile
