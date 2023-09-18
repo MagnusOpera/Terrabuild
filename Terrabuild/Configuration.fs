@@ -5,7 +5,7 @@ open YamlDotNet.Serialization
 open Collections
 open Xml
 
-module Yaml =
+module ConfigFiles =
     open System.Collections.Generic
 
     [<CLIMutable>]
@@ -76,7 +76,7 @@ let addPluginDependencies workingDirectory (dependency: Map<string, string>) =
 
 let read workspaceDirectory =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
-    let buildConfig = Yaml.DeserializeFile<Yaml.BuildConfig> buildFile
+    let buildConfig = Yaml.DeserializeFile<ConfigFiles.BuildConfig> buildFile
     let buildConfig = { Dependencies = buildConfig.Dependencies |> emptyIfNull
                                        |> List.ofSeq
                         Targets = buildConfig.Targets |> emptyIfNull 
@@ -95,13 +95,13 @@ let read workspaceDirectory =
                 let dependencyConfig =
                     match IO.combine dependencyDirectory "PROJECT" with
                     | IO.File projectFile ->
-                        Yaml.DeserializeFile<Yaml.ProjectConfig> projectFile
+                        Yaml.DeserializeFile<ConfigFiles.ProjectConfig> projectFile
                     | _ ->
-                        { Yaml.Dependencies = null
-                          Yaml.Outputs = null
-                          Yaml.Targets = null
-                          Yaml.Steps = null
-                          Yaml.Tags = null }
+                        { ConfigFiles.Dependencies = null
+                          ConfigFiles.Outputs = null
+                          ConfigFiles.Targets = null
+                          ConfigFiles.Steps = null
+                          ConfigFiles.Tags = null }
 
                 let dependencies =
                     dependencyConfig.Dependencies |> emptyIfNull
