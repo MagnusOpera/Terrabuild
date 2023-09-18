@@ -94,7 +94,7 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
                         | _ -> [])
                     |> Map.ofSeq
 
-                let beforeOutputs = enumerateFileInfos node.Configuration.Outputs
+                let beforeOutputs = Map.empty
 
                 let stepLogs = List<BuildCache.StepInfo>()
                 let mutable lastExitCode = 0
