@@ -6,7 +6,7 @@ type Node = {
     ProjectId: string
     TargetId: string
     Configuration: Configuration.ProjectConfig
-    Dependencies: Set<string>
+    Dependencies: string set
     Files: string list
     FilesHash: string
 }
