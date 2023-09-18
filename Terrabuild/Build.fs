@@ -108,7 +108,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
                 let afterOutputs = FileSystem.createSnapshot projectDirectory node.Configuration.Outputs
 
-                // remove files that have not changed
+                // keep only new or modified files
                 let newOutputs = afterOutputs - beforeOutputs 
 
                 // create an archive with new files
