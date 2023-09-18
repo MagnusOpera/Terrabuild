@@ -1,4 +1,4 @@
-module Helpers.Yaml
+module Yaml
 open YamlDotNet.Serialization
 open YamlDotNet.Serialization.NamingConventions
 

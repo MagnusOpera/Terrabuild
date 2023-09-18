@@ -1,4 +1,4 @@
-module Helpers.Json
+module Json
 open System.Text.Json
 open System.Text.Json.Serialization
 

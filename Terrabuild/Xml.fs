@@ -1,4 +1,4 @@
-﻿module Helpers.Xml
+﻿module Xml
 open System.Xml.Linq
 
 #nowarn "0077" // op_Explicit

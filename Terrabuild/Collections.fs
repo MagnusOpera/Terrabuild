@@ -1,4 +1,4 @@
-module Helpers.Collections
+module Collections
 
 // [<AutoOpen>]
 // module Set =

@@ -1,14 +1,11 @@
 module Graph
 open System.Collections.Concurrent
-open Helpers.Collections
-open Configuration
-open Helpers
-
+open Collections
 
 type Node = {
     ProjectId: string
     TargetId: string
-    Configuration: ProjectConfig
+    Configuration: Configuration.ProjectConfig
     Dependencies: Set<string>
     Files: string list
     FilesHash: string
@@ -21,7 +18,7 @@ type WorkspaceGraph = {
 }
 
 
-let buildGraph (wsConfig: WorkspaceConfig) (target: string) =
+let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 

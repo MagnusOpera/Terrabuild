@@ -1,6 +1,5 @@
 module Exec
 open System.Diagnostics
-open Helpers
 open System
 open System.IO
 

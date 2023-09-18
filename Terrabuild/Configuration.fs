@@ -1,11 +1,9 @@
 module Configuration
-open Helpers
-open Helpers.String
 open System.IO
 open System.Xml.Linq
-open Helpers.Xml
 open YamlDotNet.Serialization
-open Helpers.Collections
+open Collections
+open Xml
 
 module Yaml =
     open System.Collections.Generic

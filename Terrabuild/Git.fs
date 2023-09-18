@@ -1,4 +1,4 @@
-module Helpers.Git
+module Git
 
 let getHeadCommit (dir: string) =
     match Exec.execCaptureOutput dir "git" "rev-parse HEAD" with

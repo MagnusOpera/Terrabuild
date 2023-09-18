@@ -1,4 +1,4 @@
-module Helpers.String
+module String
 
 open System
 open Microsoft.FSharp.Reflection

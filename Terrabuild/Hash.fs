@@ -1,4 +1,4 @@
-module Helpers.Hash
+module Hash
 open System.IO
 open System.Security.Cryptography
 open System

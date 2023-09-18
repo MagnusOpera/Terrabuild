@@ -1,7 +1,6 @@
 module BuildCache
 open System
 open System.IO
-open Helpers
 
 type StepInfo = {
     Command: string

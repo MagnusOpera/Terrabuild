@@ -6,16 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Helpers/IO.fs" />
-    <Compile Include="Helpers/Zip.fs" />
-    <Compile Include="Helpers/String.fs" />
-    <Compile Include="Helpers/Collections.fs" />
-    <Compile Include="Helpers/Yaml.fs" />
-    <Compile Include="Helpers/Json.fs" />
-    <Compile Include="Helpers/Exec.fs" />
-    <Compile Include="Helpers/Git.fs" />
-    <Compile Include="Helpers/Xml.fs" />
-    <Compile Include="Helpers/Hash.fs" />
+    <Compile Include="IO.fs" />
+    <Compile Include="Zip.fs" />
+    <Compile Include="String.fs" />
+    <Compile Include="Collections.fs" />
+    <Compile Include="Yaml.fs" />
+    <Compile Include="Json.fs" />
+    <Compile Include="Exec.fs" />
+    <Compile Include="Git.fs" />
+    <Compile Include="Xml.fs" />
+    <Compile Include="Hash.fs" />
+    <Compile Include="FileSystem.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Graph.fs" />
     <Compile Include="BuildCache.fs" />

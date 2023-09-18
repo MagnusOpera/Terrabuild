@@ -1,4 +1,4 @@
-module Helpers.Zip
+module Zip
 open System.IO.Compression
 open System.IO
 

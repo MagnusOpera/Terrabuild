@@ -1,6 +1,4 @@
-﻿open Helpers
-
-let config = Configuration.read "tests"
+﻿let config = Configuration.read "tests"
 // printfn $"{config}"
 
 let graph = Graph.buildGraph config "build"

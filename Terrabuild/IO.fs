@@ -1,4 +1,4 @@
-module Helpers.IO
+module IO
 open System.IO
 
 let combine parent child =

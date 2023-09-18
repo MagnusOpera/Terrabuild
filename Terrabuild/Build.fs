@@ -1,9 +1,6 @@
 module Build
-open Graph
-open Helpers
 open System
 open System.Collections.Generic
-open Configuration
 
 
 type BuildInfo = {
@@ -24,7 +21,7 @@ let getExecInfo info =
     else
         failwith "Unknown step"
 
-let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
+let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) =
 
     let variableContext = workspaceConfig.Build.Variables
 
@@ -82,19 +79,7 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
             | _ -> 
                 printfn $"Building {node.TargetId}@{node.ProjectId}: {nodeHash}"
 
-                let enumerateFileInfos (outputs: string seq) =
-                    outputs
-                    |> Seq.map (IO.combine projectDirectory)
-                    |> Seq.collect (fun output ->
-                        match output with
-                        | IO.File _ -> [ output, System.IO.File.GetLastWriteTimeUtc output ]
-                        | IO.Directory _ -> System.IO.Directory.EnumerateFiles(output, "*", System.IO.SearchOption.AllDirectories)
-                                            |> Seq.map (fun file -> file, System.IO.File.GetLastWriteTimeUtc file)
-                                            |> List.ofSeq
-                        | _ -> [])
-                    |> Map.ofSeq
-
-                let beforeOutputs = enumerateFileInfos node.Configuration.Outputs
+                let beforeOutputs = FileSystem.createSnapshot projectDirectory node.Configuration.Outputs
 
                 let stepLogs = List<BuildCache.StepInfo>()
                 let mutable lastExitCode = 0
@@ -121,16 +106,10 @@ let run (workspaceConfig: WorkspaceConfig) (g: WorkspaceGraph) =
                     stepLog |> stepLogs.Add
                     lastExitCode <- exitCode
 
-                let afterOutputs = enumerateFileInfos node.Configuration.Outputs
+                let afterOutputs = FileSystem.createSnapshot projectDirectory node.Configuration.Outputs
 
                 // remove files that have not changed
-                let newOutputs =
-                    afterOutputs
-                    |> Seq.choose (fun afterOutput ->
-                        match beforeOutputs |> Map.tryFind afterOutput.Key with
-                        | Some prevWriteDate when afterOutput.Value = prevWriteDate -> None
-                        | _ -> Some afterOutput.Key)
-                    |> List.ofSeq
+                let newOutputs = afterOutputs - beforeOutputs 
 
                 // create an archive with new files
                 let outputArchive = Zip.createArchive projectDirectory newOutputs
