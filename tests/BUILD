@@ -4,7 +4,7 @@ dependencies:
   - projects/project3
 
 targets:
-  build: [^build]
+  build: [build^]
   publish: [build]
   container: [publish]
 

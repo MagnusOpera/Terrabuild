@@ -44,12 +44,10 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                 // apply on each dependency
                 let children =
                     dependsOns
-                    |> Seq.collect (fun dependsOn -> 
-                        if dependsOn.StartsWith("^") then
-                            let dependsOn = dependsOn.Substring(1)
-                            projectConfig.Dependencies |> Seq.choose (buildTarget dependsOn)
-                        else
-                            [ buildTarget dependsOn projectId ] |> Seq.choose id)
+                    |> Seq.collect (fun dependsOn ->
+                        match dependsOn with
+                        | String.Regex "^(.)+\^$" [ parentDependsOn ] -> projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
+                        | _ -> [ buildTarget dependsOn projectId ] |> Seq.choose id)
                     |> Set.ofSeq
 
                 let isLeaf = dependsOns |> Seq.exists (fun dependsOn -> dependsOn.StartsWith("^"))
