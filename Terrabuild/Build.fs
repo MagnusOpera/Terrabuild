@@ -37,7 +37,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
         // compute node hash:
         // - hash of dependencies
-        // - list of files (without outputs)
+        // - list of files (without outputs & ignores)
         // - files hash
         // - variables dependencies
 
@@ -48,7 +48,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                 | _ -> []
 
             steps
-            |> Seq.collect (fun kvp -> kvp.Values |> Seq.collect extractVariables )
+            |> Seq.collect (fun step -> step.Arguments |> extractVariables )
             |> Seq.map (fun var -> var, variableContext[var])
             |> Map.ofSeq
 
@@ -79,40 +79,39 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
             | _ -> 
                 printfn $"Building {node.TargetId}@{node.ProjectId}: {nodeHash}"
 
-                let beforeOutputs = FileSystem.createSnapshot projectDirectory node.Configuration.Outputs
+                let beforeFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 
                 let stepLogs = List<BuildCache.StepInfo>()
                 let mutable lastExitCode = 0
                 let mutable stepIndex = 0
                 while stepIndex < steps.Length && lastExitCode = 0 do
-                    let stepInfo = steps[stepIndex]
+                    let step = steps[stepIndex]
                     stepIndex <- stepIndex + 1                        
 
                     let setVariables s =
                         variables
                         |> Map.fold (fun step key value -> step |> String.replace $"$({key})" value) s
 
-                    let stepInfo = stepInfo |> Map.map (fun _ v -> setVariables v)
-
-                    let command, args = getExecInfo stepInfo
+                    let step = { step
+                                 with Arguments = step.Arguments |> setVariables }
 
                     let beginExecution = System.Diagnostics.Stopwatch.StartNew()
-                    let exitCode, logFile = Exec.execCaptureTimestampedOutput projectDirectory command args
+                    let exitCode, logFile = Exec.execCaptureTimestampedOutput projectDirectory step.Command step.Arguments
                     let executionDuration = beginExecution.Elapsed
-                    let stepLog = { BuildCache.Command = command
-                                    BuildCache.Args = args
+                    let stepLog = { BuildCache.Command = step.Command
+                                    BuildCache.Args = step.Arguments
                                     BuildCache.Duration = executionDuration
                                     BuildCache.Log = logFile }
                     stepLog |> stepLogs.Add
                     lastExitCode <- exitCode
 
-                let afterOutputs = FileSystem.createSnapshot projectDirectory node.Configuration.Outputs
+                let afterFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 
                 // keep only new or modified files
-                let newOutputs = afterOutputs - beforeOutputs 
+                let newFiles = afterFiles - beforeFiles 
 
                 // create an archive with new files
-                let outputArchive = Zip.createArchive projectDirectory newOutputs
+                let outputArchive = Zip.createArchive projectDirectory newFiles
 
                 let summary = { BuildCache.Project = node.ProjectId
                                 BuildCache.Target = node.TargetId

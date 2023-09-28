@@ -1,14 +1,10 @@
-
-dependencies:
-  - ^dotnet: library2.csproj
-
-outputs:
-  - bin
-  - obj
+extensions:
+  - (dotnet): 1.0.0
+    project: library2.csproj
 
 steps:
   build:
-    - ^dotnet: build
+    - (dotnet): build
       configuration: $(configuration)
-    - ^shell: echo
+    - (shell): echo
       args: "done lib2"

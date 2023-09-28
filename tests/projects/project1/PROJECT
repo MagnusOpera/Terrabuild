@@ -1,5 +1,5 @@
 dependencies:
-  - ^path: ../../libraries/library1
+  - ../../libraries/library1
 
 outputs:
   - dist
@@ -9,15 +9,15 @@ targets:
 
 steps:
   build:
-    - ^shell: echo
+    - (shell): echo
       args: "building project1"
-    - ^shell: make
+    - (shell): make
       args: build
 
   publish:
-    - ^shell: echo
+    - (shell): echo
       args: "publishing project1"
-    - ^shell: make
+    - (shell): make
       args: publish
 
 tags:

@@ -1,8 +1,8 @@
 ﻿let config = Configuration.read "tests"
-// printfn $"{config}"
+printfn $"{config}"
 
 let graph = Graph.buildGraph config "build"
-// printfn $"{graph}"
+printfn $"{graph}"
 
 let buildInfo = Build.run config graph
 printfn $"{buildInfo}"

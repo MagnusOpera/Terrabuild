@@ -1,4 +1,4 @@
 steps:
   build:
-    - ^shell: echo
+    - (shell): echo
       args: "building project2"

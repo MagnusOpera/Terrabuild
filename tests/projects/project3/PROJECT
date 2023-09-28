@@ -1,20 +1,14 @@
-dependencies:
-  - ^dotnet: project3.csproj
-
-targets:
-  build: [^build]
-
-outputs:
-  - bin
-  - obj
+extensions:
+  - (dotnet): 1.0.0
+    project: project3.csproj
 
 steps:
   build:
-    - ^shell: echo
+    - (shell): echo
       args: "building project3"
-    - ^dotnet: build
+    - (dotnet): build
       configuration: $(configuration)
 
   publish:
-   - ^dotnet: publish
+   - (dotnet): publish
      configuration: $(configuration)
