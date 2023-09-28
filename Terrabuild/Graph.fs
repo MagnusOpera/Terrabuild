@@ -9,6 +9,7 @@ type Node = {
     Dependencies: string set
     Files: string list
     FilesHash: string
+    IsLeaf: bool
 }
 
 type WorkspaceGraph = {
@@ -53,6 +54,8 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                             [ buildTarget dependsOn projectId ] |> List.choose id)
                     |> Set.ofSeq
 
+                let isLeaf = dependsOns |> Seq.exists (fun dependsOn -> dependsOn.StartsWith("^"))
+
                 let projectDir = IO.combine wsConfig.Directory projectId
                 let ignoreFiles =
                     projectConfig.Outputs 
@@ -69,7 +72,8 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                              Configuration = projectConfig
                              Files = files
                              FilesHash = hash
-                             Dependencies = children }
+                             Dependencies = children
+                             IsLeaf = isLeaf }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     failwith "Unexpected graph building race"
             Some nodeId

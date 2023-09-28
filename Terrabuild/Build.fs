@@ -64,20 +64,26 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
         // check first if it's possible to restore previously built state
         let summary = BuildCache.getBuildSummary nodeHash
+
+        let cleanOutputs () =
+            node.Configuration.Outputs
+            |> Seq.map (IO.combine projectDirectory)
+            |> Seq.iter IO.deleteAny
+
         let summary =
             match summary with
             | Some summary ->
                 printfn $"Reusing build cache for {node.TargetId}@{node.ProjectId}: {nodeHash}"
 
                 // cleanup before restoring outputs
-                node.Configuration.Outputs
-                |> Seq.map (IO.combine projectDirectory)
-                |> Seq.iter IO.deleteAny
+                cleanOutputs()
 
                 Zip.restoreArchive summary.Outputs projectDirectory
                 summary
             | _ -> 
                 printfn $"Building {node.TargetId}@{node.ProjectId}: {nodeHash}"
+
+                if node.IsLeaf then cleanOutputs()
 
                 let beforeFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 
