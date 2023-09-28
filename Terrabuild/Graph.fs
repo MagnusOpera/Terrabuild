@@ -46,7 +46,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                     dependsOns
                     |> Seq.collect (fun dependsOn ->
                         match dependsOn with
-                        | String.Regex "^(.)+\^$" [ parentDependsOn ] -> projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
+                        | String.Regex "^(.+)\^$" [ parentDependsOn ] -> projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
                         | _ -> [ buildTarget dependsOn projectId ] |> Seq.choose id)
                     |> Set.ofSeq
 
