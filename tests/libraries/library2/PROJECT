@@ -1,6 +1,5 @@
 extensions:
-  - (dotnet): 1.0.0
-    project: library2.csproj
+  - (dotnet): library2.csproj
 
 steps:
   build:

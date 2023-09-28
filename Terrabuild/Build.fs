@@ -2,27 +2,13 @@ module Build
 open System
 open System.Collections.Generic
 
-
 type BuildInfo = {
     Commit: string
     Target: string
     Dependencies: Map<string, string>
 }
 
-
-let getExecInfo info =
-    if info |> Map.containsKey "^shell" then
-        info["^shell"], info["args"]
-    elif info |> Map.containsKey "^dotnet" then
-        let dotnetCommand = info["^dotnet"]
-        let dotnetConfig = info |> Map.tryFind "configuration" |> Option.defaultValue "Debug"
-        let args = info |> Map.tryFind "args" |> Option.defaultValue ""
-        "dotnet", $"{dotnetCommand} --no-dependencies --configuration {dotnetConfig} {args}"
-    else
-        failwith "Unknown step"
-
 let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) =
-
     let variableContext = workspaceConfig.Build.Variables
 
     let rec buildDependencies (nodeIds: string seq) =

@@ -1,6 +1,5 @@
 extensions:
-  - (dotnet): 1.0.0
-    project: project3.csproj
+  - (dotnet): project3.csproj
 
 steps:
   build:

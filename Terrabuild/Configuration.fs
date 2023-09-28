@@ -66,7 +66,7 @@ type Capabilities =
     | Ignores = 8
 
 [<AbstractClass>]
-type Extension(projectDir: string, args: Map<string, string>) =
+type Extension(projectFile: string, args: Map<string, string>) =
     abstract Capabilities: Capabilities with get
     abstract Dependencies: string list
     abstract Outputs: string list
@@ -74,11 +74,10 @@ type Extension(projectDir: string, args: Map<string, string>) =
     abstract GetStep: action:string * args:Map<string, string> -> Step list
 
 
-type DotnetExtension(projectDir, args) =
-    inherit Extension(projectDir, args)
+type DotnetExtension(projectFile, args) =
+    inherit Extension(projectFile, args)
 
-    let parseDotnetDependencies workingDirectory projectFile =
-        let projectFile = IO.combine workingDirectory projectFile
+    let parseDotnetDependencies (projectFile: string) =
         let xdoc = XDocument.Load (projectFile)
         let refs = xdoc.Descendants() 
                         |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
@@ -88,13 +87,11 @@ type DotnetExtension(projectDir, args) =
                         |> List.ofSeq
         refs 
 
-    let project = args |> Map.find "project"
-
     override _.Capabilities = Capabilities.Dependencies
                               ||| Capabilities.Steps
                               ||| Capabilities.Outputs
 
-    override _.Dependencies = parseDotnetDependencies projectDir project
+    override _.Dependencies = parseDotnetDependencies projectFile
 
     override _.Outputs = [ "bin"; "obj" ]
 
@@ -123,10 +120,10 @@ type ShellExtension(projectDir, args) =
         let arguments = args |> Map.tryFind "args" |> Option.defaultValue ""
         [ { Command = action; Arguments = arguments } ]
 
-let getExtension name version projectDir args : Extension =
+let getExtension name projectFile args : Extension =
     match name with
-    | "dotnet" -> DotnetExtension(projectDir, args)
-    | "shell" -> ShellExtension(projectDir, args)
+    | "dotnet" -> DotnetExtension(projectFile, args)
+    | "shell" -> ShellExtension(projectFile, args)
     | _ -> failwith $"Unknown plugin {name}"
 
 let getExtensionFromInvoke name =
@@ -149,7 +146,7 @@ let read workspaceDirectory =
             let projectDir = IO.combine workspaceDirectory dependency
 
             let defaultExtensions = 
-                [ "shell", getExtension "shell" "1.0.0" projectDir Map.empty ]
+                [ "shell", getExtension "shell" projectDir Map.empty ]
 
             // process only unknown dependency
             if projects |> Map.containsKey dependency |> not then
@@ -169,7 +166,8 @@ let read workspaceDirectory =
                 let extensions =
                     let buildExtension (arguments: Map<string, string>) =
                         let extName, extParam, extArgs = getExtensionParamAndArgs arguments
-                        let extension = getExtension extName extParam projectDir extArgs
+                        let projectPath = IO.combine projectDir extParam
+                        let extension = getExtension extName projectPath extArgs
                         extName, extension
 
                     dependencyConfig.Extensions
