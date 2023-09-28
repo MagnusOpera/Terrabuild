@@ -58,7 +58,7 @@ type WorkspaceConfig = {
 }
 
 [<Flags>]
-type ExtensionCapabilities =
+type Capabilities =
     | None = 0
     | Dependencies = 1
     | Steps = 2
@@ -66,16 +66,16 @@ type ExtensionCapabilities =
     | Ignores = 8
 
 [<AbstractClass>]
-type Extension() =
-    abstract Capabilities: ExtensionCapabilities with get
-    abstract member GetDependencies: string list
-    abstract member GetOutputs: string list
-    abstract member GetIgnores: string list
-    abstract member GetStep: action:string * args:Map<string, string> -> Step list
+type Extension(projectDir: string, args: Map<string, string>) =
+    abstract Capabilities: Capabilities with get
+    abstract Dependencies: string list
+    abstract Outputs: string list
+    abstract Ignores: string list
+    abstract GetStep: action:string * args:Map<string, string> -> Step list
 
 
-type DotnetExtension(workingDir, args) =
-    inherit Extension()
+type DotnetExtension(projectDir, args) =
+    inherit Extension(projectDir, args)
 
     let parseDotnetDependencies workingDirectory projectFile =
         let projectFile = IO.combine workingDirectory projectFile
@@ -90,17 +90,15 @@ type DotnetExtension(workingDir, args) =
 
     let project = args |> Map.find "project"
 
-    let dependencies workingDir = parseDotnetDependencies workingDir project
+    override _.Capabilities = Capabilities.Dependencies
+                              ||| Capabilities.Steps
+                              ||| Capabilities.Outputs
 
-    override _.Capabilities = ExtensionCapabilities.Dependencies
-                              ||| ExtensionCapabilities.Steps
-                              ||| ExtensionCapabilities.Outputs
+    override _.Dependencies = parseDotnetDependencies projectDir project
 
-    override _.GetDependencies = dependencies workingDir
+    override _.Outputs = [ "bin"; "obj" ]
 
-    override _.GetOutputs = [ "bin"; "obj" ]
-
-    override _.GetIgnores = NotSupportedException() |> raise
+    override _.Ignores = NotSupportedException() |> raise
 
     override _.GetStep(action, args) =
         let configuration = args |> Map.tryFind "configuration" |> Option.defaultValue "Debug"
@@ -110,25 +108,25 @@ type DotnetExtension(workingDir, args) =
         | "build" | "publish" | "run" | "pack" -> [ { Command = "dotnet"; Arguments = dotnetArgs } ]
         | _ -> failwith $"Unsupported action '{action}'"
 
-type ShellExtension() =
-    inherit Extension()
+type ShellExtension(projectDir, args) =
+    inherit Extension(projectDir, args)
 
-    override _.Capabilities = ExtensionCapabilities.Steps
+    override _.Capabilities = Capabilities.Steps
 
-    override _.GetDependencies = NotSupportedException() |> raise
+    override _.Dependencies = NotSupportedException() |> raise
 
-    override _.GetOutputs = NotSupportedException() |> raise
+    override _.Outputs = NotSupportedException() |> raise
 
-    override _.GetIgnores = NotSupportedException() |> raise
+    override _.Ignores = NotSupportedException() |> raise
 
     override _.GetStep(action, args) =
         let arguments = args |> Map.tryFind "args" |> Option.defaultValue ""
         [ { Command = action; Arguments = arguments } ]
 
-let getExtension name version workingDir args : Extension =
+let getExtension name version projectDir args : Extension =
     match name with
-    | "dotnet" -> DotnetExtension(workingDir, args)
-    | "shell" -> ShellExtension()
+    | "dotnet" -> DotnetExtension(projectDir, args)
+    | "shell" -> ShellExtension(projectDir, args)
     | _ -> failwith $"Unknown plugin {name}"
 
 let getExtensionFromInvoke name =
@@ -148,15 +146,15 @@ let read workspaceDirectory =
 
     let rec scanDependencies dependencies =
         for dependency in dependencies do
-            let dependencyDirectory = IO.combine workspaceDirectory dependency
+            let projectDir = IO.combine workspaceDirectory dependency
 
             let defaultExtensions = 
-                [ "shell", getExtension "shell" "1.0.0" dependencyDirectory Map.empty ]
+                [ "shell", getExtension "shell" "1.0.0" projectDir Map.empty ]
 
             // process only unknown dependency
             if projects |> Map.containsKey dependency |> not then
                 let dependencyConfig =
-                    match IO.combine dependencyDirectory "PROJECT" with
+                    match IO.combine projectDir "PROJECT" with
                     | IO.File projectFile -> Yaml.DeserializeFile<ConfigFiles.ProjectConfig> projectFile
                     | _ -> ConfigFiles.ProjectConfig()
 
@@ -171,7 +169,7 @@ let read workspaceDirectory =
                 let extensions =
                     let buildExtension (arguments: Map<string, string>) =
                         let extName, extParam, extArgs = getExtensionParamAndArgs arguments
-                        let extension = getExtension extName extParam dependencyDirectory extArgs
+                        let extension = getExtension extName extParam projectDir extArgs
                         extName, extension
 
                     dependencyConfig.Extensions
@@ -182,7 +180,7 @@ let read workspaceDirectory =
 
                 let getExtensionCapabilities capability getCapability (extension: Extension) =
                     match extension.Capabilities &&& capability with
-                    | ExtensionCapabilities.None -> []
+                    | Capabilities.None -> []
                     | _ -> getCapability extension
 
                 let getExtensionsCapabilities capability getCapability =
@@ -195,13 +193,13 @@ let read workspaceDirectory =
                     |> Seq.collect (fun args ->
                             let extName, extParam, extArgs = args |> Map.ofDict |> getExtensionParamAndArgs
                             let extension = extensions |> Map.find extName
-                            getExtensionCapabilities ExtensionCapabilities.Steps (fun e -> e.GetStep(extParam, extArgs)) extension)
+                            getExtensionCapabilities Capabilities.Steps (fun e -> e.GetStep(extParam, extArgs)) extension)
                     |> List.ofSeq
 
                 // collect extension capabilities
-                let extensionDependencies = getExtensionsCapabilities ExtensionCapabilities.Dependencies (fun e -> e.GetDependencies)
-                let extensionOutputs = getExtensionsCapabilities ExtensionCapabilities.Outputs (fun e -> e.GetOutputs)
-                let extensionIgnores = getExtensionsCapabilities ExtensionCapabilities.Ignores (fun e -> e.GetIgnores)
+                let extensionDependencies = getExtensionsCapabilities Capabilities.Dependencies (fun e -> e.Dependencies)
+                let extensionOutputs = getExtensionsCapabilities Capabilities.Outputs (fun e -> e.Outputs)
+                let extensionIgnores = getExtensionsCapabilities Capabilities.Ignores (fun e -> e.Ignores)
 
                 let steps = dependencyConfig.Steps |> Map.ofDict |> Map.map (fun _ value -> convertStepList value)
                 let dependencies = dependencyConfig.Dependencies |> List.ofSeq |> List.append extensionDependencies
@@ -221,7 +219,7 @@ let read workspaceDirectory =
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let dependencies =
                     dependencyConfig.Dependencies
-                    |> List.map (fun dep -> IO.combine dependencyDirectory dep |> IO.relativePath workspaceDirectory)
+                    |> List.map (fun dep -> IO.combine projectDir dep |> IO.relativePath workspaceDirectory)
 
                 let dependencyConfig = { dependencyConfig
                                          with Dependencies = dependencies }
