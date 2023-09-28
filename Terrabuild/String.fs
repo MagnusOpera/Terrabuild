@@ -36,6 +36,10 @@ let toString (x:'a) =
 let isEmpty (s: string) =
     String.IsNullOrWhiteSpace(s)
 
+let firstLine (input: string) =
+    use reader = new StringReader(input)
+    reader.ReadLine()
+
 let sha256 (s: string) =
     let sha256 = SHA256.Create()
     use ms = new MemoryStream()
