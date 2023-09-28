@@ -35,12 +35,10 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                 let buildDependsOn = 
                     wsConfig.Build.Targets
                     |> Map.tryFind target
-                    |> Option.defaultValue List.empty
-                    |> Set.ofList
+                    |> Option.defaultValue Set.empty
                 let projDependsOn = projectConfig.Targets
                                     |> Map.tryFind target
-                                    |> Option.defaultValue List.empty
-                                    |> Set.ofList
+                                    |> Option.defaultValue Set.empty
                 let dependsOns = buildDependsOn + projDependsOn
 
                 // apply on each dependency
@@ -49,9 +47,9 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                     |> Seq.collect (fun dependsOn -> 
                         if dependsOn.StartsWith("^") then
                             let dependsOn = dependsOn.Substring(1)
-                            projectConfig.Dependencies |> List.choose (buildTarget dependsOn)
+                            projectConfig.Dependencies |> Seq.choose (buildTarget dependsOn)
                         else
-                            [ buildTarget dependsOn projectId ] |> List.choose id)
+                            [ buildTarget dependsOn projectId ] |> Seq.choose id)
                     |> Set.ofSeq
 
                 let isLeaf = dependsOns |> Seq.exists (fun dependsOn -> dependsOn.StartsWith("^"))

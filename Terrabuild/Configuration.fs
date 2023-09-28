@@ -23,9 +23,9 @@ module ConfigFiles =
         member val Variables = Dictionary<string, string>() with get, set
 
 
-type Dependencies = string list
-type Outputs = string list
-type TargetRules = list<string>
+type Dependencies = Set<string>
+type Outputs = Set<string>
+type TargetRules = Set<string>
 type Targets = Map<string, TargetRules>
 type Step = {
     Command: string
@@ -33,7 +33,7 @@ type Step = {
 }
 type StepCommands = Step list
 type Steps = Map<string, StepCommands>
-type Tags = string list
+type Tags = Set<string>
 type Variables = Map<string, string>
 
 type ProjectConfig = {
@@ -138,8 +138,8 @@ let getExtensionFromInvoke name =
 let read workspaceDirectory =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
     let buildConfig = Yaml.DeserializeFile<ConfigFiles.BuildConfig> buildFile
-    let buildConfig = { Dependencies = buildConfig.Dependencies |> List.ofSeq
-                        Targets = buildConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> List.ofSeq)
+    let buildConfig = { Dependencies = buildConfig.Dependencies |> Set.ofSeq
+                        Targets = buildConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
                         Variables = buildConfig.Variables |> Map.ofDict }
 
     let mutable projects = Map.empty
@@ -186,7 +186,6 @@ let read workspaceDirectory =
                 let getExtensionsCapabilities capability getCapability =
                     extensions
                     |> Seq.collect (fun kvp -> getExtensionCapabilities capability getCapability kvp.Value)
-                    |> List.ofSeq
 
                 let convertStepList steps =
                     steps
@@ -202,11 +201,11 @@ let read workspaceDirectory =
                 let extensionIgnores = getExtensionsCapabilities Capabilities.Ignores (fun e -> e.Ignores)
 
                 let steps = dependencyConfig.Steps |> Map.ofDict |> Map.map (fun _ value -> convertStepList value)
-                let dependencies = dependencyConfig.Dependencies |> List.ofSeq |> List.append extensionDependencies
-                let outputs = dependencyConfig.Outputs |> List.ofSeq |> List.append extensionOutputs
-                let ignores = dependencyConfig.Ignores |> List.ofSeq |> List.append outputs |> List.append extensionIgnores
-                let targets = dependencyConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> List.ofSeq)
-                let tags = dependencyConfig.Tags |> List.ofSeq
+                let dependencies = dependencyConfig.Dependencies |> Seq.append extensionDependencies |> Set.ofSeq
+                let outputs = dependencyConfig.Outputs |> Seq.append extensionOutputs |> Set.ofSeq
+                let ignores = dependencyConfig.Ignores |> Seq.append outputs |> Seq.append extensionIgnores |> Set.ofSeq
+                let targets = dependencyConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
+                let tags = dependencyConfig.Tags |> Set.ofSeq
 
                 let dependencyConfig =
                     { Dependencies = dependencies
@@ -219,7 +218,7 @@ let read workspaceDirectory =
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let dependencies =
                     dependencyConfig.Dependencies
-                    |> List.map (fun dep -> IO.combine projectDir dep |> IO.relativePath workspaceDirectory)
+                    |> Set.map (fun dep -> IO.combine projectDir dep |> IO.relativePath workspaceDirectory)
 
                 let dependencyConfig = { dependencyConfig
                                          with Dependencies = dependencies }
