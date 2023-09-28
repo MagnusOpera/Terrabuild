@@ -120,17 +120,11 @@ type ShellExtension(projectDir, args) =
         let arguments = args |> Map.tryFind "args" |> Option.defaultValue ""
         [ { Command = action; Arguments = arguments } ]
 
-let getExtension name projectFile args : Extension =
+let loadExtension name projectFile args : Extension =
     match name with
     | "dotnet" -> DotnetExtension(projectFile, args)
     | "shell" -> ShellExtension(projectFile, args)
     | _ -> failwith $"Unknown plugin {name}"
-
-let getExtensionFromInvoke name =
-    match name with
-    | String.Regex "^\(([a-z]+)\)$" [name] -> Some name
-    | _ -> None
-
 
 let read workspaceDirectory =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
@@ -141,12 +135,17 @@ let read workspaceDirectory =
 
     let mutable projects = Map.empty
 
+    let getExtensionFromInvocation name =
+        match name with
+        | String.Regex "^\(([a-z]+)\)$" [name] -> Some name
+        | _ -> None
+
     let rec scanDependencies dependencies =
         for dependency in dependencies do
             let projectDir = IO.combine workspaceDirectory dependency
 
             let defaultExtensions = 
-                [ "shell", getExtension "shell" projectDir Map.empty ]
+                [ "shell", loadExtension "shell" projectDir Map.empty ]
 
             // process only unknown dependency
             if projects |> Map.containsKey dependency |> not then
@@ -156,9 +155,9 @@ let read workspaceDirectory =
                     | _ -> ConfigFiles.ProjectConfig()
 
                 let getExtensionParamAndArgs (arguments: Map<string, string>) =
-                    let extensionInfo, extensionArgs = arguments |> Map.partition (fun k v -> k |> getExtensionFromInvoke |> Option.isSome)
+                    let extensionInfo, extensionArgs = arguments |> Map.partition (fun k v -> k |> getExtensionFromInvocation |> Option.isSome)
                     let extensionCommand = extensionInfo |> Seq.exactlyOne
-                    let extensionName = (extensionCommand.Key |> getExtensionFromInvoke |> Option.get)
+                    let extensionName = (extensionCommand.Key |> getExtensionFromInvocation |> Option.get)
                     let extensionParam = extensionCommand.Value
                     extensionName, extensionParam, extensionArgs
 
@@ -167,7 +166,7 @@ let read workspaceDirectory =
                     let buildExtension (arguments: Map<string, string>) =
                         let extName, extParam, extArgs = getExtensionParamAndArgs arguments
                         let projectPath = IO.combine projectDir extParam
-                        let extension = getExtension extName projectPath extArgs
+                        let extension = loadExtension extName projectPath extArgs
                         extName, extension
 
                     dependencyConfig.Extensions
