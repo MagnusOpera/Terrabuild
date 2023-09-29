@@ -8,7 +8,7 @@ type BuildInfo = {
     Dependencies: Map<string, string>
 }
 
-let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) =
+let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) (noCache: bool) =
     let variables = workspaceConfig.Build.Variables
 
     let rec buildDependencies (nodeIds: string seq) =
@@ -45,7 +45,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
             |> Map.add "terrabuild_node_hash" nodeHash
 
         // check first if it's possible to restore previously built state
-        let summary = BuildCache.getBuildSummary cacheEntryId
+        let summary =
+            if noCache then None
+            else BuildCache.getBuildSummary cacheEntryId
 
         let cleanOutputs () =
             node.Configuration.Outputs
@@ -116,7 +118,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                                 BuildCache.Outputs = outputArchive
                                 BuildCache.ExitCode = lastExitCode }
                 BuildCache.writeBuildSummary cacheEntryId summary
-
+                
         if summary.ExitCode = 0 then nodeTargetHash
         else
             let content = summary.Steps |> List.last |> (fun x -> x.Log) |> IO.readTextFile 
