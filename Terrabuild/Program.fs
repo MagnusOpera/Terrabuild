@@ -54,5 +54,6 @@ let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild
 match parser.ParseCommandLine() with
 | p when p.Contains(TerrabuildArgs.Build) -> p |> targetShortcut "build"
 | p when p.Contains(TerrabuildArgs.Dist) -> p |> targetShortcut "dist"
+| p when p.Contains(TerrabuildArgs.Serve) -> p |> targetShortcut "serve"
 | p when p.Contains(TerrabuildArgs.Run) -> p |> target
 | _ -> printfn $"{parser.PrintUsage()}"

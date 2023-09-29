@@ -29,6 +29,7 @@ with
 type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<BuildArgs>
     | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<BuildArgs>
+    | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<BuildArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<RunArgs>
     | [<AltCommandLine("--ws"); Unique; Inherit>] Workspace of path:string
 with
@@ -37,5 +38,6 @@ with
             match this with
             | Build _ -> "Run target 'build'."
             | Dist _ -> "Run target 'dist'."
+            | Serve _ -> "Run target 'serve'."
             | Run _ -> "Run specified target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
