@@ -2,7 +2,6 @@ namespace Extensions.Echo
 open System
 open Extensions
 
-
 type EchoExtension(workspaceDir, projectDir, projectFile, args) =
     inherit Extension(workspaceDir, projectDir, projectFile, args)
 

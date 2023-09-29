@@ -6,7 +6,6 @@ type Step = {
     Arguments: string
 }
 
-
 [<Flags>]
 type Capabilities =
     | None = 0
