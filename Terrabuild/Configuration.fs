@@ -60,6 +60,7 @@ let loadExtension name workspaceDir projectDir projectFile args : Extension =
     | "dotnet" -> Extensions.Dotnet.DotnetExtension(workspaceDir, projectDir, projectFile, args)
     | "shell" -> Extensions.Shell.ShellExtension(workspaceDir, projectDir, projectFile, args)
     | "docker" -> Extensions.Docker.DockerExtension(workspaceDir, projectDir, projectFile, args)
+    | "make" -> Extensions.Make.MakeExtension(workspaceDir, projectDir, projectFile, args)
     | _ -> failwith $"Unknown plugin {name}"
 
 let read workspaceDirectory =

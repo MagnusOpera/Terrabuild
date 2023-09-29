@@ -1,3 +1,7 @@
+
+extensions:
+  - (make): Makefile
+
 dependencies:
   - ../../libraries/library1
 
@@ -11,8 +15,8 @@ steps:
   build:
     - (shell): echo
       args: "building project1"
-    - (shell): make
-      args: build
+    - (make): build
+      secret: tsoin tsoin
 
   publish:
     - (shell): echo

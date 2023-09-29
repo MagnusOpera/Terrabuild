@@ -1,7 +1,9 @@
 
+secret?=tagada
+
 build: clean
 	mkdir dist
-	echo "tagada" > dist/secret.txt
+	echo $(secret) > dist/secret.txt
 
 publish:
 	mkdir dist/publish
