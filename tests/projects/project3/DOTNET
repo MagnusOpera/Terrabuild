@@ -1,6 +1,10 @@
 extensions:
   - (dotnet): project3.csproj
 
+ignores:
+  - Dockerfile
+  - DOCKER
+
 steps:
   build:
     - (dotnet): build

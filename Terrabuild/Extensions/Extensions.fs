@@ -16,7 +16,7 @@ type Capabilities =
     | Ignores = 8
 
 [<AbstractClass>]
-type Extension(projectDir:string, projectFile: string, args: Map<string, string>) =
+type Extension(workspaceDir: string, projectDir:string, projectFile: string, args: Map<string, string>) =
     abstract Capabilities: Capabilities with get
     abstract Dependencies: string list
     abstract Outputs: string list

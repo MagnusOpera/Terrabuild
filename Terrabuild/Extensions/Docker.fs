@@ -2,8 +2,8 @@ namespace Extensions.Docker
 open System
 open Extensions
 
-type DockerExtension(projectDir, projectFile, args) =
-    inherit Extension(projectDir, projectFile, args)
+type DockerExtension(workspaceDir, projectDir, projectFile, args) =
+    inherit Extension(workspaceDir, projectDir, projectFile, args)
 
     let getBuildStep (args: Map<string, string>) =
         let arguments = args |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}={kvp.Value}") ""

@@ -1,8 +1,7 @@
 dependencies:
 - projects/project1
 - projects/project2
-- projects/project3/src
-- projects/project3/deploy
+- projects/project3
 
 targets:
   build: [^build]

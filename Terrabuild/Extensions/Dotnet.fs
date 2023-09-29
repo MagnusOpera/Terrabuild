@@ -15,8 +15,8 @@ open Extensions
 open Xml
 open System.IO
 
-type DotnetExtension(projectDir, projectFile, args) =
-    inherit Extension(projectDir, projectFile, args)
+type DotnetExtension(workspaceDir, projectDir, projectFile, args) =
+    inherit Extension(workspaceDir, projectDir, projectFile, args)
 
     let parseDotnetDependencies (projectFile: string) =
         let project = Path.Combine(projectDir, projectFile)

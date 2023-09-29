@@ -18,7 +18,13 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
     and buildDependency nodeId =
         let node = g.Nodes[nodeId]
-        let projectDirectory = IO.combine workspaceConfig.Directory node.ProjectId
+        let projectDirectory =
+            match IO.combine workspaceConfig.Directory node.ProjectId with
+            | IO.Directory projectDirectory -> projectDirectory
+            | IO.File projectFile -> IO.parentDirectory projectFile
+            | _ -> failwith $"Failed to find project '{node.ProjectId}"
+        
+
         let steps = node.Configuration.Steps[node.TargetId]
 
         // compute node hash:
@@ -60,7 +66,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                 printfn $"Building {node.TargetId}@{node.ProjectId}: {cacheEntryId}"
                 let startedAt = DateTime.UtcNow
 
-                if node.IsLeaf then cleanOutputs()
+                if node.IsLeaf then
+                    printfn $"Cleaning output of leaf task '{cacheEntryId}'"
+                    cleanOutputs()
 
                 let beforeFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 

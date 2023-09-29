@@ -40,15 +40,24 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                 let dependsOns = buildDependsOn + projDependsOn
 
                 // apply on each dependency
-                let children =
-                    dependsOns
-                    |> Seq.collect (fun dependsOn ->
-                        match dependsOn with
-                        | String.Regex "^\^(.+)$" [ parentDependsOn ] -> projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
-                        | _ -> [ buildTarget dependsOn projectId ] |> Seq.choose id)
-                    |> Set.ofSeq
+                let children, hasInternalDependencies =
 
-                let isLeaf = dependsOns |> Seq.exists (fun dependsOn -> dependsOn.StartsWith("^"))
+                    let mutable children = Set.empty
+                    let mutable hasInternalDependencies = false
+
+                    for dependsOn in dependsOns do
+                        let childDependency = 
+                            match dependsOn with
+                            | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
+                                projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
+                            | _ ->
+                                hasInternalDependencies <- true
+                                [ buildTarget dependsOn projectId ] |> Seq.choose id
+                        children <- children + (childDependency |> Set.ofSeq)
+                    children, hasInternalDependencies
+
+                // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
+                let isLeaf = hasInternalDependencies |> not
 
                 let node = { ProjectId = projectId
                              TargetId = target

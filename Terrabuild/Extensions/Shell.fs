@@ -3,8 +3,8 @@ open System
 open Extensions
 
 
-type ShellExtension(projectDir, projectFile, args) =
-    inherit Extension(projectDir, projectFile, args)
+type ShellExtension(workspaceDir, projectDir, projectFile, args) =
+    inherit Extension(workspaceDir, projectDir, projectFile, args)
 
     override _.Capabilities = Capabilities.Steps
 

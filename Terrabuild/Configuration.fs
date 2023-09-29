@@ -55,11 +55,11 @@ type WorkspaceConfig = {
     Projects: Map<string, ProjectConfig>
 }
 
-let loadExtension name projectDir projectFile args : Extension =
+let loadExtension name workspaceDir projectDir projectFile args : Extension =
     match name with
-    | "dotnet" -> Extensions.Dotnet.DotnetExtension(projectDir, projectFile, args)
-    | "shell" -> Extensions.Shell.ShellExtension(projectDir, projectFile, args)
-    | "docker" -> Extensions.Docker.DockerExtension(projectDir, projectFile, args)
+    | "dotnet" -> Extensions.Dotnet.DotnetExtension(workspaceDir, projectDir, projectFile, args)
+    | "shell" -> Extensions.Shell.ShellExtension(workspaceDir, projectDir, projectFile, args)
+    | "docker" -> Extensions.Docker.DockerExtension(workspaceDir, projectDir, projectFile, args)
     | _ -> failwith $"Unknown plugin {name}"
 
 let read workspaceDirectory =
@@ -79,10 +79,15 @@ let read workspaceDirectory =
 
     let rec scanDependencies dependencies =
         for dependency in dependencies do
-            let projectDir = IO.combine workspaceDirectory dependency
+            let projectId = IO.combine workspaceDirectory dependency
+            let projectDir, projectFile = 
+                match projectId with
+                | IO.File projectFile -> IO.parentDirectory projectFile, IO.getFilename projectFile
+                | IO.Directory projectDir -> projectDir, "PROJECT"
+                | _ -> failwith $"Failed to find project '{projectId}'"
 
             let defaultExtensions = 
-                [ "shell", loadExtension "shell" projectDir projectDir Map.empty ]
+                [ "shell", loadExtension "shell" workspaceDirectory projectDir projectDir Map.empty ]
 
             // process only unknown dependency
             if processedNodes.TryAdd(dependency, true) then
@@ -90,7 +95,7 @@ let read workspaceDirectory =
                 // we might have landed in a directory without a configuration
                 // in that case we just use the default configuration (which does nothing)
                 let dependencyConfig =
-                    match IO.combine projectDir "PROJECT" with
+                    match IO.combine projectDir projectFile with
                     | IO.File projectFile -> Yaml.DeserializeFile<YamlConfigFiles.ProjectConfig> projectFile
                     | _ -> YamlConfigFiles.ProjectConfig()
 
@@ -106,7 +111,7 @@ let read workspaceDirectory =
                 let extensions =
                     let buildExtension (arguments: Map<string, string>) =
                         let extName, extParam, extArgs = getExtensionParamAndArgs arguments
-                        let extension = loadExtension extName projectDir extParam extArgs
+                        let extension = loadExtension extName workspaceDirectory projectDir extParam extArgs
                         extName, extension
 
                     dependencyConfig.Extensions
