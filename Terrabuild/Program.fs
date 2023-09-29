@@ -24,8 +24,6 @@ let targetShortcut target (tbResult: ParseResults<TerrabuildArgs>) =
         | Some _ -> true
         | _ -> false
 
-    let tags = buildResult.GetResults(BuildArgs.Tag)
-
     runTarget wsDir target noCache
 
 
@@ -43,8 +41,6 @@ let target (tbResult: ParseResults<TerrabuildArgs>) =
         | _ -> false
 
     let target = targetResult.GetResult(RunArgs.Target)
-
-    let tags = targetResult.GetResults(RunArgs.Tag)
 
     runTarget wsDir target noCache
 

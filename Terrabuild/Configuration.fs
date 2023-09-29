@@ -15,7 +15,6 @@ module YamlConfigFiles =
         member val Outputs = List<string>() with get, set
         member val Ignores = List<string>() with get, set
         member val Targets = Dictionary<string, List<string>>() with get, set
-        member val Tags = List<string>() with get, set
 
     type BuildConfig() =
         member val Dependencies = List<string>() with get, set
@@ -38,7 +37,6 @@ type ProjectConfig = {
     Outputs: Outputs
     Targets: Targets
     Steps: Steps
-    Tags: Tags
     Files: Set<string>
     Hash: string
 }
@@ -162,7 +160,6 @@ let read workspaceDirectory =
                 let projectOutputs = dependencyConfig.Outputs |> Seq.append extensionOutputs |> Set.ofSeq
                 let projectIgnores = dependencyConfig.Ignores |> Seq.append projectOutputs |> Seq.append extensionIgnores |> Set.ofSeq
                 let projectTargets = dependencyConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
-                let projectTags = dependencyConfig.Tags |> Set.ofSeq
 
                 // get dependencies on variables
                 let variables =
@@ -207,7 +204,6 @@ let read workspaceDirectory =
                       Ignores = projectIgnores
                       Targets = projectTargets
                       Steps = projectSteps
-                      Tags = projectTags
                       Files = projectFiles
                       Hash = nodeHash }
 

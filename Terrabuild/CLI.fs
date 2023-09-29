@@ -4,26 +4,22 @@ open Argu
 [<RequireQualifiedAccess>]
 type BuildArgs =
     | [<AltCommandLine("--nc"); Unique>] NoCache
-    | [<AltCommandLine("--t")>] Tag of tag:string
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
             | NoCache -> "Do not use cache when building target."
-            | Tag _ -> "Select projets to build using one or more tags."
 
 [<RequireQualifiedAccess>]
 type RunArgs =
     | [<MainCommand; ExactlyOnce; First>] Target of target:string
     | [<AltCommandLine("--nc"); Unique>] NoCache
-    | [<AltCommandLine("--t")>] Tag of tag:string
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
             | Target _ -> "Specify build target."
             | NoCache -> "Do not use cache when building target."
-            | Tag _ -> "Select projets to build using one or more tags."
 
 [<RequireQualifiedAccess>]
 type TerrabuildArgs =
