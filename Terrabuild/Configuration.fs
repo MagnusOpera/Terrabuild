@@ -61,6 +61,7 @@ let loadExtension name workspaceDir projectDir projectFile args : Extension =
     | "shell" -> Extensions.Shell.ShellExtension(workspaceDir, projectDir, projectFile, args)
     | "docker" -> Extensions.Docker.DockerExtension(workspaceDir, projectDir, projectFile, args)
     | "make" -> Extensions.Make.MakeExtension(workspaceDir, projectDir, projectFile, args)
+    | "echo" -> Extensions.Echo.EchoExtension(workspaceDir, projectDir, projectFile, args)
     | _ -> failwith $"Unknown plugin {name}"
 
 let read workspaceDirectory =
@@ -88,7 +89,8 @@ let read workspaceDirectory =
                 | _ -> failwith $"Failed to find project '{projectId}'"
 
             let defaultExtensions = 
-                [ "shell", loadExtension "shell" workspaceDirectory projectDir projectDir Map.empty ]
+                [ "shell", loadExtension "shell" workspaceDirectory projectDir projectDir Map.empty
+                  "echo", loadExtension "echo" workspaceDirectory projectDir projectDir Map.empty ]
 
             // process only unknown dependency
             if processedNodes.TryAdd(dependency, true) then

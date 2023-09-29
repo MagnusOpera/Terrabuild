@@ -9,6 +9,7 @@
     <Compile Include="Extensions/Docker.fs" />
     <Compile Include="Extensions/Shell.fs" />
     <Compile Include="Extensions/Make.fs" />
+    <Compile Include="Extensions/Echo.fs" />
     <Compile Include="IO.fs" />
     <Compile Include="Zip.fs" />
     <Compile Include="String.fs" />
