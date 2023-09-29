@@ -29,7 +29,7 @@ let build (tbResult: ParseResults<TerrabuildArgs>) =
     runTarget wsDir "build" noCache
 
 let target (tbResult: ParseResults<TerrabuildArgs>) =
-    let targetResult = tbResult.GetResult(TerrabuildArgs.Target)
+    let targetResult = tbResult.GetResult(TerrabuildArgs.Run)
 
     let wsDir =
         match tbResult.TryGetResult(TerrabuildArgs.Workspace) with
@@ -37,13 +37,13 @@ let target (tbResult: ParseResults<TerrabuildArgs>) =
         | _ -> "."
 
     let noCache =
-        match targetResult.TryGetResult(TargetArgs.NoCache) with
+        match targetResult.TryGetResult(RunArgs.NoCache) with
         | Some _ -> true
         | _ -> false
 
-    let target = targetResult.GetResult(TargetArgs.Target)
+    let target = targetResult.GetResult(RunArgs.Target)
 
-    let tags = targetResult.GetResults(TargetArgs.Tag)
+    let tags = targetResult.GetResults(RunArgs.Tag)
 
     runTarget wsDir target noCache
 
@@ -52,5 +52,5 @@ let errorHandler = ProcessExiter()
 let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
 match parser.ParseCommandLine() with
 | p when p.Contains(TerrabuildArgs.Build) -> p |> build
-| p when p.Contains(TerrabuildArgs.Target) -> p |> target
+| p when p.Contains(TerrabuildArgs.Run) -> p |> target
 | _ -> printfn $"{parser.PrintUsage()}"

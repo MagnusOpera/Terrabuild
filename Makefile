@@ -7,3 +7,8 @@ run:
 
 target:
 	dotnet run --project Terrabuild -- target build --workspace tests
+
+usage:
+	dotnet run --project Terrabuild -- --help
+	dotnet run --project Terrabuild -- build --help
+	dotnet run --project Terrabuild -- run --help
