@@ -11,7 +11,7 @@ let runTarget wsDir target noCache =
     printfn $"{buildInfo}"
 
 
-let build (tbResult: ParseResults<TerrabuildArgs>) =
+let targetShortcut target (tbResult: ParseResults<TerrabuildArgs>) =
     let buildResult = tbResult.GetResult(TerrabuildArgs.Build)
 
     let wsDir =
@@ -26,7 +26,8 @@ let build (tbResult: ParseResults<TerrabuildArgs>) =
 
     let tags = buildResult.GetResults(BuildArgs.Tag)
 
-    runTarget wsDir "build" noCache
+    runTarget wsDir target noCache
+
 
 let target (tbResult: ParseResults<TerrabuildArgs>) =
     let targetResult = tbResult.GetResult(TerrabuildArgs.Run)
@@ -51,6 +52,7 @@ let target (tbResult: ParseResults<TerrabuildArgs>) =
 let errorHandler = ProcessExiter()
 let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
 match parser.ParseCommandLine() with
-| p when p.Contains(TerrabuildArgs.Build) -> p |> build
+| p when p.Contains(TerrabuildArgs.Build) -> p |> targetShortcut "build"
+| p when p.Contains(TerrabuildArgs.Dist) -> p |> targetShortcut "dist"
 | p when p.Contains(TerrabuildArgs.Run) -> p |> target
 | _ -> printfn $"{parser.PrintUsage()}"
