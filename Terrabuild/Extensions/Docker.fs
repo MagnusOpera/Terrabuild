@@ -26,7 +26,6 @@ type DockerExtension(workspaceDir, projectDir, projectFile, args) =
 
     override _.Ignores = NotSupportedException() |> raise
 
-
     override _.GetStep(action, args) =
         match action with
         | "build" -> getBuildStep args
