@@ -12,7 +12,6 @@ let computeFilesSha files =
         sha256.ComputeHash hFile |> ms.Write
 
     files
-    |> Seq.sort
     |> Seq.iter computeFileSha
 
     ms.Position <- 0

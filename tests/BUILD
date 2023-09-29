@@ -1,12 +1,13 @@
 dependencies:
-  - projects/project1
-  - projects/project2
-  - projects/project3
+- projects/project1
+- projects/project2
+- projects/project3
 
 targets:
-  build: [build^]
+  build: [^build]
   publish: [build]
-  container: [publish]
+  docker: [publish]
+  push: [docker]
 
 variables:
   configuration: Release

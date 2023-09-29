@@ -9,7 +9,7 @@ type BuildInfo = {
 }
 
 let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) =
-    let variableContext = workspaceConfig.Build.Variables
+    let variables = workspaceConfig.Build.Variables
 
     let rec buildDependencies (nodeIds: string seq) =
         nodeIds
@@ -27,29 +27,19 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
         // - files hash
         // - variables dependencies
 
-        let variables =
-            let extractVariables s =
-                match s with
-                | String.Regex "\$\(([a-z]+)\)" variables -> variables
-                | _ -> []
-
-            steps
-            |> Seq.collect (fun step -> step.Arguments |> extractVariables )
-            |> Seq.map (fun var -> var, variableContext[var])
-            |> Map.ofSeq
-
-        let variableHashes =
-            variables
-            |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-            |> String.join "\n"
-
         let dependenciesHashes = buildDependencies node.Dependencies
-        let nodeHash =
-            dependenciesHashes @ node.Files @ [ node.FilesHash ; variableHashes ]
-            |> String.join "\n" |> String.sha256
+
+        let nodeHash = node.Configuration.Hash
+
+        let nodeTargetHash = $"{node.TargetId}/{nodeHash}"
+        let cacheEntryId = IO.combine node.ProjectId nodeTargetHash
+
+        let variables =
+            variables
+            |> Map.add "terrabuild_node_hash" nodeHash
 
         // check first if it's possible to restore previously built state
-        let summary = BuildCache.getBuildSummary nodeHash
+        let summary = BuildCache.getBuildSummary cacheEntryId
 
         let cleanOutputs () =
             node.Configuration.Outputs
@@ -59,7 +49,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
         let summary =
             match summary with
             | Some summary ->
-                printfn $"Reusing build cache for {node.TargetId}@{node.ProjectId}: {nodeHash}"
+                printfn $"Reusing build cache for {node.TargetId}@{node.ProjectId}: {cacheEntryId}"
 
                 // cleanup before restoring outputs
                 cleanOutputs()
@@ -67,7 +57,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                 Zip.restoreArchive summary.Outputs projectDirectory
                 summary
             | _ -> 
-                printfn $"Building {node.TargetId}@{node.ProjectId}: {nodeHash}"
+                printfn $"Building {node.TargetId}@{node.ProjectId}: {cacheEntryId}"
+                let startedAt = DateTime.UtcNow
 
                 if node.IsLeaf then cleanOutputs()
 
@@ -90,8 +81,11 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                     let beginExecution = System.Diagnostics.Stopwatch.StartNew()
                     let exitCode, logFile = Exec.execCaptureTimestampedOutput projectDirectory step.Command step.Arguments
                     let executionDuration = beginExecution.Elapsed
+                    let endedAt = DateTime.UtcNow
                     let stepLog = { BuildCache.Command = step.Command
-                                    BuildCache.Args = step.Arguments
+                                    BuildCache.Arguments = step.Arguments
+                                    BuildCache.StartedAt = startedAt
+                                    BuildCache.EndedAt = endedAt
                                     BuildCache.Duration = executionDuration
                                     BuildCache.Log = logFile }
                     stepLog |> stepLogs.Add
@@ -107,20 +101,19 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
                 let summary = { BuildCache.Project = node.ProjectId
                                 BuildCache.Target = node.TargetId
-                                BuildCache.Files = node.Files
-                                BuildCache.FilesHash = node.FilesHash
+                                BuildCache.Files = node.Configuration.Files
+                                BuildCache.Ignores = node.Configuration.Ignores
                                 BuildCache.Variables = variables
-                                BuildCache.Dependencies = dependenciesHashes
                                 BuildCache.Steps = stepLogs |> List.ofSeq
                                 BuildCache.Outputs = outputArchive
                                 BuildCache.ExitCode = lastExitCode }
-                BuildCache.writeBuildSummary nodeHash summary
+                BuildCache.writeBuildSummary cacheEntryId summary
 
-        if summary.ExitCode = 0 then nodeHash
+        if summary.ExitCode = 0 then nodeTargetHash
         else
             let content = summary.Steps |> List.last |> (fun x -> x.Log) |> IO.readTextFile 
-            printfn $"Build failure for node hash {nodeHash}:\n{content}"
-            failwith $"Build failure for node hash {nodeHash}"
+            printfn $"Build failure for node hash {cacheEntryId}:\n{content}"
+            failwith $"Build failure for node hash {cacheEntryId}"
 
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
     let dependencies = g.RootNodes |> Map.map (fun k v -> buildDependency v)

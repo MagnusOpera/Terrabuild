@@ -7,8 +7,6 @@ type Node = {
     TargetId: string
     Configuration: Configuration.ProjectConfig
     Dependencies: string set
-    Files: string list
-    FilesHash: string
     IsLeaf: bool
 }
 
@@ -46,28 +44,15 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
                     dependsOns
                     |> Seq.collect (fun dependsOn ->
                         match dependsOn with
-                        | String.Regex "^(.+)\^$" [ parentDependsOn ] -> projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
+                        | String.Regex "^\^(.+)$" [ parentDependsOn ] -> projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
                         | _ -> [ buildTarget dependsOn projectId ] |> Seq.choose id)
                     |> Set.ofSeq
 
                 let isLeaf = dependsOns |> Seq.exists (fun dependsOn -> dependsOn.StartsWith("^"))
 
-                let projectDir = IO.combine wsConfig.Directory projectId
-                let ignoreFiles =
-                    projectConfig.Outputs 
-                    |> Seq.map (fun output -> IO.combine projectDir output)
-                    |> Set.ofSeq
-                
-                let files = projectDir |> IO.enumerateFilesBut ignoreFiles |> List.ofSeq
-                let hash = files |> Hash.computeFilesSha
-
-                let files = files |> List.map (IO.relativePath wsConfig.Directory)
-
                 let node = { ProjectId = projectId
                              TargetId = target
                              Configuration = projectConfig
-                             Files = files
-                             FilesHash = hash
                              Dependencies = children
                              IsLeaf = isLeaf }
                 if allNodes.TryAdd(nodeId, node) |> not then

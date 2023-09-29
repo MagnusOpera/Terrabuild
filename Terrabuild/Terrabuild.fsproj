@@ -1,11 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
+    <Compile Include="Extensions/Extensions.fs" />
+    <Compile Include="Extensions/Dotnet.fs" />
+    <Compile Include="Extensions/Docker.fs" />
+    <Compile Include="Extensions/Shell.fs" />
     <Compile Include="IO.fs" />
     <Compile Include="Zip.fs" />
     <Compile Include="String.fs" />
@@ -14,7 +16,6 @@
     <Compile Include="Json.fs" />
     <Compile Include="Exec.fs" />
     <Compile Include="Git.fs" />
-    <Compile Include="Xml.fs" />
     <Compile Include="Hash.fs" />
     <Compile Include="FileSystem.fs" />
     <Compile Include="Configuration.fs" />
@@ -23,10 +24,8 @@
     <Compile Include="Build.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="YamlDotNet" Version="13.3.1" />
     <PackageReference Include="FSharp.SystemTextJson" Version="0.19.13" />
   </ItemGroup>
-
 </Project>

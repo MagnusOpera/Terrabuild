@@ -4,7 +4,9 @@ open System.IO
 
 type StepInfo = {
     Command: string
-    Args: string
+    Arguments: string
+    StartedAt: DateTime
+    EndedAt: DateTime
     Duration: TimeSpan
     Log: string
 }
@@ -13,9 +15,8 @@ type Summary = {
     Project: string
     Target: string
     Steps: StepInfo list
-    Dependencies: string list
-    Files: string list
-    FilesHash: string
+    Files: Set<string>    
+    Ignores: Set<string>
     Variables: Map<string, string>
     Outputs: string
     ExitCode: int

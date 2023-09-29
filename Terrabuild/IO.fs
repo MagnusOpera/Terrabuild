@@ -36,7 +36,8 @@ let deleteAny entry =
     | Directory directory -> Directory.Delete(directory, true)
     | _ -> ()
 
-let enumerateFilesBut ignore dir =
+let enumerateFilesBut ignore rootdir =
+    let ignore = ignore |> Set.map (combine rootdir)
     let rec enumerateFilesBut dir =
         seq {
             if ignore |> Set.contains dir |> not then
@@ -50,6 +51,6 @@ let enumerateFilesBut ignore dir =
                     yield! enumerateFilesBut dir                
         }
 
-    let res = enumerateFilesBut dir |> List.ofSeq
+    let res = enumerateFilesBut rootdir |> List.ofSeq
     res
 

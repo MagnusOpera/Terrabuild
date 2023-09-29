@@ -1,11 +1,11 @@
 module Configuration
 open System.IO
-open System.Xml.Linq
 open Collections
-open Xml
 open System
+open System.Collections.Concurrent
+open Extensions
 
-module ConfigFiles =
+module YamlConfigFiles =
     open System.Collections.Generic
 
     type ProjectConfig() =
@@ -27,10 +27,6 @@ type Dependencies = Set<string>
 type Outputs = Set<string>
 type TargetRules = Set<string>
 type Targets = Map<string, TargetRules>
-type Step = {
-    Command: string
-    Arguments: string
-}
 type StepCommands = Step list
 type Steps = Map<string, StepCommands>
 type Tags = Set<string>
@@ -43,6 +39,8 @@ type ProjectConfig = {
     Targets: Targets
     Steps: Steps
     Tags: Tags
+    Files: Set<string>
+    Hash: string
 }
 
 type BuildConfig = {
@@ -57,82 +55,21 @@ type WorkspaceConfig = {
     Projects: Map<string, ProjectConfig>
 }
 
-[<Flags>]
-type Capabilities =
-    | None = 0
-    | Dependencies = 1
-    | Steps = 2
-    | Outputs = 4
-    | Ignores = 8
-
-[<AbstractClass>]
-type Extension(projectFile: string, args: Map<string, string>) =
-    abstract Capabilities: Capabilities with get
-    abstract Dependencies: string list
-    abstract Outputs: string list
-    abstract Ignores: string list
-    abstract GetStep: action:string * args:Map<string, string> -> Step list
-
-
-type DotnetExtension(projectFile, args) =
-    inherit Extension(projectFile, args)
-
-    let parseDotnetDependencies (projectFile: string) =
-        let xdoc = XDocument.Load (projectFile)
-        let refs = xdoc.Descendants() 
-                        |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
-                        |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string)
-                        |> Seq.map IO.parentDirectory
-                        |> Seq.distinct
-                        |> List.ofSeq
-        refs 
-
-    override _.Capabilities = Capabilities.Dependencies
-                              ||| Capabilities.Steps
-                              ||| Capabilities.Outputs
-
-    override _.Dependencies = parseDotnetDependencies projectFile
-
-    override _.Outputs = [ "bin"; "obj" ]
-
-    override _.Ignores = NotSupportedException() |> raise
-
-    override _.GetStep(action, args) =
-        let configuration = args |> Map.tryFind "configuration" |> Option.defaultValue "Debug"
-        let arguments = args |> Map.tryFind "args" |> Option.defaultValue ""
-        let dotnetArgs = $"{action} --no-dependencies --configuration {configuration} {arguments}"
-        match action with
-        | "build" | "publish" | "run" | "pack" -> [ { Command = "dotnet"; Arguments = dotnetArgs } ]
-        | _ -> failwith $"Unsupported action '{action}'"
-
-type ShellExtension(projectDir, args) =
-    inherit Extension(projectDir, args)
-
-    override _.Capabilities = Capabilities.Steps
-
-    override _.Dependencies = NotSupportedException() |> raise
-
-    override _.Outputs = NotSupportedException() |> raise
-
-    override _.Ignores = NotSupportedException() |> raise
-
-    override _.GetStep(action, args) =
-        let arguments = args |> Map.tryFind "args" |> Option.defaultValue ""
-        [ { Command = action; Arguments = arguments } ]
-
-let loadExtension name projectFile args : Extension =
+let loadExtension name projectDir projectFile args : Extension =
     match name with
-    | "dotnet" -> DotnetExtension(projectFile, args)
-    | "shell" -> ShellExtension(projectFile, args)
+    | "dotnet" -> Extensions.Dotnet.DotnetExtension(projectDir, projectFile, args)
+    | "shell" -> Extensions.Shell.ShellExtension(projectDir, projectFile, args)
+    | "docker" -> Extensions.Docker.DockerExtension(projectDir, projectFile, args)
     | _ -> failwith $"Unknown plugin {name}"
 
 let read workspaceDirectory =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
-    let buildConfig = Yaml.DeserializeFile<ConfigFiles.BuildConfig> buildFile
+    let buildConfig = Yaml.DeserializeFile<YamlConfigFiles.BuildConfig> buildFile
     let buildConfig = { Dependencies = buildConfig.Dependencies |> Set.ofSeq
                         Targets = buildConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
                         Variables = buildConfig.Variables |> Map.ofDict }
 
+    let processedNodes = ConcurrentDictionary<string, bool>()
     let mutable projects = Map.empty
 
     let getExtensionFromInvocation name =
@@ -145,14 +82,18 @@ let read workspaceDirectory =
             let projectDir = IO.combine workspaceDirectory dependency
 
             let defaultExtensions = 
-                [ "shell", loadExtension "shell" projectDir Map.empty ]
+                [ "shell", loadExtension "shell" projectDir projectDir Map.empty ]
 
             // process only unknown dependency
-            if projects |> Map.containsKey dependency |> not then
+            if processedNodes.TryAdd(dependency, true) then
+
+                // we might have landed in a directory without a configuration
+                // in that case we just use the default configuration (which does nothing)
                 let dependencyConfig =
                     match IO.combine projectDir "PROJECT" with
-                    | IO.File projectFile -> Yaml.DeserializeFile<ConfigFiles.ProjectConfig> projectFile
-                    | _ -> ConfigFiles.ProjectConfig()
+                    | IO.File projectFile -> Yaml.DeserializeFile<YamlConfigFiles.ProjectConfig> projectFile
+                    | _ -> YamlConfigFiles.ProjectConfig()
+
 
                 let getExtensionParamAndArgs (arguments: Map<string, string>) =
                     let extensionInfo, extensionArgs = arguments |> Map.partition (fun k v -> k |> getExtensionFromInvocation |> Option.isSome)
@@ -165,8 +106,7 @@ let read workspaceDirectory =
                 let extensions =
                     let buildExtension (arguments: Map<string, string>) =
                         let extName, extParam, extArgs = getExtensionParamAndArgs arguments
-                        let projectPath = IO.combine projectDir extParam
-                        let extension = loadExtension extName projectPath extArgs
+                        let extension = loadExtension extName projectDir extParam extArgs
                         extName, extension
 
                     dependencyConfig.Extensions
@@ -184,6 +124,20 @@ let read workspaceDirectory =
                     extensions
                     |> Seq.collect (fun kvp -> getExtensionCapabilities capability getCapability kvp.Value)
 
+                let extensionDependencies = getExtensionsCapabilities Capabilities.Dependencies (fun e -> e.Dependencies)
+
+                let projectDependencies = dependencyConfig.Dependencies |> Seq.append extensionDependencies |> Set.ofSeq
+
+                // convert relative dependencies to absolute dependencies respective to workspaceDirectory
+                let projectDependencies =
+                    projectDependencies
+                    |> Set.map (fun dep -> IO.combine projectDir dep |> IO.relativePath workspaceDirectory)
+
+                // we go depth-first in order to compute node hash right after
+                // NOTE: this could lead to a memory usage problem
+                scanDependencies projectDependencies
+
+
                 let convertStepList steps =
                     steps
                     |> Seq.collect (fun args ->
@@ -193,35 +147,64 @@ let read workspaceDirectory =
                     |> List.ofSeq
 
                 // collect extension capabilities
-                let extensionDependencies = getExtensionsCapabilities Capabilities.Dependencies (fun e -> e.Dependencies)
                 let extensionOutputs = getExtensionsCapabilities Capabilities.Outputs (fun e -> e.Outputs)
                 let extensionIgnores = getExtensionsCapabilities Capabilities.Ignores (fun e -> e.Ignores)
 
-                let steps = dependencyConfig.Steps |> Map.ofDict |> Map.map (fun _ value -> convertStepList value)
-                let dependencies = dependencyConfig.Dependencies |> Seq.append extensionDependencies |> Set.ofSeq
-                let outputs = dependencyConfig.Outputs |> Seq.append extensionOutputs |> Set.ofSeq
-                let ignores = dependencyConfig.Ignores |> Seq.append outputs |> Seq.append extensionIgnores |> Set.ofSeq
-                let targets = dependencyConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
-                let tags = dependencyConfig.Tags |> Set.ofSeq
+                let projectSteps = dependencyConfig.Steps |> Map.ofDict |> Map.map (fun _ value -> convertStepList value)
+                let projectOutputs = dependencyConfig.Outputs |> Seq.append extensionOutputs |> Set.ofSeq
+                let projectIgnores = dependencyConfig.Ignores |> Seq.append projectOutputs |> Seq.append extensionIgnores |> Set.ofSeq
+                let projectTargets = dependencyConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
+                let projectTags = dependencyConfig.Tags |> Set.ofSeq
+
+                // get dependencies on variables
+                let variables =
+                    let extractVariables s =
+                        match s with
+                        | String.Regex "\$\(([a-z]+)\)" variables -> variables
+                        | _ -> []
+
+                    projectSteps
+                    |> Seq.collect (fun kvp -> kvp.Value
+                                               |> List.collect (fun step -> step.Arguments |> extractVariables))
+                    |> Seq.except ["terrabuild_node_hash"]
+                    |> Seq.map (fun varName -> varName, buildConfig.Variables |> Map.find varName)
+                    |> Map.ofSeq
+
+                let variableHashes =
+                    variables
+                    |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
+                    |> String.join "\n"
+
+                // get dependencies on files
+                let files = projectDir |> IO.enumerateFilesBut projectIgnores |> Set.ofSeq
+                let filesHash = files |> Seq.sort |> Hash.computeFilesSha
+                let projectFiles = files |> Set.map (IO.relativePath projectDir)
+
+                let ignoresHash = projectIgnores |> Seq.sort |> String.join "\n" |> String.sha256
+
+                let dependenciesHash =
+                    projectDependencies
+                    |> Seq.map (fun dependency -> (projects |> Map.find dependency).Hash)
+                    |> Seq.sort
+                    |> String.join "\n" |> String.sha256
+
+                // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
+                let nodeHash =
+                    [ filesHash; ignoresHash; dependenciesHash; variableHashes ]
+                    |> String.join "\n" |> String.sha256
 
                 let dependencyConfig =
-                    { Dependencies = dependencies
-                      Outputs = outputs
-                      Ignores = ignores
-                      Targets = targets
-                      Steps = steps
-                      Tags = tags }
+                    { Dependencies = projectDependencies
+                      Outputs = projectOutputs
+                      Ignores = projectIgnores
+                      Targets = projectTargets
+                      Steps = projectSteps
+                      Tags = projectTags
+                      Files = projectFiles
+                      Hash = nodeHash }
 
-                // convert relative dependencies to absolute dependencies respective to workspaceDirectory
-                let dependencies =
-                    dependencyConfig.Dependencies
-                    |> Set.map (fun dep -> IO.combine projectDir dep |> IO.relativePath workspaceDirectory)
-
-                let dependencyConfig = { dependencyConfig
-                                         with Dependencies = dependencies }
                 projects <- projects |> Map.add dependency dependencyConfig
 
-                scanDependencies dependencies
 
     // initial dependency list is absolute respective to workspaceDirectory
     scanDependencies buildConfig.Dependencies
