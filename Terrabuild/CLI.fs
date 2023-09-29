@@ -4,7 +4,7 @@ open Argu
 [<RequireQualifiedAccess>]
 type BuildArgs =
     | [<Unique; AltCommandLine("--nc"); Inherit>] NoCache
-    | [<CustomCommandLine("--tag"); AltCommandLine("--t"); Inherit>] Tag of tag:string
+    | [<AltCommandLine("--t"); Inherit>] Tag of tag:string
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -16,7 +16,7 @@ with
 type RunArgs =
     | [<MainCommand; ExactlyOnce; First>] Target of target:string
     | [<Unique; AltCommandLine("--nc"); Inherit>] NoCache
-    | [<CustomCommandLine("--tag"); AltCommandLine("--t"); Inherit>] Tag of tag:string
+    | [<AltCommandLine("--t"); Inherit>] Tag of tag:string
 with
     interface IArgParserTemplate with
         member this.Usage =
