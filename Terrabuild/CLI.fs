@@ -3,7 +3,7 @@ open Argu
 
 [<RequireQualifiedAccess>]
 type BuildArgs =
-    | [<Unique; AltCommandLine("--nc"); Inherit>] NoCache
+    | [<AltCommandLine("--nc"); Unique; Inherit>] NoCache
     | [<AltCommandLine("--t"); Inherit>] Tag of tag:string
 with
     interface IArgParserTemplate with
@@ -15,7 +15,7 @@ with
 [<RequireQualifiedAccess>]
 type RunArgs =
     | [<MainCommand; ExactlyOnce; First>] Target of target:string
-    | [<Unique; AltCommandLine("--nc"); Inherit>] NoCache
+    | [<AltCommandLine("--nc"); Unique; Inherit>] NoCache
     | [<AltCommandLine("--t"); Inherit>] Tag of tag:string
 with
     interface IArgParserTemplate with
@@ -29,7 +29,7 @@ with
 type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<BuildArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<RunArgs>
-    | [<Unique; AltCommandLine("--ws"); Inherit>] Workspace of path:string
+    | [<AltCommandLine("--ws"); Unique; Inherit>] Workspace of path:string
 with
     interface IArgParserTemplate with
         member this.Usage =
