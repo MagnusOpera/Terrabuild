@@ -14,9 +14,7 @@ type Capabilities =
     | Outputs = 4
     | Ignores = 8
 
-
 type IExtensionContext =
-    abstract WorkspaceDirectory: string with get
     abstract ProjectDirectory: string with get
     abstract ProjectFile: string with get
     abstract Parameters: Map<string, string> with get

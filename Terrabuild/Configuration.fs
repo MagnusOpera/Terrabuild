@@ -3,7 +3,6 @@ open System.IO
 open Collections
 open System
 open System.Collections.Concurrent
-open Extensions
 
 module YamlConfigFiles =
     open System.Collections.Generic
@@ -26,7 +25,7 @@ type Dependencies = Set<string>
 type Outputs = Set<string>
 type TargetRules = Set<string>
 type Targets = Map<string, TargetRules>
-type StepCommands = Step list
+type StepCommands = Extensions.Step list
 type Steps = Map<string, StepCommands>
 type Tags = Set<string>
 type Variables = Map<string, string>
@@ -53,10 +52,9 @@ type WorkspaceConfig = {
     Projects: Map<string, ProjectConfig>
 }
 
-let loadExtension name workspaceDir projectDir projectFile parameters : Extension =
-    let context = { new IExtensionContext
-                    with member _.WorkspaceDirectory = workspaceDir
-                         member _.ProjectDirectory = projectDir
+let loadExtension name projectDir projectFile parameters : Extensions.Extension =
+    let context = { new Extensions.IExtensionContext
+                    with member _.ProjectDirectory = projectDir
                          member _.ProjectFile = projectFile
                          member _.Parameters = parameters }
 
@@ -93,8 +91,8 @@ let read workspaceDirectory =
                 | _ -> failwith $"Failed to find project '{projectId}'"
 
             let defaultExtensions = 
-                [ "shell", loadExtension "shell" workspaceDirectory projectDir projectDir Map.empty
-                  "echo", loadExtension "echo" workspaceDirectory projectDir projectDir Map.empty ]
+                [ "shell", loadExtension "shell" projectDir projectDir Map.empty
+                  "echo", loadExtension "echo" projectDir projectDir Map.empty ]
 
             // process only unknown dependency
             if processedNodes.TryAdd(dependency, true) then
@@ -118,7 +116,7 @@ let read workspaceDirectory =
                 let extensions =
                     let buildExtension (arguments: Map<string, string>) =
                         let extName, extParam, extArgs = getExtensionParamAndArgs arguments
-                        let extension = loadExtension extName workspaceDirectory projectDir extParam extArgs
+                        let extension = loadExtension extName projectDir extParam extArgs
                         extName, extension
 
                     dependencyConfig.Extensions
@@ -127,16 +125,16 @@ let read workspaceDirectory =
                     |> Seq.append defaultExtensions
                     |> Map.ofSeq
 
-                let getExtensionCapabilities capability getCapability (extension: Extension) =
+                let getExtensionCapabilities capability getCapability (extension: Extensions.Extension) =
                     match extension.Capabilities &&& capability with
-                    | Capabilities.None -> []
+                    | Extensions.Capabilities.None -> []
                     | _ -> getCapability extension
 
                 let getExtensionsCapabilities capability getCapability =
                     extensions
                     |> Seq.collect (fun kvp -> getExtensionCapabilities capability getCapability kvp.Value)
 
-                let extensionDependencies = getExtensionsCapabilities Capabilities.Dependencies (fun e -> e.Dependencies)
+                let extensionDependencies = getExtensionsCapabilities Extensions.Capabilities.Dependencies (fun e -> e.Dependencies)
 
                 let projectDependencies = dependencyConfig.Dependencies |> Seq.append extensionDependencies |> Set.ofSeq
 
@@ -155,12 +153,12 @@ let read workspaceDirectory =
                     |> Seq.collect (fun args ->
                             let extName, extParam, extArgs = args |> Map.ofDict |> getExtensionParamAndArgs
                             let extension = extensions |> Map.find extName
-                            getExtensionCapabilities Capabilities.Steps (fun e -> e.GetStep(extParam, extArgs)) extension)
+                            getExtensionCapabilities Extensions.Capabilities.Steps (fun e -> e.GetStep(extParam, extArgs)) extension)
                     |> List.ofSeq
 
                 // collect extension capabilities
-                let extensionOutputs = getExtensionsCapabilities Capabilities.Outputs (fun e -> e.Outputs)
-                let extensionIgnores = getExtensionsCapabilities Capabilities.Ignores (fun e -> e.Ignores)
+                let extensionOutputs = getExtensionsCapabilities Extensions.Capabilities.Outputs (fun e -> e.Outputs)
+                let extensionIgnores = getExtensionsCapabilities Extensions.Capabilities.Ignores (fun e -> e.Ignores)
 
                 let projectSteps = dependencyConfig.Steps |> Map.ofDict |> Map.map (fun _ value -> convertStepList value)
                 let projectOutputs = dependencyConfig.Outputs |> Seq.append extensionOutputs |> Set.ofSeq
