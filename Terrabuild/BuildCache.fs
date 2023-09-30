@@ -63,7 +63,7 @@ let writeBuildSummary (id: string) (summary: Summary) =
 
     // move log files to target storage
     let newLogs = summary.Steps |> List.mapi (fun idx stepLog -> { stepLog
-                                                                      with Log = moveFile idx stepLog.Log })
+                                                                   with Log = moveFile idx stepLog.Log })
 
     let outputsFile = IO.combine entryDir "outputs.zip"
     IO.moveFile summary.Outputs outputsFile
