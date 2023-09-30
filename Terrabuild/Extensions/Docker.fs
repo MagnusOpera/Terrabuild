@@ -2,12 +2,12 @@ namespace Extensions.Docker
 open System
 open Extensions
 
-type DockerExtension(workspaceDir, projectDir, projectFile, args) =
-    inherit Extension(workspaceDir, projectDir, projectFile, args)
+type DockerExtension(context) =
+    inherit Extension(context)
 
     let getBuildStep (args: Map<string, string>) =
         let arguments = args |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
-        let buildArgs = $"build --file {projectFile} --tag terrabuild:$(terrabuild_node_hash) {arguments} ."
+        let buildArgs = $"build --file {context.ProjectFile} --tag terrabuild:$(terrabuild_node_hash) {arguments} ."
         [ { Command = "docker"; Arguments = buildArgs} ]
 
     let getPushStep (args: Map<string, string>) =

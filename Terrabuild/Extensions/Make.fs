@@ -3,8 +3,8 @@ namespace Extensions.Make
 open System
 open Extensions
 
-type MakeExtension(workspaceDir, projectDir, projectFile, args) =
-    inherit Extension(workspaceDir, projectDir, projectFile, args)
+type MakeExtension(context) =
+    inherit Extension(context)
 
     override _.Capabilities = Capabilities.Steps
 

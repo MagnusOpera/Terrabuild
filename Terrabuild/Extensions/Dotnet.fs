@@ -15,11 +15,11 @@ open Extensions
 open Xml
 open System.IO
 
-type DotnetExtension(workspaceDir, projectDir, projectFile, args) =
-    inherit Extension(workspaceDir, projectDir, projectFile, args)
+type DotnetExtension(context) =
+    inherit Extension(context)
 
-    let parseDotnetDependencies (projectFile: string) =
-        let project = Path.Combine(projectDir, projectFile)
+    let parseDotnetDependencies =
+        let project = Path.Combine(context.ProjectDirectory, context.ProjectFile)
         let xdoc = XDocument.Load (project)
         let refs = xdoc.Descendants() 
                         |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
@@ -33,7 +33,7 @@ type DotnetExtension(workspaceDir, projectDir, projectFile, args) =
                               ||| Capabilities.Steps
                               ||| Capabilities.Outputs
 
-    override _.Dependencies = parseDotnetDependencies projectFile
+    override _.Dependencies = parseDotnetDependencies 
 
     override _.Outputs = [ "bin"; "obj" ]
 

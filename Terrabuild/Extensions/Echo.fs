@@ -2,8 +2,8 @@ namespace Extensions.Echo
 open System
 open Extensions
 
-type EchoExtension(workspaceDir, projectDir, projectFile, args) =
-    inherit Extension(workspaceDir, projectDir, projectFile, args)
+type EchoExtension(context) =
+    inherit Extension(context)
 
     override _.Capabilities = Capabilities.Steps
 

@@ -53,13 +53,19 @@ type WorkspaceConfig = {
     Projects: Map<string, ProjectConfig>
 }
 
-let loadExtension name workspaceDir projectDir projectFile args : Extension =
+let loadExtension name workspaceDir projectDir projectFile parameters : Extension =
+    let context = { new IExtensionContext
+                    with member _.WorkspaceDirectory = workspaceDir
+                         member _.ProjectDirectory = projectDir
+                         member _.ProjectFile = projectFile
+                         member _.Parameters = parameters }
+
     match name with
-    | "dotnet" -> Extensions.Dotnet.DotnetExtension(workspaceDir, projectDir, projectFile, args)
-    | "shell" -> Extensions.Shell.ShellExtension(workspaceDir, projectDir, projectFile, args)
-    | "docker" -> Extensions.Docker.DockerExtension(workspaceDir, projectDir, projectFile, args)
-    | "make" -> Extensions.Make.MakeExtension(workspaceDir, projectDir, projectFile, args)
-    | "echo" -> Extensions.Echo.EchoExtension(workspaceDir, projectDir, projectFile, args)
+    | "dotnet" -> Extensions.Dotnet.DotnetExtension(context)
+    | "shell" -> Extensions.Shell.ShellExtension(context)
+    | "docker" -> Extensions.Docker.DockerExtension(context)
+    | "make" -> Extensions.Make.MakeExtension(context)
+    | "echo" -> Extensions.Echo.EchoExtension(context)
     | _ -> failwith $"Unknown plugin {name}"
 
 let read workspaceDirectory =

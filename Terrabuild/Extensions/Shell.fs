@@ -2,8 +2,8 @@ namespace Extensions.Shell
 open System
 open Extensions
 
-type ShellExtension(workspaceDir, projectDir, projectFile, args) =
-    inherit Extension(workspaceDir, projectDir, projectFile, args)
+type ShellExtension(context) =
+    inherit Extension(context)
 
     override _.Capabilities = Capabilities.Steps
 
