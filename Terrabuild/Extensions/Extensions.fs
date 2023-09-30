@@ -14,13 +14,13 @@ type Capabilities =
     | Outputs = 4
     | Ignores = 8
 
-type IExtensionContext =
+type IContext =
     abstract ProjectDirectory: string with get
     abstract ProjectFile: string with get
     abstract Parameters: Map<string, string> with get
 
 [<AbstractClass>]
-type Extension(context: IExtensionContext) =
+type Extension(context: IContext) =
     abstract Capabilities: Capabilities with get
     abstract Dependencies: string list
     abstract Outputs: string list

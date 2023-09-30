@@ -53,7 +53,7 @@ type WorkspaceConfig = {
 }
 
 let loadExtension name projectDir projectFile parameters : Extensions.Extension =
-    let context = { new Extensions.IExtensionContext
+    let context = { new Extensions.IContext
                     with member _.ProjectDirectory = projectDir
                          member _.ProjectFile = projectFile
                          member _.Parameters = parameters }
