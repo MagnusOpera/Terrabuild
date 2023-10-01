@@ -26,7 +26,7 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
     let tmpFile = IO.getTempFilename()
     use logWriter = new StreamWriter(tmpFile)
     let writeLock = obj()
-    let inline lockWrite (msg: string) = lock writeLock (fun () ->logWriter.WriteLine(msg))
+    let inline lockWrite (msg: string) = lock writeLock (fun () -> logWriter.WriteLine(msg))
 
     use proc = new Process()
     let psi = proc.StartInfo
@@ -36,13 +36,12 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
     psi.WorkingDirectory <- workingDir
     psi.RedirectStandardOutput <- true
     psi.RedirectStandardError <- true
-    proc.OutputDataReceived.Add(fun e -> $"OUT {DateTime.UtcNow} - {e.Data}" |> lockWrite)
-    proc.ErrorDataReceived.Add(fun e -> $"ERR {DateTime.UtcNow} - {e.Data}" |> lockWrite)
+    proc.OutputDataReceived.Add(fun e -> $"{DateTime.UtcNow}\tOUT\t{e.Data}" |> lockWrite)
+    proc.ErrorDataReceived.Add(fun e -> $"{DateTime.UtcNow}\tERR\t{e.Data}" |> lockWrite)
 
     proc.Start() |> ignore
     proc.BeginOutputReadLine()
     proc.BeginErrorReadLine()
     proc.WaitForExit()
-    logWriter.WriteLine($"END {DateTime.UtcNow}")
 
     proc.ExitCode, tmpFile
