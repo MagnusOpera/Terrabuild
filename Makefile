@@ -3,7 +3,7 @@ build:
 	dotnet build
 
 run:
-	dotnet run --project Terrabuild -- build --workspace tests
+	dotnet run --project Terrabuild -- run push --workspace tests
 
 run-nc:
 	dotnet run --project Terrabuild -- build --workspace tests --nocache

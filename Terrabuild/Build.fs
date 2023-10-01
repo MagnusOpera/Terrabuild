@@ -37,8 +37,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
         let nodeHash = node.Configuration.Hash
 
-        let nodeTargetHash = $"{node.TargetId}/{nodeHash}"
-        let cacheEntryId = IO.combine node.ProjectId nodeTargetHash
+        let nodeTargetHash = $"{nodeHash}/{node.TargetId}/"
+        let cacheEntryId = nodeTargetHash
 
         let variables =
             variables
