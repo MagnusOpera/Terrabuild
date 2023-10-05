@@ -1,8 +1,8 @@
-namespace Extensions.Echo
+namespace Extensions
 open System
 open Extensions
 
-type EchoExtension(context) =
+type Echo(context) =
     inherit Extension(context)
 
     override _.Capabilities = Capabilities.Steps

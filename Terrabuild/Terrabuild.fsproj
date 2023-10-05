@@ -10,26 +10,28 @@
     <Compile Include="Extensions/Shell.fs" />
     <Compile Include="Extensions/Make.fs" />
     <Compile Include="Extensions/Echo.fs" />
-    <Compile Include="IO.fs" />
-    <Compile Include="Zip.fs" />
-    <Compile Include="String.fs" />
-    <Compile Include="Collections.fs" />
-    <Compile Include="Yaml.fs" />
-    <Compile Include="Json.fs" />
-    <Compile Include="Exec.fs" />
-    <Compile Include="Git.fs" />
-    <Compile Include="Hash.fs" />
-    <Compile Include="FileSystem.fs" />
-    <Compile Include="Configuration.fs" />
-    <Compile Include="Graph.fs" />
-    <Compile Include="BuildCache.fs" />
-    <Compile Include="Build.fs" />
-    <Compile Include="CLI.fs" />
+    <Compile Include="Storages/Storages.fs" />
+    <Compile Include="Storages/MicrosoftBlobStorage.fs" />
+    <Compile Include="Helpers/IO.fs" />
+    <Compile Include="Helpers/Zip.fs" />
+    <Compile Include="Helpers/String.fs" />
+    <Compile Include="Helpers/Collections.fs" />
+    <Compile Include="Helpers/Yaml.fs" />
+    <Compile Include="Helpers/Json.fs" />
+    <Compile Include="Helpers/Exec.fs" />
+    <Compile Include="Helpers/Git.fs" />
+    <Compile Include="Helpers/Hash.fs" />
+    <Compile Include="Helpers/FileSystem.fs" />
+    <Compile Include="Core/Configuration.fs" />
+    <Compile Include="Core/Graph.fs" />
+    <Compile Include="Core/BuildCache.fs" />
+    <Compile Include="Core/Build.fs" />
+    <Compile Include="Core/CLI.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="YamlDotNet" Version="13.3.1" />
-    <PackageReference Include="FSharp.SystemTextJson" Version="0.19.13" />
+    <PackageReference Include="YamlDotNet" Version="13.5.1" />
+    <PackageReference Include="FSharp.SystemTextJson" Version="1.2.42" />
     <PackageReference Include="Argu" Version="6.1.1" />
   </ItemGroup>
 </Project>

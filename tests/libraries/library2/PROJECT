@@ -6,4 +6,4 @@ steps:
     - (dotnet): build
       configuration: $(configuration)
     - (shell): echo
-      args: "done lib2"
+      arguments: "done lib2"

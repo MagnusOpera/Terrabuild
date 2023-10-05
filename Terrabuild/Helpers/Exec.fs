@@ -22,9 +22,8 @@ let execCaptureOutput (workingDir: string) (command: string) (args: string) =
     | 0 -> Success (proc.StandardOutput.ReadToEnd(), proc.ExitCode)
     | _ -> Error (proc.StandardError.ReadToEnd(), proc.ExitCode)
 
-let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: string) =
-    let tmpFile = IO.getTempFilename()
-    use logWriter = new StreamWriter(tmpFile)
+let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: string) (logFile: string) =
+    use logWriter = new StreamWriter(logFile)
     let writeLock = obj()
     let inline lockWrite (msg: string) = lock writeLock (fun () -> logWriter.WriteLine(msg))
 
@@ -44,4 +43,4 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
     proc.BeginErrorReadLine()
     proc.WaitForExit()
 
-    proc.ExitCode, tmpFile
+    proc.ExitCode

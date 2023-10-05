@@ -28,6 +28,7 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<BuildArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<RunArgs>
     | [<AltCommandLine("--ws"); Unique; Inherit>] Workspace of path:string
+    | [<Unique; Inherit>] Shared
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -37,3 +38,4 @@ with
             | Serve _ -> "Run target 'serve'."
             | Run _ -> "Run specified target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Shared -> "Local or shared execution"

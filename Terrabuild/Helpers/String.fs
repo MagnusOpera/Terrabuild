@@ -19,6 +19,9 @@ let trim (trimChar : char) (s : string) =
 let join (separator : string) (strings : string seq) =
     String.Join(separator, strings)
 
+let contains (findWhat:string) (value:string) =
+    value.Contains(findWhat)
+
 let replace (replaceWhat:string) (replaceBy:string) (value:string) =
     value.Replace(replaceWhat, replaceBy)
 

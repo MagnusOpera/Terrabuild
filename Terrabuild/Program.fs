@@ -2,13 +2,14 @@
 open System
 open CLI
 
-let runTarget wsDir target noCache =
-    printfn $"Running target '{target}'"
-
-    let config = Configuration.read wsDir
+let runTarget wsDir target noCache shared =
+    let config = Configuration.read wsDir shared
     let graph = Graph.buildGraph config target
-    let buildInfo = Build.run config graph noCache
-    printfn $"{buildInfo}"
+    let cache = BuildCache.Cache(None)
+    let buildInfo = Build.run config graph noCache cache
+
+    let jsonBuildInfo = Json.Serialize buildInfo
+    printfn $"{jsonBuildInfo}"
 
 
 let targetShortcut target (tbResult: ParseResults<TerrabuildArgs>) =
@@ -19,12 +20,17 @@ let targetShortcut target (tbResult: ParseResults<TerrabuildArgs>) =
         | Some workspace -> workspace
         | _ -> "."
 
+    let shared =
+        match tbResult.TryGetResult(TerrabuildArgs.Shared) with
+        | Some TerrabuildArgs.Shared -> true
+        | _ -> false
+
     let noCache =
         match buildResult.TryGetResult(BuildArgs.NoCache) with
         | Some _ -> true
         | _ -> false
 
-    runTarget wsDir target noCache
+    runTarget wsDir target noCache shared
 
 
 let target (tbResult: ParseResults<TerrabuildArgs>) =
@@ -35,6 +41,11 @@ let target (tbResult: ParseResults<TerrabuildArgs>) =
         | Some workspace -> workspace
         | _ -> "."
 
+    let shared =
+        match tbResult.TryGetResult(TerrabuildArgs.Shared) with
+        | Some TerrabuildArgs.Shared -> true
+        | _ -> false
+
     let noCache =
         match targetResult.TryGetResult(RunArgs.NoCache) with
         | Some _ -> true
@@ -42,7 +53,7 @@ let target (tbResult: ParseResults<TerrabuildArgs>) =
 
     let target = targetResult.GetResult(RunArgs.Target)
 
-    runTarget wsDir target noCache
+    runTarget wsDir target noCache shared
 
 
 let errorHandler = ProcessExiter()

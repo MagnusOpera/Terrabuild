@@ -18,6 +18,7 @@ type IContext =
     abstract ProjectDirectory: string with get
     abstract ProjectFile: string with get
     abstract Parameters: Map<string, string> with get
+    abstract Shared: bool with get
 
 [<AbstractClass>]
 type Extension(context: IContext) =

@@ -1,4 +1,4 @@
-namespace Extensions.Dotnet
+namespace Extensions
 
 #nowarn "0077" // op_Explicit
 
@@ -15,7 +15,7 @@ open Extensions
 open Xml
 open System.IO
 
-type DotnetExtension(context) =
+type Dotnet(context) =
     inherit Extension(context)
 
     let parseDotnetDependencies =
@@ -41,7 +41,7 @@ type DotnetExtension(context) =
 
     override _.GetStep(action, args) =
         let configuration = args |> Map.tryFind "configuration" |> Option.defaultValue "Debug"
-        let arguments = args |> Map.tryFind "args" |> Option.defaultValue ""
+        let arguments = args |> Map.tryFind "arguments" |> Option.defaultValue ""
         let dotnetArgs = $"{action} --no-dependencies --configuration {configuration} {arguments}"
         match action with
         | "build" | "publish" | "run" | "pack" -> [ { Command = "dotnet"; Arguments = dotnetArgs } ]

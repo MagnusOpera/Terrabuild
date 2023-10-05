@@ -52,21 +52,22 @@ type WorkspaceConfig = {
     Projects: Map<string, ProjectConfig>
 }
 
-let loadExtension name projectDir projectFile parameters : Extensions.Extension =
+let private loadExtension name projectDir projectFile parameters shared : Extensions.Extension =
     let context = { new Extensions.IContext
                     with member _.ProjectDirectory = projectDir
                          member _.ProjectFile = projectFile
-                         member _.Parameters = parameters }
+                         member _.Parameters = parameters
+                         member _.Shared = shared }
 
     match name with
-    | "dotnet" -> Extensions.Dotnet.DotnetExtension(context)
-    | "shell" -> Extensions.Shell.ShellExtension(context)
-    | "docker" -> Extensions.Docker.DockerExtension(context)
-    | "make" -> Extensions.Make.MakeExtension(context)
-    | "echo" -> Extensions.Echo.EchoExtension(context)
+    | "dotnet" -> Extensions.Dotnet(context)
+    | "shell" -> Extensions.Shell(context)
+    | "docker" -> Extensions.Docker(context)
+    | "make" -> Extensions.Make(context)
+    | "echo" -> Extensions.Echo(context)
     | _ -> failwith $"Unknown plugin {name}"
 
-let read workspaceDirectory =
+let read workspaceDirectory shared =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
     let buildConfig = Yaml.DeserializeFile<YamlConfigFiles.BuildConfig> buildFile
     let buildConfig = { Dependencies = buildConfig.Dependencies |> Set.ofSeq
@@ -91,8 +92,8 @@ let read workspaceDirectory =
                 | _ -> failwith $"Failed to find project '{projectId}'"
 
             let defaultExtensions = 
-                [ "shell", loadExtension "shell" projectDir projectDir Map.empty
-                  "echo", loadExtension "echo" projectDir projectDir Map.empty ]
+                [ "shell", loadExtension "shell" projectDir projectDir Map.empty shared
+                  "echo", loadExtension "echo" projectDir projectDir Map.empty shared ]
 
             // process only unknown dependency
             if processedNodes.TryAdd(dependency, true) then
@@ -116,7 +117,7 @@ let read workspaceDirectory =
                 let extensions =
                     let buildExtension (arguments: Map<string, string>) =
                         let extName, extParam, extArgs = getExtensionParamAndArgs arguments
-                        let extension = loadExtension extName projectDir extParam extArgs
+                        let extension = loadExtension extName projectDir extParam extArgs shared
                         extName, extension
 
                     dependencyConfig.Extensions

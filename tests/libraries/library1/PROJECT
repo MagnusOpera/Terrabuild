@@ -1,4 +1,4 @@
 steps:
   build:
     - (shell): echo
-      args: "building library1"
+      arguments: "building library1"

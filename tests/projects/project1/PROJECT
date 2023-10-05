@@ -15,10 +15,10 @@ steps:
   build:
     - (echo): "building project1"
     - (make): build
-      secret: tsoin tsoin
+      $secret: tsoin tsoin
 
   publish:
     - (shell): echo
-      args: "publishing project1"
+      arguments: "publishing project1"
     - (shell): make
-      args: publish
+      arguments: publish

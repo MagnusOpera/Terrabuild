@@ -1,8 +1,8 @@
-namespace Extensions.Shell
+namespace Extensions
 open System
 open Extensions
 
-type ShellExtension(context) =
+type Shell(context) =
     inherit Extension(context)
 
     override _.Capabilities = Capabilities.Steps
@@ -14,5 +14,5 @@ type ShellExtension(context) =
     override _.Ignores = NotSupportedException() |> raise
 
     override _.GetStep(action, args) =
-        let arguments = args |> Map.tryFind "args" |> Option.defaultValue ""
+        let arguments = args |> Map.tryFind "arguments" |> Option.defaultValue ""
         [ { Command = action; Arguments = arguments } ]

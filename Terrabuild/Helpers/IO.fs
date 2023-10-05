@@ -36,6 +36,10 @@ let deleteAny entry =
     | Directory directory -> Directory.Delete(directory, true)
     | _ -> ()
 
+let enumerateFiles rootdir =
+    Directory.EnumerateFiles(rootdir, "*", SearchOption.AllDirectories)
+    |> List.ofSeq
+
 let enumerateFilesBut ignore rootdir =
     let ignore = ignore |> Set.map (combine rootdir)
     let rec enumerateFilesBut dir =
@@ -54,3 +58,12 @@ let enumerateFilesBut ignore rootdir =
     let res = enumerateFilesBut rootdir |> List.ofSeq
     res
 
+let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
+    for entry in entries do
+        let relative = relativePath baseDir entry
+        let target = combine targetDir relative
+        let targetDir = parentDirectory target
+        Directory.CreateDirectory targetDir |> ignore
+        File.Copy(entry, target)
+    if entries |> List.isEmpty then None
+    else Some targetDir

@@ -1,22 +1,38 @@
-namespace Extensions.Docker
+namespace Extensions
 open System
 open Extensions
 
-type DockerExtension(context) =
+type Docker(context) =
     inherit Extension(context)
 
+    let getArgs (args: Map<string, string>) =
+        let args = args |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
+                                                  else None)
+        let arguments = args |> Seq.fold (fun acc (key, value) -> $"{acc} --build-arg {key}=\"{value}\"") ""
+        arguments
+
     let getBuildStep (args: Map<string, string>) =
-        let arguments = args |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
-        let buildArgs = $"build --file {context.ProjectFile} --tag terrabuild:$(terrabuild_node_hash) {arguments} ."
-        [ { Command = "docker"; Arguments = buildArgs} ]
+        let image = args["image"]
+        let arguments = getArgs args
+        let buildArgs = $"build --file {context.ProjectFile} --tag {image}:$(terrabuild_node_hash) {arguments} ."
+
+        if context.Shared then
+            let pushArgs = $"push {image}:$(terrabuild_node_hash)"
+            [ { Command = "docker"; Arguments = buildArgs}
+              { Command = "docker"; Arguments = pushArgs} ]
+        else
+            [ { Command = "docker"; Arguments = buildArgs} ]
 
     let getPushStep (args: Map<string, string>) =
-        let tag = args |> Map.find "tag"
-        let tagArgs = $"tag terrabuild:$(terrabuild_node_hash) {tag}"        
-        let pushArgs = $"push {tag}"
+        let image = args["image"]
+        let tag = args["tag"]
 
-        [ { Command = "docker"; Arguments = tagArgs}
-          { Command = "docker"; Arguments = pushArgs} ]
+        if context.Shared then
+            let retagArgs = $"buildx imagetools {image}:$(terrabuild_node_hash) {image}:{tag}"
+            [ { Command = "docker"; Arguments = retagArgs} ]
+        else
+            let tagArgs = $"tag {image}:$(terrabuild_node_hash) {image}:{tag}"
+            [ { Command = "docker"; Arguments = tagArgs} ]
 
     override _.Capabilities = Capabilities.Steps
 
