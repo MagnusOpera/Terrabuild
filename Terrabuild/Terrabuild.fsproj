@@ -26,7 +26,7 @@
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/BuildCache.fs" />
     <Compile Include="Core/Build.fs" />
-    <Compile Include="Core/CLI.fs" />
+    <Compile Include="CLI.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
