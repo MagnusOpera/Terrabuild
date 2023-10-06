@@ -2,6 +2,12 @@ module BuildCache
 open System
 open System.IO
 
+[<RequireQualifiedAccess>]
+type TaskStatus =
+    | Success
+    | Failure
+
+[<RequireQualifiedAccess>]
 type StepInfo = {
     Command: string
     Arguments: string
@@ -9,8 +15,10 @@ type StepInfo = {
     EndedAt: DateTime
     Duration: TimeSpan
     Log: string
+    ExitCode: int
 }
 
+[<RequireQualifiedAccess>]
 type Summary = {
     Project: string
     Target: string
@@ -19,7 +27,7 @@ type Summary = {
     Ignores: Set<string>
     Variables: Map<string, string>
     Outputs: string option
-    ExitCode: int
+    Status: TaskStatus
 }
 
 

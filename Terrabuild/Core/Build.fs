@@ -117,12 +117,13 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                         let exitCode = Exec.execCaptureTimestampedOutput projectDirectory step.Command step.Arguments logFile
                         let executionDuration = beginExecution.Elapsed
                         let endedAt = DateTime.UtcNow
-                        let stepLog = { BuildCache.Command = step.Command
-                                        BuildCache.Arguments = step.Arguments
-                                        BuildCache.StartedAt = startedAt
-                                        BuildCache.EndedAt = endedAt
-                                        BuildCache.Duration = executionDuration
-                                        BuildCache.Log = logFile }
+                        let stepLog = { BuildCache.StepInfo.Command = step.Command
+                                        BuildCache.StepInfo.Arguments = step.Arguments
+                                        BuildCache.StepInfo.StartedAt = startedAt
+                                        BuildCache.StepInfo.EndedAt = endedAt
+                                        BuildCache.StepInfo.Duration = executionDuration
+                                        BuildCache.StepInfo.Log = logFile
+                                        BuildCache.StepInfo.ExitCode = exitCode }
                         stepLog |> stepLogs.Add
                         lastExitCode <- exitCode
 
@@ -137,23 +138,26 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
                     let touchedVariables = usedVariables |> Seq.map (fun key -> key, variables[key]) |> Map.ofSeq
 
-                    let summary = { BuildCache.Project = node.ProjectId
-                                    BuildCache.Target = node.TargetId
-                                    BuildCache.Files = node.Configuration.Files
-                                    BuildCache.Ignores = node.Configuration.Ignores
-                                    BuildCache.Variables = touchedVariables
-                                    BuildCache.Steps = stepLogs |> List.ofSeq
-                                    BuildCache.Outputs = outputs
-                                    BuildCache.ExitCode = lastExitCode }
+                    let status =
+                        if lastExitCode = 0 then BuildCache.TaskStatus.Success
+                        else BuildCache.TaskStatus.Failure
+
+                    let summary = { BuildCache.Summary.Project = node.ProjectId
+                                    BuildCache.Summary.Target = node.TargetId
+                                    BuildCache.Summary.Files = node.Configuration.Files
+                                    BuildCache.Summary.Ignores = node.Configuration.Ignores
+                                    BuildCache.Summary.Variables = touchedVariables
+                                    BuildCache.Summary.Steps = stepLogs |> List.ofSeq
+                                    BuildCache.Summary.Outputs = outputs
+                                    BuildCache.Summary.Status = status }
                     cacheEntry.Complete summary
                     summary
 
-            if summary.ExitCode = 0 then
-                cacheEntryId |> BuildStatus.Success
-            else
-                cacheEntryId |> BuildStatus.Failure
-        | Some unsatisfyingDep ->
-            unsatisfyingDep |> BuildStatus.Unsatisfied
+            match summary.Status with
+            | BuildCache.TaskStatus.Success -> BuildStatus.Success cacheEntryId
+            | BuildCache.TaskStatus.Failure -> BuildStatus.Failure cacheEntryId
+
+        | Some unsatisfyingDep -> BuildStatus.Unsatisfied unsatisfyingDep
 
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
     let dependencies = g.RootNodes |> Map.map (fun k v -> buildDependency v)
