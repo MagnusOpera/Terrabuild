@@ -179,8 +179,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: BuildOpt
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
 
     let dependencies =
-        buildBatches.Graph.Nodes
-        |> Seq.map (fun (KeyValue(nodeId, node)) -> node.ProjectId, getDependencyStatus nodeId)
+        buildBatches.Graph.RootNodes
+        |> Seq.map (fun (KeyValue(dependency, nodeId)) -> dependency, getDependencyStatus nodeId)
         |> Map.ofSeq
 
     let endedAt = DateTime.UtcNow
