@@ -6,7 +6,7 @@ open System.Collections.Generic
 type BuildStatus =
     | Success of string
     | Failure of string
-    | Unsatisfied of string
+    | Unfulfilled of string
 
 [<RequireQualifiedAccess>]
 type BuildInfo = {
@@ -18,7 +18,7 @@ type BuildInfo = {
 let private isBuildUnsatisfied status =
     match status with
     | BuildStatus.Failure depId -> Some depId
-    | BuildStatus.Unsatisfied depId -> Some depId
+    | BuildStatus.Unfulfilled depId -> Some depId
     | BuildStatus.Success _ -> None
  
 let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) (noCache: bool) (cache: BuildCache.Cache) =
@@ -157,7 +157,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
             | BuildCache.TaskStatus.Success -> BuildStatus.Success cacheEntryId
             | BuildCache.TaskStatus.Failure -> BuildStatus.Failure cacheEntryId
 
-        | Some unsatisfyingDep -> BuildStatus.Unsatisfied unsatisfyingDep
+        | Some unsatisfyingDep -> BuildStatus.Unfulfilled unsatisfyingDep
 
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
     let dependencies = g.RootNodes |> Map.map (fun k v -> buildDependency v)
