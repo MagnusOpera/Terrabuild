@@ -18,12 +18,30 @@ open System.IO
 type Dotnet(context) =
     inherit Extension(context)
 
+    let knownProjectExtensions =
+        [ "*.pssproj"
+          "*.csproj"
+          "*.vbproj"
+          "*.fsproj"
+          "*.sqlproj" ]
+
     let parseDotnetDependencies =
-        let project = Path.Combine(context.ProjectDirectory, context.ProjectFile)
+
+        let projectFile =
+            if context.ProjectFile |> String.IsNullOrEmpty then
+                let projects =
+                    knownProjectExtensions
+                    |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(context.ProjectDirectory, ext))
+                projects |> Seq.exactlyOne |> Path.GetFileName
+            else
+                context.ProjectFile
+
+        let project = Path.Combine(context.ProjectDirectory, projectFile)
         let xdoc = XDocument.Load (project)
         let refs = xdoc.Descendants() 
                         |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
                         |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string)
+                        |> Seq.map (fun x -> x.Replace("\\", "/"))
                         |> Seq.map Path.GetDirectoryName
                         |> Seq.distinct
                         |> List.ofSeq

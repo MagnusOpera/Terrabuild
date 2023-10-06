@@ -146,7 +146,11 @@ let read workspaceDirectory shared =
 
                 // we go depth-first in order to compute node hash right after
                 // NOTE: this could lead to a memory usage problem
-                scanDependencies projectDependencies
+                try
+                    scanDependencies projectDependencies
+                with
+                    _ -> failwith $"Invalid graph while processing {dependency}"
+                         reraise()
 
 
                 let convertStepList steps =
