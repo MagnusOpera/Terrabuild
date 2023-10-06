@@ -25,16 +25,17 @@ type Dotnet(context) =
           "*.fsproj"
           "*.sqlproj" ]
 
+    let projectFile =
+        if context.ProjectFile |> String.IsNullOrWhiteSpace then
+            let projects =
+                knownProjectExtensions
+                |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(context.ProjectDirectory, ext))
+            projects |> Seq.exactlyOne |> Path.GetFileName
+        else
+            context.ProjectFile
+
     let parseDotnetDependencies =
 
-        let projectFile =
-            if context.ProjectFile |> String.IsNullOrWhiteSpace then
-                let projects =
-                    knownProjectExtensions
-                    |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(context.ProjectDirectory, ext))
-                projects |> Seq.exactlyOne |> Path.GetFileName
-            else
-                context.ProjectFile
 
         let project = Path.Combine(context.ProjectDirectory, projectFile)
         let xdoc = XDocument.Load (project)
@@ -60,7 +61,12 @@ type Dotnet(context) =
     override _.GetStep(action, args) =
         let configuration = args |> Map.tryFind "configuration" |> Option.defaultValue "Debug"
         let arguments = args |> Map.tryFind "arguments" |> Option.defaultValue ""
-        let dotnetArgs = $"{action} --no-dependencies --configuration {configuration} {arguments}"
         match action with
-        | "build" | "publish" | "run" | "pack" -> [ { Command = "dotnet"; Arguments = dotnetArgs } ]
+        | "restore" -> [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies {arguments}" } ]
+        | "build" ->
+            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies {arguments}" }
+              { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
+        | "publish" | "run" | "pack" ->
+            [ { Command = "dotnet"
+                Arguments = $"{action} {projectFile} --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
         | _ -> failwith $"Unsupported action '{action}'"
