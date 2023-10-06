@@ -180,7 +180,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: BuildOpt
 
     let dependencies =
         buildBatches.Graph.Nodes
-        |> Map.map (fun nodeId _ -> getDependencyStatus nodeId)
+        |> Seq.map (fun (KeyValue(nodeId, node)) -> node.ProjectId, getDependencyStatus nodeId)
+        |> Map.ofSeq
 
     let endedAt = DateTime.UtcNow
     let duration = endedAt - startedAt
