@@ -45,6 +45,7 @@ with
 [<RequireQualifiedAccess>]
 type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<BuildArgs>
+    | [<CliPrefix(CliPrefix.None)>] Test of ParseResults<BuildArgs>
     | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<BuildArgs>
     | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<BuildArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<RunArgs>
@@ -54,6 +55,7 @@ with
         member this.Usage =
             match this with
             | Build _ -> "Run target 'build'."
+            | Test _ -> "Run target 'test'."
             | Dist _ -> "Run target 'dist'."
             | Serve _ -> "Run target 'serve'."
             | Run _ -> "Run specified targets."

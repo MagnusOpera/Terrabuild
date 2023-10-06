@@ -66,6 +66,8 @@ type Dotnet(context) =
         | "build" ->
             [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies {arguments}" }
               { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
+        | "test" ->
+            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-build --no-restore {arguments}" } ]
         | "publish" | "run" | "pack" ->
-            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
+            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-build --no-restore {arguments}" } ]
         | _ -> failwith $"Unsupported action '{action}'"
