@@ -194,7 +194,8 @@ let read workspaceDirectory shared =
 
                 // check for circular or missing dependencies
                 for childDependency in projectDependencies do
-                    if projects |> Map.tryFind dependency |> Option.isNone then failwith $"Invalid graph due to circular dependencies between {dependency} and {childDependency}"
+                    if projects |> Map.tryFind childDependency |> Option.isNone then
+                        failwith $"Invalid graph due to circular dependencies between {dependency} and {childDependency}"
 
                 let dependenciesHash =
                     projectDependencies
