@@ -3,13 +3,12 @@ open System.Text.Json
 open System.Text.Json.Serialization
 
 let private settings =
-    let settings =
-        JsonFSharpOptions.ThothLike()
-                         .WithUnionTagNamingPolicy(JsonNamingPolicy.CamelCase)
-                         .ToJsonSerializerOptions()
-    settings.WriteIndented <- true
-    settings.PropertyNamingPolicy <- JsonNamingPolicy.CamelCase
-    settings
+    let options = JsonSerializerOptions(WriteIndented = true,
+                                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase)
+    JsonFSharpOptions.ThothLike()
+                        .WithUnionTagNamingPolicy(JsonNamingPolicy.CamelCase)
+                        .AddToJsonSerializerOptions(options)
+    options
 
 let Serialize (value: obj)=
     JsonSerializer.Serialize(value, settings)
