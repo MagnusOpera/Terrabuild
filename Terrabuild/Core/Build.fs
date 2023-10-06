@@ -4,6 +4,11 @@ open System.Collections.Generic
 
 [<RequireQualifiedAccess>]
 type BuildStatus =
+    | Success
+    | Failure
+
+[<RequireQualifiedAccess>]
+type TaskBuildStatus =
     | Success of string
     | Failure of string
     | Unfulfilled of string
@@ -11,25 +16,32 @@ type BuildStatus =
 [<RequireQualifiedAccess>]
 type BuildInfo = {
     Commit: string
+    StartedAt: DateTime
+    EndedAt: DateTime
+    Duration: TimeSpan
+    Status: BuildStatus
     Target: string
-    Dependencies: Map<string, BuildStatus>
+    Dependencies: Map<string, TaskBuildStatus>
 }
 
-let private isBuildUnsatisfied status =
-    match status with
-    | BuildStatus.Failure depId -> Some depId
-    | BuildStatus.Unfulfilled depId -> Some depId
-    | BuildStatus.Success _ -> None
+let private isBuildSuccess = function
+    | TaskBuildStatus.Success _ -> true
+    | _ -> false
  
+let private isTaskUnsatisfied = function
+    | TaskBuildStatus.Failure depId -> Some depId
+    | TaskBuildStatus.Unfulfilled depId -> Some depId
+    | TaskBuildStatus.Success _ -> None
+
 let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) (noCache: bool) (cache: BuildCache.Cache) =
     let variables = workspaceConfig.Build.Variables
 
-    let rec buildDependencies (nodeIds: string seq) : BuildStatus list =
+    let rec buildDependencies (nodeIds: string seq) : TaskBuildStatus list =
         nodeIds
         |> Seq.map buildDependency
         |> List.ofSeq
 
-    and buildDependency nodeId: BuildStatus =
+    and buildDependency nodeId: TaskBuildStatus =
         let node = g.Nodes[nodeId]
         let projectDirectory =
             match IO.combinePath workspaceConfig.Directory node.ProjectId with
@@ -50,7 +62,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
         // - variables dependencies
 
         let dependenciesHashes = buildDependencies node.Dependencies
-        let unsatisfyingDep = dependenciesHashes |> Seq.choose isBuildUnsatisfied |> Seq.tryHead
+        let unsatisfyingDep = dependenciesHashes |> Seq.choose isTaskUnsatisfied |> Seq.tryHead
         match unsatisfyingDep with
         | None -> 
             let variables =
@@ -113,15 +125,15 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
                         let step = { step with Arguments = step.Arguments |> setVariables }
 
-                        let beginExecution = System.Diagnostics.Stopwatch.StartNew()
+                        let startedAt = DateTime.UtcNow
                         let exitCode = Exec.execCaptureTimestampedOutput projectDirectory step.Command step.Arguments logFile
-                        let executionDuration = beginExecution.Elapsed
                         let endedAt = DateTime.UtcNow
+                        let duration = endedAt - startedAt
                         let stepLog = { BuildCache.StepInfo.Command = step.Command
                                         BuildCache.StepInfo.Arguments = step.Arguments
                                         BuildCache.StepInfo.StartedAt = startedAt
                                         BuildCache.StepInfo.EndedAt = endedAt
-                                        BuildCache.StepInfo.Duration = executionDuration
+                                        BuildCache.StepInfo.Duration = duration
                                         BuildCache.StepInfo.Log = logFile
                                         BuildCache.StepInfo.ExitCode = exitCode }
                         stepLog |> stepLogs.Add
@@ -154,21 +166,26 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                     summary
 
             match summary.Status with
-            | BuildCache.TaskStatus.Success -> BuildStatus.Success cacheEntryId
-            | BuildCache.TaskStatus.Failure -> BuildStatus.Failure cacheEntryId
+            | BuildCache.TaskStatus.Success -> TaskBuildStatus.Success cacheEntryId
+            | BuildCache.TaskStatus.Failure -> TaskBuildStatus.Failure cacheEntryId
 
-        | Some unsatisfyingDep -> BuildStatus.Unfulfilled unsatisfyingDep
+        | Some unsatisfyingDep -> TaskBuildStatus.Unfulfilled unsatisfyingDep
 
+    let startedAt = DateTime.UtcNow
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
     let dependencies = g.RootNodes |> Map.map (fun k v -> buildDependency v)
+    let endedAt = DateTime.UtcNow
+    let duration = endedAt - startedAt
+    let status =
+        let isSuccess = dependencies |> Seq.forall (fun (KeyValue(_, value)) -> isBuildSuccess value)
+        if isSuccess then BuildStatus.Success
+        else BuildStatus.Failure
+
     let buildInfo = { BuildInfo.Commit = headCommit
+                      BuildInfo.StartedAt = startedAt
+                      BuildInfo.EndedAt = endedAt
+                      BuildInfo.Duration = duration
+                      BuildInfo.Status = status
                       BuildInfo.Target = g.Target
                       BuildInfo.Dependencies = dependencies }
-
-    let hasBuildFailure =
-        dependencies |> Seq.choose (fun (KeyValue(_, value)) -> isBuildUnsatisfied value) |> Seq.tryHead
-
-    match hasBuildFailure with
-    | Some _ -> printfn "Build failed"
-    | _ -> printfn "Build succeeded"
     buildInfo
