@@ -18,7 +18,7 @@ with
 let createSnapshot projectDirectory outputs =
     let files =
         outputs
-        |> Seq.map (IO.combine projectDirectory)
+        |> Seq.map (IO.combinePath projectDirectory)
         |> Seq.collect (fun output ->
             match output with
             | IO.File _ -> [ output, System.IO.File.GetLastWriteTimeUtc output ]

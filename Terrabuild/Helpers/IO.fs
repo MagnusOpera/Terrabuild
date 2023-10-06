@@ -1,7 +1,7 @@
 module IO
 open System.IO
 
-let combine parent child =
+let combinePath parent child =
     Path.Combine(parent, child)
 
 let relativePath fromDir toDir =
@@ -9,6 +9,9 @@ let relativePath fromDir toDir =
 
 let parentDirectory (path: string) =
     Path.GetDirectoryName(path)
+
+let createDirectory (path: string) =
+    Directory.CreateDirectory(path) |> ignore
 
 let readTextFile filename =
     filename |> File.ReadAllText
@@ -41,7 +44,7 @@ let enumerateFiles rootdir =
     |> List.ofSeq
 
 let enumerateFilesBut ignore rootdir =
-    let ignore = ignore |> Set.map (combine rootdir)
+    let ignore = ignore |> Set.map (combinePath rootdir)
     let rec enumerateFilesBut dir =
         seq {
             if ignore |> Set.contains dir |> not then
@@ -61,7 +64,7 @@ let enumerateFilesBut ignore rootdir =
 let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
     for entry in entries do
         let relative = relativePath baseDir entry
-        let target = combine targetDir relative
+        let target = combinePath targetDir relative
         let targetDir = parentDirectory target
         Directory.CreateDirectory targetDir |> ignore
         File.Copy(entry, target)

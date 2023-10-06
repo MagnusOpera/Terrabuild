@@ -32,7 +32,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
     and buildDependency nodeId: BuildStatus =
         let node = g.Nodes[nodeId]
         let projectDirectory =
-            match IO.combine workspaceConfig.Directory node.ProjectId with
+            match IO.combinePath workspaceConfig.Directory node.ProjectId with
             | IO.Directory projectDirectory -> projectDirectory
             | IO.File projectFile -> IO.parentDirectory projectFile
             | _ -> failwith $"Failed to find project '{node.ProjectId}"
@@ -65,7 +65,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
             let cleanOutputs () =
                 node.Configuration.Outputs
-                |> Seq.map (IO.combine projectDirectory)
+                |> Seq.map (IO.combinePath projectDirectory)
                 |> Seq.iter IO.deleteAny
 
             let summary =

@@ -84,7 +84,7 @@ let read workspaceDirectory shared =
 
     let rec scanDependencies dependencies =
         for dependency in dependencies do
-            let projectId = IO.combine workspaceDirectory dependency
+            let projectId = IO.combinePath workspaceDirectory dependency
             let projectDir, projectFile = 
                 match projectId with
                 | IO.File projectFile -> IO.parentDirectory projectFile, IO.getFilename projectFile
@@ -101,7 +101,7 @@ let read workspaceDirectory shared =
                 // we might have landed in a directory without a configuration
                 // in that case we just use the default configuration (which does nothing)
                 let dependencyConfig =
-                    match IO.combine projectDir projectFile with
+                    match IO.combinePath projectDir projectFile with
                     | IO.File projectFile -> Yaml.DeserializeFile<YamlConfigFiles.ProjectConfig> projectFile
                     | _ -> YamlConfigFiles.ProjectConfig()
 
@@ -142,7 +142,7 @@ let read workspaceDirectory shared =
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let projectDependencies =
                     projectDependencies
-                    |> Set.map (fun dep -> IO.combine projectDir dep |> IO.relativePath workspaceDirectory)
+                    |> Set.map (fun dep -> IO.combinePath projectDir dep |> IO.relativePath workspaceDirectory)
 
                 // we go depth-first in order to compute node hash right after
                 // NOTE: this could lead to a memory usage problem

@@ -5,7 +5,7 @@ open System.IO
 let rec addAny (archive: ZipArchive) entryName sourceName = 
     let fileName = IO.getFilename sourceName
     if File.GetAttributes(sourceName).HasFlag(FileAttributes.Directory) then
-        addDirectory archive (IO.combine entryName fileName) sourceName
+        addDirectory archive (IO.combinePath entryName fileName) sourceName
     else
         archive.CreateEntryFromFile(sourceName, Path.Combine(entryName, fileName), CompressionLevel.SmallestSize) |> ignore
 
