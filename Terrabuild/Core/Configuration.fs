@@ -14,6 +14,7 @@ module YamlConfigFiles =
         member val Outputs = List<string>() with get, set
         member val Ignores = List<string>() with get, set
         member val Targets = Dictionary<string, List<string>>() with get, set
+        member val Variables = Dictionary<string, string>() with get, set
 
     type BuildConfig() =
         member val Dependencies = List<string>() with get, set
@@ -38,6 +39,7 @@ type ProjectConfig = {
     Steps: Steps
     Files: Set<string>
     Hash: string
+    Variables: Variables
 }
 
 type BuildConfig = {
@@ -76,6 +78,8 @@ let read workspaceDirectory shared =
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let mutable projects = Map.empty
+
+    let buildVariables = buildConfig.Variables
 
     let getExtensionFromInvocation name =
         match name with
@@ -149,8 +153,8 @@ let read workspaceDirectory shared =
                 try
                     scanDependencies projectDependencies
                 with
-                    _ -> failwith $"Invalid graph while processing {dependency}"
-                         reraise()
+                    ex -> failwith $"Invalid graph while processing {dependency}:\n{ex}"
+                          reraise()
 
 
                 let convertStepList steps =
@@ -169,6 +173,9 @@ let read workspaceDirectory shared =
                 let projectOutputs = dependencyConfig.Outputs |> Seq.append extensionOutputs |> Set.ofSeq
                 let projectIgnores = dependencyConfig.Ignores |> Seq.append projectOutputs |> Seq.append extensionIgnores |> Set.ofSeq
                 let projectTargets = dependencyConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
+                let projectVariables = dependencyConfig.Variables |> Map.ofDict
+
+                let scopeVariables = buildVariables |> Map.replace projectVariables
 
                 // get dependencies on variables
                 let variables =
@@ -181,7 +188,7 @@ let read workspaceDirectory shared =
                     |> Seq.collect (fun kvp -> kvp.Value
                                                |> List.collect (fun step -> step.Arguments |> extractVariables))
                     |> Seq.except ["terrabuild_node_hash"]
-                    |> Seq.map (fun varName -> varName, buildConfig.Variables |> Map.find varName)
+                    |> Seq.map (fun varName -> varName, scopeVariables |> Map.find varName)
                     |> Map.ofSeq
 
                 let variableHashes =
@@ -219,7 +226,8 @@ let read workspaceDirectory shared =
                       Targets = projectTargets
                       Steps = projectSteps
                       Files = projectFiles
-                      Hash = nodeHash }
+                      Hash = nodeHash
+                      Variables = projectVariables }
 
                 projects <- projects |> Map.add dependency dependencyConfig
 

@@ -2,55 +2,35 @@
 open System
 open CLI
 
-let runTarget wsDir target noCache shared =
+let runTarget wsDir target shared options =
     let config = Configuration.read wsDir shared
     let graph = Graph.buildGraph config target
     let cache = BuildCache.Cache(None)
-    let buildInfo = Build.run config graph noCache cache
-
+    let buildLevels = BuildOptimizer.optimize graph
+    let buildInfo = ParallelBuild.run config buildLevels cache options
     let jsonBuildInfo = Json.Serialize buildInfo
     printfn $"{jsonBuildInfo}"
 
 
 let targetShortcut target (buildArgs: ParseResults<BuildArgs>) =
     let shared = buildArgs.TryGetResult(BuildArgs.Shared) |> Option.isSome
-
-    let wsDir =
-        match buildArgs.TryGetResult(BuildArgs.Workspace) with
-        | Some workspace -> workspace
-        | _ -> "."
-
-    let noCache =
-        match buildArgs.TryGetResult(BuildArgs.NoCache) with
-        | Some _ -> true
-        | _ -> false
-
-    runTarget wsDir target noCache shared
+    let wsDir = buildArgs.GetResult(BuildArgs.Workspace, defaultValue = ".")
+    let options = { ParallelBuild.BuildOptions.NoCache = buildArgs.Contains(BuildArgs.NoCache)
+                    ParallelBuild.BuildOptions.MaxBuilds = buildArgs.GetResult(BuildArgs.Parallel, defaultValue = 4) }
+    runTarget wsDir target shared options
 
 
 let target (targetArgs: ParseResults<RunArgs>) =
-    let wsDir =
-        match targetArgs.TryGetResult(RunArgs.Workspace) with
-        | Some workspace -> workspace
-        | _ -> "."
-
+    let wsDir = targetArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
     let shared = targetArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
-
-    let noCache =
-        match targetArgs.TryGetResult(RunArgs.NoCache) with
-        | Some _ -> true
-        | _ -> false
-
     let target = targetArgs.GetResult(RunArgs.Target)
-
-    runTarget wsDir target noCache shared
+    let options = { ParallelBuild.BuildOptions.NoCache = targetArgs.Contains(RunArgs.NoCache)
+                    ParallelBuild.BuildOptions.MaxBuilds = targetArgs.GetResult(RunArgs.Parallel, defaultValue = 4) }
+    runTarget wsDir target shared options
 
 
 let clear (clearArgs: ParseResults<ClearArgs>) =
-    match clearArgs.TryGetResult(ClearArgs.BuildCache) with
-    | Some _ -> BuildCache.clearBuildCache()
-    | _ -> ()
-
+    if clearArgs.Contains(ClearArgs.BuildCache) then BuildCache.clearBuildCache()
 
 let errorHandler = ProcessExiter()
 let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)

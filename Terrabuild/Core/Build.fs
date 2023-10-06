@@ -173,12 +173,12 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
     let startedAt = DateTime.UtcNow
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
     let dependencies = g.RootNodes |> Map.map (fun k v -> buildDependency v)
-    let endedAt = DateTime.UtcNow
-    let duration = endedAt - startedAt
     let status =
         let isSuccess = dependencies |> Seq.forall (fun (KeyValue(_, value)) -> isBuildSuccess value)
         if isSuccess then BuildStatus.Success
         else BuildStatus.Failure
+    let endedAt = DateTime.UtcNow
+    let duration = endedAt - startedAt
 
     let buildInfo = { BuildInfo.Commit = headCommit
                       BuildInfo.StartedAt = startedAt

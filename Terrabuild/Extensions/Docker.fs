@@ -5,6 +5,10 @@ open Extensions
 type Docker(context) =
     inherit Extension(context)
 
+    let dockerfile =
+        if context.ProjectFile |> String.IsNullOrWhiteSpace then "Dockerfile"
+        else context.ProjectFile
+
     let getArgs (args: Map<string, string>) =
         let args = args |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
                                                   else None)
@@ -14,7 +18,7 @@ type Docker(context) =
     let getBuildStep (args: Map<string, string>) =
         let image = args["image"]
         let arguments = getArgs args
-        let buildArgs = $"build --file {context.ProjectFile} --tag {image}:$(terrabuild_node_hash) {arguments} ."
+        let buildArgs = $"build --file {dockerfile} --tag {image}:$(terrabuild_node_hash) {arguments} ."
 
         if context.Shared then
             let pushArgs = $"push {image}:$(terrabuild_node_hash)"

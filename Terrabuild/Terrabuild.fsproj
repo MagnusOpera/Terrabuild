@@ -22,9 +22,12 @@
     <Compile Include="Helpers/Git.fs" />
     <Compile Include="Helpers/Hash.fs" />
     <Compile Include="Helpers/FileSystem.fs" />
+    <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Core/Configuration.fs" />
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/BuildCache.fs" />
+    <Compile Include="Core/BuildOptimizer.fs" />
+    <Compile Include="Core/ParallelBuild.fs" />
     <Compile Include="Core/Build.fs" />
     <Compile Include="CLI.fs" />
     <Compile Include="Program.fs" />

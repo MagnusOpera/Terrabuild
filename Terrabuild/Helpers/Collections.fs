@@ -20,3 +20,6 @@ module Map =
         m |> Map.fold (fun acc k v -> match f k v with
                                       | Some x -> acc |> Map.add k x
                                       | _ -> acc) Map.empty
+
+    let replace addMap sourceMap =
+        addMap |> Map.fold (fun acc key value -> Map.add key value acc) sourceMap

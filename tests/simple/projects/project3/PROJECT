@@ -13,10 +13,13 @@ steps:
 
   docker:
    - (docker): build
-     image: ghcr.io/magnus-opera/project3
+     image: $(image)
      $configuration: $(configuration)
 
   push:
    - (docker): push
-     image: ghcr.io/magnus-opera/project3
+     image: $(image)
      tag: 666
+
+variables:
+  image: ghcr.io/magnus-opera/project3

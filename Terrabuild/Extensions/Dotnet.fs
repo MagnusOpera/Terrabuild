@@ -28,7 +28,7 @@ type Dotnet(context) =
     let parseDotnetDependencies =
 
         let projectFile =
-            if context.ProjectFile |> String.IsNullOrEmpty then
+            if context.ProjectFile |> String.IsNullOrWhiteSpace then
                 let projects =
                     knownProjectExtensions
                     |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(context.ProjectDirectory, ext))

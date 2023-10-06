@@ -4,6 +4,7 @@ open Argu
 [<RequireQualifiedAccess>]
 type BuildArgs =
     | [<Unique; Inherit>] Workspace of path:string
+    | [<Unique; Inherit>] Parallel of max:int
     | [<Unique; Inherit>] Shared
     | [<Unique>] NoCache
 with
@@ -11,6 +12,7 @@ with
         member this.Usage =
             match this with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Parallel _ -> "Max parallel build concurrency (default 4)."
             | Shared -> "Local or shared execution."
             | NoCache -> "Do not use cache when building target."
 
@@ -18,6 +20,7 @@ with
 type RunArgs =
     | [<MainCommand; ExactlyOnce; First>] Target of target:string
     | [<Unique; Inherit>] Workspace of path:string
+    | [<Unique; Inherit>] Parallel of max:int
     | [<Unique; Inherit>] Shared
     | [<Unique>] NoCache
 with
@@ -26,6 +29,7 @@ with
             match this with
             | Target _ -> "Specify build target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Parallel _ -> "Max parallel build concurrency (default 4)."
             | Shared -> "Local or shared execution."
             | NoCache -> "Do not use cache when building target."
 
