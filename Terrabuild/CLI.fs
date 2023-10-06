@@ -11,7 +11,7 @@ with
         member this.Usage =
             match this with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
-            | Shared -> "Local or shared execution"
+            | Shared -> "Local or shared execution."
             | NoCache -> "Do not use cache when building target."
 
 [<RequireQualifiedAccess>]
@@ -26,7 +26,7 @@ with
             match this with
             | Target _ -> "Specify build target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
-            | Shared -> "Local or shared execution"
+            | Shared -> "Local or shared execution."
             | NoCache -> "Do not use cache when building target."
 
 [<RequireQualifiedAccess>]
