@@ -26,3 +26,6 @@ usage:
 	dotnet run --project Terrabuild -- run --help
 	dotnet run --project Terrabuild -- serve --help
 	dotnet run --project Terrabuild -- clear --help
+
+clear-cache:
+	dotnet run --project Terrabuild -- clear --buildcache
