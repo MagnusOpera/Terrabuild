@@ -10,7 +10,7 @@ let private settings =
                         .AddToJsonSerializerOptions(options)
     options
 
-let Serialize (value: obj)=
+let Serialize (value: obj) =
     JsonSerializer.Serialize(value, settings)
 
 let Deserialize<'t> (json: string) =
