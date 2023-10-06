@@ -12,55 +12,52 @@ let runTarget wsDir target noCache shared =
     printfn $"{jsonBuildInfo}"
 
 
-let targetShortcut target (tbResult: ParseResults<TerrabuildArgs>) =
-    let buildResult = tbResult.GetResult(TerrabuildArgs.Build)
+let targetShortcut target (buildArgs: ParseResults<BuildArgs>) =
+    let shared = buildArgs.TryGetResult(BuildArgs.Shared) |> Option.isSome
 
     let wsDir =
-        match tbResult.TryGetResult(TerrabuildArgs.Workspace) with
+        match buildArgs.TryGetResult(BuildArgs.Workspace) with
         | Some workspace -> workspace
         | _ -> "."
 
-    let shared =
-        match tbResult.TryGetResult(TerrabuildArgs.Shared) with
-        | Some TerrabuildArgs.Shared -> true
-        | _ -> false
-
     let noCache =
-        match buildResult.TryGetResult(BuildArgs.NoCache) with
+        match buildArgs.TryGetResult(BuildArgs.NoCache) with
         | Some _ -> true
         | _ -> false
 
     runTarget wsDir target noCache shared
 
 
-let target (tbResult: ParseResults<TerrabuildArgs>) =
-    let targetResult = tbResult.GetResult(TerrabuildArgs.Run)
-
+let target (targetArgs: ParseResults<RunArgs>) =
     let wsDir =
-        match tbResult.TryGetResult(TerrabuildArgs.Workspace) with
+        match targetArgs.TryGetResult(RunArgs.Workspace) with
         | Some workspace -> workspace
         | _ -> "."
 
-    let shared =
-        match tbResult.TryGetResult(TerrabuildArgs.Shared) with
-        | Some TerrabuildArgs.Shared -> true
-        | _ -> false
+    let shared = targetArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
 
     let noCache =
-        match targetResult.TryGetResult(RunArgs.NoCache) with
+        match targetArgs.TryGetResult(RunArgs.NoCache) with
         | Some _ -> true
         | _ -> false
 
-    let target = targetResult.GetResult(RunArgs.Target)
+    let target = targetArgs.GetResult(RunArgs.Target)
 
     runTarget wsDir target noCache shared
+
+
+let clear (clearArgs: ParseResults<ClearArgs>) =
+    match clearArgs.TryGetResult(ClearArgs.BuildCache) with
+    | Some _ -> BuildCache.clearBuildCache()
+    | _ -> ()
 
 
 let errorHandler = ProcessExiter()
 let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
 match parser.ParseCommandLine() with
-| p when p.Contains(TerrabuildArgs.Build) -> p |> targetShortcut "build"
-| p when p.Contains(TerrabuildArgs.Dist) -> p |> targetShortcut "dist"
-| p when p.Contains(TerrabuildArgs.Serve) -> p |> targetShortcut "serve"
-| p when p.Contains(TerrabuildArgs.Run) -> p |> target
+| p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
+| p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"
+| p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> targetShortcut "serve"
+| p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> target
+| p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
 | _ -> printfn $"{parser.PrintUsage()}"

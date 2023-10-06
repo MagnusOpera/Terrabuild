@@ -18,3 +18,5 @@ usage:
 	dotnet run --project Terrabuild -- --help
 	dotnet run --project Terrabuild -- build --help
 	dotnet run --project Terrabuild -- run --help
+	dotnet run --project Terrabuild -- serve --help
+	dotnet run --project Terrabuild -- clear --help

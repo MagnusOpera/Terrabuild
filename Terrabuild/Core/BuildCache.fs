@@ -51,6 +51,8 @@ let private markEntryAsCompleted entryDir =
     let completeFile = IO.combinePath entryDir completeFilename
     File.WriteAllText(completeFile, "")
 
+let clearBuildCache () =
+    IO.deleteAny buildCacheDirectory
 
 type NewEntry(entryDir: string, id: string, storage: Storages.Storage option) =
     let mutable logNum = 0
