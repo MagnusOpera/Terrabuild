@@ -1,0 +1,6 @@
+dependencies:
+  - ../C
+
+steps:
+  build:
+    - (echo): "building B"

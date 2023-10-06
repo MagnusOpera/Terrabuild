@@ -192,6 +192,10 @@ let read workspaceDirectory shared =
 
                 let ignoresHash = projectIgnores |> Seq.sort |> String.join "\n" |> String.sha256
 
+                // check for circular or missing dependencies
+                for childDependency in projectDependencies do
+                    if projects |> Map.tryFind dependency |> Option.isNone then failwith $"Invalid graph due to circular dependencies between {dependency} and {childDependency}"
+
                 let dependenciesHash =
                     projectDependencies
                     |> Seq.map (fun dependency -> (projects |> Map.find dependency).Hash)
