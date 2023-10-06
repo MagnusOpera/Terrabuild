@@ -8,7 +8,7 @@ type TaskStatus =
     | Failure
 
 [<RequireQualifiedAccess>]
-type StepInfo = {
+type StepSummary = {
     Command: string
     Arguments: string
     StartedAt: DateTime
@@ -19,10 +19,10 @@ type StepInfo = {
 }
 
 [<RequireQualifiedAccess>]
-type Summary = {
+type TargetSummary = {
     Project: string
     Target: string
-    Steps: StepInfo list
+    Steps: StepSummary list
     Files: Set<string>    
     Ignores: Set<string>
     Variables: Map<string, string>
@@ -34,7 +34,7 @@ type Summary = {
 type IEntry =
     abstract NextLogFile: unit -> string
     abstract Outputs: string with get
-    abstract Complete: summary:Summary -> unit
+    abstract Complete: summary:TargetSummary -> unit
 
 
 let private summaryFilename = "summary.json"
@@ -92,12 +92,12 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage option) =
 
 
 type Cache(storage: Storages.Storage option) =
-    member _.TryGetSummary id : Summary option =
+    member _.TryGetSummary id : TargetSummary option =
         let entryDir = IO.combinePath buildCacheDirectory id
         
         let loadSummary () =
             let summaryFile = IO.combinePath entryDir summaryFilename
-            let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<Summary>
+            let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
             let summary = { summary
                             with Steps = summary.Steps
                                          |> List.map (fun stepLog -> { stepLog

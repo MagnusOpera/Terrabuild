@@ -99,7 +99,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                     let cacheEntry = cache.CreateEntry cacheEntryId
 
                     printfn $"Building {node.TargetId}@{node.ProjectId}: {cacheEntryId}"
-                    let startedAt = DateTime.UtcNow
 
                     if node.IsLeaf then
                         printfn $"Cleaning output of leaf task '{cacheEntryId}'"
@@ -107,11 +106,12 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
                     let beforeFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 
-                    let stepLogs = List<BuildCache.StepInfo>()
+                    let stepLogs = List<BuildCache.StepSummary>()
                     let mutable lastExitCode = 0
                     let mutable stepIndex = 0
                     let usedVariables = HashSet<string>()
                     while stepIndex < steps.Length && lastExitCode = 0 do
+                        let startedAt = DateTime.UtcNow
                         let step = steps[stepIndex]
                         let logFile = cacheEntry.NextLogFile()
                         stepIndex <- stepIndex + 1                        
@@ -125,17 +125,16 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
                         let step = { step with Arguments = step.Arguments |> setVariables }
 
-                        let startedAt = DateTime.UtcNow
                         let exitCode = Exec.execCaptureTimestampedOutput projectDirectory step.Command step.Arguments logFile
                         let endedAt = DateTime.UtcNow
                         let duration = endedAt - startedAt
-                        let stepLog = { BuildCache.StepInfo.Command = step.Command
-                                        BuildCache.StepInfo.Arguments = step.Arguments
-                                        BuildCache.StepInfo.StartedAt = startedAt
-                                        BuildCache.StepInfo.EndedAt = endedAt
-                                        BuildCache.StepInfo.Duration = duration
-                                        BuildCache.StepInfo.Log = logFile
-                                        BuildCache.StepInfo.ExitCode = exitCode }
+                        let stepLog = { BuildCache.StepSummary.Command = step.Command
+                                        BuildCache.StepSummary.Arguments = step.Arguments
+                                        BuildCache.StepSummary.StartedAt = startedAt
+                                        BuildCache.StepSummary.EndedAt = endedAt
+                                        BuildCache.StepSummary.Duration = duration
+                                        BuildCache.StepSummary.Log = logFile
+                                        BuildCache.StepSummary.ExitCode = exitCode }
                         stepLog |> stepLogs.Add
                         lastExitCode <- exitCode
 
@@ -154,14 +153,14 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
                         if lastExitCode = 0 then BuildCache.TaskStatus.Success
                         else BuildCache.TaskStatus.Failure
 
-                    let summary = { BuildCache.Summary.Project = node.ProjectId
-                                    BuildCache.Summary.Target = node.TargetId
-                                    BuildCache.Summary.Files = node.Configuration.Files
-                                    BuildCache.Summary.Ignores = node.Configuration.Ignores
-                                    BuildCache.Summary.Variables = touchedVariables
-                                    BuildCache.Summary.Steps = stepLogs |> List.ofSeq
-                                    BuildCache.Summary.Outputs = outputs
-                                    BuildCache.Summary.Status = status }
+                    let summary = { BuildCache.TargetSummary.Project = node.ProjectId
+                                    BuildCache.TargetSummary.Target = node.TargetId
+                                    BuildCache.TargetSummary.Files = node.Configuration.Files
+                                    BuildCache.TargetSummary.Ignores = node.Configuration.Ignores
+                                    BuildCache.TargetSummary.Variables = touchedVariables
+                                    BuildCache.TargetSummary.Steps = stepLogs |> List.ofSeq
+                                    BuildCache.TargetSummary.Outputs = outputs
+                                    BuildCache.TargetSummary.Status = status }
                     cacheEntry.Complete summary
                     summary
 
