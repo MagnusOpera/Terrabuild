@@ -109,7 +109,8 @@ type Cache(storage: Storages.Storage option) =
 
         let completeFile = IO.combinePath entryDir completeFilename
         match completeFile with
-        | IO.File _ -> loadSummary() |> Some
+        | IO.File _ ->
+            loadSummary() |> Some
         | _ ->
             // cleanup the mess - it's not valid anyway
             IO.deleteAny entryDir
@@ -123,7 +124,8 @@ type Cache(storage: Storages.Storage option) =
                     let summary = loadSummary()
                     entryDir |> markEntryAsCompleted
                     summary |> Some
-                | _ -> None
+                | _ ->
+                    None
             | _ -> None
 
     member _.CreateEntry id : IEntry =

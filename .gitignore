@@ -408,3 +408,4 @@ dist
 .idea
 node_modules
 Makefile2
+init.sh

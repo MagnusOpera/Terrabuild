@@ -17,6 +17,7 @@ module YamlConfigFiles =
         member val Variables = Dictionary<string, string>() with get, set
 
     type BuildConfig() =
+        member val SharedCache = "" with get, set
         member val Dependencies = List<string>() with get, set
         member val Targets = Dictionary<string, List<string>>() with get, set
         member val Variables = Dictionary<string, string>() with get, set
@@ -49,6 +50,7 @@ type BuildConfig = {
 }
 
 type WorkspaceConfig = {
+    Storage: Storages.Storage option
     Directory: string
     Build: BuildConfig
     Projects: Map<string, ProjectConfig>
@@ -69,12 +71,21 @@ let private loadExtension name projectDir projectFile parameters shared : Extens
     | "echo" -> Extensions.Echo(context)
     | _ -> failwith $"Unknown plugin {name}"
 
+let private loadStorage name : Storages.Storage option =
+    match name with
+    | "azureblob" -> Storages.MicrosoftBlobStorage() :> Storages.Storage |> Some
+    | _ -> None
+
 let read workspaceDirectory shared =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
     let buildConfig = Yaml.DeserializeFile<YamlConfigFiles.BuildConfig> buildFile
+
+    let storage = loadStorage buildConfig.SharedCache
+
     let buildConfig = { Dependencies = buildConfig.Dependencies |> Set.ofSeq
                         Targets = buildConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
                         Variables = buildConfig.Variables |> Map.ofDict }
+
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let mutable projects = Map.empty
@@ -234,4 +245,7 @@ let read workspaceDirectory shared =
 
     // initial dependency list is absolute respective to workspaceDirectory
     scanDependencies buildConfig.Dependencies
-    { Directory = workspaceDirectory; Build = buildConfig; Projects = projects }
+    { Storage = storage
+      Directory = workspaceDirectory
+      Build = buildConfig
+      Projects = projects }

@@ -1,3 +1,5 @@
+sharedCache: azureblob
+
 dependencies:
 - projects/project1
 - projects/project2

@@ -5,7 +5,7 @@ open CLI
 let runTarget wsDir target shared options =
     let config = Configuration.read wsDir shared
     let graph = Graph.buildGraph config target
-    let cache = BuildCache.Cache(None)
+    let cache = BuildCache.Cache(config.Storage)
     let buildLevels = BuildOptimizer.optimize graph
     let buildInfo = ParallelBuild.run config buildLevels cache options
     let jsonBuildInfo = Json.Serialize buildInfo
