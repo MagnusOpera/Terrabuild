@@ -12,20 +12,22 @@ let runTarget wsDir target shared options =
     printfn $"{jsonBuildInfo}"
 
 
-let targetShortcut target (buildArgs: ParseResults<BuildArgs>) =
-    let shared = buildArgs.TryGetResult(BuildArgs.Shared) |> Option.isSome
-    let wsDir = buildArgs.GetResult(BuildArgs.Workspace, defaultValue = ".")
-    let options = { ParallelBuild.BuildOptions.NoCache = buildArgs.Contains(BuildArgs.NoCache)
-                    ParallelBuild.BuildOptions.MaxBuilds = buildArgs.GetResult(BuildArgs.Parallel, defaultValue = 4) }
+let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
+    let shared = buildArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
+    let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
+    let options = { ParallelBuild.BuildOptions.NoCache = buildArgs.Contains(RunArgs.NoCache)
+                    ParallelBuild.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = 4)
+                    ParallelBuild.BuildOptions.Retry = buildArgs.Contains(RunArgs.Retry) }
     runTarget wsDir target shared options
 
 
-let target (targetArgs: ParseResults<RunArgs>) =
-    let wsDir = targetArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
-    let shared = targetArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
-    let target = targetArgs.GetResult(RunArgs.Target)
-    let options = { ParallelBuild.BuildOptions.NoCache = targetArgs.Contains(RunArgs.NoCache)
-                    ParallelBuild.BuildOptions.MaxBuilds = targetArgs.GetResult(RunArgs.Parallel, defaultValue = 4) }
+let target (targetArgs: ParseResults<TargetArgs>) =
+    let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
+    let shared = targetArgs.TryGetResult(TargetArgs.Shared) |> Option.isSome
+    let target = targetArgs.GetResult(TargetArgs.Target)
+    let options = { ParallelBuild.BuildOptions.NoCache = targetArgs.Contains(TargetArgs.NoCache)
+                    ParallelBuild.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = 4)
+                    ParallelBuild.BuildOptions.Retry = targetArgs.Contains(TargetArgs.Retry) }
     runTarget wsDir target shared options
 
 

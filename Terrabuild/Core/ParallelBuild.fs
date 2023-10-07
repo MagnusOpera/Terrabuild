@@ -26,8 +26,9 @@ type BuildInfo = {
 }
 
 type BuildOptions = {
-    MaxBuilds: int
+    MaxConcurrency: int
     NoCache: bool
+    Retry: bool
 }
 
 let private isTaskUnsatisfied = function
@@ -80,7 +81,13 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: BuildOpt
             // check first if it's possible to restore previously built state
             let summary =
                 if options.NoCache then None
-                else cache.TryGetSummary cacheEntryId
+                else
+                    // take care of retrying failed tasks
+                    match cache.TryGetSummary cacheEntryId with
+                    | Some summary ->
+                        if summary.Status = BuildCache.TaskStatus.Failure then None
+                        else Some summary
+                    | _ -> None
 
             let cleanOutputs () =
                 node.Configuration.Outputs
@@ -174,7 +181,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: BuildOpt
     buildBatches.Batches
     |> Seq.iteri (fun batchNum batch ->
         printfn $"Building level {batchNum}"
-        Threading.ParExec (fun node -> async { buildNode node }) batch.Nodes options.MaxBuilds |> ignore)
+        Threading.ParExec (fun node -> async { buildNode node }) batch.Nodes options.MaxConcurrency |> ignore)
 
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
 

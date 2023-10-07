@@ -24,6 +24,11 @@ type BuildInfo = {
     Dependencies: Map<string, TaskBuildStatus>
 }
 
+type BuildOptions = {
+    NoCache: bool
+    Retry: bool
+}
+
 let private isBuildSuccess = function
     | TaskBuildStatus.Success _ -> true
     | _ -> false
@@ -33,7 +38,7 @@ let private isTaskUnsatisfied = function
     | TaskBuildStatus.Unfulfilled depId -> Some depId
     | TaskBuildStatus.Success _ -> None
 
-let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) (noCache: bool) (cache: BuildCache.Cache) =
+let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGraph) (cache: BuildCache.Cache) (options: BuildOptions) =
     let variables = workspaceConfig.Build.Variables
 
     let rec buildDependencies (nodeIds: string seq) : TaskBuildStatus list =
@@ -48,7 +53,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
             | IO.Directory projectDirectory -> projectDirectory
             | IO.File projectFile -> IO.parentDirectory projectFile
             | _ -> failwith $"Failed to find project '{node.ProjectId}"
-        
 
         let steps = node.Configuration.Steps[node.TargetId]
         let nodeHash = node.Configuration.Hash
@@ -66,8 +70,14 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
             // check first if it's possible to restore previously built state
             let summary =
-                if noCache then None
-                else cache.TryGetSummary cacheEntryId
+                if options.NoCache then None
+                else
+                    // take care of retrying failed tasks
+                    match cache.TryGetSummary cacheEntryId with
+                    | Some summary ->
+                        if summary.Status = BuildCache.TaskStatus.Failure then None
+                        else Some summary
+                    | _ -> None
 
             let cleanOutputs () =
                 node.Configuration.Outputs

@@ -2,11 +2,12 @@ module CLI
 open Argu
 
 [<RequireQualifiedAccess>]
-type BuildArgs =
+type RunArgs =
     | [<Unique; Inherit>] Workspace of path:string
     | [<Unique; Inherit>] Parallel of max:int
     | [<Unique; Inherit>] Shared
     | [<Unique>] NoCache
+    | [<Unique>] Retry
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -15,14 +16,16 @@ with
             | Parallel _ -> "Max parallel build concurrency (default 4)."
             | Shared -> "Local or shared execution."
             | NoCache -> "Do not use cache when building target."
+            | Retry -> "Retry failed task."
 
 [<RequireQualifiedAccess>]
-type RunArgs =
+type TargetArgs =
     | [<MainCommand; ExactlyOnce; First>] Target of target:string
     | [<Unique; Inherit>] Workspace of path:string
     | [<Unique; Inherit>] Parallel of max:int
     | [<Unique; Inherit>] Shared
     | [<Unique>] NoCache
+    | [<Unique>] Retry
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -32,6 +35,7 @@ with
             | Parallel _ -> "Max parallel build concurrency (default 4)."
             | Shared -> "Local or shared execution."
             | NoCache -> "Do not use cache when building target."
+            | Retry -> "Retry failed task."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =
@@ -44,11 +48,11 @@ with
 
 [<RequireQualifiedAccess>]
 type TerrabuildArgs =
-    | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<BuildArgs>
-    | [<CliPrefix(CliPrefix.None)>] Test of ParseResults<BuildArgs>
-    | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<BuildArgs>
-    | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<BuildArgs>
-    | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<RunArgs>
+    | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<RunArgs>
+    | [<CliPrefix(CliPrefix.None)>] Test of ParseResults<RunArgs>
+    | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<RunArgs>
+    | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<RunArgs>
+    | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<TargetArgs>
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
 with
     interface IArgParserTemplate with
