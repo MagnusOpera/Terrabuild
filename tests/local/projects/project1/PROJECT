@@ -1,0 +1,24 @@
+
+extensions:
+  - (make): Makefile
+
+dependencies:
+  - ../../libraries/library1
+
+outputs:
+  - dist
+
+targets:
+  publish: [ build ]
+
+steps:
+  build:
+    - (echo): "building project1"
+    - (make): build
+      $secret: tsoin tsoin
+
+  publish:
+    - (shell): echo
+      arguments: "publishing project1"
+    - (shell): make
+      arguments: publish
