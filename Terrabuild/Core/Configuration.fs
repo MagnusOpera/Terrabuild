@@ -17,7 +17,7 @@ module YamlConfigFiles =
         member val Variables = Dictionary<string, string>() with get, set
 
     type BuildConfig() =
-        member val SharedCache = "" with get, set
+        member val Storage = "" with get, set
         member val Dependencies = List<string>() with get, set
         member val Targets = Dictionary<string, List<string>>() with get, set
         member val Variables = Dictionary<string, string>() with get, set
@@ -80,7 +80,7 @@ let read workspaceDirectory shared =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
     let buildConfig = Yaml.DeserializeFile<YamlConfigFiles.BuildConfig> buildFile
 
-    let storage = loadStorage buildConfig.SharedCache
+    let storage = loadStorage buildConfig.Storage
 
     let buildConfig = { Dependencies = buildConfig.Dependencies |> Set.ofSeq
                         Targets = buildConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
