@@ -46,7 +46,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: BuildOpt
     // collect dependencies status
     let getDependencyStatus depId =
         let depNode = buildBatches.Graph.Nodes[depId]
-        let depCacheEntryId = $"{depNode.Configuration.Hash}/{depNode.TargetId}"
+        let depCacheEntryId = $"{depNode.ProjectId}/{depNode.Configuration.Hash}/{depNode.TargetId}"
         match cache.TryGetSummary depCacheEntryId with
         | Some summary -> 
             match summary.Status with
