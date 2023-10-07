@@ -62,12 +62,12 @@ type Dotnet(context) =
         let configuration = args |> Map.tryFind "configuration" |> Option.defaultValue "Debug"
         let arguments = args |> Map.tryFind "arguments" |> Option.defaultValue ""
         match action with
-        | "restore" -> [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies {arguments}" } ]
+        | "restore" -> [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies {arguments}" } ]
         | "build" ->
-            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies {arguments}" }
-              { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
+            [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies" }
+              { Command = "dotnet"; Arguments = $"build {projectFile} --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
         | "test" ->
-            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-build --no-restore {arguments}" } ]
+            [ { Command = "dotnet"; Arguments = $"test {projectFile} --no-build {arguments}" } ]
         | "publish" | "run" | "pack" ->
-            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-build --no-restore {arguments}" } ]
+            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-build {arguments}" } ]
         | _ -> failwith $"Unsupported action '{action}'"
