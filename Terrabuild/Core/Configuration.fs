@@ -80,7 +80,9 @@ let read workspaceDirectory shared =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
     let buildConfig = Yaml.DeserializeFile<YamlConfigFiles.BuildConfig> buildFile
 
-    let storage = loadStorage buildConfig.Storage
+    let storage =
+        if shared then loadStorage buildConfig.Storage
+        else None
 
     let buildConfig = { Dependencies = buildConfig.Dependencies |> Set.ofSeq
                         Targets = buildConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
