@@ -62,7 +62,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: BuildOpt
 
         let steps = node.Configuration.Steps[node.TargetId]
         let nodeHash = node.Configuration.Hash
-        let cacheEntryId = $"{nodeHash}/{node.TargetId}"
+        let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}"
         let nodeTargetHash = cacheEntryId |> String.sha256
 
         let unsatisfyingDep =

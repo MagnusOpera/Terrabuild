@@ -52,14 +52,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (g: Graph.WorkspaceGrap
 
         let steps = node.Configuration.Steps[node.TargetId]
         let nodeHash = node.Configuration.Hash
-        let cacheEntryId = $"{nodeHash}/{node.TargetId}"
+        let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}"
         let nodeTargetHash = cacheEntryId |> String.sha256
-
-        // compute node hash:
-        // - hash of dependencies
-        // - list of files (without outputs & ignores)
-        // - files hash
-        // - variables dependencies
 
         let dependenciesHashes = buildDependencies node.Dependencies
         let unsatisfyingDep = dependenciesHashes |> Seq.choose isTaskUnsatisfied |> Seq.tryHead
