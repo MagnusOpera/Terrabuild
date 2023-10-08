@@ -62,12 +62,13 @@ type BuildNotification() =
         let CSI = ESC + "["
         let EL2 = $"{CSI}2K"
         let CUU1 = $"{CSI}1A"
-        let crossmark = "\U0000274C"
-        let checkmark = "\U00002714"
+        let crossmark = "✘"
+        let checkmark = "✔"
         let green = $"{CSI}32m"
-        let red = $"{CSI}91m"
+        let red = $"{CSI}31m"
         let yellow = $"{CSI}33m"
         let normal = $"{CSI}0m"
+
 
         let clear count =
             let eraseLine = "\r" + EL2 + CUU1 + EL2
