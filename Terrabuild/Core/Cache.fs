@@ -1,4 +1,4 @@
-module BuildCache
+module Cache
 open System
 open System.IO
 open System.Formats.Tar

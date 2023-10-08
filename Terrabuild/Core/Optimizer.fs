@@ -1,4 +1,4 @@
-module BuildOptimizer
+module Optimizer
 open System.Collections.Generic
 
 [<RequireQualifiedAccess>]

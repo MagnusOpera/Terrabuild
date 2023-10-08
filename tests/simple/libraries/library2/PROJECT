@@ -5,5 +5,7 @@ steps:
   build:
     - (dotnet): build
       configuration: $(configuration)
+    - (shell): sleep
+      arguments: "10"
     - (shell): echo
       arguments: "done lib2"
