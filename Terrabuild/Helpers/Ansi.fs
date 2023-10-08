@@ -15,7 +15,12 @@ module Emojis =
     let checkmark = "✔"
     let party = "🎉"
     let rocket = "🚀"
-
+    let explosion = "💥"
+    let thumbUp = "👍"
+    let thumbDown = "👎"
+    let happy = "😃"
+    let sad = "🙁"
+    
 module Styles =
     let black = color 30
     let red = color 31

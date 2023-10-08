@@ -4,7 +4,7 @@ open System
 
 [<RequireQualifiedAccess>]
 type PrinterProtocol =
-    | BuildStarted
+    | BuildStarted of graph:Graph.WorkspaceGraph
     | BuildCompleted of summary:Build.BuildSummary
     | BuildNodeStarted of node:Graph.Node
     | BuildNodeCompleted of node:Graph.Node * summary:Cache.TargetSummary option
@@ -28,7 +28,8 @@ type BuildNotification() =
         let rec messageLoop s= async {
             let! msg = inbox.Receive()
             match msg with
-            | PrinterProtocol.BuildStarted -> 
+            | PrinterProtocol.BuildStarted graph -> 
+                Console.WriteLine($"{Ansi.Emojis.rocket} Running target {graph.Target}")
                 scheduleUpdate ()
                 return! messageLoop () 
 
@@ -40,7 +41,12 @@ type BuildNotification() =
                     let log = IO.readTextFile lastLog.Log
                     Console.WriteLine(log)
 
-                let msg = $"{Ansi.Emojis.rocket} Completed in {summary.Duration}"
+                let result =
+                    match summary.Status with
+                    | Build.BuildStatus.Success -> Ansi.Emojis.happy
+                    | _ -> Ansi.Emojis.sad
+
+                let msg = $"{result} Completed in {summary.Duration}"
                 Console.Out.WriteLine(msg)
 
                 // let jsonBuildInfo = Json.Serialize summary
@@ -86,8 +92,8 @@ type BuildNotification() =
         member _.WaitCompletion(): unit = 
             buildComplete.WaitOne() |> ignore
 
-        member _.BuildStarted() =
-            PrinterProtocol.BuildStarted |> printerAgent.Post
+        member _.BuildStarted graph =
+            graph |> PrinterProtocol.BuildStarted |> printerAgent.Post
 
         member _.BuildCompleted(summary: Build.BuildSummary) = 
             summary

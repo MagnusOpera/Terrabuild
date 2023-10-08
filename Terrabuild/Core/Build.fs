@@ -33,7 +33,7 @@ type BuildSummary = {
 
 type IBuildNotification =
     abstract WaitCompletion: unit -> unit
-    abstract BuildStarted: unit -> unit
+    abstract BuildStarted: graph:Graph.WorkspaceGraph -> unit
     abstract BuildCompleted: summary:BuildSummary -> unit
     abstract BuildNodeStarted: node:Graph.Node -> unit
     abstract BuildNodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
@@ -184,7 +184,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: Optimize
         | Some _ ->
             notification.BuildNodeCompleted node None
 
-    notification.BuildStarted ()
+    notification.BuildStarted buildBatches.Graph
     let startedAt = DateTime.UtcNow
 
     buildBatches.Batches
