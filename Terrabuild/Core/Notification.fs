@@ -29,7 +29,7 @@ type BuildNotification() =
             let! msg = inbox.Receive()
             match msg with
             | PrinterProtocol.BuildStarted graph -> 
-                Console.WriteLine($"{Ansi.Emojis.rocket} Running target {graph.Target}")
+                Console.WriteLine($"{Ansi.Emojis.popcorn} Running target {graph.Target}")
                 scheduleUpdate ()
                 return! messageLoop () 
 
@@ -42,8 +42,8 @@ type BuildNotification() =
 
                 let result =
                     match summary.Status with
-                    | Build.BuildStatus.Success -> Ansi.Emojis.happy
-                    | _ -> Ansi.Emojis.sad
+                    | Build.BuildStatus.Success -> Ansi.Emojis.rocket
+                    | _ -> Ansi.Emojis.bomb
 
                 let msg = $"{result} Completed in {summary.Duration}"
                 Console.Out.WriteLine(msg)
