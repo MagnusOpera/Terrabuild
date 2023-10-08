@@ -36,11 +36,9 @@ let target (targetArgs: ParseResults<TargetArgs>) =
 let clear (clearArgs: ParseResults<ClearArgs>) =
     if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
 
-let args = [| "build"; "--workspace"; "tests/simple"; "--nocache" |]
 let errorHandler = ProcessExiter()
 let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
-// match parser.ParseCommandLine() with
-match parser.Parse(args) with
+match parser.ParseCommandLine() with
 | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
 | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
 | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"
