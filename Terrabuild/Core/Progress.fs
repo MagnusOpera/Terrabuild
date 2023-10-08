@@ -102,8 +102,15 @@ type BuildNotification() =
                 return! messageLoop items 
 
             | PrinterProtocol.BuildCompleted summary ->
-                let jsonBuildInfo = Json.Serialize summary
-                Console.Out.WriteLine($"{jsonBuildInfo}")
+                let msg = $"Build duration: {summary.Duration}"
+                let msg =
+                    match summary.Status with
+                    | BuildStatus.Success -> green + msg + normal
+                    | BuildStatus.Failure -> red + msg + normal
+                Console.Out.WriteLine(msg)
+
+                // let jsonBuildInfo = Json.Serialize summary
+                // Console.Out.WriteLine($"{jsonBuildInfo}")
                 buildComplete.Set() |> ignore
 
             | PrinterProtocol.BuildNodeStarted node ->
