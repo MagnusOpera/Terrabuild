@@ -1,4 +1,0 @@
-steps:
-  build:
-    - (shell): echo
-      arguments: "building project2"

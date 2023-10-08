@@ -12,16 +12,16 @@ run-build-circular:
 	dotnet run --project Terrabuild -- build --workspace tests/circular
 
 run-build:
-	dotnet run --project Terrabuild -- build --workspace tests/local
+	dotnet run --project Terrabuild -- build --workspace tests/simple
 
 run-build-az:
-	dotnet run --project Terrabuild -- build --workspace tests/azure
+	dotnet run --project Terrabuild -- build --workspace tests/simple --shared
 
 run-build-nc:
-	dotnet run --project Terrabuild -- build --workspace tests/local --nocache
+	dotnet run --project Terrabuild -- build --workspace tests/simple --nocache
 
 run-push:
-	dotnet run --project Terrabuild -- run push --workspace tests/local
+	dotnet run --project Terrabuild -- run push --workspace tests/simple
 
 usage:
 	dotnet run --project Terrabuild -- --help

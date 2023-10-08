@@ -13,7 +13,7 @@
     <Compile Include="Storages/Storages.fs" />
     <Compile Include="Storages/MicrosoftBlobStorage.fs" />
     <Compile Include="Helpers/IO.fs" />
-    <Compile Include="Helpers/Zip.fs" />
+    <Compile Include="Helpers/Compression.fs" />
     <Compile Include="Helpers/String.fs" />
     <Compile Include="Helpers/Collections.fs" />
     <Compile Include="Helpers/Yaml.fs" />

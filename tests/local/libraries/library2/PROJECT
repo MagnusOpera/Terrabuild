@@ -1,9 +1,0 @@
-extensions:
-  - (dotnet): library2.csproj
-
-steps:
-  build:
-    - (dotnet): build
-      configuration: $(configuration)
-    - (shell): echo
-      arguments: "done lib2"

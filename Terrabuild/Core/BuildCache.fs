@@ -1,6 +1,8 @@
 module BuildCache
 open System
 open System.IO
+open System.Formats.Tar
+open System.IO.Compression
 
 [<RequireQualifiedAccess>]
 type TaskStatus =
@@ -85,9 +87,16 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage option) =
 
             match storage with
             | Some storage ->
-                let files = IO.enumerateFiles entryDir
-                let tmpArchive = Zip.createArchive entryDir files
-                storage.Upload id tmpArchive
+                let tarFile = IO.getTempFilename()
+                let compressFile = IO.getTempFilename()
+                try
+                    entryDir |> Compression.tar tarFile
+                    tarFile |> Compression.compress compressFile
+                    storage.Upload id compressFile
+                finally
+                    IO.deleteAny compressFile
+                    IO.deleteAny tarFile
+
             | _ -> ()
 
             entryDir |> markEntryAsCompleted
@@ -119,11 +128,17 @@ type Cache(storage: Storages.Storage option) =
             match storage with
             | Some storage ->
                 match storage.TryDownload id with
-                | Some tmpArchive ->
-                    Zip.restoreArchive tmpArchive entryDir
-                    let summary = loadSummary()
-                    entryDir |> markEntryAsCompleted
-                    summary |> Some
+                | Some tarFile ->
+                    let uncompressFile = IO.getTempFilename()
+                    try
+                        tarFile |> Compression.uncompress uncompressFile
+                        uncompressFile |> Compression.untar entryDir
+                        let summary = loadSummary()
+                        entryDir |> markEntryAsCompleted
+                        summary |> Some
+                    finally
+                        IO.deleteAny uncompressFile
+                        IO.deleteAny tarFile
                 | _ ->
                     None
             | _ -> None
