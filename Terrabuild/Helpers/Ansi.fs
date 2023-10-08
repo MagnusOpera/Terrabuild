@@ -8,7 +8,7 @@ let CSI = ESC + "["
 let cursorUp (x: int) = $"{CSI}{x}A"
 let cursorDown (x: int) = $"{CSI}{x}B"
 let cursorHome = "\r"
-let color (x: int) = $"{CSI}{x}m"
+let csi (x: int) = $"{CSI}{x}m"
 
 module Emojis =
     let crossmark = "✘"
@@ -25,13 +25,18 @@ module Emojis =
     let popcorn = "🍿"
 
 module Styles =
-    let black = color 30
-    let red = color 31
-    let green = color 32
-    let yellow = color 33
-    let blue = color 34
-    let magenta = color 35
-    let cyan = color 36
-    let white = color 37
+    let reset = csi 0
+    let bold = csi 1
+    let slowBlink = csi 5
+    let invert = csi 7
 
-    let normal = $"{CSI}0m"
+    let black = csi 30
+    let red = csi 31
+    let green = csi 32
+    let yellow = csi 33
+    let blue = csi 34
+    let magenta = csi 35
+    let cyan = csi 36
+    let white = csi 37
+
+

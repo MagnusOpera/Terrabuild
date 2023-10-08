@@ -1,5 +1,6 @@
 module Progress
 open System
+open Ansi
 open Ansi.Styles
 open Ansi.Emojis
 
@@ -21,12 +22,12 @@ type ProgressRenderer() =
 
     let printableStatus item =
         match item.Status with
-        | Success -> green + checkmark + normal
-        | Fail -> red + crossmark + normal
+        | Success -> green + checkmark + reset
+        | Fail -> red + crossmark + reset
         | Progress startedAt ->
             let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequency) |> int
             let offset = diff % spinner.Length
-            yellow + spinner[offset] + normal
+            yellow + spinner[offset] + reset
 
     let printableItem item =
         let status = printableStatus item

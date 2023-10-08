@@ -36,7 +36,7 @@ type BuildNotification() =
             | PrinterProtocol.BuildCompleted summary ->
                 for failedSummary in failedLogs do
                     let lastLog = failedSummary.Steps |> List.last
-                    Console.WriteLine($"{Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {lastLog.Command} {lastLog.Arguments}{Ansi.Styles.normal}")
+                    Console.WriteLine($"{Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {lastLog.Command} {lastLog.Arguments}{Ansi.Styles.reset}")
                     let log = IO.readTextFile lastLog.Log
                     Console.WriteLine(log)
 
