@@ -14,7 +14,7 @@ let untar (outputDirectoryName: string) (inputFileName: string) =
 let compress (outputFileName: string) (inputFileName: string) =
     use input = File.OpenRead(inputFileName)
     use output = File.Create(outputFileName)
-    use compressor = new BrotliStream(output, CompressionLevel.SmallestSize)
+    use compressor = new BrotliStream(output, CompressionMode.Compress)
     input.CopyTo(compressor);
 
 let uncompress (outputFileName: string) (inputFileName: string) =
