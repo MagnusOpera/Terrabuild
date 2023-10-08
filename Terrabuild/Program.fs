@@ -9,7 +9,7 @@ let runTarget wsDir target shared options =
     let graph = Graph.buildGraph config target
     let cache = Cache.Cache(config.Storage)
     let buildLevels = Optimizer.optimize graph
-    let buildNotification = Progress.BuildNotification() :> Progress.IBuildNotification
+    let buildNotification = Notification.BuildNotification() :> Notification.IBuildNotification
     Build.run config buildLevels cache buildNotification options
     buildNotification.WaitCompletion()
 

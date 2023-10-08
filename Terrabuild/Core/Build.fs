@@ -2,7 +2,7 @@ module Build
 open System
 open System.Collections.Generic
 open Collections
-open Progress
+open Notification
 
 type BuildOptions = {
     MaxConcurrency: int

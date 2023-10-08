@@ -1,167 +1,59 @@
 module Progress
 open System
-open System.Text
 
-
-[<RequireQualifiedAccess>]
-type BuildStatus =
+type ProgressStatus =
     | Success
-    | Failure
-
-[<RequireQualifiedAccess>]
-type TaskBuildStatus =
-    | Success of string
-    | Failure of string
-    | Unfulfilled of string
-
-[<RequireQualifiedAccess>]
-type BuildSummary = {
-    Commit: string
-    StartedAt: DateTime
-    EndedAt: DateTime
-    Duration: TimeSpan
-    Status: BuildStatus
-    Target: string
-    Dependencies: Map<string, TaskBuildStatus>
-}
-
-
-type IBuildNotification =
-    abstract WaitCompletion: unit -> unit
-    abstract BuildStarted: unit -> unit
-    abstract BuildCompleted: buildSummary:BuildSummary -> unit
-    abstract BuildNodeStarted: node:Graph.Node -> unit
-    abstract BuildNodeCompleted: node:Graph.Node -> status:TaskBuildStatus -> unit
-
-[<RequireQualifiedAccess>]
-type PrinterProtocol =
-    | BuildStarted
-    | BuildCompleted of summaryFilename:BuildSummary
-    | BuildNodeStarted of node:Graph.Node
-    | BuildNodeCompleted of node:Graph.Node * status:TaskBuildStatus
-    | Render
-
+    | Fail
+    | Progress of startedAt:DateTime
 
 type ProgressItem = {
-    Project: string
-    Target: string
-    Offset: int
-    mutable Status: TaskBuildStatus option
+    mutable Status: ProgressStatus
+    Label: string
 }
 
+type ProgressRenderer() =
+    let mutable items = []
 
-type BuildNotification() =
+    let spinner = [ "⠋"; "⠙"; "⠹"; "⠸"; "⠼"; "⠴";  "⠦"; "⠧"; "⠇"; "⠏" ]
+    let frequency = 100.0
 
-    let buildComplete = new System.Threading.ManualResetEvent(false)
+    let crossmark = "✘"
+    let checkmark = "✔"
+    let ESC = "\u001b"
+    let CSI = ESC + "["
+    let green = $"{CSI}32m"
+    let red = $"{CSI}31m"
+    let yellow = $"{CSI}33m"
+    let normal = $"{CSI}0m"
 
-    let handler (inbox: MailboxProcessor<PrinterProtocol>) =
-        let spinner = [ "⠋"; "⠙"; "⠹"; "⠸"; "⠼"; "⠴";  "⠦"; "⠧"; "⠇"; "⠏" ]
-        let updateDelay = 100
-        let resolution = 100
-        let ESC = "\u001b"
-        let CSI = ESC + "["
-        let EL2 = $"{CSI}2K"
-        let CUU1 = $"{CSI}1A"
-        let crossmark = "✘"
-        let checkmark = "✔"
-        let green = $"{CSI}32m"
-        let red = $"{CSI}31m"
-        let yellow = $"{CSI}33m"
-        let normal = $"{CSI}0m"
+    let printableStatus item =
+        match item.Status with
+        | Success -> green + checkmark + normal
+        | Fail -> red + crossmark + normal
+        | Progress startedAt ->
+            let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequency) |> int
+            let offset = diff % spinner.Length
+            yellow + spinner[offset] + normal
 
+    let printableItem item =
+        let status = printableStatus item
+        $"{status} {item.Label}"
 
-        let clear count =
-            let eraseLine = "\r" + EL2 + CUU1 + EL2
-            let eraseLines =
-                [1..count]
-                |> List.fold (fun (acc:StringBuilder) _ -> acc.Append(eraseLine)) (StringBuilder())
-            Console.Out.Write(eraseLines)
-            Console.Out.Flush()
+    member _.Refresh () =
+        // update status: move home, move top, write status
+        let updateCmd =
+            items
+            |> List.fold (fun acc item -> acc + $"\r{CSI}1A" + (item |> printableStatus)) ""
+        let updateCmd = updateCmd + $"\r{CSI}{items.Length}B"
+        updateCmd |> Console.Out.Write
 
-        let render (turn: int) (items: ProgressItem list) =
-            for item in items do
-                let status =
-                    match item.Status with
-                    | Some (TaskBuildStatus.Success _) -> green + checkmark + normal
-                    | Some (TaskBuildStatus.Failure _) -> red + crossmark + normal
-                    | Some (TaskBuildStatus.Unfulfilled _) -> red + crossmark + normal
-                    | _ -> yellow + spinner[(turn + item.Offset) % spinner.Length] + normal
-                Console.Out.WriteLine($"{status} {item.Target} {item.Project}")
-            Console.Out.Flush()
+    member _.Add (label: string) (status: ProgressStatus) =
+        let item = { Status = status; Label = label }
+        items <- item :: items
+        let printable = printableItem item
+        Console.Out.WriteLine(printable)
 
-        let scheduleUpdate () =
-            System.Threading.Tasks.Task.Delay(updateDelay).ContinueWith(fun t -> PrinterProtocol.Render |> inbox.Post) |> ignore
-
-        // the message processing function
-        let rec messageLoop (items: ProgressItem list) = async {
-            let turn = DateTime.Now.Millisecond / resolution
-            let! msg = inbox.Receive()
-            match msg with
-            | PrinterProtocol.BuildStarted -> 
-                scheduleUpdate()
-                return! messageLoop items 
-
-            | PrinterProtocol.BuildCompleted summary ->
-                let msg = $"Build duration: {summary.Duration}"
-                let msg =
-                    match summary.Status with
-                    | BuildStatus.Success -> green + msg + normal
-                    | BuildStatus.Failure -> red + msg + normal
-                Console.Out.WriteLine(msg)
-
-                // let jsonBuildInfo = Json.Serialize summary
-                // Console.Out.WriteLine($"{jsonBuildInfo}")
-                buildComplete.Set() |> ignore
-
-            | PrinterProtocol.BuildNodeStarted node ->
-                let newItem = { Project = node.ProjectId
-                                Target = node.TargetId
-                                Status = None
-                                Offset = (DateTime.Now.Millisecond |> int) % spinner.Length }
-                let newItems = items @ [ newItem ]
-                clear items.Length
-                render turn newItems
-                scheduleUpdate()
-                return! messageLoop newItems
-
-            | PrinterProtocol.BuildNodeCompleted (node, status) ->
-                let item = items |> List.find (fun x -> x.Project = node.ProjectId && x.Target = node.TargetId)
-                item.Status <- Some status
-                clear items.Length
-                render turn items
-                scheduleUpdate()
-                return! messageLoop items  
-
-            | PrinterProtocol.Render ->
-                clear items.Length
-                render turn items
-                scheduleUpdate()
-                return! messageLoop items  
-        }
-
-        // start the loop
-        messageLoop []
-
-    let printerAgent = MailboxProcessor.Start(handler)
-
-    interface IBuildNotification with
-        member _.WaitCompletion(): unit = 
-            buildComplete.WaitOne() |> ignore
-
-        member _.BuildStarted() =
-            PrinterProtocol.BuildStarted |> printerAgent.Post
-
-        member _.BuildCompleted(summary: BuildSummary) = 
-            summary
-            |> PrinterProtocol.BuildCompleted
-            |> printerAgent.Post
-
-        member _.BuildNodeStarted(node: Graph.Node) = 
-            node
-            |> PrinterProtocol.BuildNodeStarted
-            |> printerAgent.Post
-
-        member _.BuildNodeCompleted (node: Graph.Node) (status: TaskBuildStatus) = 
-            (node, status)
-            |> PrinterProtocol.BuildNodeCompleted
-            |> printerAgent.Post
+    member this.Update (label: string) (status: ProgressStatus) =
+        let index = items |> List.findIndex (fun item -> item.Label = label)
+        items[index].Status <- status
+        this.Refresh()

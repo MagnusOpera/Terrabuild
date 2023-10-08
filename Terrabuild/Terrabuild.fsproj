@@ -28,6 +28,7 @@
     <Compile Include="Core/Cache.fs" />
     <Compile Include="Core/Optimizer.fs" />
     <Compile Include="Core/Progress.fs" />
+    <Compile Include="Core/Notification.fs" />
     <Compile Include="Core/Build.fs" />
     <Compile Include="CLI.fs" />
     <Compile Include="Program.fs" />
