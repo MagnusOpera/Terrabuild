@@ -1,41 +1,13 @@
 module Notification
 open System
 
-[<RequireQualifiedAccess>]
-type BuildStatus =
-    | Success
-    | Failure
-
-[<RequireQualifiedAccess>]
-type TaskBuildStatus =
-    | Success of string
-    | Failure of string
-    | Unfulfilled of string
-
-[<RequireQualifiedAccess>]
-type BuildSummary = {
-    Commit: string
-    StartedAt: DateTime
-    EndedAt: DateTime
-    Duration: TimeSpan
-    Status: BuildStatus
-    Target: string
-    Dependencies: Map<string, TaskBuildStatus>
-}
-
-type IBuildNotification =
-    abstract WaitCompletion: unit -> unit
-    abstract BuildStarted: unit -> unit
-    abstract BuildCompleted: buildSummary:BuildSummary -> unit
-    abstract BuildNodeStarted: node:Graph.Node -> unit
-    abstract BuildNodeCompleted: node:Graph.Node -> status:TaskBuildStatus -> unit
 
 [<RequireQualifiedAccess>]
 type PrinterProtocol =
     | BuildStarted
-    | BuildCompleted of summaryFilename:BuildSummary
+    | BuildCompleted of summary:Build.BuildSummary
     | BuildNodeStarted of node:Graph.Node
-    | BuildNodeCompleted of node:Graph.Node * status:TaskBuildStatus
+    | BuildNodeCompleted of node:Graph.Node * summary:Cache.TargetSummary option
     | Render
 
 type BuildNotification() =
@@ -43,6 +15,8 @@ type BuildNotification() =
     let buildComplete = new System.Threading.ManualResetEvent(false)
     let renderer = Progress.ProgressRenderer()
     let updateTimer = 100
+
+    let mutable failedLogs : Cache.TargetSummary list = []
 
     let handler (inbox: MailboxProcessor<PrinterProtocol>) =
 
@@ -59,7 +33,14 @@ type BuildNotification() =
                 return! messageLoop () 
 
             | PrinterProtocol.BuildCompleted summary ->
-                let msg = $"Completed in {summary.Duration}"
+                Console.WriteLine()
+                for failedSummary in failedLogs do
+                    let lastLog = failedSummary.Steps |> List.last
+                    Console.WriteLine($"{Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {lastLog.Command} {lastLog.Arguments}{Ansi.Styles.normal}")
+                    let log = IO.readTextFile lastLog.Log
+                    Console.WriteLine(log)
+
+                let msg = $"{Ansi.Emojis.rocket} Completed in {summary.Duration}"
                 Console.Out.WriteLine(msg)
 
                 // let jsonBuildInfo = Json.Serialize summary
@@ -73,12 +54,16 @@ type BuildNotification() =
                 scheduleUpdate ()
                 return! messageLoop ()
 
-            | PrinterProtocol.BuildNodeCompleted (node, status) ->
+            | PrinterProtocol.BuildNodeCompleted (node, summary) ->
                 let status =
-                    match status with
-                    | TaskBuildStatus.Success _ -> Progress.Success
-                    | TaskBuildStatus.Failure _ -> Progress.Fail
-                    | TaskBuildStatus.Unfulfilled _ -> Progress.Fail
+                    match summary with
+                    | Some summary ->
+                        match summary.Status with
+                        | Cache.TaskStatus.Success -> Progress.Success
+                        | _ ->
+                            failedLogs <- failedLogs @ [ summary ]
+                            Progress.Fail
+                    | _ -> Progress.Fail
 
                 let label = $"{node.TargetId} {node.ProjectId}"
                 renderer.Update label status
@@ -97,14 +82,14 @@ type BuildNotification() =
 
     let printerAgent = MailboxProcessor.Start(handler)
 
-    interface IBuildNotification with
+    interface Build.IBuildNotification with
         member _.WaitCompletion(): unit = 
             buildComplete.WaitOne() |> ignore
 
         member _.BuildStarted() =
             PrinterProtocol.BuildStarted |> printerAgent.Post
 
-        member _.BuildCompleted(summary: BuildSummary) = 
+        member _.BuildCompleted(summary: Build.BuildSummary) = 
             summary
             |> PrinterProtocol.BuildCompleted
             |> printerAgent.Post
@@ -114,7 +99,7 @@ type BuildNotification() =
             |> PrinterProtocol.BuildNodeStarted
             |> printerAgent.Post
 
-        member _.BuildNodeCompleted (node: Graph.Node) (status: TaskBuildStatus) = 
+        member _.BuildNodeCompleted (node: Graph.Node) (status: Cache.TargetSummary option) = 
             (node, status)
             |> PrinterProtocol.BuildNodeCompleted
             |> printerAgent.Post

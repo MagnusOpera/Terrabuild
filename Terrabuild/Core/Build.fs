@@ -2,13 +2,41 @@ module Build
 open System
 open System.Collections.Generic
 open Collections
-open Notification
 
 type BuildOptions = {
     MaxConcurrency: int
     NoCache: bool
     Retry: bool
 }
+
+[<RequireQualifiedAccess>]
+type TaskBuildStatus =
+    | Success of string
+    | Failure of string
+    | Unfulfilled of string
+
+[<RequireQualifiedAccess>]
+type BuildStatus =
+    | Success
+    | Failure
+
+[<RequireQualifiedAccess>]
+type BuildSummary = {
+    Commit: string
+    StartedAt: DateTime
+    EndedAt: DateTime
+    Duration: TimeSpan
+    Status: BuildStatus
+    Target: string
+    Dependencies: Map<string, TaskBuildStatus>
+}
+
+type IBuildNotification =
+    abstract WaitCompletion: unit -> unit
+    abstract BuildStarted: unit -> unit
+    abstract BuildCompleted: summary:BuildSummary -> unit
+    abstract BuildNodeStarted: node:Graph.Node -> unit
+    abstract BuildNodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
 
 let private isTaskUnsatisfied = function
     | TaskBuildStatus.Failure depId -> Some depId
@@ -54,21 +82,14 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: Optimize
 
         match unsatisfyingDep with
         | None ->
-            let variables =
-                variables
-                |> Map.replace node.Configuration.Variables
-                |> Map.add "terrabuild_node_hash" nodeHash
-                |> Map.add "terrabuild_target_hash" nodeTargetHash
-
             // check first if it's possible to restore previously built state
             let summary =
                 if options.NoCache then None
                 else
                     // take care of retrying failed tasks
                     match cache.TryGetSummary cacheEntryId with
-                    | Some summary ->
-                        if summary.Status = Cache.TaskStatus.Failure then None
-                        else Some summary
+                    | Some summary when summary.Status = Cache.TaskStatus.Failure && options.Retry -> None
+                    | Some summary -> Some summary
                     | _ -> None
 
             let cleanOutputs () =
@@ -87,12 +108,15 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: Optimize
                     IO.copyFiles projectDirectory outputs files |> ignore
                 | _ -> ()
 
-                let buildStatus =
-                    if summary.Status = Cache.TaskStatus.Success then TaskBuildStatus.Success cacheEntryId
-                    else TaskBuildStatus.Failure cacheEntryId
-                notification.BuildNodeCompleted node buildStatus
+                notification.BuildNodeCompleted node (Some summary)
 
             | _ ->
+                let variables =
+                    variables
+                    |> Map.replace node.Configuration.Variables
+                    |> Map.add "terrabuild_node_hash" nodeHash
+                    |> Map.add "terrabuild_target_hash" nodeTargetHash
+
                 let cacheEntry = cache.CreateEntry cacheEntryId
 
                 if node.IsLeaf then
@@ -156,13 +180,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: Optimize
                                 Cache.TargetSummary.Outputs = outputs
                                 Cache.TargetSummary.Status = status }
                 cacheEntry.Complete summary
-
-                let buildStatus =
-                    if summary.Status = Cache.TaskStatus.Success then TaskBuildStatus.Success cacheEntryId
-                    else TaskBuildStatus.Failure cacheEntryId
-                notification.BuildNodeCompleted node buildStatus
-        | Some unsatisfyingDep ->
-            notification.BuildNodeCompleted node (TaskBuildStatus.Unfulfilled unsatisfyingDep)
+                notification.BuildNodeCompleted node (Some summary)
+        | Some _ ->
+            notification.BuildNodeCompleted node None
 
     notification.BuildStarted ()
     let startedAt = DateTime.UtcNow

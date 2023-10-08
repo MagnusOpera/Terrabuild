@@ -25,7 +25,14 @@ let execCaptureOutput (workingDir: string) (command: string) (args: string) =
 let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: string) (logFile: string) =
     use logWriter = new StreamWriter(logFile)
     let writeLock = obj()
-    let inline lockWrite (msg: string) = lock writeLock (fun () -> logWriter.WriteLine(msg))
+
+    let inline lockWrite (buffer: string ref) (msg: string) =
+        lock writeLock (fun () ->
+            let prevValue = buffer.Value
+            if prevValue |> isNull |> not then
+                logWriter.WriteLine(prevValue)
+            buffer.Value <- msg
+        )
 
     use proc = new Process()
     let psi = proc.StartInfo
@@ -35,8 +42,11 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
     psi.WorkingDirectory <- workingDir
     psi.RedirectStandardOutput <- true
     psi.RedirectStandardError <- true
-    proc.OutputDataReceived.Add(fun e -> $"{DateTime.UtcNow}\tOUT\t{e.Data}" |> lockWrite)
-    proc.ErrorDataReceived.Add(fun e -> $"{DateTime.UtcNow}\tERR\t{e.Data}" |> lockWrite)
+
+    let prevStd = ref null
+    let prevErr = ref null
+    proc.OutputDataReceived.Add(fun e -> e.Data |> lockWrite prevStd)
+    proc.ErrorDataReceived.Add(fun e -> e.Data |> lockWrite prevErr)
 
     proc.Start() |> ignore
     proc.BeginOutputReadLine()

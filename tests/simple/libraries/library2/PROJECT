@@ -4,7 +4,7 @@ extensions:
 steps:
   build:
     - (shell): sleep
-      arguments: "10"
+      arguments: "1"
     - (dotnet): build
       configuration: $(configuration)
     - (shell): echo

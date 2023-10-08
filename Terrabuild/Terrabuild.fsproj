@@ -23,13 +23,14 @@
     <Compile Include="Helpers/Hash.fs" />
     <Compile Include="Helpers/FileSystem.fs" />
     <Compile Include="Helpers/Threading.fs" />
+    <Compile Include="Helpers/Ansi.fs" />
     <Compile Include="Helpers/Progress.fs" />
     <Compile Include="Core/Configuration.fs" />
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Cache.fs" />
     <Compile Include="Core/Optimizer.fs" />
-    <Compile Include="Core/Notification.fs" />
     <Compile Include="Core/Build.fs" />
+    <Compile Include="Core/Notification.fs" />
     <Compile Include="CLI.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

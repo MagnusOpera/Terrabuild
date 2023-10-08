@@ -1,5 +1,7 @@
 module Progress
 open System
+open Ansi.Styles
+open Ansi.Emojis
 
 type ProgressStatus =
     | Success
@@ -16,15 +18,6 @@ type ProgressRenderer() =
 
     let spinner = [ "⠋"; "⠙"; "⠹"; "⠸"; "⠼"; "⠴";  "⠦"; "⠧"; "⠇"; "⠏" ]
     let frequency = 100.0
-
-    let crossmark = "✘"
-    let checkmark = "✔"
-    let ESC = "\u001b"
-    let CSI = ESC + "["
-    let green = $"{CSI}32m"
-    let red = $"{CSI}31m"
-    let yellow = $"{CSI}33m"
-    let normal = $"{CSI}0m"
 
     let printableStatus item =
         match item.Status with
@@ -43,8 +36,8 @@ type ProgressRenderer() =
         // update status: move home, move top, write status
         let updateCmd =
             items
-            |> List.fold (fun acc item -> acc + $"\r{CSI}1A" + (item |> printableStatus)) ""
-        let updateCmd = updateCmd + $"\r{CSI}{items.Length}B"
+            |> List.fold (fun acc item -> acc + $"{Ansi.cursorHome}{Ansi.cursorUp 1}" + (item |> printableStatus)) ""
+        let updateCmd = updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}"
         updateCmd |> Console.Out.Write
 
     member _.Add (label: string) (status: ProgressStatus) =
