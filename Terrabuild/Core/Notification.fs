@@ -1,7 +1,5 @@
 module Notification
 open System
-open System.Text
-
 
 [<RequireQualifiedAccess>]
 type BuildStatus =
@@ -25,7 +23,6 @@ type BuildSummary = {
     Dependencies: Map<string, TaskBuildStatus>
 }
 
-
 type IBuildNotification =
     abstract WaitCompletion: unit -> unit
     abstract BuildStarted: unit -> unit
@@ -40,15 +37,6 @@ type PrinterProtocol =
     | BuildNodeStarted of node:Graph.Node
     | BuildNodeCompleted of node:Graph.Node * status:TaskBuildStatus
     | Render
-
-
-type ProgressItem = {
-    Project: string
-    Target: string
-    Offset: int
-    mutable Status: TaskBuildStatus option
-}
-
 
 type BuildNotification() =
 
