@@ -71,7 +71,7 @@ type BuildNotification() =
                 return! messageLoop () 
 
             | PrinterProtocol.BuildCompleted summary ->
-                let msg = $"Build duration: {summary.Duration}"
+                let msg = $"Completed in {summary.Duration}"
                 Console.Out.WriteLine(msg)
 
                 // let jsonBuildInfo = Json.Serialize summary

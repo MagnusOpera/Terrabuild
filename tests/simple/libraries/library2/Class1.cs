@@ -5,4 +5,3 @@ public class Class1 {
         Console.WriteLine($"Hello {name}");
     }
 }
-dd
