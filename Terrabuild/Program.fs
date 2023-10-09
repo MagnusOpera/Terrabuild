@@ -35,8 +35,22 @@ let target (targetArgs: ParseResults<TargetArgs>) =
 let clear (clearArgs: ParseResults<ClearArgs>) =
     if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
 
+type TerrabuildExiter() =
+    interface IExiter with
+        member _.Name: string = "Process Exiter"
+
+        member _.Exit(msg: string, errorCode: ErrorCode) =
+            let writer = if errorCode = ErrorCode.HelpText then Console.Out else Console.Error
+            do
+                writer.WriteLine msg
+                writer.Flush()
+                Console.Write(Ansi.Styles.cursorShow)
+                Console.Out.Flush()
+
+            exit (int errorCode)
+
 let processCommandLine () =
-    let errorHandler = ProcessExiter()
+    let errorHandler = TerrabuildExiter()
     let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
     match parser.ParseCommandLine() with
     | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
@@ -51,11 +65,18 @@ let processCommandLine () =
 let main _ =
     try
         Console.Write(Ansi.Styles.cursorHide)
-        Console.CancelKeyPress.Add (fun _ -> Console.WriteLine($"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}"))
+        Console.Out.Flush()
+
+        Console.CancelKeyPress.Add (fun _ ->
+            Console.WriteLine($"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}")
+            Console.Out.Flush())
         processCommandLine()
+
         Console.Write(Ansi.Styles.cursorShow)
+        Console.Out.Flush()
         0
     with
         ex ->
             Console.WriteLine($"{Ansi.Emojis.bomb} Failed with error\n{ex}{Ansi.Styles.cursorShow}")
+            Console.Out.Flush()
             5
