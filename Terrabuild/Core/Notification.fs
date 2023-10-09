@@ -35,6 +35,7 @@ type BuildNotification() =
                 return! messageLoop () 
 
             | PrinterProtocol.BuildCompleted summary ->
+                renderer.Refresh()
                 for failedSummary in failedLogs do
                     let lastLog = failedSummary.Steps |> List.last
                     Console.WriteLine($"{Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {lastLog.Command} {lastLog.Arguments}{Ansi.Styles.reset}")
