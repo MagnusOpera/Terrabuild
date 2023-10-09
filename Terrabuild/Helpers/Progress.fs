@@ -25,16 +25,16 @@ type ProgressRenderer() =
 
     let printableStatus item =
         match item.Status with
-        | Success -> green + checkmark + reset
-        | Fail -> red + crossmark + reset
+        | Success -> green + " " + checkmark + reset
+        | Fail -> red + " " + crossmark + reset
         | Scheduled startedAt ->
             let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequencyWaiting) |> int
             let offset = diff % spinnerWaiting.Length
-            yellow + spinnerWaiting[offset] + reset
+            yellow + " " + spinnerWaiting[offset] + reset
         | Progress startedAt ->
             let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequencyProgress) |> int
             let offset = diff % spinnerProgress.Length
-            yellow + spinnerProgress[offset] + reset
+            yellow + " " + spinnerProgress[offset] + reset
 
     let printableItem item =
         let status = printableStatus item
