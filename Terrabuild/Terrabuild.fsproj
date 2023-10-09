@@ -22,7 +22,6 @@
     <Compile Include="Helpers/Git.fs" />
     <Compile Include="Helpers/Hash.fs" />
     <Compile Include="Helpers/FileSystem.fs" />
-    <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/Ansi.fs" />
     <Compile Include="Helpers/Progress.fs" />
     <Compile Include="Core/Configuration.fs" />

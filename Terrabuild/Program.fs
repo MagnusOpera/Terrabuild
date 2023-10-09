@@ -1,17 +1,31 @@
 ﻿open Argu
-open System
 open CLI
+open System
+
+let rec dumpKnownException (ex: Exception) =
+    seq {
+        match ex with
+        | null -> ()
+        | :? Configuration.ConfigException as ex ->
+            yield ex.Message
+            yield! ex.InnerException |> dumpKnownException 
+        | _ -> ()
+    }
 
 let runTarget wsDir target shared options =
-    Console.WriteLine($"{Ansi.Emojis.box} Reading configuration")
-    let config = Configuration.read wsDir shared
-    Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph")
-    let graph = Graph.buildGraph config target
-    let cache = Cache.Cache(config.Storage)
-    let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-    Build.run config graph cache buildNotification options
-    buildNotification.WaitCompletion()
-
+    try
+        Console.WriteLine($"{Ansi.Emojis.box} Reading configuration")
+        let config = Configuration.read wsDir shared
+        Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph")
+        let graph = Graph.buildGraph config target
+        let cache = Cache.Cache(config.Storage)
+        let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+        Build.run config graph cache buildNotification options
+        buildNotification.WaitCompletion()
+    with
+        | :? Configuration.ConfigException as ex ->
+            let reason = dumpKnownException ex |> Seq.rev |> String.join ", "
+            Console.WriteLine($"{Ansi.Emojis.explosion} {reason}")
 
 let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
     let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")

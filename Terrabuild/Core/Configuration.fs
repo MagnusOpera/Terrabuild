@@ -76,6 +76,9 @@ let private loadStorage name : Storages.Storage option =
     | "azureblob" -> Storages.MicrosoftBlobStorage() :> Storages.Storage |> Some
     | _ -> None
 
+type ConfigException(msg, innerException: Exception) =
+    inherit Exception(msg, innerException)
+
 let read workspaceDirectory shared =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
     let buildConfig = Yaml.DeserializeFile<YamlConfigFiles.BuildConfig> buildFile
@@ -166,9 +169,9 @@ let read workspaceDirectory shared =
                 try
                     scanDependencies projectDependencies
                 with
-                    ex -> failwith $"Invalid graph while processing {dependency}:\n{ex}"
-                          reraise()
-
+                    ex ->
+                        ConfigException($"while processing {dependency}", ex)
+                        |> raise
 
                 let convertStepList steps =
                     steps
@@ -219,7 +222,8 @@ let read workspaceDirectory shared =
                 // check for circular or missing dependencies
                 for childDependency in projectDependencies do
                     if projects |> Map.tryFind childDependency |> Option.isNone then
-                        failwith $"Invalid graph due to circular dependencies between {dependency} and {childDependency}"
+                        ConfigException($"Circular dependencies between {dependency} and {childDependency}", null)
+                        |> raise
 
                 let dependenciesHash =
                     projectDependencies
