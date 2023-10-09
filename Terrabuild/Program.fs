@@ -53,7 +53,7 @@ let restoreCursor () =
 [<EntryPoint>]
 let main _ =
     try
-        Console.CancelKeyPress.Add (fun e ->
+        Console.CancelKeyPress.Add (fun _ ->
             Console.WriteLine($"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}")
             restoreCursor())
 
