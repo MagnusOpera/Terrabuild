@@ -17,7 +17,7 @@ type ProgressItem = {
 type ProgressRenderer() =
     let mutable items = []
 
-    let spinnerWaiting = [ "◐"; "◓"; "◑"; "◒" ]
+    let spinnerWaiting = [ "⠁"; "⠂"; "⠄"; "⠂" ]
     let frequencyWaiting = 200.0
 
     let spinnerProgress = [ "⠋"; "⠙"; "⠹"; "⠸"; "⠼"; "⠴";  "⠦"; "⠧"; "⠇"; "⠏" ]
@@ -40,12 +40,15 @@ type ProgressRenderer() =
         let status = printableStatus item
         $"{status} {item.Label}"
 
+    do
+        Console.Out.Write(cursorHide)
+
     member _.Refresh () =
         // update status: move home, move top, write status
         let updateCmd =
             items
             |> List.fold (fun acc item -> acc + $"{Ansi.cursorHome}{Ansi.cursorUp 1}" + (item |> printableStatus)) ""
-        let updateCmd = cursorHide + updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}" + cursorShow
+        let updateCmd = updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}"
         updateCmd |> Console.Out.Write
 
     member _.Update (label: string) (status: ProgressStatus) =
