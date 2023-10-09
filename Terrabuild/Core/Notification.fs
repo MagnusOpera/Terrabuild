@@ -6,6 +6,7 @@ open System
 type PrinterProtocol =
     | BuildStarted of graph:Graph.WorkspaceGraph
     | BuildCompleted of summary:Build.BuildSummary
+    | BuildNodeScheduled of node:Graph.Node
     | BuildNodeStarted of node:Graph.Node
     | BuildNodeCompleted of node:Graph.Node * summary:Cache.TargetSummary option
     | Render
@@ -52,10 +53,17 @@ type BuildNotification() =
                 // Console.Out.WriteLine($"{jsonBuildInfo}")
                 buildComplete.Set() |> ignore
 
+            | PrinterProtocol.BuildNodeScheduled node ->
+                let label = $"{node.TargetId} {node.ProjectId}"
+                let status = Progress.Scheduled DateTime.Now
+                renderer.Update label status
+                scheduleUpdate ()
+                return! messageLoop ()
+
             | PrinterProtocol.BuildNodeStarted node ->
                 let label = $"{node.TargetId} {node.ProjectId}"
                 let status = Progress.Progress DateTime.Now
-                renderer.Add label status
+                renderer.Update label status
                 scheduleUpdate ()
                 return! messageLoop ()
 
@@ -97,6 +105,11 @@ type BuildNotification() =
         member _.BuildCompleted(summary: Build.BuildSummary) = 
             summary
             |> PrinterProtocol.BuildCompleted
+            |> printerAgent.Post
+
+        member _.BuildNodeScheduled(node: Graph.Node) = 
+            node
+            |> PrinterProtocol.BuildNodeScheduled
             |> printerAgent.Post
 
         member _.BuildNodeStarted(node: Graph.Node) = 

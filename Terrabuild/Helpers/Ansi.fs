@@ -39,4 +39,5 @@ module Styles =
     let cyan = csi 36
     let white = csi 37
 
-
+    let cursorHide = $"{CSI}?25l"
+    let cursorShow = $"{CSI}?25h"

@@ -25,6 +25,14 @@ type Dotnet(context) =
           "*.fsproj"
           "*.sqlproj" ]
 
+    let configuration args =
+        match args |> Map.tryFind "configruation" with
+        | Some configuration -> configuration
+        | _ ->
+            match context.Parameters.TryFind("configuration") with
+            | Some configuration -> configuration
+            | _ -> "Debug"
+
     let projectFile =
         if context.ProjectFile |> String.IsNullOrWhiteSpace then
             let projects =
@@ -59,7 +67,7 @@ type Dotnet(context) =
     override _.Ignores = NotSupportedException() |> raise
 
     override _.GetStep(action, args) =
-        let configuration = args |> Map.tryFind "configuration" |> Option.defaultValue "Debug"
+        let configuration = configuration args
         let arguments = args |> Map.tryFind "arguments" |> Option.defaultValue ""
         match action with
         | "restore" -> [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies {arguments}" } ]

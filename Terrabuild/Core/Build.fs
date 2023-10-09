@@ -35,6 +35,7 @@ type IBuildNotification =
     abstract WaitCompletion: unit -> unit
     abstract BuildStarted: graph:Graph.WorkspaceGraph -> unit
     abstract BuildCompleted: summary:BuildSummary -> unit
+    abstract BuildNodeScheduled: node:Graph.Node -> unit
     abstract BuildNodeStarted: node:Graph.Node -> unit
     abstract BuildNodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
 
@@ -56,7 +57,7 @@ type BuildQueue(maxItems: int) =
         let rec trySchedule () =
             match queue.Count, inFlight with
             | (0, 0) -> completion.Set() |> ignore
-            | (n, _) when 0 < n && n < maxItems ->
+            | (n, _) when 0 < n && inFlight < maxItems ->
                 inFlight <- inFlight + 1
                 queue.Dequeue() |> runTask
             | _ -> ()
@@ -116,8 +117,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         | _ -> TaskBuildStatus.Unfulfilled depCacheEntryId
 
     let buildNode (node: Graph.Node) =
-        notification.BuildNodeStarted node
-
         let projectDirectory =
             match IO.combinePath workspaceConfig.Directory node.ProjectId with
             | IO.Directory projectDirectory -> projectDirectory
@@ -162,7 +161,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     IO.copyFiles projectDirectory outputs files |> ignore
                 | _ -> ()
 
-                notification.BuildNodeCompleted node (Some summary)
+                Some summary
 
             | _ ->
                 let variables =
@@ -234,9 +233,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                                 Cache.TargetSummary.Outputs = outputs
                                 Cache.TargetSummary.Status = status }
                 cacheEntry.Complete summary
-                notification.BuildNodeCompleted node (Some summary)
+                Some summary
         | Some _ ->
-            notification.BuildNodeCompleted node None
+            None
 
     // this is the core of the build
     // schedule first nodes with no incoming edges
@@ -246,8 +245,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         let node = graph.Nodes[nodeId]
 
         let buildAction () = 
-            // schedule node
-            buildNode node
+            notification.BuildNodeStarted node
+            let summary = buildNode node
+            notification.BuildNodeCompleted node summary
 
             // schedule children nodes if ready
             let triggers = reverseIncomings[nodeId]                
@@ -257,6 +257,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     readyNodes[trigger].Value <- -1 // mark node as scheduled
                     scheduleNode trigger
 
+        notification.BuildNodeScheduled node
         buildQueue.Enqueue buildAction
 
 
