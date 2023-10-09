@@ -73,7 +73,7 @@ type Dotnet(context) =
         | "restore" -> [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies {arguments}" } ]
         | "build" ->
             [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies" }
-              { Command = "dotnet"; Arguments = $"build {projectFile} --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
+              { Command = "dotnet"; Arguments = $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
         | "test" ->
             [ { Command = "dotnet"; Arguments = $"test --no-build --configuration {configuration} {projectFile}" } ]
         | "publish" | "run" | "pack" ->
