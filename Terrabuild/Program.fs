@@ -45,10 +45,14 @@ let processCommandLine () =
     | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
     | _ -> printfn $"{parser.PrintUsage()}"
 
+let restoreCursor() =
+    Console.Write(Ansi.Styles.cursorShow)
+
 [<EntryPoint>]
 let main args =
     try
+        Console.CancelKeyPress.Add (fun _ -> restoreCursor())
         processCommandLine()
         0
     finally
-        Console.Write(Ansi.Styles.cursorShow)
+        restoreCursor()
