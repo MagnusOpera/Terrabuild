@@ -25,6 +25,13 @@ module Emojis =
     let popcorn = "🍿"
     let trashcan = "🗑️"
     let bolt = "⚡️"
+    let bug = "🪲"
+    let warning = "⚠️"
+    let poop = "💩"
+    let skull = "☠️"
+    let noentry = "⛔️"
+    let cyclone = "🌀"
+    let prohibited = "🚫"
 
 module Styles =
     let reset = csi 0
