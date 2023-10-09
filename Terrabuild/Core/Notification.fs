@@ -15,7 +15,7 @@ type BuildNotification() =
 
     let buildComplete = new System.Threading.ManualResetEvent(false)
     let renderer = Progress.ProgressRenderer()
-    let updateTimer = 100
+    let updateTimer = 200
 
     let mutable failedLogs : Cache.TargetSummary list = []
 
