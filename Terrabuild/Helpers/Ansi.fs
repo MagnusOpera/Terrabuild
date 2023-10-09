@@ -23,6 +23,8 @@ module Emojis =
     let sad = "🙁"
     let box = "📦"
     let popcorn = "🍿"
+    let trashcan = "🗑️"
+    let bolt = "⚡️"
 
 module Styles =
     let reset = csi 0

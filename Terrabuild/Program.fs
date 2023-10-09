@@ -3,7 +3,9 @@ open System
 open CLI
 
 let runTarget wsDir target shared options =
+    Console.WriteLine($"{Ansi.Emojis.box} Reading configuration")
     let config = Configuration.read wsDir shared
+    Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph")
     let graph = Graph.buildGraph config target
     let cache = Cache.Cache(config.Storage)
     let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
@@ -12,8 +14,8 @@ let runTarget wsDir target shared options =
 
 
 let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
-    let shared = buildArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
     let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
+    let shared = buildArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
     let options = { Build.BuildOptions.NoCache = buildArgs.Contains(RunArgs.NoCache)
                     Build.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = 4)
                     Build.BuildOptions.Retry = buildArgs.Contains(RunArgs.Retry) }
@@ -21,9 +23,9 @@ let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
 
 
 let target (targetArgs: ParseResults<TargetArgs>) =
+    let target = targetArgs.GetResult(TargetArgs.Target)
     let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
     let shared = targetArgs.TryGetResult(TargetArgs.Shared) |> Option.isSome
-    let target = targetArgs.GetResult(TargetArgs.Target)
     let options = { Build.BuildOptions.NoCache = targetArgs.Contains(TargetArgs.NoCache)
                     Build.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = 4)
                     Build.BuildOptions.Retry = targetArgs.Contains(TargetArgs.Retry) }
@@ -46,13 +48,16 @@ let processCommandLine () =
     | _ -> printfn $"{parser.PrintUsage()}"
 
 let restoreCursor() =
-    Console.Write(Ansi.Styles.cursorShow)
+    Console.WriteLine($"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}")
 
 [<EntryPoint>]
-let main args =
+let main _ =
     try
         Console.CancelKeyPress.Add (fun _ -> restoreCursor())
         processCommandLine()
-        0
-    finally
         restoreCursor()
+        0
+    with
+        ex ->
+            Console.WriteLine($"{Ansi.Emojis.bomb} Failed with error\n{ex}")
+            5
