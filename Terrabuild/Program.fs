@@ -47,20 +47,14 @@ let processCommandLine () =
     | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
     | _ -> printfn $"{parser.PrintUsage()}"
 
-let restoreCursor () =
-    Console.Write(Ansi.Styles.cursorShow)
-
 [<EntryPoint>]
 let main _ =
     try
-        Console.CancelKeyPress.Add (fun _ ->
-            Console.WriteLine($"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}")
-            restoreCursor())
-
+        Console.CancelKeyPress.Add (fun _ -> Console.WriteLine($"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}"))
         processCommandLine()
-        restoreCursor()
+        Console.Write(Ansi.Styles.cursorShow)
         0
     with
         ex ->
-            Console.WriteLine($"{Ansi.Emojis.bomb} Failed with error\n{ex}")
+            Console.WriteLine($"{Ansi.Emojis.bomb} Failed with error\n{ex}{Ansi.Styles.cursorShow}")
             5
