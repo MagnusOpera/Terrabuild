@@ -13,7 +13,7 @@ with
         member this.Usage =
             match this with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
-            | Parallel _ -> "Max parallel build concurrency (default 4)."
+            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Shared -> "Local or shared execution."
             | NoCache -> "Do not use cache when building target."
             | Retry -> "Retry failed task."
@@ -32,7 +32,7 @@ with
             match this with
             | Target _ -> "Specify build target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
-            | Parallel _ -> "Max parallel build concurrency (default 4)."
+            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Shared -> "Local or shared execution."
             | NoCache -> "Do not use cache when building target."
             | Retry -> "Retry failed task."

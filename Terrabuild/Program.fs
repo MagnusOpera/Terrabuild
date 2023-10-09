@@ -31,7 +31,7 @@ let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
     let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
     let shared = buildArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
     let options = { Build.BuildOptions.NoCache = buildArgs.Contains(RunArgs.NoCache)
-                    Build.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = 4)
+                    Build.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
                     Build.BuildOptions.Retry = buildArgs.Contains(RunArgs.Retry) }
     runTarget wsDir target shared options
 
@@ -41,7 +41,7 @@ let target (targetArgs: ParseResults<TargetArgs>) =
     let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
     let shared = targetArgs.TryGetResult(TargetArgs.Shared) |> Option.isSome
     let options = { Build.BuildOptions.NoCache = targetArgs.Contains(TargetArgs.NoCache)
-                    Build.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = 4)
+                    Build.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
                     Build.BuildOptions.Retry = targetArgs.Contains(TargetArgs.Retry) }
     runTarget wsDir target shared options
 
