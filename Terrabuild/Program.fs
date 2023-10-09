@@ -50,6 +50,7 @@ let processCommandLine () =
 [<EntryPoint>]
 let main _ =
     try
+        Console.Write(Ansi.Styles.cursorHide)
         Console.CancelKeyPress.Add (fun _ -> Console.WriteLine($"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}"))
         processCommandLine()
         Console.Write(Ansi.Styles.cursorShow)

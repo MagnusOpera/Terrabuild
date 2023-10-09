@@ -40,9 +40,6 @@ type ProgressRenderer() =
         let status = printableStatus item
         $"{status} {item.Label}"
 
-    do
-        Console.Out.Write(cursorHide)
-
     member _.Refresh () =
         // update status: move home, move top, write status
         let updateCmd =
