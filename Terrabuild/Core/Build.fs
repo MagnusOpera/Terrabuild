@@ -43,7 +43,61 @@ let private isTaskUnsatisfied = function
     | TaskBuildStatus.Unfulfilled depId -> Some depId
     | TaskBuildStatus.Success _ -> None
 
-let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: Optimizer.BuildBatches) (cache: Cache.Cache) (notification: IBuildNotification) (options: BuildOptions) =
+
+
+
+type BuildQueue(maxItems: int) =
+    let completion = new System.Threading.ManualResetEvent(false)
+    let queueLock = obj()
+    let queue = Queue<( (unit -> unit) )>()
+    let mutable inFlight = 0
+
+    member _.Enqueue (action: unit -> unit) =
+        let rec trySchedule () =
+            match queue.Count, inFlight with
+            | (0, 0) -> completion.Set() |> ignore
+            | (n, _) when 0 < n && n < maxItems ->
+                inFlight <- inFlight + 1
+                queue.Dequeue() |> runTask
+            | _ -> ()
+        and runTask action =
+            async {
+                action()
+                lock queueLock (fun () ->
+                    inFlight <- inFlight - 1
+                    trySchedule()
+                )
+            } |> Async.Start
+
+        lock queueLock (fun () ->
+            queue.Enqueue(action)
+            trySchedule()
+        )
+
+    member _.WaitCompletion() =
+        completion.WaitOne() |> ignore
+
+let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.Cache) (notification: IBuildNotification) (options: BuildOptions) =
+
+    // compute first incoming edges
+    let reverseIncomings = graph.Nodes |> Map.map (fun _ _ -> List<string>())
+    for KeyValue(nodeId, node) in graph.Nodes do
+        for dependency in node.Dependencies do
+            reverseIncomings[dependency].Add(nodeId)
+
+    let allNodes =
+        graph.Nodes |> Map.map (fun _ _ -> ref 0)
+
+    let refCounts =
+        reverseIncomings
+        |> Seq.collect (fun kvp -> kvp.Value)
+        |> Seq.countBy (id)
+        |> Map.ofSeq
+        |> Map.map (fun _ value -> ref value)
+
+    let readyNodes =
+        allNodes |> Map.replace refCounts
+
     let variables = workspaceConfig.Build.Variables
 
     let isBuildSuccess = function
@@ -52,7 +106,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: Optimize
 
     // collect dependencies status
     let getDependencyStatus depId =
-        let depNode = buildBatches.Graph.Nodes[depId]
+        let depNode = graph.Nodes[depId]
         let depCacheEntryId = $"{depNode.ProjectId}/{depNode.Configuration.Hash}/{depNode.TargetId}"
         match cache.TryGetSummary depCacheEntryId with
         | Some summary -> 
@@ -184,17 +238,41 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: Optimize
         | Some _ ->
             notification.BuildNodeCompleted node None
 
-    notification.BuildStarted buildBatches.Graph
+    // this is the core of the build
+    // schedule first nodes with no incoming edges
+    // on completion schedule released nodes
+    let buildQueue = BuildQueue(options.MaxConcurrency)
+    let rec scheduleNode (nodeId: string) =
+        let node = graph.Nodes[nodeId]
+
+        let buildAction () = 
+            // schedule node
+            buildNode node
+
+            // schedule children nodes if ready
+            let triggers = reverseIncomings[nodeId]                
+            for trigger in triggers do
+                let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
+                if newValue = 0 then
+                    readyNodes[trigger].Value <- -1 // mark node as scheduled
+                    scheduleNode trigger
+
+        buildQueue.Enqueue buildAction
+
+
+    notification.BuildStarted graph
     let startedAt = DateTime.UtcNow
 
-    buildBatches.Batches
-    |> Seq.iteri (fun batchNum batch ->
-        Threading.ParExec (fun node -> async { buildNode node }) batch.Nodes options.MaxConcurrency |> ignore)
+    readyNodes
+    |> Map.filter (fun _ value -> value.Value = 0)
+    |> Map.iter (fun key _ -> scheduleNode key)
+    buildQueue.WaitCompletion()
+
 
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
 
     let dependencies =
-        buildBatches.Graph.RootNodes
+        graph.RootNodes
         |> Seq.map (fun (KeyValue(dependency, nodeId)) -> dependency, getDependencyStatus nodeId)
         |> Map.ofSeq
 
@@ -211,6 +289,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (buildBatches: Optimize
                       BuildSummary.EndedAt = endedAt
                       BuildSummary.Duration = duration
                       BuildSummary.Status = status
-                      BuildSummary.Target = buildBatches.Graph.Target
+                      BuildSummary.Target = graph.Target
                       BuildSummary.Dependencies = dependencies }
     notification.BuildCompleted buildInfo
