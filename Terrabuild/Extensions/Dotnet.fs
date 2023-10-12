@@ -25,13 +25,16 @@ type Dotnet(context) =
           "*.fsproj"
           "*.sqlproj" ]
 
-    let configuration args =
-        match args |> Map.tryFind "configruation" with
-        | Some configuration -> configuration
+    let failArg name =
+        failwith $"Missing {name} parameter"
+
+    let get name defaultValue args =
+        match args |> Map.tryFind name with
+        | Some value -> value
         | _ ->
-            match context.Parameters.TryFind("configuration") with
-            | Some configuration -> configuration
-            | _ -> "Debug"
+            match context.Parameters |> Map.tryFind name with
+            | Some value -> value
+            | _ -> defaultValue name
 
     let projectFile =
         if context.ProjectFile |> String.IsNullOrWhiteSpace then
@@ -43,8 +46,6 @@ type Dotnet(context) =
             context.ProjectFile
 
     let parseDotnetDependencies =
-
-
         let project = Path.Combine(context.ProjectDirectory, projectFile)
         let xdoc = XDocument.Load (project)
         let refs = xdoc.Descendants() 
@@ -67,15 +68,16 @@ type Dotnet(context) =
     override _.Ignores = NotSupportedException() |> raise
 
     override _.GetStep(action, args) =
-        let configuration = configuration args
-        let arguments = args |> Map.tryFind "arguments" |> Option.defaultValue ""
+        let configuration = args |> get "configuration" (fun _ -> "Debug")
+        let arguments = args |> get "arguments" (fun _ -> "")
         match action with
         | "restore" -> [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies {arguments}" } ]
         | "build" ->
             [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies" }
               { Command = "dotnet"; Arguments = $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
         | "test" ->
-            [ { Command = "dotnet"; Arguments = $"test --no-build --configuration {configuration} {projectFile}" } ]
+            let filter = args |> get "filter" (fun _ -> "")
+            [ { Command = "dotnet"; Arguments = $"test --no-build --configuration {configuration} {projectFile} --filter \"{filter}\"" } ]
         | "publish" | "run" | "pack" ->
             [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-build {arguments}" } ]
         | _ -> failwith $"Unsupported action '{action}'"

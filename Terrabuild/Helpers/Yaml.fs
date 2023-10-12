@@ -5,6 +5,7 @@ open YamlDotNet.Serialization.NamingConventions
 let deserializer =
     DeserializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
+        .WithDuplicateKeyChecking()
         .Build()
 
 
