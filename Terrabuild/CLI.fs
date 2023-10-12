@@ -3,11 +3,12 @@ open Argu
 
 [<RequireQualifiedAccess>]
 type RunArgs =
-    | [<Unique; Inherit>] Workspace of path:string
-    | [<Unique; Inherit>] Parallel of max:int
-    | [<Unique; Inherit>] Shared
-    | [<Unique>] NoCache
-    | [<Unique>] Retry
+    | [<Unique; Inherit; AltCommandLine("--ws")>] Workspace of path:string
+    | [<Unique; Inherit; AltCommandLine("--par")>] Parallel of max:int
+    | [<Unique; Inherit; AltCommandLine("--s")>] Shared
+    | [<Unique; Inherit; AltCommandLine("--env")>] Environment of name:string
+    | [<Unique; AltCommandLine("--nc")>] NoCache
+    | [<Unique; AltCommandLine("--r")>] Retry
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -15,17 +16,19 @@ with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Shared -> "Local or shared execution."
+            | Environment _ -> "Environment to use."
             | NoCache -> "Do not use cache when building target."
             | Retry -> "Retry failed task."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
     | [<MainCommand; ExactlyOnce; First>] Target of target:string
-    | [<Unique; Inherit>] Workspace of path:string
-    | [<Unique; Inherit>] Parallel of max:int
-    | [<Unique; Inherit>] Shared
-    | [<Unique>] NoCache
-    | [<Unique>] Retry
+    | [<Unique; Inherit; AltCommandLine("--ws")>] Workspace of path:string
+    | [<Unique; Inherit; AltCommandLine("--par")>] Parallel of max:int
+    | [<Unique; Inherit; AltCommandLine("--s")>] Shared
+    | [<Unique; Inherit; AltCommandLine("--env")>] Environment of name:string
+    | [<Unique; AltCommandLine("--nc")>] NoCache
+    | [<Unique; AltCommandLine("--r")>] Retry
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -34,6 +37,7 @@ with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Shared -> "Local or shared execution."
+            | Environment _ -> "Environment to use."
             | NoCache -> "Do not use cache when building target."
             | Retry -> "Retry failed task."
 

@@ -9,14 +9,14 @@ let rec dumpKnownException (ex: Exception) =
         | :? Configuration.ConfigException as ex ->
             yield ex.Message
             yield! ex.InnerException |> dumpKnownException 
-        | _ -> ()
+        | _ -> yield ex.ToString()
     }
 
-let runTarget wsDir target shared options =
+let runTarget wsDir target shared environment options =
     try
         Console.WriteLine($"{Ansi.Emojis.box} Reading configuration")
-        let config = Configuration.read wsDir shared
-        Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph")
+        let config = Configuration.read wsDir shared environment
+        Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}")
         let graph = Graph.buildGraph config target
         let cache = Cache.Cache(config.Storage)
         let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
@@ -30,20 +30,22 @@ let runTarget wsDir target shared options =
 let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
     let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
     let shared = buildArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
+    let environment = buildArgs.TryGetResult(RunArgs.Environment)
     let options = { Build.BuildOptions.NoCache = buildArgs.Contains(RunArgs.NoCache)
                     Build.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
                     Build.BuildOptions.Retry = buildArgs.Contains(RunArgs.Retry) }
-    runTarget wsDir target shared options
+    runTarget wsDir target shared environment options
 
 
 let target (targetArgs: ParseResults<TargetArgs>) =
     let target = targetArgs.GetResult(TargetArgs.Target)
     let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
     let shared = targetArgs.TryGetResult(TargetArgs.Shared) |> Option.isSome
+    let environment = targetArgs.TryGetResult(TargetArgs.Environment)
     let options = { Build.BuildOptions.NoCache = targetArgs.Contains(TargetArgs.NoCache)
                     Build.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
                     Build.BuildOptions.Retry = targetArgs.Contains(TargetArgs.Retry) }
-    runTarget wsDir target shared options
+    runTarget wsDir target shared environment options
 
 
 let clear (clearArgs: ParseResults<ClearArgs>) =

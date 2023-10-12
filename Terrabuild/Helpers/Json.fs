@@ -6,6 +6,7 @@ let private settings =
     let options = JsonSerializerOptions(WriteIndented = true,
                                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase)
     JsonFSharpOptions.ThothLike()
+                        .WithUnwrapOption()
                         .WithUnionTagNamingPolicy(JsonNamingPolicy.CamelCase)
                         .AddToJsonSerializerOptions(options)
     options

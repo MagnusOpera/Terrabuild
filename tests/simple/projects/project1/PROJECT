@@ -1,6 +1,6 @@
-
-extensions:
-  - (make): Makefile
+builders:
+  make:
+    with: Makefile
 
 dependencies:
   - ../../libraries/library1

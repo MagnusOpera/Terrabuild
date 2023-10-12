@@ -1,20 +1,24 @@
-extensions:
-  - (dotnet): project3.csproj
-  - (docker): Dockerfile
+builders:
+  dotnet:
+    use: dotnet
+    with: project3.csproj
+
+  docker:
+    use: docker
+    with: Dockerfile
+    parameters:
+      $configuration: $(configuration)
 
 steps:
   build:
     - (dotnet): build
-      configuration: $(configuration)
 
   publish:
    - (dotnet): publish
-     configuration: $(configuration)
 
   docker:
    - (docker): build
      image: $(image)
-     $configuration: $(configuration)
 
   push:
    - (docker): push

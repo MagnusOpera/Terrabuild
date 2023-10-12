@@ -1,11 +1,13 @@
-extensions:
-  - (dotnet): library2.csproj
+builders:
+  netbuild:
+    use: dotnet
+    with: library2.csproj
 
 steps:
   build:
     - (shell): sleep
       arguments: "1"
-    - (dotnet): build
+    - (netbuild): build
       configuration: $(configuration)
     - (shell): echo
       arguments: "done lib2"

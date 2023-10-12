@@ -12,10 +12,10 @@ run-build-circular:
 	dotnet run --project Terrabuild -- build --workspace tests/circular
 
 run-build:
-	dotnet run --project Terrabuild -- build --workspace tests/simple
+	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug
 
 run-build-az:
-	dotnet run --project Terrabuild -- build --workspace tests/simple --shared
+	dotnet run --project Terrabuild -- build --workspace tests/simple --shared --env release
 
 run-build-nc:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --nocache

@@ -8,8 +8,16 @@ dependencies:
 targets:
   build: [^build]
   publish: [build]
-  docker: [publish, ^publish]
+  docker: [publish]
   push: [docker]
 
-variables:
-  configuration: Release
+environments:
+  debug:
+    configuration: Debug
+
+  release:
+    configuration: Release
+
+extensions:
+  dotnet:
+    configuration: $(configuration)

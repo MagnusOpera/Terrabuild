@@ -7,8 +7,13 @@ open System.Collections.Concurrent
 module YamlConfigFiles =
     open System.Collections.Generic
 
+    type BuilderConfig() =
+        member val Use: string = null with get, set
+        member val With = "" with get, set
+        member val Parameters = Dictionary<string, string>() with get, set
+
     type ProjectConfig() =
-        member val Extensions = List<Dictionary<string, string>>() with get, set
+        member val Builders = Dictionary<string, BuilderConfig>() with get, set
         member val Steps = Dictionary<string, List<Dictionary<string, string>>>() with get, set
         member val Dependencies = List<string>() with get, set
         member val Outputs = List<string>() with get, set
@@ -20,8 +25,8 @@ module YamlConfigFiles =
         member val Storage = "" with get, set
         member val Dependencies = List<string>() with get, set
         member val Targets = Dictionary<string, List<string>>() with get, set
-        member val Variables = Dictionary<string, string>() with get, set
-
+        member val Environments = Dictionary<string, Dictionary<string, string>>() with get, set
+        member val Extensions = Dictionary<string, Dictionary<string, string>>() with get, set
 
 type Dependencies = Set<string>
 type Outputs = Set<string>
@@ -31,6 +36,7 @@ type StepCommands = Extensions.Step list
 type Steps = Map<string, StepCommands>
 type Tags = Set<string>
 type Variables = Map<string, string>
+type ExtensionConfigs = Map<string, Map<string, string>>
 
 type ProjectConfig = {
     Dependencies: Dependencies
@@ -54,9 +60,10 @@ type WorkspaceConfig = {
     Directory: string
     Build: BuildConfig
     Projects: Map<string, ProjectConfig>
+    Environment: string
 }
 
-let private loadExtension name projectDir projectFile parameters shared : Extensions.Extension =
+let private loadExtension name projectFile parameters projectDir shared : Extensions.Extension =
     let context = { new Extensions.IContext
                     with member _.ProjectDirectory = projectDir
                          member _.ProjectFile = projectFile
@@ -79,7 +86,7 @@ let private loadStorage name : Storages.Storage option =
 type ConfigException(msg, innerException: Exception) =
     inherit Exception(msg, innerException)
 
-let read workspaceDirectory shared =
+let read workspaceDirectory shared environment =
     let buildFile = Path.Combine(workspaceDirectory, "BUILD")
     let buildConfig = Yaml.DeserializeFile<YamlConfigFiles.BuildConfig> buildFile
 
@@ -87,10 +94,32 @@ let read workspaceDirectory shared =
         if shared then loadStorage buildConfig.Storage
         else None
 
+    // get variables from environment
+    let environment, variables =
+        match environment with
+        | None ->
+            // no environment specified - use the first one if any
+            match buildConfig.Environments |> Seq.tryHead with
+            | Some kvp -> kvp.Key, kvp.Value |> Map.ofDict
+            | _ -> "default", Map.empty
+        | Some environment -> 
+            // environment specified - get it !
+            match buildConfig.Environments.TryGetValue environment with
+            | true, vars ->
+                environment, vars |> Map.ofDict
+            | false, _ ->
+                ConfigException($"Environment {environment} not found", null)
+                |> raise
+
+    // default configuration for extensions
+    let extensionConfigs =
+        buildConfig.Extensions
+        |> Map.ofDict
+        |> Map.map (fun _ config -> config |> Map.ofDict)
+
     let buildConfig = { Dependencies = buildConfig.Dependencies |> Set.ofSeq
                         Targets = buildConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
-                        Variables = buildConfig.Variables |> Map.ofDict }
-
+                        Variables = variables }
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let mutable projects = Map.empty
@@ -112,8 +141,8 @@ let read workspaceDirectory shared =
                 | _ -> failwith $"Failed to find project '{projectId}'"
 
             let defaultExtensions = 
-                [ "shell", loadExtension "shell" projectDir projectDir Map.empty shared
-                  "echo", loadExtension "echo" projectDir projectDir Map.empty shared ]
+                Map [ "shell", loadExtension "shell" projectDir Map.empty projectDir shared
+                      "echo", loadExtension "echo" projectDir Map.empty projectDir shared ]
 
             // process only unknown dependency
             if processedNodes.TryAdd(dependency, true) then
@@ -134,30 +163,38 @@ let read workspaceDirectory shared =
                     extensionName, extensionParam, extensionArgs
 
                 // load specified extensions
-                let extensions =
-                    let buildExtension (arguments: Map<string, string>) =
-                        let extName, extParam, extArgs = getExtensionParamAndArgs arguments
-                        let extension = loadExtension extName projectDir extParam extArgs shared
-                        extName, extension
+                let builders =
+                    dependencyConfig.Builders
+                    |> Map.ofDict
+                    |> Map.map (fun alias config ->
+                        let useConfig =
+                            match config.Use with
+                            | null -> alias
+                            | _ -> config.Use
+                        let withConfig =
+                            config.With
+                        let baseConfig =
+                            match extensionConfigs |> Map.tryFind useConfig with
+                            | Some baseConfig -> baseConfig
+                            | _ -> Map.empty
+                        let buildConfig =
+                            baseConfig
+                            |> Map.replace (config.Parameters |> Map.ofDict)
+                        loadExtension useConfig withConfig buildConfig projectDir shared)
+                    |> Map.replace defaultExtensions
 
-                    dependencyConfig.Extensions
-                    |> Seq.map Map.ofDict
-                    |> Seq.map buildExtension
-                    |> Seq.append defaultExtensions
-                    |> Map.ofSeq
-
-                let getExtensionCapabilities capability getCapability (extension: Extensions.Extension) =
+                let getBuilderCapabilities capability getCapability (extension: Extensions.Extension) =
                     match extension.Capabilities &&& capability with
                     | Extensions.Capabilities.None -> []
                     | _ -> getCapability extension
 
                 let getExtensionsCapabilities capability getCapability =
-                    extensions
-                    |> Seq.collect (fun kvp -> getExtensionCapabilities capability getCapability kvp.Value)
+                    builders
+                    |> Seq.collect (fun (KeyValue(_, extension)) -> getBuilderCapabilities capability getCapability extension)
 
-                let extensionDependencies = getExtensionsCapabilities Extensions.Capabilities.Dependencies (fun e -> e.Dependencies)
+                let builderDependencies = getExtensionsCapabilities Extensions.Capabilities.Dependencies (fun e -> e.Dependencies)
 
-                let projectDependencies = dependencyConfig.Dependencies |> Seq.append extensionDependencies |> Set.ofSeq
+                let projectDependencies = dependencyConfig.Dependencies |> Seq.append builderDependencies |> Set.ofSeq
 
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let projectDependencies =
@@ -177,8 +214,8 @@ let read workspaceDirectory shared =
                     steps
                     |> Seq.collect (fun args ->
                             let extName, extParam, extArgs = args |> Map.ofDict |> getExtensionParamAndArgs
-                            let extension = extensions |> Map.find extName
-                            getExtensionCapabilities Extensions.Capabilities.Steps (fun e -> e.GetStep(extParam, extArgs)) extension)
+                            let builder = builders |> Map.find extName
+                            getBuilderCapabilities Extensions.Capabilities.Steps (fun e -> e.GetStep(extParam, extArgs)) builder)
                     |> List.ofSeq
 
                 // collect extension capabilities
@@ -254,4 +291,5 @@ let read workspaceDirectory shared =
     { Storage = storage
       Directory = workspaceDirectory
       Build = buildConfig
-      Projects = projects }
+      Projects = projects
+      Environment = environment }
