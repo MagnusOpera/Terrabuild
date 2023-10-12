@@ -8,6 +8,7 @@ builders:
     with: Dockerfile
     parameters:
       $configuration: $(configuration)
+      image: ghcr.io/magnus-opera/project3
 
 steps:
   build:
@@ -18,12 +19,7 @@ steps:
 
   docker:
    - (docker): build
-     image: $(image)
 
   push:
    - (docker): push
-     image: $(image)
      tag: 666
-
-variables:
-  image: ghcr.io/magnus-opera/project3

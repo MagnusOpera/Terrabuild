@@ -9,6 +9,14 @@ type Docker(context) =
         if context.ProjectFile |> String.IsNullOrWhiteSpace then "Dockerfile"
         else context.ProjectFile
 
+    let get name args =
+        match args |> Map.tryFind name with
+        | Some value -> value
+        | _ ->
+            match context.Parameters |> Map.tryFind name with
+            | Some value -> value
+            | _ -> failwith $"Missing {name} parameter"
+        
     let getArgs (args: Map<string, string>) =
         let args = args |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
                                                   else None)
@@ -16,7 +24,7 @@ type Docker(context) =
         arguments
 
     let getBuildStep (args: Map<string, string>) =
-        let image = args["image"]
+        let image = args |> get "image"
         let arguments = getArgs args
         let buildArgs = $"build --file {dockerfile} --tag {image}:$(terrabuild_node_hash) {arguments} ."
 
@@ -28,8 +36,8 @@ type Docker(context) =
             [ { Command = "docker"; Arguments = buildArgs} ]
 
     let getPushStep (args: Map<string, string>) =
-        let image = args["image"]
-        let tag = args["tag"]
+        let image = args |> get "image"
+        let tag = args |> get "tag"
 
         if context.Shared then
             let retagArgs = $"buildx imagetools {image}:$(terrabuild_node_hash) {image}:{tag}"

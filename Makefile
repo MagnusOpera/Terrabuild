@@ -18,7 +18,7 @@ run-build-az:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --shared --env release
 
 run-build-nc:
-	dotnet run --project Terrabuild -- build --workspace tests/simple --nocache
+	dotnet run --project Terrabuild -- build --workspace tests/simple --nocache --env debug
 
 run-push:
 	dotnet run --project Terrabuild -- run push --workspace tests/simple

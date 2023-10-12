@@ -19,7 +19,6 @@ module YamlConfigFiles =
         member val Outputs = List<string>() with get, set
         member val Ignores = List<string>() with get, set
         member val Targets = Dictionary<string, List<string>>() with get, set
-        member val Variables = Dictionary<string, string>() with get, set
 
     type BuildConfig() =
         member val Storage = "" with get, set
@@ -95,19 +94,14 @@ let read workspaceDirectory shared environment =
         else None
 
     // get variables from environment
-    let environment, variables =
-        match environment with
-        | None ->
-            // no environment specified - use the first one if any
-            match buildConfig.Environments |> Seq.tryHead with
-            | Some kvp -> kvp.Key, kvp.Value |> Map.ofDict
-            | _ -> "default", Map.empty
-        | Some environment -> 
-            // environment specified - get it !
-            match buildConfig.Environments.TryGetValue environment with
-            | true, vars ->
-                environment, vars |> Map.ofDict
-            | false, _ ->
+    let variables =
+        match buildConfig.Environments.TryGetValue environment with
+        | true, vars ->
+            vars |> Map.ofDict
+        | _ ->
+            match environment with
+            | "default" -> Map.empty
+            | _ ->
                 ConfigException($"Environment {environment} not found", null)
                 |> raise
 
@@ -226,9 +220,6 @@ let read workspaceDirectory shared environment =
                 let projectOutputs = dependencyConfig.Outputs |> Seq.append extensionOutputs |> Set.ofSeq
                 let projectIgnores = dependencyConfig.Ignores |> Seq.append projectOutputs |> Seq.append extensionIgnores |> Set.ofSeq
                 let projectTargets = dependencyConfig.Targets |> Map.ofDict |> Map.map (fun _ v -> v |> Set.ofSeq)
-                let projectVariables = dependencyConfig.Variables |> Map.ofDict
-
-                let scopeVariables = buildVariables |> Map.replace projectVariables
 
                 // get dependencies on variables
                 let variables =
@@ -240,8 +231,10 @@ let read workspaceDirectory shared environment =
                     projectSteps
                     |> Seq.collect (fun kvp -> kvp.Value
                                                |> List.collect (fun step -> step.Arguments |> extractVariables))
-                    |> Seq.except ["terrabuild_node_hash"]
-                    |> Seq.map (fun varName -> varName, scopeVariables |> Map.find varName)
+                    |> Seq.map (fun varName ->
+                        match buildVariables |> Map.tryFind varName with
+                        | Some value -> varName, value
+                        | _ -> ConfigException($"Variable {varName} has no value", null) |> raise)
                     |> Map.ofSeq
 
                 let variableHashes =
@@ -281,7 +274,7 @@ let read workspaceDirectory shared environment =
                       Steps = projectSteps
                       Files = projectFiles
                       Hash = nodeHash
-                      Variables = projectVariables }
+                      Variables = variables }
 
                 projects <- projects |> Map.add dependency dependencyConfig
 
