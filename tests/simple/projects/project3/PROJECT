@@ -1,8 +1,5 @@
 builders:
   dotnet:
-    use: dotnet
-    with: project3.csproj
-
   docker:
     use: docker
     with: Dockerfile

@@ -7,6 +7,7 @@ open System.Collections.Concurrent
 module YamlConfigFiles =
     open System.Collections.Generic
 
+    [<AllowNullLiteral>]
     type BuilderConfig() =
         member val Use: string = null with get, set
         member val With = "" with get, set
@@ -161,6 +162,12 @@ let read workspaceDirectory shared environment =
                     dependencyConfig.Builders
                     |> Map.ofDict
                     |> Map.map (fun alias config ->
+                        // HACK yamldotnet is so broken
+                        let config =
+                            match config with
+                            | null -> YamlConfigFiles.BuilderConfig()
+                            | _ -> config
+
                         let useConfig =
                             match config.Use with
                             | null -> alias
