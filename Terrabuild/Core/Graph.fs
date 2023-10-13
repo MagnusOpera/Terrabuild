@@ -8,6 +8,7 @@ type Node = {
     Configuration: Configuration.ProjectConfig
     Dependencies: string set
     IsLeaf: bool
+    IsPlaceholder: bool
 }
 
 type WorkspaceGraph = {
@@ -25,51 +26,49 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
         let nodeId = $"{projectId}-{target}"
         let projectConfig = wsConfig.Projects[projectId]
 
-        // process only if a named step list exist
-        match projectConfig.Steps |> Map.tryFind target with
-        | Some _ ->
-            if processedNodes.TryAdd(nodeId, true) then
-                // merge targets requirements
-                let buildDependsOn = 
-                    wsConfig.Build.Targets
-                    |> Map.tryFind target
-                    |> Option.defaultValue Set.empty
-                let projDependsOn = projectConfig.Targets
-                                    |> Map.tryFind target
-                                    |> Option.defaultValue Set.empty
-                let dependsOns = buildDependsOn + projDependsOn
+        if processedNodes.TryAdd(nodeId, true) then
+            // merge targets requirements
+            let buildDependsOn =
+                wsConfig.Build.Targets
+                |> Map.tryFind target
+                |> Option.defaultValue Set.empty
+            let projDependsOn = projectConfig.Targets
+                                |> Map.tryFind target
+                                |> Option.defaultValue Set.empty
+            let dependsOns = buildDependsOn + projDependsOn
 
-                // apply on each dependency
-                let children, hasInternalDependencies =
+            // apply on each dependency
+            let children, hasInternalDependencies =
 
-                    let mutable children = Set.empty
-                    let mutable hasInternalDependencies = false
+                let mutable children = Set.empty
+                let mutable hasInternalDependencies = false
 
-                    for dependsOn in dependsOns do
-                        let childDependency = 
-                            match dependsOn with
-                            | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
-                                projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
-                            | _ ->
-                                hasInternalDependencies <- true
-                                [ buildTarget dependsOn projectId ] |> Seq.choose id
-                        children <- children + (childDependency |> Set.ofSeq)
-                    children, hasInternalDependencies
+                for dependsOn in dependsOns do
+                    let childDependency =
+                        match dependsOn with
+                        | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
+                            projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
+                        | _ ->
+                            hasInternalDependencies <- true
+                            [ buildTarget dependsOn projectId ] |> Seq.choose id
+                    children <- children + (childDependency |> Set.ofSeq)
+                children, hasInternalDependencies
 
-                // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
-                let isLeaf = hasInternalDependencies |> not
+            // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
+            let isLeaf = hasInternalDependencies |> not
 
-                let node = { ProjectId = projectId
-                             TargetId = target
-                             Configuration = projectConfig
-                             Dependencies = children
-                             IsLeaf = isLeaf }
-                if allNodes.TryAdd(nodeId, node) |> not then
-                    failwith "Unexpected graph building race"
+            let isPlaceholder = projectConfig.Steps |> Map.containsKey target |> not
+            let node = { ProjectId = projectId
+                         TargetId = target
+                         Configuration = projectConfig
+                         Dependencies = children
+                         IsLeaf = isLeaf
+                         IsPlaceholder = isPlaceholder }
+            if allNodes.TryAdd(nodeId, node) |> not then
+                failwith "Unexpected graph building race"
             Some nodeId
-
-        | _ ->
-            None
+        else
+            Some nodeId
 
     let rootNodes =
         let rootNodes = seq {

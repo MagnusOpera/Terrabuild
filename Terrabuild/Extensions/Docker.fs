@@ -19,10 +19,15 @@ type Docker(context) =
             match context.Parameters |> Map.tryFind name with
             | Some value -> value
             | _ -> defaultValue name
-        
+
     let getArgs (args: Map<string, string>) =
-        let args = args |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
-                                                  else None)
+        let args1 = args |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
+                                                   else None)
+        let args2 =
+            context.Parameters |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
+                                                         else None)
+        let args = Seq.append args1 args2
+
         let arguments = args |> Seq.fold (fun acc (key, value) -> $"{acc} --build-arg {key}=\"{value}\"") ""
         arguments
 
