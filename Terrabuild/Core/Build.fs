@@ -33,12 +33,15 @@ type BuildSummary = {
 
 type IBuildNotification =
     abstract WaitCompletion: unit -> unit
+
     abstract BuildStarted: graph:Graph.WorkspaceGraph -> unit
     abstract BuildCompleted: summary:BuildSummary -> unit
-    abstract BuildNodeScheduled: node:Graph.Node -> unit
-    abstract BuildNodeStarted: node:Graph.Node -> unit
-    abstract BuildNodeUploaded: node:Graph.Node -> unit
-    abstract BuildNodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
+
+    abstract NodeScheduled: node:Graph.Node -> unit
+    abstract NodeDownloading: node:Graph.Node -> unit
+    abstract NodeBuilding: node:Graph.Node -> unit
+    abstract NodeUploading: node:Graph.Node -> unit
+    abstract NodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
 
 let private isTaskUnsatisfied = function
     | TaskBuildStatus.Failure depId -> Some depId
@@ -118,17 +121,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         | _ -> TaskBuildStatus.Unfulfilled depCacheEntryId
 
     let buildNode (node: Graph.Node) =
-        let projectDirectory =
-            match IO.combinePath workspaceConfig.Directory node.ProjectId with
-            | IO.Directory projectDirectory -> projectDirectory
-            | IO.File projectFile -> IO.parentDirectory projectFile
-            | _ -> failwith $"Failed to find project '{node.ProjectId}"
-
-        let steps = node.Configuration.Steps[node.TargetId]
-        let nodeHash = node.Configuration.Hash
-        let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}"
-        let nodeTargetHash = cacheEntryId |> String.sha256
-
+        notification.NodeDownloading node
         let unsatisfyingDep =
             node.Dependencies
             |> Seq.map getDependencyStatus
@@ -136,6 +129,17 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
         match unsatisfyingDep with
         | None ->
+            let projectDirectory =
+                match IO.combinePath workspaceConfig.Directory node.ProjectId with
+                | IO.Directory projectDirectory -> projectDirectory
+                | IO.File projectFile -> IO.parentDirectory projectFile
+                | _ -> failwith $"Failed to find project '{node.ProjectId}"
+
+            let steps = node.Configuration.Steps[node.TargetId]
+            let nodeHash = node.Configuration.Hash
+            let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}"
+            let nodeTargetHash = cacheEntryId |> String.sha256
+
             // check first if it's possible to restore previously built state
             let summary =
                 if options.NoCache then None
@@ -146,25 +150,23 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     | Some summary -> Some summary
                     | _ -> None
 
-            let cleanOutputs () =
+            // clean outputs if leaf node (otherwise outputs are layered on top of previous ones)
+            if node.IsLeaf then
                 node.Configuration.Outputs
                 |> Seq.map (IO.combinePath projectDirectory)
                 |> Seq.iter IO.deleteAny
 
             match summary with
             | Some summary ->
-                if node.IsLeaf then
-                    cleanOutputs()
-
                 match summary.Outputs with
                 | Some outputs ->
                     let files = IO.enumerateFiles outputs
                     IO.copyFiles projectDirectory outputs files |> ignore
                 | _ -> ()
-
                 Some summary
 
             | _ ->
+                notification.NodeBuilding node
                 let variables =
                     variables
                     |> Map.replace node.Configuration.Variables
@@ -172,9 +174,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     |> Map.add "terrabuild_target_hash" nodeTargetHash
 
                 let cacheEntry = cache.CreateEntry cacheEntryId
-
-                if node.IsLeaf then
-                    cleanOutputs()
 
                 let beforeFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 
@@ -210,9 +209,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     stepLog |> stepLogs.Add
                     lastExitCode <- exitCode
 
-                // Console.WriteLine($"Uploading {node}")
-                notification.BuildNodeUploaded node
-
+                notification.NodeUploading node
                 let afterFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 
                 // keep only new or modified files
@@ -249,9 +246,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         let node = graph.Nodes[nodeId]
 
         let buildAction () = 
-            notification.BuildNodeStarted node
             let summary = buildNode node
-            notification.BuildNodeCompleted node summary
+            notification.NodeCompleted node summary
 
             // schedule children nodes if ready
             let triggers = reverseIncomings[nodeId]                
@@ -261,7 +257,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     readyNodes[trigger].Value <- -1 // mark node as scheduled
                     scheduleNode trigger
 
-        notification.BuildNodeScheduled node
+        notification.NodeScheduled node
         buildQueue.Enqueue buildAction
 
 

@@ -3,47 +3,38 @@ open System
 open Ansi.Styles
 open Ansi.Emojis
 
+[<RequireQualifiedAccess>]
 type ProgressStatus =
     | Success
     | Fail
-    | Scheduled of startedAt:DateTime
-    | Progress of startedAt:DateTime
-    | Upload of startedAt:DateTime
+    | Running of startedAt:DateTime * spinner:string * frequency:double
 
 type ProgressItem = {
-    mutable Status: ProgressStatus
     Label: string
+    mutable Status: ProgressStatus
 }
 
 type ProgressRenderer() =
     let mutable items = []
 
-    // https://antofthy.gitlab.io/info/ascii/HeartBeats_howto.txt
-    let spinnerWaiting = [ "⠁"; "⠂"; "⠄"; "⠂" ]
-    let frequencyWaiting = 200.0
+    // // https://antofthy.gitlab.io/info/ascii/HeartBeats_howto.txt
+    // let spinnerWaiting = [ "⠁"; "⠂"; "⠄"; "⠂" ]
+    // let frequencyWaiting = 200.0
 
-    let spinnerUpload = [ "⣤"; "⠶"; "⠛"; "⠛"; "⠶" ]
-    let frequencyUpload = 200.0
+    // let spinnerUpload = [ "⣤"; "⠶"; "⠛"; "⠛"; "⠶" ]
+    // let frequencyUpload = 200.0
 
-    let spinnerProgress = [ "⠋"; "⠙"; "⠹"; "⠸"; "⠼"; "⠴";  "⠦"; "⠧"; "⠇"; "⠏" ]
-    let frequencyProgress = 100.0
+    // let spinnerProgress = [ "⠋"; "⠙"; "⠹"; "⠸"; "⠼"; "⠴";  "⠦"; "⠧"; "⠇"; "⠏" ]
+    // let frequencyProgress = 100.0
 
     let printableStatus item =
         match item.Status with
-        | Success -> green + " " + checkmark + reset
-        | Fail -> red + " " + crossmark + reset
-        | Scheduled startedAt ->
-            let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequencyWaiting) |> int
-            let offset = diff % spinnerWaiting.Length
-            yellow + " " + spinnerWaiting[offset] + reset
-        | Upload startedAt ->
-            let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequencyUpload) |> int
-            let offset = diff % spinnerUpload.Length
-            yellow + " " + spinnerUpload[offset] + reset
-        | Progress startedAt ->
-            let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequencyProgress) |> int
-            let offset = diff % spinnerProgress.Length
-            yellow + " " + spinnerProgress[offset] + reset
+        | ProgressStatus.Success -> green + " " + checkmark + reset
+        | ProgressStatus.Fail -> red + " " + crossmark + reset
+        | ProgressStatus.Running (startedAt, spinner, frequency) ->
+            let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequency) |> int
+            let offset = diff % spinner.Length
+            $"{yellow} {spinner[offset]}{reset}"
 
     let printableItem item =
         let status = printableStatus item
@@ -57,12 +48,24 @@ type ProgressRenderer() =
         let updateCmd = updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}"
         updateCmd |> Console.Out.Write
 
-    member _.Update (label: string) (status: ProgressStatus) =
+    member _.Update (label: string) (spinner: string) (frequency: double) =
+        match items |> List.tryFindIndex (fun item -> item.Label = label) with
+        | Some index ->
+            items[index].Status <- ProgressStatus.Running (DateTime.Now, spinner, frequency)
+        | _ ->
+            let item = { Label = label; Status = ProgressStatus.Running (DateTime.Now, spinner, frequency) }
+            items <- item :: items
+            let printable = printableItem item
+            Console.Out.WriteLine(printable)
+
+    member _.Complete (label: string) (success: bool) =
+        let status =
+            if success then ProgressStatus.Success
+            else ProgressStatus.Fail
+
         match items |> List.tryFindIndex (fun item -> item.Label = label) with
         | Some index ->
             items[index].Status <- status
         | _ ->
-            let item = { Status = status; Label = label }
+            let item = { Label = label; Status = status }
             items <- item :: items
-            let printable = printableItem item
-            Console.Out.WriteLine(printable)

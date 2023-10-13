@@ -1,15 +1,33 @@
 module Notification
 open System
 
+// https://antofthy.gitlab.io/info/ascii/HeartBeats_howto.txt
+let spinnerScheduled = "⠁⠂⠄⠂"
+let frequencyScheduled = 200.0
+
+let spinnerUpload = "↑  ↑ ↑ "
+let frequencyUpload = 200.0
+
+let spinnerDownload = "↓  ↓ ↓ "
+let frequencyDownload = 200.0
+
+let spinnerBuilding = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+let frequencyBuilding = 100.0
+
+
+[<RequireQualifiedAccess>]
+type NodeStatus =
+    | Scheduled
+    | Building
+    | Downloading
+    | Uploading
 
 [<RequireQualifiedAccess>]
 type PrinterProtocol =
     | BuildStarted of graph:Graph.WorkspaceGraph
     | BuildCompleted of summary:Build.BuildSummary
-    | BuildNodeScheduled of node:Graph.Node
-    | BuildNodeStarted of node:Graph.Node
-    | UploadNodeStarted of node:Graph.Node
-    | BuildNodeCompleted of node:Graph.Node * summary:Cache.TargetSummary option
+    | NodeStatusChanged of node:Graph.Node * status:NodeStatus
+    | NodeCompleted of node:Graph.Node * summary:Cache.TargetSummary option
     | Render
 
 type BuildNotification() =
@@ -55,40 +73,31 @@ type BuildNotification() =
                 // Console.Out.WriteLine($"{jsonBuildInfo}")
                 buildComplete.Set() |> ignore
 
-            | PrinterProtocol.BuildNodeScheduled node ->
+            | PrinterProtocol.NodeStatusChanged (node, status) ->            
+                let spinner, frequency =
+                    match status with
+                    | NodeStatus.Scheduled -> spinnerScheduled, frequencyScheduled
+                    | NodeStatus.Downloading -> spinnerDownload, frequencyDownload
+                    | NodeStatus.Uploading -> spinnerUpload, frequencyUpload
+                    | NodeStatus.Building -> spinnerBuilding, frequencyBuilding
                 let label = $"{node.TargetId} {node.ProjectId}"
-                let status = Progress.Scheduled DateTime.Now
-                renderer.Update label status
+                renderer.Update label spinner frequency
                 scheduleUpdate ()
                 return! messageLoop ()
 
-            | PrinterProtocol.BuildNodeStarted node ->
-                let label = $"{node.TargetId} {node.ProjectId}"
-                let status = Progress.Progress DateTime.Now
-                renderer.Update label status
-                scheduleUpdate ()
-                return! messageLoop ()
-
-            | PrinterProtocol.UploadNodeStarted node ->
-                let label = $"{node.TargetId} {node.ProjectId}"
-                let status = Progress.Upload DateTime.Now
-                renderer.Update label status
-                scheduleUpdate ()
-                return! messageLoop ()
-
-            | PrinterProtocol.BuildNodeCompleted (node, summary) ->
+            | PrinterProtocol.NodeCompleted (node, summary) ->
                 let status =
                     match summary with
                     | Some summary ->
                         match summary.Status with
-                        | Cache.TaskStatus.Success -> Progress.Success
+                        | Cache.TaskStatus.Success -> true
                         | _ ->
                             failedLogs <- failedLogs @ [ summary ]
-                            Progress.Fail
-                    | _ -> Progress.Fail
+                            false
+                    | _ -> false
 
                 let label = $"{node.TargetId} {node.ProjectId}"
-                renderer.Update label status
+                renderer.Complete label status
 
                 scheduleUpdate ()
                 return! messageLoop ()
@@ -109,29 +118,29 @@ type BuildNotification() =
             buildComplete.WaitOne() |> ignore
 
         member _.BuildStarted graph =
-            graph |> PrinterProtocol.BuildStarted |> printerAgent.Post
+            PrinterProtocol.BuildStarted graph
+            |> printerAgent.Post
 
         member _.BuildCompleted(summary: Build.BuildSummary) = 
-            summary
-            |> PrinterProtocol.BuildCompleted
+            PrinterProtocol.BuildCompleted summary
             |> printerAgent.Post
 
-        member _.BuildNodeScheduled(node: Graph.Node) = 
-            node
-            |> PrinterProtocol.BuildNodeScheduled
+        member _.NodeScheduled(node: Graph.Node) =
+            PrinterProtocol.NodeStatusChanged (node, NodeStatus.Scheduled)
             |> printerAgent.Post
 
-        member _.BuildNodeStarted(node: Graph.Node) = 
-            node
-            |> PrinterProtocol.BuildNodeStarted
+        member _.NodeDownloading(node: Graph.Node) = 
+            PrinterProtocol.NodeStatusChanged (node, NodeStatus.Downloading)
             |> printerAgent.Post
 
-        member _.BuildNodeUploaded(node: Graph.Node) = 
-            node
-            |> PrinterProtocol.UploadNodeStarted
+        member _.NodeBuilding(node: Graph.Node) = 
+            PrinterProtocol.NodeStatusChanged (node, NodeStatus.Building)
             |> printerAgent.Post
 
-        member _.BuildNodeCompleted (node: Graph.Node) (status: Cache.TargetSummary option) = 
-            (node, status)
-            |> PrinterProtocol.BuildNodeCompleted
+        member _.NodeUploading(node: Graph.Node) = 
+            PrinterProtocol.NodeStatusChanged (node, NodeStatus.Uploading)
+            |> printerAgent.Post
+
+        member _.NodeCompleted (node: Graph.Node) (status: Cache.TargetSummary option) = 
+            PrinterProtocol.NodeCompleted (node, status)
             |> printerAgent.Post
