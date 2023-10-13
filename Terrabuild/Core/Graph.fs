@@ -24,9 +24,10 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
 
     let rec buildTarget target projectId  =
         let nodeId = $"{projectId}-{target}"
-        let projectConfig = wsConfig.Projects[projectId]
 
-        if processedNodes.TryAdd(nodeId, true) then
+        let processNode () =
+            let projectConfig = wsConfig.Projects[projectId]
+
             // merge targets requirements
             let buildDependsOn =
                 wsConfig.Build.Targets
@@ -39,7 +40,6 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
 
             // apply on each dependency
             let children, hasInternalDependencies =
-
                 let mutable children = Set.empty
                 let mutable hasInternalDependencies = false
 
@@ -47,10 +47,10 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
                     let childDependency =
                         match dependsOn with
                         | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
-                            projectConfig.Dependencies |> Seq.choose (buildTarget parentDependsOn)
+                            projectConfig.Dependencies |> Seq.map (buildTarget parentDependsOn)
                         | _ ->
                             hasInternalDependencies <- true
-                            [ buildTarget dependsOn projectId ] |> Seq.choose id
+                            [ buildTarget dependsOn projectId ]
                     children <- children + (childDependency |> Set.ofSeq)
                 children, hasInternalDependencies
 
@@ -66,20 +66,16 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
                          IsPlaceholder = isPlaceholder }
             if allNodes.TryAdd(nodeId, node) |> not then
                 failwith "Unexpected graph building race"
-            Some nodeId
-        else
-            Some nodeId
+
+        if processedNodes.TryAdd(nodeId, true) then processNode()
+        nodeId
 
     let rootNodes =
-        let rootNodes = seq {
+        Map [
             for dependency in wsConfig.Build.Dependencies do
                 for target in targets do
-                    yield buildTarget target dependency |> Option.map (fun r -> dependency, r)
-        }
-
-        rootNodes
-        |> Seq.choose id
-        |> Map.ofSeq
+                    dependency, buildTarget target dependency
+        ]
 
     { Targets = targets
       Nodes = Map.ofDict allNodes 

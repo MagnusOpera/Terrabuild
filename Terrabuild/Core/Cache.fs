@@ -103,45 +103,56 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage option) =
 
 
 type Cache(storage: Storages.Storage option) =
+    let cachedSumaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
+
     member _.TryGetSummary id : TargetSummary option =
-        let entryDir = IO.combinePath buildCacheDirectory id
-        
-        let loadSummary () =
-            let summaryFile = IO.combinePath entryDir summaryFilename
-            let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
-            let summary = { summary
-                            with Steps = summary.Steps
-                                         |> List.map (fun stepLog -> { stepLog
-                                                                       with Log = IO.combinePath entryDir stepLog.Log })
-                                 Outputs = summary.Outputs |> Option.map (fun outputs -> IO.combinePath entryDir outputs) }
-            summary
 
-        let completeFile = IO.combinePath entryDir completeFilename
-        match completeFile with
-        | IO.File _ ->
-            loadSummary() |> Some
+        match cachedSumaries.TryGetValue(id) with
+        | true, summary -> Some summary
         | _ ->
-            // cleanup the mess - it's not valid anyway
-            IO.deleteAny entryDir
+            let entryDir = IO.combinePath buildCacheDirectory id
+            let summaryFile = IO.combinePath entryDir summaryFilename
+            let completeFile = IO.combinePath entryDir completeFilename
 
-            // try get remote entry
-            match storage with
-            | Some storage ->
-                match storage.TryDownload id with
-                | Some tarFile ->
-                    let uncompressFile = IO.getTempFilename()
-                    try
-                        tarFile |> Compression.uncompress uncompressFile
-                        uncompressFile |> Compression.untar entryDir
-                        let summary = loadSummary()
-                        entryDir |> markEntryAsCompleted
-                        summary |> Some
-                    finally
-                        IO.deleteAny uncompressFile
-                        IO.deleteAny tarFile
-                | _ ->
-                    None
-            | _ -> None
+
+            let loadSummary () =
+                let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
+                let summary = { summary
+                                with Steps = summary.Steps
+                                             |> List.map (fun stepLog -> { stepLog
+                                                                           with Log = IO.combinePath entryDir stepLog.Log })
+                                     Outputs = summary.Outputs |> Option.map (fun outputs -> IO.combinePath entryDir outputs) }
+                cachedSumaries.TryAdd(summaryFile, summary) |> ignore
+                summary
+
+
+            match completeFile with
+            | IO.File _ ->
+                loadSummary() |> Some
+            | _ ->
+                // cleanup the mess - it's not valid anyway
+                IO.deleteAny entryDir
+
+                // try get remote entry
+                match storage with
+                | Some storage ->
+                    match storage.TryDownload id with
+                    | Some tarFile ->
+                        let uncompressFile = IO.getTempFilename()
+                        try
+                            tarFile |> Compression.uncompress uncompressFile
+                            uncompressFile |> Compression.untar entryDir
+                            entryDir |> markEntryAsCompleted
+                            let summary = loadSummary()
+                            summary |> Some
+                        finally
+                            IO.deleteAny uncompressFile
+                            IO.deleteAny tarFile
+                    | _ ->
+                        None
+                | _ -> None
+
+
 
     member _.CreateEntry id : IEntry =
         let entryDir = IO.combinePath buildCacheDirectory id

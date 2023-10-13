@@ -283,7 +283,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     |> Map.iter (fun key _ -> scheduleNode key)
     buildQueue.WaitCompletion()
 
-
     let headCommit = Git.getHeadCommit workspaceConfig.Directory
 
     let dependencies =
