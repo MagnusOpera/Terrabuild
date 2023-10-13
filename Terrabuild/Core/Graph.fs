@@ -11,13 +11,13 @@ type Node = {
 }
 
 type WorkspaceGraph = {
-    Target: string
+    Targets: string list
     Nodes: Map<string, Node>
     RootNodes: Map<string, string>
 }
 
 
-let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
+let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) =
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
@@ -72,10 +72,16 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (target: string) =
             None
 
     let rootNodes =
-        wsConfig.Build.Dependencies
-        |> Seq.choose (fun dependency -> buildTarget target dependency |> Option.map (fun r -> dependency, r))
+        let rootNodes = seq {
+            for dependency in wsConfig.Build.Dependencies do
+                for target in targets do
+                    yield buildTarget target dependency |> Option.map (fun r -> dependency, r)
+        }
+
+        rootNodes
+        |> Seq.choose id
         |> Map.ofSeq
 
-    { Target = target
+    { Targets = targets
       Nodes = Map.ofDict allNodes 
       RootNodes = rootNodes }

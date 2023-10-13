@@ -49,7 +49,8 @@ type BuildNotification() =
             let! msg = inbox.Receive()
             match msg with
             | PrinterProtocol.BuildStarted graph -> 
-                Console.WriteLine($"{Ansi.Emojis.rocket} Running target {graph.Target}")
+                let targets = graph.Targets |> String.join ","
+                Console.WriteLine($"{Ansi.Emojis.rocket} Running targets {targets}")
                 scheduleUpdate ()
                 return! messageLoop () 
 

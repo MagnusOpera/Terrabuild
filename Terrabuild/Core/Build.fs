@@ -27,7 +27,7 @@ type BuildSummary = {
     EndedAt: DateTime
     Duration: TimeSpan
     Status: BuildStatus
-    Target: string
+    Targets: string list
     Dependencies: Map<string, TaskBuildStatus>
 }
 
@@ -290,6 +290,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                       BuildSummary.EndedAt = endedAt
                       BuildSummary.Duration = duration
                       BuildSummary.Status = status
-                      BuildSummary.Target = graph.Target
+                      BuildSummary.Targets = graph.Targets
                       BuildSummary.Dependencies = dependencies }
     notification.BuildCompleted buildInfo

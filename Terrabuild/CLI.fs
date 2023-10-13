@@ -3,10 +3,10 @@ open Argu
 
 [<RequireQualifiedAccess>]
 type RunArgs =
-    | [<Unique; Inherit; AltCommandLine("--ws")>] Workspace of path:string
-    | [<Unique; Inherit; AltCommandLine("--par")>] Parallel of max:int
-    | [<Unique; Inherit; AltCommandLine("--s")>] Shared
-    | [<Unique; Inherit; AltCommandLine("--env")>] Environment of name:string
+    | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
+    | [<Unique; AltCommandLine("--par")>] Parallel of max:int
+    | [<Unique; AltCommandLine("--s")>] Shared
+    | [<Unique; AltCommandLine("--env")>] Environment of name:string
     | [<Unique; AltCommandLine("--nc")>] NoCache
     | [<Unique; AltCommandLine("--r")>] Retry
 with
@@ -22,11 +22,11 @@ with
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
-    | [<MainCommand; ExactlyOnce; First>] Target of target:string
-    | [<Unique; Inherit; AltCommandLine("--ws")>] Workspace of path:string
-    | [<Unique; Inherit; AltCommandLine("--par")>] Parallel of max:int
-    | [<Unique; Inherit; AltCommandLine("--s")>] Shared
-    | [<Unique; Inherit; AltCommandLine("--env")>] Environment of name:string
+    | [<Mandatory; ExactlyOnce; MainCommand; First>] Target of target:string list
+    | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
+    | [<Unique; AltCommandLine("--par")>] Parallel of max:int
+    | [<Unique; AltCommandLine("--s")>] Shared
+    | [<Unique; AltCommandLine("--env")>] Environment of name:string
     | [<Unique; AltCommandLine("--nc")>] NoCache
     | [<Unique; AltCommandLine("--r")>] Retry
 with
