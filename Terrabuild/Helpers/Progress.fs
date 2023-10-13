@@ -6,8 +6,9 @@ open Ansi.Emojis
 type ProgressStatus =
     | Success
     | Fail
-    | Progress of startedAt:DateTime
     | Scheduled of startedAt:DateTime
+    | Progress of startedAt:DateTime
+    | Upload of startedAt:DateTime
 
 type ProgressItem = {
     mutable Status: ProgressStatus
@@ -17,8 +18,12 @@ type ProgressItem = {
 type ProgressRenderer() =
     let mutable items = []
 
+    // https://antofthy.gitlab.io/info/ascii/HeartBeats_howto.txt
     let spinnerWaiting = [ "⠁"; "⠂"; "⠄"; "⠂" ]
     let frequencyWaiting = 200.0
+
+    let spinnerUpload = [ "⣤"; "⠶"; "⠛"; "⠛"; "⠶" ]
+    let frequencyUpload = 200.0
 
     let spinnerProgress = [ "⠋"; "⠙"; "⠹"; "⠸"; "⠼"; "⠴";  "⠦"; "⠧"; "⠇"; "⠏" ]
     let frequencyProgress = 100.0
@@ -31,6 +36,10 @@ type ProgressRenderer() =
             let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequencyWaiting) |> int
             let offset = diff % spinnerWaiting.Length
             yellow + " " + spinnerWaiting[offset] + reset
+        | Upload startedAt ->
+            let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequencyUpload) |> int
+            let offset = diff % spinnerUpload.Length
+            yellow + " " + spinnerUpload[offset] + reset
         | Progress startedAt ->
             let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequencyProgress) |> int
             let offset = diff % spinnerProgress.Length

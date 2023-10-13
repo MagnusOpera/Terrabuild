@@ -37,6 +37,7 @@ type IBuildNotification =
     abstract BuildCompleted: summary:BuildSummary -> unit
     abstract BuildNodeScheduled: node:Graph.Node -> unit
     abstract BuildNodeStarted: node:Graph.Node -> unit
+    abstract BuildNodeUploaded: node:Graph.Node -> unit
     abstract BuildNodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
 
 let private isTaskUnsatisfied = function
@@ -152,8 +153,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
             match summary with
             | Some summary ->
-                // cleanup before restoring outputs
-                cleanOutputs()
+                if node.IsLeaf then
+                    cleanOutputs()
 
                 match summary.Outputs with
                 | Some outputs ->
@@ -208,6 +209,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                                     Cache.StepSummary.ExitCode = exitCode }
                     stepLog |> stepLogs.Add
                     lastExitCode <- exitCode
+
+                // Console.WriteLine($"Uploading {node}")
+                notification.BuildNodeUploaded node
 
                 let afterFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 
