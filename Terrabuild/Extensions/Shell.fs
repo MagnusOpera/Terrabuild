@@ -2,17 +2,23 @@ namespace Extensions
 open System
 open Extensions
 
+type ShellCommand() =
+    inherit StepParameters()
+    member val Arguments = "" with get, set
+
 type Shell(context) =
     inherit Extension(context)
 
-    override _.Capabilities = Capabilities.Steps
+    override _.Dependencies = []
 
-    override _.Dependencies = NotSupportedException() |> raise
+    override _.Outputs = []
 
-    override _.Outputs = NotSupportedException() |> raise
+    override _.Ignores = []
 
-    override _.Ignores = NotSupportedException() |> raise
+    override _.GetStepParameters _ = typeof<ShellCommand>
 
-    override _.GetStep(action, args) =
-        let arguments = args |> Map.tryFind "arguments" |> Option.defaultValue ""
-        [ { Command = action; Arguments = arguments } ]
+    override _.BuildStepCommands (action, parameters) =
+        match parameters with
+        | :? ShellCommand as parameters ->
+            [ { Command = action; Arguments = parameters.Arguments } ]
+        | _ -> ArgumentException($"Unknown action {action}") |> raise

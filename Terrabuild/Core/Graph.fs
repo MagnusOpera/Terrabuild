@@ -46,7 +46,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
                 for dependsOn in dependsOns do
                     let childDependency =
                         match dependsOn with
-                        | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
+                        | String.Regex "^\^(\w+)$" [ parentDependsOn ] ->
                             projectConfig.Dependencies |> Seq.map (buildTarget parentDependsOn)
                         | _ ->
                             hasInternalDependencies <- true

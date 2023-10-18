@@ -14,6 +14,7 @@ targets:
 environments:
   debug:
     configuration: Debug
+    secret_message: tagada
 
   release:
     configuration: Release

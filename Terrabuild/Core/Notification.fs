@@ -50,7 +50,8 @@ type BuildNotification() =
             match msg with
             | PrinterProtocol.BuildStarted graph -> 
                 let targets = graph.Targets |> String.join ","
-                Console.WriteLine($"{Ansi.Emojis.rocket} Running targets {targets}")
+                let targetLabel = if graph.Targets.Length > 1 then "targets" else "target"
+                Console.WriteLine($"{Ansi.Emojis.rocket} Running {targetLabel} {targets}")
                 scheduleUpdate ()
                 return! messageLoop () 
 

@@ -28,13 +28,9 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
 
     let inline lockWrite (buffer: string ref) (msg: string) =
         lock writeLock (fun () ->
-            logWriter.WriteLine(msg)
-
-            // let prevValue = buffer.Value
-            // if prevValue |> isNull |> not then
-            //     logWriter.WriteLine(prevValue)
-            //     Console.WriteLine(prevValue)
-            // buffer.Value <- msg
+            if buffer.Value |> String.IsNullOrEmpty |> not then
+                logWriter.WriteLine(buffer.Value)
+            buffer.Value <- msg
         )
 
     use proc = new Process()

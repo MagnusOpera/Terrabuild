@@ -1,29 +1,24 @@
 namespace Extensions
 open System
 
-type Step = {
+type Command = {
     Command: string
     Arguments: string
 }
 
-[<Flags>]
-type Capabilities =
-    | None = 0
-    | Dependencies = 1
-    | Steps = 2
-    | Outputs = 4
-    | Ignores = 8
-
 type IContext =
-    abstract ProjectDirectory: string with get
-    abstract ProjectFile: string with get
-    abstract Parameters: Map<string, string> with get
-    abstract Shared: bool with get
+    abstract Directory: string with get
+    abstract With: string option with get
+
+[<AbstractClass; AllowNullLiteral>]
+type StepParameters() =
+    member val NodeHash:string = null with get, set
+    member val Shared:bool = false with get, set
 
 [<AbstractClass>]
 type Extension(context: IContext) =
-    abstract Capabilities: Capabilities with get
     abstract Dependencies: string list
     abstract Outputs: string list
     abstract Ignores: string list
-    abstract GetStep: action:string * args:Map<string, string> -> Step list
+    abstract GetStepParameters: action:string -> Type
+    abstract BuildStepCommands: action:string * parameters:StepParameters -> Command list

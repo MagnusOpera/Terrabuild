@@ -4,19 +4,21 @@ builders:
     use: docker
     with: Dockerfile
     parameters:
-      $configuration: $(configuration)
       image: ghcr.io/magnus-opera/project3
+      arguments:
 
 steps:
   build:
     - (dotnet): build
 
   publish:
-   - (dotnet): publish
+    - (dotnet): publish
 
   docker:
-   - (docker): build
+    - (docker): build
+      arguments:
+        configuration: $(configuration)
 
   push:
-   - (docker): push
-     tag: 666
+    - (docker): push
+      tag: 666

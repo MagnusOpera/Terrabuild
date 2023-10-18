@@ -15,7 +15,8 @@ steps:
   build:
     - (echo): "building project1"
     - (make): build
-      $secret: tsoin tsoin
+      parameters:
+        secret: $(secret_message)
 
   publish:
     - (shell): echo

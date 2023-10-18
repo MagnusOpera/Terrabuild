@@ -3,23 +3,25 @@ namespace Extensions
 open System
 open Extensions
 
+type MakeCommand() =
+    inherit StepParameters()
+    member val Parameters = System.Collections.Generic.Dictionary<string, string>() with get, set
+
+
 type Make(context) =
     inherit Extension(context)
 
-    let getArgs (args: Map<string, string>) action =
-        let args = args |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
-                                                  else None)
-        let arguments = args |> Seq.fold (fun acc (key, value) -> $"{acc} {key}=\"{value}\"") action
-        arguments
+    override _.Dependencies = []
 
-    override _.Capabilities = Capabilities.Steps
+    override _.Outputs = []
 
-    override _.Dependencies = NotSupportedException() |> raise
+    override _.Ignores = []
 
-    override _.Outputs = NotSupportedException() |> raise
+    override _.GetStepParameters _ = typeof<MakeCommand>
 
-    override _.Ignores = NotSupportedException() |> raise
-
-    override _.GetStep(action, args) =
-        let arguments = getArgs args action
-        [ { Command = "make"; Arguments = arguments } ]
+    override _.BuildStepCommands (action, parameters) =
+        match parameters with
+        | :? MakeCommand as parameters ->
+            let args = parameters.Parameters |> Seq.fold (fun acc kvp -> $"{acc} {kvp.Key}=\"{kvp.Value}\"") $"{action}"
+            [ { Command = "make"; Arguments = args } ]
+        | _ -> ArgumentException($"Unknown action {action}") |> raise

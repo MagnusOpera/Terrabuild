@@ -103,8 +103,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     let readyNodes =
         allNodes |> Map.replace refCounts
 
-    let variables = workspaceConfig.Build.Variables
-
     let isBuildSuccess = function
         | TaskBuildStatus.Success _ -> true
         | _ -> false
@@ -133,20 +131,16 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 match IO.combinePath workspaceConfig.Directory node.ProjectId with
                 | IO.Directory projectDirectory -> projectDirectory
                 | IO.File projectFile -> IO.parentDirectory projectFile
-                | _ -> failwith $"Failed to find project '{node.ProjectId}"
+                | _ -> failwith $"Failed to find project {node.ProjectId}"
 
             let steps = node.Configuration.Steps |> Map.tryFind node.TargetId
             let nodeHash = node.Configuration.Hash
             let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}"
-            let nodeTargetHash = cacheEntryId |> String.sha256
 
             match steps with
             | None ->
                 let summary = { Cache.TargetSummary.Project = node.ProjectId
                                 Cache.TargetSummary.Target = node.TargetId
-                                Cache.TargetSummary.Files = node.Configuration.Files
-                                Cache.TargetSummary.Ignores = node.Configuration.Ignores
-                                Cache.TargetSummary.Variables = Map.empty
                                 Cache.TargetSummary.Steps = List.empty
                                 Cache.TargetSummary.Outputs = None
                                 Cache.TargetSummary.Status = Cache.TaskStatus.Success }
@@ -183,32 +177,17 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 | _ ->
                     let cacheEntry = cache.CreateEntry cacheEntryId
                     notification.NodeBuilding node
-                    let variables =
-                        variables
-                        |> Map.replace node.Configuration.Variables
-                        |> Map.add "terrabuild_node_hash" nodeHash
-                        |> Map.add "terrabuild_target_hash" nodeTargetHash
 
                     let beforeFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
 
                     let stepLogs = List<Cache.StepSummary>()
                     let mutable lastExitCode = 0
                     let mutable stepIndex = 0
-                    let usedVariables = HashSet<string>()
                     while stepIndex < steps.Length && lastExitCode = 0 do
                         let startedAt = DateTime.UtcNow
                         let step = steps[stepIndex]
                         let logFile = cacheEntry.NextLogFile()
                         stepIndex <- stepIndex + 1
-
-                        let setVariables s =
-                            variables
-                            |> Map.fold (fun step key value ->
-                                let newStep = step |> String.replace $"$({key})" value
-                                if newStep <> step then usedVariables.Add(key) |> ignore
-                                newStep) s
-
-                        let step = { step with Arguments = step.Arguments |> setVariables }
 
                         let exitCode = Exec.execCaptureTimestampedOutput projectDirectory step.Command step.Arguments logFile
                         let endedAt = DateTime.UtcNow
@@ -233,17 +212,12 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     let entryOutputsDir = cacheEntry.Outputs
                     let outputs = IO.copyFiles entryOutputsDir projectDirectory newFiles
 
-                    let touchedVariables = usedVariables |> Seq.map (fun key -> key, variables[key]) |> Map.ofSeq
-
                     let status =
                         if lastExitCode = 0 then Cache.TaskStatus.Success
                         else Cache.TaskStatus.Failure
 
                     let summary = { Cache.TargetSummary.Project = node.ProjectId
                                     Cache.TargetSummary.Target = node.TargetId
-                                    Cache.TargetSummary.Files = node.Configuration.Files
-                                    Cache.TargetSummary.Ignores = node.Configuration.Ignores
-                                    Cache.TargetSummary.Variables = touchedVariables
                                     Cache.TargetSummary.Steps = stepLogs |> List.ofSeq
                                     Cache.TargetSummary.Outputs = outputs
                                     Cache.TargetSummary.Status = status }

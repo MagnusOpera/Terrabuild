@@ -2,68 +2,53 @@ namespace Extensions
 open System
 open Extensions
 
+type DockerBuild() =
+    inherit StepParameters()
+    member val Image = "" with get, set
+    member val Arguments = System.Collections.Generic.Dictionary<string, string>() with get, set
+
+type DockerPush() =
+    inherit StepParameters()
+    member val Image = "" with get, set
+    member val Tag = "" with get, set
+
 type Docker(context) =
     inherit Extension(context)
 
     let dockerfile =
-        if context.ProjectFile |> String.IsNullOrWhiteSpace then "Dockerfile"
-        else context.ProjectFile
+        match context.With with
+        | Some dockerfile -> dockerfile
+        | _ -> "Dockerfile"
 
-    let failArg name =
-        failwith $"Missing {name} parameter"
+    override _.Dependencies = []
 
-    let get name defaultValue args =
-        match args |> Map.tryFind name with
-        | Some value -> value
-        | _ ->
-            match context.Parameters |> Map.tryFind name with
-            | Some value -> value
-            | _ -> defaultValue name
+    override _.Outputs = []
 
-    let getArgs (args: Map<string, string>) =
-        let args1 = args |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
-                                                   else None)
-        let args2 =
-            context.Parameters |> Seq.choose (fun kvp -> if kvp.Key.StartsWith("$") then Some (kvp.Key.Substring(1), kvp.Value)
-                                                         else None)
-        let args = Seq.append args1 args2
+    override _.Ignores = []
 
-        let arguments = args |> Seq.fold (fun acc (key, value) -> $"{acc} --build-arg {key}=\"{value}\"") ""
-        arguments
-
-    let getBuildStep (args: Map<string, string>) =
-        let image = args |> get "image" failArg
-        let arguments = getArgs args
-        let buildArgs = $"build --file {dockerfile} --tag {image}:$(terrabuild_node_hash) {arguments} ."
-
-        if context.Shared then
-            let pushArgs = $"push {image}:$(terrabuild_node_hash)"
-            [ { Command = "docker"; Arguments = buildArgs}
-              { Command = "docker"; Arguments = pushArgs} ]
-        else
-            [ { Command = "docker"; Arguments = buildArgs} ]
-
-    let getPushStep (args: Map<string, string>) =
-        let image = args |> get "image" failArg
-        let tag = args |> get "tag" failArg
-
-        if context.Shared then
-            let retagArgs = $"buildx imagetools {image}:$(terrabuild_node_hash) {image}:{tag}"
-            [ { Command = "docker"; Arguments = retagArgs} ]
-        else
-            let tagArgs = $"tag {image}:$(terrabuild_node_hash) {image}:{tag}"
-            [ { Command = "docker"; Arguments = tagArgs} ]
-
-    override _.Capabilities = Capabilities.Steps
-
-    override _.Dependencies = NotSupportedException() |> raise
-
-    override _.Outputs = NotSupportedException() |> raise
-
-    override _.Ignores = NotSupportedException() |> raise
-
-    override _.GetStep(action, args) =
+    override _.GetStepParameters action =
         match action with
-        | "build" -> getBuildStep args
-        | "push" -> getPushStep args
-        | _ -> failwith $"Unsupported action '{action}'"
+        | "build" -> typeof<DockerBuild>
+        | "push" -> typeof<DockerPush>
+        | _ -> ArgumentException($"Unknown action {action}") |> raise
+
+    override _.BuildStepCommands (_, parameters) =
+        match parameters with
+        | :? DockerBuild as parameters ->
+            let args = parameters.Arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
+            let buildArgs = $"build --file {dockerfile} --tag {parameters.Image}:{parameters.NodeHash} {args} ."
+
+            if parameters.Shared then
+                let pushArgs = $"push {parameters.Image}:{parameters.NodeHash}"
+                [ { Command = "docker"; Arguments = buildArgs}
+                  { Command = "docker"; Arguments = pushArgs} ]
+            else
+                [ { Command = "docker"; Arguments = buildArgs} ]
+        | :? DockerPush as parameters ->
+            if parameters.Shared then
+                let retagArgs = $"buildx imagetools {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{parameters.Tag}"
+                [ { Command = "docker"; Arguments = retagArgs} ]
+            else
+                let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{parameters.Tag}"
+                [ { Command = "docker"; Arguments = tagArgs} ]        
+        | _ -> ArgumentException($"Unknown action") |> raise

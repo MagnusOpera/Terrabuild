@@ -5,13 +5,13 @@ open Extensions
 type Echo(context) =
     inherit Extension(context)
 
-    override _.Capabilities = Capabilities.Steps
+    override _.Dependencies = []
 
-    override _.Dependencies = NotSupportedException() |> raise
+    override _.Outputs = []
 
-    override _.Outputs = NotSupportedException() |> raise
+    override _.Ignores = []
 
-    override _.Ignores = NotSupportedException() |> raise
+    override _.GetStepParameters _ = null
 
-    override _.GetStep(action, args) =
+    override _.BuildStepCommands (action, _) =
         [ { Command = "echo"; Arguments = action } ]

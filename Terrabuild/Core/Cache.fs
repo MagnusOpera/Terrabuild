@@ -25,9 +25,6 @@ type TargetSummary = {
     Project: string
     Target: string
     Steps: StepSummary list
-    Files: Set<string>    
-    Ignores: Set<string>
-    Variables: Map<string, string>
     Outputs: string option
     Status: TaskStatus
 }

@@ -18,7 +18,11 @@ let runTarget wsDir target shared environment options =
         let config = Configuration.read wsDir shared environment
         Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}")
         let graph = Graph.buildGraph config target
-        let cache = Cache.Cache(config.Storage)
+
+        // let jsonGraph = Json.Serialize graph
+        // jsonGraph |> IO.writeTextFile "graph.json"
+
+        let cache = Cache.Cache(config.Build.Storage)
         let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
         Build.run config graph cache buildNotification options
         buildNotification.WaitCompletion()
@@ -66,9 +70,11 @@ type TerrabuildExiter() =
             exit (int errorCode)
 
 let processCommandLine () =
+    let args = [| "build"; "--workspace"; "tests/simple"; "--environment"; "debug" |]
     let errorHandler = TerrabuildExiter()
     let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
     match parser.ParseCommandLine() with
+    // match parser.Parse(args) with
     | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
     | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
     | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"

@@ -15,6 +15,26 @@ open Extensions
 open Xml
 open System.IO
 
+
+
+type DotnetRestore() =
+    inherit StepParameters()
+
+
+type DotnetBuild() =
+    inherit StepParameters()
+    member val Configuration = "Debug" with get, set
+
+type DotnetTest() =
+    inherit StepParameters()
+    member val Configuration = "Debug" with get, set
+    member val Filter = "" with get, set
+
+type DotnetPublish() =
+    inherit StepParameters()
+    member val Configuration = "Debug" with get, set
+
+
 type Dotnet(context) =
     inherit Extension(context)
 
@@ -25,28 +45,17 @@ type Dotnet(context) =
           "*.fsproj"
           "*.sqlproj" ]
 
-    let failArg name =
-        failwith $"Missing {name} parameter"
-
-    let get name defaultValue args =
-        match args |> Map.tryFind name with
-        | Some value -> value
-        | _ ->
-            match context.Parameters |> Map.tryFind name with
-            | Some value -> value
-            | _ -> defaultValue name
-
     let projectFile =
-        if context.ProjectFile |> String.IsNullOrWhiteSpace then
+        match context.With with
+        | Some projectFile -> projectFile
+        | _ ->
             let projects =
                 knownProjectExtensions
-                |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(context.ProjectDirectory, ext))
+                |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(context.Directory, ext))
             projects |> Seq.exactlyOne |> Path.GetFileName
-        else
-            context.ProjectFile
 
     let parseDotnetDependencies =
-        let project = Path.Combine(context.ProjectDirectory, projectFile)
+        let project = Path.Combine(context.Directory, projectFile)
         let xdoc = XDocument.Load (project)
         let refs = xdoc.Descendants() 
                         |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
@@ -57,27 +66,29 @@ type Dotnet(context) =
                         |> List.ofSeq
         refs 
 
-    override _.Capabilities = Capabilities.Dependencies
-                              ||| Capabilities.Steps
-                              ||| Capabilities.Outputs
-
     override _.Dependencies = parseDotnetDependencies 
 
     override _.Outputs = [ "bin"; "obj" ]
 
-    override _.Ignores = NotSupportedException() |> raise
+    override _.Ignores = []
 
-    override _.GetStep(action, args) =
-        let configuration = args |> get "configuration" (fun _ -> "Debug")
-        let arguments = args |> get "arguments" (fun _ -> "")
+    override _.GetStepParameters action =
         match action with
-        | "restore" -> [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies {arguments}" } ]
-        | "build" ->
+        | "restore" -> typeof<DotnetRestore>
+        | "build" -> typeof<DotnetBuild>
+        | "test" -> typeof<DotnetTest>
+        | "publish" -> typeof<DotnetPublish>
+        | _ -> ArgumentException($"Unknown action {action}") |> raise
+
+    override _.BuildStepCommands (_, parameters) =
+        match parameters with
+        | :? DotnetRestore as parameters ->
+            [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies" } ]
+        | :? DotnetBuild as parameters ->
             [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies" }
-              { Command = "dotnet"; Arguments = $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration} {arguments}" } ]
-        | "test" ->
-            let filter = args |> get "filter" (fun _ -> "")
-            [ { Command = "dotnet"; Arguments = $"test --no-build --configuration {configuration} {projectFile} --filter \"{filter}\"" } ]
-        | "publish" | "run" | "pack" ->
-            [ { Command = "dotnet"; Arguments = $"{action} {projectFile} --no-build {arguments}" } ]
-        | _ -> failwith $"Unsupported action '{action}'"
+              { Command = "dotnet"; Arguments = $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {parameters.Configuration}" } ]
+        | :? DotnetTest as parameters ->
+            [ { Command = "dotnet"; Arguments = $"test --no-build --configuration {parameters.Configuration} {projectFile} --filter \"{parameters.Filter}\"" } ]
+        | :? DotnetPublish as parameters ->
+            [ { Command = "dotnet"; Arguments = $"publish {projectFile} --no-build --configuration {parameters.Configuration}" } ]
+        | _ -> ArgumentException($"Unknown action") |> raise

@@ -58,6 +58,14 @@ let (|Regex|_|) pattern input =
     if m.Success then Some(List.tail [ for g in m.Groups -> g.Value ])
     else None
 
+let AllMatches pattern input =
+    let ms = Regex.Matches(input, pattern)
+    [   for m in ms do
+            for g in m.Groups |> Seq.tail do
+                for c in g.Captures do
+                    c.Value
+    ]
+
 let (|Integer|_|) (s: string) =
     match Int32.TryParse(s) with
     | true, i -> Some i
