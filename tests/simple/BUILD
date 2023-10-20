@@ -2,10 +2,10 @@ storage: azureblob
 
 targets:
   build: [^build]
-  publish: [build]
-  docker: [publish]
+  dist: [build]
+  docker: [dist]
   push: [docker]
-  deploy: [build]
+  deploy: [push]
 
 environments:
   debug:

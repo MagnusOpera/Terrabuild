@@ -9,7 +9,7 @@ outputs:
   - dist
 
 targets:
-  publish: [ build ]
+  publish: [ dist ]
 
 steps:
   build:

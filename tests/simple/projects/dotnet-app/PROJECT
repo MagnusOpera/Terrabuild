@@ -11,7 +11,7 @@ steps:
   build:
     - (dotnet): build
 
-  publish:
+  dist:
     - (dotnet): publish
 
   docker:
