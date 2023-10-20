@@ -11,9 +11,9 @@ type BuildOptions = {
 
 [<RequireQualifiedAccess>]
 type TaskBuildStatus =
-    | Success of string
-    | Failure of string
-    | Unfulfilled of string
+    | Success of nodeId:string * target:string
+    | Failure of nodeId:string * target:string
+    | Unfulfilled of nodeId:string
 
 [<RequireQualifiedAccess>]
 type BuildStatus =
@@ -44,7 +44,7 @@ type IBuildNotification =
     abstract NodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
 
 let private isTaskUnsatisfied = function
-    | TaskBuildStatus.Failure depId -> Some depId
+    | TaskBuildStatus.Failure (depId, _) -> Some depId
     | TaskBuildStatus.Unfulfilled depId -> Some depId
     | TaskBuildStatus.Success _ -> None
 
@@ -114,19 +114,19 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         match cache.TryGetSummary depCacheEntryId with
         | Some summary -> 
             match summary.Status with
-            | Cache.TaskStatus.Success -> TaskBuildStatus.Success depCacheEntryId
-            | Cache.TaskStatus.Failure -> TaskBuildStatus.Failure depCacheEntryId
-        | _ -> TaskBuildStatus.Unfulfilled depCacheEntryId
+            | Cache.TaskStatus.Success -> TaskBuildStatus.Success (depNode.Configuration.Hash, summary.Target)
+            | Cache.TaskStatus.Failure -> TaskBuildStatus.Failure (depNode.Configuration.Hash, summary.Target)
+        | _ -> TaskBuildStatus.Unfulfilled depId
 
     let buildNode (node: Graph.Node) =
         notification.NodeDownloading node
-        let unsatisfyingDep =
+        let isAllSatisfied =
             node.Dependencies
             |> Seq.map getDependencyStatus
-            |> Seq.choose isTaskUnsatisfied |> Seq.tryHead
+            |> Seq.choose isTaskUnsatisfied
+            |> Seq.isEmpty
 
-        match unsatisfyingDep with
-        | None ->
+        if isAllSatisfied then
             let projectDirectory =
                 match IO.combinePath workspaceConfig.Directory node.ProjectId with
                 | IO.Directory projectDirectory -> projectDirectory
@@ -223,7 +223,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                                     Cache.TargetSummary.Status = status }
                     cacheEntry.Complete summary
                     Some summary
-        | Some _ ->
+        else
             None
 
     // this is the core of the build
@@ -261,7 +261,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
     let dependencies =
         graph.RootNodes
-        |> Seq.map (fun (KeyValue(dependency, nodeId)) -> dependency, getDependencyStatus nodeId)
+        |> Seq.map (fun (KeyValue(dependency, nodeId)) ->
+            dependency, getDependencyStatus nodeId)
         |> Map
 
     let endedAt = DateTime.UtcNow
@@ -280,3 +281,4 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                       BuildSummary.Targets = graph.Targets
                       BuildSummary.Dependencies = dependencies }
     notification.BuildCompleted buildInfo
+    buildInfo

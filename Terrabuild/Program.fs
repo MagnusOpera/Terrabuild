@@ -51,8 +51,13 @@ let processCommandLine () =
 
             let cache = Cache.Cache(config.Build.Storage)
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            Build.run config graph cache buildNotification options
+            let build = Build.run config graph cache buildNotification options
             buildNotification.WaitCompletion()
+
+            if debug then
+                let jsonBuild = Json.Serialize build
+                jsonBuild |> IO.writeTextFile "terrabuild.build.json"
+
         with
             | :? Configuration.ConfigException as ex ->
                 let reason = dumpKnownException ex |> Seq.rev |> String.join ", "
