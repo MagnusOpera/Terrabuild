@@ -14,14 +14,20 @@ run-build-circular:
 run-build:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --debug
 
-run-build-app:
-	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
+run-build:
+	dotnet run --project Terrabuild -- dist --workspace tests/simple --environment debug --debug
+
+run-build-retry:
+	dotnet run --project Terrabuild -- dist --workspace tests/simple --environment debug --debug --retry
 
 run-docker:
 	dotnet run --project Terrabuild -- run docker --workspace tests/simple --environment debug
 
 run-deploy:
 	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug
+
+run-build-app:
+	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
 
 run-build-az:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --shared --env release
