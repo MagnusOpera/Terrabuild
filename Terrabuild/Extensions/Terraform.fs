@@ -38,17 +38,18 @@ type Terraform(context) =
     override _.BuildStepCommands (_, parameters) =
         match parameters with
         | :? TerrformInit ->
-            [ { Command = "terraform"; Arguments = $"init" } ]
+            [ { Command = "terraform"; Arguments = $"init -reconfigure" } ]
         | :? TerrformWorkspace as parameters ->
-            [ { Command = "terraform"; Arguments = $"workspace select {parameters.Workspace}" } ]
+            [ { Command = "terraform"; Arguments = $"init -reconfigure" }
+              { Command = "terraform"; Arguments = $"workspace select {parameters.Workspace}" } ]
         | :? TerraformPlan as parameters ->
             let workspace = parameters.Workspace |> Option.ofObj
-            [ { Command = "terraform"; Arguments = $"init" }
+            [ { Command = "terraform"; Arguments = $"init -reconfigure" }
               if workspace |> Option.isSome then { Command = "terraform"; Arguments = $"workspace select {workspace.Value}" }
               { Command = "terraform"; Arguments = $"plan -out=terrabuild.planfile" } ]
         | :? TerraformApply as parameters ->
             let workspace = parameters.Workspace |> Option.ofObj
-            [ { Command = "terraform"; Arguments = $"init" }
+            [ { Command = "terraform"; Arguments = $"init -reconfigure" }
               if workspace |> Option.isSome then { Command = "terraform"; Arguments = $"workspace select {workspace.Value}" }
               { Command = "terraform"; Arguments = $"apply terrabuild.planfile" } ]
         | _ -> ArgumentException($"Unknown action") |> raise

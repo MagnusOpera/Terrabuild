@@ -22,8 +22,8 @@ run-docker:
 run-deploy:
 	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry)
 
-run-deploy-default:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=default $(retry)
+run-deploy-dev:
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev $(retry)
 
 run-build-app:
 	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
