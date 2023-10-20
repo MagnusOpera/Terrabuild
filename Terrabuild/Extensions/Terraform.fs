@@ -23,7 +23,7 @@ type Terraform(context) =
 
     override _.Dependencies = [] 
 
-    override _.Outputs = [ "terraform.planfile" ]
+    override _.Outputs = [ "terrabuild.planfile" ]
 
     override _.Ignores = [ ".terraform" ]
 
