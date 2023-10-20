@@ -1,8 +1,6 @@
 module Cache
 open System
 open System.IO
-open System.Formats.Tar
-open System.IO.Compression
 
 [<RequireQualifiedAccess>]
 type TaskStatus =
@@ -62,6 +60,29 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage option) =
         | IO.None -> ()
         IO.createDirectory entryDir
 
+    let write (summary: TargetSummary) =
+        let summary =
+            { summary
+                with Steps = summary.Steps
+                             |> List.map (fun step -> { step
+                                                        with Log = IO.getFilename step.Log })
+                     Outputs = summary.Outputs
+                               |> Option.map (fun outputs -> IO.getFilename outputs) }
+
+        let summaryFile = IO.combinePath entryDir summaryFilename
+        summary |> Json.Serialize |> IO.writeTextFile summaryFile
+
+    let upload (storage: Storages.Storage) =
+        let tarFile = IO.getTempFilename()
+        let compressFile = IO.getTempFilename()
+        try
+            entryDir |> Compression.tar tarFile
+            tarFile |> Compression.compress compressFile
+            storage.Upload id compressFile
+        finally
+            IO.deleteAny compressFile
+            IO.deleteAny tarFile
+
     interface IEntry with
         member _.NextLogFile () =
             logNum <- logNum + 1
@@ -71,31 +92,8 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage option) =
         member _.Outputs = IO.combinePath entryDir "outputs"
 
         member _.Complete summary =
-            let summary =
-                { summary
-                  with Steps = summary.Steps
-                               |> List.map (fun step -> { step
-                                                          with Log = IO.getFilename step.Log })
-                       Outputs = summary.Outputs
-                                 |> Option.map (fun outputs -> IO.getFilename outputs) }
-
-            let summaryFile = IO.combinePath entryDir summaryFilename
-            summary |> Json.Serialize |> IO.writeTextFile summaryFile
-
-            match storage with
-            | Some storage ->
-                let tarFile = IO.getTempFilename()
-                let compressFile = IO.getTempFilename()
-                try
-                    entryDir |> Compression.tar tarFile
-                    tarFile |> Compression.compress compressFile
-                    storage.Upload id compressFile
-                finally
-                    IO.deleteAny compressFile
-                    IO.deleteAny tarFile
-
-            | _ -> ()
-
+            summary |> write
+            storage |> Option.iter upload
             entryDir |> markEntryAsCompleted
 
 
@@ -111,8 +109,7 @@ type Cache(storage: Storages.Storage option) =
             let summaryFile = IO.combinePath entryDir summaryFilename
             let completeFile = IO.combinePath entryDir completeFilename
 
-
-            let loadSummary () =
+            let load () =
                 let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
                 let summary = { summary
                                 with Steps = summary.Steps
@@ -122,33 +119,30 @@ type Cache(storage: Storages.Storage option) =
                 cachedSumaries.TryAdd(summaryFile, summary) |> ignore
                 summary
 
+            let download (storage: Storages.Storage) =
+                match storage.TryDownload id with
+                | Some tarFile ->
+                    let uncompressFile = IO.getTempFilename()
+                    try
+                        tarFile |> Compression.uncompress uncompressFile
+                        uncompressFile |> Compression.untar entryDir
+                        entryDir |> markEntryAsCompleted
+                        let summary = load()
+                        summary |> Some
+                    finally
+                        IO.deleteAny uncompressFile
+                        IO.deleteAny tarFile
+                | _ ->
+                    None
+
 
             match completeFile with
             | IO.File _ ->
-                loadSummary() |> Some
+                load() |> Some
             | _ ->
-                // cleanup the mess - it's not valid anyway
+                // cleanup everything - it's not valid anyway
                 IO.deleteAny entryDir
-
-                // try get remote entry
-                match storage with
-                | Some storage ->
-                    match storage.TryDownload id with
-                    | Some tarFile ->
-                        let uncompressFile = IO.getTempFilename()
-                        try
-                            tarFile |> Compression.uncompress uncompressFile
-                            uncompressFile |> Compression.untar entryDir
-                            entryDir |> markEntryAsCompleted
-                            let summary = loadSummary()
-                            summary |> Some
-                        finally
-                            IO.deleteAny uncompressFile
-                            IO.deleteAny tarFile
-                    | _ ->
-                        None
-                | _ -> None
-
+                storage |> Option.bind download
 
 
     member _.CreateEntry id : IEntry =
