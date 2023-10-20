@@ -11,12 +11,14 @@ environments:
   debug:
     configuration: Debug
     secret_message: tagada
+    workspace: default
 
   release:
     configuration: Release
+    workspace: default
 
 extensions:
   dotnet:
     configuration: $(configuration)
   terraform:
-    workspace: dev
+    workspace: $(workspace)

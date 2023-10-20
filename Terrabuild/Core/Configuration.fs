@@ -284,14 +284,15 @@ type WorkspaceConfig = {
 
 
 
-let read workspaceDir shared environment labels =
+let read workspaceDir shared environment labels variables =
     let buildFile = Path.Combine(workspaceDir, "BUILD")
     let buildDocument = Yaml.loadDocument buildFile
     let buildConfig = BuildConfigParser.parse buildDocument shared environment
 
     let processedNodes = ConcurrentDictionary<string, bool>()
-    let buildVariables = buildConfig.Variables
-
+    let buildVariables =
+        buildConfig.Variables
+        |> Map.replace variables
 
     let rec scanDependency projects project =
         let projectId = IO.combinePath workspaceDir project

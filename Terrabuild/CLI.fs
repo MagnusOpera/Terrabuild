@@ -10,6 +10,7 @@ type RunArgs =
     | [<Unique; AltCommandLine("--nc")>] NoCache
     | [<Unique; AltCommandLine("--r")>] Retry
     | [<Unique; AltCommandLine("--l")>] Label of labels:string list
+    | [<EqualsAssignment; AltCommandLine("--v")>] Variable of variable:string * value:string
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -21,6 +22,7 @@ with
             | NoCache -> "Do not use cache when building target."
             | Retry -> "Retry failed task."
             | Label _-> "Select projects based on labels."
+            | Variable _ -> "Set variable."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
@@ -32,6 +34,7 @@ type TargetArgs =
     | [<Unique; AltCommandLine("--nc")>] NoCache
     | [<Unique; AltCommandLine("--r")>] Retry
     | [<Unique; AltCommandLine("--l")>] Label of labels:string list
+    | [<EqualsAssignment; AltCommandLine("--v")>] Variable of variable:string * value:string
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -44,6 +47,7 @@ with
             | NoCache -> "Do not use cache when building target."
             | Retry -> "Retry failed task."
             | Label _-> "Select projects based on labels."
+            | Variable _ -> "Set variable."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =

@@ -33,10 +33,10 @@ let processCommandLine () =
     let result = parser.ParseCommandLine()
     let debug = result.Contains(TerrabuildArgs.Debug)
 
-    let runTarget wsDir target shared environment labels options =
+    let runTarget wsDir target shared environment labels variables options =
         try
             Console.WriteLine($"{Ansi.Emojis.box} Reading configuration")
-            let config = Configuration.read wsDir shared environment labels
+            let config = Configuration.read wsDir shared environment labels variables
 
             if debug then
                 let jsonConfig = Json.Serialize config
@@ -63,10 +63,11 @@ let processCommandLine () =
         let shared = buildArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default"
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map Set
+        let variables = buildArgs.GetResults(RunArgs.Variable) |> Map
         let options = { Build.BuildOptions.NoCache = buildArgs.Contains(RunArgs.NoCache)
                         Build.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Build.BuildOptions.Retry = buildArgs.Contains(RunArgs.Retry) }
-        runTarget wsDir [target] shared environment labels options
+        runTarget wsDir [target] shared environment labels variables options
 
 
     let target (targetArgs: ParseResults<TargetArgs>) =
@@ -75,10 +76,11 @@ let processCommandLine () =
         let shared = targetArgs.TryGetResult(TargetArgs.Shared) |> Option.isSome
         let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default"
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map Set
+        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Map
         let options = { Build.BuildOptions.NoCache = targetArgs.Contains(TargetArgs.NoCache)
                         Build.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Build.BuildOptions.Retry = targetArgs.Contains(TargetArgs.Retry) }
-        runTarget wsDir targets shared environment labels options
+        runTarget wsDir targets shared environment labels variables options
 
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
