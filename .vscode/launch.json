@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Terrabuild",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Terrabuild/bin/Debug/net7.0/Terrabuild.dll",
+            "args": ["build", "--workspace", "tests/simple", "--environment", "debug", "--debug"],
+            "cwd": "",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+   ]
+}
