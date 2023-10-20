@@ -58,12 +58,10 @@ let enumerateFilesBut ignores rootdir =
                 let files =
                     Directory.EnumerateFiles(dir)
                     |> Seq.filter (fun file -> ignores |> Seq.exists (fun ignore -> file.StartsWith(ignore)) |> not)
-                    |> List.ofSeq
                 yield! files
 
                 let dirs =
                     Directory.EnumerateDirectories(dir)
-                    |> List.ofSeq
 
                 for dir in dirs do
                     yield! enumerateFilesBut dir
