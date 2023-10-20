@@ -1,4 +1,3 @@
-
 build:
 	dotnet build
 
@@ -14,17 +13,14 @@ run-build-circular:
 run-build:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --debug
 
-run-build:
+run-dist:
 	dotnet run --project Terrabuild -- dist --workspace tests/simple --environment debug --debug
-
-run-build-retry:
-	dotnet run --project Terrabuild -- dist --workspace tests/simple --environment debug --debug --retry
 
 run-docker:
 	dotnet run --project Terrabuild -- run docker --workspace tests/simple --environment debug
 
 run-deploy:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry)
 
 run-build-app:
 	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
@@ -47,3 +43,7 @@ usage:
 
 clear-cache:
 	dotnet run --project Terrabuild -- clear --buildcache
+
+docker-prune:
+	docker system prune -af
+

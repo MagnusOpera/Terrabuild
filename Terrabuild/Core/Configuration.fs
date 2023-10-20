@@ -370,17 +370,14 @@ let read workspaceDir shared environment labels =
             let projectSteps =
                 projectDef.StepDefinitions
                 |> Map.map (fun targetId steps ->
-                    let cacheEntryId = $"{projectId}/{nodeHash}/{targetId}"
-                    let nodeTargetHash = cacheEntryId |> String.sha256
-
                     steps
                     |> List.collect (fun stepDef ->
 
-                        let stepParams = $"nodeHash: \"{nodeTargetHash}\"\nshared: {shared}\n{stepDef.Parameters}"
+                        let stepParams = $"nodeHash: \"{nodeHash}\"\nshared: {shared}\n{stepDef.Parameters}"
 
                         let variables =
                             variables
-                            |> Map.add "terrabuild_node_hash" nodeTargetHash
+                            |> Map.add "terrabuild_node_hash" nodeHash
 
                         let stepParams =
                             variables
