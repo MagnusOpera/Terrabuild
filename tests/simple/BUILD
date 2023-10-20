@@ -5,6 +5,7 @@ targets:
   publish: [build]
   docker: [publish]
   push: [docker]
+  deploy: [build]
 
 environments:
   debug:

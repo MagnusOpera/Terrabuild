@@ -1,0 +1,16 @@
+builders:
+  terraform:
+
+dependencies:
+  - ../../projects/dotnet-app
+
+steps:
+  build:
+    - (terraform): plan
+
+  deploy:
+    - (terraform): apply
+
+labels:
+  - app
+  - dotnet

@@ -1,7 +1,7 @@
 builders:
   netbuild:
     use: dotnet
-    with: library2.csproj
+    with: dotnet-lib.csproj
 
 steps:
   build:

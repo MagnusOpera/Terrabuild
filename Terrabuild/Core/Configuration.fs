@@ -33,6 +33,7 @@ module ExtensionLoaders =
         match name with
         | "dotnet" -> Extensions.Dotnet(context)
         | "npm" -> Extensions.Npm(context)
+        | "terraform" -> Extensions.Terraform(context)
         | "shell" -> Extensions.Shell(context)
         | "docker" -> Extensions.Docker(context)
         | "make" -> Extensions.Make(context)

@@ -3,7 +3,7 @@ builders:
     with: Makefile
 
 dependencies:
-  - ../../libraries/library1
+  - ../../libraries/shell-lib
 
 outputs:
   - dist

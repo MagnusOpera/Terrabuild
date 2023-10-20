@@ -3,5 +3,5 @@ ARG configuration=Release
 
 WORKDIR /app
 COPY bin/${configuration}/net7.0/publish /app
-ENTRYPOINT ["/app/project3"]
+ENTRYPOINT ["/app/dotnet-app"]
 
