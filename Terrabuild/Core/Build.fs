@@ -178,7 +178,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     let cacheEntry = cache.CreateEntry cacheEntryId
                     notification.NodeBuilding node
 
-                    let beforeFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
+                    let beforeFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Outputs
 
                     let stepLogs = List<Cache.StepSummary>()
                     let mutable lastExitCode = 0
@@ -203,7 +203,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                         lastExitCode <- exitCode
 
                     notification.NodeUploading node
-                    let afterFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Ignores
+                    let afterFiles = FileSystem.createSnapshot projectDirectory node.Configuration.Outputs
 
                     // keep only new or modified files
                     let newFiles = afterFiles - beforeFiles

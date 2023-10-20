@@ -1,7 +1,9 @@
+builders:
+  npm:
+
 steps:
   build:
-    - (shell): echo
-      arguments: "building project2"
+    - (npm): build
 
 labels:
   - app

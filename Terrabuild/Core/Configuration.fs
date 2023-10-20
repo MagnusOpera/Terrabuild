@@ -32,6 +32,7 @@ module ExtensionLoaders =
 
         match name with
         | "dotnet" -> Extensions.Dotnet(context)
+        | "npm" -> Extensions.Npm(context)
         | "shell" -> Extensions.Shell(context)
         | "docker" -> Extensions.Docker(context)
         | "make" -> Extensions.Make(context)
@@ -122,7 +123,7 @@ module ProjectConfigParser =
         | String.Regex "^\((\w+)\)$" [name] -> Some name
         | _ -> None
 
-    let parse workspaceDir buildDocument projectDir projectFile =
+    let parse projectId workspaceDir buildDocument projectDir projectFile =
         let defaultExtensions = 
             Map [ "shell", (ExtensionLoaders.loadExtension "shell" projectDir None, Map.empty)
                   "echo", (ExtensionLoaders.loadExtension "echo" projectDir None, Map.empty) ]
@@ -182,7 +183,7 @@ module ProjectConfigParser =
                         builderParams
                     let builder = ExtensionLoaders.loadExtension builderUse projectDir builderWith
                     builder, builderParams)
-            | Some _ -> failwith "Expecting mapping"
+            | Some _ -> ConfigException($"Project {projectId} has malformed builders mapping", null) |> raise
             | _ -> Map.empty
 
         // collect extension capabilities
@@ -202,7 +203,7 @@ module ProjectConfigParser =
             |> Set
 
         let projectOutputs = projectOutputs + builderOutputs
-        let projectIgnores = projectIgnores + projectOutputs + builderIgnores
+        let projectIgnores = projectIgnores + builderIgnores
 
 
         // convert relative dependencies to absolute dependencies respective to workspaceDirectory
@@ -227,7 +228,7 @@ module ProjectConfigParser =
                         actions |> List.map (fun action ->
                             match action with
                             | Yaml.Mapping (_, actionConfig) ->
-                                let builderInfo, stepParams = actionConfig |> Map.partition (fun k v -> k |> getExtensionFromInvocation |> Option.isSome)
+                                let builderInfo, stepParams = actionConfig |> Map.partition (fun k _ -> k |> getExtensionFromInvocation |> Option.isSome)
                                 let builderInfo = builderInfo |> Seq.exactlyOne
                                 let builderName, builderCommand = builderInfo.Key |> getExtensionFromInvocation |> Option.get, builderInfo.Value |> Yaml.toString
                                 let (builder, builderParams) = projectBuilders |> Map.find builderName
@@ -240,7 +241,7 @@ module ProjectConfigParser =
 
                                 use writer = new StringWriter()
                                 YamlDotNet.RepresentationModel.YamlStream([
-                                    YamlDotNet.RepresentationModel.YamlDocument(stepParams)
+                                    if stepParams.Children.Count > 0 then YamlDotNet.RepresentationModel.YamlDocument(stepParams)
                                 ]).Save(writer)
                                 let content = writer.ToString()
 
@@ -301,7 +302,7 @@ let read workspaceDir shared environment labels =
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
-            let projectDef = ProjectConfigParser.parse workspaceDir buildDocument projectDir projectFile
+            let projectDef = ProjectConfigParser.parse project workspaceDir buildDocument projectDir projectFile
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
@@ -323,7 +324,7 @@ let read workspaceDir shared environment labels =
 
 
             // get dependencies on files
-            let files = projectDir |> IO.enumerateFilesBut projectDef.Ignores |> Set
+            let files = projectDir |> IO.enumerateFilesBut (projectDef.Outputs + projectDef.Ignores) |> Set
             let filesHash =
                 files
                 |> Seq.sort
@@ -361,7 +362,7 @@ let read workspaceDir shared environment labels =
 
             // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
             let nodeHash =
-                [ filesHash; dependenciesHash; variableHashes ]
+                [ project; filesHash; dependenciesHash; variableHashes ]
                 |> String.join "\n"
                 |> String.sha256
 

@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Extensions/Extensions.fs" />
     <Compile Include="Extensions/Dotnet.fs" />
+    <Compile Include="Extensions/Npm.fs" />
     <Compile Include="Extensions/Docker.fs" />
     <Compile Include="Extensions/Shell.fs" />
     <Compile Include="Extensions/Make.fs" />

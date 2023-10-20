@@ -50,19 +50,23 @@ let enumerateMatchingFiles pattern rootdir =
     Directory.EnumerateFiles(rootdir, pattern, SearchOption.AllDirectories)
     |> List.ofSeq
 
-let enumerateFilesBut ignore rootdir =
-    let ignore = ignore |> Set.map (combinePath rootdir)
+let enumerateFilesBut ignores rootdir =
+    let ignores = ignores |> Set.map (combinePath rootdir)
     let rec enumerateFilesBut dir =
         seq {
-            if ignore |> Set.contains dir |> not then
-                let files = Directory.EnumerateFiles(dir)
-                for file in files do
-                    if ignore |> Set.contains file |> not then
-                        yield file
+            if ignores |> Set.contains dir |> not then
+                let files =
+                    Directory.EnumerateFiles(dir)
+                    |> Seq.filter (fun file -> ignores |> Seq.exists (fun ignore -> file.StartsWith(ignore)) |> not)
+                    |> List.ofSeq
+                yield! files
 
-                let dirs = Directory.EnumerateDirectories(dir)
+                let dirs =
+                    Directory.EnumerateDirectories(dir)
+                    |> List.ofSeq
+
                 for dir in dirs do
-                    yield! enumerateFilesBut dir                
+                    yield! enumerateFilesBut dir
         }
 
     let res = enumerateFilesBut rootdir |> List.ofSeq
