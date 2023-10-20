@@ -18,3 +18,5 @@ environments:
 extensions:
   dotnet:
     configuration: $(configuration)
+  terraform:
+    workspace: dev
