@@ -97,7 +97,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         reverseIncomings
         |> Seq.collect (fun kvp -> kvp.Value)
         |> Seq.countBy (id)
-        |> Map.ofSeq
+        |> Map
         |> Map.map (fun _ value -> ref value)
 
     let readyNodes =
@@ -262,7 +262,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     let dependencies =
         graph.RootNodes
         |> Seq.map (fun (KeyValue(dependency, nodeId)) -> dependency, getDependencyStatus nodeId)
-        |> Map.ofSeq
+        |> Map
 
     let endedAt = DateTime.UtcNow
     let duration = endedAt - startedAt

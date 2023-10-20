@@ -14,7 +14,7 @@ module Map =
     let ofDict dic = 
         dic 
         |> Seq.map (|KeyValue|)  
-        |> Map.ofSeq
+        |> Map
 
     let choose f m =
         m |> Map.fold (fun acc k v -> match f k v with

@@ -19,7 +19,7 @@ let (|Mapping|Scalar|Sequence|) (yamlNode: YamlNode) =
             |> Seq.map (fun kvp -> 
                 let keyNode = kvp.Key :?> YamlScalarNode
                 keyNode.Value, kvp.Value) 
-            |> Map.ofSeq            
+            |> Map            
         Mapping (node, mapping)
     | YamlNodeType.Scalar   -> 
         let node = yamlNode :?> YamlScalarNode

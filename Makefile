@@ -12,7 +12,10 @@ run-build-circular:
 	dotnet run --project Terrabuild -- build --workspace tests/circular
 
 run-build:
-	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug
+	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --debug
+
+run-build-app:
+	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
 
 run-docker:
 	dotnet run --project Terrabuild -- run docker --workspace tests/simple --environment debug

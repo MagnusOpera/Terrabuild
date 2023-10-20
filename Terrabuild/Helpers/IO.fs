@@ -39,8 +39,15 @@ let deleteAny entry =
     | Directory directory -> Directory.Delete(directory, true)
     | _ -> ()
 
+let enumerateDirs rootDir =
+    Directory.EnumerateDirectories(rootDir)
+
 let enumerateFiles rootdir =
     Directory.EnumerateFiles(rootdir, "*", SearchOption.AllDirectories)
+    |> List.ofSeq
+
+let enumerateMatchingFiles pattern rootdir =
+    Directory.EnumerateFiles(rootdir, pattern, SearchOption.AllDirectories)
     |> List.ofSeq
 
 let enumerateFilesBut ignore rootdir =

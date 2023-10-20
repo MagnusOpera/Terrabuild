@@ -26,5 +26,5 @@ let createSnapshot projectDirectory outputs =
                                 |> Seq.map (fun file -> file, System.IO.File.GetLastWriteTimeUtc file)
                                 |> List.ofSeq
             | _ -> [])
-        |> Map.ofSeq
+        |> Map
     { TimestampedFiles = files }

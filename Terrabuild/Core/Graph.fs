@@ -51,7 +51,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
                         | _ ->
                             hasInternalDependencies <- true
                             [ buildTarget dependsOn projectId ]
-                    children <- children + (childDependency |> Set.ofSeq)
+                    children <- children + (childDependency |> Set)
                 children, hasInternalDependencies
 
             // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
@@ -72,7 +72,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
 
     let rootNodes =
         Map [
-            for dependency in wsConfig.Build.Dependencies do
+            for dependency in wsConfig.Dependencies do
                 for target in targets do
                     dependency, buildTarget target dependency
         ]

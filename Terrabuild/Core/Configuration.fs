@@ -50,7 +50,6 @@ module BuildConfigParser =
     [<RequireQualifiedAccess>]
     type BuildConfig = {
         Storage: Storages.Storage option
-        Dependencies: Dependencies
         Targets: Targets
         Variables: Variables
     }
@@ -67,16 +66,10 @@ module BuildConfigParser =
             else
                 None
 
-        // dependencies
-        let dependencies =
-            buildDocument
-            |> Yaml.query "/dependencies"
-            |> Yaml.toOptionalStringList
-
         // targets
         let targets =
             match buildDocument |> Yaml.query "/targets" with
-            | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Set.ofList << Yaml.toStringList)
+            | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Set << Yaml.toStringList)
             | _ -> Map.empty
 
         // variables
@@ -95,8 +88,7 @@ module BuildConfigParser =
                     ConfigException($"Environment {environment} not found", null)
                     |> raise
 
-        let buildConfig = { BuildConfig.Dependencies = dependencies |> Set.ofSeq
-                            BuildConfig.Targets = targets
+        let buildConfig = { BuildConfig.Targets = targets
                             BuildConfig.Variables = variables
                             BuildConfig.Storage = storage}
         buildConfig
@@ -122,6 +114,7 @@ module ProjectConfigParser =
         Outputs: Paths
         Targets: Targets
         StepDefinitions: Map<string, StepDefinition list>
+        Labels: Set<string>
     }
 
     let getExtensionFromInvocation name =
@@ -145,24 +138,24 @@ module ProjectConfigParser =
             projectDocument
             |> Yaml.query "/outputs"
             |> Yaml.toOptionalStringList
-            |> Set.ofList
+            |> Set
 
         let projectIgnores =
             projectDocument
             |> Yaml.query "/outputs"
             |> Yaml.toOptionalStringList
-            |> Set.ofList
+            |> Set
 
         let projectTargets =
             match projectDocument |> Yaml.query "/targets" with
-            | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Set.ofList << Yaml.toStringList)
+            | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Set << Yaml.toStringList)
             | _ -> Map.empty
 
         let projectDependencies =
             projectDocument
             |> Yaml.query "/dependencies"
             |> Yaml.toOptionalStringList
-            |> Set.ofList
+            |> Set
 
         let projectBuilders =
             match projectDocument |> Yaml.query "/builders" with
@@ -196,17 +189,17 @@ module ProjectConfigParser =
         let builderOutputs =
             projectBuilders
             |> Seq.collect (fun (KeyValue(_, (extension, _))) -> extension.Outputs)
-            |> Set.ofSeq
+            |> Set
 
         let builderIgnores =
             projectBuilders
             |> Seq.collect (fun (KeyValue(_, (extension, _))) -> extension.Ignores)
-            |> Set.ofSeq
+            |> Set
 
         let builderDependencies =
             projectBuilders
             |> Seq.collect (fun (KeyValue(_, (extension, _))) -> extension.Dependencies)
-            |> Set.ofSeq
+            |> Set
 
         let projectOutputs = projectOutputs + builderOutputs
         let projectIgnores = projectIgnores + projectOutputs + builderIgnores
@@ -218,6 +211,10 @@ module ProjectConfigParser =
             |> Set.map (fun dep -> IO.combinePath projectDir dep
                                     |> IO.relativePath workspaceDir)
 
+        let labels =
+            match projectDocument |> Yaml.query "/labels" with
+            | Some (Yaml.Sequence (_, sequence)) -> sequence |> List.map Yaml.toString |> Set
+            | _ -> Set.empty
 
         let projectBuilders = defaultExtensions |> Map.replace projectBuilders
 
@@ -258,7 +255,8 @@ module ProjectConfigParser =
           ProjectDefinition.Ignores = projectIgnores
           ProjectDefinition.Outputs = projectOutputs
           ProjectDefinition.Targets = projectTargets
-          ProjectDefinition.StepDefinitions = projectStepDefinitions }
+          ProjectDefinition.StepDefinitions = projectStepDefinitions
+          ProjectDefinition.Labels = labels }
 
 
 
@@ -271,10 +269,12 @@ type ProjectConfig = {
     Steps: Steps
     Hash: string
     Variables: Variables
+    Labels: Set<string>
 }
 
 type WorkspaceConfig = {
     Directory: string
+    Dependencies: Dependencies
     Build: BuildConfigParser.BuildConfig
     Projects: Map<string, ProjectConfig>
     Environment: string
@@ -282,140 +282,171 @@ type WorkspaceConfig = {
 
 
 
-let read workspaceDir shared environment =
+let read workspaceDir shared environment labels =
     let buildFile = Path.Combine(workspaceDir, "BUILD")
     let buildDocument = Yaml.loadDocument buildFile
     let buildConfig = BuildConfigParser.parse buildDocument shared environment
 
-
     let processedNodes = ConcurrentDictionary<string, bool>()
-    let mutable projects = Map.empty
     let buildVariables = buildConfig.Variables
 
 
-    let rec scanDependencies dependencies =
-        for project in dependencies do
-            let projectId = IO.combinePath workspaceDir project
-            let projectDir, projectFile = 
-                match projectId with
-                | IO.File projectFile -> IO.parentDirectory projectFile, IO.getFilename projectFile
-                | IO.Directory projectDir -> projectDir, "PROJECT"
-                | _ -> failwith $"Failed to find project {projectId}"
+    let rec scanDependency projects project =
+        let projectId = IO.combinePath workspaceDir project
+        let projectDir, projectFile = 
+            match projectId with
+            | IO.Directory projectDir -> projectDir, "PROJECT"
+            | IO.File _ -> ConfigException($"Dependency {project} is not a directory", null) |> raise
+            | _ -> failwith $"Failed to find project {projectId}"
 
-            // process only unknown dependency
-            if processedNodes.TryAdd(project, true) then
+        // process only unknown dependency
+        if processedNodes.TryAdd(project, true) then
+            let projectDef = ProjectConfigParser.parse workspaceDir buildDocument projectDir projectFile
 
-                let projectDef = ProjectConfigParser.parse workspaceDir buildDocument projectDir projectFile
-
-                // we go depth-first in order to compute node hash right after
-                // NOTE: this could lead to a memory usage problem
+            // we go depth-first in order to compute node hash right after
+            // NOTE: this could lead to a memory usage problem
+            let projects =
                 try
-                    scanDependencies projectDef.Dependencies
+                    scanDependencies projects projectDef.Dependencies
                 with
                     ex ->
                         ConfigException($"while processing {project}", ex)
                         |> raise
 
 
-                // check for circular or missing dependencies
-                for childDependency in projectDef.Dependencies do
-                    if projects |> Map.tryFind childDependency |> Option.isNone then
-                        ConfigException($"Circular dependencies between {project} and {childDependency}", null)
+            // check for circular or missing dependencies
+            for childDependency in projectDef.Dependencies do
+                if projects |> Map.tryFind childDependency |> Option.isNone then
+                    ConfigException($"Circular dependencies between {project} and {childDependency}", null)
+                    |> raise
+
+
+
+            // get dependencies on files
+            let files = projectDir |> IO.enumerateFilesBut projectDef.Ignores |> Set
+            let filesHash =
+                files
+                |> Seq.sort
+                |> Hash.computeFilesSha
+
+            let variables = 
+                projectDef.StepDefinitions
+                |> Seq.collect (fun l -> l.Value)
+                |> Seq.collect (fun stepDef -> String.AllMatches "\$\((\w+)\)" stepDef.Parameters)
+                |> Set
+                |> Seq.map (fun varName ->
+                    match buildVariables |> Map.tryFind varName with
+                    | Some value -> varName, value
+                    | _ -> ConfigException($"Variable {varName} is not defined in \"{environment}\"", null) |> raise)
+                |> Map
+
+            let dependenciesHash =
+                projectDef.Dependencies
+                |> Seq.map (fun dependency -> 
+                    match projects |> Map.tryFind dependency with
+                    | Some project -> project.Hash
+                    | _ ->
+                        ConfigException($"Circular dependencies between {project} and {dependency}", null)
                         |> raise
+                )
+                |> Seq.sort
+                |> String.join "\n"
+                |> String.sha256
 
+            let variableHashes =
+                variables
+                |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
+                |> String.join "\n"
+                |> String.sha256
 
+            // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
+            let nodeHash =
+                [ filesHash; dependenciesHash; variableHashes ]
+                |> String.join "\n"
+                |> String.sha256
 
-                // get dependencies on files
-                let files = projectDir |> IO.enumerateFilesBut projectDef.Ignores |> Set.ofSeq
-                let filesHash =
-                    files
-                    |> Seq.sort
-                    |> Hash.computeFilesSha
+            let projectSteps =
+                projectDef.StepDefinitions
+                |> Map.map (fun targetId steps ->
+                    let cacheEntryId = $"{projectId}/{nodeHash}/{targetId}"
+                    let nodeTargetHash = cacheEntryId |> String.sha256
 
-                let variables = 
-                    projectDef.StepDefinitions
-                    |> Seq.collect (fun l -> l.Value)
-                    |> Seq.collect (fun stepDef -> String.AllMatches "\$\((\w+)\)" stepDef.Parameters)
-                    |> Set.ofSeq
-                    |> Seq.map (fun varName ->
-                        match buildVariables |> Map.tryFind varName with
-                        | Some value -> varName, value
-                        | _ -> ConfigException($"Variable {varName} is not defined in \"{environment}\"", null) |> raise)
-                    |> Map.ofSeq
+                    steps
+                    |> List.collect (fun stepDef ->
 
-                let dependenciesHash =
-                    projectDef.Dependencies
-                    |> Seq.map (fun dependency -> 
-                        match projects |> Map.tryFind dependency with
-                        | Some project -> project.Hash
-                        | _ ->
-                            ConfigException($"Circular dependencies between {project} and {dependency}", null)
-                            |> raise
+                        let stepParams = $"nodeHash: \"{nodeTargetHash}\"\nshared: {shared}\n{stepDef.Parameters}"
+
+                        let variables =
+                            variables
+                            |> Map.add "terrabuild_node_hash" nodeTargetHash
+
+                        let stepParams =
+                            variables
+                            |> Map.fold (fun acc key value -> acc |> String.replace $"$({key})" value) stepParams
+                        let stepArgsType =
+                            stepDef.Extension.GetStepParameters stepDef.Command
+                        let stepParameters =
+                                stepArgsType |> Option.ofObj
+                                |> Option.map (fun stepArgsType -> stepParams |> Yaml.loadModelFromType stepArgsType)
+                                |> Option.defaultValue null
+                        match stepParameters with
+                        | null -> []
+                        | :? Extensions.StepParameters as stepParameters ->
+                            stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
+                        | _ -> failwith "Unexpected type for action type"
                     )
-                    |> Seq.sort
-                    |> String.join "\n"
-                    |> String.sha256
-
-                let variableHashes =
-                    variables
-                    |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-                    |> String.join "\n"
-                    |> String.sha256
-
-                // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
-                let nodeHash =
-                    [ filesHash; dependenciesHash; variableHashes ]
-                    |> String.join "\n"
-                    |> String.sha256
-
-                let projectSteps =
-                    projectDef.StepDefinitions
-                    |> Map.map (fun targetId steps ->
-                        let cacheEntryId = $"{projectId}/{nodeHash}/{targetId}"
-                        let nodeTargetHash = cacheEntryId |> String.sha256
-
-                        steps
-                        |> List.collect (fun stepDef ->
-
-                            let stepParams = $"nodeHash: \"{nodeTargetHash}\"\nshared: {shared}\n{stepDef.Parameters}"
-
-                            let variables =
-                                variables
-                                |> Map.add "terrabuild_node_hash" nodeTargetHash
-
-                            let stepParams =
-                                variables
-                                |> Map.fold (fun acc key value -> acc |> String.replace $"$({key})" value) stepParams
-                            let stepArgsType =
-                                stepDef.Extension.GetStepParameters stepDef.Command
-                            let stepParameters =
-                                  stepArgsType |> Option.ofObj
-                                  |> Option.map (fun stepArgsType -> stepParams |> Yaml.loadModelFromType stepArgsType)
-                                  |> Option.defaultValue null
-                            match stepParameters with
-                            | null -> []
-                            | :? Extensions.StepParameters as stepParameters ->
-                                stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
-                            | _ -> failwith "Unexpected type for action type"
-                        )
-                    )
+                )
 
 
-                let projectConfig =
-                    { Dependencies = projectDef.Dependencies
-                      Outputs = projectDef.Outputs
-                      Ignores = projectDef.Ignores
-                      Targets = projectDef.Targets
-                      Steps = projectSteps
-                      Hash = nodeHash
-                      Variables = variables }
+            let projectConfig =
+                { Dependencies = projectDef.Dependencies
+                  Outputs = projectDef.Outputs
+                  Ignores = projectDef.Ignores
+                  Targets = projectDef.Targets
+                  Steps = projectSteps
+                  Hash = nodeHash
+                  Variables = variables
+                  Labels = projectDef.Labels }
 
-                projects <- projects |> Map.add project projectConfig
+            projects |> Map.add project projectConfig
+        else
+            projects
 
+    and scanDependencies projects dependencies =
+        let mutable projects = projects
+        for project in dependencies do
+            projects <- scanDependency projects project
+        projects
 
-    // initial dependency list is absolute respective to workspaceDirectory
-    scanDependencies buildConfig.Dependencies
+    // scan for projects
+    let rec findDependencies dir =
+        seq {
+            let projectFile =  IO.combinePath dir "PROJECT" 
+            match projectFile with
+            | IO.File file ->
+                file |> IO.parentDirectory |> IO.relativePath workspaceDir
+            | _ ->
+                for subdir in dir |> IO.enumerateDirs do
+                    yield! findDependencies subdir
+        }
+    let dependencies =
+        workspaceDir
+        |> findDependencies
+        |> Set
+
+    let projects = scanDependencies Map.empty dependencies
+
+    // select dependencies with labels if any
+    let dependencies =
+        match labels with
+        | Some labels ->
+            projects
+             |> Seq.choose (fun (KeyValue(dependency, config)) -> if Set.intersect config.Labels labels <> Set.empty then Some dependency else None)
+        | _ -> projects.Keys
+        |> Set
+
     { Directory = workspaceDir
+      Dependencies = dependencies
       Build = buildConfig
       Projects = projects
       Environment = environment }

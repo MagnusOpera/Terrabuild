@@ -9,6 +9,7 @@ type RunArgs =
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
     | [<Unique; AltCommandLine("--nc")>] NoCache
     | [<Unique; AltCommandLine("--r")>] Retry
+    | [<Unique; AltCommandLine("--l")>] Label of labels:string list
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -19,6 +20,7 @@ with
             | Environment _ -> "Environment to use."
             | NoCache -> "Do not use cache when building target."
             | Retry -> "Retry failed task."
+            | Label _-> "Select projects based on labels."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
@@ -29,6 +31,7 @@ type TargetArgs =
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
     | [<Unique; AltCommandLine("--nc")>] NoCache
     | [<Unique; AltCommandLine("--r")>] Retry
+    | [<Unique; AltCommandLine("--l")>] Label of labels:string list
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -40,6 +43,7 @@ with
             | Environment _ -> "Environment to use."
             | NoCache -> "Do not use cache when building target."
             | Retry -> "Retry failed task."
+            | Label _-> "Select projects based on labels."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =
@@ -58,6 +62,7 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<TargetArgs>
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
+    | [<Hidden; Unique; Inherit>] Debug
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -68,3 +73,4 @@ with
             | Serve _ -> "Run target 'serve'."
             | Run _ -> "Run specified targets."
             | Clear _ -> "Clear specified caches."
+            | Debug -> "Enable logging and debug dumps."

@@ -12,48 +12,6 @@ let rec dumpKnownException (ex: Exception) =
         | _ -> yield ex.ToString()
     }
 
-let runTarget wsDir target shared environment options =
-    try
-        Console.WriteLine($"{Ansi.Emojis.box} Reading configuration")
-        let config = Configuration.read wsDir shared environment
-        Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}")
-        let graph = Graph.buildGraph config target
-
-        // let jsonGraph = Json.Serialize graph
-        // jsonGraph |> IO.writeTextFile "graph.json"
-
-        let cache = Cache.Cache(config.Build.Storage)
-        let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-        Build.run config graph cache buildNotification options
-        buildNotification.WaitCompletion()
-    with
-        | :? Configuration.ConfigException as ex ->
-            let reason = dumpKnownException ex |> Seq.rev |> String.join ", "
-            Console.WriteLine($"{Ansi.Emojis.explosion} {reason}")
-
-let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
-    let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
-    let shared = buildArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
-    let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default"
-    let options = { Build.BuildOptions.NoCache = buildArgs.Contains(RunArgs.NoCache)
-                    Build.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
-                    Build.BuildOptions.Retry = buildArgs.Contains(RunArgs.Retry) }
-    runTarget wsDir [target] shared environment options
-
-
-let target (targetArgs: ParseResults<TargetArgs>) =
-    let targets = targetArgs.GetResult(TargetArgs.Target)
-    let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
-    let shared = targetArgs.TryGetResult(TargetArgs.Shared) |> Option.isSome
-    let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default"
-    let options = { Build.BuildOptions.NoCache = targetArgs.Contains(TargetArgs.NoCache)
-                    Build.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
-                    Build.BuildOptions.Retry = targetArgs.Contains(TargetArgs.Retry) }
-    runTarget wsDir targets shared environment options
-
-
-let clear (clearArgs: ParseResults<ClearArgs>) =
-    if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
 
 type TerrabuildExiter() =
     interface IExiter with
@@ -70,11 +28,63 @@ type TerrabuildExiter() =
             exit (int errorCode)
 
 let processCommandLine () =
-    let args = [| "build"; "--workspace"; "tests/simple"; "--environment"; "debug" |]
     let errorHandler = TerrabuildExiter()
     let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
-    match parser.ParseCommandLine() with
-    // match parser.Parse(args) with
+    let result = parser.ParseCommandLine()
+    let debug = result.Contains(TerrabuildArgs.Debug)
+
+    let runTarget wsDir target shared environment labels options =
+        try
+            Console.WriteLine($"{Ansi.Emojis.box} Reading configuration")
+            let config = Configuration.read wsDir shared environment labels
+
+            if debug then
+                let jsonConfig = Json.Serialize config
+                jsonConfig |> IO.writeTextFile "terrabuild.config.json"
+
+            Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}")
+            let graph = Graph.buildGraph config target
+
+            if debug then
+                let jsonGraph = Json.Serialize graph
+                jsonGraph |> IO.writeTextFile "terrabuild.graph.json"
+
+            let cache = Cache.Cache(config.Build.Storage)
+            let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+            Build.run config graph cache buildNotification options
+            buildNotification.WaitCompletion()
+        with
+            | :? Configuration.ConfigException as ex ->
+                let reason = dumpKnownException ex |> Seq.rev |> String.join ", "
+                Console.WriteLine($"{Ansi.Emojis.explosion} {reason}")
+
+    let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
+        let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
+        let shared = buildArgs.TryGetResult(RunArgs.Shared) |> Option.isSome
+        let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default"
+        let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map Set
+        let options = { Build.BuildOptions.NoCache = buildArgs.Contains(RunArgs.NoCache)
+                        Build.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
+                        Build.BuildOptions.Retry = buildArgs.Contains(RunArgs.Retry) }
+        runTarget wsDir [target] shared environment labels options
+
+
+    let target (targetArgs: ParseResults<TargetArgs>) =
+        let targets = targetArgs.GetResult(TargetArgs.Target)
+        let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
+        let shared = targetArgs.TryGetResult(TargetArgs.Shared) |> Option.isSome
+        let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default"
+        let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map Set
+        let options = { Build.BuildOptions.NoCache = targetArgs.Contains(TargetArgs.NoCache)
+                        Build.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
+                        Build.BuildOptions.Retry = targetArgs.Contains(TargetArgs.Retry) }
+        runTarget wsDir targets shared environment labels options
+
+
+    let clear (clearArgs: ParseResults<ClearArgs>) =
+        if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
+
+    match result with
     | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
     | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
     | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"

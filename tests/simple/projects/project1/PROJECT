@@ -23,3 +23,6 @@ steps:
       arguments: "publishing project1"
     - (shell): make
       arguments: publish
+
+labels:
+  - app

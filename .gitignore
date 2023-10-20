@@ -409,3 +409,5 @@ dist
 node_modules
 Makefile2
 init.sh
+terrabuild.config.json
+terrabuild.graph.json

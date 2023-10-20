@@ -22,3 +22,7 @@ steps:
   push:
     - (docker): push
       tag: 666
+
+labels:
+  - app
+  - dotnet
