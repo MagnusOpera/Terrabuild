@@ -412,5 +412,4 @@ init.sh
 terrabuild.config.json
 terrabuild.graph.json
 terrabuild.planfile
-terraform.tfstate
 .terraform
