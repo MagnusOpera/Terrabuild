@@ -1,7 +1,7 @@
 namespace SourceControls
 
-type Local(workspaceDir: string) =
-    inherit SourceControl(workspaceDir)
+type Local() =
+    inherit SourceControl()
 
     override _.HeadCommit = "local"
 

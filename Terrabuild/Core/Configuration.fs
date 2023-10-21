@@ -46,10 +46,10 @@ module ExtensionLoaders =
         | Some "azureblob" -> Storages.MicrosoftBlobStorage()
         | _ -> failwith $"Unknown storage {name}"
 
-    let loadSourceControl workspaceDir name: SourceControls.SourceControl =
+    let loadSourceControl name: SourceControls.SourceControl =
         match name with
-        | None -> SourceControls.Local(workspaceDir)
-        | Some "github" -> SourceControls.GitHub(workspaceDir)
+        | None -> SourceControls.Local()
+        | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control {name}"
 
 module BuildConfigParser =
@@ -300,9 +300,9 @@ let read workspaceDir shared environment labels variables =
             buildDocument
             |> Yaml.query "/sourcecontrol"
             |> Yaml.toOptionalString
-            |> ExtensionLoaders.loadSourceControl workspaceDir
+            |> ExtensionLoaders.loadSourceControl
         else
-            ExtensionLoaders.loadSourceControl workspaceDir None
+            ExtensionLoaders.loadSourceControl None
 
 
 

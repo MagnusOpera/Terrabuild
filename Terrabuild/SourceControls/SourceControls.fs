@@ -1,6 +1,6 @@
 namespace SourceControls
 
 [<AbstractClass>]
-type SourceControl(workspaceDir:string) =
+type SourceControl() =
     abstract HeadCommit: string
     abstract BranchOrTag: string

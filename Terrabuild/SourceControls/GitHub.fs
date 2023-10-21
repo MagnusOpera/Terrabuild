@@ -1,7 +1,7 @@
 namespace SourceControls
 
-type GitHub(workspaceDir: string) =
-    inherit SourceControl(workspaceDir)
+type GitHub() =
+    inherit SourceControl()
 
     override _.HeadCommit =
         let hash = System.Environment.GetEnvironmentVariable("GITHUB_SHA")
