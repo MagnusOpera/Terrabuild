@@ -37,17 +37,17 @@ type Docker(context) =
             let args = parameters.Arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
             let buildArgs = $"build --file {dockerfile} --tag {parameters.Image}:{parameters.NodeHash} {args} ."
 
-            if parameters.Shared then
+            if context.Shared then
                 let pushArgs = $"push {parameters.Image}:{parameters.NodeHash}"
                 [ { Command = "docker"; Arguments = buildArgs}
                   { Command = "docker"; Arguments = pushArgs} ]
             else
                 [ { Command = "docker"; Arguments = buildArgs} ]
         | :? DockerPush as parameters ->
-            if parameters.Shared then
-                let retagArgs = $"buildx imagetools {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{parameters.BranchOrTag}"
+            if context.Shared then
+                let retagArgs = $"buildx imagetools {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{context.BranchOrTag}"
                 [ { Command = "docker"; Arguments = retagArgs} ]
             else
-                let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{parameters.BranchOrTag}"
+                let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{context.BranchOrTag}"
                 [ { Command = "docker"; Arguments = tagArgs} ]        
         | _ -> ArgumentException($"Unknown action") |> raise

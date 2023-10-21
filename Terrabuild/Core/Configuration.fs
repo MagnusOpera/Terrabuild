@@ -25,11 +25,7 @@ type ExtensionConfigs = Map<string, Map<string, string>>
 
 module ExtensionLoaders =
 
-    let loadExtension name projectDir projectFile : Extensions.Extension =
-        let context = { new Extensions.IContext
-                        with member _.Directory = projectDir
-                             member _.With = projectFile }
-
+    let loadExtension name context : Extensions.Extension =
         match name with
         | "dotnet" -> Extensions.Dotnet(context)
         | "npm" -> Extensions.Npm(context)
@@ -61,7 +57,7 @@ module BuildConfigParser =
     }
 
 
-    let parse buildDocument shared environment =
+    let parse buildDocument environment =
         // targets
         let targets =
             match buildDocument |> Yaml.query "/targets" with
@@ -117,11 +113,7 @@ module ProjectConfigParser =
         | String.Regex "^\((\w+)\)$" [name] -> Some name
         | _ -> None
 
-    let parse projectId workspaceDir buildDocument projectDir projectFile =
-        let defaultExtensions = 
-            Map [ "shell", (ExtensionLoaders.loadExtension "shell" projectDir None, Map.empty)
-                  "echo", (ExtensionLoaders.loadExtension "echo" projectDir None, Map.empty) ]
-
+    let parse projectId workspaceDir buildDocument projectDir projectFile defaultExtensions shared commit branchOrTag =
         // we might have landed in a directory without a configuration
         // in that case we just use the default configuration (which does nothing)
         let projectDocument =
@@ -175,7 +167,15 @@ module ProjectConfigParser =
 
                         let builderParams = configBuilderParams |> Map.replace configProjectParams
                         builderParams
-                    let builder = ExtensionLoaders.loadExtension builderUse projectDir builderWith
+ 
+                    let context = { new Extensions.IContext
+                                    with member _.Directory = projectDir
+                                         member _.With = builderWith
+                                         member _.Shared = shared
+                                         member _.Commit = commit
+                                         member _.BranchOrTag = branchOrTag }
+  
+                    let builder = ExtensionLoaders.loadExtension builderUse context 
                     builder, builderParams)
             | Some _ -> ConfigException($"Project {projectId} has malformed builders mapping", null) |> raise
             | _ -> Map.empty
@@ -282,7 +282,7 @@ type WorkspaceConfig = {
 let read workspaceDir shared environment labels variables =
     let buildFile = Path.Combine(workspaceDir, "BUILD")
     let buildDocument = Yaml.loadDocument buildFile
-    let buildConfig = BuildConfigParser.parse buildDocument shared environment
+    let buildConfig = BuildConfigParser.parse buildDocument environment
 
     // storage
     let storage =
@@ -304,7 +304,19 @@ let read workspaceDir shared environment labels variables =
         else
             ExtensionLoaders.loadSourceControl None
 
+    let commit = sourceControl.HeadCommit
+    let branchOrTag = sourceControl.BranchOrTag
 
+    let defaultExtensions =
+        let context = { new Extensions.IContext
+                        with member _.Directory = workspaceDir
+                                member _.With = None
+                                member _.Shared = shared
+                                member _.Commit = commit
+                                member _.BranchOrTag = branchOrTag }
+
+        Map [ "shell", (ExtensionLoaders.loadExtension "shell" context, Map.empty)
+              "echo", (ExtensionLoaders.loadExtension "echo" context, Map.empty) ]
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let buildVariables =
@@ -321,7 +333,7 @@ let read workspaceDir shared environment labels variables =
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
-            let projectDef = ProjectConfigParser.parse project workspaceDir buildDocument projectDir projectFile
+            let projectDef = ProjectConfigParser.parse project workspaceDir buildDocument projectDir projectFile defaultExtensions shared commit branchOrTag
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
@@ -390,8 +402,7 @@ let read workspaceDir shared environment labels variables =
                 |> Map.map (fun targetId steps ->
                     steps
                     |> List.collect (fun stepDef ->
-
-                        let stepParams = $"nodeHash: \"{nodeHash}\"\nshared: {shared}\ncommit: \"{sourceControl.HeadCommit}\"\nbranchOrTag: \"{sourceControl.BranchOrTag}\"\n{stepDef.Parameters}"
+                        let stepParams = $"nodeHash: \"{nodeHash}\"\n{stepDef.Parameters}"
 
                         let variables =
                             variables
