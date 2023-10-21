@@ -51,7 +51,7 @@ let private markEntryAsCompleted entryDir =
 let clearBuildCache () =
     IO.deleteAny buildCacheDirectory
 
-type NewEntry(entryDir: string, id: string, storage: Storages.Storage option) =
+type NewEntry(entryDir: string, id: string, storage: Storages.Storage) =
     let mutable logNum = 0
 
     do
@@ -93,11 +93,11 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage option) =
 
         member _.Complete summary =
             summary |> write
-            storage |> Option.iter upload
+            storage |> upload
             entryDir |> markEntryAsCompleted
 
 
-type Cache(storage: Storages.Storage option) =
+type Cache(storage: Storages.Storage) =
     let cachedSumaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
 
     member _.TryGetSummary id : TargetSummary option =
@@ -142,7 +142,7 @@ type Cache(storage: Storages.Storage option) =
             | _ ->
                 // cleanup everything - it's not valid anyway
                 IO.deleteAny entryDir
-                storage |> Option.bind download
+                storage |> download
 
 
     member _.CreateEntry id : IEntry =

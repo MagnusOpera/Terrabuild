@@ -4,6 +4,9 @@
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="SourceControls/SourceControls.fs" />
+    <Compile Include="SourceControls/Local.fs" />
+    <Compile Include="SourceControls/GitHub.fs" />
     <Compile Include="Extensions/Extensions.fs" />
     <Compile Include="Extensions/Dotnet.fs" />
     <Compile Include="Extensions/Npm.fs" />
@@ -13,6 +16,7 @@
     <Compile Include="Extensions/Make.fs" />
     <Compile Include="Extensions/Echo.fs" />
     <Compile Include="Storages/Storages.fs" />
+    <Compile Include="Storages/Local.fs" />
     <Compile Include="Storages/MicrosoftBlobStorage.fs" />
     <Compile Include="Helpers/IO.fs" />
     <Compile Include="Helpers/Compression.fs" />

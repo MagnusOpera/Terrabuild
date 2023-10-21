@@ -49,7 +49,7 @@ let processCommandLine () =
                 let jsonGraph = Json.Serialize graph
                 jsonGraph |> IO.writeTextFile "terrabuild.graph.json"
 
-            let cache = Cache.Cache(config.Build.Storage)
+            let cache = Cache.Cache(config.Storage)
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
             let build = Build.run config graph cache buildNotification options
             buildNotification.WaitCompletion()

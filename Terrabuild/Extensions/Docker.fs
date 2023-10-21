@@ -10,7 +10,6 @@ type DockerBuild() =
 type DockerPush() =
     inherit StepParameters()
     member val Image = "" with get, set
-    member val Tag = "" with get, set
 
 type Docker(context) =
     inherit Extension(context)
@@ -46,9 +45,9 @@ type Docker(context) =
                 [ { Command = "docker"; Arguments = buildArgs} ]
         | :? DockerPush as parameters ->
             if parameters.Shared then
-                let retagArgs = $"buildx imagetools {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{parameters.Tag}"
+                let retagArgs = $"buildx imagetools {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{parameters.BranchOrTag}"
                 [ { Command = "docker"; Arguments = retagArgs} ]
             else
-                let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{parameters.Tag}"
+                let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{parameters.BranchOrTag}"
                 [ { Command = "docker"; Arguments = tagArgs} ]        
         | _ -> ArgumentException($"Unknown action") |> raise

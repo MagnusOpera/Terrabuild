@@ -23,6 +23,7 @@ type BuildStatus =
 [<RequireQualifiedAccess>]
 type BuildSummary = {
     Commit: string
+    BranchOrTag: string
     StartedAt: DateTime
     EndedAt: DateTime
     Duration: TimeSpan
@@ -257,7 +258,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     |> Map.iter (fun key _ -> scheduleNode key)
     buildQueue.WaitCompletion()
 
-    let headCommit = Git.getHeadCommit workspaceConfig.Directory
+    let headCommit = workspaceConfig.SourceControl.HeadCommit
+    let branchOrTag = workspaceConfig.SourceControl.BranchOrTag
 
     let dependencies =
         graph.RootNodes
@@ -274,6 +276,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         else BuildStatus.Failure
 
     let buildInfo = { BuildSummary.Commit = headCommit
+                      BuildSummary.BranchOrTag = branchOrTag
                       BuildSummary.StartedAt = startedAt
                       BuildSummary.EndedAt = endedAt
                       BuildSummary.Duration = duration

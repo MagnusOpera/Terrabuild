@@ -14,6 +14,8 @@ type IContext =
 type StepParameters() =
     member val NodeHash:string = null with get, set
     member val Shared:bool = false with get, set
+    member val Commit:string = "" with get, set
+    member val BranchOrTag:string = "" with get, set
 
 [<AbstractClass>]
 type Extension(context: IContext) =

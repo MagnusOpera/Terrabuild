@@ -12,5 +12,4 @@ steps:
     - (terraform): apply
 
 labels:
-  - app
-  - dotnet
+  - infra

@@ -42,32 +42,26 @@ module ExtensionLoaders =
 
     let loadStorage name : Storages.Storage =
         match name with
-        | "azureblob" -> Storages.MicrosoftBlobStorage() :> Storages.Storage
+        | None -> Storages.Local()
+        | Some "azureblob" -> Storages.MicrosoftBlobStorage()
         | _ -> failwith $"Unknown storage {name}"
 
-
+    let loadSourceControl workspaceDir name: SourceControls.SourceControl =
+        match name with
+        | None -> SourceControls.Local(workspaceDir)
+        | Some "github" -> SourceControls.GitHub(workspaceDir)
+        | _ -> failwith $"Unknown source control {name}"
 
 module BuildConfigParser =
 
     [<RequireQualifiedAccess>]
     type BuildConfig = {
-        Storage: Storages.Storage option
         Targets: Targets
         Variables: Variables
     }
 
 
     let parse buildDocument shared environment =
-        // storage
-        let storage =
-            if shared then
-                buildDocument
-                |> Yaml.query "/storage"
-                |> Yaml.toOptionalString
-                |> Option.map ExtensionLoaders.loadStorage 
-            else
-                None
-
         // targets
         let targets =
             match buildDocument |> Yaml.query "/targets" with
@@ -91,8 +85,7 @@ module BuildConfigParser =
                     |> raise
 
         let buildConfig = { BuildConfig.Targets = targets
-                            BuildConfig.Variables = variables
-                            BuildConfig.Storage = storage}
+                            BuildConfig.Variables = variables }
         buildConfig
 
 
@@ -275,6 +268,8 @@ type ProjectConfig = {
 }
 
 type WorkspaceConfig = {
+    Storage: Storages.Storage
+    SourceControl: SourceControls.SourceControl
     Directory: string
     Dependencies: Dependencies
     Build: BuildConfigParser.BuildConfig
@@ -288,6 +283,28 @@ let read workspaceDir shared environment labels variables =
     let buildFile = Path.Combine(workspaceDir, "BUILD")
     let buildDocument = Yaml.loadDocument buildFile
     let buildConfig = BuildConfigParser.parse buildDocument shared environment
+
+    // storage
+    let storage =
+        if shared then
+            buildDocument
+            |> Yaml.query "/storage"
+            |> Yaml.toOptionalString
+            |> ExtensionLoaders.loadStorage 
+        else
+            ExtensionLoaders.loadStorage None
+
+    // source control
+    let sourceControl =
+        if shared then
+            buildDocument
+            |> Yaml.query "/sourcecontrol"
+            |> Yaml.toOptionalString
+            |> ExtensionLoaders.loadSourceControl workspaceDir
+        else
+            ExtensionLoaders.loadSourceControl workspaceDir None
+
+
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let buildVariables =
@@ -374,7 +391,7 @@ let read workspaceDir shared environment labels variables =
                     steps
                     |> List.collect (fun stepDef ->
 
-                        let stepParams = $"nodeHash: \"{nodeHash}\"\nshared: {shared}\n{stepDef.Parameters}"
+                        let stepParams = $"nodeHash: \"{nodeHash}\"\nshared: {shared}\ncommit: \"{sourceControl.HeadCommit}\"\nbranchOrTag: \"{sourceControl.BranchOrTag}\"\n{stepDef.Parameters}"
 
                         let variables =
                             variables
@@ -447,6 +464,8 @@ let read workspaceDir shared environment labels variables =
 
     { Directory = workspaceDir
       Dependencies = dependencies
+      Storage = storage
+      SourceControl = sourceControl
       Build = buildConfig
       Projects = projects
       Environment = environment }
