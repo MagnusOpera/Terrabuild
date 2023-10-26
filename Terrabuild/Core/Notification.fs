@@ -51,7 +51,7 @@ type BuildNotification() =
             | PrinterProtocol.BuildStarted graph -> 
                 let targets = graph.Targets |> String.join ","
                 let targetLabel = if graph.Targets.Length > 1 then "targets" else "target"
-                Console.WriteLine($"{Ansi.Emojis.rocket} Running {targetLabel} {targets}")
+                $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
                 scheduleUpdate ()
                 return! messageLoop () 
 
@@ -59,20 +59,21 @@ type BuildNotification() =
                 renderer.Refresh()
                 for failedSummary in failedLogs do
                     let lastLog = failedSummary.Steps |> List.last
-                    Console.WriteLine($"{Ansi.Emojis.prohibited} {Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {lastLog.Command} {lastLog.Arguments}{Ansi.Styles.reset}")
+
+                    $"{Ansi.Emojis.prohibited} {Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {lastLog.Command} {lastLog.Arguments}{Ansi.Styles.reset}"
+                    |> Terminal.writeLine
+
                     let log = IO.readTextFile lastLog.Log
-                    Console.WriteLine(log)
+                    log |> Terminal.writeLine
 
                 let result =
                     match summary.Status with
                     | Build.BuildStatus.Success -> Ansi.Emojis.happy
                     | _ -> Ansi.Emojis.sad
 
-                let msg = $"{result} Completed in {summary.Duration}"
-                Console.Out.WriteLine(msg)
+                $"{result} Completed in {summary.Duration}"
+                |> Terminal.writeLine
 
-                // let jsonBuildInfo = Json.Serialize summary
-                // Console.Out.WriteLine($"{jsonBuildInfo}")
                 buildComplete.Set() |> ignore
 
             | PrinterProtocol.NodeStatusChanged (node, status) ->

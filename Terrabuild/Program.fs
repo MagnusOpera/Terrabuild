@@ -18,12 +18,9 @@ type TerrabuildExiter() =
         member _.Name: string = "Process Exiter"
 
         member _.Exit(msg: string, errorCode: ErrorCode) =
-            let writer = if errorCode = ErrorCode.HelpText then Console.Out else Console.Error
             do
-                writer.WriteLine msg
-                writer.Flush()
-                Console.Write(Ansi.Styles.cursorShow)
-                Console.Out.Flush()
+                msg |> Terminal.writeLine
+                Terminal.showCursor()
 
             exit (int errorCode)
 
@@ -35,14 +32,14 @@ let processCommandLine () =
 
     let runTarget wsDir target shared environment labels variables options =
         try
-            Console.WriteLine($"{Ansi.Emojis.box} Reading configuration")
+            $"{Ansi.Emojis.box} Reading configuration" |> Terminal.writeLine
             let config = Configuration.read wsDir shared environment labels variables
 
             if debug then
                 let jsonConfig = Json.Serialize config
                 jsonConfig |> IO.writeTextFile "terrabuild.config.json"
 
-            Console.WriteLine($"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}")
+            $"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}" |> Terminal.writeLine
             let graph = Graph.buildGraph config target
 
             if debug then
@@ -61,7 +58,7 @@ let processCommandLine () =
         with
             | :? Configuration.ConfigException as ex ->
                 let reason = dumpKnownException ex |> Seq.rev |> String.join ", "
-                Console.WriteLine($"{Ansi.Emojis.explosion} {reason}")
+                $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
 
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
         let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
@@ -103,19 +100,13 @@ let processCommandLine () =
 [<EntryPoint>]
 let main _ =
     try
-        Console.Write(Ansi.Styles.cursorHide)
-        Console.Out.Flush()
-
-        Console.CancelKeyPress.Add (fun _ ->
-            Console.WriteLine($"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}")
-            Console.Out.Flush())
+        Terminal.hideCursor()
+        Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
         processCommandLine()
-
-        Console.Write(Ansi.Styles.cursorShow)
-        Console.Out.Flush()
+        Terminal.showCursor()
         0
     with
         ex ->
-            Console.WriteLine($"{Ansi.Emojis.bomb} Failed with error\n{ex}{Ansi.Styles.cursorShow}")
-            Console.Out.Flush()
+            $"{Ansi.Emojis.bomb} Failed with error\n{ex}{Ansi.Styles.cursorShow}" |> Terminal.writeLine
+            Terminal.showCursor()
             5

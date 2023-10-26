@@ -46,7 +46,7 @@ type ProgressRenderer() =
             items
             |> List.fold (fun acc item -> acc + $"{Ansi.cursorHome}{Ansi.cursorUp 1}" + (item |> printableStatus)) ""
         let updateCmd = updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}"
-        updateCmd |> Console.Out.Write
+        updateCmd |> Terminal.write |> Terminal.flush
 
     member _.Update (label: string) (spinner: string) (frequency: double) =
         match items |> List.tryFindIndex (fun item -> item.Label = label) with
@@ -55,8 +55,7 @@ type ProgressRenderer() =
         | _ ->
             let item = { Label = label; Status = ProgressStatus.Running (DateTime.Now, spinner, frequency) }
             items <- item :: items
-            let printable = printableItem item
-            Console.Out.WriteLine(printable)
+            printableItem item |> Terminal.writeLine |> Terminal.flush
 
     member _.Complete (label: string) (success: bool) =
         let status =
