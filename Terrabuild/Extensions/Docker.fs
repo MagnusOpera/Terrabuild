@@ -20,7 +20,7 @@ type Docker(context) =
         | _ -> "Dockerfile"
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Container = Some "docker"
+        { Extensions.CommandLine.Container = None
           Extensions.CommandLine.ContainerTag = None
           Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
