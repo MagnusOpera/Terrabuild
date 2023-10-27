@@ -3,8 +3,8 @@ open System.Collections.Concurrent
 open Collections
 
 type Node = {
-    ProjectId: string
-    TargetId: string
+    Project: string
+    Target: string
     Configuration: Configuration.ProjectConfig
     Dependencies: string set
     IsLeaf: bool
@@ -71,8 +71,8 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
             let isLeaf = hasInternalDependencies |> not
 
             let isPlaceholder = projectConfig.Steps |> Map.containsKey target |> not
-            let node = { ProjectId = projectId
-                         TargetId = target
+            let node = { Project = projectId
+                         Target = target
                          Configuration = projectConfig
                          Dependencies = children
                          IsLeaf = isLeaf
@@ -93,9 +93,9 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
                         |> Seq.collect removePlaceholders
                     for nodeId in nodeIds do
                         let node = allNodes[nodeId]
-                        node.ProjectId, nodeId
+                        node.Project, nodeId
         ]
 
     { Targets = targets
-      Nodes = Map.ofDict allNodes 
+      Nodes = allNodes |> Map.ofDict |> Map.filter (fun _ node -> node.IsPlaceholder |> not)
       RootNodes = rootNodes }

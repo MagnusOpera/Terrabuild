@@ -83,7 +83,7 @@ type BuildNotification() =
                     | NodeStatus.Downloading -> spinnerDownload, frequencyDownload
                     | NodeStatus.Uploading -> spinnerUpload, frequencyUpload
                     | NodeStatus.Building -> spinnerBuilding, frequencyBuilding
-                let label = $"{node.TargetId} {node.ProjectId}"
+                let label = $"{node.Target} {node.Project}"
                 renderer.Update label spinner frequency
                 scheduleUpdate ()
                 return! messageLoop ()
@@ -99,7 +99,7 @@ type BuildNotification() =
                             false
                     | _ -> false
 
-                let label = $"{node.TargetId} {node.ProjectId}"
+                let label = $"{node.Target} {node.Project}"
                 renderer.Complete label status
                 scheduleUpdate ()
                 return! messageLoop ()

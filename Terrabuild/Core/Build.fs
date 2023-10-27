@@ -118,9 +118,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     // collect dependencies status
     let getDependencyStatus depId =
         let node = graph.Nodes[depId]
-        let step = node.Configuration.Steps |> Map.tryFind node.TargetId
+        let step = node.Configuration.Steps |> Map.tryFind node.Target
         let stepHash = step |> Option.map (fun cl -> cl.Hash) |> Option.defaultValue "dummy"
-        let cacheEntryId = $"{node.ProjectId}/{node.Configuration.Hash}/{node.TargetId}/{stepHash}"
+        let cacheEntryId = $"{node.Project}/{node.Configuration.Hash}/{node.Target}/{stepHash}"
         match cache.TryGetSummary cacheEntryId with
         | Some summary -> 
             match summary.Status with
@@ -138,20 +138,20 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
         if isAllSatisfied then
             let projectDirectory =
-                match IO.combinePath workspaceConfig.Directory node.ProjectId with
+                match IO.combinePath workspaceConfig.Directory node.Project with
                 | IO.Directory projectDirectory -> projectDirectory
                 | IO.File projectFile -> IO.parentDirectory projectFile
-                | _ -> failwith $"Failed to find project {node.ProjectId}"
+                | _ -> failwith $"Failed to find project {node.Project}"
 
-            let step = node.Configuration.Steps |> Map.tryFind node.TargetId
+            let step = node.Configuration.Steps |> Map.tryFind node.Target
             let stepHash = step |> Option.map (fun cl -> cl.Hash) |> Option.defaultValue "dummy"
             let nodeHash = node.Configuration.Hash
-            let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}/{stepHash}"
+            let cacheEntryId = $"{node.Project}/{nodeHash}/{node.Target}/{stepHash}"
 
             match step with
             | None ->
-                let summary = { Cache.TargetSummary.Project = node.ProjectId
-                                Cache.TargetSummary.Target = node.TargetId
+                let summary = { Cache.TargetSummary.Project = node.Project
+                                Cache.TargetSummary.Target = node.Target
                                 Cache.TargetSummary.Steps = List.empty
                                 Cache.TargetSummary.Outputs = None
                                 Cache.TargetSummary.Status = Cache.TaskStatus.Success }
@@ -206,7 +206,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                             | Some container ->
                                 let cmd = "docker"
                                 let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
-                                let args = $"run --entrypoint {commandLine.Command} --rm -v {wsDir}:/terrabuild -w /terrabuild/{node.ProjectId} {container}:{tag} {commandLine.Arguments}"
+                                let args = $"run --entrypoint {commandLine.Command} --rm -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container}:{tag} {commandLine.Arguments}"
                                 workspaceConfig.Directory, cmd, args
                             | _ ->
                                 projectDirectory, commandLine.Command, commandLine.Arguments    
@@ -239,8 +239,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                         if lastExitCode = 0 then Cache.TaskStatus.Success
                         else Cache.TaskStatus.Failure
 
-                    let summary = { Cache.TargetSummary.Project = node.ProjectId
-                                    Cache.TargetSummary.Target = node.TargetId
+                    let summary = { Cache.TargetSummary.Project = node.Project
+                                    Cache.TargetSummary.Target = node.Target
                                     Cache.TargetSummary.Steps = stepLogs |> List.ofSeq
                                     Cache.TargetSummary.Outputs = outputs
                                     Cache.TargetSummary.Status = status }
