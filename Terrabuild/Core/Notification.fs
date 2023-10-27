@@ -77,33 +77,31 @@ type BuildNotification() =
                 buildComplete.Set() |> ignore
 
             | PrinterProtocol.NodeStatusChanged (node, status) ->
-                if node.IsPlaceholder |> not then
-                    let spinner, frequency =
-                        match status with
-                        | NodeStatus.Scheduled -> spinnerScheduled, frequencyScheduled
-                        | NodeStatus.Downloading -> spinnerDownload, frequencyDownload
-                        | NodeStatus.Uploading -> spinnerUpload, frequencyUpload
-                        | NodeStatus.Building -> spinnerBuilding, frequencyBuilding
-                    let label = $"{node.TargetId} {node.ProjectId}"
-                    renderer.Update label spinner frequency
-                    scheduleUpdate ()
+                let spinner, frequency =
+                    match status with
+                    | NodeStatus.Scheduled -> spinnerScheduled, frequencyScheduled
+                    | NodeStatus.Downloading -> spinnerDownload, frequencyDownload
+                    | NodeStatus.Uploading -> spinnerUpload, frequencyUpload
+                    | NodeStatus.Building -> spinnerBuilding, frequencyBuilding
+                let label = $"{node.TargetId} {node.ProjectId}"
+                renderer.Update label spinner frequency
+                scheduleUpdate ()
                 return! messageLoop ()
 
             | PrinterProtocol.NodeCompleted (node, summary) ->
-                if node.IsPlaceholder |> not then
-                    let status =
-                        match summary with
-                        | Some summary ->
-                            match summary.Status with
-                            | Cache.TaskStatus.Success -> true
-                            | _ ->
-                                failedLogs <- failedLogs @ [ summary ]
-                                false
-                        | _ -> false
+                let status =
+                    match summary with
+                    | Some summary ->
+                        match summary.Status with
+                        | Cache.TaskStatus.Success -> true
+                        | _ ->
+                            failedLogs <- failedLogs @ [ summary ]
+                            false
+                    | _ -> false
 
-                    let label = $"{node.TargetId} {node.ProjectId}"
-                    renderer.Complete label status
-                    scheduleUpdate ()
+                let label = $"{node.TargetId} {node.ProjectId}"
+                renderer.Complete label status
+                scheduleUpdate ()
                 return! messageLoop ()
 
             | PrinterProtocol.Render ->

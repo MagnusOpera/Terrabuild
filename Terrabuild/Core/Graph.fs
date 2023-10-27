@@ -22,6 +22,14 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
+    let removePlaceholders dependency =
+        let childNode = allNodes[dependency]
+        let newChildren : string seq =
+            if childNode.IsPlaceholder then
+                childNode.Dependencies
+            else [ dependency ]
+        newChildren
+
     let rec buildTarget target projectId  =
         let nodeId = $"{projectId}-{target}"
 
@@ -47,11 +55,16 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
                     let childDependency =
                         match dependsOn with
                         | String.Regex "^\^([a-zA-Z][_a-zA-Z0-9]+)$" [ parentDependsOn ] ->
-                            projectConfig.Dependencies |> Seq.map (buildTarget parentDependsOn)
+                            projectConfig.Dependencies
+                            |> Seq.map (buildTarget parentDependsOn)
+                            |> List.ofSeq
                         | _ ->
                             hasInternalDependencies <- true
                             [ buildTarget dependsOn projectId ]
-                    children <- children + (childDependency |> Set)
+                    let childrenNoPlaceholders =
+                        childDependency
+                        |> Seq.collect removePlaceholders
+                    children <- children + (childrenNoPlaceholders |> Set)
                 children, hasInternalDependencies
 
             // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
@@ -71,12 +84,18 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
         nodeId
 
     let rootNodes =
-        Map [
+        seq {
             for dependency in wsConfig.Dependencies do
                 for target in targets do
                     dependency, buildTarget target dependency
-        ]
+                    let nodeIds =
+                        [ buildTarget target dependency ]
+                        |> Seq.collect removePlaceholders
+                    for nodeId in nodeIds do
+                        let node = allNodes[nodeId]
+                        node.ProjectId, nodeId
+        }
 
     { Targets = targets
       Nodes = Map.ofDict allNodes 
-      RootNodes = rootNodes }
+      RootNodes = rootNodes |> Map }

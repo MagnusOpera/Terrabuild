@@ -85,14 +85,21 @@ type BuildQueue(maxItems: int) =
 
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.Cache) (notification: IBuildNotification) (options: BuildOptions) =
 
+    let realNodes =
+        graph.Nodes
+        |> Map.filter (fun _ node -> node.IsPlaceholder |> not)
+
     // compute first incoming edges
-    let reverseIncomings = graph.Nodes |> Map.map (fun _ _ -> List<string>())
-    for KeyValue(nodeId, node) in graph.Nodes do
+    let reverseIncomings =
+        realNodes
+        |> Map.map (fun _ _ -> List<string>())
+    for KeyValue(nodeId, node) in realNodes do
         for dependency in node.Dependencies do
             reverseIncomings[dependency].Add(nodeId)
 
     let allNodes =
-        graph.Nodes |> Map.map (fun _ _ -> ref 0)
+        realNodes
+        |> Map.map (fun _ _ -> ref 0)
 
     let refCounts =
         reverseIncomings
