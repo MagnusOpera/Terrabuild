@@ -130,7 +130,7 @@ module ProjectConfigParser =
 
         let projectIgnores =
             projectDocument
-            |> Yaml.query "/outputs"
+            |> Yaml.query "/ignores"
             |> Yaml.toOptionalStringList
             |> Set
 
