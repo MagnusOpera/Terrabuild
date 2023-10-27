@@ -4,7 +4,7 @@ builders:
     use: docker
     with: Dockerfile
     parameters:
-      image: ghcr.io/magnusopera/project3
+      image: ghcr.io/magnusopera/dotnet-app
 
 steps:
   build:
