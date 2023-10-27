@@ -4,6 +4,9 @@ builders:
 dependencies:
   - ../../projects/dotnet-app
 
+ignores:
+  - terrabuild.tfstate
+
 steps:
   build:
     - (terraform): plan
