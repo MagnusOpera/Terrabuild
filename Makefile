@@ -23,7 +23,7 @@ run-push:
 	dotnet run --project Terrabuild -- run push --workspace tests/simple --environment debug --label app --debug --retry
 
 run-deploy:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry)
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry) --debug
 
 run-deploy-dev:
 	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev $(retry)
