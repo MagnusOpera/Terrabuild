@@ -50,11 +50,10 @@ type Docker(context) =
             else
                 [ buildCmdLine "docker" buildArgs ]
         | :? DockerPush as parameters ->
-            let branchOrTag = context.BranchOrTag.Replace("/", "-")
             if context.Shared then
-                let retagArgs = $"buildx imagetools create -t {parameters.Image}:{branchOrTag} {parameters.Image}:{parameters.NodeHash}"
+                let retagArgs = $"buildx imagetools create -t {parameters.Image}:$(terrabuild_branch_or_tag) {parameters.Image}:{parameters.NodeHash}"
                 [ buildCmdLine "docker" retagArgs ]
             else
-                let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{branchOrTag}"
+                let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:$(terrabuild_branch_or_tag)"
                 [ buildCmdLine "docker" tagArgs ]        
         | _ -> ArgumentException($"Unknown action") |> raise

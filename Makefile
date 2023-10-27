@@ -17,7 +17,7 @@ run-dist:
 	dotnet run --project Terrabuild -- dist --workspace tests/simple --environment debug --debug
 
 run-docker:
-	dotnet run --project Terrabuild -- run docker --workspace tests/simple --environment debug --label app --debug
+	dotnet run --project Terrabuild -- run docker --workspace tests/simple --environment debug --label app --debug --retry
 
 run-push:
 	dotnet run --project Terrabuild -- run push --workspace tests/simple --environment debug --label app --debug --retry

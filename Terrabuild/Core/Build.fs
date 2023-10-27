@@ -110,13 +110,15 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
     // collect dependencies status
     let getDependencyStatus depId =
-        let depNode = graph.Nodes[depId]
-        let depCacheEntryId = $"{depNode.ProjectId}/{depNode.Configuration.Hash}/{depNode.TargetId}"
-        match cache.TryGetSummary depCacheEntryId with
+        let node = graph.Nodes[depId]
+        let step = node.Configuration.Steps |> Map.tryFind node.TargetId
+        let stepHash = step |> Option.map (fun cl -> cl.Hash) |> Option.defaultValue "dummy"
+        let cacheEntryId = $"{node.ProjectId}/{node.Configuration.Hash}/{node.TargetId}/{stepHash}"
+        match cache.TryGetSummary cacheEntryId with
         | Some summary -> 
             match summary.Status with
-            | Cache.TaskStatus.Success -> TaskBuildStatus.Success (depNode.Configuration.Hash, summary.Target)
-            | Cache.TaskStatus.Failure -> TaskBuildStatus.Failure (depNode.Configuration.Hash, summary.Target)
+            | Cache.TaskStatus.Success -> TaskBuildStatus.Success (node.Configuration.Hash, summary.Target)
+            | Cache.TaskStatus.Failure -> TaskBuildStatus.Failure (node.Configuration.Hash, summary.Target)
         | _ -> TaskBuildStatus.Unfulfilled depId
 
     let buildNode (node: Graph.Node) =
@@ -134,11 +136,12 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 | IO.File projectFile -> IO.parentDirectory projectFile
                 | _ -> failwith $"Failed to find project {node.ProjectId}"
 
-            let commandLines = node.Configuration.Steps |> Map.tryFind node.TargetId
+            let step = node.Configuration.Steps |> Map.tryFind node.TargetId
+            let stepHash = step |> Option.map (fun cl -> cl.Hash) |> Option.defaultValue "dummy"
             let nodeHash = node.Configuration.Hash
-            let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}"
+            let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}/{stepHash}"
 
-            match commandLines with
+            match step with
             | None ->
                 let summary = { Cache.TargetSummary.Project = node.ProjectId
                                 Cache.TargetSummary.Target = node.TargetId
@@ -148,7 +151,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 let cacheEntry = cache.CreateEntry cacheEntryId
                 cacheEntry.Complete summary
                 Some summary
-            | Some commandLines ->
+            | Some step ->
 
                 // check first if it's possible to restore previously built state
                 let summary =
@@ -184,9 +187,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     let stepLogs = List<Cache.StepSummary>()
                     let mutable lastExitCode = 0
                     let mutable cmdLineIndex = 0
-                    while cmdLineIndex < commandLines.Length && lastExitCode = 0 do
+                    while cmdLineIndex < step.CommandLines.Length && lastExitCode = 0 do
                         let startedAt = DateTime.UtcNow
-                        let commandLine = commandLines[cmdLineIndex]
+                        let commandLine = step.CommandLines[cmdLineIndex]
                         let logFile = cacheEntry.NextLogFile()
                         cmdLineIndex <- cmdLineIndex + 1
 

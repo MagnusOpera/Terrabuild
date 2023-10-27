@@ -11,14 +11,19 @@ open System.Collections.Concurrent
 type ConfigException(msg, innerException: Exception) =
     inherit Exception(msg, innerException)
 
-
-
 type Dependencies = Set<string>
 type Paths = Set<string>
 type TargetRules = Set<string>
 type Targets = Map<string, TargetRules>
-type StepCommands = Extensions.CommandLine list
-type Steps = Map<string, StepCommands>
+
+[<RequireQualifiedAccess>]
+type Step = {
+    Hash: string
+    Variables: Map<string, string>
+    CommandLines: Extensions.CommandLine list
+}
+
+type Steps = Map<string, Step>
 type Variables = Map<string, string>
 type ExtensionConfigs = Map<string, Map<string, string>>
 
@@ -172,9 +177,7 @@ module ProjectConfigParser =
                     let context = { new Extensions.IContext
                                     with member _.Directory = projectDir
                                          member _.With = builderWith
-                                         member _.Shared = shared
-                                         member _.Commit = commit
-                                         member _.BranchOrTag = branchOrTag }
+                                         member _.Shared = shared }
   
                     let builder = ExtensionLoaders.loadExtension builderUse context 
                     builder, builderParams)
@@ -312,9 +315,7 @@ let read workspaceDir shared environment labels variables =
         let context = { new Extensions.IContext
                         with member _.Directory = workspaceDir
                                 member _.With = None
-                                member _.Shared = shared
-                                member _.Commit = commit
-                                member _.BranchOrTag = branchOrTag }
+                                member _.Shared = shared }
 
         Map [ "shell", (ExtensionLoaders.loadExtension "shell" context, Map.empty)
               "echo", (ExtensionLoaders.loadExtension "echo" context, Map.empty) ]
@@ -362,16 +363,38 @@ let read workspaceDir shared environment labels variables =
                 |> Seq.sort
                 |> Hash.computeFilesSha
 
-            let variables = 
+            let projectSteps =
+                projectDef.StepDefinitions
+                |> Map.map (fun targetId steps ->
+                    steps
+                    |> List.collect (fun stepDef ->
+                        let stepParams = $"nodeHash: \"$(terrabuild_node_hash)\"\n{stepDef.Parameters}"
+                        let stepArgsType = stepDef.Extension.GetStepParameters stepDef.Command
+                        let stepParameters =
+                            stepArgsType |> Option.ofObj
+                            |> Option.map (fun stepArgsType -> stepParams |> Yaml.loadModelFromType stepArgsType)
+                            |> Option.defaultValue null
+
+                        match stepParameters with
+                        | null -> []
+                        | :? Extensions.StepParameters as stepParameters ->
+                            stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
+                        | _ -> failwith "Unexpected type for action type"
+                    )
+                )
+
+            let variables =
                 projectDef.StepDefinitions
                 |> Seq.collect (fun l -> l.Value)
                 |> Seq.collect (fun stepDef -> String.AllMatches "\$\((\w+)\)" stepDef.Parameters)
                 |> Set
+                |> Set.remove "terrabuild_node_hash"
                 |> Seq.map (fun varName ->
                     match buildVariables |> Map.tryFind varName with
                     | Some value -> varName, value
                     | _ -> ConfigException($"Variable {varName} is not defined in \"{environment}\"", null) |> raise)
                 |> Map
+                |> Map.add "terrabuild_branch_or_tag" (branchOrTag.Replace("/", "-"))
 
             let dependenciesHash =
                 projectDef.Dependencies
@@ -386,47 +409,49 @@ let read workspaceDir shared environment labels variables =
                 |> String.join "\n"
                 |> String.sha256
 
-            let variableHashes =
-                variables
-                |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-                |> String.join "\n"
-                |> String.sha256
-
             // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
             let nodeHash =
-                [ project; filesHash; dependenciesHash; variableHashes ]
+                [ project; filesHash; dependenciesHash ]
                 |> String.join "\n"
                 |> String.sha256
 
+            let variables =
+                variables
+                |> Map.add "terrabuild_node_hash" nodeHash
+
             let projectSteps =
-                projectDef.StepDefinitions
-                |> Map.map (fun targetId steps ->
-                    steps
-                    |> List.collect (fun stepDef ->
-                        let stepParams = $"nodeHash: \"{nodeHash}\"\n{stepDef.Parameters}"
+                projectSteps
+                |> Map.map (fun _ steps ->
+                    // collect variables for this step
+                    let variableNames =
+                        steps
+                        |> Seq.collect (fun stepDef -> String.AllMatches "\$\((\w+)\)" stepDef.Arguments)
+                        |> Set
 
-                        let variables =
-                            variables
-                            |> Map.add "terrabuild_node_hash" nodeHash
+                    let variableValues =
+                        variableNames
+                        |> Seq.map (fun varName ->
+                            match variables |> Map.tryFind varName with
+                            | Some value -> varName, value
+                            | _ -> ConfigException($"Variable {varName} is not defined in \"{environment}\"", null) |> raise)
+                        |> Map
 
-                        let stepParams =
-                            variables
-                            |> Map.fold (fun acc key value -> acc |> String.replace $"$({key})" value) stepParams
-                        let stepArgsType =
-                            stepDef.Extension.GetStepParameters stepDef.Command
-                        let stepParameters =
-                                stepArgsType |> Option.ofObj
-                                |> Option.map (fun stepArgsType -> stepParams |> Yaml.loadModelFromType stepArgsType)
-                                |> Option.defaultValue null
+                    let variableHashes =
+                        variableValues
+                        |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
+                        |> String.join "\n"
+                        |> String.sha256
 
-                        match stepParameters with
-                        | null -> []
-                        | :? Extensions.StepParameters as stepParameters ->
-                            stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
-                        | _ -> failwith "Unexpected type for action type"
-                    )
+                    let stepWithValues =
+                        steps
+                        |> List.map (fun step ->
+                            { step
+                              with Arguments = variableValues
+                                               |> Map.fold (fun acc key value -> acc |> String.replace $"$({key})" value) step.Arguments })
+                    { Step.Hash = variableHashes
+                      Step.Variables = variableValues
+                      Step.CommandLines = stepWithValues }                        
                 )
-
 
             let projectConfig =
                 { Dependencies = projectDef.Dependencies
