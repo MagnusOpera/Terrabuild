@@ -30,7 +30,7 @@ jobs:
       - name: Run Tests
         run: make run-deploy-az-retry
 
-      - name: Upload Terraform Debug
+      - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v2
         with:
           name: Terrabuild
