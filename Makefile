@@ -31,8 +31,11 @@ run-deploy-dev:
 run-build-app:
 	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
 
-run-build-az:
-	dotnet run --project Terrabuild -- build --workspace tests/simple --shared --env release
+run-deploy-az:
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry) --debug --shared
+
+run-deploy-az-retry:
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry) --debug --shared --retry
 
 run-build-nc:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --nocache --env debug

@@ -41,17 +41,22 @@ type ProgressRenderer() =
         $"{status} {item.Label}"
 
     member _.Refresh () =
-        // update status: move home, move top, write status
-        let updateCmd =
-            items
-            |> List.fold (fun acc item -> acc + $"{Ansi.cursorHome}{Ansi.cursorUp 1}" + (item |> printableStatus)) ""
-        let updateCmd = updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}"
-        updateCmd |> Terminal.write |> Terminal.flush
+        if Terminal.supportAnsi then
+            // update status: move home, move top, write status
+            let updateCmd =
+                items
+                |> List.fold (fun acc item -> acc + $"{Ansi.cursorHome}{Ansi.cursorUp 1}" + (item |> printableStatus)) ""
+            let updateCmd = updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}"
+            updateCmd |> Terminal.write |> Terminal.flush
 
     member _.Update (label: string) (spinner: string) (frequency: double) =
         match items |> List.tryFindIndex (fun item -> item.Label = label) with
         | Some index ->
             items[index].Status <- ProgressStatus.Running (DateTime.Now, spinner, frequency)
+
+            if Terminal.supportAnsi |> not then
+                printableItem items[index] |> Terminal.writeLine |> Terminal.flush
+
         | _ ->
             let item = { Label = label; Status = ProgressStatus.Running (DateTime.Now, spinner, frequency) }
             items <- item :: items
@@ -62,9 +67,15 @@ type ProgressRenderer() =
             if success then ProgressStatus.Success
             else ProgressStatus.Fail
 
-        match items |> List.tryFindIndex (fun item -> item.Label = label) with
-        | Some index ->
-            items[index].Status <- status
-        | _ ->
-            let item = { Label = label; Status = status }
-            items <- item :: items
+        let item =
+            match items |> List.tryFindIndex (fun item -> item.Label = label) with
+            | Some index ->
+                items[index].Status <- status
+                items[index]
+            | _ ->
+                let item = { Label = label; Status = status }
+                items <- item :: items
+                item
+
+        if Terminal.supportAnsi |> not then
+            printableItem item |> Terminal.writeLine |> Terminal.flush

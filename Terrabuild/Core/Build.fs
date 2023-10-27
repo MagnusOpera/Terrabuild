@@ -195,7 +195,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                             match commandLine.Container with
                             | Some container ->
                                 let cmd = "docker"
-                                let args = $"run --entrypoint {commandLine.Command} --rm -v {IO.combinePath Environment.CurrentDirectory projectDirectory}:/terrabuild -w /terrabuild {container}:{tag} {commandLine.Arguments}"
+                                let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
+                                let args = $"run --entrypoint {commandLine.Command} --rm -v {wsDir}:/terrabuild -w /terrabuild/{node.ProjectId} {container}:{tag} {commandLine.Arguments}"
                                 workspaceConfig.Directory, cmd, args
                             | _ ->
                                 projectDirectory, commandLine.Command, commandLine.Arguments    

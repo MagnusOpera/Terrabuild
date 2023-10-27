@@ -1,0 +1,49 @@
+name: build
+
+on: push
+
+env:
+  TERRABUILD_AZURE_BLOB_STORAGE: ${{ secrets.TERRABUILD_AZURE_BLOB_STORAGE }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write    
+
+    steps:
+      - name: Cloning repository
+        uses: actions/checkout@v1
+
+      - name: Build
+        run: make build
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Tests
+        run: make run-deploy-az-retry
+
+      - name: Upload Configuration
+        uses: actions/upload-artifact@v2
+        with:
+          name: Configuration
+          path: terrabuild.config.json
+
+      - name: Upload Graph
+        uses: actions/upload-artifact@v2
+        with:
+          name: Graph
+          path: terrabuild.graph.json
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v2
+        with:
+          name: Build
+          path: terrabuild.build.json

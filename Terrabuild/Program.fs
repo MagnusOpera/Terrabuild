@@ -55,10 +55,14 @@ let processCommandLine () =
                 let jsonBuild = Json.Serialize build
                 jsonBuild |> IO.writeTextFile "terrabuild.build.json"
 
+            if build.Status = Build.BuildStatus.Success then 0
+            else 5
+
         with
             | :? Configuration.ConfigException as ex ->
                 let reason = dumpKnownException ex |> Seq.rev |> String.join ", "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
+                5
 
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
         let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
@@ -94,17 +98,17 @@ let processCommandLine () =
     | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"
     | p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> targetShortcut "serve"
     | p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> target
-    | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
-    | _ -> printfn $"{parser.PrintUsage()}"
+    | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear; 0
+    | _ -> printfn $"{parser.PrintUsage()}"; 0
 
 [<EntryPoint>]
 let main _ =
     try
         Terminal.hideCursor()
         Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
-        processCommandLine()
+        let ret = processCommandLine()
         Terminal.showCursor()
-        0
+        ret
     with
         ex ->
             $"{Ansi.Emojis.bomb} Failed with error\n{ex}{Ansi.Styles.cursorShow}" |> Terminal.writeLine
