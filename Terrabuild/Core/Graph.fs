@@ -84,7 +84,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
         nodeId
 
     let rootNodes =
-        seq {
+        Map [
             for dependency in wsConfig.Dependencies do
                 for target in targets do
                     dependency, buildTarget target dependency
@@ -94,8 +94,8 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
                     for nodeId in nodeIds do
                         let node = allNodes[nodeId]
                         node.ProjectId, nodeId
-        }
+        ]
 
     { Targets = targets
       Nodes = Map.ofDict allNodes 
-      RootNodes = rootNodes |> Map }
+      RootNodes = rootNodes }
