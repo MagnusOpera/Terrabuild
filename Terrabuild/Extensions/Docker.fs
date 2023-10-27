@@ -19,6 +19,12 @@ type Docker(context) =
         | Some dockerfile -> dockerfile
         | _ -> "Dockerfile"
 
+    let buildCmdLine cmd args =
+        { Extensions.CommandLine.Container = Some "docker"
+          Extensions.CommandLine.ContainerTag = None
+          Extensions.CommandLine.Command = cmd
+          Extensions.CommandLine.Arguments = args }
+
     override _.Dependencies = []
 
     override _.Outputs = []
@@ -39,15 +45,15 @@ type Docker(context) =
 
             if context.Shared then
                 let pushArgs = $"push {parameters.Image}:{parameters.NodeHash}"
-                [ { Command = "docker"; Arguments = buildArgs}
-                  { Command = "docker"; Arguments = pushArgs} ]
+                [ buildCmdLine "docker" buildArgs
+                  buildCmdLine "docker" pushArgs ]
             else
-                [ { Command = "docker"; Arguments = buildArgs} ]
+                [ buildCmdLine "docker" buildArgs ]
         | :? DockerPush as parameters ->
             if context.Shared then
                 let retagArgs = $"buildx imagetools {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{context.BranchOrTag}"
-                [ { Command = "docker"; Arguments = retagArgs} ]
+                [ buildCmdLine "docker" retagArgs ]
             else
                 let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:{context.BranchOrTag}"
-                [ { Command = "docker"; Arguments = tagArgs} ]        
+                [ buildCmdLine "docker" tagArgs ]        
         | _ -> ArgumentException($"Unknown action") |> raise

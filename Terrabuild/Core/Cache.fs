@@ -9,6 +9,7 @@ type TaskStatus =
 
 [<RequireQualifiedAccess>]
 type StepSummary = {
+    CommandLine: Extensions.CommandLine
     Command: string
     Arguments: string
     StartedAt: DateTime

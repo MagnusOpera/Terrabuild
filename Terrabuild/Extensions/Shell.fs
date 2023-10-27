@@ -9,6 +9,12 @@ type ShellCommand() =
 type Shell(context) =
     inherit Extension(context)
 
+    let buildCmdLine cmd args =
+        { Extensions.CommandLine.Container = None
+          Extensions.CommandLine.ContainerTag = None
+          Extensions.CommandLine.Command = cmd
+          Extensions.CommandLine.Arguments = args }
+
     override _.Dependencies = []
 
     override _.Outputs = []
@@ -20,5 +26,5 @@ type Shell(context) =
     override _.BuildStepCommands (action, parameters) =
         match parameters with
         | :? ShellCommand as parameters ->
-            [ { Command = action; Arguments = parameters.Arguments } ]
+            [ buildCmdLine action parameters.Arguments ]
         | _ -> ArgumentException($"Unknown action {action}") |> raise

@@ -11,6 +11,12 @@ type MakeCommand() =
 type Make(context) =
     inherit Extension(context)
 
+    let buildCmdLine cmd args =
+        { Extensions.CommandLine.Container = None
+          Extensions.CommandLine.ContainerTag = None
+          Extensions.CommandLine.Command = cmd
+          Extensions.CommandLine.Arguments = args }
+
     override _.Dependencies = []
 
     override _.Outputs = []
@@ -23,5 +29,5 @@ type Make(context) =
         match parameters with
         | :? MakeCommand as parameters ->
             let args = parameters.Parameters |> Seq.fold (fun acc kvp -> $"{acc} {kvp.Key}=\"{kvp.Value}\"") $"{action}"
-            [ { Command = "make"; Arguments = args } ]
+            [ buildCmdLine "make" args ]
         | _ -> ArgumentException($"Unknown action {action}") |> raise

@@ -1,7 +1,6 @@
 namespace Extensions
 open System
 
-
 type TerrformInit() =
     inherit StepParameters()
 
@@ -21,6 +20,12 @@ type TerraformApply() =
 type Terraform(context) =
     inherit Extension(context)
 
+    let buildCmdLine cmd args =
+        { Extensions.CommandLine.Container = Some "hashicorp/terraform"
+          Extensions.CommandLine.ContainerTag = None
+          Extensions.CommandLine.Command = cmd
+          Extensions.CommandLine.Arguments = args }
+
     override _.Dependencies = [] 
 
     override _.Outputs = [ "terrabuild.planfile" ]
@@ -38,18 +43,18 @@ type Terraform(context) =
     override _.BuildStepCommands (_, parameters) =
         match parameters with
         | :? TerrformInit ->
-            [ { Command = "terraform"; Arguments = $"init -reconfigure" } ]
+            [ buildCmdLine "terraform" "init -reconfigure" ]
         | :? TerrformWorkspace as parameters ->
-            [ { Command = "terraform"; Arguments = $"init -reconfigure" }
-              { Command = "terraform"; Arguments = $"workspace select {parameters.Workspace}" } ]
+            [ buildCmdLine "terraform" "init -reconfigure"
+              buildCmdLine "terraform" $"workspace select {parameters.Workspace}" ]
         | :? TerraformPlan as parameters ->
             let workspace = parameters.Workspace |> Option.ofObj
-            [ { Command = "terraform"; Arguments = $"init -reconfigure" }
-              if workspace |> Option.isSome then { Command = "terraform"; Arguments = $"workspace select {workspace.Value}" }
-              { Command = "terraform"; Arguments = $"plan -out=terrabuild.planfile" } ]
+            [ buildCmdLine "terraform" "init -reconfigure"
+              if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
+              buildCmdLine "terraform" "plan -out=terrabuild.planfile" ]
         | :? TerraformApply as parameters ->
             let workspace = parameters.Workspace |> Option.ofObj
-            [ { Command = "terraform"; Arguments = $"init -reconfigure" }
-              if workspace |> Option.isSome then { Command = "terraform"; Arguments = $"workspace select {workspace.Value}" }
-              { Command = "terraform"; Arguments = $"apply terrabuild.planfile" } ]
+            [ buildCmdLine "terraform" "init -reconfigure"
+              if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
+              buildCmdLine "terraform"  "apply terrabuild.planfile" ]
         | _ -> ArgumentException($"Unknown action") |> raise

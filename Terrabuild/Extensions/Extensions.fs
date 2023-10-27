@@ -1,10 +1,14 @@
 namespace Extensions
 open System
 
-type Command = {
+[<RequireQualifiedAccess>]
+type CommandLine = {
+    Container: string option
+    ContainerTag: string option
     Command: string
     Arguments: string
 }
+
 
 type IContext =
     abstract Directory: string with get
@@ -23,4 +27,4 @@ type Extension(context: IContext) =
     abstract Outputs: string list
     abstract Ignores: string list
     abstract GetStepParameters: action:string -> Type
-    abstract BuildStepCommands: action:string * parameters:StepParameters -> Command list
+    abstract BuildStepCommands: action:string * parameters:StepParameters -> CommandLine list

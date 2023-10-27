@@ -134,11 +134,11 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 | IO.File projectFile -> IO.parentDirectory projectFile
                 | _ -> failwith $"Failed to find project {node.ProjectId}"
 
-            let steps = node.Configuration.Steps |> Map.tryFind node.TargetId
+            let commandLines = node.Configuration.Steps |> Map.tryFind node.TargetId
             let nodeHash = node.Configuration.Hash
             let cacheEntryId = $"{node.ProjectId}/{nodeHash}/{node.TargetId}"
 
-            match steps with
+            match commandLines with
             | None ->
                 let summary = { Cache.TargetSummary.Project = node.ProjectId
                                 Cache.TargetSummary.Target = node.TargetId
@@ -148,7 +148,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 let cacheEntry = cache.CreateEntry cacheEntryId
                 cacheEntry.Complete summary
                 Some summary
-            | Some steps ->
+            | Some commandLines ->
 
                 // check first if it's possible to restore previously built state
                 let summary =
@@ -183,18 +183,29 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
                     let stepLogs = List<Cache.StepSummary>()
                     let mutable lastExitCode = 0
-                    let mutable stepIndex = 0
-                    while stepIndex < steps.Length && lastExitCode = 0 do
+                    let mutable cmdLineIndex = 0
+                    while cmdLineIndex < commandLines.Length && lastExitCode = 0 do
                         let startedAt = DateTime.UtcNow
-                        let step = steps[stepIndex]
+                        let commandLine = commandLines[cmdLineIndex]
                         let logFile = cacheEntry.NextLogFile()
-                        stepIndex <- stepIndex + 1
+                        cmdLineIndex <- cmdLineIndex + 1
 
-                        let exitCode = Exec.execCaptureTimestampedOutput projectDirectory step.Command step.Arguments logFile
+                        let workDir, cmd, args =
+                            let tag = commandLine.ContainerTag |> Option.defaultValue "latest"
+                            match commandLine.Container with
+                            | Some container ->
+                                let cmd = "docker"
+                                let args = $"run --entrypoint {commandLine.Command} --rm -v {IO.combinePath Environment.CurrentDirectory projectDirectory}:/terrabuild -w /terrabuild {container}:{tag} {commandLine.Arguments}"
+                                workspaceConfig.Directory, cmd, args
+                            | _ ->
+                                projectDirectory, commandLine.Command, commandLine.Arguments    
+
+                        let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
                         let endedAt = DateTime.UtcNow
                         let duration = endedAt - startedAt
-                        let stepLog = { Cache.StepSummary.Command = step.Command
-                                        Cache.StepSummary.Arguments = step.Arguments
+                        let stepLog = { Cache.StepSummary.CommandLine = commandLine
+                                        Cache.StepSummary.Command = cmd
+                                        Cache.StepSummary.Arguments = args
                                         Cache.StepSummary.StartedAt = startedAt
                                         Cache.StepSummary.EndedAt = endedAt
                                         Cache.StepSummary.Duration = duration

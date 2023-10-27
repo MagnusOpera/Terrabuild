@@ -66,6 +66,12 @@ type Dotnet(context) =
                         |> List.ofSeq
         refs 
 
+    let buildCmdLine cmd args =
+        { Extensions.CommandLine.Container = Some "mcr.microsoft.com/dotnet/sdk"
+          Extensions.CommandLine.ContainerTag = None
+          Extensions.CommandLine.Command = cmd
+          Extensions.CommandLine.Arguments = args }
+
     override _.Dependencies = parseDotnetDependencies 
 
     override _.Outputs = [ "bin"; "obj" ]
@@ -83,12 +89,12 @@ type Dotnet(context) =
     override _.BuildStepCommands (_, parameters) =
         match parameters with
         | :? DotnetRestore as parameters ->
-            [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies" } ]
+            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" ]
         | :? DotnetBuild as parameters ->
-            [ { Command = "dotnet"; Arguments = $"restore {projectFile} --no-dependencies" }
-              { Command = "dotnet"; Arguments = $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {parameters.Configuration}" } ]
+            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies"
+              buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {parameters.Configuration}" ]
         | :? DotnetTest as parameters ->
-            [ { Command = "dotnet"; Arguments = $"test --no-build --configuration {parameters.Configuration} {projectFile} --filter \"{parameters.Filter}\"" } ]
+            [ buildCmdLine "dotnet" $"test --no-build --configuration {parameters.Configuration} {projectFile} --filter \"{parameters.Filter}\"" ]
         | :? DotnetPublish as parameters ->
-            [ { Command = "dotnet"; Arguments = $"publish {projectFile} --no-build --configuration {parameters.Configuration}" } ]
+            [ buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {parameters.Configuration}" ]
         | _ -> ArgumentException($"Unknown action") |> raise

@@ -12,11 +12,12 @@ type ConfigException(msg, innerException: Exception) =
     inherit Exception(msg, innerException)
 
 
+
 type Dependencies = Set<string>
 type Paths = Set<string>
 type TargetRules = Set<string>
 type Targets = Map<string, TargetRules>
-type StepCommands = Extensions.Command list
+type StepCommands = Extensions.CommandLine list
 type Steps = Map<string, StepCommands>
 type Variables = Map<string, string>
 type ExtensionConfigs = Map<string, Map<string, string>>
@@ -255,7 +256,6 @@ module ProjectConfigParser =
 
 
 
-
 type ProjectConfig = {
     Dependencies: Dependencies
     Ignores: Paths
@@ -417,11 +417,30 @@ let read workspaceDir shared environment labels variables =
                                 stepArgsType |> Option.ofObj
                                 |> Option.map (fun stepArgsType -> stepParams |> Yaml.loadModelFromType stepArgsType)
                                 |> Option.defaultValue null
+
                         match stepParameters with
                         | null -> []
                         | :? Extensions.StepParameters as stepParameters ->
                             stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
                         | _ -> failwith "Unexpected type for action type"
+
+                        // match container with
+                        // | Some container ->
+                        //     let commands =
+                        //         commands
+                        //         |> List.map (fun command ->
+                        //             { WorkspaceCommandLine.WorkingDir = workspaceDir
+                        //               WorkspaceCommandLine.Command = "docker"
+                        //               WorkspaceCommandLine.Arguments = $"run --rm -v {IO.combinePath Environment.CurrentDirectory projectDir}:/terrabuild -w /terrabuild {container} {command.Command} {command.Arguments}" })
+                        //     commands
+                        // | None ->
+                        //     let commands =
+                        //         commands
+                        //         |> List.map (fun command ->
+                        //             { WorkspaceCommandLine.WorkingDir = projectDir
+                        //               WorkspaceCommandLine.Command = command.Command
+                        //               WorkspaceCommandLine.Arguments = command.Arguments })
+                        //     commands
                     )
                 )
 

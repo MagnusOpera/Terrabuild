@@ -16,6 +16,12 @@ type NpmTest() =
 type Npm(context) =
     inherit Extension(context)
 
+    let buildCmdLine cmd args =
+        { Extensions.CommandLine.Container = Some "node"
+          Extensions.CommandLine.ContainerTag = None
+          Extensions.CommandLine.Command = cmd
+          Extensions.CommandLine.Arguments = args }
+
     override _.Dependencies = [] 
 
     override _.Outputs = [ "dist" ]
@@ -32,11 +38,11 @@ type Npm(context) =
     override _.BuildStepCommands (_, parameters) =
         match parameters with
         | :? NpmInstall ->
-            [ { Command = "npm"; Arguments = $"ci" } ]
+            [ buildCmdLine "npm" "ci" ]
         | :? NpmBuild ->
-            [ { Command = "npm"; Arguments = $"ci" }
-              { Command = "npm"; Arguments = $"run build" } ]
+            [ buildCmdLine "npm" "ci"
+              buildCmdLine "npm" "run build" ]
         | :? NpmTest ->
-            [ { Command = "npm"; Arguments = $"ci" }
-              { Command = "npm"; Arguments = $"run test" } ]
+            [ buildCmdLine "npm" "ci"
+              buildCmdLine "npm" "run test" ]
         | _ -> ArgumentException($"Unknown action") |> raise
