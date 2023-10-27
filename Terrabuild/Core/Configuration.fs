@@ -116,7 +116,7 @@ module ProjectConfigParser =
 
     let getExtensionFromInvocation name =
         match name with
-        | String.Regex "^\((\w+)\)$" [name] -> Some name
+        | String.Regex "^\(([a-zA-Z][_a-zA-Z0-9]+)\)$" [name] -> Some name
         | _ -> None
 
     let parse projectId workspaceDir buildDocument projectDir projectFile defaultExtensions shared commit branchOrTag =
@@ -386,7 +386,7 @@ let read workspaceDir shared environment labels variables =
             let variables =
                 projectDef.StepDefinitions
                 |> Seq.collect (fun l -> l.Value)
-                |> Seq.collect (fun stepDef -> String.AllMatches "\$\((\w+)\)" stepDef.Parameters)
+                |> Seq.collect (fun stepDef -> String.AllMatches "\$\(([a-zA-Z][_a-zA-Z0-9]+)\)" stepDef.Parameters)
                 |> Set
                 |> Set.remove "terrabuild_node_hash"
                 |> Seq.map (fun varName ->
@@ -425,7 +425,7 @@ let read workspaceDir shared environment labels variables =
                     // collect variables for this step
                     let variableNames =
                         steps
-                        |> Seq.collect (fun stepDef -> String.AllMatches "\$\((\w+)\)" stepDef.Arguments)
+                        |> Seq.collect (fun stepDef -> String.AllMatches "\$\(([a-zA-Z][_a-zA-Z0-9]+)\)" stepDef.Arguments)
                         |> Set
 
                     let variableValues =
