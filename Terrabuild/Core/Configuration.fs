@@ -258,6 +258,7 @@ module ProjectConfigParser =
 
 type ProjectConfig = {
     Dependencies: Dependencies
+    Files: string set
     Ignores: Paths
     Outputs: Paths
     Targets: Targets
@@ -423,30 +424,13 @@ let read workspaceDir shared environment labels variables =
                         | :? Extensions.StepParameters as stepParameters ->
                             stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
                         | _ -> failwith "Unexpected type for action type"
-
-                        // match container with
-                        // | Some container ->
-                        //     let commands =
-                        //         commands
-                        //         |> List.map (fun command ->
-                        //             { WorkspaceCommandLine.WorkingDir = workspaceDir
-                        //               WorkspaceCommandLine.Command = "docker"
-                        //               WorkspaceCommandLine.Arguments = $"run --rm -v {IO.combinePath Environment.CurrentDirectory projectDir}:/terrabuild -w /terrabuild {container} {command.Command} {command.Arguments}" })
-                        //     commands
-                        // | None ->
-                        //     let commands =
-                        //         commands
-                        //         |> List.map (fun command ->
-                        //             { WorkspaceCommandLine.WorkingDir = projectDir
-                        //               WorkspaceCommandLine.Command = command.Command
-                        //               WorkspaceCommandLine.Arguments = command.Arguments })
-                        //     commands
                     )
                 )
 
 
             let projectConfig =
                 { Dependencies = projectDef.Dependencies
+                  Files = files
                   Outputs = projectDef.Outputs
                   Ignores = projectDef.Ignores
                   Targets = projectDef.Targets
