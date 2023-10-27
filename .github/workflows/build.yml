@@ -30,20 +30,8 @@ jobs:
       - name: Run Tests
         run: make run-deploy-az-retry
 
-      - name: Upload Configuration
+      - name: Upload Terraform Debug
         uses: actions/upload-artifact@v2
         with:
-          name: Configuration
-          path: terrabuild.config.json
-
-      - name: Upload Graph
-        uses: actions/upload-artifact@v2
-        with:
-          name: Graph
-          path: terrabuild.graph.json
-
-      - name: Upload Build
-        uses: actions/upload-artifact@v2
-        with:
-          name: Build
-          path: terrabuild.build.json
+          name: Terrabuild
+          path: terrabuild.*.json
