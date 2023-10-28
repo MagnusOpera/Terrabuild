@@ -52,47 +52,13 @@ type IBuildNotification =
     abstract NodeUploading: node:Graph.Node -> unit
     abstract NodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
 
+
+
 let private isNodeUnsatisfied = function
     | NodeBuildStatus.Failure nodeInfo -> Some nodeInfo
     | NodeBuildStatus.Unfulfilled nodeInfo -> Some nodeInfo
     | NodeBuildStatus.Success _ -> None
 
-
-
-
-type BuildQueue(maxItems: int) =
-    let completion = new System.Threading.ManualResetEvent(false)
-    let queueLock = obj()
-    let queue = Queue<( (unit -> unit) )>()
-    let mutable totalTasks = 0
-    let mutable inFlight = 0
-
-    member _.Enqueue (action: unit -> unit) =
-        let rec trySchedule () =
-            match queue.Count, inFlight with
-            | (0, 0) -> completion.Set() |> ignore
-            | (n, _) when 0 < n && inFlight < maxItems ->
-                inFlight <- inFlight + 1
-                queue.Dequeue() |> runTask
-            | _ -> ()
-        and runTask action =
-            async {
-                action()
-                lock queueLock (fun () ->
-                    inFlight <- inFlight - 1
-                    trySchedule()
-                )
-            } |> Async.Start
-
-        lock queueLock (fun () ->
-            totalTasks <- totalTasks + 1
-            queue.Enqueue(action)
-            trySchedule()
-        )
-
-    member _.WaitCompletion() =
-        let enqueuedTasks = lock queueLock (fun () -> totalTasks)
-        if enqueuedTasks > 0 then completion.WaitOne() |> ignore
 
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.Cache) (notification: IBuildNotification) (options: BuildOptions) =
 
@@ -246,7 +212,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     // this is the core of the build
     // schedule first nodes with no incoming edges
     // on completion schedule released nodes
-    let buildQueue = BuildQueue(options.MaxConcurrency)
+    let buildQueue = Exec.BuildQueue(options.MaxConcurrency)
     let rec scheduleNode (nodeId: string) =
         let node = graph.Nodes[nodeId]
 

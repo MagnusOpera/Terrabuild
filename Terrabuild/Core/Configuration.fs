@@ -75,19 +75,19 @@ module ExtensionLoaders =
         | "docker" -> Extensions.Docker(context)
         | "make" -> Extensions.Make(context)
         | "echo" -> Extensions.Echo(context)
-        | _ -> failwith $"Unknown plugin {name}"
+        | _ -> failwith $"Unknown plugin '{name}'"
 
     let loadStorage name : Storages.Storage =
         match name with
         | None -> Storages.Local()
         | Some "azureblob" -> Storages.MicrosoftBlobStorage()
-        | _ -> failwith $"Unknown storage {name}"
+        | _ -> failwith $"Unknown storage '{name}'"
 
     let loadSourceControl name: SourceControls.SourceControl =
         match name with
         | None -> SourceControls.Local()
         | Some "github" -> SourceControls.GitHub()
-        | _ -> failwith $"Unknown source control {name}"
+        | _ -> failwith $"Unknown source control '{name}'"
 
 module BuildConfigParser =
 
@@ -102,7 +102,7 @@ module BuildConfigParser =
         let environments =
             match buildDocument |> Yaml.query "/environments" with
             | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Yaml.toStringMap)
-            | Some _ -> failwith "Invalid configuration for environements"
+            | Some _ -> failwith "Invalid configuration for environments in BUILD configuration"
             | None -> Map.empty
 
         let variables =
@@ -112,7 +112,7 @@ module BuildConfigParser =
                 match environment with
                 | "default" -> Map.empty
                 | _ ->
-                    ConfigException($"Environment {environment} not found", null)
+                    ConfigException($"Environment '{environment}' not found", null)
                     |> raise
 
         let buildConfig = { BuildConfig.Targets = targets
@@ -150,11 +150,15 @@ module ProjectConfigParser =
         | _ -> None
 
     let parse projectId workspaceDir buildDocument projectDir projectFile defaultExtensions shared commit branchOrTag =
+        let projectFilename = IO.combinePath projectDir projectFile
         // we might have landed in a directory without a configuration
         // in that case we just use the default configuration (which does nothing)
         let projectDocument =
-            match IO.combinePath projectDir projectFile with
-            | IO.File projectFile -> Yaml.loadDocument projectFile
+            match projectFilename with
+            | IO.File projectFile ->
+                match Yaml.loadDocument projectFile with
+                | Ok doc -> doc
+                | Error err -> ConfigException($"PROJECT '{projectFilename}' is invalid", err) |> raise
             | _ -> null
 
         let projectOutputs =
@@ -172,6 +176,7 @@ module ProjectConfigParser =
         let projectTargets =
             match projectDocument |> Yaml.query "/targets" with
             | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Set << Yaml.toStringList)
+            | Some _ -> ConfigException($"Expecting mapping  for element /targets in PROJECT '{projectFilename}'", null) |> raise
             | _ -> Map.empty
 
         let projectDependencies =
@@ -183,6 +188,7 @@ module ProjectConfigParser =
         let labels =
             match projectDocument |> Yaml.query "/labels" with
             | Some (Yaml.Sequence (_, sequence)) -> sequence |> List.map Yaml.toString |> Set
+            | Some _ -> ConfigException($"Expecting list for element /labels", null) |> raise
             | _ -> Set.empty
 
         let projectBuilders =
@@ -203,13 +209,13 @@ module ProjectConfigParser =
                         let configBuilderParams =
                             match buildDocument |> Yaml.query $"/extensions/{builderUse}" with
                             | Some (Yaml.Mapping (_, mapping)) -> mapping
-                            | Some _ -> failwith "Expecting mapping"
+                            | Some _ -> ConfigException($"Expecting mapping for element /extensions/{builderUse} in PROJECT '{projectFilename}'", null) |> raise
                             | _ -> Map.empty
 
                         let configProjectParams =
                             match mapping |> Yaml.query $"parameters" with
                             | Some (Yaml.Mapping (_, mapping)) -> mapping
-                            | Some _ -> failwith "Expecting mapping"
+                            | Some _ -> ConfigException($"Expecting mapping for element /builders/{builderUse}/parameters in PROJECT '{projectFilename}'", null) |> raise
                             | _ -> Map.empty
 
                         let builderParams = configBuilderParams |> Map.replace configProjectParams
@@ -222,7 +228,7 @@ module ProjectConfigParser =
   
                     let builder = ExtensionLoaders.loadExtension builderUse context 
                     {| Extension = builder; Parameters = builderParams; Container = builderContainer |})
-            | Some _ -> ConfigException($"Project {projectId} has malformed builders mapping", null) |> raise
+            | Some _ -> ConfigException($"Project '{projectId}' has malformed builders mapping", null) |> raise
             | _ -> Map.empty
 
         // collect extension capabilities
@@ -303,7 +309,10 @@ module ProjectConfigParser =
 
 let read workspaceDir shared environment labels variables =
     let buildFile = Path.Combine(workspaceDir, "BUILD")
-    let buildDocument = Yaml.loadDocument buildFile
+    let buildDocument =
+        match Yaml.loadDocument buildFile with
+        | Ok doc -> doc
+        | Error err -> ConfigException($"Configuration '{buildFile}' is invalid", err) |> raise
     let buildConfig = BuildConfigParser.parse buildDocument environment
 
     // storage
@@ -352,7 +361,7 @@ let read workspaceDir shared environment labels variables =
         let projectDir, projectFile = 
             match projectId with
             | IO.Directory projectDir -> projectDir, "PROJECT"
-            | IO.File _ -> ConfigException($"Dependency {project} is not a directory", null) |> raise
+            | IO.File _ -> ConfigException($"Dependency '{project}' is not a directory", null) |> raise
             | _ -> failwith $"Failed to find project {projectId}"
 
         // process only unknown dependency
@@ -366,7 +375,7 @@ let read workspaceDir shared environment labels variables =
                     scanDependencies projects projectDef.Dependencies
                 with
                     ex ->
-                        ConfigException($"while processing {project}", ex)
+                        ConfigException($"while processing '{project}'", ex)
                         |> raise
 
 
@@ -421,7 +430,7 @@ let read workspaceDir shared environment labels variables =
                 |> Seq.map (fun varName ->
                     match buildVariables |> Map.tryFind varName with
                     | Some value -> varName, value
-                    | _ -> ConfigException($"Variable {varName} is not defined in \"{environment}\"", null) |> raise)
+                    | _ -> ConfigException($"Variable '{varName}' is not defined in environment '{environment}'", null) |> raise)
                 |> Map
                 |> Map.add "terrabuild_branch_or_tag" (branchOrTag.Replace("/", "-"))
 
@@ -431,7 +440,7 @@ let read workspaceDir shared environment labels variables =
                     match projects |> Map.tryFind dependency with
                     | Some project -> project.Hash
                     | _ ->
-                        ConfigException($"Circular dependencies between {project} and {dependency}", null)
+                        ConfigException($"Circular dependencies between '{project}' and '{dependency}'", null)
                         |> raise
                 )
                 |> Seq.sort
@@ -526,6 +535,7 @@ let read workspaceDir shared environment labels variables =
                 for subdir in dir |> IO.enumerateDirs do
                     yield! findDependencies subdir
         }
+
     let dependencies =
         workspaceDir
         |> findDependencies

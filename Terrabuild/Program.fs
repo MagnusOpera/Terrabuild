@@ -5,12 +5,24 @@ open System
 let rec dumpKnownException (ex: Exception) =
     seq {
         match ex with
-        | null -> ()
         | :? Configuration.ConfigException as ex ->
             yield ex.Message
-            yield! ex.InnerException |> dumpKnownException 
+            yield! ex.InnerException |> dumpKnownException
+        | null -> ()
+        | _ ->
+            yield ex.ToString()
+            yield! ex.InnerException |> dumpKnownException
+    }
+
+let rec dumpUnknownException (ex: Exception) =
+    seq {
+        match ex with
+        | :? Configuration.ConfigException as ex ->
+            yield! ex |> dumpKnownException
+        | null -> ()
         | _ -> yield ex.ToString()
     }
+
 
 
 type TerrabuildExiter() =
@@ -64,7 +76,7 @@ let processCommandLine () =
 
         with
             | :? Configuration.ConfigException as ex ->
-                let reason = dumpKnownException ex |> Seq.rev |> String.join ", "
+                let reason = dumpUnknownException ex |> String.join "\n   "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
 

@@ -100,11 +100,14 @@ let singleDocument (yamlStream: YamlStream) =
     node
 
 let loadDocument filename =
-    let yaml = System.IO.File.ReadAllText filename
-    use input = new StringReader(yaml)
-    let yamlStream = YamlStream()
-    yamlStream.Load(input)
-    yamlStream |> singleDocument
+    try
+        let yaml = System.IO.File.ReadAllText filename
+        use input = new StringReader(yaml)
+        let yamlStream = YamlStream()
+        yamlStream.Load(input)
+        yamlStream |> singleDocument |> Ok
+    with
+        | ex -> Error ex
 
 let deserializer =
     DeserializerBuilder()

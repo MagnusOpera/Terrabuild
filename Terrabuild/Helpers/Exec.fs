@@ -2,6 +2,7 @@ module Exec
 open System.Diagnostics
 open System
 open System.IO
+open System.Collections.Generic
 
 type CaptureResult =
     | Success of string*int
@@ -49,3 +50,38 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
     proc.WaitForExit()
 
     proc.ExitCode
+
+
+type BuildQueue(maxItems: int) =
+    let completion = new System.Threading.ManualResetEvent(false)
+    let queueLock = obj()
+    let queue = Queue<( (unit -> unit) )>()
+    let mutable totalTasks = 0
+    let mutable inFlight = 0
+
+    member _.Enqueue (action: unit -> unit) =
+        let rec trySchedule () =
+            match queue.Count, inFlight with
+            | (0, 0) -> completion.Set() |> ignore
+            | (n, _) when 0 < n && inFlight < maxItems ->
+                inFlight <- inFlight + 1
+                queue.Dequeue() |> runTask
+            | _ -> ()
+        and runTask action =
+            async {
+                action()
+                lock queueLock (fun () ->
+                    inFlight <- inFlight - 1
+                    trySchedule()
+                )
+            } |> Async.Start
+
+        lock queueLock (fun () ->
+            totalTasks <- totalTasks + 1
+            queue.Enqueue(action)
+            trySchedule()
+        )
+
+    member _.WaitCompletion() =
+        let enqueuedTasks = lock queueLock (fun () -> totalTasks)
+        if enqueuedTasks > 0 then completion.WaitOne() |> ignore
