@@ -32,6 +32,10 @@ let processCommandLine () =
 
     let runTarget wsDir target shared environment labels variables options =
         try
+            if debug then
+                let jsonOptions = Json.Serialize options
+                jsonOptions |> IO.writeTextFile "terrabuild.options.json"
+
             $"{Ansi.Emojis.box} Reading configuration" |> Terminal.writeLine
             let config = Configuration.read wsDir shared environment labels variables
 
