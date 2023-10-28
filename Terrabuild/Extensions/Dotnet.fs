@@ -67,9 +67,10 @@ type Dotnet(context) =
         refs 
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Container = Some "mcr.microsoft.com/dotnet/sdk"
-          Extensions.CommandLine.Command = cmd
+        { Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
+
+    override _.Container = Some "mcr.microsoft.com/dotnet/sdk"
 
     override _.Dependencies = parseDotnetDependencies 
 

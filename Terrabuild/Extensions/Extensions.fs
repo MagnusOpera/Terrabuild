@@ -3,7 +3,6 @@ open System
 
 [<RequireQualifiedAccess>]
 type CommandLine = {
-    Container: string option
     Command: string
     Arguments: string
 }
@@ -20,6 +19,7 @@ type StepParameters() =
 
 [<AbstractClass>]
 type Extension(context: IContext) =
+    abstract Container: string option
     abstract Dependencies: string list
     abstract Outputs: string list
     abstract Ignores: string list

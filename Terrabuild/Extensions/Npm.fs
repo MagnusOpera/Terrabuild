@@ -17,9 +17,10 @@ type Npm(context) =
     inherit Extension(context)
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Container = Some "node"
-          Extensions.CommandLine.Command = cmd
+        { Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
+
+    override _.Container = Some "node"
 
     override _.Dependencies = [] 
 

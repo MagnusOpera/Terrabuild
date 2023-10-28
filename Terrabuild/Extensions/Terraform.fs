@@ -21,9 +21,10 @@ type Terraform(context) =
     inherit Extension(context)
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Container = Some "hashicorp/terraform"
-          Extensions.CommandLine.Command = cmd
+        { Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
+
+    override _.Container = Some "hashicorp/terraform"
 
     override _.Dependencies = [] 
 

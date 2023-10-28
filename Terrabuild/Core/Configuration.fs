@@ -16,11 +16,19 @@ type Paths = Set<string>
 type TargetRules = Set<string>
 type Targets = Map<string, TargetRules>
 
+
+[<RequireQualifiedAccess>]
+type ContaineredCommandLine = {
+    Container: string option
+    Command: string
+    Arguments: string
+}
+
 [<RequireQualifiedAccess>]
 type Step = {
     Hash: string
     Variables: Map<string, string>
-    CommandLines: Extensions.CommandLine list
+    CommandLines: ContaineredCommandLine list
 }
 
 type Steps = Map<string, Step>
@@ -76,6 +84,7 @@ module BuildConfigParser =
             | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Yaml.toStringMap)
             | Some _ -> failwith "Invalid configuration for environements"
             | None -> Map.empty
+
         let variables =
             match environments |> Map.tryFind environment with
             | Some variables -> variables
@@ -102,6 +111,7 @@ module ProjectConfigParser =
         Extension: Extensions.Extension
         Command: string
         Parameters: string
+        Container: string option
     }
 
     [<RequireQualifiedAccess>]
@@ -149,6 +159,11 @@ module ProjectConfigParser =
             |> Yaml.query "/dependencies"
             |> Yaml.toOptionalStringList
             |> Set
+
+        let labels =
+            match projectDocument |> Yaml.query "/labels" with
+            | Some (Yaml.Sequence (_, sequence)) -> sequence |> List.map Yaml.toString |> Set
+            | _ -> Set.empty
 
         let projectBuilders =
             match projectDocument |> Yaml.query "/builders" with
@@ -205,19 +220,14 @@ module ProjectConfigParser =
         let projectOutputs = projectOutputs + builderOutputs
         let projectIgnores = projectIgnores + builderIgnores
 
-
         // convert relative dependencies to absolute dependencies respective to workspaceDirectory
         let projectDependencies =
             (projectDependencies + builderDependencies)
             |> Set.map (fun dep -> IO.combinePath projectDir dep
                                     |> IO.relativePath workspaceDir)
 
-        let labels =
-            match projectDocument |> Yaml.query "/labels" with
-            | Some (Yaml.Sequence (_, sequence)) -> sequence |> List.map Yaml.toString |> Set
-            | _ -> Set.empty
-
         let projectBuilders = defaultExtensions |> Map.replace projectBuilders
+
 
         let projectStepDefinitions =
             match projectDocument |> Yaml.query "/steps" with
@@ -245,9 +255,14 @@ module ProjectConfigParser =
                                 ]).Save(writer)
                                 let content = writer.ToString()
 
+                                let container =
+                                    builderInfo.Container
+                                    |> Option.orElse builderInfo.Extension.Container
+
                                 { StepDefinition.Extension = builderInfo.Extension
                                   StepDefinition.Command = builderCommand
-                                  StepDefinition.Parameters = content }
+                                  StepDefinition.Parameters = content
+                                  StepDefinition.Container = container }
                             | _ -> failwith "Expecting mapping")
                     | _ -> failwith "Expecting sequence")
             | _ -> Map.empty
@@ -284,7 +299,6 @@ type WorkspaceConfig = {
     Projects: Map<string, ProjectConfig>
     Environment: string
 }
-
 
 
 let read workspaceDir shared environment labels variables =
@@ -383,14 +397,21 @@ let read workspaceDir shared environment labels variables =
                             |> Option.map (fun stepArgsType -> stepParams |> Yaml.loadModelFromType stepArgsType)
                             |> Option.defaultValue null
 
-                        match stepParameters with
-                        | null -> []
-                        | :? Extensions.StepParameters as stepParameters ->
-                            stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
-                        | _ -> failwith "Unexpected type for action type"
+                        let cmds =
+                            match stepParameters with
+                            | null -> []
+                            | :? Extensions.StepParameters as stepParameters ->
+                                stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
+                            | _ -> failwith "Unexpected type for action type"
+
+                        cmds
+                        |> List.map (fun cmd ->
+                            { ContaineredCommandLine.Container = stepDef.Container
+                              ContaineredCommandLine.Command = cmd.Command
+                              ContaineredCommandLine.Arguments = cmd.Arguments })
                     )
                 )
-
+ 
             let variables =
                 projectDef.StepDefinitions
                 |> Seq.collect (fun l -> l.Value)
@@ -429,10 +450,10 @@ let read workspaceDir shared environment labels variables =
 
             let projectSteps =
                 projectSteps
-                |> Map.map (fun _ steps ->
+                |> Map.map (fun _ stepCommandLines ->
                     // collect variables for this step
                     let variableNames =
-                        steps
+                        stepCommandLines
                         |> Seq.collect (fun stepDef -> String.AllMatches "\$\(([a-zA-Z][_a-zA-Z0-9]+)\)" stepDef.Arguments)
                         |> Set
 
@@ -451,14 +472,15 @@ let read workspaceDir shared environment labels variables =
                         |> String.sha256
 
                     let stepWithValues =
-                        steps
+                        stepCommandLines
                         |> List.map (fun step ->
                             { step
                               with Arguments = variableValues
                                                |> Map.fold (fun acc key value -> acc |> String.replace $"$({key})" value) step.Arguments })
+
                     { Step.Hash = variableHashes
                       Step.Variables = variableValues
-                      Step.CommandLines = stepWithValues }                        
+                      Step.CommandLines = stepWithValues }
                 )
 
             let projectConfig =

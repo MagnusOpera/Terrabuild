@@ -12,9 +12,10 @@ type Make(context) =
     inherit Extension(context)
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Container = None
-          Extensions.CommandLine.Command = cmd
+        { Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
+
+    override _.Container = None
 
     override _.Dependencies = []
 
