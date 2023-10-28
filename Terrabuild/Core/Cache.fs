@@ -55,11 +55,16 @@ let clearBuildCache () =
 type NewEntry(entryDir: string, id: string, storage: Storages.Storage) =
     let mutable logNum = 0
 
+    let logsDir = IO.combinePath entryDir "logs"
+    let outputsDir = IO.combinePath entryDir "outputs"
+
     do
         match entryDir with
         | IO.Directory _ | IO.File _ -> IO.deleteAny entryDir
         | IO.None -> ()
         IO.createDirectory entryDir
+        IO.createDirectory logsDir
+        // NOTE: outputs is created on demand only
 
     let write (summary: TargetSummary) =
         let summary =
@@ -70,27 +75,32 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage) =
                      Outputs = summary.Outputs
                                |> Option.map (fun outputs -> IO.getFilename outputs) }
 
-        let summaryFile = IO.combinePath entryDir summaryFilename
+        let summaryFile = IO.combinePath logsDir summaryFilename
         summary |> Json.Serialize |> IO.writeTextFile summaryFile
 
     let upload (storage: Storages.Storage) =
-        let tarFile = IO.getTempFilename()
-        let compressFile = IO.getTempFilename()
-        try
-            entryDir |> Compression.tar tarFile
-            tarFile |> Compression.compress compressFile
-            storage.Upload id compressFile
-        finally
-            IO.deleteAny compressFile
-            IO.deleteAny tarFile
+        let uploadDir sourceDir name =
+            let tarFile = IO.getTempFilename()
+            let compressFile = IO.getTempFilename()
+            try
+                sourceDir |> Compression.tar tarFile
+                tarFile |> Compression.compress compressFile
+                storage.Upload $"{id}/{name}" compressFile
+            finally
+                IO.deleteAny compressFile
+                IO.deleteAny tarFile
+
+        if Directory.Exists outputsDir then
+            uploadDir outputsDir "outputs"
+        uploadDir logsDir "logs"
 
     interface IEntry with
         member _.NextLogFile () =
             logNum <- logNum + 1
             let filename = $"step{logNum}.log"
-            IO.combinePath entryDir filename
+            IO.combinePath logsDir filename
 
-        member _.Outputs = IO.combinePath entryDir "outputs"
+        member _.Outputs = outputsDir
 
         member _.Complete summary =
             summary |> write
@@ -99,15 +109,17 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage) =
 
 
 type Cache(storage: Storages.Storage) =
-    let cachedSumaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
+    let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
 
     member _.TryGetSummary id : TargetSummary option =
 
-        match cachedSumaries.TryGetValue(id) with
+        match cachedSummaries.TryGetValue(id) with
         | true, summary -> Some summary
         | _ ->
             let entryDir = IO.combinePath buildCacheDirectory id
-            let summaryFile = IO.combinePath entryDir summaryFilename
+            let logsDir = IO.combinePath entryDir "logs"
+            let outputsDir = IO.combinePath entryDir "outputs"
+            let summaryFile = IO.combinePath logsDir summaryFilename
             let completeFile = IO.combinePath entryDir completeFilename
 
             let load () =
@@ -115,27 +127,43 @@ type Cache(storage: Storages.Storage) =
                 let summary = { summary
                                 with Steps = summary.Steps
                                              |> List.map (fun stepLog -> { stepLog
-                                                                           with Log = IO.combinePath entryDir stepLog.Log })
-                                     Outputs = summary.Outputs |> Option.map (fun outputs -> IO.combinePath entryDir outputs) }
-                cachedSumaries.TryAdd(summaryFile, summary) |> ignore
+                                                                           with Log = IO.combinePath logsDir stepLog.Log })
+                                     Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
+                cachedSummaries.TryAdd(summaryFile, summary) |> ignore
                 summary
 
             let download (storage: Storages.Storage) =
-                match storage.TryDownload id with
-                | Some tarFile ->
-                    let uncompressFile = IO.getTempFilename()
-                    try
-                        tarFile |> Compression.uncompress uncompressFile
-                        uncompressFile |> Compression.untar entryDir
+                let downloadDir targetDir name =
+                    match storage.TryDownload $"{id}/{name}" with
+                    | Some tarFile ->
+                        let uncompressFile = IO.getTempFilename()
+                        try
+                            tarFile |> Compression.uncompress uncompressFile
+                            uncompressFile |> Compression.untar targetDir
+                            Some targetDir
+                        finally
+                            IO.deleteAny uncompressFile
+                            IO.deleteAny tarFile
+                    | _ ->
+                        None
+                
+                match downloadDir logsDir "logs" with
+                | Some _ ->
+                    let summary = load()
+
+                    match summary.Outputs with
+                    | Some outputsDir ->
+                        match downloadDir outputsDir "outputs" with
+                        | Some _ ->
+                            entryDir |> markEntryAsCompleted
+                            summary |> Some
+                        | _ ->
+                            None
+                    | _ ->
                         entryDir |> markEntryAsCompleted
-                        let summary = load()
                         summary |> Some
-                    finally
-                        IO.deleteAny uncompressFile
-                        IO.deleteAny tarFile
                 | _ ->
                     None
-
 
             match completeFile with
             | IO.File _ ->

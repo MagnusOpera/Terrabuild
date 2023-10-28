@@ -192,8 +192,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 let newFiles = afterFiles - beforeFiles
 
                 // create an archive with new files
-                let entryOutputsDir = cacheEntry.Outputs
-                let outputs = IO.copyFiles entryOutputsDir projectDirectory newFiles
+                let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
                 let status =
                     if lastExitCode = 0 then Cache.TaskStatus.Success

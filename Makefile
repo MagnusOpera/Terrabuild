@@ -13,6 +13,9 @@ run-build-circular:
 run-build:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
 
+run-build-az:
+	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --shared
+
 run-dist:
 	dotnet run --project Terrabuild -- dist --workspace tests/simple --environment debug --debug
 
