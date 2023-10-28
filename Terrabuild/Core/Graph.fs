@@ -8,33 +8,24 @@ type Node = {
     Configuration: Configuration.ProjectConfig
     Dependencies: string set
     IsLeaf: bool
-    IsPlaceholder: bool
 }
 
 type WorkspaceGraph = {
-    Targets: string list
+    Targets: Set<string>
     Nodes: Map<string, Node>
-    RootNodes: Map<string, string>
+    RootNodes: Set<string>
 }
 
 
-let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) =
+let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
-    let removePlaceholders dependency =
-        let childNode = allNodes[dependency]
-        let newChildren : string seq =
-            if childNode.IsPlaceholder then
-                childNode.Dependencies
-            else [ dependency ]
-        newChildren
-
-    let rec buildTarget target projectId  =
-        let nodeId = $"{projectId}-{target}"
+    let rec buildTarget target project =
+        let nodeId = $"{project}-{target}"
 
         let processNode () =
-            let projectConfig = wsConfig.Projects[projectId]
+            let projectConfig = wsConfig.Projects[project]
 
             // merge targets requirements
             let buildDependsOn =
@@ -52,50 +43,44 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string list) 
                 let mutable hasInternalDependencies = false
 
                 for dependsOn in dependsOns do
-                    let childDependency =
+                    let childDependencies =
                         match dependsOn with
                         | String.Regex "^\^([a-zA-Z][_a-zA-Z0-9]+)$" [ parentDependsOn ] ->
                             projectConfig.Dependencies
-                            |> Seq.map (buildTarget parentDependsOn)
-                            |> List.ofSeq
+                            |> Seq.collect (buildTarget parentDependsOn)
                         | _ ->
                             hasInternalDependencies <- true
-                            [ buildTarget dependsOn projectId ]
-                    let childrenNoPlaceholders =
-                        childDependency
-                        |> Seq.collect removePlaceholders
-                    children <- children + (childrenNoPlaceholders |> Set)
+                            buildTarget dependsOn project
+                    children <- children + (childDependencies |> Set)
                 children, hasInternalDependencies
 
             // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
             let isLeaf = hasInternalDependencies |> not
 
-            let isPlaceholder = projectConfig.Steps |> Map.containsKey target |> not
-            let node = { Project = projectId
-                         Target = target
-                         Configuration = projectConfig
-                         Dependencies = children
-                         IsLeaf = isLeaf
-                         IsPlaceholder = isPlaceholder }
-            if allNodes.TryAdd(nodeId, node) |> not then
-                failwith "Unexpected graph building race"
+            // only generate computation node - that is node that generate something
+            // barrier nodes are just discarded and dependencies lift level up
+            let isComputationNode = projectConfig.Steps |> Map.containsKey target
+
+            if isComputationNode then
+                let node = { Project = project
+                             Target = target
+                             Configuration = projectConfig
+                             Dependencies = children
+                             IsLeaf = isLeaf }
+                if allNodes.TryAdd(nodeId, node) |> not then
+                    failwith "Unexpected graph building race"
+                [ nodeId ]
+            else
+                children |> List.ofSeq
 
         if processedNodes.TryAdd(nodeId, true) then processNode()
-        nodeId
+        else [ nodeId ]
 
     let rootNodes =
-        Map [
-            for dependency in wsConfig.Dependencies do
-                for target in targets do
-                    dependency, buildTarget target dependency
-                    let nodeIds =
-                        [ buildTarget target dependency ]
-                        |> Seq.collect removePlaceholders
-                    for nodeId in nodeIds do
-                        let node = allNodes[nodeId]
-                        node.Project, nodeId
-        ]
+        wsConfig.Dependencies |> Seq.collect (fun dependency ->
+            targets |> Seq.collect (fun target -> buildTarget target dependency))
+        |> Set
 
     { Targets = targets
-      Nodes = allNodes |> Map.ofDict |> Map.filter (fun _ node -> node.IsPlaceholder |> not)
+      Nodes = allNodes |> Map.ofDict
       RootNodes = rootNodes }

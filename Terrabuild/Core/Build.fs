@@ -10,7 +10,7 @@ type BuildOptions = {
 }
 
 [<RequireQualifiedAccess>]
-type TaskBuildStatus =
+type NodeBuildStatus =
     | Success of nodeId:string * target:string
     | Failure of nodeId:string * target:string
     | Unfulfilled of nodeId:string
@@ -28,8 +28,8 @@ type BuildSummary = {
     EndedAt: DateTime
     Duration: TimeSpan
     Status: BuildStatus
-    Targets: string list
-    Dependencies: Map<string, TaskBuildStatus>
+    Targets: Set<string>
+    RootNodes: Set<NodeBuildStatus>
 }
 
 type IBuildNotification =
@@ -44,10 +44,10 @@ type IBuildNotification =
     abstract NodeUploading: node:Graph.Node -> unit
     abstract NodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
 
-let private isTaskUnsatisfied = function
-    | TaskBuildStatus.Failure (depId, _) -> Some depId
-    | TaskBuildStatus.Unfulfilled depId -> Some depId
-    | TaskBuildStatus.Success _ -> None
+let private isNodeUnsatisfied = function
+    | NodeBuildStatus.Failure (depId, _) -> Some depId
+    | NodeBuildStatus.Unfulfilled depId -> Some depId
+    | NodeBuildStatus.Success _ -> None
 
 
 
@@ -56,6 +56,7 @@ type BuildQueue(maxItems: int) =
     let completion = new System.Threading.ManualResetEvent(false)
     let queueLock = obj()
     let queue = Queue<( (unit -> unit) )>()
+    let mutable totalTasks = 0
     let mutable inFlight = 0
 
     member _.Enqueue (action: unit -> unit) =
@@ -76,29 +77,27 @@ type BuildQueue(maxItems: int) =
             } |> Async.Start
 
         lock queueLock (fun () ->
+            totalTasks <- totalTasks + 1
             queue.Enqueue(action)
             trySchedule()
         )
 
     member _.WaitCompletion() =
-        completion.WaitOne() |> ignore
+        let enqueuedTasks = lock queueLock (fun () -> totalTasks)
+        if enqueuedTasks > 0 then completion.WaitOne() |> ignore
 
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.Cache) (notification: IBuildNotification) (options: BuildOptions) =
 
-    let realNodes =
-        graph.Nodes
-        |> Map.filter (fun _ node -> node.IsPlaceholder |> not)
-
     // compute first incoming edges
     let reverseIncomings =
-        realNodes
+        graph.Nodes
         |> Map.map (fun _ _ -> List<string>())
-    for KeyValue(nodeId, node) in realNodes do
+    for KeyValue(nodeId, node) in graph.Nodes do
         for dependency in node.Dependencies do
             reverseIncomings[dependency].Add(nodeId)
 
     let allNodes =
-        realNodes
+        graph.Nodes
         |> Map.map (fun _ _ -> ref 0)
 
     let refCounts =
@@ -112,7 +111,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         allNodes |> Map.replace refCounts
 
     let isBuildSuccess = function
-        | TaskBuildStatus.Success _ -> true
+        | NodeBuildStatus.Success _ -> true
         | _ -> false
 
     // collect dependencies status
@@ -124,16 +123,16 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         match cache.TryGetSummary cacheEntryId with
         | Some summary -> 
             match summary.Status with
-            | Cache.TaskStatus.Success -> TaskBuildStatus.Success (node.Configuration.Hash, summary.Target)
-            | Cache.TaskStatus.Failure -> TaskBuildStatus.Failure (node.Configuration.Hash, summary.Target)
-        | _ -> TaskBuildStatus.Unfulfilled depId
+            | Cache.TaskStatus.Success -> NodeBuildStatus.Success (node.Configuration.Hash, summary.Target)
+            | Cache.TaskStatus.Failure -> NodeBuildStatus.Failure (node.Configuration.Hash, summary.Target)
+        | _ -> NodeBuildStatus.Unfulfilled depId
 
     let buildNode (node: Graph.Node) =
         notification.NodeDownloading node
         let isAllSatisfied =
             node.Dependencies
             |> Seq.map getDependencyStatus
-            |> Seq.choose isTaskUnsatisfied
+            |> Seq.choose isNodeUnsatisfied
             |> Seq.isEmpty
 
         if isAllSatisfied then
@@ -278,6 +277,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     readyNodes
     |> Map.filter (fun _ value -> value.Value = 0)
     |> Map.iter (fun key _ -> scheduleNode key)
+
+    // wait only if we have something to do
     buildQueue.WaitCompletion()
 
     let headCommit = workspaceConfig.SourceControl.HeadCommit
@@ -285,15 +286,14 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
     let dependencies =
         graph.RootNodes
-        |> Seq.map (fun (KeyValue(dependency, nodeId)) ->
-            dependency, getDependencyStatus nodeId)
-        |> Map
+        |> Seq.map getDependencyStatus
+        |> Set
 
     let endedAt = DateTime.UtcNow
     let duration = endedAt - startedAt
 
     let status =
-        let isSuccess = dependencies |> Seq.forall (fun (KeyValue(_, value)) -> isBuildSuccess value)
+        let isSuccess = dependencies |> Seq.forall isBuildSuccess
         if isSuccess then BuildStatus.Success
         else BuildStatus.Failure
 
@@ -304,6 +304,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                       BuildSummary.Duration = duration
                       BuildSummary.Status = status
                       BuildSummary.Targets = graph.Targets
-                      BuildSummary.Dependencies = dependencies }
+                      BuildSummary.RootNodes = dependencies }
     notification.BuildCompleted buildInfo
     buildInfo

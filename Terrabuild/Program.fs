@@ -73,7 +73,7 @@ let processCommandLine () =
         let options = { Build.BuildOptions.NoCache = buildArgs.Contains(RunArgs.NoCache)
                         Build.BuildOptions.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Build.BuildOptions.Retry = buildArgs.Contains(RunArgs.Retry) }
-        runTarget wsDir [target] shared environment labels variables options
+        runTarget wsDir (Set.singleton target) shared environment labels variables options
 
 
     let target (targetArgs: ParseResults<TargetArgs>) =
@@ -86,7 +86,7 @@ let processCommandLine () =
         let options = { Build.BuildOptions.NoCache = targetArgs.Contains(TargetArgs.NoCache)
                         Build.BuildOptions.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Build.BuildOptions.Retry = targetArgs.Contains(TargetArgs.Retry) }
-        runTarget wsDir targets shared environment labels variables options
+        runTarget wsDir (Set targets) shared environment labels variables options
 
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
