@@ -2,12 +2,22 @@ module Graph
 open System.Collections.Concurrent
 open Collections
 
+type Paths = string set
+
+[<RequireQualifiedAccess>]
+type Action = {
+    Variables: Map<string, string>
+    CommandLines: Configuration.ContaineredCommandLine list
+}
+
 type Node = {
     Project: string
     Target: string
-    Configuration: Configuration.ProjectConfig
     Dependencies: string set
     IsLeaf: bool
+    Hash: string
+    Action: Action
+    Outputs: Configuration.Paths
 }
 
 type WorkspaceGraph = {
@@ -59,18 +69,28 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
 
             // only generate computation node - that is node that generate something
             // barrier nodes are just discarded and dependencies lift level up
-            let isComputationNode = projectConfig.Steps |> Map.containsKey target
+            match projectConfig.Steps |> Map.tryFind target with
+            | Some step ->
+                let hashContent = [
+                    yield! step.Variables |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
+                    yield! step.CommandLines |> Seq.map (fun cmd -> $"{cmd.Container} {cmd.Command} {cmd.Arguments}")
+                    yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].Hash)
+                ]
 
-            if isComputationNode then
+                let hash = hashContent |> String.sha256list
+
                 let node = { Project = project
                              Target = target
-                             Configuration = projectConfig
+                             Action = { Action.Variables = step.Variables
+                                        Action.CommandLines = step.CommandLines }
+                             Outputs = projectConfig.Outputs
                              Dependencies = children
-                             IsLeaf = isLeaf }
+                             IsLeaf = isLeaf
+                             Hash = hash }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     failwith "Unexpected graph building race"
                 [ nodeId ]
-            else
+            | _ ->
                 children |> List.ofSeq
 
         if processedNodes.TryAdd(nodeId, true) then processNode()

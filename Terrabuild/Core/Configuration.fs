@@ -465,12 +465,6 @@ let read workspaceDir shared environment labels variables =
                             | _ -> ConfigException($"Variable {varName} is not defined in \"{environment}\"", null) |> raise)
                         |> Map
 
-                    let variableHashes =
-                        variableValues
-                        |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-                        |> String.join "\n"
-                        |> String.sha256
-
                     let stepWithValues =
                         stepCommandLines
                         |> List.map (fun step ->
@@ -478,7 +472,24 @@ let read workspaceDir shared environment labels variables =
                               with Arguments = variableValues
                                                |> Map.fold (fun acc key value -> acc |> String.replace $"$({key})" value) step.Arguments })
 
-                    { Step.Hash = variableHashes
+                    let variableHash =
+                        variableValues
+                        |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
+                        |> String.join "\n"
+                        |> String.sha256
+
+                    let stepHash =
+                        stepWithValues
+                        |> Seq.map (fun step -> $"{step.Container} {step.Command} {step.Arguments}")
+                        |> String.join "\n"
+                        |> String.sha256
+
+                    let hash =
+                        [ stepHash; variableHash ]
+                        |> String.join "\n"
+                        |> String.sha256
+
+                    { Step.Hash = hash
                       Step.Variables = variableValues
                       Step.CommandLines = stepWithValues }
                 )
