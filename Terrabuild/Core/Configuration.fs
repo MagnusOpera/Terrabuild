@@ -191,10 +191,14 @@ module ProjectConfigParser =
                 builderMappings |> Map.map (fun alias mapping ->
                     let builderUse =
                         mapping |> Yaml.query "use" |> Yaml.toOptionalString |> Option.defaultValue alias
+
                     let builderWith =
                         mapping |> Yaml.query "with" |> Yaml.toOptionalString
+
                     let builderContainer =
                         mapping |> Yaml.query "container" |> Yaml.toOptionalString
+                        |> Option.orElse (buildDocument |> Yaml.query $"/extensions/{builderUse}/container" |> Yaml.toOptionalString) 
+
                     let builderParams =
                         let configBuilderParams =
                             match buildDocument |> Yaml.query $"/extensions/{builderUse}" with
