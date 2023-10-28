@@ -40,6 +40,10 @@ run-deploy-az-retry:
 run-build-nc:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --nocache --env debug
 
+
+github-tests:
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --shared --retry --parallel 4
+
 usage:
 	dotnet run --project Terrabuild -- --help
 	dotnet run --project Terrabuild -- build --help

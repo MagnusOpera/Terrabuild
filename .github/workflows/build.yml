@@ -28,7 +28,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Tests
-        run: make run-deploy-az-retry
+        run: make github-tests
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v2
