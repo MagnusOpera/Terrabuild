@@ -4,7 +4,6 @@ open System
 [<RequireQualifiedAccess>]
 type CommandLine = {
     Container: string option
-    ContainerTag: string option
     Command: string
     Arguments: string
 }

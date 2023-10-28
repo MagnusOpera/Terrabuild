@@ -22,7 +22,6 @@ type Terraform(context) =
 
     let buildCmdLine cmd args =
         { Extensions.CommandLine.Container = Some "hashicorp/terraform"
-          Extensions.CommandLine.ContainerTag = None
           Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
 

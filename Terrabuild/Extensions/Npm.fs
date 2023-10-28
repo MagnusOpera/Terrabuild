@@ -18,7 +18,6 @@ type Npm(context) =
 
     let buildCmdLine cmd args =
         { Extensions.CommandLine.Container = Some "node"
-          Extensions.CommandLine.ContainerTag = None
           Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
 

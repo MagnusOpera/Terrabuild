@@ -68,7 +68,6 @@ type Dotnet(context) =
 
     let buildCmdLine cmd args =
         { Extensions.CommandLine.Container = Some "mcr.microsoft.com/dotnet/sdk"
-          Extensions.CommandLine.ContainerTag = None
           Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
 

@@ -6,7 +6,6 @@ type Echo(context) =
 
     let buildCmdLine cmd args =
         { Extensions.CommandLine.Container = None
-          Extensions.CommandLine.ContainerTag = None
           Extensions.CommandLine.Command = cmd
           Extensions.CommandLine.Arguments = args }
 
