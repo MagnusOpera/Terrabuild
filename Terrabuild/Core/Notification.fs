@@ -60,7 +60,11 @@ type BuildNotification() =
                 for failedSummary in failedLogs do
                     let lastLog = failedSummary.Steps |> List.last
 
-                    $"{Ansi.Emojis.prohibited} {Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {lastLog.CommandLine.Command} {lastLog.CommandLine.Arguments}{Ansi.Styles.reset}"
+                    let containered =
+                        match lastLog.CommandLine.Container with
+                        | None -> ""
+                        | Some container -> $"{{{container}}} "
+                    $"{Ansi.Emojis.prohibited} {Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {containered}{lastLog.CommandLine.Command} {lastLog.CommandLine.Arguments}{Ansi.Styles.reset}"
                     |> Terminal.writeLine
 
                     let log = IO.readTextFile lastLog.Log
