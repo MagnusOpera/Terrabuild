@@ -29,8 +29,8 @@ type BuildSummary = {
     EndedAt: DateTime
     Duration: TimeSpan
     Status: BuildStatus
-    Targets: Set<string>
-    RootNodes: Set<NodeBuildStatus>
+    Targets: string set
+    RootNodes: NodeBuildStatus set
 }
 
 type IBuildNotification =

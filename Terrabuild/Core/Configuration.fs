@@ -5,17 +5,14 @@ open System
 open System.Collections.Concurrent
 
 
-
-
-
 type ConfigException(msg, innerException: Exception) =
     inherit Exception(msg, innerException)
 
-type Dependencies = Set<string>
-type Paths = Set<string>
-type TargetRules = Set<string>
-type Targets = Map<string, TargetRules>
 
+type Dependencies = string set
+type Paths = string set
+type TargetRules = string set
+type Targets = Map<string, TargetRules>
 
 [<RequireQualifiedAccess>]
 type ContaineredCommandLine = {
@@ -35,6 +32,36 @@ type Steps = Map<string, Step>
 type Variables = Map<string, string>
 type ExtensionConfigs = Map<string, Map<string, string>>
 
+
+[<RequireQualifiedAccess>]
+type ProjectConfig = {
+    Dependencies: Dependencies
+    Files: string set
+    Ignores: Paths
+    Outputs: Paths
+    Targets: Targets
+    Steps: Steps
+    Hash: string
+    Variables: Variables
+    Labels: string set
+}
+
+[<RequireQualifiedAccess>]
+type BuildConfig = {
+    Targets: Targets
+    Variables: Variables
+}
+
+[<RequireQualifiedAccess>]
+type WorkspaceConfig = {
+    Storage: Storages.Storage
+    SourceControl: SourceControls.SourceControl
+    Directory: string
+    Dependencies: Dependencies
+    Build: BuildConfig
+    Projects: Map<string, ProjectConfig>
+    Environment: string
+}
 
 
 module ExtensionLoaders =
@@ -63,13 +90,6 @@ module ExtensionLoaders =
         | _ -> failwith $"Unknown source control {name}"
 
 module BuildConfigParser =
-
-    [<RequireQualifiedAccess>]
-    type BuildConfig = {
-        Targets: Targets
-        Variables: Variables
-    }
-
 
     let parse buildDocument environment =
         // targets
@@ -121,7 +141,7 @@ module ProjectConfigParser =
         Outputs: Paths
         Targets: Targets
         StepDefinitions: Map<string, StepDefinition list>
-        Labels: Set<string>
+        Labels: string set
     }
 
     let getExtensionFromInvocation name =
@@ -275,30 +295,6 @@ module ProjectConfigParser =
           ProjectDefinition.Labels = labels }
 
 
-
-[<RequireQualifiedAccess>]
-type ProjectConfig = {
-    Dependencies: Dependencies
-    Files: string set
-    Ignores: Paths
-    Outputs: Paths
-    Targets: Targets
-    Steps: Steps
-    Hash: string
-    Variables: Variables
-    Labels: Set<string>
-}
-
-[<RequireQualifiedAccess>]
-type WorkspaceConfig = {
-    Storage: Storages.Storage
-    SourceControl: SourceControls.SourceControl
-    Directory: string
-    Dependencies: Dependencies
-    Build: BuildConfigParser.BuildConfig
-    Projects: Map<string, ProjectConfig>
-    Environment: string
-}
 
 
 let read workspaceDir shared environment labels variables =

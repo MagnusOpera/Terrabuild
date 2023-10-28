@@ -11,9 +11,9 @@ type Node = {
 }
 
 type WorkspaceGraph = {
-    Targets: Set<string>
+    Targets: string set
     Nodes: Map<string, Node>
-    RootNodes: Set<string>
+    RootNodes: string set
 }
 
 
