@@ -409,9 +409,7 @@ dist
 node_modules
 Makefile2
 init.sh
-terrabuild.config.json
-terrabuild.graph.json
-terrabuild.build.json
+terrabuild.*.json
 terrabuild.planfile
 terraform.tfstate
 .terraform

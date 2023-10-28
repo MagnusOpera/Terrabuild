@@ -158,6 +158,8 @@ module ProjectConfigParser =
                         mapping |> Yaml.query "use" |> Yaml.toOptionalString |> Option.defaultValue alias
                     let builderWith =
                         mapping |> Yaml.query "with" |> Yaml.toOptionalString
+                    let builderContainer =
+                        mapping |> Yaml.query "container" |> Yaml.toOptionalString
                     let builderParams =
                         let configBuilderParams =
                             match buildDocument |> Yaml.query $"/extensions/{builderUse}" with
@@ -180,24 +182,24 @@ module ProjectConfigParser =
                                          member _.Shared = shared }
   
                     let builder = ExtensionLoaders.loadExtension builderUse context 
-                    builder, builderParams)
+                    {| Extension = builder; Parameters = builderParams; Container = builderContainer |})
             | Some _ -> ConfigException($"Project {projectId} has malformed builders mapping", null) |> raise
             | _ -> Map.empty
 
         // collect extension capabilities
         let builderOutputs =
             projectBuilders
-            |> Seq.collect (fun (KeyValue(_, (extension, _))) -> extension.Outputs)
+            |> Seq.collect (fun (KeyValue(_, builderInfo)) -> builderInfo.Extension.Outputs)
             |> Set
 
         let builderIgnores =
             projectBuilders
-            |> Seq.collect (fun (KeyValue(_, (extension, _))) -> extension.Ignores)
+            |> Seq.collect (fun (KeyValue(_, builderInfo)) -> builderInfo.Extension.Ignores)
             |> Set
 
         let builderDependencies =
             projectBuilders
-            |> Seq.collect (fun (KeyValue(_, (extension, _))) -> extension.Dependencies)
+            |> Seq.collect (fun (KeyValue(_, builderInfo)) -> builderInfo.Extension.Dependencies)
             |> Set
 
         let projectOutputs = projectOutputs + builderOutputs
@@ -229,10 +231,10 @@ module ProjectConfigParser =
                                 let builderInfo, stepParams = actionConfig |> Map.partition (fun k _ -> k |> getExtensionFromInvocation |> Option.isSome)
                                 let builderInfo = builderInfo |> Seq.exactlyOne
                                 let builderName, builderCommand = builderInfo.Key |> getExtensionFromInvocation |> Option.get, builderInfo.Value |> Yaml.toString
-                                let (builder, builderParams) = projectBuilders |> Map.find builderName
+                                let builderInfo = projectBuilders |> Map.find builderName
 
                                 let stepParams =
-                                    builderParams
+                                    builderInfo.Parameters
                                     |> Map.replace stepParams 
                                     |> Seq.map (fun kvp -> System.Collections.Generic.KeyValuePair(YamlDotNet.RepresentationModel.YamlScalarNode(kvp.Key) :> YamlDotNet.RepresentationModel.YamlNode, kvp.Value))
                                     |> YamlDotNet.RepresentationModel.YamlMappingNode
@@ -243,7 +245,7 @@ module ProjectConfigParser =
                                 ]).Save(writer)
                                 let content = writer.ToString()
 
-                                { StepDefinition.Extension = builder
+                                { StepDefinition.Extension = builderInfo.Extension
                                   StepDefinition.Command = builderCommand
                                   StepDefinition.Parameters = content }
                             | _ -> failwith "Expecting mapping")
@@ -259,6 +261,7 @@ module ProjectConfigParser =
 
 
 
+[<RequireQualifiedAccess>]
 type ProjectConfig = {
     Dependencies: Dependencies
     Files: string set
@@ -271,6 +274,7 @@ type ProjectConfig = {
     Labels: Set<string>
 }
 
+[<RequireQualifiedAccess>]
 type WorkspaceConfig = {
     Storage: Storages.Storage
     SourceControl: SourceControls.SourceControl
@@ -317,8 +321,12 @@ let read workspaceDir shared environment labels variables =
                                 member _.With = None
                                 member _.Shared = shared }
 
-        Map [ "shell", (ExtensionLoaders.loadExtension "shell" context, Map.empty)
-              "echo", (ExtensionLoaders.loadExtension "echo" context, Map.empty) ]
+        Map [ "shell", {| Extension = ExtensionLoaders.loadExtension "shell" context
+                          Parameters = Map.empty
+                          Container = None |}
+              "echo", {| Extension = ExtensionLoaders.loadExtension "echo" context
+                         Parameters = Map.empty
+                         Container = None |} ]
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let buildVariables =
@@ -339,7 +347,7 @@ let read workspaceDir shared environment labels variables =
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
-            let projects =
+            let projects: Map<string, ProjectConfig> =
                 try
                     scanDependencies projects projectDef.Dependencies
                 with
@@ -454,15 +462,15 @@ let read workspaceDir shared environment labels variables =
                 )
 
             let projectConfig =
-                { Dependencies = projectDef.Dependencies
-                  Files = files
-                  Outputs = projectDef.Outputs
-                  Ignores = projectDef.Ignores
-                  Targets = projectDef.Targets
-                  Steps = projectSteps
-                  Hash = nodeHash
-                  Variables = variables
-                  Labels = projectDef.Labels }
+                { ProjectConfig.Dependencies = projectDef.Dependencies
+                  ProjectConfig.Files = files
+                  ProjectConfig.Outputs = projectDef.Outputs
+                  ProjectConfig.Ignores = projectDef.Ignores
+                  ProjectConfig.Targets = projectDef.Targets
+                  ProjectConfig.Steps = projectSteps
+                  ProjectConfig.Hash = nodeHash
+                  ProjectConfig.Variables = variables
+                  ProjectConfig.Labels = projectDef.Labels }
 
             projects |> Map.add project projectConfig
         else
@@ -501,10 +509,10 @@ let read workspaceDir shared environment labels variables =
         | _ -> projects.Keys
         |> Set
 
-    { Directory = workspaceDir
-      Dependencies = dependencies
-      Storage = storage
-      SourceControl = sourceControl
-      Build = buildConfig
-      Projects = projects
-      Environment = environment }
+    { WorkspaceConfig.Directory = workspaceDir
+      WorkspaceConfig.Dependencies = dependencies
+      WorkspaceConfig.Storage = storage
+      WorkspaceConfig.SourceControl = sourceControl
+      WorkspaceConfig.Build = buildConfig
+      WorkspaceConfig.Projects = projects
+      WorkspaceConfig.Environment = environment }

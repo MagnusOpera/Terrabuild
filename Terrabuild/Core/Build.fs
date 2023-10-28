@@ -3,6 +3,7 @@ open System
 open System.Collections.Generic
 open Collections
 
+[<RequireQualifiedAccess>]
 type BuildOptions = {
     MaxConcurrency: int
     NoCache: bool
