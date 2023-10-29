@@ -55,6 +55,10 @@ let private isNodeUnsatisfied = function
 
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
 
+    let cacheMode =
+        if options.CI then Extensions.Cacheability.Always
+        else Extensions.Cacheability.Remote
+
     // compute first incoming edges
     let reverseIncomings =
         graph.Nodes
@@ -99,13 +103,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         | _ -> NodeBuildStatus.Unfulfilled nodeInfo
 
     let buildNode (node: Graph.Node) =
-        // determine if step node can be reused or not
-        let useRemoteCache =
-            let currentMode =
-                if options.CI then Extensions.Cacheability.Always
-                else Extensions.Cacheability.Remote
-            Extensions.Cacheability.Never <> (node.Cache &&& currentMode)
-
         notification.NodeDownloading node
         let isAllSatisfied =
             node.Dependencies
@@ -126,6 +123,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
             let summary =
                 if options.NoCache || node.Cache = Extensions.Cacheability.Never then None
                 else
+                    // determine if step node can be reused or not
+                    let useRemoteCache = Extensions.Cacheability.Never <> (node.Cache &&& cacheMode)
+
                     // get task execution summary & take care of retrying failed tasks
                     match cache.TryGetSummary useRemoteCache cacheEntryId with
                     | Some summary when summary.Status = Cache.TaskStatus.Failure && options.Retry -> None
