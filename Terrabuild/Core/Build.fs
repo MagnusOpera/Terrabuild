@@ -120,7 +120,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 | IO.File projectFile -> IO.parentDirectory projectFile
                 | _ -> failwith $"Failed to find project {node.Project}"
 
-            let action = node.Action
             let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
 
             // check first if it's possible to restore previously built state
@@ -157,9 +156,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 let stepLogs = List<Cache.StepSummary>()
                 let mutable lastExitCode = 0
                 let mutable cmdLineIndex = 0
-                while cmdLineIndex < action.CommandLines.Length && lastExitCode = 0 do
+                while cmdLineIndex < node.CommandLines.Length && lastExitCode = 0 do
                     let startedAt = DateTime.UtcNow
-                    let commandLine = action.CommandLines[cmdLineIndex]
+                    let commandLine = node.CommandLines[cmdLineIndex]
                     let logFile = cacheEntry.NextLogFile()
                     cmdLineIndex <- cmdLineIndex + 1
 
@@ -176,9 +175,10 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
                     let endedAt = DateTime.UtcNow
                     let duration = endedAt - startedAt
-                    let stepLog = { Cache.StepSummary.CommandLine = commandLine
-                                    Cache.StepSummary.Command = cmd
-                                    Cache.StepSummary.Arguments = args
+                    let stepLog = { Cache.StepSummary.Command = commandLine.Command
+                                    Cache.StepSummary.Arguments = commandLine.Arguments
+                                    Cache.StepSummary.Container = commandLine.Container
+                                    Cache.StepSummary.Variables = node.Variables
                                     Cache.StepSummary.StartedAt = startedAt
                                     Cache.StepSummary.EndedAt = endedAt
                                     Cache.StepSummary.Duration = duration

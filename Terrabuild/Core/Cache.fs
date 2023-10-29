@@ -9,9 +9,10 @@ type TaskStatus =
 
 [<RequireQualifiedAccess>]
 type StepSummary = {
-    CommandLine: Configuration.ContaineredCommandLine
     Command: string
     Arguments: string
+    Container: string option
+    Variables: Map<string, string>
     StartedAt: DateTime
     EndedAt: DateTime
     Duration: TimeSpan

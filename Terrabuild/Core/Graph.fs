@@ -5,9 +5,10 @@ open Collections
 type Paths = string set
 
 [<RequireQualifiedAccess>]
-type Action = {
-    Variables: Map<string, string>
-    CommandLines: Configuration.ContaineredCommandLine list
+type CommandLine = {
+    Container: string option
+    Command: string
+    Arguments: string
 }
 
 type Node = {
@@ -16,7 +17,8 @@ type Node = {
     Dependencies: string set
     IsLeaf: bool
     Hash: string
-    Action: Action
+    Variables: Map<string, string>
+    CommandLines: CommandLine list
     Outputs: Configuration.Paths
     Cache: Extensions.Cacheability
 }
@@ -89,10 +91,16 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
                     step.CommandLines
                     |> Seq.fold (fun acc cmd -> acc &&& cmd.Cache) childrenCache
 
+                let commandLines =
+                    step.CommandLines
+                    |> List.map (fun cmd -> { CommandLine.Container = cmd.Container
+                                              CommandLine.Command = cmd.Command
+                                              CommandLine.Arguments = cmd.Arguments })
+
                 let node = { Project = project
                              Target = target
-                             Action = { Action.Variables = step.Variables
-                                        Action.CommandLines = step.CommandLines }
+                             Variables = step.Variables
+                             CommandLines = commandLines
                              Outputs = projectConfig.Outputs
                              Dependencies = children
                              IsLeaf = isLeaf
