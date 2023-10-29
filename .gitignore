@@ -403,7 +403,6 @@ FodyWeavers.xsd
 
 # repository specific
 .DS_Store
-.terrabuild
 dist
 .idea
 node_modules
