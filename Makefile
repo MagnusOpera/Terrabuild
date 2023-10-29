@@ -14,7 +14,7 @@ run-build:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
 
 run-build-az:
-	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --shared
+	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --ci
 
 run-dist:
 	dotnet run --project Terrabuild -- dist --workspace tests/simple --environment debug --debug
@@ -29,23 +29,23 @@ run-deploy:
 	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug
 
 run-deploy-az:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --shared
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --ci
 
 run-deploy-dev:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev $(retry)
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev
 
 run-build-app:
 	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
 
 run-deploy-az-retry:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry) --debug --shared --retry
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --ci --retry
 
 run-build-nc:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --nocache --env debug
 
 
 github-tests:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --shared --retry --parallel 4
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --ci --retry --parallel 4
 
 usage:
 	dotnet run --project Terrabuild -- --help

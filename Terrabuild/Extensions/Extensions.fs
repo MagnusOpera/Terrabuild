@@ -19,7 +19,7 @@ type CommandLine = {
 type IContext =
     abstract Directory: string with get
     abstract With: string option with get
-    abstract Shared : bool with get
+    abstract CI : bool with get
 
 [<AbstractClass; AllowNullLiteral>]
 type StepParameters() =

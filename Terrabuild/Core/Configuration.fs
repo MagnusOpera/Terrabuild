@@ -4,6 +4,13 @@ open Collections
 open System
 open System.Collections.Concurrent
 
+[<RequireQualifiedAccess>]
+type Options = {
+    MaxConcurrency: int
+    NoCache: bool
+    Retry: bool
+    CI: bool
+}
 
 type ConfigException(msg, innerException: Exception) =
     inherit Exception(msg, innerException)
@@ -225,7 +232,7 @@ module ProjectConfigParser =
                     let context = { new Extensions.IContext
                                     with member _.Directory = projectDir
                                          member _.With = builderWith
-                                         member _.Shared = shared }
+                                         member _.CI = shared }
   
                     let builder = ExtensionLoaders.loadExtension builderUse context 
                     {| Extension = builder; Parameters = builderParams; Container = builderContainer |})
@@ -308,7 +315,7 @@ module ProjectConfigParser =
 
 
 
-let read workspaceDir shared environment labels variables =
+let read workspaceDir (options: Options) environment labels variables =
     let buildFile = Path.Combine(workspaceDir, "BUILD")
     let buildDocument =
         match Yaml.loadDocument buildFile with
@@ -325,7 +332,7 @@ let read workspaceDir shared environment labels variables =
 
     // source control
     let sourceControl =
-        if shared then
+        if options.CI then
             buildDocument
             |> Yaml.query "/sourcecontrol"
             |> Yaml.toOptionalString
@@ -339,8 +346,8 @@ let read workspaceDir shared environment labels variables =
     let defaultExtensions =
         let context = { new Extensions.IContext
                         with member _.Directory = workspaceDir
-                                member _.With = None
-                                member _.Shared = shared }
+                             member _.With = None
+                             member _.CI = options.CI }
 
         Map [ "shell", {| Extension = ExtensionLoaders.loadExtension "shell" context
                           Parameters = Map.empty
@@ -364,7 +371,7 @@ let read workspaceDir shared environment labels variables =
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
-            let projectDef = ProjectConfigParser.parse project workspaceDir buildDocument projectDir projectFile defaultExtensions shared commit branchOrTag
+            let projectDef = ProjectConfigParser.parse project workspaceDir buildDocument projectDir projectFile defaultExtensions options.CI commit branchOrTag
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem

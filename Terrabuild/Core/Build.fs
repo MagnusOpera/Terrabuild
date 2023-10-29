@@ -4,14 +4,6 @@ open System.Collections.Generic
 open Collections
 
 [<RequireQualifiedAccess>]
-type BuildOptions = {
-    MaxConcurrency: int
-    NoCache: bool
-    Retry: bool
-    Shared: bool
-}
-
-[<RequireQualifiedAccess>]
 type NodeInfo = {
     Project: string
     Target: string
@@ -61,7 +53,7 @@ let private isNodeUnsatisfied = function
     | NodeBuildStatus.Success _ -> None
 
 
-let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: BuildOptions) =
+let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
 
     // compute first incoming edges
     let reverseIncomings =
@@ -110,7 +102,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         // determine if step node can be reused or not
         let useRemoteCache =
             let currentMode =
-                if options.Shared then Extensions.Cacheability.Remote
+                if options.CI then Extensions.Cacheability.Remote
                 else Extensions.Cacheability.Local
             Extensions.Cacheability.Never <> (currentMode &&& node.Cache)
 
@@ -157,7 +149,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 Some summary
 
             | _ ->
-                let cacheEntry = cache.CreateEntry options.Shared cacheEntryId
+                let cacheEntry = cache.CreateEntry options.CI cacheEntryId
                 notification.NodeBuilding node
 
                 let beforeFiles = FileSystem.createSnapshot projectDirectory node.Outputs
