@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Terrabuild Cache
-          path: $HOME/.terrabuild
+          path: $HOME/.terrabuild/
 
       - name: Dump
         run: env
