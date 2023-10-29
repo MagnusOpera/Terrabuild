@@ -40,4 +40,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Terrabuild Cache
-          path: ${{ env.HOME }}/.terrabuild
+          path: .terrabuild
