@@ -6,7 +6,7 @@ type Cacheability =
     | Never = 0
     | Local = 1
     | Remote = 2
-    | Always = 3 // Local | Shared
+    | Always = 3 // Local + Remote
 
 [<RequireQualifiedAccess>]
 type CommandLine = {
