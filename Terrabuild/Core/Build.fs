@@ -133,7 +133,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
             // check first if it's possible to restore previously built state
             let summary =
-                if options.NoCache then None
+                if options.NoCache || node.Cache = Extensions.Cacheability.Never then None
                 else
                     // get task execution summary & take care of retrying failed tasks
                     match cache.TryGetSummary useRemoteCache cacheEntryId with
