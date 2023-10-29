@@ -4,10 +4,10 @@ open Argu
 [<RequireQualifiedAccess>]
 type RunArgs =
     | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
-    | [<Unique; AltCommandLine("--par")>] Parallel of max:int
-    | [<Unique>] CI
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
+    | [<Unique; AltCommandLine("--par")>] Parallel of max:int
     | [<Unique; AltCommandLine("--nc")>] NoCache
+    | [<Unique>] CI
     | [<Unique; AltCommandLine("--r")>] Retry
     | [<Unique; AltCommandLine("--l")>] Label of labels:string list
     | [<EqualsAssignment; AltCommandLine("--v")>] Variable of variable:string * value:string
@@ -16,10 +16,10 @@ with
         member this.Usage =
             match this with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
-            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
-            | CI -> "Local or CI execution."
             | Environment _ -> "Environment to use."
-            | NoCache -> "Do not use cache when building target."
+            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
+            | NoCache -> "Ignore cache when building target."
+            | CI -> "CI mode."
             | Retry -> "Retry failed task."
             | Label _-> "Select projects based on labels."
             | Variable _ -> "Set variable."
@@ -28,10 +28,10 @@ with
 type TargetArgs =
     | [<Mandatory; ExactlyOnce; MainCommand; First>] Target of target:string list
     | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
-    | [<Unique; AltCommandLine("--par")>] Parallel of max:int
-    | [<Unique>] CI
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
+    | [<Unique; AltCommandLine("--par")>] Parallel of max:int
     | [<Unique; AltCommandLine("--nc")>] NoCache
+    | [<Unique>] CI
     | [<Unique; AltCommandLine("--r")>] Retry
     | [<Unique; AltCommandLine("--l")>] Label of labels:string list
     | [<EqualsAssignment; AltCommandLine("--v")>] Variable of variable:string * value:string
@@ -41,10 +41,10 @@ with
             match this with
             | Target _ -> "Specify build target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
-            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
-            | CI -> "Local or CI execution."
             | Environment _ -> "Environment to use."
-            | NoCache -> "Do not use cache when building target."
+            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
+            | NoCache -> "Ignore cache when building target."
+            | CI -> "CI mode."
             | Retry -> "Retry failed task."
             | Label _-> "Select projects based on labels."
             | Variable _ -> "Set variable."
