@@ -49,9 +49,9 @@ let private buildCacheDirectory =
     IO.createDirectory cacheDir
     cacheDir
 
-let private markEntryAsCompleted entryDir =
+let private markEntryAsCompleted reason entryDir =
     let completeFile = IO.combinePath entryDir completeFilename
-    File.WriteAllText(completeFile, "")
+    File.WriteAllText(completeFile, reason)
 
 let clearBuildCache () =
     IO.deleteAny buildCacheDirectory
@@ -110,7 +110,7 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
         member _.Complete summary =
             summary |> write
             storage |> upload
-            entryDir |> markEntryAsCompleted
+            entryDir |> markEntryAsCompleted "local"
 
 
 type Cache(storage: Storages.Storage) =
@@ -161,12 +161,12 @@ type Cache(storage: Storages.Storage) =
                         | Some outputsDir ->
                             match downloadDir outputsDir "outputs" with
                             | Some _ ->
-                                entryDir |> markEntryAsCompleted
+                                entryDir |> markEntryAsCompleted "remote"
                                 summary |> Some
                             | _ ->
                                 None
                         | _ ->
-                            entryDir |> markEntryAsCompleted
+                            entryDir |> markEntryAsCompleted "remote"
                             summary |> Some
                     | _ ->
                         None

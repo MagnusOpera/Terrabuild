@@ -102,9 +102,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         // determine if step node can be reused or not
         let useRemoteCache =
             let currentMode =
-                if options.CI then Extensions.Cacheability.Remote
-                else Extensions.Cacheability.Local
-            Extensions.Cacheability.Never <> (currentMode &&& node.Cache)
+                if options.CI then Extensions.Cacheability.Always
+                else Extensions.Cacheability.Remote
+            Extensions.Cacheability.Never <> (node.Cache &&& currentMode)
 
         notification.NodeDownloading node
         let isAllSatisfied =
