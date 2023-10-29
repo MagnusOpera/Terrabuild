@@ -26,16 +26,16 @@ run-push:
 	dotnet run --project Terrabuild -- run push --workspace tests/simple --environment debug --label app --debug --retry
 
 run-deploy:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry) --debug
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug
+
+run-deploy-az:
+	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --shared
 
 run-deploy-dev:
 	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev $(retry)
 
 run-build-app:
 	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
-
-run-deploy-az:
-	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry) --debug --shared
 
 run-deploy-az-retry:
 	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug $(retry) --debug --shared --retry

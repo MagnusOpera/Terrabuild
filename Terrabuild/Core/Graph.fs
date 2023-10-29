@@ -18,6 +18,7 @@ type Node = {
     Hash: string
     Action: Action
     Outputs: Configuration.Paths
+    Cache: Extensions.Cacheability
 }
 
 type WorkspaceGraph = {
@@ -79,6 +80,15 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
 
                 let hash = hashContent |> String.sha256list
 
+                // compute cacheability of this node
+                let childrenCache =
+                    children
+                    |> Seq.fold (fun acc nodeId -> acc &&& allNodes[nodeId].Cache) Extensions.Cacheability.Always
+
+                let cache =
+                    step.CommandLines
+                    |> Seq.fold (fun acc cmd -> acc &&& cmd.Cache) childrenCache
+
                 let node = { Project = project
                              Target = target
                              Action = { Action.Variables = step.Variables
@@ -86,7 +96,8 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
                              Outputs = projectConfig.Outputs
                              Dependencies = children
                              IsLeaf = isLeaf
-                             Hash = hash }
+                             Hash = hash
+                             Cache = cache }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     failwith "Unexpected graph building race"
                 [ nodeId ]

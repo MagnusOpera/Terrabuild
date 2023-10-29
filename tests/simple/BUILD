@@ -1,5 +1,5 @@
 storage: azureblob
-# sourcecontrol: github
+sourcecontrol: github
 
 targets:
   build: [^build]

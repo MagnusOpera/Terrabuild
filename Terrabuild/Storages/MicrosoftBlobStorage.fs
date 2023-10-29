@@ -13,7 +13,13 @@ type MicrosoftBlobStorage() =
 
     let container =
         let container = client.GetBlobContainerClient("buildcache")
-        container.CreateIfNotExists() |> ignore
+
+        // ensure container is created (in case we need to write to blob storage)
+        try
+            container.CreateIfNotExists() |> ignore
+        with
+            | :? Azure.RequestFailedException -> ()
+
         container
 
     override _.TryDownload id =

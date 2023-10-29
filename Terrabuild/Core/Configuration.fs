@@ -19,6 +19,7 @@ type ContaineredCommandLine = {
     Container: string option
     Command: string
     Arguments: string
+    Cache: Extensions.Cacheability
 }
 
 [<RequireQualifiedAccess>]
@@ -317,13 +318,10 @@ let read workspaceDir shared environment labels variables =
 
     // storage
     let storage =
-        if shared then
-            buildDocument
-            |> Yaml.query "/storage"
-            |> Yaml.toOptionalString
-            |> ExtensionLoaders.loadStorage 
-        else
-            ExtensionLoaders.loadStorage None
+        buildDocument
+        |> Yaml.query "/storage"
+        |> Yaml.toOptionalString
+        |> ExtensionLoaders.loadStorage 
 
     // source control
     let sourceControl =
@@ -417,7 +415,8 @@ let read workspaceDir shared environment labels variables =
                         |> List.map (fun cmd ->
                             { ContaineredCommandLine.Container = stepDef.Container
                               ContaineredCommandLine.Command = cmd.Command
-                              ContaineredCommandLine.Arguments = cmd.Arguments })
+                              ContaineredCommandLine.Arguments = cmd.Arguments
+                              ContaineredCommandLine.Cache = cmd.Cache })
                     )
                 )
  

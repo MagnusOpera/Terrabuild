@@ -18,7 +18,8 @@ type Npm(context) =
 
     let buildCmdLine cmd args =
         { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args }
+          Extensions.CommandLine.Arguments = args
+          Extensions.CommandLine.Cache = Cacheability.Always }
 
     override _.Container = Some "node"
 

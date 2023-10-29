@@ -68,7 +68,8 @@ type Dotnet(context) =
 
     let buildCmdLine cmd args =
         { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args }
+          Extensions.CommandLine.Arguments = args
+          Extensions.CommandLine.Cache = Cacheability.Always }
 
     override _.Container = Some "mcr.microsoft.com/dotnet/sdk"
 

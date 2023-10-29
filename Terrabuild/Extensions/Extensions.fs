@@ -1,10 +1,18 @@
 namespace Extensions
 open System
 
+[<Flags>]
+type Cacheability =
+    | Never = 0
+    | Local = 1
+    | Remote = 2
+    | Always = 3 // Local | Shared
+
 [<RequireQualifiedAccess>]
 type CommandLine = {
     Command: string
     Arguments: string
+    Cache: Cacheability
 }
 
 

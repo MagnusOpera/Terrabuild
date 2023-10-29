@@ -28,11 +28,14 @@ type TargetSummary = {
     Status: TaskStatus
 }
 
-
 type IEntry =
     abstract NextLogFile: unit -> string
     abstract Outputs: string with get
     abstract Complete: summary:TargetSummary -> unit
+
+type ICache =
+    abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
+    abstract CreateEntry: useRemote:bool -> id:string -> IEntry
 
 
 let private summaryFilename = "summary.json"
@@ -52,7 +55,7 @@ let private markEntryAsCompleted entryDir =
 let clearBuildCache () =
     IO.deleteAny buildCacheDirectory
 
-type NewEntry(entryDir: string, id: string, storage: Storages.Storage) =
+type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.Storage) =
     let mutable logNum = 0
 
     let logsDir = IO.combinePath entryDir "logs"
@@ -90,9 +93,10 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage) =
                 IO.deleteAny compressFile
                 IO.deleteAny tarFile
 
-        if Directory.Exists outputsDir then
-            uploadDir outputsDir "outputs"
-        uploadDir logsDir "logs"
+        if useRemote then
+            if Directory.Exists outputsDir then
+                uploadDir outputsDir "outputs"
+            uploadDir logsDir "logs"
 
     interface IEntry with
         member _.NextLogFile () =
@@ -111,69 +115,72 @@ type NewEntry(entryDir: string, id: string, storage: Storages.Storage) =
 type Cache(storage: Storages.Storage) =
     let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
 
-    member _.TryGetSummary id : TargetSummary option =
+    interface ICache with
+        member _.TryGetSummary useRemote id : TargetSummary option =
 
-        match cachedSummaries.TryGetValue(id) with
-        | true, summary -> Some summary
-        | _ ->
-            let entryDir = IO.combinePath buildCacheDirectory id
-            let logsDir = IO.combinePath entryDir "logs"
-            let outputsDir = IO.combinePath entryDir "outputs"
-            let summaryFile = IO.combinePath logsDir summaryFilename
-            let completeFile = IO.combinePath entryDir completeFilename
+            match cachedSummaries.TryGetValue(id) with
+            | true, summary -> Some summary
+            | _ ->
+                let entryDir = IO.combinePath buildCacheDirectory id
+                let logsDir = IO.combinePath entryDir "logs"
+                let outputsDir = IO.combinePath entryDir "outputs"
+                let summaryFile = IO.combinePath logsDir summaryFilename
+                let completeFile = IO.combinePath entryDir completeFilename
 
-            let load () =
-                let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
-                let summary = { summary
-                                with Steps = summary.Steps
-                                             |> List.map (fun stepLog -> { stepLog
-                                                                           with Log = IO.combinePath logsDir stepLog.Log })
-                                     Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
-                cachedSummaries.TryAdd(summaryFile, summary) |> ignore
-                summary
+                let load () =
+                    let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
+                    let summary = { summary
+                                    with Steps = summary.Steps
+                                                 |> List.map (fun stepLog -> { stepLog
+                                                                               with Log = IO.combinePath logsDir stepLog.Log })
+                                         Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
+                    cachedSummaries.TryAdd(summaryFile, summary) |> ignore
+                    summary
 
-            let download (storage: Storages.Storage) =
-                let downloadDir targetDir name =
-                    match storage.TryDownload $"{id}/{name}" with
-                    | Some tarFile ->
-                        let uncompressFile = IO.getTempFilename()
-                        try
-                            tarFile |> Compression.uncompress uncompressFile
-                            uncompressFile |> Compression.untar targetDir
-                            Some targetDir
-                        finally
-                            IO.deleteAny uncompressFile
-                            IO.deleteAny tarFile
-                    | _ ->
-                        None
-                
-                match downloadDir logsDir "logs" with
-                | Some _ ->
-                    let summary = load()
-
-                    match summary.Outputs with
-                    | Some outputsDir ->
-                        match downloadDir outputsDir "outputs" with
-                        | Some _ ->
-                            entryDir |> markEntryAsCompleted
-                            summary |> Some
+                let download (storage: Storages.Storage) =
+                    let downloadDir targetDir name =
+                        match storage.TryDownload $"{id}/{name}" with
+                        | Some tarFile ->
+                            let uncompressFile = IO.getTempFilename()
+                            try
+                                tarFile |> Compression.uncompress uncompressFile
+                                uncompressFile |> Compression.untar targetDir
+                                Some targetDir
+                            finally
+                                IO.deleteAny uncompressFile
+                                IO.deleteAny tarFile
                         | _ ->
                             None
+                    
+                    match downloadDir logsDir "logs" with
+                    | Some _ ->
+                        let summary = load()
+
+                        match summary.Outputs with
+                        | Some outputsDir ->
+                            match downloadDir outputsDir "outputs" with
+                            | Some _ ->
+                                entryDir |> markEntryAsCompleted
+                                summary |> Some
+                            | _ ->
+                                None
+                        | _ ->
+                            entryDir |> markEntryAsCompleted
+                            summary |> Some
                     | _ ->
-                        entryDir |> markEntryAsCompleted
-                        summary |> Some
+                        None
+
+                match completeFile with
+                | IO.File _ ->
+                    load() |> Some
                 | _ ->
-                    None
+                    // cleanup everything - it's not valid anyway
+                    IO.deleteAny entryDir
 
-            match completeFile with
-            | IO.File _ ->
-                load() |> Some
-            | _ ->
-                // cleanup everything - it's not valid anyway
-                IO.deleteAny entryDir
-                storage |> download
+                    if useRemote then storage |> download
+                    else None
 
 
-    member _.CreateEntry id : IEntry =
-        let entryDir = IO.combinePath buildCacheDirectory id
-        NewEntry(entryDir, id, storage)
+        member _.CreateEntry useRemote id : IEntry =
+            let entryDir = IO.combinePath buildCacheDirectory id
+            NewEntry(entryDir, useRemote, id, storage)

@@ -8,6 +8,7 @@ type BuildOptions = {
     MaxConcurrency: int
     NoCache: bool
     Retry: bool
+    Shared: bool
 }
 
 [<RequireQualifiedAccess>]
@@ -60,7 +61,7 @@ let private isNodeUnsatisfied = function
     | NodeBuildStatus.Success _ -> None
 
 
-let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.Cache) (notification: IBuildNotification) (options: BuildOptions) =
+let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: BuildOptions) =
 
     // compute first incoming edges
     let reverseIncomings =
@@ -96,7 +97,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
             { NodeInfo.Project = node.Project
               NodeInfo.Target = node.Target
               NodeInfo.Hash = node.Hash }
-        match cache.TryGetSummary cacheEntryId with
+
+        // NOTE: always hit local cache here
+        match cache.TryGetSummary false cacheEntryId with
         | Some summary -> 
             match summary.Status with
             | Cache.TaskStatus.Success -> NodeBuildStatus.Success nodeInfo
@@ -104,6 +107,13 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         | _ -> NodeBuildStatus.Unfulfilled nodeInfo
 
     let buildNode (node: Graph.Node) =
+        // determine if step node can be reused or not
+        let useRemoteCache =
+            let currentMode =
+                if options.Shared then Extensions.Cacheability.Remote
+                else Extensions.Cacheability.Local
+            Extensions.Cacheability.Never <> (currentMode &&& node.Cache)
+
         notification.NodeDownloading node
         let isAllSatisfied =
             node.Dependencies
@@ -125,8 +135,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
             let summary =
                 if options.NoCache then None
                 else
-                    // take care of retrying failed tasks
-                    match cache.TryGetSummary cacheEntryId with
+                    // get task execution summary & take care of retrying failed tasks
+                    match cache.TryGetSummary useRemoteCache cacheEntryId with
                     | Some summary when summary.Status = Cache.TaskStatus.Failure && options.Retry -> None
                     | Some summary -> Some summary
                     | _ -> None
@@ -147,7 +157,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 Some summary
 
             | _ ->
-                let cacheEntry = cache.CreateEntry cacheEntryId
+                let cacheEntry = cache.CreateEntry options.Shared cacheEntryId
                 notification.NodeBuilding node
 
                 let beforeFiles = FileSystem.createSnapshot projectDirectory node.Outputs
