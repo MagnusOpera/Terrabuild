@@ -164,13 +164,14 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
                     let workDir, cmd, args =
                         match commandLine.Container with
+                        | None
+                        | Some null ->
+                            projectDirectory, commandLine.Command, commandLine.Arguments
                         | Some container ->
                             let cmd = "docker"
                             let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
                             let args = $"run --entrypoint {commandLine.Command} --rm -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
                             workspaceConfig.Directory, cmd, args
-                        | _ ->
-                            projectDirectory, commandLine.Command, commandLine.Arguments
 
                     let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
                     let endedAt = DateTime.UtcNow

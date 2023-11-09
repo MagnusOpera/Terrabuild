@@ -39,9 +39,13 @@
     <Compile Include="CLI.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../PresqueYaml/PresqueYaml/PresqueYaml.fsproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.18.0" />
-    <PackageReference Include="YamlDotNet" Version="13.5.1" />
     <PackageReference Include="FSharp.SystemTextJson" Version="1.2.42" />
     <PackageReference Include="Argu" Version="6.1.1" />
   </ItemGroup>

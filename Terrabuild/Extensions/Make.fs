@@ -3,9 +3,9 @@ namespace Extensions
 open System
 open Extensions
 
-type MakeCommand() =
-    inherit StepParameters()
-    member val Parameters = System.Collections.Generic.Dictionary<string, string>() with get, set
+type MakeCommand = {
+    Parameters: Map<string, string>
+}
 
 
 type Make(context) =
@@ -27,8 +27,8 @@ type Make(context) =
     override _.GetStepParameters _ = typeof<MakeCommand>
 
     override _.BuildStepCommands (action, parameters) =
-        match parameters with
-        | :? MakeCommand as parameters ->
+        match parameters, action with
+        | :? MakeCommand as parameters, _ ->
             let args = parameters.Parameters |> Seq.fold (fun acc kvp -> $"{acc} {kvp.Key}=\"{kvp.Value}\"") $"{action}"
             [ buildCmdLine "make" args ]
         | _ -> ArgumentException($"Unknown action {action}") |> raise

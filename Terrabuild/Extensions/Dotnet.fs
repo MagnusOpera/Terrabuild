@@ -16,24 +16,18 @@ open Xml
 open System.IO
 
 
+type DotnetBuild = {
+    Configuration: string
+}
 
-type DotnetRestore() =
-    inherit StepParameters()
+type DotnetTest = {
+    Configuration: string
+    Filter: string
+}
 
-
-type DotnetBuild() =
-    inherit StepParameters()
-    member val Configuration = "Debug" with get, set
-
-type DotnetTest() =
-    inherit StepParameters()
-    member val Configuration = "Debug" with get, set
-    member val Filter = "" with get, set
-
-type DotnetPublish() =
-    inherit StepParameters()
-    member val Configuration = "Debug" with get, set
-
+type DotnetPublish = {
+    Configuration: string
+}
 
 type Dotnet(context) =
     inherit Extension(context)
@@ -81,21 +75,21 @@ type Dotnet(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "restore" -> typeof<DotnetRestore>
+        | "restore" -> null
         | "build" -> typeof<DotnetBuild>
         | "test" -> typeof<DotnetTest>
         | "publish" -> typeof<DotnetPublish>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
-    override _.BuildStepCommands (_, parameters) =
-        match parameters with
-        | :? DotnetRestore as parameters ->
+    override _.BuildStepCommands (action, parameters) =
+        match parameters, action with
+        | _, "restore" ->
             [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" ]
-        | :? DotnetBuild as parameters ->
+        | :? DotnetBuild as parameters, _ ->
             [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies"
               buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {parameters.Configuration}" ]
-        | :? DotnetTest as parameters ->
+        | :? DotnetTest as parameters, _ ->
             [ buildCmdLine "dotnet" $"test --no-build --configuration {parameters.Configuration} {projectFile} --filter \"{parameters.Filter}\"" ]
-        | :? DotnetPublish as parameters ->
+        | :? DotnetPublish as parameters, _ ->
             [ buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {parameters.Configuration}" ]
         | _ -> ArgumentException($"Unknown action") |> raise

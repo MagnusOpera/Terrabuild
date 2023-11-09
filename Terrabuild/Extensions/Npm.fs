@@ -2,17 +2,6 @@ namespace Extensions
 open System
 
 
-type NpmInstall() =
-    inherit StepParameters()
-
-
-type NpmBuild() =
-    inherit StepParameters()
-
-type NpmTest() =
-    inherit StepParameters()
-
-
 type Npm(context) =
     inherit Extension(context)
 
@@ -31,19 +20,19 @@ type Npm(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "install" -> typeof<NpmInstall>
-        | "build" -> typeof<NpmBuild>
-        | "test" -> typeof<NpmTest>
+        | "install" -> null
+        | "build" -> null
+        | "test" -> null
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
-    override _.BuildStepCommands (_, parameters) =
-        match parameters with
-        | :? NpmInstall ->
+    override _.BuildStepCommands (action, parameters) =
+        match parameters, action with
+        | _, "install" ->
             [ buildCmdLine "npm" "ci" ]
-        | :? NpmBuild ->
+        | _, "build" ->
             [ buildCmdLine "npm" "ci"
               buildCmdLine "npm" "run build" ]
-        | :? NpmTest ->
+        | _, "test" ->
             [ buildCmdLine "npm" "ci"
               buildCmdLine "npm" "run test" ]
         | _ -> ArgumentException($"Unknown action") |> raise

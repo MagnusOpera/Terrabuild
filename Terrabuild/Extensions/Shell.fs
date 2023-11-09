@@ -1,10 +1,10 @@
 namespace Extensions
-open System
 open Extensions
+open System
 
-type ShellCommand() =
-    inherit StepParameters()
-    member val Arguments = "" with get, set
+type ShellCommand = {
+    Arguments: string
+}
 
 type Shell(context) =
     inherit Extension(context)
@@ -25,7 +25,7 @@ type Shell(context) =
     override _.GetStepParameters _ = typeof<ShellCommand>
 
     override _.BuildStepCommands (action, parameters) =
-        match parameters with
-        | :? ShellCommand as parameters ->
+        match parameters, action with
+        | :? ShellCommand as parameters, _ ->
             [ buildCmdLine action parameters.Arguments ]
         | _ -> ArgumentException($"Unknown action {action}") |> raise

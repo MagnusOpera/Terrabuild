@@ -3,6 +3,7 @@ open System.IO
 open Collections
 open System
 open System.Collections.Concurrent
+open PresqueYaml.Model
 
 [<RequireQualifiedAccess>]
 type Options = {
@@ -103,13 +104,13 @@ module BuildConfigParser =
         // targets
         let targets =
             match buildDocument |> Yaml.query "/targets" with
-            | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Set << Yaml.toStringList)
+            | Some (YamlNode.Mapping mapping) -> mapping |> Map.map (fun _ -> Yaml.deserialize<Set<string>>)
             | _ -> Map.empty
 
         // variables
         let environments =
             match buildDocument |> Yaml.query "/environments" with
-            | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Yaml.toStringMap)
+            | Some (YamlNode.Mapping mapping) -> mapping |> Map.map (fun _ -> Yaml.deserialize<Map<string, string>>)
             | Some _ -> failwith "Invalid configuration for environments in BUILD configuration"
             | None -> Map.empty
 
@@ -138,7 +139,7 @@ module ProjectConfigParser =
     type StepDefinition = {
         Extension: Extensions.Extension
         Command: string
-        Parameters: string
+        Parameters: Map<string, YamlNode>
         Container: string option
     }
 
@@ -167,7 +168,7 @@ module ProjectConfigParser =
                 match Yaml.loadDocument projectFile with
                 | Ok doc -> doc
                 | Error err -> ConfigException($"PROJECT '{projectFilename}' is invalid", err) |> raise
-            | _ -> null
+            | _ -> YamlNode.None
 
         let projectOutputs =
             projectDocument
@@ -183,7 +184,7 @@ module ProjectConfigParser =
 
         let projectTargets =
             match projectDocument |> Yaml.query "/targets" with
-            | Some (Yaml.Mapping (_, mapping)) -> mapping |> Map.map (fun _ -> Set << Yaml.toStringList)
+            | Some (YamlNode.Mapping mapping) -> mapping |> Map.map (fun _ -> Yaml.deserialize<Set<string>>)
             | Some _ -> ConfigException($"Expecting mapping  for element /targets in PROJECT '{projectFilename}'", null) |> raise
             | _ -> Map.empty
 
@@ -195,13 +196,13 @@ module ProjectConfigParser =
 
         let labels =
             match projectDocument |> Yaml.query "/labels" with
-            | Some (Yaml.Sequence (_, sequence)) -> sequence |> List.map Yaml.toString |> Set
+            | Some (YamlNode.Sequence sequence as node) -> Yaml.deserialize<Set<string>> node
             | Some _ -> ConfigException($"Expecting list for element /labels", null) |> raise
             | _ -> Set.empty
 
         let projectBuilders =
             match projectDocument |> Yaml.query "/builders" with
-            | Some (Yaml.Mapping (_, builderMappings)) ->
+            | Some (YamlNode.Mapping builderMappings) ->
                 builderMappings |> Map.map (fun alias mapping ->
                     let builderUse =
                         mapping |> Yaml.query "use" |> Yaml.toOptionalString |> Option.defaultValue alias
@@ -215,14 +216,14 @@ module ProjectConfigParser =
 
                     let builderParams =
                         let configBuilderParams =
-                            match buildDocument |> Yaml.query $"/extensions/{builderUse}" with
-                            | Some (Yaml.Mapping (_, mapping)) -> mapping
-                            | Some _ -> ConfigException($"Expecting mapping for element /extensions/{builderUse} in PROJECT '{projectFilename}'", null) |> raise
+                            match buildDocument |> Yaml.query $"/extensions/{builderUse}/parameters" with
+                            | Some (YamlNode.Mapping mapping) -> mapping
+                            | Some _ -> ConfigException($"Expecting mapping for element /extensions/{builderUse}/parameters in PROJECT '{projectFilename}'", null) |> raise
                             | _ -> Map.empty
 
                         let configProjectParams =
                             match mapping |> Yaml.query $"parameters" with
-                            | Some (Yaml.Mapping (_, mapping)) -> mapping
+                            | Some (YamlNode.Mapping mapping) -> mapping
                             | Some _ -> ConfigException($"Expecting mapping for element /builders/{builderUse}/parameters in PROJECT '{projectFilename}'", null) |> raise
                             | _ -> Map.empty
 
@@ -269,13 +270,13 @@ module ProjectConfigParser =
 
         let projectStepDefinitions =
             match projectDocument |> Yaml.query "/steps" with
-            | Some (Yaml.Mapping (_, stepMappings)) ->
+            | Some (YamlNode.Mapping stepMappings) ->
                 stepMappings |> Map.map (fun _ stepMapping ->
                     match stepMapping with
-                    | Yaml.Sequence (_, actions) ->
+                    | YamlNode.Sequence actions ->
                         actions |> List.map (fun action ->
                             match action with
-                            | Yaml.Mapping (_, actionConfig) ->
+                            | YamlNode.Mapping actionConfig ->
                                 let builderInfo, stepParams = actionConfig |> Map.partition (fun k _ -> k |> getExtensionFromInvocation |> Option.isSome)
                                 let builderInfo = builderInfo |> Seq.exactlyOne
                                 let builderName, builderCommand = builderInfo.Key |> getExtensionFromInvocation |> Option.get, builderInfo.Value |> Yaml.toString
@@ -284,14 +285,6 @@ module ProjectConfigParser =
                                 let stepParams =
                                     builderInfo.Parameters
                                     |> Map.replace stepParams 
-                                    |> Seq.map (fun kvp -> System.Collections.Generic.KeyValuePair(YamlDotNet.RepresentationModel.YamlScalarNode(kvp.Key) :> YamlDotNet.RepresentationModel.YamlNode, kvp.Value))
-                                    |> YamlDotNet.RepresentationModel.YamlMappingNode
-
-                                use writer = new StringWriter()
-                                YamlDotNet.RepresentationModel.YamlStream([
-                                    if stepParams.Children.Count > 0 then YamlDotNet.RepresentationModel.YamlDocument(stepParams)
-                                ]).Save(writer)
-                                let content = writer.ToString()
 
                                 let container =
                                     builderInfo.Container
@@ -299,7 +292,7 @@ module ProjectConfigParser =
 
                                 { StepDefinition.Extension = builderInfo.Extension
                                   StepDefinition.Command = builderCommand
-                                  StepDefinition.Parameters = content
+                                  StepDefinition.Parameters = stepParams
                                   StepDefinition.Container = container }
                             | _ -> failwith "Expecting mapping")
                     | _ -> failwith "Expecting sequence")
@@ -405,19 +398,20 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> Map.map (fun targetId steps ->
                     steps
                     |> List.collect (fun stepDef ->
-                        let stepParams = $"nodeHash: \"$(terrabuild_node_hash)\"\n{stepDef.Parameters}"
+                        let stepParams =
+                            stepDef.Parameters
+                            |> Map.add "nodeHash" (YamlNode.Scalar "$(terrabuild_node_hash)")
                         let stepArgsType = stepDef.Extension.GetStepParameters stepDef.Command
                         let stepParameters =
                             stepArgsType |> Option.ofObj
-                            |> Option.map (fun stepArgsType -> stepParams |> Yaml.loadModelFromType stepArgsType)
+                            |> Option.map (fun stepArgsType -> Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams))
                             |> Option.defaultValue null
 
                         let cmds =
                             match stepParameters with
                             | null -> []
-                            | :? Extensions.StepParameters as stepParameters ->
+                            | stepParameters ->
                                 stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
-                            | _ -> failwith "Unexpected type for action type"
 
                         cmds
                         |> List.map (fun cmd ->
@@ -431,7 +425,9 @@ let read workspaceDir (options: Options) environment labels variables =
             let variables =
                 projectDef.StepDefinitions
                 |> Seq.collect (fun l -> l.Value)
-                |> Seq.collect (fun stepDef -> String.AllMatches "\$\(([a-zA-Z][_a-zA-Z0-9]+)\)" stepDef.Parameters)
+                |> Seq.collect (fun stepDef ->
+                    let prms = Yaml.dumpAsString (YamlNode.Mapping stepDef.Parameters)
+                    String.AllMatches "\$\(([a-zA-Z][_a-zA-Z0-9]+)\)" prms)
                 |> Set
                 |> Set.remove "terrabuild_node_hash"
                 |> Seq.map (fun varName ->

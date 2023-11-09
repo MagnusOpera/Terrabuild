@@ -1,20 +1,18 @@
 namespace Extensions
 open System
 
-type TerrformInit() =
-    inherit StepParameters()
 
-type TerrformWorkspace() =
-    inherit StepParameters()
-    member val Workspace = "default" with get, set
+type TerraformWorkspace = {
+    Workspace: string
+}
 
-type TerraformPlan() =
-    inherit StepParameters()
-    member val Workspace: string = null with get, set
+type TerraformPlan = {
+    Workspace: string
+}
 
-type TerraformApply() =
-    inherit StepParameters()
-    member val Workspace: string = null with get, set
+type TerraformApply = {
+    Workspace: string
+}
 
 
 type Terraform(context) =
@@ -35,25 +33,25 @@ type Terraform(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "init" -> typeof<TerrformInit>
-        | "workspace" -> typeof<TerrformWorkspace>
+        | "init" -> null
+        | "workspace" -> typeof<TerraformWorkspace>
         | "plan" -> typeof<TerraformPlan>
         | "apply" -> typeof<TerraformApply>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
-    override _.BuildStepCommands (_, parameters) =
-        match parameters with
-        | :? TerrformInit ->
+    override _.BuildStepCommands (action, parameters) =
+        match parameters, action with
+        | _, "init" ->
             [ buildCmdLine "terraform" "init -reconfigure" ]
-        | :? TerrformWorkspace as parameters ->
+        | :? TerraformWorkspace as parameters, _ ->
             [ buildCmdLine "terraform" "init -reconfigure"
               buildCmdLine "terraform" $"workspace select {parameters.Workspace}" ]
-        | :? TerraformPlan as parameters ->
+        | :? TerraformPlan as parameters, _ ->
             let workspace = parameters.Workspace |> Option.ofObj
             [ buildCmdLine "terraform" "init -reconfigure"
               if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
               buildCmdLine "terraform" "plan -out=terrabuild.planfile" ]
-        | :? TerraformApply as parameters ->
+        | :? TerraformApply as parameters, _ ->
             let workspace = parameters.Workspace |> Option.ofObj
             [ buildCmdLine "terraform" "init -reconfigure"
               if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"

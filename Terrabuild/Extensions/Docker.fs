@@ -2,14 +2,16 @@ namespace Extensions
 open System
 open Extensions
 
-type DockerBuild() =
-    inherit StepParameters()
-    member val Image = "" with get, set
-    member val Arguments = System.Collections.Generic.Dictionary<string, string>() with get, set
+type DockerBuild = {
+    NodeHash: string
+    Image: string
+    Arguments: Map<string, string>
+}
 
-type DockerPush() =
-    inherit StepParameters()
-    member val Image = "" with get, set
+type DockerPush = {
+    NodeHash: string
+    Image: string
+}
 
 type Docker(context) =
     inherit Extension(context)
@@ -38,9 +40,9 @@ type Docker(context) =
         | "push" -> typeof<DockerPush>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
-    override _.BuildStepCommands (_, parameters) =
-        match parameters with
-        | :? DockerBuild as parameters ->
+    override _.BuildStepCommands (action, parameters) =
+        match parameters, action with
+        | :? DockerBuild as parameters, _ ->
             let args = parameters.Arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
             let buildArgs = $"build --file {dockerfile} --tag {parameters.Image}:{parameters.NodeHash} {args} ."
 
@@ -50,7 +52,7 @@ type Docker(context) =
                   buildCmdLine "docker" pushArgs Cacheability.Remote ]
             else
                 [ buildCmdLine "docker" buildArgs Cacheability.Local ]
-        | :? DockerPush as parameters ->
+        | :? DockerPush as parameters, _ ->
             if context.CI then
                 let retagArgs = $"buildx imagetools create -t {parameters.Image}:$(terrabuild_branch_or_tag) {parameters.Image}:{parameters.NodeHash}"
                 [ buildCmdLine "docker" retagArgs Cacheability.Remote ]
