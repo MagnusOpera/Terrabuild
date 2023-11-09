@@ -328,7 +328,8 @@ let read workspaceDir (options: Options) environment labels variables =
         buildDocument
         |> Yaml.query "/storage"
         |> Yaml.toOptionalString
-        |> ExtensionLoaders.loadStorage 
+        |> Option.bind (fun x -> if options.NoCache then None else Some x)
+        |> ExtensionLoaders.loadStorage
 
     // source control
     let sourceControl =
