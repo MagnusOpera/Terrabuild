@@ -3,7 +3,7 @@ open System.IO
 open Collections
 open System
 open System.Collections.Concurrent
-open PresqueYaml.Model
+open PresqueYaml
 
 [<RequireQualifiedAccess>]
 type Options = {

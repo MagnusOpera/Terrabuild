@@ -2,20 +2,18 @@ module Yaml
 open System
 open System.IO
 open Collections
-open PresqueYaml.Model
+open PresqueYaml
 open System.Text
 
 
 let loadDocument filename =
     try
         let yaml = System.IO.File.ReadAllText filename
-        let model = PresqueYaml.Model.read yaml
+        let model = Parser.read yaml
         model |> Ok
     with
         | ex -> Error ex
 
-
-// converted to F# from https://stackoverflow.com/questions/51630430/getting-a-yamldotnet-sharpyaml-node-using-a-string-path-such-as-category-objec
 let toString (node: YamlNode) =
     match node with
     | YamlNode.Scalar value -> value
