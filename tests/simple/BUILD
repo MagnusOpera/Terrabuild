@@ -20,10 +20,8 @@ environments:
 
 extensions:
   dotnet:
-    container:
     parameters:
       configuration: $(configuration)
   terraform:
-    container:
     parameters:
       workspace: $(workspace)

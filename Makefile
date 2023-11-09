@@ -13,6 +13,9 @@ run-build-circular:
 run-build:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
 
+run-build-nc:
+	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --nc
+
 run-build-az:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --ci
 
@@ -39,9 +42,6 @@ run-build-app:
 
 run-deploy-az-retry:
 	dotnet run --project Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --ci --retry
-
-run-build-nc:
-	dotnet run --project Terrabuild -- build --workspace tests/simple --nocache --env debug
 
 
 github-tests:
