@@ -13,7 +13,7 @@ run-build-circular:
 run-build:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
 
-run-build-nc:
+run-rebuild:
 	dotnet run --project Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --nc
 
 run-build-az:
