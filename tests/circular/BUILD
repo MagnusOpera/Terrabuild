@@ -1,6 +1,3 @@
-dependencies:
-- A
-
 targets:
   build: [^build]
   publish: [build]

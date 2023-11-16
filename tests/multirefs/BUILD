@@ -1,5 +1,3 @@
-dependencies:
-- A
 
 targets:
   build: [^build]
