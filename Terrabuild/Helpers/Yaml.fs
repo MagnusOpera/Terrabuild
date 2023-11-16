@@ -2,14 +2,14 @@ module Yaml
 open System
 open System.IO
 open Collections
-open PresqueYaml
+open MagnusOpera.PresqueYaml
 open System.Text
 
 
 let loadDocument filename =
     try
         let yaml = System.IO.File.ReadAllText filename
-        let model = Parser.read yaml
+        let model = YamlParser.Read yaml
         model |> Ok
     with
         | ex -> Error ex
@@ -99,10 +99,10 @@ let queryMap<'t> path mapper node =
 
 
 let deserialize<'T>(node: YamlNode): 'T =
-    PresqueYaml.Serializer.YamlSerializer.Deserialize<'T>(node, PresqueYaml.Defaults.options)
+    YamlSerializer.Deserialize<'T>(node, Defaults.options)
 
 let deserializeType(returnType:Type, node: YamlNode): obj =
-    PresqueYaml.Serializer.YamlSerializer.Deserialize(node, returnType, PresqueYaml.Defaults.options)
+    YamlSerializer.Deserialize(node, returnType, Defaults.options)
 
 let dumpAsString (node: YamlNode) =
     let sb = StringBuilder()

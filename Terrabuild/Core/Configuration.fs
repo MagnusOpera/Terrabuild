@@ -3,7 +3,7 @@ open System.IO
 open Collections
 open System
 open System.Collections.Concurrent
-open PresqueYaml
+open MagnusOpera.PresqueYaml
 
 [<RequireQualifiedAccess>]
 type Options = {
