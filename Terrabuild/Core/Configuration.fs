@@ -5,6 +5,43 @@ open System
 open System.Collections.Concurrent
 open MagnusOpera.PresqueYaml
 
+
+
+
+type ExtensionConfig = {
+    Container: string option
+    Parameters: YamlNode
+}
+
+type VariablesConfig = Map<string, string>
+
+type BuildConfig = {
+    Storage: string option
+    SourceControl: string option
+    Targets: Map<string, string list>
+    Environments: Map<string, VariablesConfig>
+    Extensions: Map<string, ExtensionConfig>
+}
+
+
+
+type BuilderConfig = {
+    Use: string option
+    With: string option
+    
+}
+
+type ProjectConfig = {
+    Builders: Map<string, BuilderConfig>
+}
+
+
+
+
+
+
+
+
 [<RequireQualifiedAccess>]
 type Options = {
     MaxConcurrency: int
