@@ -14,8 +14,16 @@ jobs:
       packages: write    
 
     steps:
+      - name: Info
+        run: echo 'Building ${{ github.ref }}'
+
       - name: Cloning repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.100
 
       - name: Build
         run: make build
