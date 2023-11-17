@@ -10,9 +10,9 @@ type Shell(context) =
     inherit Extension(context)
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args
-          Extensions.CommandLine.Cache = Cacheability.Always }
+        { CommandLine.Command = cmd
+          CommandLine.Arguments = args
+          CommandLine.Cache = Cacheability.Always }
 
     override _.Container = None
 

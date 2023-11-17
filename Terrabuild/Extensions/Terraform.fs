@@ -19,9 +19,9 @@ type Terraform(context) =
     inherit Extension(context)
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args
-          Extensions.CommandLine.Cache = Cacheability.Always }
+        { CommandLine.Command = cmd
+          CommandLine.Arguments = args
+          CommandLine.Cache = Cacheability.Always }
 
     override _.Container = Some "hashicorp/terraform:1.6.4"
 
