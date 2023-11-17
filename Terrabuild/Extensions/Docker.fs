@@ -22,9 +22,9 @@ type Docker(context) =
         | _ -> "Dockerfile"
 
     let buildCmdLine cmd args cache =
-        { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args
-          Extensions.CommandLine.Cache = cache }
+        { CommandLine.Command = cmd
+          CommandLine.Arguments = args
+          CommandLine.Cache = cache }
 
     override _.Container = None
 

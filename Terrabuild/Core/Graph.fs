@@ -19,7 +19,7 @@ type Node = {
     Hash: string
     Variables: Map<string, string>
     CommandLines: CommandLine list
-    Outputs: Configuration.Paths
+    Outputs: Configuration.Items
     Cache: Extensions.Cacheability
 }
 

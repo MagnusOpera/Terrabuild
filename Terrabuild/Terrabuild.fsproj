@@ -40,8 +40,12 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.4.0" />
+  </ItemGroup> -->
+
+  <ItemGroup>
+    <ProjectReference Include="../../PresqueYaml/PresqueYaml/PresqueYaml.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
