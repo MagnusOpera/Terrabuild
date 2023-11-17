@@ -40,13 +40,13 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <!-- <ItemGroup>
-    <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.4.0" />
-  </ItemGroup> -->
-
   <ItemGroup>
-    <ProjectReference Include="../../PresqueYaml/PresqueYaml/PresqueYaml.fsproj" />
+    <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.5.0" />
   </ItemGroup>
+
+<!--  <ItemGroup>-->
+<!--    <ProjectReference Include="../../PresqueYaml/PresqueYaml/PresqueYaml.fsproj" />-->
+<!--  </ItemGroup>-->
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
