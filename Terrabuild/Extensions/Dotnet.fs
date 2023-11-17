@@ -65,7 +65,7 @@ type Dotnet(context) =
           CommandLine.Arguments = args
           CommandLine.Cache = Cacheability.Always }
 
-    override _.Container = Some "mcr.microsoft.com/dotnet/sdk"
+    override _.Container = Some "mcr.microsoft.com/dotnet/sdk:7.0"
 
     override _.Dependencies = parseDotnetDependencies 
 
