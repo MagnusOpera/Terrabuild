@@ -33,10 +33,10 @@ type Terraform(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "init" -> null
-        | "workspace" -> typeof<TerraformWorkspace>
-        | "plan" -> typeof<TerraformPlan>
-        | "apply" -> typeof<TerraformApply>
+        | "init" -> None
+        | "workspace" -> Some typeof<TerraformWorkspace>
+        | "plan" -> Some typeof<TerraformPlan>
+        | "apply" -> Some typeof<TerraformApply>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =

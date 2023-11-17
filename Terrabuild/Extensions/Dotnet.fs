@@ -75,10 +75,10 @@ type Dotnet(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "restore" -> null
-        | "build" -> typeof<DotnetBuild>
-        | "test" -> typeof<DotnetTest>
-        | "publish" -> typeof<DotnetPublish>
+        | "restore" -> None
+        | "build" -> Some typeof<DotnetBuild>
+        | "test" -> Some typeof<DotnetTest>
+        | "publish" -> Some typeof<DotnetPublish>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =

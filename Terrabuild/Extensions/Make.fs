@@ -24,7 +24,7 @@ type Make(context) =
 
     override _.Ignores = []
 
-    override _.GetStepParameters _ = typeof<MakeCommand>
+    override _.GetStepParameters _ = Some typeof<MakeCommand>
 
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with

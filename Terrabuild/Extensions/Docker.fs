@@ -36,8 +36,8 @@ type Docker(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "build" -> typeof<DockerBuild>
-        | "push" -> typeof<DockerPush>
+        | "build" -> Some typeof<DockerBuild>
+        | "push" -> Some typeof<DockerPush>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =

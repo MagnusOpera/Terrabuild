@@ -17,7 +17,7 @@ type Echo(context) =
 
     override _.Ignores = []
 
-    override _.GetStepParameters _ = null
+    override _.GetStepParameters _ = None
 
     override _.BuildStepCommands (action, _) =
         [ buildCmdLine "echo" action ]

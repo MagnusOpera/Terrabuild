@@ -22,7 +22,7 @@ type Shell(context) =
 
     override _.Ignores = []
 
-    override _.GetStepParameters _ = typeof<ShellCommand>
+    override _.GetStepParameters _ = Some typeof<ShellCommand>
 
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with

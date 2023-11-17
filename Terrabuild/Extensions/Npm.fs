@@ -20,9 +20,9 @@ type Npm(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "install" -> null
-        | "build" -> null
-        | "test" -> null
+        | "install" -> None
+        | "build" -> None
+        | "test" -> None
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =

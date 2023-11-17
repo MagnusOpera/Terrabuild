@@ -359,15 +359,11 @@ let read workspaceDir (options: Options) environment labels variables =
                             |> Map.add "nodeHash" (YamlNode.Scalar "$(terrabuild_node_hash)")
                         let stepArgsType = stepDef.Extension.GetStepParameters stepDef.Command
                         let stepParameters =
-                            stepArgsType |> Option.ofObj
+                            stepArgsType
                             |> Option.map (fun stepArgsType -> Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams))
                             |> Option.defaultValue null
 
-                        let cmds =
-                            match stepParameters with
-                            | null -> []
-                            | stepParameters ->
-                                stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
+                        let cmds = stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
 
                         cmds
                         |> List.map (fun cmd ->
