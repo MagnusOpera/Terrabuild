@@ -5,8 +5,6 @@ open System
 open System.Collections.Concurrent
 open MagnusOpera.PresqueYaml
 
-
-
 type ExtensionConfig = {
     Container: YamlNodeValue<string>
     Parameters: YamlNode
@@ -21,8 +19,6 @@ type BuildConfig = {
     Targets: Map<string, string set>
     Extensions: Map<string, ExtensionConfig>
 }
-
-
 
 type BuilderConfig = {
     Use: string option
@@ -45,12 +41,6 @@ type ProjectConfig = {
     Labels: Items
 }
 
-
-
-
-
-
-
 [<RequireQualifiedAccess>]
 type Options = {
     MaxConcurrency: int
@@ -61,7 +51,6 @@ type Options = {
 
 type ConfigException(msg, innerException: Exception) =
     inherit Exception(msg, innerException)
-
 
 [<RequireQualifiedAccess>]
 type ContaineredCommand = {
@@ -80,10 +69,6 @@ type Step = {
 
 type Steps = Map<string, Step>
 
-// type ExtensionConfigs = Map<string, Map<string, string>>
-//
-//
-
 [<RequireQualifiedAccess>]
 type Project = {
     Dependencies: Items
@@ -96,19 +81,6 @@ type Project = {
     Variables: Variables
     Labels: string set
 }
-//
-// type TargetRules = string set
-// type Targets = Map<string, TargetRules>
-// type Variables = Map<string, string>
-//
-// [<RequireQualifiedAccess>]
-// type ParsedBuildConfig = {
-//     Storage: string option
-//     SourceControl: string option
-//     Targets: Targets
-//     Variables: Variables
-// }
-//
 
 [<RequireQualifiedAccess>]
 type WorkspaceConfig = {
@@ -146,34 +118,6 @@ module ExtensionLoaders =
         | None -> SourceControls.Local()
         | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control '{name}'"
-
-// module BuildConfigParser =
-//
-//     let parse (buildConfig: BuildConfig) environment =
-//         // targets
-//         let targets = buildConfig.Targets
-//
-//         // variables
-//         let environments = buildConfig.Environments
-//         let variables =
-//             match environments |> Map.tryFind environment with
-//             | Some variables -> variables
-//             | _ ->
-//                 match environment with
-//                 | "default" -> Map.empty
-//                 | _ ->
-//                     ConfigException($"Environment '{environment}' not found", null)
-//                     |> raise
-//
-//         let parsedBuildConfig =
-//             { ParsedBuildConfig.Targets = targets
-//               ParsedBuildConfig.Variables = variables }
-//         parsedBuildConfig
-//
-
-
-
-
 
 module ProjectConfigParser =
 
