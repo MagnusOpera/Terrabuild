@@ -9,7 +9,7 @@ open MagnusOpera.PresqueYaml
 
 
 type ExtensionConfig = {
-    Container: string option
+    Container: YamlNodeValue<string>
     Parameters: YamlNode
 }
 
@@ -28,13 +28,19 @@ type BuildConfig = {
 type BuilderConfig = {
     Use: string option
     With: string option
-    
+    Container: YamlNodeValue<string>
+    Parameters: YamlNode
 }
+
+type CommandConfig = Map<string, string>
 
 type ProjectConfig = {
     Builders: Map<string, BuilderConfig>
+    Dependencies: string list
+    Targets: Map<string, string list>
+    Steps: Map<string, YamlNodeValue<CommandConfig> list>
+    Labels: string list
 }
-
 
 
 
