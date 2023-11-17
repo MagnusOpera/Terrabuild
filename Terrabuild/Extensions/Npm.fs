@@ -10,7 +10,7 @@ type Npm(context) =
           Extensions.CommandLine.Arguments = args
           Extensions.CommandLine.Cache = Cacheability.Always }
 
-    override _.Container = Some "node"
+    override _.Container = Some "node:20.9"
 
     override _.Dependencies = [] 
 
