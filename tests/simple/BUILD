@@ -20,6 +20,7 @@ environments:
 
 extensions:
   dotnet:
+    container: mcr.microsoft.com/dotnet/sdk:7.0
     parameters:
       configuration: $(configuration)
   terraform:

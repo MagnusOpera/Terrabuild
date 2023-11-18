@@ -22,9 +22,9 @@ type Docker(context) =
         | _ -> "Dockerfile"
 
     let buildCmdLine cmd args cache =
-        { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args
-          Extensions.CommandLine.Cache = cache }
+        { CommandLine.Command = cmd
+          CommandLine.Arguments = args
+          CommandLine.Cache = cache }
 
     override _.Container = None
 
@@ -36,8 +36,8 @@ type Docker(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "build" -> typeof<DockerBuild>
-        | "push" -> typeof<DockerPush>
+        | "build" -> Some typeof<DockerBuild>
+        | "push" -> Some typeof<DockerPush>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =

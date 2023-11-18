@@ -17,16 +17,16 @@ open System.IO
 
 
 type DotnetBuild = {
-    Configuration: string
+    Configuration: string option
 }
 
 type DotnetTest = {
-    Configuration: string
-    Filter: string
+    Configuration: string option
+    Filter: string option
 }
 
 type DotnetPublish = {
-    Configuration: string
+    Configuration: string option
 }
 
 type Dotnet(context) =
@@ -61,11 +61,11 @@ type Dotnet(context) =
         refs 
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args
-          Extensions.CommandLine.Cache = Cacheability.Always }
+        { CommandLine.Command = cmd
+          CommandLine.Arguments = args
+          CommandLine.Cache = Cacheability.Always }
 
-    override _.Container = Some "mcr.microsoft.com/dotnet/sdk"
+    override _.Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
 
     override _.Dependencies = parseDotnetDependencies 
 
@@ -75,10 +75,10 @@ type Dotnet(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "restore" -> null
-        | "build" -> typeof<DotnetBuild>
-        | "test" -> typeof<DotnetTest>
-        | "publish" -> typeof<DotnetPublish>
+        | "restore" -> None
+        | "build" -> Some typeof<DotnetBuild>
+        | "test" -> Some typeof<DotnetTest>
+        | "publish" -> Some typeof<DotnetPublish>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =
@@ -86,10 +86,14 @@ type Dotnet(context) =
         | _, "restore" ->
             [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" ]
         | :? DotnetBuild as parameters, _ ->
+            let config = parameters.Configuration |> Option.defaultValue "Debug"
             [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies"
-              buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {parameters.Configuration}" ]
+              buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {config}" ]
         | :? DotnetTest as parameters, _ ->
-            [ buildCmdLine "dotnet" $"test --no-build --configuration {parameters.Configuration} {projectFile} --filter \"{parameters.Filter}\"" ]
+            let config = parameters.Configuration |> Option.defaultValue "Debug"
+            let filter = parameters.Filter |> Option.defaultValue "true"
+            [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" ]
         | :? DotnetPublish as parameters, _ ->
-            [ buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {parameters.Configuration}" ]
+            let config = parameters.Configuration |> Option.defaultValue "Debug"
+            [ buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {config}" ]
         | _ -> ArgumentException($"Unknown action") |> raise

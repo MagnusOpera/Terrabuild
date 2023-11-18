@@ -3,16 +3,16 @@ open Extensions
 open System
 
 type ShellCommand = {
-    Arguments: string
+    Arguments: string option
 }
 
 type Shell(context) =
     inherit Extension(context)
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args
-          Extensions.CommandLine.Cache = Cacheability.Always }
+        { CommandLine.Command = cmd
+          CommandLine.Arguments = args
+          CommandLine.Cache = Cacheability.Always }
 
     override _.Container = None
 
@@ -22,10 +22,11 @@ type Shell(context) =
 
     override _.Ignores = []
 
-    override _.GetStepParameters _ = typeof<ShellCommand>
+    override _.GetStepParameters _ = Some typeof<ShellCommand>
 
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with
         | :? ShellCommand as parameters, _ ->
-            [ buildCmdLine action parameters.Arguments ]
+            let args = parameters.Arguments |> Option.defaultValue ""
+            [ buildCmdLine action args ]
         | _ -> ArgumentException($"Unknown action {action}") |> raise

@@ -27,5 +27,5 @@ type Extension(context: IContext) =
     abstract Dependencies: string list
     abstract Outputs: string list
     abstract Ignores: string list
-    abstract GetStepParameters: action:string -> Type
+    abstract GetStepParameters: action:string -> Type option
     abstract BuildStepCommands: action:string * parameters:obj -> CommandLine list

@@ -99,10 +99,11 @@ let queryMap<'t> path mapper node =
 
 
 let deserialize<'T>(node: YamlNode): 'T =
-    YamlSerializer.Deserialize<'T>(node, Defaults.options)
+    YamlSerializer.Deserialize<'T>(node)
 
 let deserializeType(returnType:Type, node: YamlNode): obj =
     YamlSerializer.Deserialize(node, returnType, Defaults.options)
+
 
 let dumpAsString (node: YamlNode) =
     let sb = StringBuilder()

@@ -5,6 +5,42 @@ open System
 open System.Collections.Concurrent
 open MagnusOpera.PresqueYaml
 
+type ExtensionConfig = {
+    Container: YamlNodeValue<string>
+    Parameters: YamlNode
+}
+
+type Variables = Map<string, string>
+
+type BuildConfig = {
+    Storage: string option
+    SourceControl: string option
+    Environments: Map<string, Variables>
+    Targets: Map<string, string set>
+    Extensions: Map<string, ExtensionConfig>
+}
+
+type BuilderConfig = {
+    Use: string option
+    With: string option
+    Container: YamlNodeValue<string>
+    Parameters: Map<string, YamlNode>
+}
+
+type Items = string set
+type CommandConfig = Map<string, YamlNode>
+type TargetRules = string set
+
+type ProjectConfig = {
+    Builders: Map<string, BuilderConfig option>
+    Dependencies: Items
+    Outputs: Items
+    Ignores: Items
+    Targets: Map<string, Items>
+    Steps: Map<string, CommandConfig list>
+    Labels: Items
+}
+
 [<RequireQualifiedAccess>]
 type Options = {
     MaxConcurrency: int
@@ -16,14 +52,8 @@ type Options = {
 type ConfigException(msg, innerException: Exception) =
     inherit Exception(msg, innerException)
 
-
-type Dependencies = string set
-type Paths = string set
-type TargetRules = string set
-type Targets = Map<string, TargetRules>
-
 [<RequireQualifiedAccess>]
-type ContaineredCommandLine = {
+type ContaineredCommand = {
     Container: string option
     Command: string
     Arguments: string
@@ -34,21 +64,18 @@ type ContaineredCommandLine = {
 type Step = {
     Hash: string
     Variables: Map<string, string>
-    CommandLines: ContaineredCommandLine list
+    CommandLines: ContaineredCommand list
 }
 
 type Steps = Map<string, Step>
-type Variables = Map<string, string>
-type ExtensionConfigs = Map<string, Map<string, string>>
-
 
 [<RequireQualifiedAccess>]
-type ProjectConfig = {
-    Dependencies: Dependencies
+type Project = {
+    Dependencies: Items
     Files: string set
-    Ignores: Paths
-    Outputs: Paths
-    Targets: Targets
+    Ignores: Items
+    Outputs: Items
+    Targets: Map<string, Items>
     Steps: Steps
     Hash: string
     Variables: Variables
@@ -56,19 +83,13 @@ type ProjectConfig = {
 }
 
 [<RequireQualifiedAccess>]
-type BuildConfig = {
-    Targets: Targets
-    Variables: Variables
-}
-
-[<RequireQualifiedAccess>]
 type WorkspaceConfig = {
     Storage: Storages.Storage
     SourceControl: SourceControls.SourceControl
     Directory: string
-    Dependencies: Dependencies
+    Dependencies: Items
     Build: BuildConfig
-    Projects: Map<string, ProjectConfig>
+    Projects: Map<string, Project>
     Environment: string
 }
 
@@ -98,57 +119,22 @@ module ExtensionLoaders =
         | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control '{name}'"
 
-module BuildConfigParser =
-
-    let parse buildDocument environment =
-        // targets
-        let targets =
-            match buildDocument |> Yaml.query "/targets" with
-            | Some (YamlNode.Mapping mapping) -> mapping |> Map.map (fun _ -> Yaml.deserialize<Set<string>>)
-            | _ -> Map.empty
-
-        // variables
-        let environments =
-            match buildDocument |> Yaml.query "/environments" with
-            | Some (YamlNode.Mapping mapping) -> mapping |> Map.map (fun _ -> Yaml.deserialize<Map<string, string>>)
-            | Some _ -> failwith "Invalid configuration for environments in BUILD configuration"
-            | None -> Map.empty
-
-        let variables =
-            match environments |> Map.tryFind environment with
-            | Some variables -> variables
-            | _ ->
-                match environment with
-                | "default" -> Map.empty
-                | _ ->
-                    ConfigException($"Environment '{environment}' not found", null)
-                    |> raise
-
-        let buildConfig = { BuildConfig.Targets = targets
-                            BuildConfig.Variables = variables }
-        buildConfig
-
-
-
-
-
-
 module ProjectConfigParser =
 
     [<RequireQualifiedAccess>]
     type StepDefinition = {
         Extension: Extensions.Extension
         Command: string
-        Parameters: Map<string, YamlNode>
+        Parameters: CommandConfig
         Container: string option
     }
-
+    
     [<RequireQualifiedAccess>]
     type ProjectDefinition = {
-        Dependencies: Dependencies
-        Ignores: Paths
-        Outputs: Paths
-        Targets: Targets
+        Dependencies: Items
+        Ignores: Items
+        Outputs: Items
+        Targets: Map<string, Items>
         StepDefinitions: Map<string, StepDefinition list>
         Labels: string set
     }
@@ -158,7 +144,7 @@ module ProjectConfigParser =
         | String.Regex "^\(([a-zA-Z][_a-zA-Z0-9]+)\)$" [name] -> Some name
         | _ -> None
 
-    let parse projectId workspaceDir buildDocument projectDir projectFile defaultExtensions shared commit branchOrTag =
+    let parse projectId workspaceDir (buildConfig: BuildConfig) projectDir projectFile defaultExtensions shared commit branchOrTag =
         let projectFilename = IO.combinePath projectDir projectFile
         // we might have landed in a directory without a configuration
         // in that case we just use the default configuration (which does nothing)
@@ -169,76 +155,52 @@ module ProjectConfigParser =
                 | Ok doc -> doc
                 | Error err -> ConfigException($"PROJECT '{projectFilename}' is invalid", err) |> raise
             | _ -> YamlNode.None
+        let projectConfig = Yaml.deserialize<ProjectConfig> projectDocument
+        
+        let projectOutputs = projectConfig.Outputs
+        let projectIgnores = projectConfig.Ignores
+        let projectTargets = projectConfig.Targets
+        let projectDependencies = projectConfig.Dependencies
+        let labels = projectConfig.Labels
 
-        let projectOutputs =
-            projectDocument
-            |> Yaml.query "/outputs"
-            |> Yaml.toOptionalStringList
-            |> Set
-
-        let projectIgnores =
-            projectDocument
-            |> Yaml.query "/ignores"
-            |> Yaml.toOptionalStringList
-            |> Set
-
-        let projectTargets =
-            match projectDocument |> Yaml.query "/targets" with
-            | Some (YamlNode.Mapping mapping) -> mapping |> Map.map (fun _ -> Yaml.deserialize<Set<string>>)
-            | Some _ -> ConfigException($"Expecting mapping  for element /targets in PROJECT '{projectFilename}'", null) |> raise
-            | _ -> Map.empty
-
-        let projectDependencies =
-            projectDocument
-            |> Yaml.query "/dependencies"
-            |> Yaml.toOptionalStringList
-            |> Set
-
-        let labels =
-            match projectDocument |> Yaml.query "/labels" with
-            | Some (YamlNode.Sequence sequence as node) -> Yaml.deserialize<Set<string>> node
-            | Some _ -> ConfigException($"Expecting list for element /labels", null) |> raise
-            | _ -> Set.empty
-
+        let defaultBuilder = {
+            BuilderConfig.Container = YamlNodeValue.Undefined
+            BuilderConfig.Use = None
+            BuilderConfig.With = None
+            BuilderConfig.Parameters = Map.empty 
+        }
+        
         let projectBuilders =
-            match projectDocument |> Yaml.query "/builders" with
-            | Some (YamlNode.Mapping builderMappings) ->
-                builderMappings |> Map.map (fun alias mapping ->
-                    let builderUse =
-                        mapping |> Yaml.query "use" |> Yaml.toOptionalString |> Option.defaultValue alias
+            projectConfig.Builders
+            |> Map.map (fun alias builderConfig ->
+                let builderConfig =
+                    builderConfig
+                    |> Option.defaultValue defaultBuilder
+                
+                // load extension first
+                let builderUse = builderConfig.Use |> Option.defaultValue alias
+                let builderWith = builderConfig.With
+                let context = { new Extensions.IContext
+                                with member _.Directory = projectDir
+                                     member _.With = builderWith
+                                     member _.CI = shared }
 
-                    let builderWith =
-                        mapping |> Yaml.query "with" |> Yaml.toOptionalString
+                let builder = ExtensionLoaders.loadExtension builderUse context
+                let builderParams = builderConfig.Parameters
 
-                    let builderContainer =
-                        mapping |> Yaml.query "container" |> Yaml.toOptionalString
-                        |> Option.orElse (buildDocument |> Yaml.query $"/extensions/{builderUse}/container" |> Yaml.toOptionalString) 
+                // container override ?
+                let containerOverride =
+                    buildConfig.Extensions
+                     |> Map.tryFind builderUse
+                     |> Option.map (fun extension -> extension.Container)
+                     |> Option.defaultValue builderConfig.Container
+                let container =
+                    match containerOverride with
+                    | YamlNodeValue.Value container -> Some container
+                    | YamlNodeValue.None -> None
+                    | YamlNodeValue.Undefined -> builder.Container
 
-                    let builderParams =
-                        let configBuilderParams =
-                            match buildDocument |> Yaml.query $"/extensions/{builderUse}/parameters" with
-                            | Some (YamlNode.Mapping mapping) -> mapping
-                            | Some _ -> ConfigException($"Expecting mapping for element /extensions/{builderUse}/parameters in PROJECT '{projectFilename}'", null) |> raise
-                            | _ -> Map.empty
-
-                        let configProjectParams =
-                            match mapping |> Yaml.query $"parameters" with
-                            | Some (YamlNode.Mapping mapping) -> mapping
-                            | Some _ -> ConfigException($"Expecting mapping for element /builders/{builderUse}/parameters in PROJECT '{projectFilename}'", null) |> raise
-                            | _ -> Map.empty
-
-                        let builderParams = configBuilderParams |> Map.replace configProjectParams
-                        builderParams
- 
-                    let context = { new Extensions.IContext
-                                    with member _.Directory = projectDir
-                                         member _.With = builderWith
-                                         member _.CI = shared }
-  
-                    let builder = ExtensionLoaders.loadExtension builderUse context 
-                    {| Extension = builder; Parameters = builderParams; Container = builderContainer |})
-            | Some _ -> ConfigException($"Project '{projectId}' has malformed builders mapping", null) |> raise
-            | _ -> Map.empty
+                {| Extension = builder; Parameters = builderParams; Container = container |})
 
         // collect extension capabilities
         let builderOutputs =
@@ -269,34 +231,20 @@ module ProjectConfigParser =
 
 
         let projectStepDefinitions =
-            match projectDocument |> Yaml.query "/steps" with
-            | Some (YamlNode.Mapping stepMappings) ->
-                stepMappings |> Map.map (fun _ stepMapping ->
-                    match stepMapping with
-                    | YamlNode.Sequence actions ->
-                        actions |> List.map (fun action ->
-                            match action with
-                            | YamlNode.Mapping actionConfig ->
-                                let builderInfo, stepParams = actionConfig |> Map.partition (fun k _ -> k |> getExtensionFromInvocation |> Option.isSome)
-                                let builderInfo = builderInfo |> Seq.exactlyOne
-                                let builderName, builderCommand = builderInfo.Key |> getExtensionFromInvocation |> Option.get, builderInfo.Value |> Yaml.toString
-                                let builderInfo = projectBuilders |> Map.find builderName
+            projectConfig.Steps
+            |> Map.map (fun _ commands ->
+                commands |> List.map (fun command ->
+                    let builderInfo, stepParams = command |> Map.partition (fun k _ -> k |> getExtensionFromInvocation |> Option.isSome)
+                    let builderInfo = builderInfo |> Seq.exactlyOne
+                    let builderName, builderCommand = builderInfo.Key |> getExtensionFromInvocation |> Option.get, builderInfo.Value |> Yaml.toString
+                    let builderInfo = projectBuilders |> Map.find builderName
 
-                                let stepParams =
-                                    builderInfo.Parameters
-                                    |> Map.replace stepParams 
+                    let stepParams = stepParams |> Map.replace builderInfo.Parameters
 
-                                let container =
-                                    builderInfo.Container
-                                    |> Option.orElse builderInfo.Extension.Container
-
-                                { StepDefinition.Extension = builderInfo.Extension
-                                  StepDefinition.Command = builderCommand
-                                  StepDefinition.Parameters = stepParams
-                                  StepDefinition.Container = container }
-                            | _ -> failwith "Expecting mapping")
-                    | _ -> failwith "Expecting sequence")
-            | _ -> Map.empty
+                    { StepDefinition.Extension = builderInfo.Extension
+                      StepDefinition.Container = builderInfo.Container
+                      StepDefinition.Command = builderCommand
+                      StepDefinition.Parameters = stepParams }))
 
         { ProjectDefinition.Dependencies = projectDependencies
           ProjectDefinition.Ignores = projectIgnores
@@ -314,29 +262,40 @@ let read workspaceDir (options: Options) environment labels variables =
         match Yaml.loadDocument buildFile with
         | Ok doc -> doc
         | Error err -> ConfigException($"Configuration '{buildFile}' is invalid", err) |> raise
-    let buildConfig = BuildConfigParser.parse buildDocument environment
+    let buildConfig = Yaml.deserialize<BuildConfig> buildDocument
+
+    // variables
+    let environments = buildConfig.Environments
+    let envVariables =
+        match environments |> Map.tryFind environment with
+        | Some variables -> variables
+        | _ ->
+            match environment with
+            | "default" -> Map.empty
+            | _ ->
+                ConfigException($"Environment '{environment}' not found", null)
+                |> raise
+    let buildVariables =
+        envVariables
+        |> Map.replace variables
 
     // storage
     let storage =
-        buildDocument
-        |> Yaml.query "/storage"
-        |> Yaml.toOptionalString
+        buildConfig.Storage
         |> Option.bind (fun x -> if options.NoCache then None else Some x)
         |> ExtensionLoaders.loadStorage
 
     // source control
     let sourceControl =
         if options.CI then
-            buildDocument
-            |> Yaml.query "/sourcecontrol"
-            |> Yaml.toOptionalString
+            buildConfig.SourceControl
             |> ExtensionLoaders.loadSourceControl
         else
             ExtensionLoaders.loadSourceControl None
-
     let commit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
 
+    // extensions
     let defaultExtensions =
         let context = { new Extensions.IContext
                         with member _.Directory = workspaceDir
@@ -351,9 +310,6 @@ let read workspaceDir (options: Options) environment labels variables =
                          Container = None |} ]
 
     let processedNodes = ConcurrentDictionary<string, bool>()
-    let buildVariables =
-        buildConfig.Variables
-        |> Map.replace variables
 
     let rec scanDependency projects project =
         let projectId = IO.combinePath workspaceDir project
@@ -365,11 +321,11 @@ let read workspaceDir (options: Options) environment labels variables =
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
-            let projectDef = ProjectConfigParser.parse project workspaceDir buildDocument projectDir projectFile defaultExtensions options.CI commit branchOrTag
+            let projectDef = ProjectConfigParser.parse project workspaceDir buildConfig projectDir projectFile defaultExtensions options.CI commit branchOrTag
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
-            let projects: Map<string, ProjectConfig> =
+            let projects: Map<string, Project> =
                 try
                     scanDependencies projects projectDef.Dependencies
                 with
@@ -403,22 +359,18 @@ let read workspaceDir (options: Options) environment labels variables =
                             |> Map.add "nodeHash" (YamlNode.Scalar "$(terrabuild_node_hash)")
                         let stepArgsType = stepDef.Extension.GetStepParameters stepDef.Command
                         let stepParameters =
-                            stepArgsType |> Option.ofObj
+                            stepArgsType
                             |> Option.map (fun stepArgsType -> Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams))
                             |> Option.defaultValue null
 
-                        let cmds =
-                            match stepParameters with
-                            | null -> []
-                            | stepParameters ->
-                                stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
+                        let cmds = stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
 
                         cmds
                         |> List.map (fun cmd ->
-                            { ContaineredCommandLine.Container = stepDef.Container
-                              ContaineredCommandLine.Command = cmd.Command
-                              ContaineredCommandLine.Arguments = cmd.Arguments
-                              ContaineredCommandLine.Cache = cmd.Cache })
+                            { ContaineredCommand.Container = stepDef.Container
+                              ContaineredCommand.Command = cmd.Command
+                              ContaineredCommand.Arguments = cmd.Arguments
+                              ContaineredCommand.Cache = cmd.Cache })
                     )
                 )
  
@@ -507,15 +459,15 @@ let read workspaceDir (options: Options) environment labels variables =
                 )
 
             let projectConfig =
-                { ProjectConfig.Dependencies = projectDef.Dependencies
-                  ProjectConfig.Files = files
-                  ProjectConfig.Outputs = projectDef.Outputs
-                  ProjectConfig.Ignores = projectDef.Ignores
-                  ProjectConfig.Targets = projectDef.Targets
-                  ProjectConfig.Steps = projectSteps
-                  ProjectConfig.Hash = nodeHash
-                  ProjectConfig.Variables = variables
-                  ProjectConfig.Labels = projectDef.Labels }
+                { Project.Dependencies = projectDef.Dependencies
+                  Project.Files = files
+                  Project.Outputs = projectDef.Outputs
+                  Project.Ignores = projectDef.Ignores
+                  Project.Targets = projectDef.Targets
+                  Project.Steps = projectSteps
+                  Project.Hash = nodeHash
+                  Project.Variables = variables
+                  Project.Labels = projectDef.Labels }
 
             projects |> Map.add project projectConfig
         else

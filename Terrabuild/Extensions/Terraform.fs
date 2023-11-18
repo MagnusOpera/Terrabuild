@@ -7,11 +7,11 @@ type TerraformWorkspace = {
 }
 
 type TerraformPlan = {
-    Workspace: string
+    Workspace: string option
 }
 
 type TerraformApply = {
-    Workspace: string
+    Workspace: string option
 }
 
 
@@ -19,11 +19,11 @@ type Terraform(context) =
     inherit Extension(context)
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args
-          Extensions.CommandLine.Cache = Cacheability.Always }
+        { CommandLine.Command = cmd
+          CommandLine.Arguments = args
+          CommandLine.Cache = Cacheability.Always }
 
-    override _.Container = Some "hashicorp/terraform"
+    override _.Container = Some "hashicorp/terraform:1.6.4"
 
     override _.Dependencies = [] 
 
@@ -33,10 +33,10 @@ type Terraform(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "init" -> null
-        | "workspace" -> typeof<TerraformWorkspace>
-        | "plan" -> typeof<TerraformPlan>
-        | "apply" -> typeof<TerraformApply>
+        | "init" -> None
+        | "workspace" -> Some typeof<TerraformWorkspace>
+        | "plan" -> Some typeof<TerraformPlan>
+        | "apply" -> Some typeof<TerraformApply>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =
@@ -47,12 +47,12 @@ type Terraform(context) =
             [ buildCmdLine "terraform" "init -reconfigure"
               buildCmdLine "terraform" $"workspace select {parameters.Workspace}" ]
         | :? TerraformPlan as parameters, _ ->
-            let workspace = parameters.Workspace |> Option.ofObj
+            let workspace = parameters.Workspace
             [ buildCmdLine "terraform" "init -reconfigure"
               if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
               buildCmdLine "terraform" "plan -out=terrabuild.planfile" ]
         | :? TerraformApply as parameters, _ ->
-            let workspace = parameters.Workspace |> Option.ofObj
+            let workspace = parameters.Workspace
             [ buildCmdLine "terraform" "init -reconfigure"
               if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
               buildCmdLine "terraform"  "apply terrabuild.planfile" ]

@@ -41,8 +41,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.1.0" />
+    <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.10.0" />
   </ItemGroup>
+
+<!--  <ItemGroup>-->
+<!--    <ProjectReference Include="../../PresqueYaml/PresqueYaml/PresqueYaml.fsproj" />-->
+<!--  </ItemGroup>-->
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />

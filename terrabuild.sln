@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild", "Terrabuild\Terrabuild.fsproj", "{9DE39771-3C5A-47C8-905A-338367C27214}"
 EndProject
+#Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PresqueYaml", "..\PresqueYaml\PresqueYaml\PresqueYaml.fsproj", "{7C71755F-D0D0-4645-9F4F-95DAC8CDFCB7}"
+#EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{9DE39771-3C5A-47C8-905A-338367C27214}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DE39771-3C5A-47C8-905A-338367C27214}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DE39771-3C5A-47C8-905A-338367C27214}.Release|Any CPU.Build.0 = Release|Any CPU
+#		{7C71755F-D0D0-4645-9F4F-95DAC8CDFCB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+#		{7C71755F-D0D0-4645-9F4F-95DAC8CDFCB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+#		{7C71755F-D0D0-4645-9F4F-95DAC8CDFCB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+#		{7C71755F-D0D0-4645-9F4F-95DAC8CDFCB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

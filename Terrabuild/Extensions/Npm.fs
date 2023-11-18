@@ -6,11 +6,11 @@ type Npm(context) =
     inherit Extension(context)
 
     let buildCmdLine cmd args =
-        { Extensions.CommandLine.Command = cmd
-          Extensions.CommandLine.Arguments = args
-          Extensions.CommandLine.Cache = Cacheability.Always }
+        { CommandLine.Command = cmd
+          CommandLine.Arguments = args
+          CommandLine.Cache = Cacheability.Always }
 
-    override _.Container = Some "node"
+    override _.Container = Some "node:20.9"
 
     override _.Dependencies = [] 
 
@@ -20,9 +20,9 @@ type Npm(context) =
 
     override _.GetStepParameters action =
         match action with
-        | "install" -> null
-        | "build" -> null
-        | "test" -> null
+        | "install" -> None
+        | "build" -> None
+        | "test" -> None
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =
