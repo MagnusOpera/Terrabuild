@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.9.0" />
+    <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.10.0" />
   </ItemGroup>
 
 <!--  <ItemGroup>-->
