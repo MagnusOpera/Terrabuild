@@ -7,11 +7,11 @@ type TerraformWorkspace = {
 }
 
 type TerraformPlan = {
-    Workspace: string
+    Workspace: string option
 }
 
 type TerraformApply = {
-    Workspace: string
+    Workspace: string option
 }
 
 
@@ -47,12 +47,12 @@ type Terraform(context) =
             [ buildCmdLine "terraform" "init -reconfigure"
               buildCmdLine "terraform" $"workspace select {parameters.Workspace}" ]
         | :? TerraformPlan as parameters, _ ->
-            let workspace = parameters.Workspace |> Option.ofObj
+            let workspace = parameters.Workspace
             [ buildCmdLine "terraform" "init -reconfigure"
               if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
               buildCmdLine "terraform" "plan -out=terrabuild.planfile" ]
         | :? TerraformApply as parameters, _ ->
-            let workspace = parameters.Workspace |> Option.ofObj
+            let workspace = parameters.Workspace
             [ buildCmdLine "terraform" "init -reconfigure"
               if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
               buildCmdLine "terraform"  "apply terrabuild.planfile" ]

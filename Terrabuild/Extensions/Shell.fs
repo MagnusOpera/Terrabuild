@@ -3,7 +3,7 @@ open Extensions
 open System
 
 type ShellCommand = {
-    Arguments: string
+    Arguments: string option
 }
 
 type Shell(context) =
@@ -27,5 +27,6 @@ type Shell(context) =
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with
         | :? ShellCommand as parameters, _ ->
-            [ buildCmdLine action parameters.Arguments ]
+            let args = parameters.Arguments |> Option.defaultValue ""
+            [ buildCmdLine action args ]
         | _ -> ArgumentException($"Unknown action {action}") |> raise
