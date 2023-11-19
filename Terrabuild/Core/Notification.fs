@@ -45,7 +45,7 @@ type BuildNotification() =
                   .ContinueWith(fun _ -> PrinterProtocol.Render |> inbox.Post) |> ignore
 
         // the message processing function
-        let rec messageLoop s= async {
+        let rec messageLoop () = async {
             let! msg = inbox.Receive()
             match msg with
             | PrinterProtocol.BuildStarted graph -> 
@@ -88,7 +88,7 @@ type BuildNotification() =
                     | NodeStatus.Uploading -> spinnerUpload, frequencyUpload
                     | NodeStatus.Building -> spinnerBuilding, frequencyBuilding
                 let label = $"{node.Target} {node.Project}"
-                renderer.Update label spinner frequency
+                renderer.Update node.Hash label spinner frequency
                 scheduleUpdate ()
                 return! messageLoop ()
 
@@ -103,8 +103,8 @@ type BuildNotification() =
                             false
                     | _ -> false
 
-                let label = $"{node.Target} {node.Project}"
-                renderer.Complete label status
+                let label = $"[{node.Target} {node.Project}"
+                renderer.Complete node.Hash label status
                 scheduleUpdate ()
                 return! messageLoop ()
 

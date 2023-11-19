@@ -10,6 +10,7 @@ type ProgressStatus =
     | Running of startedAt:DateTime * spinner:string * frequency:double
 
 type ProgressItem = {
+    Id: string
     Label: string
     mutable Status: ProgressStatus
 }
@@ -49,8 +50,8 @@ type ProgressRenderer() =
             let updateCmd = updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}"
             updateCmd |> Terminal.write |> Terminal.flush
 
-    member _.Update (label: string) (spinner: string) (frequency: double) =
-        match items |> List.tryFindIndex (fun item -> item.Label = label) with
+    member _.Update (id: string) (label: string) (spinner: string) (frequency: double) =
+        match items |> List.tryFindIndex (fun item -> item.Id = id) with
         | Some index ->
             items[index].Status <- ProgressStatus.Running (DateTime.Now, spinner, frequency)
 
@@ -58,22 +59,22 @@ type ProgressRenderer() =
                 printableItem items[index] |> Terminal.writeLine |> Terminal.flush
 
         | _ ->
-            let item = { Label = label; Status = ProgressStatus.Running (DateTime.Now, spinner, frequency) }
+            let item = { Id = id; Label = label; Status = ProgressStatus.Running (DateTime.Now, spinner, frequency) }
             items <- item :: items
             printableItem item |> Terminal.writeLine |> Terminal.flush
 
-    member _.Complete (label: string) (success: bool) =
+    member _.Complete (id: string) (label: string) (success: bool) =
         let status =
             if success then ProgressStatus.Success
             else ProgressStatus.Fail
 
         let item =
-            match items |> List.tryFindIndex (fun item -> item.Label = label) with
+            match items |> List.tryFindIndex (fun item -> item.Id = id) with
             | Some index ->
                 items[index].Status <- status
                 items[index]
             | _ ->
-                let item = { Label = label; Status = status }
+                let item = { Id = id; Label = label; Status = status }
                 items <- item :: items
                 item
 

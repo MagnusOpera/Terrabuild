@@ -102,7 +102,7 @@ let deserialize<'T>(node: YamlNode): 'T =
     YamlSerializer.Deserialize<'T>(node)
 
 let deserializeType(returnType:Type, node: YamlNode): obj =
-    YamlSerializer.Deserialize(node, returnType, Defaults.options)
+    YamlSerializer.Deserialize(node, returnType)
 
 
 let dumpAsString (node: YamlNode) =
