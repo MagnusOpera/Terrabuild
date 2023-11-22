@@ -49,8 +49,11 @@ type Options = {
     CI: bool
 }
 
-type ConfigException(msg, innerException: Exception) =
-    inherit Exception(msg, innerException)
+type ConfigException(msg, ?innerException: Exception) =
+    inherit Exception(msg, innerException |> Option.defaultValue null)
+
+    static member Raise(msg, ?innerException) =
+        ConfigException(msg, ?innerException=innerException) |> raise
 
 [<RequireQualifiedAccess>]
 type ContaineredCommand = {
@@ -153,7 +156,7 @@ module ProjectConfigParser =
             | IO.File projectFile ->
                 match Yaml.loadDocument projectFile with
                 | Ok doc -> doc
-                | Error err -> ConfigException($"PROJECT '{projectFilename}' is invalid", err) |> raise
+                | Error err -> ConfigException.Raise($"PROJECT '{projectFilename}' is invalid", err)
             | _ -> YamlNode.None
         let projectConfig = Yaml.deserialize<ProjectConfig> projectDocument
         
@@ -261,7 +264,7 @@ let read workspaceDir (options: Options) environment labels variables =
     let buildDocument =
         match Yaml.loadDocument buildFile with
         | Ok doc -> doc
-        | Error err -> ConfigException($"Configuration '{buildFile}' is invalid", err) |> raise
+        | Error err -> ConfigException.Raise($"Configuration '{buildFile}' is invalid", err)
     let buildConfig = Yaml.deserialize<BuildConfig> buildDocument
 
     // variables
@@ -272,9 +275,7 @@ let read workspaceDir (options: Options) environment labels variables =
         | _ ->
             match environment with
             | "default" -> Map.empty
-            | _ ->
-                ConfigException($"Environment '{environment}' not found", null)
-                |> raise
+            | _ -> ConfigException.Raise($"Environment '{environment}' not found")
     let buildVariables =
         envVariables
         |> Map.replace variables
@@ -316,7 +317,7 @@ let read workspaceDir (options: Options) environment labels variables =
         let projectDir, projectFile = 
             match projectId with
             | IO.Directory projectDir -> projectDir, "PROJECT"
-            | IO.File _ -> ConfigException($"Dependency '{project}' is not a directory", null) |> raise
+            | IO.File _ -> ConfigException.Raise($"Dependency '{project}' is not a directory")
             | _ -> failwith $"Failed to find project {projectId}"
 
         // process only unknown dependency
@@ -330,15 +331,13 @@ let read workspaceDir (options: Options) environment labels variables =
                     scanDependencies projects projectDef.Dependencies
                 with
                     ex ->
-                        ConfigException($"while processing '{project}'", ex)
-                        |> raise
+                        ConfigException.Raise($"while processing '{project}'", ex)
 
 
             // check for circular or missing dependencies
             for childDependency in projectDef.Dependencies do
                 if projects |> Map.tryFind childDependency |> Option.isNone then
-                    ConfigException($"Circular dependencies between {project} and {childDependency}", null)
-                    |> raise
+                    ConfigException.Raise($"Circular dependencies between {project} and {childDependency}")
 
 
 
@@ -385,7 +384,7 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> Seq.map (fun varName ->
                     match buildVariables |> Map.tryFind varName with
                     | Some value -> varName, value
-                    | _ -> ConfigException($"Variable '{varName}' is not defined in environment '{environment}'", null) |> raise)
+                    | _ -> ConfigException.Raise($"Variable '{varName}' is not defined in environment '{environment}'"))
                 |> Map
                 |> Map.add "terrabuild_branch_or_tag" (branchOrTag.Replace("/", "-"))
 
@@ -395,8 +394,7 @@ let read workspaceDir (options: Options) environment labels variables =
                     match projects |> Map.tryFind dependency with
                     | Some project -> project.Hash
                     | _ ->
-                        ConfigException($"Circular dependencies between '{project}' and '{dependency}'", null)
-                        |> raise
+                        ConfigException.Raise($"Circular dependencies between '{project}' and '{dependency}'")
                 )
                 |> Seq.sort
                 |> String.join "\n"
@@ -426,7 +424,7 @@ let read workspaceDir (options: Options) environment labels variables =
                         |> Seq.map (fun varName ->
                             match variables |> Map.tryFind varName with
                             | Some value -> varName, value
-                            | _ -> ConfigException($"Variable {varName} is not defined in \"{environment}\"", null) |> raise)
+                            | _ -> ConfigException.Raise($"Variable {varName} is not defined in \"{environment}\""))
                         |> Map
 
                     let stepWithValues =
