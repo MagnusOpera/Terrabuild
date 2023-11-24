@@ -103,7 +103,7 @@ type BuildNotification() =
                             false
                     | _ -> false
 
-                let label = $"[{node.Target} {node.Project}"
+                let label = $"{node.Target} {node.Project}"
                 renderer.Complete node.Hash label status
                 scheduleUpdate ()
                 return! messageLoop ()

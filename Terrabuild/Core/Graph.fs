@@ -35,7 +35,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
     let allNodes = ConcurrentDictionary<string, Node>()
 
     let rec buildTarget target project =
-        let nodeId = $"{project}-{target}"
+        let nodeId = $"{project}:{target}"
 
         let processNode () =
             let projectConfig = wsConfig.Projects[project]
