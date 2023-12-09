@@ -147,7 +147,7 @@ module ProjectConfigParser =
         | String.Regex "^\(([a-zA-Z][_a-zA-Z0-9]+)\)$" [name] -> Some name
         | _ -> None
 
-    let parse projectId workspaceDir (buildConfig: BuildConfig) projectDir projectFile defaultExtensions shared commit branchOrTag =
+    let parse workspaceDir (buildConfig: BuildConfig) projectDir projectFile defaultExtensions shared commit branchOrTag =
         let projectFilename = IO.combinePath projectDir projectFile
         // we might have landed in a directory without a configuration
         // in that case we just use the default configuration (which does nothing)
@@ -322,7 +322,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
-            let projectDef = ProjectConfigParser.parse project workspaceDir buildConfig projectDir projectFile defaultExtensions options.CI commit branchOrTag
+            let projectDef = ProjectConfigParser.parse workspaceDir buildConfig projectDir projectFile defaultExtensions options.CI commit branchOrTag
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
