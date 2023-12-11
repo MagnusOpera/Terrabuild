@@ -9,8 +9,6 @@ targets:
   deploy: [push]
 
 environments:
-  default:
-
   release:
     configuration: Release
 
