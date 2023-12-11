@@ -32,6 +32,7 @@ type TargetSummary = {
 type IEntry =
     abstract NextLogFile: unit -> string
     abstract Outputs: string with get
+    abstract Dir: string with get
     abstract Complete: summary:TargetSummary -> unit
 
 type ICache =
@@ -106,6 +107,8 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
             IO.combinePath logsDir filename
 
         member _.Outputs = outputsDir
+
+        member _.Dir = entryDir
 
         member _.Complete summary =
             summary |> write

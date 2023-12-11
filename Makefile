@@ -6,7 +6,7 @@ publish:
 	dotnet publish src/Terrabuild -o $(PWD)/out
 
 dist: publish
-	out/Terrabuild build --workspace src --environment release --retry
+	out/Terrabuild build --workspace src --environment release --retry --debug
 
 
 tests: run-build run-build-nc target usage
