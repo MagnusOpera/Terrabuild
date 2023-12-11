@@ -1,0 +1,26 @@
+builders:
+  dotnet:
+  docker:
+    use: docker
+    with: Dockerfile
+    parameters:
+      image: ghcr.io/magnusopera/terrabuild
+
+steps:
+  build:
+    - (dotnet): build
+
+  dist:
+    - (dotnet): publish
+
+  docker:
+    - (docker): build
+      arguments:
+        configuration: $(configuration)
+
+  push:
+    - (docker): push
+
+labels:
+  - app
+  - dotnet

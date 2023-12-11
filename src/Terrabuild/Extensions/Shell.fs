@@ -11,8 +11,7 @@ type Shell(context) =
 
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
-          CommandLine.Arguments = args
-          CommandLine.Cache = Cacheability.Always }
+          CommandLine.Arguments = args }
 
     override _.Container = None
 
@@ -28,5 +27,5 @@ type Shell(context) =
         match parameters, action with
         | :? ShellCommand as parameters, _ ->
             let args = parameters.Arguments |> Option.defaultValue ""
-            [ buildCmdLine action args ]
+            Cacheability.Always, [ buildCmdLine action args ]
         | _ -> ArgumentException($"Unknown action {action}") |> raise

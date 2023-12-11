@@ -62,8 +62,7 @@ type Dotnet(context) =
 
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
-          CommandLine.Arguments = args
-          CommandLine.Cache = Cacheability.Always }
+          CommandLine.Arguments = args }
 
     override _.Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
 
@@ -84,16 +83,16 @@ type Dotnet(context) =
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with
         | _, "restore" ->
-            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" ]
+            Cacheability.Always, [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" ]
         | :? DotnetBuild as parameters, _ ->
             let config = parameters.Configuration |> Option.defaultValue "Debug"
-            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies"
-              buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {config}" ]
+            Cacheability.Always, [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies"
+                                   buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {config}" ]
         | :? DotnetTest as parameters, _ ->
             let config = parameters.Configuration |> Option.defaultValue "Debug"
             let filter = parameters.Filter |> Option.defaultValue "true"
-            [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" ]
+            Cacheability.Always, [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" ]
         | :? DotnetPublish as parameters, _ ->
             let config = parameters.Configuration |> Option.defaultValue "Debug"
-            [ buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {config}" ]
+            Cacheability.Always, [ buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {config}" ]
         | _ -> ArgumentException($"Unknown action") |> raise

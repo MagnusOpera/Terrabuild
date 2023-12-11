@@ -1,0 +1,20 @@
+storage: azureblob
+sourcecontrol: github
+
+targets:
+  build: [^build]
+  dist: [build]
+  docker: [dist]
+  push: [docker]
+  deploy: [push]
+
+environments:
+  default:
+
+  release:
+    configuration: Release
+
+extensions:
+  dotnet:
+    parameters:
+      configuration: $(configuration)

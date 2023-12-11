@@ -413,3 +413,4 @@ terrabuild.*.json
 terrabuild.planfile
 terraform.tfstate
 .terraform
+.vscode/settings.json

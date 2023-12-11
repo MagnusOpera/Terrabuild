@@ -6,8 +6,7 @@ type Echo(context) =
 
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
-          CommandLine.Arguments = args
-          CommandLine.Cache = Cacheability.Always }
+          CommandLine.Arguments = args }
 
     override _.Container = None
 
@@ -20,4 +19,4 @@ type Echo(context) =
     override _.GetStepParameters _ = None
 
     override _.BuildStepCommands (action, _) =
-        [ buildCmdLine "echo" action ]
+        Cacheability.Always, [ buildCmdLine "echo" action ]

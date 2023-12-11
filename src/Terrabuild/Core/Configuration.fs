@@ -260,7 +260,7 @@ module ProjectConfigParser =
 
 
 let read workspaceDir (options: Options) environment labels variables =
-    let buildFile = Path.Combine(workspaceDir, "BUILD")
+    let buildFile = Path.Combine(workspaceDir, "WORKSPACE")
     let buildDocument =
         match Yaml.loadDocument buildFile with
         | Ok doc -> doc

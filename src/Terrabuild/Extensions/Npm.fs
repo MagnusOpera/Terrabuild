@@ -7,8 +7,7 @@ type Npm(context) =
 
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
-          CommandLine.Arguments = args
-          CommandLine.Cache = Cacheability.Always }
+          CommandLine.Arguments = args }
 
     override _.Container = Some "node:20.9"
 
@@ -28,11 +27,11 @@ type Npm(context) =
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with
         | _, "install" ->
-            [ buildCmdLine "npm" "ci" ]
+            Cacheability.Always, [ buildCmdLine "npm" "ci" ]
         | _, "build" ->
-            [ buildCmdLine "npm" "ci"
-              buildCmdLine "npm" "run build" ]
+            Cacheability.Always, [ buildCmdLine "npm" "ci"
+                                   buildCmdLine "npm" "run build" ]
         | _, "test" ->
-            [ buildCmdLine "npm" "ci"
-              buildCmdLine "npm" "run test" ]
+            Cacheability.Always, [ buildCmdLine "npm" "ci"
+                                   buildCmdLine "npm" "run test" ]
         | _ -> ArgumentException($"Unknown action") |> raise
