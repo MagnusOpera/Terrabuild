@@ -365,7 +365,6 @@ let read workspaceDir (options: Options) environment labels variables =
                         let stepParams =
                             stepDef.Parameters
                             |> Map.add "nodeHash" (YamlNode.Scalar "$(terrabuild_node_hash)")
-                        printfn $"Parameters for command: {project}/{targetId}: {stepParams}"
                         let stepArgsType = stepDef.Extension.GetStepParameters stepDef.Command
                         let stepParameters =
                             stepArgsType

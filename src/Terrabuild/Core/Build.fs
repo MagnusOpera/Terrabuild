@@ -176,7 +176,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                             //  - run command into a dedicated container (entrypoint)
                             //  - whole workspace is mapped in the container and current directory is set to project directory (volume + workdir)
                             //  - redirect home directory as well because we want to mutualize side effects (if any) for this step
-                            let args = $"run --entrypoint {commandLine.Command} -v {homeDir}:/root -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
+                            let args = $"run --entrypoint {commandLine.Command} --rm -v {homeDir}:/root -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
                             workspaceConfig.Directory, cmd, args
 
                     let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile

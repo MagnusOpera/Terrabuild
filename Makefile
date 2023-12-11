@@ -45,7 +45,7 @@ run-deploy-dev:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev
 
 run-build-app:
-	dotnet run --project Terrabu ild -- build --workspace tests/simple --environment debug --label dotnet --debug
+	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label dotnet --debug
 
 run-deploy-az-retry:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --ci --retry
