@@ -17,6 +17,7 @@ type Node = {
     Dependencies: string set
     IsLeaf: bool
     Hash: string
+    ProjectHash: string
     Variables: Map<string, string>
     CommandLines: CommandLine list
     Outputs: Configuration.Items
@@ -105,6 +106,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
                              Dependencies = children
                              IsLeaf = isLeaf
                              Hash = hash
+                             ProjectHash = projectConfig.Hash
                              Cache = cache }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     failwith "Unexpected graph building race"

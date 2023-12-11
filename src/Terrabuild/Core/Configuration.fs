@@ -7,7 +7,7 @@ open MagnusOpera.PresqueYaml
 
 type ExtensionConfig = {
     Container: YamlNodeValue<string>
-    Parameters: YamlNode
+    Parameters: Map<string, YamlNode>
 }
 
 type Variables = Map<string, string>
@@ -189,7 +189,16 @@ module ProjectConfigParser =
                                      member _.CI = shared }
 
                 let builder = ExtensionLoaders.loadExtension builderUse context
-                let builderParams = builderConfig.Parameters
+
+                // builder override ?
+                let paramsOverride =
+                    buildConfig.Extensions
+                    |> Map.tryFind builderUse
+                    |> Option.map (fun extension -> extension.Parameters)
+                    |> Option.defaultValue Map.empty
+                let builderParams =
+                    builderConfig.Parameters
+                    |> Map.replace paramsOverride
 
                 // container override ?
                 let containerOverride =
@@ -356,6 +365,7 @@ let read workspaceDir (options: Options) environment labels variables =
                         let stepParams =
                             stepDef.Parameters
                             |> Map.add "nodeHash" (YamlNode.Scalar "$(terrabuild_node_hash)")
+                        printfn $"Parameters for command: {project}/{targetId}: {stepParams}"
                         let stepArgsType = stepDef.Extension.GetStepParameters stepDef.Command
                         let stepParameters =
                             stepArgsType
@@ -393,8 +403,7 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> Seq.map (fun dependency -> 
                     match projects |> Map.tryFind dependency with
                     | Some project -> project.Hash
-                    | _ ->
-                        ConfigException.Raise($"Circular dependencies between '{project}' and '{dependency}'")
+                    | _ -> ConfigException.Raise($"Circular dependencies between '{project}' and '{dependency}'")
                 )
                 |> Seq.sort
                 |> String.join "\n"

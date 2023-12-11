@@ -32,12 +32,12 @@ type TargetSummary = {
 type IEntry =
     abstract NextLogFile: unit -> string
     abstract Outputs: string with get
-    abstract Dir: string with get
     abstract Complete: summary:TargetSummary -> unit
 
 type ICache =
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
     abstract CreateEntry: useRemote:bool -> id:string -> IEntry
+    abstract CreateHomeDir: nodeHash:string -> string
 
 
 let private summaryFilename = "summary.json"
@@ -47,6 +47,12 @@ let private completeFilename = ".complete"
 let private buildCacheDirectory =
     let homeDir = Environment.GetEnvironmentVariable("HOME")
     let cacheDir = IO.combinePath homeDir ".terrabuild/buildcache"
+    IO.createDirectory cacheDir
+    cacheDir
+
+let private homeDirectory =
+    let homeDir = Environment.GetEnvironmentVariable("HOME")
+    let cacheDir = IO.combinePath homeDir ".terrabuild/home"
     IO.createDirectory cacheDir
     cacheDir
 
@@ -107,8 +113,6 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
             IO.combinePath logsDir filename
 
         member _.Outputs = outputsDir
-
-        member _.Dir = entryDir
 
         member _.Complete summary =
             summary |> write
@@ -188,3 +192,7 @@ type Cache(storage: Storages.Storage) =
         member _.CreateEntry useRemote id : IEntry =
             let entryDir = IO.combinePath buildCacheDirectory id
             NewEntry(entryDir, useRemote, id, storage)
+
+        member _.CreateHomeDir nodeHash: string =
+            let homeDir = IO.combinePath homeDirectory nodeHash
+            homeDir
