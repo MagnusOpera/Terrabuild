@@ -194,9 +194,9 @@ module ProjectConfigParser =
                 // container override ?
                 let containerOverride =
                     buildConfig.Extensions
-                     |> Map.tryFind builderUse
-                     |> Option.map (fun extension -> extension.Container)
-                     |> Option.defaultValue builderConfig.Container
+                    |> Map.tryFind builderUse
+                    |> Option.map (fun extension -> extension.Container)
+                    |> Option.defaultValue builderConfig.Container
                 let container =
                     match containerOverride with
                     | YamlNodeValue.Value container -> Some container
@@ -362,14 +362,14 @@ let read workspaceDir (options: Options) environment labels variables =
                             |> Option.map (fun stepArgsType -> Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams))
                             |> Option.defaultValue null
 
-                        let cmds = stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
+                        let (cacheability, cmds) = stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
 
                         cmds
                         |> List.map (fun cmd ->
                             { ContaineredCommand.Container = stepDef.Container
                               ContaineredCommand.Command = cmd.Command
                               ContaineredCommand.Arguments = cmd.Arguments
-                              ContaineredCommand.Cache = cmd.Cache })
+                              ContaineredCommand.Cache = cacheability })
                     )
                 )
  
