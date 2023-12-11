@@ -27,6 +27,9 @@ type DotnetTest = {
 
 type DotnetPublish = {
     Configuration: string option
+    Trim: bool option
+    SingleFile: bool option
+    RuntimeIdentifier: string option
 }
 
 type Dotnet(context) =
@@ -60,9 +63,10 @@ type Dotnet(context) =
                         |> List.ofSeq
         refs 
 
-    let buildCmdLine cmd args =
+    let buildCmdLine cmd args cache =
         { CommandLine.Command = cmd
-          CommandLine.Arguments = args }
+          CommandLine.Arguments = args
+          CommandLine.Cache = cache }
 
     override _.Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
 
@@ -83,16 +87,29 @@ type Dotnet(context) =
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with
         | _, "restore" ->
-            Cacheability.Always, [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" ]
+            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local ]
         | :? DotnetBuild as parameters, _ ->
             let config = parameters.Configuration |> Option.defaultValue "Debug"
-            Cacheability.Always, [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies"
-                                   buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {config}" ]
+            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
+              buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {config}" Cacheability.Always ]
         | :? DotnetTest as parameters, _ ->
             let config = parameters.Configuration |> Option.defaultValue "Debug"
             let filter = parameters.Filter |> Option.defaultValue "true"
-            Cacheability.Always, [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" ]
+            [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" Cacheability.Always ]
         | :? DotnetPublish as parameters, _ ->
+            let runtimeId =
+                match parameters.RuntimeIdentifier with
+                | Some rid -> $" -r {rid}"
+                | _ -> ""
+            let singleFile = 
+                match parameters.SingleFile with
+                | Some true -> " -p:PublishSingleFile=true"
+                | _ -> ""
+            let trim = 
+                match parameters.Trim with
+                | Some true -> " -p:PublishTrimmed=true"
+                | _ -> ""
             let config = parameters.Configuration |> Option.defaultValue "Debug"
-            Cacheability.Always, [ buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {config}" ]
+            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
+              buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {config}{runtimeId}{singleFile}{trim}" Cacheability.Always ]
         | _ -> ArgumentException($"Unknown action") |> raise

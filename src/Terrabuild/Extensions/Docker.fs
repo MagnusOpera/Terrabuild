@@ -21,9 +21,10 @@ type Docker(context) =
         | Some dockerfile -> dockerfile
         | _ -> "Dockerfile"
 
-    let buildCmdLine cmd args =
+    let buildCmdLine cmd args cache =
         { CommandLine.Command = cmd
-          CommandLine.Arguments = args }
+          CommandLine.Arguments = args
+          CommandLine.Cache = cache }
 
     override _.Container = None
 
@@ -47,15 +48,15 @@ type Docker(context) =
 
             if context.CI then
                 let pushArgs = $"push {parameters.Image}:{parameters.NodeHash}"
-                Cacheability.Remote, [ buildCmdLine "docker" buildArgs 
-                                       buildCmdLine "docker" pushArgs ]
+                [ buildCmdLine "docker" buildArgs Cacheability.Remote
+                  buildCmdLine "docker" pushArgs Cacheability.Remote ]
             else
-                Cacheability.Local, [ buildCmdLine "docker" buildArgs ]
+                [ buildCmdLine "docker" buildArgs Cacheability.Local ]
         | :? DockerPush as parameters, _ ->
             if context.CI then
                 let retagArgs = $"buildx imagetools create -t {parameters.Image}:$(terrabuild_branch_or_tag) {parameters.Image}:{parameters.NodeHash}"
-                Cacheability.Remote, [ buildCmdLine "docker" retagArgs ]
+                [ buildCmdLine "docker" retagArgs Cacheability.Remote ]
             else
                 let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:$(terrabuild_branch_or_tag)"
-                Cacheability.Local, [ buildCmdLine "docker" tagArgs ]
+                [ buildCmdLine "docker" tagArgs Cacheability.Local ]
         | _ -> ArgumentException($"Unknown action") |> raise

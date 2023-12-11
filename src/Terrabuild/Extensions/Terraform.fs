@@ -20,7 +20,8 @@ type Terraform(context) =
 
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
-          CommandLine.Arguments = args }
+          CommandLine.Arguments = args
+          CommandLine.Cache = Cacheability.Always }
 
     override _.Container = Some "hashicorp/terraform:1.6.4"
 
@@ -41,18 +42,18 @@ type Terraform(context) =
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with
         | _, "init" ->
-            Cacheability.Always, [ buildCmdLine "terraform" "init -reconfigure" ]
+            [ buildCmdLine "terraform" "init -reconfigure" ]
         | :? TerraformWorkspace as parameters, _ ->
-            Cacheability.Always, [ buildCmdLine "terraform" "init -reconfigure"
-                                   buildCmdLine "terraform" $"workspace select {parameters.Workspace}" ]
+            [ buildCmdLine "terraform" "init -reconfigure"
+              buildCmdLine "terraform" $"workspace select {parameters.Workspace}" ]
         | :? TerraformPlan as parameters, _ ->
             let workspace = parameters.Workspace
-            Cacheability.Always, [ buildCmdLine "terraform" "init -reconfigure"
-                                   if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
-                                   buildCmdLine "terraform" "plan -out=terrabuild.planfile" ]
+            [ buildCmdLine "terraform" "init -reconfigure"
+              if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
+              buildCmdLine "terraform" "plan -out=terrabuild.planfile" ]
         | :? TerraformApply as parameters, _ ->
             let workspace = parameters.Workspace
-            Cacheability.Always, [ buildCmdLine "terraform" "init -reconfigure"
-                                   if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
-                                   buildCmdLine "terraform"  "apply terrabuild.planfile" ]
+            [ buildCmdLine "terraform" "init -reconfigure"
+              if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
+              buildCmdLine "terraform"  "apply terrabuild.planfile" ]
         | _ -> ArgumentException($"Unknown action") |> raise

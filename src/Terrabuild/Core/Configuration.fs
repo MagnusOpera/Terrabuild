@@ -371,14 +371,14 @@ let read workspaceDir (options: Options) environment labels variables =
                             |> Option.map (fun stepArgsType -> Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams))
                             |> Option.defaultValue null
 
-                        let (cacheability, cmds) = stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
+                        let cmds = stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
 
                         cmds
                         |> List.map (fun cmd ->
                             { ContaineredCommand.Container = stepDef.Container
                               ContaineredCommand.Command = cmd.Command
                               ContaineredCommand.Arguments = cmd.Arguments
-                              ContaineredCommand.Cache = cacheability })
+                              ContaineredCommand.Cache = cmd.Cache })
                     )
                 )
  

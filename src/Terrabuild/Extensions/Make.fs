@@ -13,7 +13,8 @@ type Make(context) =
 
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
-          CommandLine.Arguments = args }
+          CommandLine.Arguments = args
+          CommandLine.Cache = Cacheability.Always }
 
     override _.Container = None
 
@@ -29,5 +30,5 @@ type Make(context) =
         match parameters, action with
         | :? MakeCommand as parameters, _ ->
             let args = parameters.Parameters |> Seq.fold (fun acc kvp -> $"{acc} {kvp.Key}=\"{kvp.Value}\"") $"{action}"
-            Cacheability.Always, [ buildCmdLine "make" args ]
+            [ buildCmdLine "make" args ]
         | _ -> ArgumentException($"Unknown action {action}") |> raise

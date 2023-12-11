@@ -12,6 +12,7 @@ type Cacheability =
 type CommandLine = {
     Command: string
     Arguments: string
+    Cache: Cacheability
 }
 
 
@@ -27,4 +28,4 @@ type Extension(context: IContext) =
     abstract Outputs: string list
     abstract Ignores: string list
     abstract GetStepParameters: action:string -> Type option
-    abstract BuildStepCommands: action:string * parameters:obj -> Cacheability * CommandLine list
+    abstract BuildStepCommands: action:string * parameters:obj -> CommandLine list
