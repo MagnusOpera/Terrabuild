@@ -15,7 +15,6 @@ open Extensions
 open Xml
 open System.IO
 
-
 type DotnetBuild = {
     Configuration: string option
 }
@@ -27,9 +26,11 @@ type DotnetTest = {
 
 type DotnetPublish = {
     Configuration: string option
-    Trim: bool option
-    SingleFile: bool option
-    RuntimeIdentifier: string option
+}
+
+type DotnetExec = {
+    Command: string
+    Arguments: string option
 }
 
 type Dotnet(context) =
@@ -82,6 +83,7 @@ type Dotnet(context) =
         | "build" -> Some typeof<DotnetBuild>
         | "test" -> Some typeof<DotnetTest>
         | "publish" -> Some typeof<DotnetPublish>
+        | "exec" -> Some typeof<DotnetExec>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =
@@ -97,19 +99,10 @@ type Dotnet(context) =
             let filter = parameters.Filter |> Option.defaultValue "true"
             [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" Cacheability.Always ]
         | :? DotnetPublish as parameters, _ ->
-            let runtimeId =
-                match parameters.RuntimeIdentifier with
-                | Some rid -> $" -r {rid}"
-                | _ -> ""
-            let singleFile = 
-                match parameters.SingleFile with
-                | Some true -> " -p:PublishSingleFile=true"
-                | _ -> ""
-            let trim = 
-                match parameters.Trim with
-                | Some true -> " -p:PublishTrimmed=true"
-                | _ -> ""
             let config = parameters.Configuration |> Option.defaultValue "Debug"
             [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
-              buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {config}{runtimeId}{singleFile}{trim}" Cacheability.Always ]
+              buildCmdLine "dotnet" $"publish {projectFile} --no-restore --configuration {config}" Cacheability.Always ]
+        | :? DotnetExec as parameters, _ ->
+            let args = parameters.Arguments |> Option.defaultValue ""
+            [ buildCmdLine parameters.Command args Cacheability.Always ]
         | _ -> ArgumentException($"Unknown action") |> raise
