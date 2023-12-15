@@ -55,13 +55,14 @@ type Dotnet(context) =
     let parseDotnetDependencies =
         let project = Path.Combine(context.Directory, projectFile)
         let xdoc = XDocument.Load (project)
-        let refs = xdoc.Descendants() 
-                        |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
-                        |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string)
-                        |> Seq.map (fun x -> x.Replace("\\", "/"))
-                        |> Seq.map Path.GetDirectoryName
-                        |> Seq.distinct
-                        |> List.ofSeq
+        let refs =
+            xdoc.Descendants() 
+            |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
+            |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string)
+            |> Seq.map (fun x -> x.Replace("\\", "/"))
+            |> Seq.map Path.GetDirectoryName
+            |> Seq.distinct
+            |> List.ofSeq
         refs 
 
     let buildCmdLine cmd args cache =
