@@ -63,6 +63,7 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Test of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<RunArgs>
+    | [<CliPrefix(CliPrefix.None)>] Publish of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<TargetArgs>
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
@@ -74,6 +75,7 @@ with
             | Build _ -> "Run target 'build'."
             | Test _ -> "Run target 'test'."
             | Dist _ -> "Run target 'dist'."
+            | Publish _ -> "Run target 'publish'."
             | Serve _ -> "Run target 'serve'."
             | Run _ -> "Run specified targets."
             | Clear _ -> "Clear specified caches."
