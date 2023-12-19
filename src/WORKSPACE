@@ -5,7 +5,7 @@ targets:
   build: [^build]
   dist: [build]
   docker: [dist]
-  push: [docker]
+  publish: [docker]
   deploy: [push]
 
 environments:
