@@ -40,12 +40,14 @@ jobs:
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v2
+        if: success() || failure()
         with:
           name: Terrabuild Debug
           path: terrabuild.*.json
 
       - name: Upload Terrabuild Cache
         uses: actions/upload-artifact@v2
+        if: success() || failure()
         with:
           name: Terrabuild Cache
           path: ~/.terrabuild/buildcache/*
