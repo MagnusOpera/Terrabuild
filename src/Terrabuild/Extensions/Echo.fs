@@ -1,23 +1,22 @@
 namespace Extensions
 open Extensions
 
-type Echo(context) =
-    inherit Extension(context)
-
+type Echo(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args
           CommandLine.Cache = Cacheability.Always }
 
-    override _.Container = None
+    interface IExtension with
+        member _.Container = None
 
-    override _.Dependencies = []
+        member _.Dependencies = []
 
-    override _.Outputs = []
+        member _.Outputs = []
 
-    override _.Ignores = []
+        member _.Ignores = []
 
-    override _.GetStepParameters _ = None
+        member _.GetStepParameters _ = None
 
-    override _.BuildStepCommands (action, _) =
-        [ buildCmdLine "echo" action ]
+        member _.BuildStepCommands (action, _) =
+            [ buildCmdLine "echo" action ]

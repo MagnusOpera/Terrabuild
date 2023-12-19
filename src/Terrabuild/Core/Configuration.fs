@@ -99,7 +99,7 @@ type WorkspaceConfig = {
 
 module ExtensionLoaders =
 
-    let loadExtension name context : Extensions.Extension =
+    let loadExtension name context : Extensions.IExtension =
         match name with
         | "dotnet" -> Extensions.Dotnet(context)
         | "npm" -> Extensions.Npm(context)
@@ -126,7 +126,7 @@ module ProjectConfigParser =
 
     [<RequireQualifiedAccess>]
     type StepDefinition = {
-        Extension: Extensions.Extension
+        Extension: Extensions.IExtension
         Command: string
         Parameters: CommandConfig
         Container: string option

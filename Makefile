@@ -3,6 +3,10 @@ config ?= Debug
 build:
 	dotnet build
 
+self:
+	dotnet publish src/Terrabuild -o $(PWD)/out
+	out/Terrabuild build --workspace src --environment release --retry --debug
+
 dist:
 	rm -rf $(PWD)/out
 	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/out/windows src/Terrabuild

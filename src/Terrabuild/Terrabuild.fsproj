@@ -8,14 +8,6 @@
     <Compile Include="SourceControls/SourceControls.fs" />
     <Compile Include="SourceControls/Local.fs" />
     <Compile Include="SourceControls/GitHub.fs" />
-    <Compile Include="Extensions/Extensions.fs" />
-    <Compile Include="Extensions/Dotnet.fs" />
-    <Compile Include="Extensions/Npm.fs" />
-    <Compile Include="Extensions/Terraform.fs" />
-    <Compile Include="Extensions/Docker.fs" />
-    <Compile Include="Extensions/Shell.fs" />
-    <Compile Include="Extensions/Make.fs" />
-    <Compile Include="Extensions/Echo.fs" />
     <Compile Include="Storages/Storages.fs" />
     <Compile Include="Storages/Local.fs" />
     <Compile Include="Storages/MicrosoftBlobStorage.fs" />
@@ -32,6 +24,8 @@
     <Compile Include="Helpers/Ansi.fs" />
     <Compile Include="Helpers/Terminal.fs" />
     <Compile Include="Helpers/Progress.fs" />
+    <Compile Include="Extensions/Shell.fs" />
+    <Compile Include="Extensions/Echo.fs" />
     <Compile Include="Core/Configuration.fs" />
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Cache.fs" />
@@ -44,6 +38,10 @@
   <ItemGroup>
     <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.25.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
   </ItemGroup>
 
 <!--  <ItemGroup>-->

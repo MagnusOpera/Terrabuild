@@ -21,8 +21,7 @@ type IContext =
     abstract With: string option with get
     abstract CI : bool with get
 
-[<AbstractClass>]
-type Extension(context: IContext) =
+type IExtension =
     abstract Container: string option
     abstract Dependencies: string list
     abstract Outputs: string list
