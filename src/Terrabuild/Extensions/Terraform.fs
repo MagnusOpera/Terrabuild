@@ -23,7 +23,7 @@ type Terraform(context) =
           CommandLine.Arguments = args
           CommandLine.Cache = Cacheability.Always }
 
-    override _.Container = Some "hashicorp/terraform:1.6.4"
+    override _.Container = Some "hashicorp/terraform:1.6"
 
     override _.Dependencies = [] 
 

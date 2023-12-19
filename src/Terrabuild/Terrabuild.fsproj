@@ -43,6 +43,7 @@
 
   <ItemGroup>
     <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.25.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
 <!--  <ItemGroup>-->

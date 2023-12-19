@@ -1,6 +1,8 @@
 ﻿open Argu
 open CLI
 open System
+open Serilog
+open Serilog.Events
 
 let rec dumpKnownException (ex: Exception) =
     seq {
@@ -31,6 +33,7 @@ type TerrabuildExiter() =
 
         member _.Exit(msg: string, errorCode: ErrorCode) =
             do
+                Log.Fatal("Failed with {Message} and {ErrorCode}", msg, errorCode)
                 msg |> Terminal.writeLine
                 Terminal.showCursor()
 
@@ -41,6 +44,12 @@ let processCommandLine () =
     let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
     let result = parser.ParseCommandLine()
     let debug = result.Contains(TerrabuildArgs.Debug)
+    if debug then
+        Log.Logger <-
+            LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File("terrabuild.log")
+                .CreateLogger()
 
     let runTarget wsDir target environment labels variables (options: Configuration.Options) =
         try
@@ -76,6 +85,7 @@ let processCommandLine () =
 
         with
             | :? Configuration.ConfigException as ex ->
+                Log.Fatal("Failed with {Exception}", ex)
                 let reason = dumpUnknownException ex |> String.join "\n   "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
