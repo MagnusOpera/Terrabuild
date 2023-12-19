@@ -12,5 +12,5 @@ type GitHub() =
     override _.BranchOrTag =
         let branchOrRef = System.Environment.GetEnvironmentVariable("GITHUB_REF_NAME")
         if branchOrRef |> isNull then
-            failwith "Environment variable GITHUB_REF not found"
+            failwith "Environment variable GITHUB_REF_NAME not found"
         branchOrRef

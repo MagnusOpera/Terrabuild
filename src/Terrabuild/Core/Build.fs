@@ -160,6 +160,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     let startedAt = DateTime.UtcNow
                     let commandLine = node.CommandLines[cmdLineIndex]
                     let logFile = cacheEntry.NextLogFile()
+                    let homeDir = cache.CreateHomeDir node.ProjectHash
                     cmdLineIndex <- cmdLineIndex + 1
 
                     let workDir, cmd, args =
@@ -170,7 +171,12 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                         | Some container ->
                             let cmd = "docker"
                             let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
-                            let args = $"run --entrypoint {commandLine.Command} --rm -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
+
+                            // NOTE:
+                            //  - run command into a dedicated container (entrypoint)
+                            //  - whole workspace is mapped in the container and current directory is set to project directory (volume + workdir)
+                            //  - redirect home directory as well because we want to mutualize side effects (if any) for this step
+                            let args = $"run --entrypoint {commandLine.Command} --rm -v {homeDir}:/root -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
                             workspaceConfig.Directory, cmd, args
 
                     let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile

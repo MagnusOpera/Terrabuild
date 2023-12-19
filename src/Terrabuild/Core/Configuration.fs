@@ -7,7 +7,7 @@ open MagnusOpera.PresqueYaml
 
 type ExtensionConfig = {
     Container: YamlNodeValue<string>
-    Parameters: YamlNode
+    Parameters: Map<string, YamlNode>
 }
 
 type Variables = Map<string, string>
@@ -189,14 +189,23 @@ module ProjectConfigParser =
                                      member _.CI = shared }
 
                 let builder = ExtensionLoaders.loadExtension builderUse context
-                let builderParams = builderConfig.Parameters
+
+                // builder override ?
+                let paramsOverride =
+                    buildConfig.Extensions
+                    |> Map.tryFind builderUse
+                    |> Option.map (fun extension -> extension.Parameters)
+                    |> Option.defaultValue Map.empty
+                let builderParams =
+                    builderConfig.Parameters
+                    |> Map.replace paramsOverride
 
                 // container override ?
                 let containerOverride =
                     buildConfig.Extensions
-                     |> Map.tryFind builderUse
-                     |> Option.map (fun extension -> extension.Container)
-                     |> Option.defaultValue builderConfig.Container
+                    |> Map.tryFind builderUse
+                    |> Option.map (fun extension -> extension.Container)
+                    |> Option.defaultValue builderConfig.Container
                 let container =
                     match containerOverride with
                     | YamlNodeValue.Value container -> Some container
@@ -260,7 +269,7 @@ module ProjectConfigParser =
 
 
 let read workspaceDir (options: Options) environment labels variables =
-    let buildFile = Path.Combine(workspaceDir, "BUILD")
+    let buildFile = Path.Combine(workspaceDir, "WORKSPACE")
     let buildDocument =
         match Yaml.loadDocument buildFile with
         | Ok doc -> doc
@@ -393,8 +402,7 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> Seq.map (fun dependency -> 
                     match projects |> Map.tryFind dependency with
                     | Some project -> project.Hash
-                    | _ ->
-                        ConfigException.Raise($"Circular dependencies between '{project}' and '{dependency}'")
+                    | _ -> ConfigException.Raise($"Circular dependencies between '{project}' and '{dependency}'")
                 )
                 |> Seq.sort
                 |> String.join "\n"

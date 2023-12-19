@@ -76,6 +76,6 @@ let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
         let target = combinePath targetDir relative
         let targetDir = parentDirectory target
         Directory.CreateDirectory targetDir |> ignore
-        File.Copy(entry, target)
+        File.Copy(entry, target, true)
     if entries |> List.isEmpty then None
     else Some targetDir

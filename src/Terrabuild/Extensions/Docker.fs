@@ -58,5 +58,5 @@ type Docker(context) =
                 [ buildCmdLine "docker" retagArgs Cacheability.Remote ]
             else
                 let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:$(terrabuild_branch_or_tag)"
-                [ buildCmdLine "docker" tagArgs Cacheability.Local ]        
+                [ buildCmdLine "docker" tagArgs Cacheability.Local ]
         | _ -> ArgumentException($"Unknown action") |> raise

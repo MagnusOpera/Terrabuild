@@ -15,7 +15,6 @@ open Extensions
 open Xml
 open System.IO
 
-
 type DotnetBuild = {
     Configuration: string option
 }
@@ -27,6 +26,11 @@ type DotnetTest = {
 
 type DotnetPublish = {
     Configuration: string option
+}
+
+type DotnetExec = {
+    Command: string
+    Arguments: string option
 }
 
 type Dotnet(context) =
@@ -51,19 +55,20 @@ type Dotnet(context) =
     let parseDotnetDependencies =
         let project = Path.Combine(context.Directory, projectFile)
         let xdoc = XDocument.Load (project)
-        let refs = xdoc.Descendants() 
-                        |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
-                        |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string)
-                        |> Seq.map (fun x -> x.Replace("\\", "/"))
-                        |> Seq.map Path.GetDirectoryName
-                        |> Seq.distinct
-                        |> List.ofSeq
+        let refs =
+            xdoc.Descendants() 
+            |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
+            |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string)
+            |> Seq.map (fun x -> x.Replace("\\", "/"))
+            |> Seq.map Path.GetDirectoryName
+            |> Seq.distinct
+            |> List.ofSeq
         refs 
 
-    let buildCmdLine cmd args =
+    let buildCmdLine cmd args cache =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args
-          CommandLine.Cache = Cacheability.Always }
+          CommandLine.Cache = cache }
 
     override _.Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
 
@@ -79,21 +84,26 @@ type Dotnet(context) =
         | "build" -> Some typeof<DotnetBuild>
         | "test" -> Some typeof<DotnetTest>
         | "publish" -> Some typeof<DotnetPublish>
+        | "exec" -> Some typeof<DotnetExec>
         | _ -> ArgumentException($"Unknown action {action}") |> raise
 
     override _.BuildStepCommands (action, parameters) =
         match parameters, action with
         | _, "restore" ->
-            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" ]
+            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local ]
         | :? DotnetBuild as parameters, _ ->
             let config = parameters.Configuration |> Option.defaultValue "Debug"
-            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies"
-              buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {config}" ]
+            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
+              buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {config}" Cacheability.Always ]
         | :? DotnetTest as parameters, _ ->
             let config = parameters.Configuration |> Option.defaultValue "Debug"
             let filter = parameters.Filter |> Option.defaultValue "true"
-            [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" ]
+            [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" Cacheability.Always ]
         | :? DotnetPublish as parameters, _ ->
             let config = parameters.Configuration |> Option.defaultValue "Debug"
-            [ buildCmdLine "dotnet" $"publish {projectFile} --no-build --configuration {config}" ]
+            [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
+              buildCmdLine "dotnet" $"publish {projectFile} --no-restore --configuration {config}" Cacheability.Always ]
+        | :? DotnetExec as parameters, _ ->
+            let args = parameters.Arguments |> Option.defaultValue ""
+            [ buildCmdLine parameters.Command args Cacheability.Always ]
         | _ -> ArgumentException($"Unknown action") |> raise

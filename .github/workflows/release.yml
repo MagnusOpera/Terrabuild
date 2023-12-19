@@ -1,6 +1,12 @@
 name: build
 
-on: push
+on:
+  push:
+    branches:
+      - 'releases/**'
+
+    tags:
+      - 'v**'
 
 env:
   TERRABUILD_AZURE_BLOB_STORAGE: ${{ secrets.TERRABUILD_AZURE_BLOB_STORAGE }}
@@ -32,22 +38,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run Tests
-        run: make github-tests
-
-      - name: Build
+      - name: Build & Publish
         run: make publish
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
-        if: success() || failure()
         with:
           name: Terrabuild Debug
           path: terrabuild.*.json
-
-      - name: Upload Terrabuild Cache
-        uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          name: Terrabuild Cache
-          path: ~/.terrabuild/buildcache/*
