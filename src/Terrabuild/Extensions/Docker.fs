@@ -26,7 +26,7 @@ type Docker(context) =
           CommandLine.Arguments = args
           CommandLine.Cache = cache }
 
-    override _.Container = Some "docker:24.0-dind"
+    override _.Container = None // Some "docker:24.0-dind"
 
     override _.Dependencies = []
 
