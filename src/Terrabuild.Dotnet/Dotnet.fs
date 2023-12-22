@@ -112,7 +112,8 @@ type Dotnet(context: IContext) =
             | :? DotnetPack as parameters, _ ->
                 let config = parameters.Configuration |> Option.defaultValue "Debug"
                 let version = parameters.Version |> Option.defaultValue "0.0.0"
-                [ buildCmdLine "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {config}" Cacheability.Always ]
+                // TargetsForTfmSpecificContentInPackage ==> https://github.com/dotnet/fsharp/issues/12320
+                [ buildCmdLine "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {config} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage=" Cacheability.Always ]
             | :? DotnetExec as parameters, _ ->
                 let args = parameters.Arguments |> Option.defaultValue ""
                 [ buildCmdLine parameters.Command args Cacheability.Always ]
