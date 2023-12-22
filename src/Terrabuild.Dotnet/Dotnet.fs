@@ -34,7 +34,7 @@ type DotnetExec = {
     Arguments: string option
 }
 
-[<Export(typeof<IExtension>)>]
+[<Export("Dotnet", typeof<IExtension>)>]
 type Dotnet(context: IContext) =
     let knownProjectExtensions =
         [ "*.pssproj"

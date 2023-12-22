@@ -3,7 +3,7 @@ open System
 open System.ComponentModel.Composition
 
 
-[<Export(typeof<IExtension>)>]
+[<Export("Npm", typeof<IExtension>)>]
 type Npm(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd

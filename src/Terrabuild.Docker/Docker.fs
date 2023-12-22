@@ -14,7 +14,7 @@ type DockerPush = {
     Image: string
 }
 
-[<Export(typeof<IExtension>)>]
+[<Export("Docker", typeof<IExtension>)>]
 type Docker(context: IContext) =
     let dockerfile =
         match context.With with

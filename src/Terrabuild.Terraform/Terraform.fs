@@ -16,7 +16,7 @@ type TerraformApply = {
 }
 
 
-[<Export(typeof<IExtension>)>]
+[<Export("Terraform", typeof<IExtension>)>]
 type Terraform(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd

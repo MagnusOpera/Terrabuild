@@ -9,7 +9,7 @@ type MakeCommand = {
 }
 
 
-[<Export(typeof<IExtension>)>]
+[<Export("Make", typeof<IExtension>)>]
 type Make(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
