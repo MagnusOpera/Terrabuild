@@ -13,4 +13,17 @@
     <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#packing-using-a-nuspec -->
+    <PackageId>Terrabuild.Extensibility</PackageId>
+    <Authors>Pierre Chalamet</Authors>
+    <Title>Extensions for Terrabuild</Title>
+    <Description>Extensions for Terrabuild</Description>
+    <Copyright>Copyright 2023 Magnus Opera</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/MagnusOpera/Terrabuild</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MagnusOpera/Terrabuild.git</RepositoryUrl>
+    <PackageTags>terrabuild;build;extensibility;plugins</PackageTags>
+  </PropertyGroup>
+
 </Project>
