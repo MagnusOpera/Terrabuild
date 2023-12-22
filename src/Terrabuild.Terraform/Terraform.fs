@@ -1,5 +1,6 @@
 namespace Extensions
 open System
+open System.ComponentModel.Composition
 
 
 type TerraformWorkspace = {
@@ -15,6 +16,7 @@ type TerraformApply = {
 }
 
 
+[<Export(typeof<IExtension>)>]
 type Terraform(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd

@@ -1,6 +1,7 @@
 namespace Extensions
 open System
 open Extensions
+open System.ComponentModel.Composition
 
 type DockerBuild = {
     NodeHash: string
@@ -13,6 +14,7 @@ type DockerPush = {
     Image: string
 }
 
+[<Export(typeof<IExtension>)>]
 type Docker(context: IContext) =
     let dockerfile =
         match context.With with

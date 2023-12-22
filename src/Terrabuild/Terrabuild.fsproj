@@ -42,6 +42,11 @@
 
   <ItemGroup>
     <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
+    <ProjectReference Include="../Terrabuild.Docker/Terrabuild.Docker.fsproj" />
+    <ProjectReference Include="../Terrabuild.Dotnet/Terrabuild.Dotnet.fsproj" />
+    <ProjectReference Include="../Terrabuild.Make/Terrabuild.Make.fsproj" />
+    <ProjectReference Include="../Terrabuild.Npm/Terrabuild.Npm.fsproj" />
+    <ProjectReference Include="../Terrabuild.Terraform/Terrabuild.Terraform.fsproj" />
   </ItemGroup>
 
 <!--  <ItemGroup>-->

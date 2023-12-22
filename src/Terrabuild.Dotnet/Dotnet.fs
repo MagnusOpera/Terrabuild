@@ -14,6 +14,7 @@ open System.Xml.Linq
 open Extensions
 open Xml
 open System.IO
+open System.ComponentModel.Composition
 
 type DotnetBuild = {
     Configuration: string option
@@ -33,6 +34,7 @@ type DotnetExec = {
     Arguments: string option
 }
 
+[<Export(typeof<IExtension>)>]
 type Dotnet(context: IContext) =
     let knownProjectExtensions =
         [ "*.pssproj"

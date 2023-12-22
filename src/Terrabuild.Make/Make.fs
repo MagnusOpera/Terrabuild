@@ -2,12 +2,14 @@ namespace Extensions
 
 open System
 open Extensions
+open System.ComponentModel.Composition
 
 type MakeCommand = {
     Parameters: Map<string, string>
 }
 
 
+[<Export(typeof<IExtension>)>]
 type Make(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd

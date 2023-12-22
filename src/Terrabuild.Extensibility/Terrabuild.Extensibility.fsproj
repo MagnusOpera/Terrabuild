@@ -1,17 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Extensions.fs" />
-    <Compile Include="Dotnet.fs" />
-    <Compile Include="Npm.fs" />
-    <Compile Include="Terraform.fs" />
-    <Compile Include="Docker.fs" />
-    <Compile Include="Make.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
   </ItemGroup>
 
 </Project>
