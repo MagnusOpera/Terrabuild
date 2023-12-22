@@ -29,6 +29,11 @@ type DotnetPublish = {
     Configuration: string option
 }
 
+type DotnetPack = {
+    Configuration: string option
+    Version: string option
+}
+
 type DotnetExec = {
     Command: string
     Arguments: string option
@@ -85,6 +90,7 @@ type Dotnet(context: IContext) =
             | "build" -> Some typeof<DotnetBuild>
             | "test" -> Some typeof<DotnetTest>
             | "publish" -> Some typeof<DotnetPublish>
+            | "pack" -> Some typeof<DotnetPack>
             | "exec" -> Some typeof<DotnetExec>
             | _ -> ArgumentException($"Unknown action {action}") |> raise
 
@@ -102,8 +108,11 @@ type Dotnet(context: IContext) =
                 [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" Cacheability.Always ]
             | :? DotnetPublish as parameters, _ ->
                 let config = parameters.Configuration |> Option.defaultValue "Debug"
-                [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
-                  buildCmdLine "dotnet" $"publish {projectFile} --no-restore --configuration {config}" Cacheability.Always ]
+                [ buildCmdLine "dotnet" $"publish {projectFile} --no-restore --no-build --configuration {config}" Cacheability.Always ]
+            | :? DotnetPack as parameters, _ ->
+                let config = parameters.Configuration |> Option.defaultValue "Debug"
+                let version = parameters.Version |> Option.defaultValue "0.0.0"
+                [ buildCmdLine "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {config}" Cacheability.Always ]
             | :? DotnetExec as parameters, _ ->
                 let args = parameters.Arguments |> Option.defaultValue ""
                 [ buildCmdLine parameters.Command args Cacheability.Always ]

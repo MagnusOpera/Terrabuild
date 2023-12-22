@@ -19,6 +19,7 @@ steps:
         configuration: $(configuration)
 
   publish:
+    - (dotnet): pack
     - (docker): push
 
 labels:

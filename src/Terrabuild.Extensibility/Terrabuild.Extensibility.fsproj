@@ -9,10 +9,6 @@
     <Compile Include="Extensions.fs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
-  </ItemGroup>
-
   <PropertyGroup>
     <!-- https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#packing-using-a-nuspec -->
     <PackageId>Terrabuild.Extensibility</PackageId>

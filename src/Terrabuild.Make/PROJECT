@@ -5,6 +5,9 @@ steps:
   build:
     - (dotnet): build
 
+  publish:
+    - (dotnet): pack
+
 labels:
   - lib
   - dotnet
