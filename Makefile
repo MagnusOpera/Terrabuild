@@ -4,8 +4,8 @@ build:
 	dotnet build
 
 self:
+	rm -rf $(PWD)/out
 	dotnet publish src/Terrabuild -o $(PWD)/out
-	out/Terrabuild build --workspace src --environment release --retry --debug
 
 dist:
 	rm -rf $(PWD)/out
@@ -18,9 +18,8 @@ dist:
 	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/out/linux src/Terrabuild
 	cd out/linux; zip -r ../linux.zip ./*
 
+
 publish:
-	rm -rf $(PWD)/out
-	dotnet publish src/Terrabuild -o $(PWD)/out
 	out/Terrabuild publish --workspace src --environment release --retry --debug
 
 
