@@ -3,14 +3,11 @@ config ?= Debug
 build:
 	dotnet build
 
-dist-macos:
-	rm -rf $(PWD)/out/macos
-	dotnet publish --no-build --no-restore -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/out/macos src/Terrabuild
-	cd out/macos; zip -r ../macos.zip ./*
-
 self:
-	rm -rf $(PWD)/out/dotnet
 	dotnet publish src/Terrabuild -o $(PWD)/out/dotnet
+
+publish: self
+	out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
 dist:
 	rm -rf $(PWD)/out
@@ -22,9 +19,6 @@ dist:
 
 	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/out/linux src/Terrabuild
 	cd out/linux; zip -r ../linux.zip ./*
-
-publish: self
-	out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
 
 tests: run-build run-build-nc target usage
