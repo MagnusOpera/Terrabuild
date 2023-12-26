@@ -27,6 +27,9 @@ type DotnetTest = {
 
 type DotnetPublish = {
     Configuration: string option
+    Runtime: string option
+    Trim: bool option
+    Single: bool option
 }
 
 type DotnetPack = {
@@ -108,7 +111,19 @@ type Dotnet(context: IContext) =
                 [ buildCmdLine "dotnet" $"test --no-build --configuration {config} {projectFile} --filter \"{filter}\"" Cacheability.Always ]
             | :? DotnetPublish as parameters, _ ->
                 let config = parameters.Configuration |> Option.defaultValue "Debug"
-                [ buildCmdLine "dotnet" $"publish {projectFile} --no-restore --no-build --configuration {config}" Cacheability.Always ]
+                let runtime =
+                    match parameters.Runtime with
+                    | Some identifier -> $" -r {identifier}"
+                    | _ -> " --no-restore --no-build"
+                let trim =
+                    match parameters.Trim with
+                    | Some true -> " -p:PublishTrimmed=true"
+                    | _ -> ""
+                let single =
+                    match parameters.Single with
+                    | Some true -> " --self-contained"
+                    | _ -> ""
+                [ buildCmdLine "dotnet" $"publish {projectFile} --configuration {config}{runtime}{trim}{single}" Cacheability.Always ]
             | :? DotnetPack as parameters, _ ->
                 let config = parameters.Configuration |> Option.defaultValue "Debug"
                 let version = parameters.Version |> Option.defaultValue "0.0.0"
