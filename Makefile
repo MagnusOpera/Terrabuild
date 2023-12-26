@@ -23,8 +23,8 @@ dist:
 	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/out/linux src/Terrabuild
 	cd out/linux; zip -r ../linux.zip ./*
 
-publish:
-	out/Terrabuild publish --workspace src --environment release --retry --debug
+publish: self
+	out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
 
 tests: run-build run-build-nc target usage
