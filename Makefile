@@ -3,7 +3,7 @@ config ?= Debug
 build:
 	dotnet build
 
-self:
+self: build
 	dotnet publish src/Terrabuild -o $(PWD)/out/dotnet
 
 publish: self
