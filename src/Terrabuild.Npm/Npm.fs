@@ -3,7 +3,7 @@ open System
 open System.ComponentModel.Composition
 
 
-type Npm(context: IContext) =
+type Npm(context: Context) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args

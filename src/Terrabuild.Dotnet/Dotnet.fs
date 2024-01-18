@@ -42,7 +42,7 @@ type DotnetExec = {
     Arguments: string option
 }
 
-type Dotnet(context: IContext) =
+type Dotnet(context: Context) =
     let knownProjectExtensions =
         [ "*.pssproj"
           "*.csproj"

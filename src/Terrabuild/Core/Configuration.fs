@@ -186,10 +186,9 @@ module ProjectConfigParser =
                 // load extension first
                 let builderUse = builderConfig.Use |> Option.defaultValue alias
                 let builderWith = builderConfig.With
-                let context = { new Extensions.IContext
-                                with member _.Directory = projectDir
-                                     member _.With = builderWith
-                                     member _.CI = shared }
+                let context = { Extensions.Context.Directory = projectDir
+                                Extensions.Context.With = builderWith
+                                Extensions.Context.CI = shared }
 
                 let builder = ExtensionLoaders.loadExtension builderUse context
 
@@ -310,10 +309,9 @@ let read workspaceDir (options: Options) environment labels variables =
 
     // extensions
     let defaultExtensions =
-        let context = { new Extensions.IContext
-                        with member _.Directory = workspaceDir
-                             member _.With = None
-                             member _.CI = options.CI }
+        let context = { Extensions.Context.Directory = workspaceDir
+                        Extensions.Context.With = None
+                        Extensions.Context.CI = options.CI }
 
         Map [ "shell", {| Extension = ExtensionLoaders.loadExtension "shell" context
                           Parameters = Map.empty

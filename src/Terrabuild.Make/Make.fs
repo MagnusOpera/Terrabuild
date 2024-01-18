@@ -9,7 +9,7 @@ type MakeCommand = {
 }
 
 
-type Make(context: IContext) =
+type Make(context: Context) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args

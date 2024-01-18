@@ -14,7 +14,7 @@ type DockerPush = {
     Image: string
 }
 
-type Docker(context: IContext) =
+type Docker(context: Context) =
     let dockerfile =
         match context.With with
         | Some dockerfile -> dockerfile

@@ -16,7 +16,7 @@ type TerraformApply = {
 }
 
 
-type Terraform(context: IContext) =
+type Terraform(context: Context) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args

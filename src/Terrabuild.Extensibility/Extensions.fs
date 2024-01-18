@@ -16,10 +16,12 @@ type CommandLine = {
 }
 
 
-type IContext =
-    abstract Directory: string with get
-    abstract With: string option with get
-    abstract CI : bool with get
+[<RequireQualifiedAccess>]
+type Context = {
+    Directory: string
+    With: string option
+    CI: bool
+}
 
 type IExtension =
     abstract Container: string option
@@ -30,4 +32,4 @@ type IExtension =
     abstract BuildStepCommands: action:string * parameters:obj -> CommandLine list
 
 type IExtensionFactory =
-    abstract Create: IContext -> IExtension
+    abstract Create: Context -> IExtension
