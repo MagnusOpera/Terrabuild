@@ -98,17 +98,20 @@ type WorkspaceConfig = {
 
 
 module ExtensionLoaders =
+    open Extensions
 
     let loadExtension name context : Extensions.IExtension =
-        match name with
-        | "dotnet" -> Extensions.Dotnet(context)
-        | "npm" -> Extensions.Npm(context)
-        | "terraform" -> Extensions.Terraform(context)
-        | "shell" -> Extensions.Shell(context)
-        | "docker" -> Extensions.Docker(context)
-        | "make" -> Extensions.Make(context)
-        | "echo" -> Extensions.Echo(context)
-        | _ -> failwith $"Unknown plugin '{name}'"
+        let factory: IExtensionFactory =
+            match name with
+            | "dotnet" -> DotnetFactory()
+            | "npm" -> NpmFactory()
+            | "terraform" -> TerraformFactory()
+            | "shell" -> ShellFactory()
+            | "docker" -> DockerFactory()
+            | "make" -> MakeFactory()
+            | "echo" -> EchoFactory()
+            | _ -> failwith $"Unknown plugin '{name}'"
+        factory.Create(context)
 
     let loadStorage name : Storages.Storage =
         match name with

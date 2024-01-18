@@ -3,7 +3,6 @@ open System
 open System.ComponentModel.Composition
 
 
-[<Export("Npm", typeof<IExtension>)>]
 type Npm(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
@@ -37,3 +36,10 @@ type Npm(context: IContext) =
                 [ buildCmdLine "npm" "ci"
                   buildCmdLine "npm" "run test" ]
             | _ -> ArgumentException($"Unknown action") |> raise
+
+
+[<Export("npm", typeof<IExtensionFactory>)>]
+type NpmFactory() =
+    interface IExtensionFactory with
+        member _.Create ctx =
+            Npm(ctx)

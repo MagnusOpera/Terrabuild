@@ -16,7 +16,6 @@ type TerraformApply = {
 }
 
 
-[<Export("Terraform", typeof<IExtension>)>]
 type Terraform(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
@@ -24,15 +23,15 @@ type Terraform(context: IContext) =
           CommandLine.Cache = Cacheability.Always }
 
     interface IExtension with
-        override _.Container = Some "hashicorp/terraform:1.6"
+        member _.Container = Some "hashicorp/terraform:1.6"
 
-        override _.Dependencies = [] 
+        member _.Dependencies = [] 
 
-        override _.Outputs = [ "terrabuild.planfile" ]
+        member _.Outputs = [ "terrabuild.planfile" ]
 
-        override _.Ignores = [ ".terraform" ]
+        member _.Ignores = [ ".terraform" ]
 
-        override _.GetStepParameters action =
+        member _.GetStepParameters action =
             match action with
             | "init" -> None
             | "workspace" -> Some typeof<TerraformWorkspace>
@@ -40,7 +39,7 @@ type Terraform(context: IContext) =
             | "apply" -> Some typeof<TerraformApply>
             | _ -> ArgumentException($"Unknown action {action}") |> raise
 
-        override _.BuildStepCommands (action, parameters) =
+        member _.BuildStepCommands (action, parameters) =
             match parameters, action with
             | _, "init" ->
                 [ buildCmdLine "terraform" "init -reconfigure" ]
@@ -58,3 +57,10 @@ type Terraform(context: IContext) =
                   if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
                   buildCmdLine "terraform"  "apply terrabuild.planfile" ]
             | _ -> ArgumentException($"Unknown action") |> raise
+
+
+[<Export("terraform", typeof<IExtensionFactory>)>]
+type TerraformFactory() =
+    interface IExtensionFactory with
+        member _.Create ctx =
+            Terraform(ctx)

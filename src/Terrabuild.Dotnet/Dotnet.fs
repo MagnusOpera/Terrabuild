@@ -42,7 +42,6 @@ type DotnetExec = {
     Arguments: string option
 }
 
-[<Export("Dotnet", typeof<IExtension>)>]
 type Dotnet(context: IContext) =
     let knownProjectExtensions =
         [ "*.pssproj"
@@ -133,3 +132,10 @@ type Dotnet(context: IContext) =
                 let args = parameters.Arguments |> Option.defaultValue ""
                 [ buildCmdLine parameters.Command args Cacheability.Always ]
             | _ -> ArgumentException($"Unknown action") |> raise
+
+
+[<Export("dotnet", typeof<IExtensionFactory>)>]
+type DotnetFactory() =
+    interface IExtensionFactory with
+        member _.Create ctx =
+            Dotnet(ctx)

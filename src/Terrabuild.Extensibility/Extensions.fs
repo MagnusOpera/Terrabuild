@@ -28,3 +28,6 @@ type IExtension =
     abstract Ignores: string list
     abstract GetStepParameters: action:string -> Type option
     abstract BuildStepCommands: action:string * parameters:obj -> CommandLine list
+
+type IExtensionFactory =
+    abstract Create: IContext -> IExtension

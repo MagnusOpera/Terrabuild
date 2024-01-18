@@ -14,7 +14,6 @@ type DockerPush = {
     Image: string
 }
 
-[<Export("Docker", typeof<IExtension>)>]
 type Docker(context: IContext) =
     let dockerfile =
         match context.With with
@@ -61,3 +60,10 @@ type Docker(context: IContext) =
                     let tagArgs = $"tag {parameters.Image}:{parameters.NodeHash} {parameters.Image}:$(terrabuild_branch_or_tag)"
                     [ buildCmdLine "docker" tagArgs Cacheability.Local ]
             | _ -> ArgumentException($"Unknown action") |> raise
+
+
+[<Export("docker", typeof<IExtensionFactory>)>]
+type DockerFactory() =
+    interface IExtensionFactory with
+        member _.Create ctx =
+            Docker(ctx)

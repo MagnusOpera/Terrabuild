@@ -9,7 +9,6 @@ type MakeCommand = {
 }
 
 
-[<Export("Make", typeof<IExtension>)>]
 type Make(context: IContext) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
@@ -33,3 +32,10 @@ type Make(context: IContext) =
                 let args = parameters.Parameters |> Seq.fold (fun acc kvp -> $"{acc} {kvp.Key}=\"{kvp.Value}\"") $"{action}"
                 [ buildCmdLine "make" args ]
             | _ -> ArgumentException($"Unknown action {action}") |> raise
+
+
+[<Export("make", typeof<IExtensionFactory>)>]
+type MakeFactory() =
+    interface IExtensionFactory with
+        member _.Create ctx =
+            Make(ctx)

@@ -20,6 +20,7 @@ steps:
 
   publish:
     - (dotnet): pack
+    - (dotnet): push
     - (docker): push
 
 labels:

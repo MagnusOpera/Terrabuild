@@ -1,31 +1,39 @@
 namespace Extensions
 open Extensions
 open System
+open System.ComponentModel.Composition
 
 type ShellCommand = {
     Arguments: string option
 }
 
-type Shell(context: IContext) =
+type Shell() =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args
           CommandLine.Cache = Cacheability.Always }
 
     interface IExtension with
-        override _.Container = None
+        member _.Container = None
 
-        override _.Dependencies = []
+        member _.Dependencies = []
 
-        override _.Outputs = []
+        member _.Outputs = []
 
-        override _.Ignores = []
+        member _.Ignores = []
 
-        override _.GetStepParameters _ = Some typeof<ShellCommand>
+        member _.GetStepParameters _ = Some typeof<ShellCommand>
 
-        override _.BuildStepCommands (action, parameters) =
+        member _.BuildStepCommands (action, parameters) =
             match parameters, action with
             | :? ShellCommand as parameters, _ ->
                 let args = parameters.Arguments |> Option.defaultValue ""
                 [ buildCmdLine action args ]
             | _ -> ArgumentException($"Unknown action {action}") |> raise
+
+
+[<Export("shell", typeof<IExtensionFactory>)>]
+type ShellFactory() =
+    interface IExtensionFactory with
+        member _.Create _ =
+            Shell()

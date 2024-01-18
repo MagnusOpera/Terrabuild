@@ -1,7 +1,8 @@
 namespace Extensions
 open Extensions
+open System.ComponentModel.Composition
 
-type Echo(context: IContext) =
+type Echo() =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args
@@ -20,3 +21,10 @@ type Echo(context: IContext) =
 
         member _.BuildStepCommands (action, _) =
             [ buildCmdLine "echo" action ]
+
+
+[<Export("echo", typeof<IExtensionFactory>)>]
+type EchoFactory() =
+    interface IExtensionFactory with
+        member _.Create _ =
+            Echo()
