@@ -1,8 +1,12 @@
 config ?= Debug
+version ?= 0.0.0
 
 build:
 	dotnet build
 
+nuget:
+	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
+	
 self: build
 	dotnet publish src/Terrabuild -o $(PWD)/out/dotnet
 

@@ -17,17 +17,23 @@
     <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="NUGET.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <!-- https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#packing-using-a-nuspec -->
-    <PackageId>Terrabuild.Dotnet</PackageId>
+    <PackageId>MagnusOpera.Terrabuild.Dotnet</PackageId>
     <Authors>Pierre Chalamet</Authors>
     <Title>Dotnet extension for Terrabuild</Title>
     <Description>Dotnet extension for Terrabuild</Description>
-    <Copyright>Copyright 2023 Magnus Opera</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright 2023-2024 Magnus Opera</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/MagnusOpera/Terrabuild</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MagnusOpera/Terrabuild.git</RepositoryUrl>
     <PackageTags>terrabuild;build;.net</PackageTags>
+    <PackageReadmeFile>NUGET.md</PackageReadmeFile>
   </PropertyGroup>
 
 </Project>

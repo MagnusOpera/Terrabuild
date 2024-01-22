@@ -60,17 +60,23 @@
     <PackageReference Include="Argu" Version="6.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="NUGET.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <!-- https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#packing-using-a-nuspec -->
     <PackageId>Terrabuild</PackageId>
     <Authors>Pierre Chalamet</Authors>
     <Title>Terrabuild</Title>
     <Description>Terrabuild</Description>
-    <Copyright>Copyright 2023 Magnus Opera</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright 2023-2024 Magnus Opera</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/MagnusOpera/Terrabuild</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MagnusOpera/Terrabuild.git</RepositoryUrl>
     <PackageTags>terrabuild;build</PackageTags>
+    <PackageReadmeFile>NUGET.md</PackageReadmeFile>
   </PropertyGroup>
 
 </Project>
