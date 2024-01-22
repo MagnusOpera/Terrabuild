@@ -42,17 +42,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
-    <ProjectReference Include="../Terrabuild.Docker/Terrabuild.Docker.fsproj" />
-    <ProjectReference Include="../Terrabuild.Dotnet/Terrabuild.Dotnet.fsproj" />
-    <ProjectReference Include="../Terrabuild.Make/Terrabuild.Make.fsproj" />
-    <ProjectReference Include="../Terrabuild.Npm/Terrabuild.Npm.fsproj" />
-    <ProjectReference Include="../Terrabuild.Terraform/Terrabuild.Terraform.fsproj" />
+    <PackageReference Include="Terrabuild.Extensibility" Version="0.0.7" />
+    <PackageReference Include="Terrabuild.Docker" Version="0.0.2" />
+    <PackageReference Include="Terrabuild.Dotnet" Version="0.0.1" />
+    <PackageReference Include="Terrabuild.Make" Version="0.0.1" />
+    <PackageReference Include="Terrabuild.Npm" Version="0.0.1" />
+    <PackageReference Include="Terrabuild.Terraform" Version="0.0.1" />
   </ItemGroup>
-
-<!--  <ItemGroup>-->
-<!--    <ProjectReference Include="../../PresqueYaml/PresqueYaml/PresqueYaml.fsproj" />-->
-<!--  </ItemGroup>-->
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />

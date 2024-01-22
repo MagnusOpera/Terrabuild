@@ -2,7 +2,7 @@ config ?= Debug
 version ?= 0.0.0
 
 build:
-	dotnet build
+	dotnet build -c $(config)
 
 nuget:
 	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
