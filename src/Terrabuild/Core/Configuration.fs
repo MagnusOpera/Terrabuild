@@ -214,7 +214,7 @@ module ProjectConfigParser =
                     | YamlNodeValue.None -> None
                     | YamlNodeValue.Undefined -> builder.Container
 
-                {| Extension = builder; Parameters = builderParams; Container = container |})
+                {| Extension = builder; Parameters = builderParams; Container = None |})
 
         // collect extension capabilities
         let builderOutputs =

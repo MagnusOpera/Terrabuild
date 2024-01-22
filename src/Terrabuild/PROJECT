@@ -12,13 +12,12 @@ steps:
 
   dist:
     - (dotnet): publish
+    - (dotnet): pack
     - (docker): build
       arguments:
         configuration: $(configuration)
 
   publish:
-    - (dotnet): pack
-    - (dotnet): push
     - (docker): push
 
 labels:
