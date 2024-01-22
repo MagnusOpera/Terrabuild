@@ -4,9 +4,7 @@ sourcecontrol: github
 targets:
   build: [^build]
   dist: [build]
-  docker: [dist]
-  publish: [docker]
-  deploy: [push]
+  publish: [dist]
 
 environments:
   release:

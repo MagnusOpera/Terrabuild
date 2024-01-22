@@ -8,21 +8,24 @@ nuget:
 	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
 	
 self: build
-	dotnet publish src/Terrabuild -o $(PWD)/out/dotnet
+	dotnet publish src/Terrabuild -o $(PWD)/.out/dotnet
+
+dist: self
+	.out/dotnet/Terrabuild dist --workspace src --environment release --retry --debug
 
 publish: self
-	out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
+	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
-dist:
-	rm -rf $(PWD)/out
-	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/out/windows src/Terrabuild
-	cd out/windows; zip -r ../windows.zip ./*
+# dist:
+# 	rm -rf $(PWD)/.out
+# 	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
+# 	cd .out/windows; zip -r ../windows.zip ./*
 
-	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/out/macos src/Terrabuild
-	cd out/macos; zip -r ../macos.zip ./*
+# 	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/macos src/Terrabuild
+# 	cd .out/macos; zip -r ../macos.zip ./*
 
-	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/out/linux src/Terrabuild
-	cd out/linux; zip -r ../linux.zip ./*
+# 	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/linux src/Terrabuild
+# 	cd .out/linux; zip -r ../linux.zip ./*
 
 
 tests: run-build run-build-nc target usage

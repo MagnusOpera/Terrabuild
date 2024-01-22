@@ -12,8 +12,6 @@ steps:
 
   dist:
     - (dotnet): publish
-
-  docker:
     - (docker): build
       arguments:
         configuration: $(configuration)
