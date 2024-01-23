@@ -26,3 +26,6 @@ extensions:
   terraform:
     parameters:
       workspace: $(workspace)
+  make:
+  npm:
+  docker:

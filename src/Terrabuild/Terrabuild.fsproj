@@ -12,6 +12,7 @@
     <Compile Include="Storages/Storages.fs" />
     <Compile Include="Storages/Local.fs" />
     <Compile Include="Storages/MicrosoftBlobStorage.fs" />
+    <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/IO.fs" />
     <Compile Include="Helpers/Compression.fs" />
     <Compile Include="Helpers/String.fs" />
@@ -38,6 +39,7 @@
 
   <ItemGroup>
     <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.25.0" />
+    <PackageReference Include="MagnusOpera.Lollipops" Version="0.0.3" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 

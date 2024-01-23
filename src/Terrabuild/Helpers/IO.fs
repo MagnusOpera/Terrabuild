@@ -1,6 +1,9 @@
 module IO
 open System.IO
 
+let fullPath path =
+    Path.GetFullPath(path)
+
 let combinePath parent child =
     Path.Combine(parent, child)
 

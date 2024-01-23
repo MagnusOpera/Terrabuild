@@ -4,8 +4,11 @@ open Collections
 open System
 open System.Collections.Concurrent
 open MagnusOpera.PresqueYaml
+open MagnusOpera.Lollipops
+open System.Reflection
 
 type ExtensionConfig = {
+    Version: string option
     Container: YamlNodeValue<string>
     Parameters: Map<string, YamlNode>
 }
@@ -15,6 +18,7 @@ type Variables = Map<string, string>
 type BuildConfig = {
     Storage: string option
     SourceControl: string option
+    NuGets: string option
     Environments: Map<string, Variables>
     Targets: Map<string, string set>
     Extensions: Map<string, ExtensionConfig>
@@ -100,18 +104,12 @@ type WorkspaceConfig = {
 module ExtensionLoaders =
     open Extensions
 
-    let loadExtension name context : Extensions.IExtension =
-        let factory: IExtensionFactory =
-            match name with
-            | "dotnet" -> DotnetFactory()
-            | "npm" -> NpmFactory()
-            | "terraform" -> TerraformFactory()
-            | "shell" -> ShellFactory()
-            | "docker" -> DockerFactory()
-            | "make" -> MakeFactory()
-            | "echo" -> EchoFactory()
-            | _ -> failwith $"Unknown plugin '{name}'"
-        factory.Create(context)
+    let loadExtension (container: IContainer) name context : Extensions.IExtension =
+        try
+            let factory = container.Resolve<IExtensionFactory>(name)
+            factory.Create(context)
+        with
+            ex -> failwith $"Failed to create plugin '{name}': {ex}"
 
     let loadStorage name : Storages.Storage =
         match name with
@@ -150,7 +148,7 @@ module ProjectConfigParser =
         | String.Regex "^\(([a-zA-Z][_a-zA-Z0-9]+)\)$" [name] -> Some name
         | _ -> None
 
-    let parse workspaceDir (buildConfig: BuildConfig) projectDir projectFile defaultExtensions shared commit branchOrTag =
+    let parse workspaceDir (buildConfig: BuildConfig) projectDir projectFile container shared =
         let projectFilename = IO.combinePath projectDir projectFile
         // we might have landed in a directory without a configuration
         // in that case we just use the default configuration (which does nothing)
@@ -182,7 +180,7 @@ module ProjectConfigParser =
                 let builderConfig =
                     builderConfig
                     |> Option.defaultValue defaultBuilder
-                
+
                 // load extension first
                 let builderUse = builderConfig.Use |> Option.defaultValue alias
                 let builderWith = builderConfig.With
@@ -190,7 +188,7 @@ module ProjectConfigParser =
                                 Extensions.Context.With = builderWith
                                 Extensions.Context.CI = shared }
 
-                let builder = ExtensionLoaders.loadExtension builderUse context
+                let builder = ExtensionLoaders.loadExtension container builderUse context
 
                 // builder override ?
                 let paramsOverride =
@@ -241,9 +239,6 @@ module ProjectConfigParser =
             |> Set.map (fun dep -> IO.combinePath projectDir dep
                                     |> IO.relativePath workspaceDir)
 
-        let projectBuilders = defaultExtensions |> Map.replace projectBuilders
-
-
         let projectStepDefinitions =
             projectConfig.Steps
             |> Map.map (fun _ commands ->
@@ -271,15 +266,15 @@ module ProjectConfigParser =
 
 
 let read workspaceDir (options: Options) environment labels variables =
-    let buildFile = Path.Combine(workspaceDir, "WORKSPACE")
-    let buildDocument =
-        match Yaml.loadDocument buildFile with
+    let workspaceFile = Path.Combine(workspaceDir, "WORKSPACE")
+    let workspaceDocument =
+        match Yaml.loadDocument workspaceFile with
         | Ok doc -> doc
-        | Error err -> ConfigException.Raise($"Configuration '{buildFile}' is invalid", err)
-    let buildConfig = Yaml.deserialize<BuildConfig> buildDocument
+        | Error err -> ConfigException.Raise($"Configuration '{workspaceFile}' is invalid", err)
+    let workspaceConfig = Yaml.deserialize<BuildConfig> workspaceDocument
 
     // variables
-    let environments = buildConfig.Environments
+    let environments = workspaceConfig.Environments
     let envVariables =
         match environments |> Map.tryFind environment with
         | Some variables -> variables
@@ -293,32 +288,46 @@ let read workspaceDir (options: Options) environment labels variables =
 
     // storage
     let storage =
-        buildConfig.Storage
+        workspaceConfig.Storage
         |> Option.bind (fun x -> if options.NoCache then None else Some x)
         |> ExtensionLoaders.loadStorage
 
     // source control
     let sourceControl =
         if options.CI then
-            buildConfig.SourceControl
+            workspaceConfig.SourceControl
             |> ExtensionLoaders.loadSourceControl
         else
             ExtensionLoaders.loadSourceControl None
-    let commit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
 
     // extensions
-    let defaultExtensions =
-        let context = { Extensions.Context.Directory = workspaceDir
-                        Extensions.Context.With = None
-                        Extensions.Context.CI = options.CI }
+    let containerPackages =
+        workspaceConfig.Extensions
+        |> Seq.map (fun kvp ->
+            let name = kvp.Key
+            let version = kvp.Value.Version |> Option.defaultValue null
+            let packageId =
+                match name with
+                | "dotnet"
+                | "npm"
+                | "terraform"
+                | "docker"
+                | "make"
+                | "shell"
+                | "echo" -> $"Terrabuild.{name}"
+                | _ -> name
 
-        Map [ "shell", {| Extension = ExtensionLoaders.loadExtension "shell" context
-                          Parameters = Map.empty
-                          Container = None |}
-              "echo", {| Extension = ExtensionLoaders.loadExtension "echo" context
-                         Parameters = Map.empty
-                         Container = None |} ]
+            Package(Id = packageId, Version = version))
+        |> Array.ofSeq
+
+    let extensionSource = workspaceConfig.NuGets |> Option.defaultValue null
+    let containerConfiguration = Configuration(Source = extensionSource, Packages = containerPackages)
+    let containerPath = IO.combinePath workspaceDir ".terrabuild" |> IO.fullPath
+    let containerBuilder = containerConfiguration.Install(containerPath) |> Threading.await
+    containerBuilder.Add(Assembly.GetExecutingAssembly())
+    let container = containerBuilder.Build()
+
 
     let processedNodes = ConcurrentDictionary<string, bool>()
 
@@ -332,7 +341,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
-            let projectDef = ProjectConfigParser.parse workspaceDir buildConfig projectDir projectFile defaultExtensions options.CI commit branchOrTag
+            let projectDef = ProjectConfigParser.parse workspaceDir workspaceConfig projectDir projectFile container options.CI
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
@@ -518,6 +527,6 @@ let read workspaceDir (options: Options) environment labels variables =
       WorkspaceConfig.Dependencies = dependencies
       WorkspaceConfig.Storage = storage
       WorkspaceConfig.SourceControl = sourceControl
-      WorkspaceConfig.Build = buildConfig
+      WorkspaceConfig.Build = workspaceConfig
       WorkspaceConfig.Projects = projects
       WorkspaceConfig.Environment = environment }
