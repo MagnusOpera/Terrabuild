@@ -60,7 +60,7 @@
 
   <ItemGroup>
     <None Include="NUGET.md" Pack="true" PackagePath="\" />
-    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup>

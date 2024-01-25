@@ -206,17 +206,17 @@ module ProjectConfigParser =
                     |> Map.replace paramsOverride
 
                 // container override ?
-                // let containerOverride =
-                //     extensionDeclaration
-                //     |> Option.map (fun extension -> extension.Container)
-                //     |> Option.defaultValue builderConfig.Container
-                // let container =
-                //     match containerOverride with
-                //     | YamlNodeValue.Value container -> Some container
-                //     | YamlNodeValue.None -> None
-                //     | YamlNodeValue.Undefined -> builder.Container
+                let containerOverride =
+                    extensionDeclaration
+                    |> Option.map (fun extension -> extension.Container)
+                    |> Option.defaultValue builderConfig.Container
+                let container =
+                    match containerOverride with
+                    | YamlNodeValue.Value container -> Some container
+                    | YamlNodeValue.None -> None
+                    | YamlNodeValue.Undefined -> builder.Container
 
-                {| Extension = builder; Parameters = builderParams; Container = None |})
+                {| Extension = builder; Parameters = builderParams; Container = container |})
 
         // collect extension capabilities
         let builderOutputs =
