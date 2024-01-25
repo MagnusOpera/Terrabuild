@@ -1,8 +1,6 @@
 builders:
   dotnet:
   docker:
-    use: docker
-    with: Dockerfile
     parameters:
       image: ghcr.io/magnusopera/dotnet-app
 

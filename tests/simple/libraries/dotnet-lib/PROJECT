@@ -1,4 +1,5 @@
 builders:
+  shell:
   netbuild:
     use: dotnet
     with: dotnet-lib.csproj

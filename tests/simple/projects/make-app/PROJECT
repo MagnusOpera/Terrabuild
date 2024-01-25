@@ -1,4 +1,6 @@
 builders:
+  shell:
+  echo:
   make:
     with: Makefile
 

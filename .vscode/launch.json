@@ -6,10 +6,10 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Terrabuild/bin/Debug/net7.0/Terrabuild.dll",
+            "program": "${workspaceFolder}/src/Terrabuild/bin/Debug/net8.0/Terrabuild.dll",
             "args": ["build", "--workspace", "tests/simple", "--environment", "debug", "--debug"],
             // "args": ["run", "push", "--workspace", "tests/simple", "--environment", "debug", "--label", "app", "--debug", "--retry"],
-            "cwd": "",
+            "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"
         }

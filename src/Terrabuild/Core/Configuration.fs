@@ -21,7 +21,7 @@ type BuildConfig = {
     NuGets: string option
     Environments: Map<string, Variables>
     Targets: Map<string, string set>
-    Extensions: Map<string, ExtensionConfig>
+    Extensions: Map<string, ExtensionConfig option>
 }
 
 type BuilderConfig = {
@@ -190,27 +190,31 @@ module ProjectConfigParser =
 
                 let builder = ExtensionLoaders.loadExtension container builderUse context
 
+                let extensionDeclaration =
+                    match buildConfig.Extensions |> Map.tryFind builderUse with
+                    | Some extension -> extension
+                    | None -> failwith $"Extension '{builderUse}' is not declared in WORKSPACE"
+
                 // builder override ?
                 let paramsOverride =
-                    buildConfig.Extensions
-                    |> Map.tryFind builderUse
+                    extensionDeclaration
                     |> Option.map (fun extension -> extension.Parameters)
                     |> Option.defaultValue Map.empty
+
                 let builderParams =
                     builderConfig.Parameters
                     |> Map.replace paramsOverride
 
                 // container override ?
-                let containerOverride =
-                    buildConfig.Extensions
-                    |> Map.tryFind builderUse
-                    |> Option.map (fun extension -> extension.Container)
-                    |> Option.defaultValue builderConfig.Container
-                let container =
-                    match containerOverride with
-                    | YamlNodeValue.Value container -> Some container
-                    | YamlNodeValue.None -> None
-                    | YamlNodeValue.Undefined -> builder.Container
+                // let containerOverride =
+                //     extensionDeclaration
+                //     |> Option.map (fun extension -> extension.Container)
+                //     |> Option.defaultValue builderConfig.Container
+                // let container =
+                //     match containerOverride with
+                //     | YamlNodeValue.Value container -> Some container
+                //     | YamlNodeValue.None -> None
+                //     | YamlNodeValue.Undefined -> builder.Container
 
                 {| Extension = builder; Parameters = builderParams; Container = None |})
 
@@ -246,7 +250,10 @@ module ProjectConfigParser =
                     let builderInfo, stepParams = command |> Map.partition (fun k _ -> k |> getExtensionFromInvocation |> Option.isSome)
                     let builderInfo = builderInfo |> Seq.exactlyOne
                     let builderName, builderCommand = builderInfo.Key |> getExtensionFromInvocation |> Option.get, builderInfo.Value |> Yaml.toString
-                    let builderInfo = projectBuilders |> Map.find builderName
+                    let builderInfo =
+                        match projectBuilders |> Map.tryFind builderName with
+                        | Some builder -> builder
+                        | None -> failwith $"Builder '{builderName}' is not declared"
 
                     let stepParams = stepParams |> Map.replace builderInfo.Parameters
 
@@ -301,24 +308,39 @@ let read workspaceDir (options: Options) environment labels variables =
             ExtensionLoaders.loadSourceControl None
     let branchOrTag = sourceControl.BranchOrTag
 
-    // extensions
+    // load extensions
+    // NOTE: this is ugly as this relies on internal extensions (echo & shell), Terrabuild battery-provided extensions & external ones
+    //       before modifying this, understand where the extensions is loaded from
+
+    // here we force implicit extensions
+    let workspaceConfig = { workspaceConfig
+                            with
+                                Extensions = workspaceConfig.Extensions |> Map.add "shell" None |> Map.add "echo" None }
+
     let containerPackages =
         workspaceConfig.Extensions
-        |> Seq.map (fun kvp ->
+        |> Seq.choose (fun kvp ->
             let name = kvp.Key
-            let version = kvp.Value.Version |> Option.defaultValue null
+            let version =
+                match kvp.Value with
+                | None -> null
+                | Some value -> value.Version |> Option.defaultValue null
+            
             let packageId =
                 match name with
+                // known Terrabuild extension
                 | "dotnet"
                 | "npm"
                 | "terraform"
                 | "docker"
-                | "make"
+                | "make" -> Some $"Terrabuild.{name}"
+                // internal extensions
                 | "shell"
-                | "echo" -> $"Terrabuild.{name}"
-                | _ -> name
+                | "echo" -> None
+                // use provided name otherwise
+                | _ -> Some name
 
-            Package(Id = packageId, Version = version))
+            packageId |> Option.map (fun packageId -> Package(Id = packageId, Version = version)))
         |> Array.ofSeq
 
     let extensionSource = workspaceConfig.NuGets |> Option.defaultValue null
