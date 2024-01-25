@@ -109,7 +109,7 @@ module ExtensionLoaders =
             let factory = container.Resolve<IExtensionFactory>(name)
             factory.Create(context)
         with
-            ex -> failwith $"Failed to create plugin '{name}': {ex}"
+            ex -> failwith $"Plugin '{name}' not found (is it declared in WORKSPACE?): {ex}"
 
     let loadStorage name : Storages.Storage =
         match name with
