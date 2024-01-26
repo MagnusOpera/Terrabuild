@@ -1,14 +1,23 @@
-namespace Extensions
+namespace Extensions.Echo
 open Extensions
 open System.ComponentModel.Composition
 
-type Echo() =
+
+type Command(message: string) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args
           CommandLine.Cache = Cacheability.Always }
 
-    interface IExtension with
+    interface ICommandFactory with
+        member _.TypeOfArguments = None
+
+        member _.GetSteps _ = 
+            [ buildCmdLine "echo" message ]
+
+
+type Builder() =
+    interface IBuilder with
         member _.Container = None
 
         member _.Dependencies = []
@@ -17,14 +26,12 @@ type Echo() =
 
         member _.Ignores = []
 
-        member _.GetStepParameters _ = None
-
-        member _.BuildStepCommands (action, _) =
-            [ buildCmdLine "echo" action ]
+        member _.CreateCommand(action: string): ICommandFactory = 
+            Command(action)
 
 
 [<Export("echo", typeof<IExtensionFactory>)>]
 type EchoFactory() =
     interface IExtensionFactory with
-        member _.Create _ =
-            Echo()
+        member _.CreateBuilder _ =
+            Builder()

@@ -6,7 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Docker.fs" />
+    <Compile Include="Helpers.fs" />
+    <Compile Include="Commands/Build.fs" />
+    <Compile Include="Commands/Push.fs" />
+    <Compile Include="Builder.fs" />
+    <Compile Include="Factory.fs" />
   </ItemGroup>
 
   <ItemGroup>

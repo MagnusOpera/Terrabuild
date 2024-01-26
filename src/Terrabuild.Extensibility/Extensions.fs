@@ -23,13 +23,18 @@ type Context = {
     CI: bool
 }
 
-type IExtension =
+
+
+type ICommandFactory =
+    abstract TypeOfArguments: Type option
+    abstract GetSteps: arguments:obj -> CommandLine list
+
+type IBuilder =
     abstract Container: string option
     abstract Dependencies: string list
     abstract Outputs: string list
     abstract Ignores: string list
-    abstract GetStepParameters: action:string -> Type option
-    abstract BuildStepCommands: action:string * parameters:obj -> CommandLine list
+    abstract CreateCommand: action:string -> ICommandFactory
 
 type IExtensionFactory =
-    abstract Create: Context -> IExtension
+    abstract CreateBuilder: Context -> IBuilder

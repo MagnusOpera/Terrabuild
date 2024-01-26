@@ -6,7 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Npm.fs" />
+    <Compile Include="Helpers.fs" />
+    <Compile Include="Commands/Test.fs" />
+    <Compile Include="Commands/Install.fs" />
+    <Compile Include="Commands/Build.fs" />
+    <Compile Include="Builder.fs" />
+    <Compile Include="Factory.fs" />
   </ItemGroup>
 
   <ItemGroup>

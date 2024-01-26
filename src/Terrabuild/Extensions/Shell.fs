@@ -1,19 +1,30 @@
-namespace Extensions
+namespace Extensions.Shell
 open Extensions
-open System
 open System.ComponentModel.Composition
 
-type ShellCommand = {
+type Arguments = {
     Arguments: string option
 }
 
-type Shell() =
+
+type Command(action: string) =
     let buildCmdLine cmd args =
         { CommandLine.Command = cmd
           CommandLine.Arguments = args
           CommandLine.Cache = Cacheability.Always }
 
-    interface IExtension with
+    interface ICommandFactory with
+        member _.TypeOfArguments: System.Type option = Some typeof<Arguments>
+
+        member _.GetSteps (parameters: obj): CommandLine list = 
+            let parameters = parameters :?> Arguments
+
+            let args = parameters.Arguments |> Option.defaultValue ""
+            [ buildCmdLine action args ]
+
+
+type Builder() =
+    interface IBuilder with
         member _.Container = None
 
         member _.Dependencies = []
@@ -22,18 +33,12 @@ type Shell() =
 
         member _.Ignores = []
 
-        member _.GetStepParameters _ = Some typeof<ShellCommand>
-
-        member _.BuildStepCommands (action, parameters) =
-            match parameters, action with
-            | :? ShellCommand as parameters, _ ->
-                let args = parameters.Arguments |> Option.defaultValue ""
-                [ buildCmdLine action args ]
-            | _ -> ArgumentException($"Unknown action {action}") |> raise
+        member _.CreateCommand(action: string): ICommandFactory = 
+            Command(action)
 
 
 [<Export("shell", typeof<IExtensionFactory>)>]
 type ShellFactory() =
     interface IExtensionFactory with
-        member _.Create _ =
-            Shell()
+        member _.CreateBuilder _ =
+            Builder()

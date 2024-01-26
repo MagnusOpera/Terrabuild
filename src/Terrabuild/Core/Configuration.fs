@@ -104,10 +104,10 @@ type WorkspaceConfig = {
 module ExtensionLoaders =
     open Extensions
 
-    let loadExtension (container: IContainer) name context : Extensions.IExtension =
+    let loadExtension (container: IContainer) name context : Extensions.IBuilder =
         try
             let factory = container.Resolve<IExtensionFactory>(name)
-            factory.Create(context)
+            factory.CreateBuilder(context)
         with
             ex -> failwith $"Plugin '{name}' not found (is it declared in WORKSPACE?): {ex}"
 
@@ -127,7 +127,7 @@ module ProjectConfigParser =
 
     [<RequireQualifiedAccess>]
     type StepDefinition = {
-        Extension: Extensions.IExtension
+        Extension: Extensions.IBuilder
         Command: string
         Parameters: CommandConfig
         Container: string option
@@ -397,13 +397,13 @@ let read workspaceDir (options: Options) environment labels variables =
                         let stepParams =
                             stepDef.Parameters
                             |> Map.add "nodeHash" (YamlNode.Scalar "$(terrabuild_node_hash)")
-                        let stepArgsType = stepDef.Extension.GetStepParameters stepDef.Command
+                        let command = stepDef.Extension.CreateCommand stepDef.Command
                         let stepParameters =
-                            stepArgsType
+                            command.TypeOfArguments
                             |> Option.map (fun stepArgsType -> Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams))
                             |> Option.defaultValue null
 
-                        let cmds = stepDef.Extension.BuildStepCommands(stepDef.Command, stepParameters)
+                        let cmds = command.GetSteps(stepDef.Command, stepParameters)
 
                         cmds
                         |> List.map (fun cmd ->

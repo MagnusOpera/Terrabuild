@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Make.fs" />
+    <Compile Include="Commands/Target.fs" />
+    <Compile Include="Builder.fs" />
+    <Compile Include="Factory.fs" />
   </ItemGroup>
 
   <ItemGroup>
