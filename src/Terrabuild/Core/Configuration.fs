@@ -345,7 +345,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
     let extensionSource = workspaceConfig.NuGets |> Option.defaultValue null
     let containerConfiguration = Configuration(Source = extensionSource, Packages = containerPackages)
-    let containerPath = IO.combinePath workspaceDir ".terrabuild" |> IO.fullPath
+    let containerPath = IO.combinePath workspaceDir ".terrabuild/extensions" |> IO.fullPath
     let containerBuilder = containerConfiguration.Install(containerPath) |> Threading.await
     containerBuilder.Add(Assembly.GetExecutingAssembly())
     let container = containerBuilder.Build()

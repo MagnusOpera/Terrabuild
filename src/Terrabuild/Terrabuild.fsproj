@@ -44,7 +44,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Terrabuild.Extensibility" Version="0.0.7" />
+    <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
+    <!-- <PackageReference Include="Terrabuild.Extensibility" Version="0.0.7" /> -->
     <PackageReference Include="Terrabuild.Docker" Version="0.0.2" />
     <PackageReference Include="Terrabuild.Dotnet" Version="0.0.1" />
     <PackageReference Include="Terrabuild.Make" Version="0.0.1" />
