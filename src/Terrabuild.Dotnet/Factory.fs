@@ -1,5 +1,5 @@
 namespace Terrabuild.Dotnet
-open Extensions
+open Terrabuild.Extensibility
 open System.ComponentModel.Composition
 
 [<Export("dotnet", typeof<IExtensionFactory>)>]

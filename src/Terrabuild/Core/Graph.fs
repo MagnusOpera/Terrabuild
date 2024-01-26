@@ -1,6 +1,7 @@
 module Graph
 open System.Collections.Concurrent
 open Collections
+open Terrabuild.Extensibility
 
 type Paths = string set
 
@@ -21,7 +22,7 @@ type Node = {
     Variables: Map<string, string>
     CommandLines: CommandLine list
     Outputs: Configuration.Items
-    Cache: Extensions.Cacheability
+    Cache: Cacheability
 }
 
 type WorkspaceGraph = {
@@ -86,7 +87,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
                 // compute cacheability of this node
                 let childrenCache =
                     children
-                    |> Seq.fold (fun acc nodeId -> acc &&& allNodes[nodeId].Cache) Extensions.Cacheability.Always
+                    |> Seq.fold (fun acc nodeId -> acc &&& allNodes[nodeId].Cache) Cacheability.Always
 
                 let cache =
                     step.CommandLines

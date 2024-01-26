@@ -3,6 +3,7 @@ open System
 open System.Collections.Generic
 open Collections
 open Serilog
+open Terrabuild.Extensibility
 
 [<RequireQualifiedAccess>]
 type NodeInfo = {
@@ -57,8 +58,8 @@ let private isNodeUnsatisfied = function
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
 
     let cacheMode =
-        if options.CI then Extensions.Cacheability.Always
-        else Extensions.Cacheability.Remote
+        if options.CI then Cacheability.Always
+        else Cacheability.Remote
 
     // compute first incoming edges
     let reverseIncomings =
@@ -122,10 +123,10 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
             // check first if it's possible to restore previously built state
             let summary =
-                if options.NoCache || node.Cache = Extensions.Cacheability.Never then None
+                if options.NoCache || node.Cache = Cacheability.Never then None
                 else
                     // determine if step node can be reused or not
-                    let useRemoteCache = Extensions.Cacheability.Never <> (node.Cache &&& cacheMode)
+                    let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
 
                     // get task execution summary & take care of retrying failed tasks
                     match cache.TryGetSummary useRemoteCache cacheEntryId with

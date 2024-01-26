@@ -1,6 +1,6 @@
 namespace Terrabuild.Npm
 open System.ComponentModel.Composition
-open Extensions
+open Terrabuild.Extensibility
 
 
 [<Export("npm", typeof<IExtensionFactory>)>]

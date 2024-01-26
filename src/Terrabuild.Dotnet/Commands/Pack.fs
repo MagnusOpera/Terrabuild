@@ -1,5 +1,5 @@
 namespace Terrabuild.Dotnet.Pack
-open Extensions
+open Terrabuild.Extensibility
 open Helpers
 
 type Arguments = {

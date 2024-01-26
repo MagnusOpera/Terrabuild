@@ -1,5 +1,5 @@
 namespace Terrabuild.Docker
-open Extensions
+open Terrabuild.Extensibility
 open System.ComponentModel.Composition
 
 

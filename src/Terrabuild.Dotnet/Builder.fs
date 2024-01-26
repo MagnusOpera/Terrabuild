@@ -1,5 +1,5 @@
 namespace Terrabuild.Dotnet
-open Extensions
+open Terrabuild.Extensibility
 
 #nowarn "0077" // op_Explicit
 

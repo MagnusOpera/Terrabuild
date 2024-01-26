@@ -1,5 +1,5 @@
 namespace Terrabuild.Make.Target
-open Extensions
+open Terrabuild.Extensibility
 
 
 type Arguments = {

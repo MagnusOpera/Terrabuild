@@ -1,6 +1,6 @@
 namespace Terrabuild.Docker
 open System
-open Extensions
+open Terrabuild.Extensibility
 
 
 type Builder(context: Context) =

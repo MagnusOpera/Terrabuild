@@ -1,5 +1,5 @@
 module Helpers
-open Extensions
+open Terrabuild.Extensibility
 
 let buildCmdLine cmd args cache =
     { CommandLine.Command = cmd

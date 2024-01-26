@@ -1,4 +1,4 @@
-namespace Extensions
+namespace Terrabuild.Extensibility
 open System
 
 [<Flags>]

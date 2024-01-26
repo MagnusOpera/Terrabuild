@@ -1,5 +1,5 @@
-namespace Extensions.Echo
-open Extensions
+namespace Terrabuild.Echo
+open Terrabuild.Extensibility
 open System.ComponentModel.Composition
 
 

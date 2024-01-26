@@ -1,5 +1,5 @@
 namespace Extensions.Shell
-open Extensions
+open Terrabuild.Extensibility
 open System.ComponentModel.Composition
 
 type Arguments = {

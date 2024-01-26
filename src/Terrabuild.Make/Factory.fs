@@ -1,5 +1,5 @@
 namespace Terrabuild.Make
-open Extensions
+open Terrabuild.Extensibility
 open System.ComponentModel.Composition
 
 [<Export("make", typeof<IExtensionFactory>)>]

@@ -1,5 +1,5 @@
 namespace Terrabuild.Make
-open Extensions
+open Terrabuild.Extensibility
 
 
 type Builder() =

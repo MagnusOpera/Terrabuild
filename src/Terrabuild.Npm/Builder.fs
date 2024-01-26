@@ -1,6 +1,6 @@
 namespace Terrabuild.Npm
 open System
-open Extensions
+open Terrabuild.Extensibility
 
 
 type Builder() =

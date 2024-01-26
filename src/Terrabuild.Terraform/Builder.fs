@@ -1,5 +1,5 @@
 namespace Terrabuild.Terraform
-open Extensions
+open Terrabuild.Extensibility
 open System
 
 

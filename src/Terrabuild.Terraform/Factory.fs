@@ -1,6 +1,6 @@
 namespace Terrabuild.Terraform
 open System.ComponentModel.Composition
-open Extensions
+open Terrabuild.Extensibility
 
 
 

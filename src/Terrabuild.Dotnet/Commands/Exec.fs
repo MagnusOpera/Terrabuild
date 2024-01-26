@@ -1,5 +1,5 @@
 namespace Terrabuild.Dotnet.Exec
-open Extensions
+open Terrabuild.Extensibility
 open Helpers
 
 

@@ -1,5 +1,5 @@
 namespace Terrabuild.Docker.Push
-open Extensions
+open Terrabuild.Extensibility
 open Helpers
 
 

@@ -1,5 +1,5 @@
 namespace Terrabuild.Npm.Install
-open Extensions
+open Terrabuild.Extensibility
 open Helpers
 
 type Command() =

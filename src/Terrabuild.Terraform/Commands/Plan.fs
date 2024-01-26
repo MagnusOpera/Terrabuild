@@ -1,5 +1,5 @@
 namespace Terrabuild.Terraform.Plan
-open Extensions
+open Terrabuild.Extensibility
 open Helpers
 
 

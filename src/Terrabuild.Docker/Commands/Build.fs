@@ -1,5 +1,5 @@
 namespace Terrabuild.Docker.Build
-open Extensions
+open Terrabuild.Extensibility
 open Helpers
 
 type Arguments = {

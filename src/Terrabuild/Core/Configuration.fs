@@ -6,6 +6,7 @@ open System.Collections.Concurrent
 open MagnusOpera.PresqueYaml
 open MagnusOpera.Lollipops
 open System.Reflection
+open Terrabuild.Extensibility
 
 type ExtensionConfig = {
     Version: string option
@@ -64,7 +65,7 @@ type ContaineredCommand = {
     Container: string option
     Command: string
     Arguments: string
-    Cache: Extensions.Cacheability
+    Cache: Cacheability
 }
 
 [<RequireQualifiedAccess>]
@@ -104,7 +105,7 @@ type WorkspaceConfig = {
 module ExtensionLoaders =
     open Extensions
 
-    let loadExtension (container: IContainer) name context : Extensions.IBuilder =
+    let loadExtension (container: IContainer) name context : IBuilder =
         try
             let factory = container.Resolve<IExtensionFactory>(name)
             factory.CreateBuilder(context)
@@ -127,7 +128,7 @@ module ProjectConfigParser =
 
     [<RequireQualifiedAccess>]
     type StepDefinition = {
-        Extension: Extensions.IBuilder
+        Extension: IBuilder
         Command: string
         Parameters: CommandConfig
         Container: string option
@@ -184,9 +185,9 @@ module ProjectConfigParser =
                 // load extension first
                 let builderUse = builderConfig.Use |> Option.defaultValue alias
                 let builderWith = builderConfig.With
-                let context = { Extensions.Context.Directory = projectDir
-                                Extensions.Context.With = builderWith
-                                Extensions.Context.CI = shared }
+                let context = { Context.Directory = projectDir
+                                Context.With = builderWith
+                                Context.CI = shared }
 
                 let builder = ExtensionLoaders.loadExtension container builderUse context
 
