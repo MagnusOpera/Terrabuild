@@ -9,10 +9,8 @@ type Command(message: string) =
           CommandLine.Arguments = args
           CommandLine.Cache = Cacheability.Always }
 
-    interface ICommandFactory with
-        member _.TypeOfArguments = None
-
-        member _.GetSteps _ = 
+    interface ICommandFactoryParameterless with
+        member _.GetSteps () = 
             [ buildCmdLine "echo" message ]
 
 

@@ -14,12 +14,8 @@ type Command(context: Context) =
         | Some dockerfile -> dockerfile
         | _ -> "Dockerfile"
 
-    interface ICommandFactory with
-        member _.TypeOfArguments = Some typeof<Arguments>
-
+    interface ICommandFactory<Arguments> with
         member _.GetSteps parameters =
-            let parameters = parameters :?> Arguments
-
             let args = parameters.Arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
             let buildArgs = $"build --file {dockerfile} --tag {parameters.Image}:{parameters.NodeHash} {args} ."
 

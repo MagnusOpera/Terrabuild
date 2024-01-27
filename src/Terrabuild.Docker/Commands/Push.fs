@@ -10,11 +10,8 @@ type Arguments = {
 
 
 type Command(context: Context) =
-    interface ICommandFactory with
-        member _.TypeOfArguments = Some typeof<Arguments>
+    interface ICommandFactory<Arguments> with
         member _.GetSteps parameters =
-            let parameters = parameters :?> Arguments
-
             if context.CI then
                 let retagArgs = $"buildx imagetools create -t {parameters.Image}:$(terrabuild_branch_or_tag) {parameters.Image}:{parameters.NodeHash}"
                 [ buildCmdLine "docker" retagArgs Cacheability.Remote ]

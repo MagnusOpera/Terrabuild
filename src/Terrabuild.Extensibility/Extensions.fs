@@ -25,9 +25,15 @@ type Context = {
 
 
 
-type ICommandFactory =
-    abstract TypeOfArguments: Type option
-    abstract GetSteps: arguments:obj -> CommandLine list
+type ICommandFactory = interface end
+
+type ICommandFactoryParameterless =
+    inherit ICommandFactory
+    abstract GetSteps: unit -> CommandLine list
+
+type ICommandFactory<'T> =
+    inherit ICommandFactory
+    abstract GetSteps: arguments:'T -> CommandLine list
 
 type IBuilder =
     abstract Container: string option

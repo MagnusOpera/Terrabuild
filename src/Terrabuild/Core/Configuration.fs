@@ -346,7 +346,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
     let extensionSource = workspaceConfig.NuGets |> Option.defaultValue null
     let containerConfiguration = Configuration(Source = extensionSource, Packages = containerPackages)
-    let containerPath = IO.combinePath workspaceDir ".terrabuild/extensions" |> IO.fullPath
+    let containerPath = IO.combinePath workspaceDir ".terrabuild" |> IO.fullPath
     let containerBuilder = containerConfiguration.Install(containerPath) |> Threading.await
     containerBuilder.Add(Assembly.GetExecutingAssembly())
     let container = containerBuilder.Build()
@@ -399,12 +399,16 @@ let read workspaceDir (options: Options) environment labels variables =
                             stepDef.Parameters
                             |> Map.add "nodeHash" (YamlNode.Scalar "$(terrabuild_node_hash)")
                         let command = stepDef.Extension.CreateCommand stepDef.Command
-                        let stepParameters =
-                            command.TypeOfArguments
-                            |> Option.map (fun stepArgsType -> Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams))
-                            |> Option.defaultValue null
 
-                        let cmds = command.GetSteps(stepDef.Command, stepParameters)
+                        let cmds =
+                            match command with
+                            | :? ICommandFactoryParameterless as cfp ->
+                                cfp.GetSteps()
+                            | _ ->
+                                let mi = command.GetType().GetMethod("GetSteps")
+                                let stepArgsType = mi.GetParameters()[0]
+                                let args = Yaml.deserializeType(stepArgsType.ParameterType, YamlNode.Mapping stepParams)
+                                mi.Invoke(command, [| args |]) :?> list<CommandLine>
 
                         cmds
                         |> List.map (fun cmd ->

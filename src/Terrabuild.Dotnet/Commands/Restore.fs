@@ -3,8 +3,6 @@ open Terrabuild.Extensibility
 open Helpers
 
 type Command(projectFile: string) =
-    interface ICommandFactory with
-        member _.TypeOfArguments: System.Type option = None
-
-        member _.GetSteps (parameters: obj): CommandLine list = 
+    interface ICommandFactoryParameterless with
+        member _.GetSteps () = 
             [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local ]

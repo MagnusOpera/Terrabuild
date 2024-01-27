@@ -13,12 +13,8 @@ type Command(action: string) =
           CommandLine.Arguments = args
           CommandLine.Cache = Cacheability.Always }
 
-    interface ICommandFactory with
-        member _.TypeOfArguments: System.Type option = Some typeof<Arguments>
-
-        member _.GetSteps (parameters: obj): CommandLine list = 
-            let parameters = parameters :?> Arguments
-
+    interface ICommandFactory<Arguments> with
+        member _.GetSteps parameters = 
             let args = parameters.Arguments |> Option.defaultValue ""
             [ buildCmdLine action args ]
 

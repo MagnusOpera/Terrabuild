@@ -10,12 +10,8 @@ type Arguments = {
 }
 
 type Command(projectFile: string) =
-    interface ICommandFactory with
-        member _.TypeOfArguments: System.Type option = Some typeof<Arguments>
-
-        member _.GetSteps (parameters: obj): CommandLine list = 
-            let parameters = parameters :?> Arguments
-
+    interface ICommandFactory<Arguments> with
+        member _.GetSteps parameters = 
             let config = parameters.Configuration |> Option.defaultValue "Debug"
             let runtime =
                 match parameters.Runtime with

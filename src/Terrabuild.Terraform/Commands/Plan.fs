@@ -9,12 +9,8 @@ type Arguments = {
 
 
 type Command() =
-    interface ICommandFactory with
-        member _.TypeOfArguments = Some typeof<Arguments>
-
+    interface ICommandFactory<Arguments> with
         member _.GetSteps parameters =
-            let parameters = parameters :?> Arguments
-
             let workspace = parameters.Workspace
             [ buildCmdLine "terraform" "init -reconfigure"
               if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
