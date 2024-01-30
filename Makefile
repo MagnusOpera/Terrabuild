@@ -13,9 +13,6 @@ self: build
 dist: self
 	.out/dotnet/Terrabuild dist --workspace src --environment release --retry --debug
 
-dist: self
-	.out/dotnet/Terrabuild dist --workspace src --environment release --retry --debug
-
 publish: self
 	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 

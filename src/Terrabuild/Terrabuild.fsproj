@@ -39,12 +39,13 @@
 
   <ItemGroup>
     <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.25.0" />
-    <PackageReference Include="MagnusOpera.Lollipops" Version="0.0.3" />
+    <PackageReference Include="MagnusOpera.Lollipops" Version="0.0.4" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" /> -->
+    <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
     <PackageReference Include="Terrabuild.Extensibility" Version="0.1.0" />
   </ItemGroup>
 

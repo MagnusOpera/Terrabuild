@@ -405,9 +405,11 @@ let read workspaceDir (options: Options) environment labels variables =
                             | :? ICommandBuilder as cfp ->
                                 cfp.GetSteps()
                             | _ ->
-                                let mi = command.GetType().GetMethod("GetSteps")
-                                let stepArgsType = mi.GetParameters()[0]
-                                let args = Yaml.deserializeType(stepArgsType.ParameterType, YamlNode.Mapping stepParams)
+                                let cmditf = command.GetType().GetInterfaces()
+                                                |> Seq.find (fun t -> t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<ICommandBuilder<_>>)
+                                let stepArgsType = cmditf.GetGenericArguments()[0]
+                                let args = Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams)
+                                let mi = cmditf.GetMethod("GetSteps")
                                 mi.Invoke(command, [| args |]) :?> list<Terrabuild.Extensibility.Step>
 
                         cmds
