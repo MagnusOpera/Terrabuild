@@ -29,7 +29,7 @@ type Builder() =
 
         member _.Ignores = []
 
-        member _.CreateCommand(action: string): ICommand = 
+        member _.CreateCommand(action: string) = 
             Command(action)
 
 
