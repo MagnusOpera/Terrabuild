@@ -29,7 +29,7 @@ type Builder() =
 
 
 [<Export("echo", typeof<IExtension>)>]
-type EchoFactory() =
+type Factory() =
     interface IExtension with
         member _.CreateBuilder _ =
             Builder()

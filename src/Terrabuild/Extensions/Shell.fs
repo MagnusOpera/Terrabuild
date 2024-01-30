@@ -34,7 +34,7 @@ type Builder() =
 
 
 [<Export("shell", typeof<IExtension>)>]
-type ShellFactory() =
+type Factory() =
     interface IExtension with
         member _.CreateBuilder _ =
             Builder()
