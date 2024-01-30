@@ -55,7 +55,7 @@ type Builder(context: Context) =
 
         member _.Ignores = []
 
-        member _.CreateCommand(action: string): ICommandFactory = 
+        member _.CreateCommand(action: string): ICommand = 
             match action with
             | "restore" -> Restore.Command(projectFile)
             | "build" -> Build.Command(projectFile)

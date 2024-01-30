@@ -9,7 +9,7 @@ type Cacheability =
     | Always = 3 // Local + Remote
 
 [<RequireQualifiedAccess>]
-type CommandLine = {
+type Step = {
     Command: string
     Arguments: string
     Cache: Cacheability
@@ -25,22 +25,22 @@ type Context = {
 
 
 
-type ICommandFactory = interface end
+type ICommand = interface end
 
-type ICommandFactoryParameterless =
-    inherit ICommandFactory
-    abstract GetSteps: unit -> CommandLine list
+type ICommandBuilder =
+    inherit ICommand
+    abstract GetSteps: unit -> Step list
 
-type ICommandFactory<'T> =
-    inherit ICommandFactory
-    abstract GetSteps: arguments:'T -> CommandLine list
+type ICommandBuilder<'T> =
+    inherit ICommand
+    abstract GetSteps: arguments:'T -> Step list
 
 type IBuilder =
     abstract Container: string option
     abstract Dependencies: string list
     abstract Outputs: string list
     abstract Ignores: string list
-    abstract CreateCommand: action:string -> ICommandFactory
+    abstract CreateCommand: action:string -> ICommand
 
 type IExtensionFactory =
     abstract CreateBuilder: Context -> IBuilder

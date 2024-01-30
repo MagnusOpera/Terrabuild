@@ -2,6 +2,6 @@ module Helpers
 open Terrabuild.Extensibility
 
 let buildCmdLine cmd args =
-    { CommandLine.Command = cmd
-      CommandLine.Arguments = args
-      CommandLine.Cache = Cacheability.Always }
+    { Step.Command = cmd
+      Step.Arguments = args
+      Step.Cache = Cacheability.Always }

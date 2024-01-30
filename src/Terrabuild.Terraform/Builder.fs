@@ -13,7 +13,7 @@ type Builder() =
 
         member _.Ignores = [ ".terraform" ]
 
-        member _.CreateCommand(action: string): ICommandFactory = 
+        member _.CreateCommand(action: string): ICommand = 
             match action with
             | "init" -> Init.Command()
             | "workspace" -> Workspace.Command()

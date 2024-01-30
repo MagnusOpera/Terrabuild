@@ -9,11 +9,11 @@ type Arguments = {
 
 type Command(action: string) =
     let buildCmdLine cmd args =
-        { CommandLine.Command = cmd
-          CommandLine.Arguments = args
-          CommandLine.Cache = Cacheability.Always }
+        { Step.Command = cmd
+          Step.Arguments = args
+          Step.Cache = Cacheability.Always }
 
-    interface ICommandFactory<Arguments> with
+    interface ICommandBuilder<Arguments> with
         member _.GetSteps parameters = 
             let args = parameters.Arguments |> Option.defaultValue ""
             [ buildCmdLine action args ]
@@ -29,7 +29,7 @@ type Builder() =
 
         member _.Ignores = []
 
-        member _.CreateCommand(action: string): ICommandFactory = 
+        member _.CreateCommand(action: string): ICommand = 
             Command(action)
 
 

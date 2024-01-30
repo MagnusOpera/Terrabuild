@@ -9,7 +9,7 @@ type Arguments = {
 }
 
 type Command() =
-    interface ICommandFactory<Arguments> with
+    interface ICommandBuilder<Arguments> with
         member _.GetSteps parameters = 
             let args = parameters.Arguments |> Option.defaultValue ""
             [ buildCmdLine parameters.Command args Cacheability.Always ]

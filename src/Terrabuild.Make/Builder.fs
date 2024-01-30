@@ -4,9 +4,9 @@ open Terrabuild.Extensibility
 
 type Builder() =
     let buildCmdLine cmd args =
-        { CommandLine.Command = cmd
-          CommandLine.Arguments = args
-          CommandLine.Cache = Cacheability.Always }
+        { Step.Command = cmd
+          Step.Arguments = args
+          Step.Cache = Cacheability.Always }
 
     interface IBuilder with
         member _.Container = None

@@ -7,7 +7,7 @@ type Arguments = {
 }
 
 type Command(projectFile: string) =
-    interface ICommandFactory<Arguments> with
+    interface ICommandBuilder<Arguments> with
         member _.GetSteps parameters = 
             let config = parameters.Configuration |> Option.defaultValue "Debug"
             [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
