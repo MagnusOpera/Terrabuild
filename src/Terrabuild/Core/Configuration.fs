@@ -107,7 +107,7 @@ module ExtensionLoaders =
 
     let loadExtension (container: IContainer) name context : IBuilder =
         try
-            let factory = container.Resolve<IExtensionFactory>(name)
+            let factory = container.Resolve<IExtension>(name)
             factory.CreateBuilder(context)
         with
             ex -> failwith $"Plugin '{name}' not found (is it declared in WORKSPACE?): {ex}"
@@ -400,19 +400,19 @@ let read workspaceDir (options: Options) environment labels variables =
                             |> Map.add "nodeHash" (YamlNode.Scalar "$(terrabuild_node_hash)")
                         let command = stepDef.Extension.CreateCommand stepDef.Command
 
-                        let cmds =
+                        let steps =
                             match command with
-                            | :? ICommandBuilder as cfp ->
-                                cfp.CreateSteps()
+                            | :? ICommand as cmd ->
+                                cmd.CreateSteps()
                             | _ ->
                                 let cmditf = command.GetType().GetInterfaces()
-                                                |> Seq.find (fun t -> t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<ICommandBuilder<_>>)
+                                                |> Seq.find (fun t -> t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<ICommand<_>>)
                                 let stepArgsType = cmditf.GetGenericArguments()[0]
                                 let args = Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams)
                                 let mi = cmditf.GetMethod("CreateSteps")
                                 mi.Invoke(command, [| args |]) :?> list<Terrabuild.Extensibility.Step>
 
-                        cmds
+                        steps
                         |> List.map (fun cmd ->
                             { ContaineredCommand.Container = stepDef.Container
                               ContaineredCommand.Command = cmd.Command

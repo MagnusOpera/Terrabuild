@@ -9,7 +9,7 @@ type Command(message: string) =
           Step.Arguments = args
           Step.Cache = Cacheability.Always }
 
-    interface ICommandBuilder with
+    interface ICommand with
         member _.CreateSteps () = 
             [ buildCmdLine "echo" message ]
 
@@ -28,8 +28,8 @@ type Builder() =
             Command(action)
 
 
-[<Export("echo", typeof<IExtensionFactory>)>]
+[<Export("echo", typeof<IExtension>)>]
 type EchoFactory() =
-    interface IExtensionFactory with
+    interface IExtension with
         member _.CreateBuilder _ =
             Builder()

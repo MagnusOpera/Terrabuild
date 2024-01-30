@@ -13,7 +13,7 @@ type Command(action: string) =
           Step.Arguments = args
           Step.Cache = Cacheability.Always }
 
-    interface ICommandBuilder<Arguments> with
+    interface ICommand<Arguments> with
         member _.CreateSteps parameters = 
             let args = parameters.Arguments |> Option.defaultValue ""
             [ buildCmdLine action args ]
@@ -33,8 +33,8 @@ type Builder() =
             Command(action)
 
 
-[<Export("shell", typeof<IExtensionFactory>)>]
+[<Export("shell", typeof<IExtension>)>]
 type ShellFactory() =
-    interface IExtensionFactory with
+    interface IExtension with
         member _.CreateBuilder _ =
             Builder()
