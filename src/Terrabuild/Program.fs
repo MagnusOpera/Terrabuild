@@ -2,7 +2,6 @@
 open CLI
 open System
 open Serilog
-open Serilog.Events
 
 let rec dumpKnownException (ex: Exception) =
     seq {

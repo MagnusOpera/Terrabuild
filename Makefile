@@ -2,13 +2,16 @@ config ?= Debug
 version ?= 0.0.0
 
 build:
-	dotnet build -c $(config)
+	dotnet build -c $(config) terrabuild.sln
 
-nuget:
-	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
+all:
+	dotnet pack -c $(config) /p:Version=$(version) -o .nugets terrabuild-extensions.sln
 	
 self: build
 	dotnet publish src/Terrabuild -o $(PWD)/.out/dotnet
+
+dist: self
+	.out/dotnet/Terrabuild dist --workspace src --environment release --retry --debug
 
 dist: self
 	.out/dotnet/Terrabuild dist --workspace src --environment release --retry --debug
