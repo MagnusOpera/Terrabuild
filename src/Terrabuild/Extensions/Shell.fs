@@ -14,7 +14,7 @@ type Command(action: string) =
           Step.Cache = Cacheability.Always }
 
     interface ICommandBuilder<Arguments> with
-        member _.GetSteps parameters = 
+        member _.CreateSteps parameters = 
             let args = parameters.Arguments |> Option.defaultValue ""
             [ buildCmdLine action args ]
 

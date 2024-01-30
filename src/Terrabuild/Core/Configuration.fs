@@ -403,13 +403,13 @@ let read workspaceDir (options: Options) environment labels variables =
                         let cmds =
                             match command with
                             | :? ICommandBuilder as cfp ->
-                                cfp.GetSteps()
+                                cfp.CreateSteps()
                             | _ ->
                                 let cmditf = command.GetType().GetInterfaces()
                                                 |> Seq.find (fun t -> t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<ICommandBuilder<_>>)
                                 let stepArgsType = cmditf.GetGenericArguments()[0]
                                 let args = Yaml.deserializeType(stepArgsType, YamlNode.Mapping stepParams)
-                                let mi = cmditf.GetMethod("GetSteps")
+                                let mi = cmditf.GetMethod("CreateSteps")
                                 mi.Invoke(command, [| args |]) :?> list<Terrabuild.Extensibility.Step>
 
                         cmds

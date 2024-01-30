@@ -46,7 +46,7 @@
   <ItemGroup>
     <!-- <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" /> -->
     <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
-    <PackageReference Include="Terrabuild.Extensibility" Version="0.1.0" />
+    <PackageReference Include="Terrabuild.Extensibility" Version="0.3.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,7 +10,7 @@ type Command(message: string) =
           Step.Cache = Cacheability.Always }
 
     interface ICommandBuilder with
-        member _.GetSteps () = 
+        member _.CreateSteps () = 
             [ buildCmdLine "echo" message ]
 
 
