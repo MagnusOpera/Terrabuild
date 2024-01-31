@@ -44,10 +44,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" /> -->
     <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(Configuration) != 'Integration'">
     <PackageReference Include="Terrabuild.Extensibility" Version="0.4.0" />
   </ItemGroup>
+
+  <Import Project="../../../Terrabuild.Extensibility.targets" Condition="$(Configuration) == 'Integration'"/>
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
