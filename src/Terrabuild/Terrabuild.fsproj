@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <!-- <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers> -->
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SourceControls/SourceControls.fs" />
