@@ -4,6 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <IsPackable>false</IsPackable>
+    <Configurations>Debug;Release;BFS</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SourceControls/SourceControls.fs" />
