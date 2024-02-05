@@ -162,6 +162,10 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     let startedAt = DateTime.UtcNow
                     let commandLine = node.CommandLines[cmdLineIndex]
                     let logFile = cacheEntry.NextLogFile()
+                    
+                    // NOTE:
+                    //  we use ProjectHash here because it's interesting from a cache perspective
+                    //  some binaries could have been cached in homedir, let's reuse them if available
                     let homeDir = cache.CreateHomeDir node.ProjectHash
                     cmdLineIndex <- cmdLineIndex + 1
 
