@@ -80,6 +80,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
                     yield! step.Variables |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
                     yield! step.CommandLines |> Seq.map (fun cmd -> $"{cmd.Container} {cmd.Command} {cmd.Arguments}")
                     yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].Hash)
+                    yield projectConfig.Hash
                 ]
 
                 let hash = hashContent |> String.sha256list
