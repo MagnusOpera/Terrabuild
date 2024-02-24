@@ -83,7 +83,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
                     yield projectConfig.Hash
                 ]
 
-                let hash = hashContent |> String.sha256list
+                let hash = hashContent |> Hash.sha256list
 
                 // compute cacheability of this node
                 let childrenCache =

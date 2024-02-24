@@ -18,3 +18,17 @@ let computeFilesSha files =
     let sha256 = SHA256.Create()
     let hash = ms |> sha256.ComputeHash |> Convert.ToHexString
     hash
+
+
+let sha256 (s: string) =
+    let sha256 = SHA256.Create()
+    use ms = new MemoryStream()
+    use txtWriter = new StreamWriter(ms)
+    txtWriter.Write(s)
+    txtWriter.Flush()
+    ms.Position <- 0L
+    let hash = ms |> sha256.ComputeHash |> Convert.ToHexString
+    hash
+
+let sha256list lines =
+    lines |> String.join "\n" |> sha256

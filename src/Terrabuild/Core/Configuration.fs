@@ -445,13 +445,13 @@ let read workspaceDir (options: Options) environment labels variables =
                 )
                 |> Seq.sort
                 |> String.join "\n"
-                |> String.sha256
+                |> Hash.sha256
 
             // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
             let nodeHash =
                 [ project; filesHash; dependenciesHash ]
                 |> String.join "\n"
-                |> String.sha256
+                |> Hash.sha256
 
             let variables =
                 variables
@@ -485,18 +485,18 @@ let read workspaceDir (options: Options) environment labels variables =
                         variableValues
                         |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
                         |> String.join "\n"
-                        |> String.sha256
+                        |> Hash.sha256
 
                     let stepHash =
                         stepWithValues
                         |> Seq.map (fun step -> $"{step.Container} {step.Command} {step.Arguments}")
                         |> String.join "\n"
-                        |> String.sha256
+                        |> Hash.sha256
 
                     let hash =
                         [ stepHash; variableHash ]
                         |> String.join "\n"
-                        |> String.sha256
+                        |> Hash.sha256
 
                     { Step.Hash = hash
                       Step.Variables = variableValues

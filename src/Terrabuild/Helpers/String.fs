@@ -3,7 +3,6 @@ module String
 open System
 open Microsoft.FSharp.Reflection
 open System.IO
-open System.Security.Cryptography
 open System.Text.RegularExpressions
 
 
@@ -25,13 +24,6 @@ let contains (findWhat:string) (value:string) =
 let replace (replaceWhat:string) (replaceBy:string) (value:string) =
     value.Replace(replaceWhat, replaceBy)
 
-let guidify (input : string) =
-    use provider = System.Security.Cryptography.MD5.Create()
-    let inputBytes = System.Text.Encoding.GetEncoding(0).GetBytes(input)
-    let hashBytes = provider.ComputeHash(inputBytes)
-    let hashGuid = Guid(hashBytes)
-    hashGuid.ToString()
-
 let toString (x:'a) =
     match FSharpValue.GetUnionFields(x, typeof<'a>) with
     | case, _ -> case.Name.ToLowerInvariant()
@@ -42,19 +34,6 @@ let isEmpty (s: string) =
 let firstLine (input: string) =
     use reader = new StringReader(input)
     reader.ReadLine()
-
-let sha256 (s: string) =
-    let sha256 = SHA256.Create()
-    use ms = new MemoryStream()
-    use txtWriter = new StreamWriter(ms)
-    txtWriter.Write(s)
-    txtWriter.Flush()
-    ms.Position <- 0L
-    let hash = ms |> sha256.ComputeHash |> Convert.ToHexString
-    hash
-
-let sha256list lines =
-    lines |> join "\n" |> sha256
 
 let (|Regex|_|) pattern input =
     let m = Regex.Match(input, pattern)
