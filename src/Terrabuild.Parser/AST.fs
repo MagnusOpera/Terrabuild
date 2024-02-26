@@ -15,8 +15,8 @@ type Expr =
     | Function of Operator * Expr
 
 type Attribute =
-    | Value of name:string * value:Expr
-    | Array of name:string * value:Expr list
+    | Value of name:string * Expr
+    | Array of name:string * Expr list
     | Block of name:string * Attributes
     | BlockWithType of name:string * kind:string * Attributes
     | BlockWithTypeAndAlias of name:string * kind:string * alias:string * Attributes
