@@ -7,30 +7,30 @@ type Expression =
     | None
 
 type Terrabuild = {
-    [<AttributeName("storage")>] Storage: string option
-    [<AttributeName("sourcecontrol")>] SourceControl: string option
+    [<Name("storage")>] Storage: string option
+    [<Name("sourcecontrol")>] SourceControl: string option
 }
 
 type Target = {
-    [<BlockName>] Name: string
-    [<AttributeName("depends_on"); Required>] DependsOn: string list
+    [<Kind>] Kind: string
+    [<Name("depends_on")>] DependsOn: string list
 }
 
 type Environment = {
-    [<BlockName>] Name: string
-    [<AttributeName("variables")>] Variables: Map<string, string>
+    [<Kind>] Kind: string
+    [<Name("variables")>] Variables: Map<string, string>
 }
 
 type Extension = {
-    [<BlockName>] Name: string
-    [<BlockType>] Type: string option
-    [<AttributeName("container")>] Container: string option
-    [<AttributeName("parameters")>] Parameters: Map<string, Expression>
+    [<Kind>] Kind: string
+    [<Alias>] Alias: string option
+    [<Name("container")>] Container: string option
+    [<Name("parameters")>] Parameters: Map<string, Expression>
 }
 
 type Workspace = {
-    [<Block("terrabuild")>] Terrabuild: Terrabuild
-    [<Block("target")>] Targets: Target list
-    [<Block("environment")>] Environments: Environment list
-    [<Block("extension")>] Extensions: Extension list
+    [<Name("terrabuild")>] Terrabuild: Terrabuild
+    [<Name("target")>] Targets: Target list
+    [<Name("environment")>] Environments: Environment list
+    [<Name("extension")>] Extensions: Extension list
 }

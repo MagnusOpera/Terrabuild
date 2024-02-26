@@ -18,7 +18,7 @@ type Attribute =
     | Value of name:string * value:Expr
     | Array of name:string * value:Expr list
     | Block of name:string * Attributes
-    | BlockWithType of name:string * tpe:string * Attributes
-    | BlockWithTypeAndAlias of name:string * tpe:string * alias:string * Attributes
+    | BlockWithType of name:string * kind:string * Attributes
+    | BlockWithTypeAndAlias of name:string * kind:string * alias:string * Attributes
 
 and Attributes = Attribute list

@@ -5,23 +5,15 @@ open System.Reflection
 open Microsoft.FSharp.Reflection
 
 [<AttributeUsage(AttributeTargets.Property)>]
-type Block(name: string) =
+type KindAttribute() =
     inherit System.Attribute()
 
 [<AttributeUsage(AttributeTargets.Property)>]
-type BlockType() =
+type AliasAttribute() =
     inherit System.Attribute()
 
 [<AttributeUsage(AttributeTargets.Property)>]
-type BlockName() =
-    inherit System.Attribute()
-
-[<AttributeUsage(AttributeTargets.Property)>]
-type AttributeName(name: string) =
-    inherit System.Attribute()
-
-[<AttributeUsage(AttributeTargets.Property)>]
-type Required() =
+type NameAttribute(name: string) =
     inherit System.Attribute()
 
 
@@ -96,6 +88,6 @@ let rec mapBlocks (blocks: AST.Blocks) (ty: Type) =
 
 
 
-let map<'t> (blocks: Blocks) =
+let map<'t> (blocks: Attributes) =
     let recordType = typeof<'t>
     map blocks recordType
