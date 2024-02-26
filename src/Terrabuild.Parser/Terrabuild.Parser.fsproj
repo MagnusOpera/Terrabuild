@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FsYacc Include="Parser.fsy">
+        <OtherFlags>-v --module Parser</OtherFlags>
+    </FsYacc>
+    <FsLex Include="Lexer.fsl">
+        <OtherFlags>--module Lexer --unicode</OtherFlags>
+    </FsLex>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="AST.fs" />
+    <Compile Include="Parser.fsi" />
+    <Compile Include="Parser.fs" />
+    <Compile Include="Lexer.fs" />
+    <Compile Include="FrontEnd.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FsLexYacc" Version="10.2.0" />
+  </ItemGroup>
+
+</Project>

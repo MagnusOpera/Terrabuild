@@ -1,0 +1,1030 @@
+        Output file describing compiled parser placed in Parser.fs and Parser.fsi
+------------------------
+states = 
+state 0:  items:    _startConfiguration ->  . Configuration
+  actions:    action 'EOF' (noprec):   reduce Blocks --> 
+    action 'TRIM' (noprec):   reduce Blocks --> 
+    action 'UPPER' (noprec):   reduce Blocks --> 
+    action 'LOWER' (noprec):   reduce Blocks --> 
+    action 'PLUS' (noprec):   reduce Blocks --> 
+    action 'COMMA' (noprec):   reduce Blocks --> 
+    action 'EQUAL' (noprec):   reduce Blocks --> 
+    action 'LPAREN' (noprec):   reduce Blocks --> 
+    action 'RPAREN' (noprec):   reduce Blocks --> 
+    action 'LSQBRACKET' (noprec):   reduce Blocks --> 
+    action 'RSQBRACKET' (noprec):   reduce Blocks --> 
+    action 'LBRACE' (noprec):   reduce Blocks --> 
+    action 'RBRACE' (noprec):   reduce Blocks --> 
+    action 'VARIABLE' (noprec):   reduce Blocks --> 
+    action 'IDENTIFIER' (noprec):   reduce Blocks --> 
+    action 'STRING' (noprec):   reduce Blocks --> 
+    action 'NOTHING' (noprec):   reduce Blocks --> 
+    action 'TRUE' (noprec):   reduce Blocks --> 
+    action 'FALSE' (noprec):   reduce Blocks --> 
+    action 'error' (noprec):   reduce Blocks --> 
+    action '#' (noprec):   reduce Blocks --> 
+    action '$$' (noprec):   reduce Blocks --> 
+  immediate action: <none>  gotos:    goto Configuration: 1
+    goto Blocks: 2
+state 1:  items:    _startConfiguration -> Configuration . 
+  actions:    action 'EOF' (noprec):   accept
+    action 'TRIM' (noprec):   accept
+    action 'UPPER' (noprec):   accept
+    action 'LOWER' (noprec):   accept
+    action 'PLUS' (noprec):   accept
+    action 'COMMA' (noprec):   accept
+    action 'EQUAL' (noprec):   accept
+    action 'LPAREN' (noprec):   accept
+    action 'RPAREN' (noprec):   accept
+    action 'LSQBRACKET' (noprec):   accept
+    action 'RSQBRACKET' (noprec):   accept
+    action 'LBRACE' (noprec):   accept
+    action 'RBRACE' (noprec):   accept
+    action 'VARIABLE' (noprec):   accept
+    action 'IDENTIFIER' (noprec):   accept
+    action 'STRING' (noprec):   accept
+    action 'NOTHING' (noprec):   accept
+    action 'TRUE' (noprec):   accept
+    action 'FALSE' (noprec):   accept
+    action 'error' (noprec):   accept
+    action '#' (noprec):   accept
+    action '$$' (noprec):   accept
+  immediate action:   accept  gotos:state 2:  items:    Configuration -> Blocks . 'EOF'
+    Blocks -> Blocks . Block
+  actions:    action 'EOF' (noprec):   shift 3
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   shift 9
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto Block: 4
+    goto BlockHeader: 5
+state 3:  items:    Configuration -> Blocks 'EOF' . 
+  actions:    action 'EOF' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'TRIM' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'UPPER' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'LOWER' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'PLUS' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'COMMA' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'EQUAL' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'LPAREN' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'RPAREN' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'LSQBRACKET' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'RSQBRACKET' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'LBRACE' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'RBRACE' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'VARIABLE' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'IDENTIFIER' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'STRING' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'NOTHING' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'TRUE' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'FALSE' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action 'error' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action '#' (noprec):   reduce Configuration --> Blocks 'EOF'
+    action '$$' (noprec):   reduce Configuration --> Blocks 'EOF'
+  immediate action:   reduce Configuration --> Blocks 'EOF'  gotos:state 4:  items:    Blocks -> Blocks Block . 
+  actions:    action 'EOF' (noprec):   reduce Blocks --> Blocks Block
+    action 'TRIM' (noprec):   reduce Blocks --> Blocks Block
+    action 'UPPER' (noprec):   reduce Blocks --> Blocks Block
+    action 'LOWER' (noprec):   reduce Blocks --> Blocks Block
+    action 'PLUS' (noprec):   reduce Blocks --> Blocks Block
+    action 'COMMA' (noprec):   reduce Blocks --> Blocks Block
+    action 'EQUAL' (noprec):   reduce Blocks --> Blocks Block
+    action 'LPAREN' (noprec):   reduce Blocks --> Blocks Block
+    action 'RPAREN' (noprec):   reduce Blocks --> Blocks Block
+    action 'LSQBRACKET' (noprec):   reduce Blocks --> Blocks Block
+    action 'RSQBRACKET' (noprec):   reduce Blocks --> Blocks Block
+    action 'LBRACE' (noprec):   reduce Blocks --> Blocks Block
+    action 'RBRACE' (noprec):   reduce Blocks --> Blocks Block
+    action 'VARIABLE' (noprec):   reduce Blocks --> Blocks Block
+    action 'IDENTIFIER' (noprec):   reduce Blocks --> Blocks Block
+    action 'STRING' (noprec):   reduce Blocks --> Blocks Block
+    action 'NOTHING' (noprec):   reduce Blocks --> Blocks Block
+    action 'TRUE' (noprec):   reduce Blocks --> Blocks Block
+    action 'FALSE' (noprec):   reduce Blocks --> Blocks Block
+    action 'error' (noprec):   reduce Blocks --> Blocks Block
+    action '#' (noprec):   reduce Blocks --> Blocks Block
+    action '$$' (noprec):   reduce Blocks --> Blocks Block
+  immediate action:   reduce Blocks --> Blocks Block  gotos:state 5:  items:    Block -> BlockHeader . 'LBRACE' BlockBody 'RBRACE'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   shift 6
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:state 6:  items:    Block -> BlockHeader 'LBRACE' . BlockBody 'RBRACE'
+  actions:    action 'EOF' (noprec):   reduce BlockBody --> 
+    action 'TRIM' (noprec):   reduce BlockBody --> 
+    action 'UPPER' (noprec):   reduce BlockBody --> 
+    action 'LOWER' (noprec):   reduce BlockBody --> 
+    action 'PLUS' (noprec):   reduce BlockBody --> 
+    action 'COMMA' (noprec):   reduce BlockBody --> 
+    action 'EQUAL' (noprec):   reduce BlockBody --> 
+    action 'LPAREN' (noprec):   reduce BlockBody --> 
+    action 'RPAREN' (noprec):   reduce BlockBody --> 
+    action 'LSQBRACKET' (noprec):   reduce BlockBody --> 
+    action 'RSQBRACKET' (noprec):   reduce BlockBody --> 
+    action 'LBRACE' (noprec):   reduce BlockBody --> 
+    action 'RBRACE' (noprec):   reduce BlockBody --> 
+    action 'VARIABLE' (noprec):   reduce BlockBody --> 
+    action 'IDENTIFIER' (noprec):   reduce BlockBody --> 
+    action 'STRING' (noprec):   reduce BlockBody --> 
+    action 'NOTHING' (noprec):   reduce BlockBody --> 
+    action 'TRUE' (noprec):   reduce BlockBody --> 
+    action 'FALSE' (noprec):   reduce BlockBody --> 
+    action 'error' (noprec):   reduce BlockBody --> 
+    action '#' (noprec):   reduce BlockBody --> 
+    action '$$' (noprec):   reduce BlockBody --> 
+  immediate action: <none>  gotos:    goto BlockBody: 7
+state 7:  items:    Block -> BlockHeader 'LBRACE' BlockBody . 'RBRACE'
+    BlockBody -> BlockBody . Attribute
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   shift 8
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   shift 10
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto Block: 23
+    goto BlockHeader: 5
+    goto Attribute: 13
+    goto AttributeValue: 14
+    goto AttributeArray: 15
+    goto AttributeSubBlock: 16
+state 8:  items:    Block -> BlockHeader 'LBRACE' BlockBody 'RBRACE' . 
+  actions:    action 'EOF' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'TRIM' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'UPPER' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'LOWER' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'PLUS' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'COMMA' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'EQUAL' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'LPAREN' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'RPAREN' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'LSQBRACKET' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'RSQBRACKET' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'LBRACE' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'RBRACE' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'VARIABLE' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'IDENTIFIER' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'STRING' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'NOTHING' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'TRUE' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'FALSE' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action 'error' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action '#' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+    action '$$' (noprec):   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'
+  immediate action:   reduce Block --> BlockHeader 'LBRACE' BlockBody 'RBRACE'  gotos:state 9:  items:    BlockHeader -> 'IDENTIFIER' . 
+    BlockHeader -> 'IDENTIFIER' . 'IDENTIFIER'
+    BlockHeader -> 'IDENTIFIER' . 'IDENTIFIER' 'STRING'
+  actions:    action 'EOF' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'TRIM' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'UPPER' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'LOWER' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'PLUS' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'COMMA' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'EQUAL' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'LPAREN' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'RPAREN' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'LSQBRACKET' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'RSQBRACKET' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'LBRACE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'RBRACE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'VARIABLE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'IDENTIFIER' (noprec):   shift 11
+    action 'STRING' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'NOTHING' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'TRUE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'FALSE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'error' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action '#' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action '$$' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+  immediate action: <none>  gotos:state 10:  items:    BlockHeader -> 'IDENTIFIER' . 
+    BlockHeader -> 'IDENTIFIER' . 'IDENTIFIER'
+    BlockHeader -> 'IDENTIFIER' . 'IDENTIFIER' 'STRING'
+    AttributeValue -> 'IDENTIFIER' . 'EQUAL' Expr
+    AttributeArray -> 'IDENTIFIER' . 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+  actions:    action 'EOF' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'TRIM' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'UPPER' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'LOWER' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'PLUS' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'COMMA' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'EQUAL' (noprec):   shift 17
+    action 'LPAREN' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'RPAREN' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'LSQBRACKET' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'RSQBRACKET' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'LBRACE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'RBRACE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'VARIABLE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'IDENTIFIER' (noprec):   shift 11
+    action 'STRING' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'NOTHING' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'TRUE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'FALSE' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action 'error' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action '#' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+    action '$$' (noprec):   reduce BlockHeader --> 'IDENTIFIER'
+  immediate action: <none>  gotos:state 11:  items:    BlockHeader -> 'IDENTIFIER' 'IDENTIFIER' . 
+    BlockHeader -> 'IDENTIFIER' 'IDENTIFIER' . 'STRING'
+  actions:    action 'EOF' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'TRIM' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'UPPER' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'LOWER' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'PLUS' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'COMMA' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'EQUAL' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'LPAREN' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'RPAREN' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'LSQBRACKET' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'RSQBRACKET' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'LBRACE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'RBRACE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'VARIABLE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'IDENTIFIER' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'STRING' (noprec):   shift 12
+    action 'NOTHING' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'TRUE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'FALSE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'error' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action '#' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+    action '$$' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER'
+  immediate action: <none>  gotos:state 12:  items:    BlockHeader -> 'IDENTIFIER' 'IDENTIFIER' 'STRING' . 
+  actions:    action 'EOF' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'TRIM' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'UPPER' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'LOWER' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'PLUS' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'COMMA' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'EQUAL' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'LPAREN' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'RPAREN' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'LSQBRACKET' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'RSQBRACKET' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'LBRACE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'RBRACE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'VARIABLE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'IDENTIFIER' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'STRING' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'NOTHING' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'TRUE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'FALSE' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action 'error' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action '#' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+    action '$$' (noprec):   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'
+  immediate action:   reduce BlockHeader --> 'IDENTIFIER' 'IDENTIFIER' 'STRING'  gotos:state 13:  items:    BlockBody -> BlockBody Attribute . 
+  actions:    action 'EOF' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'TRIM' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'UPPER' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'LOWER' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'PLUS' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'COMMA' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'EQUAL' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'LPAREN' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'RPAREN' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'LSQBRACKET' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'RSQBRACKET' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'LBRACE' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'RBRACE' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'VARIABLE' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'IDENTIFIER' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'STRING' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'NOTHING' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'TRUE' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'FALSE' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action 'error' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action '#' (noprec):   reduce BlockBody --> BlockBody Attribute
+    action '$$' (noprec):   reduce BlockBody --> BlockBody Attribute
+  immediate action:   reduce BlockBody --> BlockBody Attribute  gotos:state 14:  items:    Attribute -> AttributeValue . 
+  actions:    action 'EOF' (noprec):   reduce Attribute --> AttributeValue
+    action 'TRIM' (noprec):   reduce Attribute --> AttributeValue
+    action 'UPPER' (noprec):   reduce Attribute --> AttributeValue
+    action 'LOWER' (noprec):   reduce Attribute --> AttributeValue
+    action 'PLUS' (noprec):   reduce Attribute --> AttributeValue
+    action 'COMMA' (noprec):   reduce Attribute --> AttributeValue
+    action 'EQUAL' (noprec):   reduce Attribute --> AttributeValue
+    action 'LPAREN' (noprec):   reduce Attribute --> AttributeValue
+    action 'RPAREN' (noprec):   reduce Attribute --> AttributeValue
+    action 'LSQBRACKET' (noprec):   reduce Attribute --> AttributeValue
+    action 'RSQBRACKET' (noprec):   reduce Attribute --> AttributeValue
+    action 'LBRACE' (noprec):   reduce Attribute --> AttributeValue
+    action 'RBRACE' (noprec):   reduce Attribute --> AttributeValue
+    action 'VARIABLE' (noprec):   reduce Attribute --> AttributeValue
+    action 'IDENTIFIER' (noprec):   reduce Attribute --> AttributeValue
+    action 'STRING' (noprec):   reduce Attribute --> AttributeValue
+    action 'NOTHING' (noprec):   reduce Attribute --> AttributeValue
+    action 'TRUE' (noprec):   reduce Attribute --> AttributeValue
+    action 'FALSE' (noprec):   reduce Attribute --> AttributeValue
+    action 'error' (noprec):   reduce Attribute --> AttributeValue
+    action '#' (noprec):   reduce Attribute --> AttributeValue
+    action '$$' (noprec):   reduce Attribute --> AttributeValue
+  immediate action:   reduce Attribute --> AttributeValue  gotos:state 15:  items:    Attribute -> AttributeArray . 
+  actions:    action 'EOF' (noprec):   reduce Attribute --> AttributeArray
+    action 'TRIM' (noprec):   reduce Attribute --> AttributeArray
+    action 'UPPER' (noprec):   reduce Attribute --> AttributeArray
+    action 'LOWER' (noprec):   reduce Attribute --> AttributeArray
+    action 'PLUS' (noprec):   reduce Attribute --> AttributeArray
+    action 'COMMA' (noprec):   reduce Attribute --> AttributeArray
+    action 'EQUAL' (noprec):   reduce Attribute --> AttributeArray
+    action 'LPAREN' (noprec):   reduce Attribute --> AttributeArray
+    action 'RPAREN' (noprec):   reduce Attribute --> AttributeArray
+    action 'LSQBRACKET' (noprec):   reduce Attribute --> AttributeArray
+    action 'RSQBRACKET' (noprec):   reduce Attribute --> AttributeArray
+    action 'LBRACE' (noprec):   reduce Attribute --> AttributeArray
+    action 'RBRACE' (noprec):   reduce Attribute --> AttributeArray
+    action 'VARIABLE' (noprec):   reduce Attribute --> AttributeArray
+    action 'IDENTIFIER' (noprec):   reduce Attribute --> AttributeArray
+    action 'STRING' (noprec):   reduce Attribute --> AttributeArray
+    action 'NOTHING' (noprec):   reduce Attribute --> AttributeArray
+    action 'TRUE' (noprec):   reduce Attribute --> AttributeArray
+    action 'FALSE' (noprec):   reduce Attribute --> AttributeArray
+    action 'error' (noprec):   reduce Attribute --> AttributeArray
+    action '#' (noprec):   reduce Attribute --> AttributeArray
+    action '$$' (noprec):   reduce Attribute --> AttributeArray
+  immediate action:   reduce Attribute --> AttributeArray  gotos:state 16:  items:    Attribute -> AttributeSubBlock . 
+  actions:    action 'EOF' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'TRIM' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'UPPER' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'LOWER' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'PLUS' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'COMMA' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'EQUAL' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'LPAREN' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'RPAREN' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'LSQBRACKET' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'RSQBRACKET' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'LBRACE' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'RBRACE' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'VARIABLE' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'IDENTIFIER' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'STRING' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'NOTHING' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'TRUE' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'FALSE' (noprec):   reduce Attribute --> AttributeSubBlock
+    action 'error' (noprec):   reduce Attribute --> AttributeSubBlock
+    action '#' (noprec):   reduce Attribute --> AttributeSubBlock
+    action '$$' (noprec):   reduce Attribute --> AttributeSubBlock
+  immediate action:   reduce Attribute --> AttributeSubBlock  gotos:state 17:  items:    AttributeValue -> 'IDENTIFIER' 'EQUAL' . Expr
+    AttributeArray -> 'IDENTIFIER' 'EQUAL' . 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   shift 34
+    action 'UPPER' (noprec):   shift 37
+    action 'LOWER' (noprec):   shift 40
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   shift 19
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   shift 28
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   shift 27
+    action 'NOTHING' (noprec):   shift 24
+    action 'TRUE' (noprec):   shift 25
+    action 'FALSE' (noprec):   shift 26
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto Expr: 18
+state 18:  items:    AttributeValue -> 'IDENTIFIER' 'EQUAL' Expr . 
+    Expr -> Expr . 'PLUS' Expr
+  actions:    action 'EOF' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'TRIM' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'UPPER' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'LOWER' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'PLUS' (explicit left 9999):   shift 33
+    action 'COMMA' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'EQUAL' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'LPAREN' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'RPAREN' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'LSQBRACKET' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'RSQBRACKET' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'LBRACE' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'RBRACE' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'VARIABLE' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'IDENTIFIER' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'STRING' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'NOTHING' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'TRUE' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'FALSE' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'error' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action '#' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+    action '$$' (noprec):   reduce AttributeValue --> 'IDENTIFIER' 'EQUAL' Expr
+  immediate action: <none>  gotos:state 19:  items:    AttributeArray -> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' . ArrayValues 'RSQBRACKET'
+  actions:    action 'EOF' (noprec):   reduce ArrayValues --> 
+    action 'TRIM' (noprec):   reduce ArrayValues --> 
+    action 'UPPER' (noprec):   reduce ArrayValues --> 
+    action 'LOWER' (noprec):   reduce ArrayValues --> 
+    action 'PLUS' (noprec):   reduce ArrayValues --> 
+    action 'COMMA' (noprec):   reduce ArrayValues --> 
+    action 'EQUAL' (noprec):   reduce ArrayValues --> 
+    action 'LPAREN' (noprec):   reduce ArrayValues --> 
+    action 'RPAREN' (noprec):   reduce ArrayValues --> 
+    action 'LSQBRACKET' (noprec):   reduce ArrayValues --> 
+    action 'RSQBRACKET' (noprec):   reduce ArrayValues --> 
+    action 'LBRACE' (noprec):   reduce ArrayValues --> 
+    action 'RBRACE' (noprec):   reduce ArrayValues --> 
+    action 'VARIABLE' (noprec):   reduce ArrayValues --> 
+    action 'IDENTIFIER' (noprec):   reduce ArrayValues --> 
+    action 'STRING' (noprec):   reduce ArrayValues --> 
+    action 'NOTHING' (noprec):   reduce ArrayValues --> 
+    action 'TRUE' (noprec):   reduce ArrayValues --> 
+    action 'FALSE' (noprec):   reduce ArrayValues --> 
+    action 'error' (noprec):   reduce ArrayValues --> 
+    action '#' (noprec):   reduce ArrayValues --> 
+    action '$$' (noprec):   reduce ArrayValues --> 
+  immediate action: <none>  gotos:    goto ArrayValues: 20
+state 20:  items:    AttributeArray -> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues . 'RSQBRACKET'
+    ArrayValues -> ArrayValues . Expr
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   shift 34
+    action 'UPPER' (noprec):   shift 37
+    action 'LOWER' (noprec):   shift 40
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   shift 21
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   shift 28
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   shift 27
+    action 'NOTHING' (noprec):   shift 24
+    action 'TRUE' (noprec):   shift 25
+    action 'FALSE' (noprec):   shift 26
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto Expr: 22
+state 21:  items:    AttributeArray -> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET' . 
+  actions:    action 'EOF' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'TRIM' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'UPPER' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'LOWER' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'PLUS' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'COMMA' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'EQUAL' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'LPAREN' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'RPAREN' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'LSQBRACKET' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'RSQBRACKET' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'LBRACE' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'RBRACE' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'VARIABLE' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'IDENTIFIER' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'STRING' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'NOTHING' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'TRUE' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'FALSE' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action 'error' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action '#' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+    action '$$' (noprec):   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'
+  immediate action:   reduce AttributeArray --> 'IDENTIFIER' 'EQUAL' 'LSQBRACKET' ArrayValues 'RSQBRACKET'  gotos:state 22:  items:    ArrayValues -> ArrayValues Expr . 
+    Expr -> Expr . 'PLUS' Expr
+  actions:    action 'EOF' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'TRIM' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'UPPER' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'LOWER' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'PLUS' (explicit left 9999):   shift 33
+    action 'COMMA' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'EQUAL' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'LPAREN' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'RPAREN' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'LSQBRACKET' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'RSQBRACKET' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'LBRACE' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'RBRACE' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'VARIABLE' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'IDENTIFIER' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'STRING' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'NOTHING' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'TRUE' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'FALSE' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action 'error' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action '#' (noprec):   reduce ArrayValues --> ArrayValues Expr
+    action '$$' (noprec):   reduce ArrayValues --> ArrayValues Expr
+  immediate action: <none>  gotos:state 23:  items:    AttributeSubBlock -> Block . 
+  actions:    action 'EOF' (noprec):   reduce AttributeSubBlock --> Block
+    action 'TRIM' (noprec):   reduce AttributeSubBlock --> Block
+    action 'UPPER' (noprec):   reduce AttributeSubBlock --> Block
+    action 'LOWER' (noprec):   reduce AttributeSubBlock --> Block
+    action 'PLUS' (noprec):   reduce AttributeSubBlock --> Block
+    action 'COMMA' (noprec):   reduce AttributeSubBlock --> Block
+    action 'EQUAL' (noprec):   reduce AttributeSubBlock --> Block
+    action 'LPAREN' (noprec):   reduce AttributeSubBlock --> Block
+    action 'RPAREN' (noprec):   reduce AttributeSubBlock --> Block
+    action 'LSQBRACKET' (noprec):   reduce AttributeSubBlock --> Block
+    action 'RSQBRACKET' (noprec):   reduce AttributeSubBlock --> Block
+    action 'LBRACE' (noprec):   reduce AttributeSubBlock --> Block
+    action 'RBRACE' (noprec):   reduce AttributeSubBlock --> Block
+    action 'VARIABLE' (noprec):   reduce AttributeSubBlock --> Block
+    action 'IDENTIFIER' (noprec):   reduce AttributeSubBlock --> Block
+    action 'STRING' (noprec):   reduce AttributeSubBlock --> Block
+    action 'NOTHING' (noprec):   reduce AttributeSubBlock --> Block
+    action 'TRUE' (noprec):   reduce AttributeSubBlock --> Block
+    action 'FALSE' (noprec):   reduce AttributeSubBlock --> Block
+    action 'error' (noprec):   reduce AttributeSubBlock --> Block
+    action '#' (noprec):   reduce AttributeSubBlock --> Block
+    action '$$' (noprec):   reduce AttributeSubBlock --> Block
+  immediate action:   reduce AttributeSubBlock --> Block  gotos:state 24:  items:    Expr -> 'NOTHING' . 
+  actions:    action 'EOF' (noprec):   reduce Expr --> 'NOTHING'
+    action 'TRIM' (noprec):   reduce Expr --> 'NOTHING'
+    action 'UPPER' (noprec):   reduce Expr --> 'NOTHING'
+    action 'LOWER' (noprec):   reduce Expr --> 'NOTHING'
+    action 'PLUS' (noprec):   reduce Expr --> 'NOTHING'
+    action 'COMMA' (noprec):   reduce Expr --> 'NOTHING'
+    action 'EQUAL' (noprec):   reduce Expr --> 'NOTHING'
+    action 'LPAREN' (noprec):   reduce Expr --> 'NOTHING'
+    action 'RPAREN' (noprec):   reduce Expr --> 'NOTHING'
+    action 'LSQBRACKET' (noprec):   reduce Expr --> 'NOTHING'
+    action 'RSQBRACKET' (noprec):   reduce Expr --> 'NOTHING'
+    action 'LBRACE' (noprec):   reduce Expr --> 'NOTHING'
+    action 'RBRACE' (noprec):   reduce Expr --> 'NOTHING'
+    action 'VARIABLE' (noprec):   reduce Expr --> 'NOTHING'
+    action 'IDENTIFIER' (noprec):   reduce Expr --> 'NOTHING'
+    action 'STRING' (noprec):   reduce Expr --> 'NOTHING'
+    action 'NOTHING' (noprec):   reduce Expr --> 'NOTHING'
+    action 'TRUE' (noprec):   reduce Expr --> 'NOTHING'
+    action 'FALSE' (noprec):   reduce Expr --> 'NOTHING'
+    action 'error' (noprec):   reduce Expr --> 'NOTHING'
+    action '#' (noprec):   reduce Expr --> 'NOTHING'
+    action '$$' (noprec):   reduce Expr --> 'NOTHING'
+  immediate action:   reduce Expr --> 'NOTHING'  gotos:state 25:  items:    Expr -> 'TRUE' . 
+  actions:    action 'EOF' (noprec):   reduce Expr --> 'TRUE'
+    action 'TRIM' (noprec):   reduce Expr --> 'TRUE'
+    action 'UPPER' (noprec):   reduce Expr --> 'TRUE'
+    action 'LOWER' (noprec):   reduce Expr --> 'TRUE'
+    action 'PLUS' (noprec):   reduce Expr --> 'TRUE'
+    action 'COMMA' (noprec):   reduce Expr --> 'TRUE'
+    action 'EQUAL' (noprec):   reduce Expr --> 'TRUE'
+    action 'LPAREN' (noprec):   reduce Expr --> 'TRUE'
+    action 'RPAREN' (noprec):   reduce Expr --> 'TRUE'
+    action 'LSQBRACKET' (noprec):   reduce Expr --> 'TRUE'
+    action 'RSQBRACKET' (noprec):   reduce Expr --> 'TRUE'
+    action 'LBRACE' (noprec):   reduce Expr --> 'TRUE'
+    action 'RBRACE' (noprec):   reduce Expr --> 'TRUE'
+    action 'VARIABLE' (noprec):   reduce Expr --> 'TRUE'
+    action 'IDENTIFIER' (noprec):   reduce Expr --> 'TRUE'
+    action 'STRING' (noprec):   reduce Expr --> 'TRUE'
+    action 'NOTHING' (noprec):   reduce Expr --> 'TRUE'
+    action 'TRUE' (noprec):   reduce Expr --> 'TRUE'
+    action 'FALSE' (noprec):   reduce Expr --> 'TRUE'
+    action 'error' (noprec):   reduce Expr --> 'TRUE'
+    action '#' (noprec):   reduce Expr --> 'TRUE'
+    action '$$' (noprec):   reduce Expr --> 'TRUE'
+  immediate action:   reduce Expr --> 'TRUE'  gotos:state 26:  items:    Expr -> 'FALSE' . 
+  actions:    action 'EOF' (noprec):   reduce Expr --> 'FALSE'
+    action 'TRIM' (noprec):   reduce Expr --> 'FALSE'
+    action 'UPPER' (noprec):   reduce Expr --> 'FALSE'
+    action 'LOWER' (noprec):   reduce Expr --> 'FALSE'
+    action 'PLUS' (noprec):   reduce Expr --> 'FALSE'
+    action 'COMMA' (noprec):   reduce Expr --> 'FALSE'
+    action 'EQUAL' (noprec):   reduce Expr --> 'FALSE'
+    action 'LPAREN' (noprec):   reduce Expr --> 'FALSE'
+    action 'RPAREN' (noprec):   reduce Expr --> 'FALSE'
+    action 'LSQBRACKET' (noprec):   reduce Expr --> 'FALSE'
+    action 'RSQBRACKET' (noprec):   reduce Expr --> 'FALSE'
+    action 'LBRACE' (noprec):   reduce Expr --> 'FALSE'
+    action 'RBRACE' (noprec):   reduce Expr --> 'FALSE'
+    action 'VARIABLE' (noprec):   reduce Expr --> 'FALSE'
+    action 'IDENTIFIER' (noprec):   reduce Expr --> 'FALSE'
+    action 'STRING' (noprec):   reduce Expr --> 'FALSE'
+    action 'NOTHING' (noprec):   reduce Expr --> 'FALSE'
+    action 'TRUE' (noprec):   reduce Expr --> 'FALSE'
+    action 'FALSE' (noprec):   reduce Expr --> 'FALSE'
+    action 'error' (noprec):   reduce Expr --> 'FALSE'
+    action '#' (noprec):   reduce Expr --> 'FALSE'
+    action '$$' (noprec):   reduce Expr --> 'FALSE'
+  immediate action:   reduce Expr --> 'FALSE'  gotos:state 27:  items:    Expr -> 'STRING' . 
+  actions:    action 'EOF' (noprec):   reduce Expr --> 'STRING'
+    action 'TRIM' (noprec):   reduce Expr --> 'STRING'
+    action 'UPPER' (noprec):   reduce Expr --> 'STRING'
+    action 'LOWER' (noprec):   reduce Expr --> 'STRING'
+    action 'PLUS' (noprec):   reduce Expr --> 'STRING'
+    action 'COMMA' (noprec):   reduce Expr --> 'STRING'
+    action 'EQUAL' (noprec):   reduce Expr --> 'STRING'
+    action 'LPAREN' (noprec):   reduce Expr --> 'STRING'
+    action 'RPAREN' (noprec):   reduce Expr --> 'STRING'
+    action 'LSQBRACKET' (noprec):   reduce Expr --> 'STRING'
+    action 'RSQBRACKET' (noprec):   reduce Expr --> 'STRING'
+    action 'LBRACE' (noprec):   reduce Expr --> 'STRING'
+    action 'RBRACE' (noprec):   reduce Expr --> 'STRING'
+    action 'VARIABLE' (noprec):   reduce Expr --> 'STRING'
+    action 'IDENTIFIER' (noprec):   reduce Expr --> 'STRING'
+    action 'STRING' (noprec):   reduce Expr --> 'STRING'
+    action 'NOTHING' (noprec):   reduce Expr --> 'STRING'
+    action 'TRUE' (noprec):   reduce Expr --> 'STRING'
+    action 'FALSE' (noprec):   reduce Expr --> 'STRING'
+    action 'error' (noprec):   reduce Expr --> 'STRING'
+    action '#' (noprec):   reduce Expr --> 'STRING'
+    action '$$' (noprec):   reduce Expr --> 'STRING'
+  immediate action:   reduce Expr --> 'STRING'  gotos:state 28:  items:    Expr -> 'VARIABLE' . 
+  actions:    action 'EOF' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'TRIM' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'UPPER' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'LOWER' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'PLUS' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'COMMA' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'EQUAL' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'LPAREN' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'RPAREN' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'LSQBRACKET' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'RSQBRACKET' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'LBRACE' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'RBRACE' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'VARIABLE' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'IDENTIFIER' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'STRING' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'NOTHING' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'TRUE' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'FALSE' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'error' (noprec):   reduce Expr --> 'VARIABLE'
+    action '#' (noprec):   reduce Expr --> 'VARIABLE'
+    action '$$' (noprec):   reduce Expr --> 'VARIABLE'
+  immediate action:   reduce Expr --> 'VARIABLE'  gotos:state 29:  items:    Expr -> Expr . 'PLUS' Expr
+    Expr -> Expr 'PLUS' Expr . 
+  actions:    action 'EOF' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'TRIM' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'UPPER' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'LOWER' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'PLUS' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'COMMA' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'EQUAL' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'LPAREN' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'RPAREN' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'LSQBRACKET' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'RSQBRACKET' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'LBRACE' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'RBRACE' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'VARIABLE' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'IDENTIFIER' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'STRING' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'NOTHING' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'TRUE' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'FALSE' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'error' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action '#' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action '$$' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+  immediate action: <none>  gotos:state 30:  items:    Expr -> Expr . 'PLUS' Expr
+    Expr -> 'TRIM' 'LPAREN' Expr . 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (explicit left 9999):   shift 33
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   shift 36
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:state 31:  items:    Expr -> Expr . 'PLUS' Expr
+    Expr -> 'UPPER' 'LPAREN' Expr . 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (explicit left 9999):   shift 33
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   shift 39
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:state 32:  items:    Expr -> Expr . 'PLUS' Expr
+    Expr -> 'LOWER' 'LPAREN' Expr . 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (explicit left 9999):   shift 33
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   shift 42
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:state 33:  items:    Expr -> Expr 'PLUS' . Expr
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   shift 34
+    action 'UPPER' (noprec):   shift 37
+    action 'LOWER' (noprec):   shift 40
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   shift 28
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   shift 27
+    action 'NOTHING' (noprec):   shift 24
+    action 'TRUE' (noprec):   shift 25
+    action 'FALSE' (noprec):   shift 26
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto Expr: 29
+state 34:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   shift 35
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:state 35:  items:    Expr -> 'TRIM' 'LPAREN' . Expr 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   shift 34
+    action 'UPPER' (noprec):   shift 37
+    action 'LOWER' (noprec):   shift 40
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   shift 28
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   shift 27
+    action 'NOTHING' (noprec):   shift 24
+    action 'TRUE' (noprec):   shift 25
+    action 'FALSE' (noprec):   shift 26
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto Expr: 30
+state 36:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' . 
+  actions:    action 'EOF' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'TRIM' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'UPPER' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'LOWER' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'PLUS' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'COMMA' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'EQUAL' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'LPAREN' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'RPAREN' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'LSQBRACKET' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'RSQBRACKET' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'LBRACE' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'RBRACE' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'VARIABLE' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'IDENTIFIER' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'STRING' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'NOTHING' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'TRUE' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'FALSE' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'error' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action '#' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action '$$' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+  immediate action:   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'  gotos:state 37:  items:    Expr -> 'UPPER' . 'LPAREN' Expr 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   shift 38
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:state 38:  items:    Expr -> 'UPPER' 'LPAREN' . Expr 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   shift 34
+    action 'UPPER' (noprec):   shift 37
+    action 'LOWER' (noprec):   shift 40
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   shift 28
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   shift 27
+    action 'NOTHING' (noprec):   shift 24
+    action 'TRUE' (noprec):   shift 25
+    action 'FALSE' (noprec):   shift 26
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto Expr: 31
+state 39:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' . 
+  actions:    action 'EOF' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'TRIM' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'UPPER' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'LOWER' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'PLUS' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'COMMA' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'EQUAL' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'LPAREN' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'RPAREN' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'LSQBRACKET' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'RSQBRACKET' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'LBRACE' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'RBRACE' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'VARIABLE' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'IDENTIFIER' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'STRING' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'NOTHING' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'TRUE' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'FALSE' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'error' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action '#' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action '$$' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+  immediate action:   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'  gotos:state 40:  items:    Expr -> 'LOWER' . 'LPAREN' Expr 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   shift 41
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:state 41:  items:    Expr -> 'LOWER' 'LPAREN' . Expr 'RPAREN'
+  actions:    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   shift 34
+    action 'UPPER' (noprec):   shift 37
+    action 'LOWER' (noprec):   shift 40
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   shift 28
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   shift 27
+    action 'NOTHING' (noprec):   shift 24
+    action 'TRUE' (noprec):   shift 25
+    action 'FALSE' (noprec):   shift 26
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto Expr: 32
+state 42:  items:    Expr -> 'LOWER' 'LPAREN' Expr 'RPAREN' . 
+  actions:    action 'EOF' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'TRIM' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'UPPER' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'LOWER' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'PLUS' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'COMMA' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'EQUAL' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'LPAREN' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'RPAREN' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'LSQBRACKET' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'RSQBRACKET' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'LBRACE' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'RBRACE' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'VARIABLE' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'IDENTIFIER' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'STRING' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'NOTHING' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'TRUE' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'FALSE' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'error' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action '#' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action '$$' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+  immediate action:   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'  gotos:
+startStates = 0
+------------------------

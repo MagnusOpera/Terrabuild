@@ -40,25 +40,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MagnusOpera.PresqueYaml" Version="0.25.0" />
-    <PackageReference Include="MagnusOpera.Lollipops" Version="0.0.4" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+   <ProjectReference Include="../Terrabuild.Configuration/Terrabuild.Configuration.fsproj" />
+   <ProjectReference Include="../Terrabuild.Parser/Terrabuild.Parser.fsproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(Configuration) != 'BFS'">
-    <PackageReference Include="Terrabuild.Extensibility" Version="0.4.0" />
-  </ItemGroup>
-
-  <Import Project="../../../Terrabuild.Extensibility.targets" Condition="$(Configuration) == 'BFS'"/>
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
     <PackageReference Include="FSharp.SystemTextJson" Version="1.2.42" />
     <PackageReference Include="Argu" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

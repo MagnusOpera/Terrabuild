@@ -1,0 +1,80 @@
+%{ 
+open AST
+
+
+#if DEBUG
+let debugPrint s = printfn "### %s" s
+#else
+let debugPrint s = ignore s
+#endif
+
+%}
+ 
+%start Configuration
+ 
+// terminal tokens
+%token NOTHING TRUE FALSE
+%token <string> STRING
+%token <string> IDENTIFIER
+%token <string> VARIABLE
+%token LBRACE RBRACE
+%token LSQBRACKET RSQBRACKET
+%token LPAREN RPAREN
+%token EQUAL
+%token COMMA
+%token PLUS
+%token TRIM UPPER LOWER
+%token EOF
+
+// associativity and precedences
+%left PLUS
+
+%type <AST.Blocks> Configuration
+%type <AST.Blocks> Blocks
+%type <AST.BlockHeader> BlockHeader
+%type <AST.BlockBody> BlockBody
+%type <AST.Attribute> Attribute
+%type <AST.Attribute> AttributeValue
+%type <AST.Attribute> AttributeArray
+%type <AST.Attribute> AttributeSubBlock
+%type <AST.Expr> Expr
+%% 
+
+Configuration: Blocks EOF { $1 }
+
+Blocks: /* empty */ { [] }
+      | Blocks Block { $1 @ [$2] }
+
+Block: BlockHeader LBRACE BlockBody RBRACE { { Header = $1; Body = $3 } }
+
+BlockHeader: IDENTIFIER { Block ($1) }
+           | IDENTIFIER IDENTIFIER { BlockName ($1, $2) }
+           | IDENTIFIER IDENTIFIER STRING { BlockTypeName ($1, $2, $3) }
+
+BlockBody: /* empty */ { [] }
+         | BlockBody Attribute { $1 @ [$2] }
+
+Attribute: AttributeValue { $1 }
+         | AttributeArray { $1 }
+         | AttributeSubBlock { $1 }
+
+AttributeValue: | IDENTIFIER EQUAL Expr { Value ($1, $3) }
+
+AttributeArray: IDENTIFIER EQUAL LSQBRACKET ArrayValues RSQBRACKET { Array ($1, $4) }
+ArrayValues: /* empty */ { [] }
+           | ArrayValues Expr { $1 @ [$2] }
+
+AttributeSubBlock: Block { SubBlock $1 }
+
+AttributeMapValues: /* empty */ { Map.empty }
+                  | AttributeMapValues IDENTIFIER EQUAL Expr { $1 |> Map.add $2 $4 }
+
+Expr: NOTHING { Nothing }
+    | TRUE { Boolean true }
+    | FALSE { Boolean false }
+    | STRING { String $1 }
+    | VARIABLE { Variable $1 }
+    | Expr PLUS Expr { InfixFunction ($1, Plus, $3) }
+    | TRIM LPAREN Expr RPAREN { Function (Trim, $3) }
+    | UPPER LPAREN Expr RPAREN { Function (Upper, $3) }
+    | LOWER LPAREN Expr RPAREN { Function (Lower, $3) }
