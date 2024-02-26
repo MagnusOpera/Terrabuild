@@ -29,46 +29,36 @@ let debugPrint s = ignore s
 // associativity and precedences
 %left PLUS
 
-%type <AST.Blocks> Configuration
-%type <AST.Blocks> Blocks
-%type <AST.Attribute> Block
-%type <AST.Blocks> BlockBody
-%type <AST.Blocks> BlockAttributes
+%type <AST.Attributes> Configuration
+%type <AST.Attributes> Attributes
 %type <AST.Attribute> Attribute
 %type <AST.Attribute> AttributeValue
 %type <AST.Attribute> AttributeArray
-%type <AST.Attribute> AttributeSubBlock
+%type <AST.Attribute> AttributeBlock
+%type <AST.Attributes> BlockBody
 %type <AST.Expr> Expr
 %% 
 
-Configuration: Blocks EOF { $1 }
+Configuration: Attributes EOF { $1 }
 
-Blocks: /* empty */ { [] }
-      | Blocks Block { $1 @ [$2] }
-
-Block: IDENTIFIER BlockBody { Block ($1, $2) }
-     | IDENTIFIER IDENTIFIER BlockBody { BlockWithType ($1, $2, $3) }
-     | IDENTIFIER IDENTIFIER STRING BlockBody { BlockWithTypeAndName ($1, $2, $3, $4) }
-
-BlockBody: LBRACE BlockAttributes RBRACE { $2 }
-
-BlockAttributes: /* empty */ { [] }
-               | BlockAttributes Attribute { $1 @ [$2] }
+Attributes: /* empty */ { [] }
+          | Attributes Attribute { $1 @ [$2] }
 
 Attribute: AttributeValue { $1 }
          | AttributeArray { $1 }
-         | AttributeSubBlock { $1 }
+         | AttributeBlock { $1 }
 
-AttributeValue: | IDENTIFIER EQUAL Expr { Value ($1, $3) }
+AttributeValue: IDENTIFIER EQUAL Expr { Value ($1, $3) }
 
 AttributeArray: IDENTIFIER EQUAL LSQBRACKET ArrayValues RSQBRACKET { Array ($1, $4) }
 ArrayValues: /* empty */ { [] }
            | ArrayValues Expr { $1 @ [$2] }
 
-AttributeSubBlock: Block { $1 }
+AttributeBlock: IDENTIFIER BlockBody { Block ($1, $2) }
+              | IDENTIFIER IDENTIFIER BlockBody { BlockWithType ($1, $2, $3) }
+              | IDENTIFIER IDENTIFIER STRING BlockBody { BlockWithTypeAndAlias ($1, $2, $3, $4) }
 
-AttributeMapValues: /* empty */ { Map.empty }
-                  | AttributeMapValues IDENTIFIER EQUAL Expr { $1 |> Map.add $2 $4 }
+BlockBody: LBRACE Attributes RBRACE { $2 }
 
 Expr: NOTHING { Nothing }
     | TRUE { Boolean true }

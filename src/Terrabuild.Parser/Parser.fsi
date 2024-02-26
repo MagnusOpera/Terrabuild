@@ -45,16 +45,13 @@ type tokenId =
 type nonTerminalId = 
     | NONTERM__startConfiguration
     | NONTERM_Configuration
-    | NONTERM_Blocks
-    | NONTERM_Block
-    | NONTERM_BlockBody
-    | NONTERM_BlockAttributes
+    | NONTERM_Attributes
     | NONTERM_Attribute
     | NONTERM_AttributeValue
     | NONTERM_AttributeArray
     | NONTERM_ArrayValues
-    | NONTERM_AttributeSubBlock
-    | NONTERM_AttributeMapValues
+    | NONTERM_AttributeBlock
+    | NONTERM_BlockBody
     | NONTERM_Expr
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int
@@ -67,4 +64,4 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val Configuration : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.Blocks) 
+val Configuration : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.Attributes) 
