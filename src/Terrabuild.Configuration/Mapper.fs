@@ -53,7 +53,9 @@ let mapBlock (block: AST.Block) (ty: Type) =
     | BlockTypeName (resource, _, _) -> resource
 
 
-let map (blocks: AST.Blocks) (ty: Type) =
+let mapAttributes 
+
+let rec mapBlocks (blocks: AST.Blocks) (ty: Type) =
     let ctor = FSharpValue.PreComputeRecordConstructor(ty)
     let fields = FSharpType.GetRecordFields(ty)
 
@@ -83,8 +85,14 @@ let map (blocks: AST.Blocks) (ty: Type) =
             | _ -> failwith $"Unknown field {resourceName}"
 
         let fieldType = fields[index]
-        let value = mapField block fiedType
 
+        let value =
+            match block.Header with
+            | Block resource -> mapAttributes block.Body fieldType 
+            | BlockName (resource, resourceType) -> mapAttributesWithType block.Body resourceType fieldType
+            | BlockTypeName (resource, resourceType, resourceName) -> mapAttributesWithTypeAndName block.Body resourceName resourceType fieldType
+
+        ()
 
 
 

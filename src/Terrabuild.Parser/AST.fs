@@ -14,21 +14,11 @@ type Expr =
     | InfixFunction of Expr * Operator * Expr
     | Function of Operator * Expr
 
-type BlockHeader =
-    | Block of resource:string
-    | BlockName of resource:string * name:string
-    | BlockTypeName of resource:string * tpe:string * name:string
-
 type Attribute =
     | Value of name:string * value:Expr
     | Array of name:string * value:Expr list
-    | SubBlock of Block
+    | Block of resource:string * Blocks
+    | BlockWithType of resource:string * tpe:string * Blocks
+    | BlockWithTypeAndName of resource:string * tpe:string * name:string * Blocks
 
-and Block = {
-    Header: BlockHeader
-    Body: BlockBody
-}
-
-and BlockBody = Attribute list
-
-type Blocks = Block list
+and Blocks = Attribute list

@@ -31,8 +31,9 @@ let debugPrint s = ignore s
 
 %type <AST.Blocks> Configuration
 %type <AST.Blocks> Blocks
-%type <AST.BlockHeader> BlockHeader
-%type <AST.BlockBody> BlockBody
+%type <AST.Attribute> Block
+%type <AST.Blocks> BlockBody
+%type <AST.Blocks> BlockAttributes
 %type <AST.Attribute> Attribute
 %type <AST.Attribute> AttributeValue
 %type <AST.Attribute> AttributeArray
@@ -45,14 +46,14 @@ Configuration: Blocks EOF { $1 }
 Blocks: /* empty */ { [] }
       | Blocks Block { $1 @ [$2] }
 
-Block: BlockHeader LBRACE BlockBody RBRACE { { Header = $1; Body = $3 } }
+Block: IDENTIFIER BlockBody { Block ($1, $2) }
+     | IDENTIFIER IDENTIFIER BlockBody { BlockWithType ($1, $2, $3) }
+     | IDENTIFIER IDENTIFIER STRING BlockBody { BlockWithTypeAndName ($1, $2, $3, $4) }
 
-BlockHeader: IDENTIFIER { Block ($1) }
-           | IDENTIFIER IDENTIFIER { BlockName ($1, $2) }
-           | IDENTIFIER IDENTIFIER STRING { BlockTypeName ($1, $2, $3) }
+BlockBody: LBRACE BlockAttributes RBRACE { $2 }
 
-BlockBody: /* empty */ { [] }
-         | BlockBody Attribute { $1 @ [$2] }
+BlockAttributes: /* empty */ { [] }
+               | BlockAttributes Attribute { $1 @ [$2] }
 
 Attribute: AttributeValue { $1 }
          | AttributeArray { $1 }
@@ -64,7 +65,7 @@ AttributeArray: IDENTIFIER EQUAL LSQBRACKET ArrayValues RSQBRACKET { Array ($1, 
 ArrayValues: /* empty */ { [] }
            | ArrayValues Expr { $1 @ [$2] }
 
-AttributeSubBlock: Block { SubBlock $1 }
+AttributeSubBlock: Block { $1 }
 
 AttributeMapValues: /* empty */ { Map.empty }
                   | AttributeMapValues IDENTIFIER EQUAL Expr { $1 |> Map.add $2 $4 }

@@ -47,8 +47,8 @@ type nonTerminalId =
     | NONTERM_Configuration
     | NONTERM_Blocks
     | NONTERM_Block
-    | NONTERM_BlockHeader
     | NONTERM_BlockBody
+    | NONTERM_BlockAttributes
     | NONTERM_Attribute
     | NONTERM_AttributeValue
     | NONTERM_AttributeArray
