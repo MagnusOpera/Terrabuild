@@ -3,6 +3,7 @@ open System
 open AST
 open System.Reflection
 open Microsoft.FSharp.Reflection
+open Microsoft.FSharp.Core
 
 [<AttributeUsage(AttributeTargets.Property); AllowNullLiteral>]
 type KindAttribute() =
@@ -44,6 +45,10 @@ type MapOperations<'t when 't: comparison>() =
         let add = map |> Map.add key value
         add
 
+type OptionOperations<'t when 't: null> =
+    static member Bind (value: 't): obj =
+        let v = value |> Option.ofObj
+        v
 
 let emptyList (tpe: Type) =
     let template = typedefof<ListOperations<_>>
@@ -71,6 +76,13 @@ let addMap (tpe: Type) (m: obj) (key: string) (value: obj) =
     let genType = template.MakeGenericType(tpe)
     let add = genType.GetMethod("Add")
     let res = add.Invoke(null, [| m; key; value |])
+    res
+
+let bindOption (tpe: Type) (value: obj) =
+    let template = typedefof<OptionOperations<_>>
+    let genType = template.MakeGenericType(tpe)
+    let add = genType.GetMethod("Bind")
+    let res = add.Invoke(null, [| value |])
     res
 
 let getRequiredAndDefaultValue (propInfo: PropertyInfo) =
@@ -132,10 +144,12 @@ let rec mapRecord (kind: string option) (recordType: Type) (attributes: Attribut
                         match block.Value with
                         | Scalar expr -> Some expr
                         | Array exprs -> Some exprs
-                        | Block block -> Some (mapRecord block.Kind (fields[index].PropertyType.GetGenericArguments()[0]) block.Attributes)
+                        | Block block ->
+                            let v = mapRecord block.Kind (fields[index].PropertyType.GetGenericArguments()[0]) block.Attributes
+                            bindOption (fields[index].PropertyType.GetGenericArguments()[0]) v
                     | TypeHelpers.TypeKind.FsList ->
                         if fields[index].PropertyType.GetGenericArguments()[0] = typeof<AST.Attribute> then
-                            let tail = block.Value
+                            let tail = block
                             let head = fieldRequiredAndValue[index] |> snd
                             addList (fields[index].PropertyType.GetGenericArguments()[0]) head tail                            
                         else
