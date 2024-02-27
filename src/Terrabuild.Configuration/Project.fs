@@ -18,13 +18,9 @@ type Project = {
     [<Name("parser")>] Parser: Expression option
 }
 
-type Target = {
-    [<Any>] Commands: Attributes
-}
-
 
 type ProjectConfiguration = {
     [<Name("extension")>] Extensions: Map<string, Extension>
     [<Name("project")>] Project: Project option
-    [<Name("target")>] Targets: Map<string, Target>
+    [<Name("target")>] Targets: Attributes
 }

@@ -124,18 +124,7 @@ let rec mapRecord (kind: string option) (recordType: Type) (attributes: Attribut
     for block in attributes do
         let index, value =
             match fieldIndices |> Map.tryFind block.Name with
-            | None ->
-                match fieldIndices |> Map.tryFind "__any__" with
-                | Some index ->
-                    let value: obj =
-                        match fields[index].PropertyType |> TypeHelpers.getKind with
-                        | TypeHelpers.TypeKind.FsList ->
-                            let tail = block.Value
-                            let head = fieldRequiredAndValue[index] |> snd
-                            addList (fields[index].PropertyType.GetGenericArguments()[0]) head tail
-                        | _ -> failwith $"Can't map structure to property {fields[index].Name}"
-                    index, value
-                | _ -> failwith $"Can't map structure to property"
+            | None -> failwith $"Can't map structure to property"
             | Some index ->
                 let value: obj =
                     match fields[index].PropertyType |> TypeHelpers.getKind with
@@ -145,16 +134,21 @@ let rec mapRecord (kind: string option) (recordType: Type) (attributes: Attribut
                         | Array exprs -> Some exprs
                         | Block block -> Some (mapRecord block.Kind (fields[index].PropertyType.GetGenericArguments()[0]) block.Attributes)
                     | TypeHelpers.TypeKind.FsList ->
-                        match block.Value with
-                        | Array exprs ->
-                            if fieldRequiredAndValue[index] |> fst then failwith "Already set"
-                            exprs
-                        | Block block ->
-                            if block.Alias <> None || block.Kind <> None then failwith "Unexpected block in list"
-                            let tail = mapRecord block.Kind (fields[index].PropertyType.GetGenericArguments()[0]) block.Attributes
+                        if fields[index].PropertyType.GetGenericArguments()[0] = typeof<AST.Attribute> then
+                            let tail = block.Value
                             let head = fieldRequiredAndValue[index] |> snd
-                            addList (fields[index].PropertyType.GetGenericArguments()[0]) head tail
-                        | _ -> failwith $"Can't map value to property {fields[index].Name}"
+                            addList (fields[index].PropertyType.GetGenericArguments()[0]) head tail                            
+                        else
+                            match block.Value with
+                            | Array exprs ->
+                                if fieldRequiredAndValue[index] |> fst then failwith "Already set"
+                                exprs
+                            | Block block ->
+                                if block.Alias <> None || block.Kind <> None then failwith "Unexpected block in list"
+                                let tail = mapRecord block.Kind (fields[index].PropertyType.GetGenericArguments()[0]) block.Attributes
+                                let head = fieldRequiredAndValue[index] |> snd
+                                addList (fields[index].PropertyType.GetGenericArguments()[0]) head tail
+                            | _ -> failwith $"Can't map value to property {fields[index].Name}"
                     | TypeHelpers.TypeKind.FsRecord ->
                         match block.Value with
                         | Block block -> mapRecord block.Kind fields[index].PropertyType block.Attributes
