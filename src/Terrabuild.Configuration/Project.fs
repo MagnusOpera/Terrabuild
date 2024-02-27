@@ -19,7 +19,7 @@ type Project = {
 }
 
 type Target = {
-    Commands: Attributes
+    [<Any>] Commands: Attributes
 }
 
 

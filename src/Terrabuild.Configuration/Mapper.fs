@@ -18,6 +18,10 @@ type NameAttribute(name: string) =
 type RequiredAttribute() =
     inherit System.Attribute()
 
+[<AttributeUsage(AttributeTargets.Property); AllowNullLiteral>]
+type AnyAttribute() =
+    inherit System.Attribute()
+
 
 
 type ListOperations<'t>() =
@@ -97,15 +101,17 @@ let rec mapRecord (kind: string option) (recordType: Type) (attributes: Attribut
 
     let fieldInfo (pi: PropertyInfo) =
         let isKind = pi.GetCustomAttribute<KindAttribute>() <> null
+        let isAny = pi.GetCustomAttribute<AnyAttribute>() <> null
         let name = pi.GetCustomAttribute<NameAttribute>() |> Option.ofObj |> Option.map (fun x -> x.Name)
-        isKind, name
+        isKind, isAny, name
 
     let fieldIndices =
         fields
         |> Seq.mapi (fun idx pi  -> 
             match fieldInfo pi with
-            | true, _ -> "__kind__", idx
-            | _, Some name -> name, idx
+            | true, _, _ -> "__kind__", idx
+            | _, true, _ -> "__any__", idx
+            | _, _, Some name -> name, idx
             | _ -> failwith $"Invalid property {pi.Name}")
         |> Map
 
@@ -118,6 +124,18 @@ let rec mapRecord (kind: string option) (recordType: Type) (attributes: Attribut
     for block in attributes do
         let index, value =
             match fieldIndices |> Map.tryFind block.Name with
+            | None ->
+                match fieldIndices |> Map.tryFind "__any__" with
+                | Some index ->
+                    let value: obj =
+                        match fields[index].PropertyType |> TypeHelpers.getKind with
+                        | TypeHelpers.TypeKind.FsList ->
+                            let tail = block.Value
+                            let head = fieldRequiredAndValue[index] |> snd
+                            addList (fields[index].PropertyType.GetGenericArguments()[0]) head tail
+                        | _ -> failwith $"Can't map structure to property {fields[index].Name}"
+                    index, value
+                | _ -> failwith $"Can't map structure to property"
             | Some index ->
                 let value: obj =
                     match fields[index].PropertyType |> TypeHelpers.getKind with
@@ -157,7 +175,6 @@ let rec mapRecord (kind: string option) (recordType: Type) (attributes: Attribut
                         | Array exprs -> exprs
                         | _ -> failwith $"Can't map structure to property {fields[index].Name}"
                 index, value
-            | None -> failwith $"Unknown property {block.Name}"
         fieldRequiredAndValue[index] <- false, value
 
     let fieldValues =
