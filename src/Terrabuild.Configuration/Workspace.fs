@@ -1,36 +1,32 @@
 ﻿module Workspace
 open Mapper
 
-[<RequireQualifiedAccess>]
-type Expression =
-    | String of string
-    | None
+type Expression = AST.Expr
 
 type Terrabuild = {
-    [<Name("storage")>] Storage: string option
-    [<Name("sourcecontrol")>] SourceControl: string option
+    [<Name("storage")>] Storage: Expression option
+    [<Name("sourcecontrol")>] SourceControl: Expression option
 }
 
 type Target = {
     [<Kind>] Kind: string
-    [<Name("depends_on")>] DependsOn: string list
+    [<Name("depends_on")>] DependsOn: Expression list
 }
 
 type Environment = {
     [<Kind>] Kind: string
-    [<Name("variables")>] Variables: Map<string, string>
+    [<Name("variables")>] Variables: Map<string, Expression>
 }
 
 type Extension = {
     [<Kind>] Kind: string
-    [<Alias>] Alias: string option
-    [<Name("container")>] Container: string option
+    [<Name("container")>] Container: Expression option
     [<Name("parameters")>] Parameters: Map<string, Expression>
 }
 
-type Workspace = {
+type WorkspaceConfiguration = {
     [<Name("terrabuild")>] Terrabuild: Terrabuild
-    [<Name("target")>] Targets: Target list
-    [<Name("environment")>] Environments: Environment list
-    [<Name("extension")>] Extensions: Extension list
+    [<Name("target")>] Targets: Map<string, Target>
+    [<Name("environment")>] Environments: Map<string, Environment>
+    [<Name("extension")>] Extensions: Map<string, Extension>
 }

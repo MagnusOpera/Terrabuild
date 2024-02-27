@@ -47,11 +47,11 @@ type nonTerminalId =
     | NONTERM_Configuration
     | NONTERM_Attributes
     | NONTERM_Attribute
-    | NONTERM_AttributeValue
+    | NONTERM_AttributeScalar
     | NONTERM_AttributeArray
     | NONTERM_ArrayValues
     | NONTERM_AttributeBlock
-    | NONTERM_BlockBody
+    | NONTERM_BlockValues
     | NONTERM_Expr
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int

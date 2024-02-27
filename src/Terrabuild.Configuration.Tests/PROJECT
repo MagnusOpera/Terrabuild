@@ -1,0 +1,40 @@
+extension dotnet "dotnet" {
+  import = "sss"
+  parameters {
+    configuration = $configuration
+  }
+}
+
+extension docker {
+  parameters {
+    image = "ghcr.io/magnusopera/dotnet-app"
+  }
+}
+
+project {
+  dependencies = [ "../../libraries/shell-lib" ]
+  outputs = [ "dist" ]
+  labels = [ "app"
+             "dotnet" ]
+  parser = "dotnet"
+}
+
+target build {
+  dotnet build { }  
+}
+
+target dist {
+  dotnet publish { }
+}
+
+target docker {
+  shell echo { message = trim("building project1 " + $configuration) }
+  
+  docker build {
+    configuration = $configuration
+  }
+}
+
+target push {
+  docker push { }
+}

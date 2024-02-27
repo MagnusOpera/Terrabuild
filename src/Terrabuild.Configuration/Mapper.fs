@@ -4,90 +4,165 @@ open AST
 open System.Reflection
 open Microsoft.FSharp.Reflection
 
-[<AttributeUsage(AttributeTargets.Property)>]
+[<AttributeUsage(AttributeTargets.Property); AllowNullLiteral>]
 type KindAttribute() =
     inherit System.Attribute()
 
-[<AttributeUsage(AttributeTargets.Property)>]
-type AliasAttribute() =
-    inherit System.Attribute()
-
-[<AttributeUsage(AttributeTargets.Property)>]
+[<AttributeUsage(AttributeTargets.Property); AllowNullLiteral>]
 type NameAttribute(name: string) =
     inherit System.Attribute()
 
+    member val Name = name
+
+[<AttributeUsage(AttributeTargets.Property); AllowNullLiteral>]
+type RequiredAttribute() =
+    inherit System.Attribute()
 
 
 
-let defaultValues (ty: Type): obj =
-    match TypeHelpers.getKind ty with
-    | TypeHelpers.TypeKind.FsList -> List.empty
-    | TypeHelpers.TypeKind.FsOption -> None
-    | _ -> null
+type ListOperations<'t>() =
+    static member val Empty: obj =
+        let empty : 't list = List.empty
+        empty
+
+    static member Add (head: 't list) (tail: 't): obj =
+        let res = head @ [ tail ]
+        res
+        
+
+type MapOperations<'t when 't: comparison>() =
+    static member val Empty: obj =
+        let empty : Map<string, 't> = Map.empty
+        empty
+
+    static member Add (map: Map<string, 't>) (key: string) (value: 't): obj =
+        if map |> Map.containsKey key then failwith $"Key {key} already exists"        
+        let add = map |> Map.add key value
+        add
 
 
-let isRequired (propInfo: PropertyInfo) =
+let emptyList (tpe: Type) =
+    let template = typedefof<ListOperations<_>>
+    let genType = template.MakeGenericType(tpe)
+    let empty = genType.GetProperty("Empty")
+    let inst = empty.GetValue(null)
+    inst
+
+let emptyMap (tpe: Type) =
+    let template = typedefof<MapOperations<_>>
+    let genType = template.MakeGenericType(tpe)
+    let empty = genType.GetProperty("Empty")
+    let inst = empty.GetValue(null)
+    inst
+
+let addList (tpe: Type) (head: obj) (tail: obj) =
+    let template = typedefof<ListOperations<_>>
+    let genType = template.MakeGenericType(tpe)
+    let add = genType.GetMethod("Add")
+    let res = add.Invoke(null, [| head; tail |])
+    res
+
+let addMap (tpe: Type) (m: obj) (key: string) (value: obj) =
+    let template = typedefof<MapOperations<_>>
+    let genType = template.MakeGenericType(tpe)
+    let add = genType.GetMethod("Add")
+    let res = add.Invoke(null, [| m; key; value |])
+    res
+
+let getRequiredAndDefaultValue (propInfo: PropertyInfo) =
+    let genParam idx = propInfo.PropertyType.GetGenericArguments()[idx]
+
+    let isRequired = propInfo.GetCustomAttribute<RequiredAttribute>() <> null
     match TypeHelpers.getKind propInfo.PropertyType with
-    | TypeHelpers.TypeKind.FsOption -> false
-    | TypeHelpers.TypeKind.FsList ->
-        propInfo.
-    | _ -> true, null
+    | TypeHelpers.TypeKind.FsList -> isRequired, genParam 0 |> emptyList
+    | TypeHelpers.TypeKind.FsMap -> isRequired, genParam 1 |> emptyMap
+    | _ -> false, null
 
 
+// Map<string, Expression>
+let mapMap (attributes: Attributes): obj =
+    let items = [
+        for attribute in attributes do
+            match attribute.Value with
+            | Scalar expr -> attribute.Name, expr
+            | _ -> failwith "Invalid"
+    ]
+    let mapValue = items |> Map.ofList
+    mapValue
 
-let mapBlock (block: AST.Block) (ty: Type) =
-    let ctor = FSharpValue.PreComputeRecordConstructor(ty)
-    let fields = FSharpType.GetRecordFields(ty)
+let rec mapRecord (kind: string option) (recordType: Type) (attributes: Attributes) =
+    let ctor = FSharpValue.PreComputeRecordConstructor(recordType)
+    let fields = FSharpType.GetRecordFields(recordType)
+    let fieldRequiredAndValue = fields |> Array.map getRequiredAndDefaultValue
 
-    match block.Header with
-    | Block resource -> resource
-    | BlockName (resource, _) -> resource
-    | BlockTypeName (resource, _, _) -> resource
-
-
-let mapAttributes 
-
-let rec mapBlocks (blocks: AST.Blocks) (ty: Type) =
-    let ctor = FSharpValue.PreComputeRecordConstructor(ty)
-    let fields = FSharpType.GetRecordFields(ty)
-
-    // let fieldRequired =
-    //     fields
-    //     |> Array.map isRequired
-
-    // let fieldValues =
-    //     fields
-    //     |> Array.map (fun info -> serializer.Default(info.PropertyType))
+    let fieldInfo (pi: PropertyInfo) =
+        let isKind = pi.GetCustomAttribute<KindAttribute>() <> null
+        let name = pi.GetCustomAttribute<NameAttribute>() |> Option.ofObj |> Option.map (fun x -> x.Name)
+        isKind, name
 
     let fieldIndices =
         fields
-        |> Seq.mapi (fun idx pi  -> pi.Name.ToLowerInvariant(), idx)
+        |> Seq.mapi (fun idx pi  -> 
+            match fieldInfo pi with
+            | true, _ -> "__kind__", idx
+            | _, Some name -> name, idx
+            | _ -> failwith $"Invalid property {pi.Name}")
         |> Map
 
-    for block in blocks do
-        let resourceName =
-            match block.Header with
-            | Block resource -> resource
-            | BlockName (resource, _) -> resource
-            | BlockTypeName (resource, _, _) -> resource
+    match kind, fieldIndices |> Map.tryFind "__kind__" with
+    | Some kind, Some idx -> fieldRequiredAndValue[idx] <- false, kind
+    | Some _, None -> failwith "Unexpected kind"
+    | None, None -> ()
+    | _ -> failwith $"Expecting Kind on {recordType.Name}"
 
-        let index =
-            match fieldIndices |> Map.tryFind resourceName with
-            | Some index -> index
-            | _ -> failwith $"Unknown field {resourceName}"
+    for block in attributes do
+        let index, value =
+            match fieldIndices |> Map.tryFind block.Name with
+            | Some index ->
+                let value: obj =
+                    match fields[index].PropertyType |> TypeHelpers.getKind with
+                    | TypeHelpers.TypeKind.FsOption ->
+                        match block.Value with
+                        | Scalar expr -> Some expr
+                        | Array exprs -> Some exprs
+                        | Block block -> Some (mapRecord block.Kind (fields[index].PropertyType.GetGenericArguments()[0]) block.Attributes)
+                    | TypeHelpers.TypeKind.FsList ->
+                        match block.Value with
+                        | Array exprs ->
+                            if fieldRequiredAndValue[index] |> fst then failwith "Already set"
+                            exprs
+                        | Block block ->
+                            if block.Alias <> None || block.Kind <> None then failwith "Unexpected block in list"
+                            let tail = mapRecord block.Kind (fields[index].PropertyType.GetGenericArguments()[0]) block.Attributes
+                            let head = fieldRequiredAndValue[index] |> snd
+                            addList (fields[index].PropertyType.GetGenericArguments()[0]) head tail
+                        | _ -> failwith $"Can't map value to property {fields[index].Name}"
+                    | TypeHelpers.TypeKind.FsRecord ->
+                        match block.Value with
+                        | Block block -> mapRecord block.Kind fields[index].PropertyType block.Attributes
+                        | _ -> failwith $"Can't map value to property {fields[index].Name}"
+                    | TypeHelpers.TypeKind.FsMap ->
+                        match block.Value with
+                        | Block block ->
+                            match block.Alias with
+                            | Some alias ->
+                                let tail = mapRecord block.Kind (fields[index].PropertyType.GetGenericArguments()[1]) block.Attributes
+                                let head = fieldRequiredAndValue[index] |> snd
+                                addMap (fields[index].PropertyType.GetGenericArguments()[1]) head alias tail
+                            | None -> mapMap block.Attributes
+                        | _ -> failwith $"Can't map value to property {fields[index].Name}"
+                    | _ ->
+                        match block.Value with
+                        | Scalar expr -> expr
+                        | Array exprs -> exprs
+                        | _ -> failwith $"Can't map structure to property {fields[index].Name}"
+                index, value
+            | None -> failwith $"Unknown property {block.Name}"
+        fieldRequiredAndValue[index] <- false, value
 
-        let fieldType = fields[index]
-
-        let value =
-            match block.Header with
-            | Block resource -> mapAttributes block.Body fieldType 
-            | BlockName (resource, resourceType) -> mapAttributesWithType block.Body resourceType fieldType
-            | BlockTypeName (resource, resourceType, resourceName) -> mapAttributesWithTypeAndName block.Body resourceName resourceType fieldType
-
-        ()
-
-
-
-let map<'t> (blocks: Attributes) =
-    let recordType = typeof<'t>
-    map blocks recordType
+    let fieldValues =
+        fieldRequiredAndValue
+        |> Array.mapi (fun idx (required, value) -> if required then failwith $"Missing required field {recordType.Name}::{fields[idx].Name}"
+                                                    else value)
+    let value = ctor fieldValues
+    value

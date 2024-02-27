@@ -2,10 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Blocks.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FsUnit" Version="4.0.4" />
@@ -16,11 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../Terrabuild.Parser/Terrabuild.Parser.fsproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Blocks.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>

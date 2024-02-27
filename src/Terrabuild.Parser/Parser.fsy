@@ -32,10 +32,10 @@ let debugPrint s = ignore s
 %type <AST.Attributes> Configuration
 %type <AST.Attributes> Attributes
 %type <AST.Attribute> Attribute
-%type <AST.Attribute> AttributeValue
+%type <AST.Attribute> AttributeScalar
 %type <AST.Attribute> AttributeArray
 %type <AST.Attribute> AttributeBlock
-%type <AST.Attributes> BlockBody
+%type <AST.Block> BlockValues
 %type <AST.Expr> Expr
 %% 
 
@@ -44,21 +44,20 @@ Configuration: Attributes EOF { $1 }
 Attributes: /* empty */ { [] }
           | Attributes Attribute { $1 @ [$2] }
 
-Attribute: AttributeValue { $1 }
+Attribute: AttributeScalar { $1 }
          | AttributeArray { $1 }
          | AttributeBlock { $1 }
 
-AttributeValue: IDENTIFIER EQUAL Expr { Value ($1, $3) }
+AttributeScalar: IDENTIFIER EQUAL Expr { { Name = $1; Value = Scalar $3 } }
 
-AttributeArray: IDENTIFIER EQUAL LSQBRACKET ArrayValues RSQBRACKET { Array ($1, $4) }
+AttributeArray: IDENTIFIER EQUAL LSQBRACKET ArrayValues RSQBRACKET { { Name = $1; Value = Array $4 } }
 ArrayValues: /* empty */ { [] }
            | ArrayValues Expr { $1 @ [$2] }
 
-AttributeBlock: IDENTIFIER BlockBody { Block ($1, $2) }
-              | IDENTIFIER IDENTIFIER BlockBody { BlockWithType ($1, $2, $3) }
-              | IDENTIFIER IDENTIFIER STRING BlockBody { BlockWithTypeAndAlias ($1, $2, $3, $4) }
-
-BlockBody: LBRACE Attributes RBRACE { $2 }
+AttributeBlock: IDENTIFIER BlockValues { { Name = $1; Value = Block $2 } }
+BlockValues: LBRACE Attributes RBRACE { { Kind = None; Alias = None; Attributes = $2 } }
+           | IDENTIFIER LBRACE Attributes RBRACE { { Kind = Some $1; Alias = Some $1; Attributes = $3 } }
+           | IDENTIFIER STRING LBRACE Attributes RBRACE { { Kind = Some $1; Alias = Some $2; Attributes = $4 } }
 
 Expr: NOTHING { Nothing }
     | TRUE { Boolean true }

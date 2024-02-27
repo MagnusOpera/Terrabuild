@@ -9,6 +9,7 @@
     <Compile Include="TypeHelpers.fs" />
     <Compile Include="Mapper.fs" />
     <Compile Include="Workspace.fs" />
+    <Compile Include="Project.fs" />
   </ItemGroup>
 
 

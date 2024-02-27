@@ -14,11 +14,20 @@ type Expr =
     | InfixFunction of Expr * Operator * Expr
     | Function of Operator * Expr
 
-type Attribute =
-    | Value of name:string * Expr
-    | Array of name:string * Expr list
-    | Block of name:string * Attributes
-    | BlockWithType of name:string * kind:string * Attributes
-    | BlockWithTypeAndAlias of name:string * kind:string * alias:string * Attributes
+type Block = {
+    Kind: string option
+    Alias: string option
+    Attributes: Attributes
+}
+
+and Value =
+    | Scalar of Expr
+    | Array of Expr list
+    | Block of Block
+
+and Attribute = {
+    Name: string
+    Value: Value
+}
 
 and Attributes = Attribute list
