@@ -21,8 +21,7 @@ environment release {
   }
 }
 
-extension "dotnet" {
-  container = none
+extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
   parameters {
     configuration = $configuration

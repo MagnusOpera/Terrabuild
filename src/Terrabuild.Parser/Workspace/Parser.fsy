@@ -1,0 +1,110 @@
+%{ 
+open Terrabuild.Parser.AST
+open Terrabuild.Parser.Workspace.AST
+
+
+#if DEBUG
+let debugPrint s = printfn "### %s" s
+#else
+let debugPrint s = ignore s
+#endif
+
+%}
+ 
+%start Workspace
+ 
+// terminal tokens
+%token NOTHING TRUE FALSE
+%token <string> STRING
+%token <string> IDENTIFIER
+%token <string> VARIABLE
+%token LBRACE RBRACE
+%token LSQBRACKET RSQBRACKET
+%token LPAREN RPAREN
+%token EQUAL
+%token COMMA
+%token PLUS
+%token TRIM UPPER LOWER
+%token EOF
+%token TERRABUILD TARGET ENVIRONMENT EXTENSION
+%token STORAGE SOURCECONTROL DEPENDS_ON VARIABLES CONTAINER PARAMETERS
+
+// associativity and precedences
+%left PLUS
+
+%type <Terrabuild.Parser.Workspace.AST.Workspace> Workspace
+%% 
+
+Workspace:
+    | WorkspaceComponents EOF { Workspace.Build $1 }
+
+WorkspaceComponents:
+    | /* empty */ { [] }
+    | WorkspaceComponents Terrabuild { $1 @ [$2] }
+    | WorkspaceComponents Target { $1 @ [$2] }
+    | WorkspaceComponents Environment { $1 @ [$2] }
+    | WorkspaceComponents Extension { $1 @ [$2] }
+
+Terrabuild:
+    | TERRABUILD LBRACE TerrabuildComponents RBRACE { WorkspaceComponents.Terrabuild (Terrabuild.Build $3) }
+TerrabuildComponents:
+    | /* empty */ { [] }
+    | TerrabuildComponents TerrabuildStorage { $1 @ [$2] }
+    | TerrabuildComponents TerrabuildSourceControl { $1 @ [$2] }
+TerrabuildStorage:
+    | STORAGE EQUAL String { TerrabuildComponents.Storage $3 }
+TerrabuildSourceControl:
+    | SOURCECONTROL EQUAL String { TerrabuildComponents.SourceControl $3 }
+
+Target:
+    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { WorkspaceComponents.Target ($2, Target.Build $4) }
+TargetComponents:
+    | /* empty */ { [] }
+    | TargetComponents TargetDependsOn { $1 @ [$2] }
+TargetDependsOn:
+    | DEPENDS_ON EQUAL ListOfString { TargetComponents.DependsOn $3 }
+
+Environment:
+    | ENVIRONMENT IDENTIFIER LBRACE EnvironmentComponents RBRACE { WorkspaceComponents.Environment ($2, Environment.Build $4 )}
+EnvironmentComponents:
+    | /* empty */ { [] }
+    | EnvironmentComponents EnvironmentVariables { $1 @ [$2] }
+EnvironmentVariables:
+    | VARIABLES LBRACE Variables RBRACE { EnvironmentComponents.Variables $3 }
+
+Extension:
+    | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { WorkspaceComponents.Extension ($2, Extension.Build $4) }
+ExtensionComponents:
+    | /* empty */ { [] }
+    | ExtensionComponents Container { $1 @ [$2] }
+    | ExtensionComponents Parameters { $1 @ [$2] }
+Container:
+    | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
+Parameters:
+    | PARAMETERS LBRACE Variables RBRACE { ExtensionComponents.Parameters $3 }
+
+
+String:
+    | STRING { $1 }
+ListOfString:
+    | LSQBRACKET Strings RSQBRACKET { $2 }
+Strings:
+    | /* empty */ { [] }
+    | Strings String { $1 @ [$2] }
+
+Variables:
+    | /* empty */ { Map.empty }
+    | Variables Variable { $1.Add $2 }
+Variable:
+    | IDENTIFIER EQUAL Expr { ($1, $3) }
+
+Expr:
+    | NOTHING { Nothing }
+    | TRUE { Boolean true }
+    | FALSE { Boolean false }
+    | STRING { String $1 }
+    | VARIABLE { Variable $1 }
+    | Expr PLUS Expr { InfixFunction ($1, Plus, $3) }
+    | TRIM LPAREN Expr RPAREN { Function (Trim, $3) }
+    | UPPER LPAREN Expr RPAREN { Function (Upper, $3) }
+    | LOWER LPAREN Expr RPAREN { Function (Lower, $3) }

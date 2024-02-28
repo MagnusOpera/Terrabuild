@@ -1,9 +1,9 @@
 {
 // module Lexer
 
-open Parser  // we need the terminal tokens from the Parser
+open WorkspaceParser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
- 
+
 let lexeme = LexBuffer<_>.LexemeString
 }
 
@@ -17,15 +17,25 @@ let whitespace = ' ' | '\t'
 let newline    = '\n' | '\r' '\n'
 
 rule token = parse
-    | "nothing"     { NOTHING }
-    | "true"     { TRUE }
-    | "false"    { FALSE }
-    | "trim"     { TRIM }
-    | "upper"    { UPPER }
-    | "lower"    { LOWER }
+    | "nothing" { NOTHING }
+    | "true" { TRUE }
+    | "false" { FALSE }
+    | "trim" { TRIM }
+    | "upper" { UPPER }
+    | "lower" { LOWER }
     | quotedString { 
         let s = lexeme lexbuf |> string
         STRING (s.Substring(1, s.Length-2)) }
+    | "terrabuild" { TERRABUILD }
+    | "target"     { TARGET }
+    | "environment" { ENVIRONMENT }
+    | "extension" { EXTENSION }
+    | "storage"  { STORAGE }
+    | "sourcecontrol" { SOURCECONTROL }
+    | "depends_on" { DEPENDS_ON }
+    | "variables" { VARIABLES }
+    | "container" { CONTAINER }
+    | "parameters" { PARAMETERS }
     | variable   {
         let s = lexeme lexbuf |> string
         VARIABLE (s.Substring(1, s.Length-1)) }
