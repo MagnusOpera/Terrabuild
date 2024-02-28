@@ -12,6 +12,13 @@
     <FsLex Include="Workspace/Lexer.fsl">
         <OtherFlags>--module WorkspaceLexer --unicode -o Workspace/Lexer.fs</OtherFlags>
     </FsLex>
+
+    <FsYacc Include="Build/Parser.fsy">
+        <OtherFlags>-v --module BuildParser -o Build/Parser.fs</OtherFlags>
+    </FsYacc>
+    <FsLex Include="Build/Lexer.fsl">
+        <OtherFlags>--module BuildLexer --unicode -o Build/Lexer.fs</OtherFlags>
+    </FsLex>
   </ItemGroup>
   
   <ItemGroup>
@@ -21,6 +28,11 @@
     <Compile Include="Workspace/Parser.fs" />
     <Compile Include="Workspace/Lexer.fs" />
     <Compile Include="Workspace/FrontEnd.fs" />
+    <Compile Include="Build/AST.fs" />
+    <Compile Include="Build/Parser.fsi" />
+    <Compile Include="Build/Parser.fs" />
+    <Compile Include="Build/Lexer.fs" />
+    <Compile Include="Build/FrontEnd.fs" />
   </ItemGroup>
 
   <ItemGroup>

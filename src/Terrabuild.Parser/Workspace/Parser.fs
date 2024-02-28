@@ -319,7 +319,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 39 "Workspace/Parser.fsy"
-                                                     Workspace.Build _1 
+                                                     _1 
                    )
 # 39 "Workspace/Parser.fsy"
                  : Terrabuild.Parser.Workspace.AST.Workspace));
@@ -329,7 +329,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 42 "Workspace/Parser.fsy"
-                                         [] 
+                                         Workspace.Empty 
                    )
 # 42 "Workspace/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
@@ -341,7 +341,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 43 "Workspace/Parser.fsy"
-                                                            _1 @ [_2] 
+                                                            _1.Patch _2 
                    )
 # 43 "Workspace/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
@@ -353,7 +353,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 44 "Workspace/Parser.fsy"
-                                                        _1 @ [_2] 
+                                                        _1.Patch _2 
                    )
 # 44 "Workspace/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
@@ -365,7 +365,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 45 "Workspace/Parser.fsy"
-                                                             _1 @ [_2] 
+                                                             _1.Patch _2 
                    )
 # 45 "Workspace/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
@@ -377,7 +377,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 46 "Workspace/Parser.fsy"
-                                                           _1 @ [_2] 
+                                                           _1.Patch _2 
                    )
 # 46 "Workspace/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
@@ -388,7 +388,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 49 "Workspace/Parser.fsy"
-                                                                           WorkspaceComponents.Terrabuild (Terrabuild.Build _3) 
+                                                                           WorkspaceComponents.Terrabuild _3 
                    )
 # 49 "Workspace/Parser.fsy"
                  : 'gentype_Terrabuild));
@@ -398,7 +398,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 51 "Workspace/Parser.fsy"
-                                         [] 
+                                         Terrabuild.Empty 
                    )
 # 51 "Workspace/Parser.fsy"
                  : 'gentype_TerrabuildComponents));
@@ -410,7 +410,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 52 "Workspace/Parser.fsy"
-                                                                    _1 @ [_2] 
+                                                                    _1.Patch _2 
                    )
 # 52 "Workspace/Parser.fsy"
                  : 'gentype_TerrabuildComponents));
@@ -422,7 +422,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 53 "Workspace/Parser.fsy"
-                                                                          _1 @ [_2] 
+                                                                          _1.Patch _2 
                    )
 # 53 "Workspace/Parser.fsy"
                  : 'gentype_TerrabuildComponents));
@@ -456,7 +456,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 60 "Workspace/Parser.fsy"
-                                                                              WorkspaceComponents.Target (_2, Target.Build _4) 
+                                                                              WorkspaceComponents.Target (_2, _4) 
                    )
 # 60 "Workspace/Parser.fsy"
                  : 'gentype_Target));
@@ -466,7 +466,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 62 "Workspace/Parser.fsy"
-                                         [] 
+                                         Target.Empty 
                    )
 # 62 "Workspace/Parser.fsy"
                  : 'gentype_TargetComponents));
@@ -478,7 +478,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 63 "Workspace/Parser.fsy"
-                                                              _1 @ [_2] 
+                                                              _1.Patch _2 
                    )
 # 63 "Workspace/Parser.fsy"
                  : 'gentype_TargetComponents));
@@ -501,7 +501,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 68 "Workspace/Parser.fsy"
-                                                                                        WorkspaceComponents.Environment (_2, Environment.Build _4 )
+                                                                                        WorkspaceComponents.Environment (_2, _4) 
                    )
 # 68 "Workspace/Parser.fsy"
                  : 'gentype_Environment));
@@ -511,7 +511,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 70 "Workspace/Parser.fsy"
-                                         [] 
+                                         Environment.Empty 
                    )
 # 70 "Workspace/Parser.fsy"
                  : 'gentype_EnvironmentComponents));
@@ -523,7 +523,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 71 "Workspace/Parser.fsy"
-                                                                        _1 @ [_2] 
+                                                                        _1.Patch _2 
                    )
 # 71 "Workspace/Parser.fsy"
                  : 'gentype_EnvironmentComponents));
@@ -546,7 +546,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 76 "Workspace/Parser.fsy"
-                                                                                    WorkspaceComponents.Extension (_2, Extension.Build _4) 
+                                                                                    WorkspaceComponents.Extension (_2, _4) 
                    )
 # 76 "Workspace/Parser.fsy"
                  : 'gentype_Extension));
@@ -556,7 +556,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 78 "Workspace/Parser.fsy"
-                                         [] 
+                                         Extension.Empty 
                    )
 # 78 "Workspace/Parser.fsy"
                  : 'gentype_ExtensionComponents));
@@ -568,7 +568,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 79 "Workspace/Parser.fsy"
-                                                           _1 @ [_2] 
+                                                           _1.Patch _2 
                    )
 # 79 "Workspace/Parser.fsy"
                  : 'gentype_ExtensionComponents));
@@ -580,7 +580,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 80 "Workspace/Parser.fsy"
-                                                            _1 @ [_2] 
+                                                            _1.Patch _2 
                    )
 # 80 "Workspace/Parser.fsy"
                  : 'gentype_ExtensionComponents));

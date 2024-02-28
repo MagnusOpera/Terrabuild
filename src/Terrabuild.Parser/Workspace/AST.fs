@@ -15,13 +15,10 @@ with
         { Storage = None
           SourceControl = None }    
 
-    static member Build comps =
-        let patch this comp =
-            match comp with
-            | TerrabuildComponents.Storage storage -> { this with Storage = Some storage }
-            | TerrabuildComponents.SourceControl sourceControl -> { this with SourceControl = Some sourceControl }
-
-        comps |> List.fold patch Terrabuild.Empty
+    member this.Patch comp =
+        match comp with
+        | TerrabuildComponents.Storage storage -> { this with Storage = Some storage }
+        | TerrabuildComponents.SourceControl sourceControl -> { this with SourceControl = Some sourceControl }
 
 
 [<RequireQualifiedAccess>]
@@ -35,12 +32,9 @@ with
     static member Empty =
         { DependsOn = [] }
 
-    static member Build comps =
-        let patch this comp =
-            match comp with
-            | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn }
-
-        comps |> List.fold patch Target.Empty
+    member this.Patch comp =
+        match comp with
+        | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn }
 
 
 [<RequireQualifiedAccess>]
@@ -54,12 +48,9 @@ with
     static member Empty =
         { Variables = Map.empty }
 
-    static member Build comps =
-        let patch this comp =
-            match comp with
-            | EnvironmentComponents.Variables variables -> { this with Variables = variables }
-
-        comps |> List.fold patch Environment.Empty
+    member this.Patch comp =
+        match comp with
+        | EnvironmentComponents.Variables variables -> { this with Variables = variables }
 
 
 [<RequireQualifiedAccess>]
@@ -76,13 +67,11 @@ with
         { Container = None
           Parameters = Map.empty }
 
-    static member Build comps =
-        let patch this comp =
-            match comp with
-            | ExtensionComponents.Container container -> { this with Container = Some container }
-            | ExtensionComponents.Parameters parameters -> { this with Parameters = parameters }
+    member this.Patch comp =
+        match comp with
+        | ExtensionComponents.Container container -> { this with Container = Some container }
+        | ExtensionComponents.Parameters parameters -> { this with Parameters = parameters }
 
-        comps |> List.fold patch Extension.Empty
 
 [<RequireQualifiedAccess>]
 type WorkspaceComponents =
@@ -104,12 +93,9 @@ with
           Environments = Map.empty
           Extensions = Map.empty }
 
-    static member Build comps =
-        let patch this comp =
-            match comp with
-            | WorkspaceComponents.Terrabuild terrabuild -> { this with Terrabuild = terrabuild }
-            | WorkspaceComponents.Target (name, target) -> { this with Targets = this.Targets |> Map.add name target }
-            | WorkspaceComponents.Environment (name, environment) -> { this with Environments = this.Environments |> Map.add name environment }
-            | WorkspaceComponents.Extension (name, extension) -> { this with Extensions = this.Extensions |> Map.add name extension }
-
-        comps |> List.fold patch Workspace.Empty
+    member this.Patch comp =
+        match comp with
+        | WorkspaceComponents.Terrabuild terrabuild -> { this with Terrabuild = terrabuild }
+        | WorkspaceComponents.Target (name, target) -> { this with Targets = this.Targets |> Map.add name target }
+        | WorkspaceComponents.Environment (name, environment) -> { this with Environments = this.Environments |> Map.add name environment }
+        | WorkspaceComponents.Extension (name, extension) -> { this with Extensions = this.Extensions |> Map.add name extension }

@@ -1,8 +1,8 @@
-module WorkspaceFrontEnd
+module BuildFrontEnd
 open FSharp.Text.Lexing
 
 let dumpToken (lexbuff: LexBuffer<char>) =
-    let token = WorkspaceLexer.token lexbuff
+    let token = BuildLexer.token lexbuff
     printfn $"TOKEN = {token}"
     token
 
@@ -10,7 +10,7 @@ let dumpToken (lexbuff: LexBuffer<char>) =
 let parse txt =
     let lexbuf = LexBuffer<_>.FromString txt
     try
-        WorkspaceParser.Workspace dumpToken lexbuf
+        BuildParser.Build dumpToken lexbuf
     with
     | _ ->
         let err = sprintf "Unexpected token '%s' at (%d,%d)"

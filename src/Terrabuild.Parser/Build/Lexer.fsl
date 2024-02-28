@@ -1,0 +1,54 @@
+{
+// module Lexer
+
+open BuildParser  // we need the terminal tokens from the Parser
+open FSharp.Text.Lexing
+
+let lexeme = LexBuffer<_>.LexemeString
+}
+
+let doubleQuote = '\"'
+let identifier = ['a'-'z'] ['a'-'z' '0'-'9' '_']*
+let variable = '$' identifier
+let quotedString = '\"' [^'\"']+ '\"'
+
+let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
+let whitespace = ' ' | '\t'
+let newline    = '\n' | '\r' '\n'
+
+rule token = parse
+    | "nothing" { NOTHING }
+    | "true" { TRUE }
+    | "false" { FALSE }
+    | "trim" { TRIM }
+    | "upper" { UPPER }
+    | "lower" { LOWER }
+    | quotedString { 
+        let s = lexeme lexbuf |> string
+        STRING (s.Substring(1, s.Length-2)) }
+    | "target"     { TARGET }
+    | "project"   { PROJECT }
+    | "dependencies" { DEPENDENCIES }
+    | "outputs" { OUTPUTS }
+    | "labels" { LABELS }
+    | "parser" { PARSER }
+    | "extension" { EXTENSION }
+    | "container" { CONTAINER }
+    | "parameters" { PARAMETERS }
+    | variable   {
+        let s = lexeme lexbuf |> string
+        VARIABLE (s.Substring(1, s.Length-1)) }
+    | identifier { IDENTIFIER (lexeme lexbuf |> string) }
+    | "{"        { LBRACE }
+    | "}"        { RBRACE }
+    | "["        { LSQBRACKET }
+    | "]"        { RSQBRACKET }
+    | "("        { LPAREN }
+    | ")"        { RPAREN }
+    | "="        { EQUAL }
+    | ","        { COMMA }
+    | "+"        { PLUS }
+    | whitespace { token lexbuf }
+    | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | eof        { EOF }
+    | _          { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }

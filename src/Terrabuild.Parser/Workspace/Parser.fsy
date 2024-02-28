@@ -36,48 +36,48 @@ let debugPrint s = ignore s
 %% 
 
 Workspace:
-    | WorkspaceComponents EOF { Workspace.Build $1 }
+    | WorkspaceComponents EOF { $1 }
 
 WorkspaceComponents:
-    | /* empty */ { [] }
-    | WorkspaceComponents Terrabuild { $1 @ [$2] }
-    | WorkspaceComponents Target { $1 @ [$2] }
-    | WorkspaceComponents Environment { $1 @ [$2] }
-    | WorkspaceComponents Extension { $1 @ [$2] }
+    | /* empty */ { Workspace.Empty }
+    | WorkspaceComponents Terrabuild { $1.Patch $2 }
+    | WorkspaceComponents Target { $1.Patch $2 }
+    | WorkspaceComponents Environment { $1.Patch $2 }
+    | WorkspaceComponents Extension { $1.Patch $2 }
 
 Terrabuild:
-    | TERRABUILD LBRACE TerrabuildComponents RBRACE { WorkspaceComponents.Terrabuild (Terrabuild.Build $3) }
+    | TERRABUILD LBRACE TerrabuildComponents RBRACE { WorkspaceComponents.Terrabuild $3 }
 TerrabuildComponents:
-    | /* empty */ { [] }
-    | TerrabuildComponents TerrabuildStorage { $1 @ [$2] }
-    | TerrabuildComponents TerrabuildSourceControl { $1 @ [$2] }
+    | /* empty */ { Terrabuild.Empty }
+    | TerrabuildComponents TerrabuildStorage { $1.Patch $2 }
+    | TerrabuildComponents TerrabuildSourceControl { $1.Patch $2 }
 TerrabuildStorage:
     | STORAGE EQUAL String { TerrabuildComponents.Storage $3 }
 TerrabuildSourceControl:
     | SOURCECONTROL EQUAL String { TerrabuildComponents.SourceControl $3 }
 
 Target:
-    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { WorkspaceComponents.Target ($2, Target.Build $4) }
+    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { WorkspaceComponents.Target ($2, $4) }
 TargetComponents:
-    | /* empty */ { [] }
-    | TargetComponents TargetDependsOn { $1 @ [$2] }
+    | /* empty */ { Target.Empty }
+    | TargetComponents TargetDependsOn { $1.Patch $2 }
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfString { TargetComponents.DependsOn $3 }
 
 Environment:
-    | ENVIRONMENT IDENTIFIER LBRACE EnvironmentComponents RBRACE { WorkspaceComponents.Environment ($2, Environment.Build $4 )}
+    | ENVIRONMENT IDENTIFIER LBRACE EnvironmentComponents RBRACE { WorkspaceComponents.Environment ($2, $4) }
 EnvironmentComponents:
-    | /* empty */ { [] }
-    | EnvironmentComponents EnvironmentVariables { $1 @ [$2] }
+    | /* empty */ { Environment.Empty }
+    | EnvironmentComponents EnvironmentVariables { $1.Patch $2 }
 EnvironmentVariables:
     | VARIABLES LBRACE Variables RBRACE { EnvironmentComponents.Variables $3 }
 
 Extension:
-    | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { WorkspaceComponents.Extension ($2, Extension.Build $4) }
+    | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { WorkspaceComponents.Extension ($2, $4) }
 ExtensionComponents:
-    | /* empty */ { [] }
-    | ExtensionComponents Container { $1 @ [$2] }
-    | ExtensionComponents Parameters { $1 @ [$2] }
+    | /* empty */ { Extension.Empty }
+    | ExtensionComponents Container { $1.Patch $2 }
+    | ExtensionComponents Parameters { $1.Patch $2 }
 Container:
     | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
 Parameters:

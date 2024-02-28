@@ -16,7 +16,7 @@ target publish {
 }
 
 environment release {
-  variables {
+  parameters {
     configuration = "Release"
   }
 }

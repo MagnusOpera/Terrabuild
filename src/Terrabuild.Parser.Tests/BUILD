@@ -1,6 +1,4 @@
-extension dotnet "dotnet" {
-  import = "sss"
-  container = nothing
+extension dotnet {
   parameters {
     configuration = $configuration
   }

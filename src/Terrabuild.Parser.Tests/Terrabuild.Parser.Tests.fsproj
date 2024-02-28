@@ -29,7 +29,7 @@
     <Content Include="SIMPLE">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="PROJECT">
+    <Content Include="BUILD">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
