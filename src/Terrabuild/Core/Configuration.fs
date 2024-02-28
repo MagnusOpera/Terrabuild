@@ -171,24 +171,21 @@ module ProjectConfigParser =
                     f.Invoke(null, [| projectDir |]) :?> Terrabuild.Extensibility.ProjectInfo |> Some
             | _ -> None
 
-        let projectOutputs =
+        let mergeOpt optData data =
             projectInfo
-            |> Option.map (fun project -> project.Outputs)
+            |> Option.map optData
             |> Option.defaultValue Set.empty
-            |> Set.union projectConfig.Project.Outputs
+            |> Set.union data
+
+        let projectOutputs =
+            mergeOpt (fun project -> project.Outputs) projectConfig.Project.Outputs
 
         let projectIgnores =
-            projectInfo
-            |> Option.map (fun project -> project.Ignores)
-            |> Option.defaultValue Set.empty
-            |> Set.union projectConfig.Project.Ignores
+            mergeOpt (fun project -> project.Ignores) projectConfig.Project.Ignores
 
         // convert relative dependencies to absolute dependencies respective to workspaceDirectory
         let projectDependencies =
-            projectInfo
-            |> Option.map (fun project -> project.Dependencies)
-            |> Option.defaultValue Set.empty
-            |> Set.union projectConfig.Project.Dependencies
+            mergeOpt (fun project -> project.Dependencies) projectConfig.Project.Dependencies
             |> Set.map (fun dep -> IO.combinePath projectDir dep |> IO.relativePath workspaceDir)
 
         let labels = projectConfig.Project.Labels
