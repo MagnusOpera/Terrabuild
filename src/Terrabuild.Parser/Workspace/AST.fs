@@ -57,19 +57,23 @@ with
 type ExtensionComponents =
     | Container of string
     | Parameters of Map<string, Expr>
+    | Script of string
 
 type Extension = {
+    Script: string option
     Container: string option
     Parameters: Map<string, Expr>
 }
 with
     static member Empty =
         { Container = None
+          Script = None
           Parameters = Map.empty }
 
     member this.Patch comp =
         match comp with
         | ExtensionComponents.Container container -> { this with Container = Some container }
+        | ExtensionComponents.Script script -> { this with Script = Some script }
         | ExtensionComponents.Parameters parameters -> { this with Parameters = parameters }
 
 

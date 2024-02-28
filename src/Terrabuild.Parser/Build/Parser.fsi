@@ -3,10 +3,12 @@ module BuildParser
 type token = 
   | DEPENDENCIES
   | OUTPUTS
+  | IGNORES
   | LABELS
   | PARSER
   | CONTAINER
   | PARAMETERS
+  | SCRIPT
   | EXTENSION
   | PROJECT
   | TARGET
@@ -32,10 +34,12 @@ type token =
 type tokenId = 
     | TOKEN_DEPENDENCIES
     | TOKEN_OUTPUTS
+    | TOKEN_IGNORES
     | TOKEN_LABELS
     | TOKEN_PARSER
     | TOKEN_CONTAINER
     | TOKEN_PARAMETERS
+    | TOKEN_SCRIPT
     | TOKEN_EXTENSION
     | TOKEN_PROJECT
     | TOKEN_TARGET
@@ -67,16 +71,18 @@ type nonTerminalId =
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_Container
+    | NONTERM_Script
     | NONTERM_Parameters
     | NONTERM_Project
     | NONTERM_ProjectComponents
     | NONTERM_ProjectDependencies
     | NONTERM_ProjectOutputs
+    | NONTERM_ProjectIgnores
     | NONTERM_ProjectLabels
     | NONTERM_ProjectParser
     | NONTERM_Target
     | NONTERM_TargetComponents
-    | NONTERM_Command
+    | NONTERM_Step
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings

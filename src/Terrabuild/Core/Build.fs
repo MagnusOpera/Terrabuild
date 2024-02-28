@@ -81,7 +81,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         |> Map.map (fun _ value -> ref value)
 
     let readyNodes =
-        allNodes |> Map.replace refCounts
+        refCounts |> Map.replace allNodes
 
     let isBuildSuccess = function
         | NodeBuildStatus.Success _ -> true

@@ -27,7 +27,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER
 %token EOF
 %token TERRABUILD TARGET ENVIRONMENT EXTENSION
-%token STORAGE SOURCECONTROL DEPENDS_ON VARIABLES CONTAINER PARAMETERS
+%token STORAGE SOURCECONTROL DEPENDS_ON VARIABLES CONTAINER PARAMETERS SCRIPT
 
 // associativity and precedences
 %left PLUS
@@ -77,9 +77,12 @@ Extension:
 ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents Container { $1.Patch $2 }
+    | ExtensionComponents Script { $1.Patch $2 }
     | ExtensionComponents Parameters { $1.Patch $2 }
 Container:
     | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
+Script:
+    | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
 Parameters:
     | PARAMETERS LBRACE Variables RBRACE { ExtensionComponents.Parameters $3 }
 

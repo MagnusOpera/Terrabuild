@@ -27,8 +27,10 @@ rule token = parse
     | "project"   { PROJECT }
     | "dependencies" { DEPENDENCIES }
     | "outputs" { OUTPUTS }
+    | "ignores" { IGNORES }
     | "labels" { LABELS }
     | "parser" { PARSER }
+    | "script" { SCRIPT }
     | "extension" { EXTENSION }
     | "container" { CONTAINER }
     | "parameters" { PARAMETERS }

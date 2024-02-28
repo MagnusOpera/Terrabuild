@@ -8,6 +8,7 @@ state 0:  items:    _startWorkspace ->  . Workspace
     action 'VARIABLES' (noprec):   reduce WorkspaceComponents --> 
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> 
     action 'PARAMETERS' (noprec):   reduce WorkspaceComponents --> 
+    action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> 
     action 'TERRABUILD' (noprec):   reduce WorkspaceComponents --> 
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> 
@@ -43,6 +44,7 @@ state 1:  items:    _startWorkspace -> Workspace .
     action 'VARIABLES' (noprec):   accept
     action 'CONTAINER' (noprec):   accept
     action 'PARAMETERS' (noprec):   accept
+    action 'SCRIPT' (noprec):   accept
     action 'TERRABUILD' (noprec):   accept
     action 'TARGET' (noprec):   accept
     action 'ENVIRONMENT' (noprec):   accept
@@ -80,6 +82,7 @@ state 1:  items:    _startWorkspace -> Workspace .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   shift 8
     action 'TARGET' (noprec):   shift 20
     action 'ENVIRONMENT' (noprec):   shift 29
@@ -117,6 +120,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'VARIABLES' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'CONTAINER' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'PARAMETERS' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
+    action 'SCRIPT' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'TERRABUILD' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'TARGET' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'ENVIRONMENT' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
@@ -150,6 +154,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'VARIABLES' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Terrabuild
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Terrabuild
     action 'PARAMETERS' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Terrabuild
+    action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Terrabuild
     action 'TERRABUILD' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Terrabuild
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Terrabuild
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Terrabuild
@@ -183,6 +188,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'VARIABLES' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'PARAMETERS' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
+    action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'TERRABUILD' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
@@ -216,6 +222,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'VARIABLES' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'PARAMETERS' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
+    action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'TERRABUILD' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
@@ -249,6 +256,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'VARIABLES' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'PARAMETERS' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
+    action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'TERRABUILD' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
@@ -282,6 +290,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -315,6 +324,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'VARIABLES' (noprec):   reduce TerrabuildComponents --> 
     action 'CONTAINER' (noprec):   reduce TerrabuildComponents --> 
     action 'PARAMETERS' (noprec):   reduce TerrabuildComponents --> 
+    action 'SCRIPT' (noprec):   reduce TerrabuildComponents --> 
     action 'TERRABUILD' (noprec):   reduce TerrabuildComponents --> 
     action 'TARGET' (noprec):   reduce TerrabuildComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce TerrabuildComponents --> 
@@ -351,6 +361,7 @@ state 10:  items:    Terrabuild -> 'TERRABUILD' 'LBRACE' TerrabuildComponents . 
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -386,6 +397,7 @@ state 11:  items:    Terrabuild -> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'R
     action 'VARIABLES' (noprec):   reduce Terrabuild --> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Terrabuild --> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'RBRACE'
     action 'PARAMETERS' (noprec):   reduce Terrabuild --> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'RBRACE'
+    action 'SCRIPT' (noprec):   reduce Terrabuild --> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'RBRACE'
     action 'TERRABUILD' (noprec):   reduce Terrabuild --> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'RBRACE'
     action 'TARGET' (noprec):   reduce Terrabuild --> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Terrabuild --> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'RBRACE'
@@ -419,6 +431,7 @@ state 11:  items:    Terrabuild -> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'R
     action 'VARIABLES' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildStorage
     action 'CONTAINER' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildStorage
     action 'PARAMETERS' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildStorage
+    action 'SCRIPT' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildStorage
     action 'TERRABUILD' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildStorage
     action 'TARGET' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildStorage
     action 'ENVIRONMENT' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildStorage
@@ -452,6 +465,7 @@ state 11:  items:    Terrabuild -> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'R
     action 'VARIABLES' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildSourceControl
     action 'CONTAINER' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildSourceControl
     action 'PARAMETERS' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildSourceControl
+    action 'SCRIPT' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildSourceControl
     action 'TERRABUILD' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildSourceControl
     action 'TARGET' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildSourceControl
     action 'ENVIRONMENT' (noprec):   reduce TerrabuildComponents --> TerrabuildComponents TerrabuildSourceControl
@@ -485,6 +499,7 @@ state 11:  items:    Terrabuild -> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'R
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -518,6 +533,7 @@ state 11:  items:    Terrabuild -> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'R
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -537,7 +553,7 @@ state 11:  items:    Terrabuild -> 'TERRABUILD' 'LBRACE' TerrabuildComponents 'R
     action 'RBRACE' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 53
+    action 'STRING' (noprec):   shift 57
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
@@ -552,6 +568,7 @@ state 16:  items:    TerrabuildStorage -> 'STORAGE' 'EQUAL' String .
     action 'VARIABLES' (noprec):   reduce TerrabuildStorage --> 'STORAGE' 'EQUAL' String
     action 'CONTAINER' (noprec):   reduce TerrabuildStorage --> 'STORAGE' 'EQUAL' String
     action 'PARAMETERS' (noprec):   reduce TerrabuildStorage --> 'STORAGE' 'EQUAL' String
+    action 'SCRIPT' (noprec):   reduce TerrabuildStorage --> 'STORAGE' 'EQUAL' String
     action 'TERRABUILD' (noprec):   reduce TerrabuildStorage --> 'STORAGE' 'EQUAL' String
     action 'TARGET' (noprec):   reduce TerrabuildStorage --> 'STORAGE' 'EQUAL' String
     action 'ENVIRONMENT' (noprec):   reduce TerrabuildStorage --> 'STORAGE' 'EQUAL' String
@@ -585,6 +602,7 @@ state 16:  items:    TerrabuildStorage -> 'STORAGE' 'EQUAL' String .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -618,6 +636,7 @@ state 16:  items:    TerrabuildStorage -> 'STORAGE' 'EQUAL' String .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -637,7 +656,7 @@ state 16:  items:    TerrabuildStorage -> 'STORAGE' 'EQUAL' String .
     action 'RBRACE' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 53
+    action 'STRING' (noprec):   shift 57
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
@@ -652,6 +671,7 @@ state 19:  items:    TerrabuildSourceControl -> 'SOURCECONTROL' 'EQUAL' String .
     action 'VARIABLES' (noprec):   reduce TerrabuildSourceControl --> 'SOURCECONTROL' 'EQUAL' String
     action 'CONTAINER' (noprec):   reduce TerrabuildSourceControl --> 'SOURCECONTROL' 'EQUAL' String
     action 'PARAMETERS' (noprec):   reduce TerrabuildSourceControl --> 'SOURCECONTROL' 'EQUAL' String
+    action 'SCRIPT' (noprec):   reduce TerrabuildSourceControl --> 'SOURCECONTROL' 'EQUAL' String
     action 'TERRABUILD' (noprec):   reduce TerrabuildSourceControl --> 'SOURCECONTROL' 'EQUAL' String
     action 'TARGET' (noprec):   reduce TerrabuildSourceControl --> 'SOURCECONTROL' 'EQUAL' String
     action 'ENVIRONMENT' (noprec):   reduce TerrabuildSourceControl --> 'SOURCECONTROL' 'EQUAL' String
@@ -685,6 +705,7 @@ state 19:  items:    TerrabuildSourceControl -> 'SOURCECONTROL' 'EQUAL' String .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -718,6 +739,7 @@ state 19:  items:    TerrabuildSourceControl -> 'SOURCECONTROL' 'EQUAL' String .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -751,6 +773,7 @@ state 19:  items:    TerrabuildSourceControl -> 'SOURCECONTROL' 'EQUAL' String .
     action 'VARIABLES' (noprec):   reduce TargetComponents --> 
     action 'CONTAINER' (noprec):   reduce TargetComponents --> 
     action 'PARAMETERS' (noprec):   reduce TargetComponents --> 
+    action 'SCRIPT' (noprec):   reduce TargetComponents --> 
     action 'TERRABUILD' (noprec):   reduce TargetComponents --> 
     action 'TARGET' (noprec):   reduce TargetComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce TargetComponents --> 
@@ -786,6 +809,7 @@ state 23:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -820,6 +844,7 @@ state 24:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'VARIABLES' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'PARAMETERS' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
+    action 'SCRIPT' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'TERRABUILD' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'TARGET' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
@@ -853,6 +878,7 @@ state 24:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'VARIABLES' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'CONTAINER' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'PARAMETERS' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
+    action 'SCRIPT' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'TERRABUILD' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'TARGET' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'ENVIRONMENT' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
@@ -886,6 +912,7 @@ state 24:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -919,6 +946,7 @@ state 24:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -932,7 +960,7 @@ state 24:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   shift 54
+    action 'LSQBRACKET' (noprec):   shift 58
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
@@ -953,6 +981,7 @@ state 28:  items:    TargetDependsOn -> 'DEPENDS_ON' 'EQUAL' ListOfString .
     action 'VARIABLES' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' 'EQUAL' ListOfString
     action 'CONTAINER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' 'EQUAL' ListOfString
     action 'PARAMETERS' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' 'EQUAL' ListOfString
+    action 'SCRIPT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' 'EQUAL' ListOfString
     action 'TERRABUILD' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' 'EQUAL' ListOfString
     action 'TARGET' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' 'EQUAL' ListOfString
     action 'ENVIRONMENT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' 'EQUAL' ListOfString
@@ -986,6 +1015,7 @@ state 28:  items:    TargetDependsOn -> 'DEPENDS_ON' 'EQUAL' ListOfString .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1019,6 +1049,7 @@ state 28:  items:    TargetDependsOn -> 'DEPENDS_ON' 'EQUAL' ListOfString .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1052,6 +1083,7 @@ state 28:  items:    TargetDependsOn -> 'DEPENDS_ON' 'EQUAL' ListOfString .
     action 'VARIABLES' (noprec):   reduce EnvironmentComponents --> 
     action 'CONTAINER' (noprec):   reduce EnvironmentComponents --> 
     action 'PARAMETERS' (noprec):   reduce EnvironmentComponents --> 
+    action 'SCRIPT' (noprec):   reduce EnvironmentComponents --> 
     action 'TERRABUILD' (noprec):   reduce EnvironmentComponents --> 
     action 'TARGET' (noprec):   reduce EnvironmentComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce EnvironmentComponents --> 
@@ -1087,6 +1119,7 @@ state 32:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'VARIABLES' (noprec):   shift 35
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1121,6 +1154,7 @@ state 33:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'VARIABLES' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'PARAMETERS' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
+    action 'SCRIPT' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'TERRABUILD' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'TARGET' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
@@ -1154,6 +1188,7 @@ state 33:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'VARIABLES' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'CONTAINER' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'PARAMETERS' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
+    action 'SCRIPT' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'TERRABUILD' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'TARGET' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'ENVIRONMENT' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
@@ -1187,6 +1222,7 @@ state 33:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1220,6 +1256,7 @@ state 33:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'VARIABLES' (noprec):   reduce Variables --> 
     action 'CONTAINER' (noprec):   reduce Variables --> 
     action 'PARAMETERS' (noprec):   reduce Variables --> 
+    action 'SCRIPT' (noprec):   reduce Variables --> 
     action 'TERRABUILD' (noprec):   reduce Variables --> 
     action 'TARGET' (noprec):   reduce Variables --> 
     action 'ENVIRONMENT' (noprec):   reduce Variables --> 
@@ -1255,6 +1292,7 @@ state 37:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables . 'R
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1273,7 +1311,7 @@ state 37:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables . 'R
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   shift 38
     action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   shift 59
+    action 'IDENTIFIER' (noprec):   shift 63
     action 'STRING' (noprec):   error
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
@@ -1281,7 +1319,7 @@ state 37:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables . 'R
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Variable: 58
+  immediate action: <none>  gotos:    goto Variable: 62
 state 38:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBRACE' . 
   actions:    action 'STORAGE' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'SOURCECONTROL' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
@@ -1289,6 +1327,7 @@ state 38:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
     action 'VARIABLES' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'CONTAINER' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'PARAMETERS' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
+    action 'SCRIPT' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'TERRABUILD' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'TARGET' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
@@ -1322,6 +1361,7 @@ state 38:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1355,6 +1395,7 @@ state 38:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1388,6 +1429,7 @@ state 38:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
     action 'VARIABLES' (noprec):   reduce ExtensionComponents --> 
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> 
     action 'PARAMETERS' (noprec):   reduce ExtensionComponents --> 
+    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> 
     action 'TERRABUILD' (noprec):   reduce ExtensionComponents --> 
     action 'TARGET' (noprec):   reduce ExtensionComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> 
@@ -1417,13 +1459,15 @@ state 38:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
   immediate action: <none>  gotos:    goto ExtensionComponents: 42
 state 42:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents . 'RBRACE'
     ExtensionComponents -> ExtensionComponents . Container
+    ExtensionComponents -> ExtensionComponents . Script
     ExtensionComponents -> ExtensionComponents . Parameters
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
-    action 'CONTAINER' (noprec):   shift 46
-    action 'PARAMETERS' (noprec):   shift 49
+    action 'CONTAINER' (noprec):   shift 47
+    action 'PARAMETERS' (noprec):   shift 53
+    action 'SCRIPT' (noprec):   shift 50
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1451,7 +1495,8 @@ state 42:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action '#' (noprec):   error
     action '$$' (noprec):   error
   immediate action: <none>  gotos:    goto Container: 44
-    goto Parameters: 45
+    goto Script: 45
+    goto Parameters: 46
 state 43:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE' . 
   actions:    action 'STORAGE' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'SOURCECONTROL' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
@@ -1459,6 +1504,7 @@ state 43:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'VARIABLES' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'PARAMETERS' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
+    action 'SCRIPT' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'TERRABUILD' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'TARGET' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
@@ -1492,6 +1538,7 @@ state 43:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'VARIABLES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'PARAMETERS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
+    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'TERRABUILD' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
@@ -1518,13 +1565,48 @@ state 43:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Container  gotos:state 45:  items:    ExtensionComponents -> ExtensionComponents Parameters . 
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Container  gotos:state 45:  items:    ExtensionComponents -> ExtensionComponents Script . 
+  actions:    action 'STORAGE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'SOURCECONTROL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'VARIABLES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'PARAMETERS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'TERRABUILD' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'EXTENSION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'EOF' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'TRIM' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'UPPER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'LOWER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'PLUS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'COMMA' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'EQUAL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'LPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'RPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'LSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'RSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'LBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'RBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'VARIABLE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'IDENTIFIER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'STRING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'NOTHING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'TRUE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'FALSE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Script  gotos:state 46:  items:    ExtensionComponents -> ExtensionComponents Parameters . 
   actions:    action 'STORAGE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action 'SOURCECONTROL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action 'VARIABLES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action 'PARAMETERS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
+    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action 'TERRABUILD' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
@@ -1551,13 +1633,14 @@ state 43:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
     action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Parameters  gotos:state 46:  items:    Container -> 'CONTAINER' . 'EQUAL' String
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Parameters  gotos:state 47:  items:    Container -> 'CONTAINER' . 'EQUAL' String
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1568,7 +1651,7 @@ state 43:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'LOWER' (noprec):   error
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
-    action 'EQUAL' (noprec):   shift 47
+    action 'EQUAL' (noprec):   shift 48
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
@@ -1584,13 +1667,14 @@ state 43:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 47:  items:    Container -> 'CONTAINER' 'EQUAL' . String
+  immediate action: <none>  gotos:state 48:  items:    Container -> 'CONTAINER' 'EQUAL' . String
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1610,21 +1694,22 @@ state 43:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'RBRACE' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 53
+    action 'STRING' (noprec):   shift 57
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto String: 48
-state 48:  items:    Container -> 'CONTAINER' 'EQUAL' String . 
+  immediate action: <none>  gotos:    goto String: 49
+state 49:  items:    Container -> 'CONTAINER' 'EQUAL' String . 
   actions:    action 'STORAGE' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action 'SOURCECONTROL' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action 'DEPENDS_ON' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action 'VARIABLES' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action 'CONTAINER' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action 'PARAMETERS' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
+    action 'SCRIPT' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action 'TERRABUILD' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action 'TARGET' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action 'ENVIRONMENT' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
@@ -1651,13 +1736,48 @@ state 48:  items:    Container -> 'CONTAINER' 'EQUAL' String .
     action 'error' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action '#' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
     action '$$' (noprec):   reduce Container --> 'CONTAINER' 'EQUAL' String
-  immediate action:   reduce Container --> 'CONTAINER' 'EQUAL' String  gotos:state 49:  items:    Parameters -> 'PARAMETERS' . 'LBRACE' Variables 'RBRACE'
+  immediate action:   reduce Container --> 'CONTAINER' 'EQUAL' String  gotos:state 50:  items:    Script -> 'SCRIPT' . 'EQUAL' String
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
+    action 'TERRABUILD' (noprec):   error
+    action 'TARGET' (noprec):   error
+    action 'ENVIRONMENT' (noprec):   error
+    action 'EXTENSION' (noprec):   error
+    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   shift 51
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   error
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:state 51:  items:    Script -> 'SCRIPT' 'EQUAL' . String
+  actions:    action 'STORAGE' (noprec):   error
+    action 'SOURCECONTROL' (noprec):   error
+    action 'DEPENDS_ON' (noprec):   error
+    action 'VARIABLES' (noprec):   error
+    action 'CONTAINER' (noprec):   error
+    action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1673,7 +1793,76 @@ state 48:  items:    Container -> 'CONTAINER' 'EQUAL' String .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 50
+    action 'LBRACE' (noprec):   error
+    action 'RBRACE' (noprec):   error
+    action 'VARIABLE' (noprec):   error
+    action 'IDENTIFIER' (noprec):   error
+    action 'STRING' (noprec):   shift 57
+    action 'NOTHING' (noprec):   error
+    action 'TRUE' (noprec):   error
+    action 'FALSE' (noprec):   error
+    action 'error' (noprec):   error
+    action '#' (noprec):   error
+    action '$$' (noprec):   error
+  immediate action: <none>  gotos:    goto String: 52
+state 52:  items:    Script -> 'SCRIPT' 'EQUAL' String . 
+  actions:    action 'STORAGE' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'SOURCECONTROL' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'DEPENDS_ON' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'VARIABLES' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'CONTAINER' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'PARAMETERS' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'SCRIPT' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'TERRABUILD' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'TARGET' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'ENVIRONMENT' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'EXTENSION' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'EOF' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'TRIM' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'UPPER' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'LOWER' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'PLUS' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'COMMA' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'EQUAL' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'LPAREN' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'RPAREN' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'LSQBRACKET' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'RSQBRACKET' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'LBRACE' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'RBRACE' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'VARIABLE' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'IDENTIFIER' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'STRING' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'NOTHING' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'TRUE' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'FALSE' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action 'error' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action '#' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+    action '$$' (noprec):   reduce Script --> 'SCRIPT' 'EQUAL' String
+  immediate action:   reduce Script --> 'SCRIPT' 'EQUAL' String  gotos:state 53:  items:    Parameters -> 'PARAMETERS' . 'LBRACE' Variables 'RBRACE'
+  actions:    action 'STORAGE' (noprec):   error
+    action 'SOURCECONTROL' (noprec):   error
+    action 'DEPENDS_ON' (noprec):   error
+    action 'VARIABLES' (noprec):   error
+    action 'CONTAINER' (noprec):   error
+    action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
+    action 'TERRABUILD' (noprec):   error
+    action 'TARGET' (noprec):   error
+    action 'ENVIRONMENT' (noprec):   error
+    action 'EXTENSION' (noprec):   error
+    action 'EOF' (noprec):   error
+    action 'TRIM' (noprec):   error
+    action 'UPPER' (noprec):   error
+    action 'LOWER' (noprec):   error
+    action 'PLUS' (noprec):   error
+    action 'COMMA' (noprec):   error
+    action 'EQUAL' (noprec):   error
+    action 'LPAREN' (noprec):   error
+    action 'RPAREN' (noprec):   error
+    action 'LSQBRACKET' (noprec):   error
+    action 'RSQBRACKET' (noprec):   error
+    action 'LBRACE' (noprec):   shift 54
     action 'RBRACE' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
@@ -1684,13 +1873,14 @@ state 48:  items:    Container -> 'CONTAINER' 'EQUAL' String .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 50:  items:    Parameters -> 'PARAMETERS' 'LBRACE' . Variables 'RBRACE'
+  immediate action: <none>  gotos:state 54:  items:    Parameters -> 'PARAMETERS' 'LBRACE' . Variables 'RBRACE'
   actions:    action 'STORAGE' (noprec):   reduce Variables --> 
     action 'SOURCECONTROL' (noprec):   reduce Variables --> 
     action 'DEPENDS_ON' (noprec):   reduce Variables --> 
     action 'VARIABLES' (noprec):   reduce Variables --> 
     action 'CONTAINER' (noprec):   reduce Variables --> 
     action 'PARAMETERS' (noprec):   reduce Variables --> 
+    action 'SCRIPT' (noprec):   reduce Variables --> 
     action 'TERRABUILD' (noprec):   reduce Variables --> 
     action 'TARGET' (noprec):   reduce Variables --> 
     action 'ENVIRONMENT' (noprec):   reduce Variables --> 
@@ -1717,8 +1907,8 @@ state 48:  items:    Container -> 'CONTAINER' 'EQUAL' String .
     action 'error' (noprec):   reduce Variables --> 
     action '#' (noprec):   reduce Variables --> 
     action '$$' (noprec):   reduce Variables --> 
-  immediate action: <none>  gotos:    goto Variables: 51
-state 51:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables . 'RBRACE'
+  immediate action: <none>  gotos:    goto Variables: 55
+state 55:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables . 'RBRACE'
     Variables -> Variables . Variable
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
@@ -1726,6 +1916,7 @@ state 51:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables . 'RBRACE'
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1742,9 +1933,9 @@ state 51:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables . 'RBRACE'
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
-    action 'RBRACE' (noprec):   shift 52
+    action 'RBRACE' (noprec):   shift 56
     action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   shift 59
+    action 'IDENTIFIER' (noprec):   shift 63
     action 'STRING' (noprec):   error
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
@@ -1752,14 +1943,15 @@ state 51:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables . 'RBRACE'
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Variable: 58
-state 52:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables 'RBRACE' . 
+  immediate action: <none>  gotos:    goto Variable: 62
+state 56:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables 'RBRACE' . 
   actions:    action 'STORAGE' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action 'SOURCECONTROL' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action 'DEPENDS_ON' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action 'VARIABLES' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action 'PARAMETERS' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
+    action 'SCRIPT' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action 'TERRABUILD' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action 'TARGET' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
@@ -1786,13 +1978,14 @@ state 52:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action '#' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
     action '$$' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-  immediate action:   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'  gotos:state 53:  items:    String -> 'STRING' . 
+  immediate action:   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'  gotos:state 57:  items:    String -> 'STRING' . 
   actions:    action 'STORAGE' (noprec):   reduce String --> 'STRING'
     action 'SOURCECONTROL' (noprec):   reduce String --> 'STRING'
     action 'DEPENDS_ON' (noprec):   reduce String --> 'STRING'
     action 'VARIABLES' (noprec):   reduce String --> 'STRING'
     action 'CONTAINER' (noprec):   reduce String --> 'STRING'
     action 'PARAMETERS' (noprec):   reduce String --> 'STRING'
+    action 'SCRIPT' (noprec):   reduce String --> 'STRING'
     action 'TERRABUILD' (noprec):   reduce String --> 'STRING'
     action 'TARGET' (noprec):   reduce String --> 'STRING'
     action 'ENVIRONMENT' (noprec):   reduce String --> 'STRING'
@@ -1819,13 +2012,14 @@ state 52:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   reduce String --> 'STRING'
     action '#' (noprec):   reduce String --> 'STRING'
     action '$$' (noprec):   reduce String --> 'STRING'
-  immediate action:   reduce String --> 'STRING'  gotos:state 54:  items:    ListOfString -> 'LSQBRACKET' . Strings 'RSQBRACKET'
+  immediate action:   reduce String --> 'STRING'  gotos:state 58:  items:    ListOfString -> 'LSQBRACKET' . Strings 'RSQBRACKET'
   actions:    action 'STORAGE' (noprec):   reduce Strings --> 
     action 'SOURCECONTROL' (noprec):   reduce Strings --> 
     action 'DEPENDS_ON' (noprec):   reduce Strings --> 
     action 'VARIABLES' (noprec):   reduce Strings --> 
     action 'CONTAINER' (noprec):   reduce Strings --> 
     action 'PARAMETERS' (noprec):   reduce Strings --> 
+    action 'SCRIPT' (noprec):   reduce Strings --> 
     action 'TERRABUILD' (noprec):   reduce Strings --> 
     action 'TARGET' (noprec):   reduce Strings --> 
     action 'ENVIRONMENT' (noprec):   reduce Strings --> 
@@ -1852,8 +2046,8 @@ state 52:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   reduce Strings --> 
     action '#' (noprec):   reduce Strings --> 
     action '$$' (noprec):   reduce Strings --> 
-  immediate action: <none>  gotos:    goto Strings: 55
-state 55:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
+  immediate action: <none>  gotos:    goto Strings: 59
+state 59:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
     Strings -> Strings . String
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
@@ -1861,6 +2055,7 @@ state 55:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1875,26 +2070,27 @@ state 55:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
-    action 'RSQBRACKET' (noprec):   shift 56
+    action 'RSQBRACKET' (noprec):   shift 60
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 53
+    action 'STRING' (noprec):   shift 57
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto String: 57
-state 56:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' . 
+  immediate action: <none>  gotos:    goto String: 61
+state 60:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' . 
   actions:    action 'STORAGE' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'SOURCECONTROL' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'DEPENDS_ON' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'VARIABLES' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'CONTAINER' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'PARAMETERS' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
+    action 'SCRIPT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'TERRABUILD' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'TARGET' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'ENVIRONMENT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
@@ -1921,13 +2117,14 @@ state 56:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'error' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action '#' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action '$$' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-  immediate action:   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'  gotos:state 57:  items:    Strings -> Strings String . 
+  immediate action:   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'  gotos:state 61:  items:    Strings -> Strings String . 
   actions:    action 'STORAGE' (noprec):   reduce Strings --> Strings String
     action 'SOURCECONTROL' (noprec):   reduce Strings --> Strings String
     action 'DEPENDS_ON' (noprec):   reduce Strings --> Strings String
     action 'VARIABLES' (noprec):   reduce Strings --> Strings String
     action 'CONTAINER' (noprec):   reduce Strings --> Strings String
     action 'PARAMETERS' (noprec):   reduce Strings --> Strings String
+    action 'SCRIPT' (noprec):   reduce Strings --> Strings String
     action 'TERRABUILD' (noprec):   reduce Strings --> Strings String
     action 'TARGET' (noprec):   reduce Strings --> Strings String
     action 'ENVIRONMENT' (noprec):   reduce Strings --> Strings String
@@ -1954,13 +2151,14 @@ state 56:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'error' (noprec):   reduce Strings --> Strings String
     action '#' (noprec):   reduce Strings --> Strings String
     action '$$' (noprec):   reduce Strings --> Strings String
-  immediate action:   reduce Strings --> Strings String  gotos:state 58:  items:    Variables -> Variables Variable . 
+  immediate action:   reduce Strings --> Strings String  gotos:state 62:  items:    Variables -> Variables Variable . 
   actions:    action 'STORAGE' (noprec):   reduce Variables --> Variables Variable
     action 'SOURCECONTROL' (noprec):   reduce Variables --> Variables Variable
     action 'DEPENDS_ON' (noprec):   reduce Variables --> Variables Variable
     action 'VARIABLES' (noprec):   reduce Variables --> Variables Variable
     action 'CONTAINER' (noprec):   reduce Variables --> Variables Variable
     action 'PARAMETERS' (noprec):   reduce Variables --> Variables Variable
+    action 'SCRIPT' (noprec):   reduce Variables --> Variables Variable
     action 'TERRABUILD' (noprec):   reduce Variables --> Variables Variable
     action 'TARGET' (noprec):   reduce Variables --> Variables Variable
     action 'ENVIRONMENT' (noprec):   reduce Variables --> Variables Variable
@@ -1987,13 +2185,14 @@ state 56:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'error' (noprec):   reduce Variables --> Variables Variable
     action '#' (noprec):   reduce Variables --> Variables Variable
     action '$$' (noprec):   reduce Variables --> Variables Variable
-  immediate action:   reduce Variables --> Variables Variable  gotos:state 59:  items:    Variable -> 'IDENTIFIER' . 'EQUAL' Expr
+  immediate action:   reduce Variables --> Variables Variable  gotos:state 63:  items:    Variable -> 'IDENTIFIER' . 'EQUAL' Expr
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2004,7 +2203,7 @@ state 56:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'LOWER' (noprec):   error
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
-    action 'EQUAL' (noprec):   shift 60
+    action 'EQUAL' (noprec):   shift 64
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
@@ -2020,21 +2219,22 @@ state 56:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 60:  items:    Variable -> 'IDENTIFIER' 'EQUAL' . Expr
+  immediate action: <none>  gotos:state 64:  items:    Variable -> 'IDENTIFIER' 'EQUAL' . Expr
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
     action 'EXTENSION' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 72
-    action 'UPPER' (noprec):   shift 75
-    action 'LOWER' (noprec):   shift 78
+    action 'TRIM' (noprec):   shift 76
+    action 'UPPER' (noprec):   shift 79
+    action 'LOWER' (noprec):   shift 82
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -2044,17 +2244,17 @@ state 56:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 66
+    action 'VARIABLE' (noprec):   shift 70
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 65
-    action 'NOTHING' (noprec):   shift 62
-    action 'TRUE' (noprec):   shift 63
-    action 'FALSE' (noprec):   shift 64
+    action 'STRING' (noprec):   shift 69
+    action 'NOTHING' (noprec):   shift 66
+    action 'TRUE' (noprec):   shift 67
+    action 'FALSE' (noprec):   shift 68
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 61
-state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr . 
+  immediate action: <none>  gotos:    goto Expr: 65
+state 65:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr . 
     Expr -> Expr . 'PLUS' Expr
   actions:    action 'STORAGE' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'SOURCECONTROL' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
@@ -2062,6 +2262,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'VARIABLES' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'CONTAINER' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'PARAMETERS' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
+    action 'SCRIPT' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'TERRABUILD' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'TARGET' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'ENVIRONMENT' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
@@ -2070,7 +2271,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'TRIM' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'UPPER' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'LOWER' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
-    action 'PLUS' (explicit left 9999):   shift 71
+    action 'PLUS' (explicit left 9999):   shift 75
     action 'COMMA' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'EQUAL' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action 'LPAREN' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
@@ -2088,13 +2289,14 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action '#' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
     action '$$' (noprec):   reduce Variable --> 'IDENTIFIER' 'EQUAL' Expr
-  immediate action: <none>  gotos:state 62:  items:    Expr -> 'NOTHING' . 
+  immediate action: <none>  gotos:state 66:  items:    Expr -> 'NOTHING' . 
   actions:    action 'STORAGE' (noprec):   reduce Expr --> 'NOTHING'
     action 'SOURCECONTROL' (noprec):   reduce Expr --> 'NOTHING'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'NOTHING'
     action 'VARIABLES' (noprec):   reduce Expr --> 'NOTHING'
     action 'CONTAINER' (noprec):   reduce Expr --> 'NOTHING'
     action 'PARAMETERS' (noprec):   reduce Expr --> 'NOTHING'
+    action 'SCRIPT' (noprec):   reduce Expr --> 'NOTHING'
     action 'TERRABUILD' (noprec):   reduce Expr --> 'NOTHING'
     action 'TARGET' (noprec):   reduce Expr --> 'NOTHING'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'NOTHING'
@@ -2121,13 +2323,14 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   reduce Expr --> 'NOTHING'
     action '#' (noprec):   reduce Expr --> 'NOTHING'
     action '$$' (noprec):   reduce Expr --> 'NOTHING'
-  immediate action:   reduce Expr --> 'NOTHING'  gotos:state 63:  items:    Expr -> 'TRUE' . 
+  immediate action:   reduce Expr --> 'NOTHING'  gotos:state 67:  items:    Expr -> 'TRUE' . 
   actions:    action 'STORAGE' (noprec):   reduce Expr --> 'TRUE'
     action 'SOURCECONTROL' (noprec):   reduce Expr --> 'TRUE'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'TRUE'
     action 'VARIABLES' (noprec):   reduce Expr --> 'TRUE'
     action 'CONTAINER' (noprec):   reduce Expr --> 'TRUE'
     action 'PARAMETERS' (noprec):   reduce Expr --> 'TRUE'
+    action 'SCRIPT' (noprec):   reduce Expr --> 'TRUE'
     action 'TERRABUILD' (noprec):   reduce Expr --> 'TRUE'
     action 'TARGET' (noprec):   reduce Expr --> 'TRUE'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'TRUE'
@@ -2154,13 +2357,14 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   reduce Expr --> 'TRUE'
     action '#' (noprec):   reduce Expr --> 'TRUE'
     action '$$' (noprec):   reduce Expr --> 'TRUE'
-  immediate action:   reduce Expr --> 'TRUE'  gotos:state 64:  items:    Expr -> 'FALSE' . 
+  immediate action:   reduce Expr --> 'TRUE'  gotos:state 68:  items:    Expr -> 'FALSE' . 
   actions:    action 'STORAGE' (noprec):   reduce Expr --> 'FALSE'
     action 'SOURCECONTROL' (noprec):   reduce Expr --> 'FALSE'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'FALSE'
     action 'VARIABLES' (noprec):   reduce Expr --> 'FALSE'
     action 'CONTAINER' (noprec):   reduce Expr --> 'FALSE'
     action 'PARAMETERS' (noprec):   reduce Expr --> 'FALSE'
+    action 'SCRIPT' (noprec):   reduce Expr --> 'FALSE'
     action 'TERRABUILD' (noprec):   reduce Expr --> 'FALSE'
     action 'TARGET' (noprec):   reduce Expr --> 'FALSE'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'FALSE'
@@ -2187,13 +2391,14 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   reduce Expr --> 'FALSE'
     action '#' (noprec):   reduce Expr --> 'FALSE'
     action '$$' (noprec):   reduce Expr --> 'FALSE'
-  immediate action:   reduce Expr --> 'FALSE'  gotos:state 65:  items:    Expr -> 'STRING' . 
+  immediate action:   reduce Expr --> 'FALSE'  gotos:state 69:  items:    Expr -> 'STRING' . 
   actions:    action 'STORAGE' (noprec):   reduce Expr --> 'STRING'
     action 'SOURCECONTROL' (noprec):   reduce Expr --> 'STRING'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'STRING'
     action 'VARIABLES' (noprec):   reduce Expr --> 'STRING'
     action 'CONTAINER' (noprec):   reduce Expr --> 'STRING'
     action 'PARAMETERS' (noprec):   reduce Expr --> 'STRING'
+    action 'SCRIPT' (noprec):   reduce Expr --> 'STRING'
     action 'TERRABUILD' (noprec):   reduce Expr --> 'STRING'
     action 'TARGET' (noprec):   reduce Expr --> 'STRING'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'STRING'
@@ -2220,13 +2425,14 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   reduce Expr --> 'STRING'
     action '#' (noprec):   reduce Expr --> 'STRING'
     action '$$' (noprec):   reduce Expr --> 'STRING'
-  immediate action:   reduce Expr --> 'STRING'  gotos:state 66:  items:    Expr -> 'VARIABLE' . 
+  immediate action:   reduce Expr --> 'STRING'  gotos:state 70:  items:    Expr -> 'VARIABLE' . 
   actions:    action 'STORAGE' (noprec):   reduce Expr --> 'VARIABLE'
     action 'SOURCECONTROL' (noprec):   reduce Expr --> 'VARIABLE'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'VARIABLE'
     action 'VARIABLES' (noprec):   reduce Expr --> 'VARIABLE'
     action 'CONTAINER' (noprec):   reduce Expr --> 'VARIABLE'
     action 'PARAMETERS' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'SCRIPT' (noprec):   reduce Expr --> 'VARIABLE'
     action 'TERRABUILD' (noprec):   reduce Expr --> 'VARIABLE'
     action 'TARGET' (noprec):   reduce Expr --> 'VARIABLE'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'VARIABLE'
@@ -2253,7 +2459,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   reduce Expr --> 'VARIABLE'
     action '#' (noprec):   reduce Expr --> 'VARIABLE'
     action '$$' (noprec):   reduce Expr --> 'VARIABLE'
-  immediate action:   reduce Expr --> 'VARIABLE'  gotos:state 67:  items:    Expr -> Expr . 'PLUS' Expr
+  immediate action:   reduce Expr --> 'VARIABLE'  gotos:state 71:  items:    Expr -> Expr . 'PLUS' Expr
     Expr -> Expr 'PLUS' Expr . 
   actions:    action 'STORAGE' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'SOURCECONTROL' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
@@ -2261,6 +2467,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'VARIABLES' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'CONTAINER' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'PARAMETERS' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'SCRIPT' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'TERRABUILD' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'TARGET' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'ENVIRONMENT' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
@@ -2287,7 +2494,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action '#' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action '$$' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
-  immediate action: <none>  gotos:state 68:  items:    Expr -> Expr . 'PLUS' Expr
+  immediate action: <none>  gotos:state 72:  items:    Expr -> Expr . 'PLUS' Expr
     Expr -> 'TRIM' 'LPAREN' Expr . 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
@@ -2295,6 +2502,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2303,11 +2511,11 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'TRIM' (noprec):   error
     action 'UPPER' (noprec):   error
     action 'LOWER' (noprec):   error
-    action 'PLUS' (explicit left 9999):   shift 71
+    action 'PLUS' (explicit left 9999):   shift 75
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   shift 74
+    action 'RPAREN' (noprec):   shift 78
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
@@ -2321,7 +2529,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 69:  items:    Expr -> Expr . 'PLUS' Expr
+  immediate action: <none>  gotos:state 73:  items:    Expr -> Expr . 'PLUS' Expr
     Expr -> 'UPPER' 'LPAREN' Expr . 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
@@ -2329,6 +2537,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2337,11 +2546,11 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'TRIM' (noprec):   error
     action 'UPPER' (noprec):   error
     action 'LOWER' (noprec):   error
-    action 'PLUS' (explicit left 9999):   shift 71
+    action 'PLUS' (explicit left 9999):   shift 75
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   shift 77
+    action 'RPAREN' (noprec):   shift 81
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
@@ -2355,7 +2564,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 70:  items:    Expr -> Expr . 'PLUS' Expr
+  immediate action: <none>  gotos:state 74:  items:    Expr -> Expr . 'PLUS' Expr
     Expr -> 'LOWER' 'LPAREN' Expr . 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
@@ -2363,6 +2572,7 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2371,11 +2581,11 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'TRIM' (noprec):   error
     action 'UPPER' (noprec):   error
     action 'LOWER' (noprec):   error
-    action 'PLUS' (explicit left 9999):   shift 71
+    action 'PLUS' (explicit left 9999):   shift 75
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   shift 80
+    action 'RPAREN' (noprec):   shift 84
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
@@ -2389,21 +2599,22 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 71:  items:    Expr -> Expr 'PLUS' . Expr
+  immediate action: <none>  gotos:state 75:  items:    Expr -> Expr 'PLUS' . Expr
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
     action 'EXTENSION' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 72
-    action 'UPPER' (noprec):   shift 75
-    action 'LOWER' (noprec):   shift 78
+    action 'TRIM' (noprec):   shift 76
+    action 'UPPER' (noprec):   shift 79
+    action 'LOWER' (noprec):   shift 82
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -2413,23 +2624,24 @@ state 61:  items:    Variable -> 'IDENTIFIER' 'EQUAL' Expr .
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 66
+    action 'VARIABLE' (noprec):   shift 70
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 65
-    action 'NOTHING' (noprec):   shift 62
-    action 'TRUE' (noprec):   shift 63
-    action 'FALSE' (noprec):   shift 64
+    action 'STRING' (noprec):   shift 69
+    action 'NOTHING' (noprec):   shift 66
+    action 'TRUE' (noprec):   shift 67
+    action 'FALSE' (noprec):   shift 68
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 67
-state 72:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
+  immediate action: <none>  gotos:    goto Expr: 71
+state 76:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2441,7 +2653,7 @@ state 72:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   shift 73
+    action 'LPAREN' (noprec):   shift 77
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
@@ -2456,21 +2668,22 @@ state 72:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 73:  items:    Expr -> 'TRIM' 'LPAREN' . Expr 'RPAREN'
+  immediate action: <none>  gotos:state 77:  items:    Expr -> 'TRIM' 'LPAREN' . Expr 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
     action 'EXTENSION' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 72
-    action 'UPPER' (noprec):   shift 75
-    action 'LOWER' (noprec):   shift 78
+    action 'TRIM' (noprec):   shift 76
+    action 'UPPER' (noprec):   shift 79
+    action 'LOWER' (noprec):   shift 82
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -2480,23 +2693,24 @@ state 72:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 66
+    action 'VARIABLE' (noprec):   shift 70
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 65
-    action 'NOTHING' (noprec):   shift 62
-    action 'TRUE' (noprec):   shift 63
-    action 'FALSE' (noprec):   shift 64
+    action 'STRING' (noprec):   shift 69
+    action 'NOTHING' (noprec):   shift 66
+    action 'TRUE' (noprec):   shift 67
+    action 'FALSE' (noprec):   shift 68
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 68
-state 74:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' . 
+  immediate action: <none>  gotos:    goto Expr: 72
+state 78:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' . 
   actions:    action 'STORAGE' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'SOURCECONTROL' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'VARIABLES' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'CONTAINER' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'PARAMETERS' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'SCRIPT' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'TERRABUILD' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'TARGET' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
@@ -2523,13 +2737,14 @@ state 74:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'error' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action '#' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action '$$' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
-  immediate action:   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'  gotos:state 75:  items:    Expr -> 'UPPER' . 'LPAREN' Expr 'RPAREN'
+  immediate action:   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'  gotos:state 79:  items:    Expr -> 'UPPER' . 'LPAREN' Expr 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2541,7 +2756,7 @@ state 74:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   shift 76
+    action 'LPAREN' (noprec):   shift 80
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
@@ -2556,21 +2771,22 @@ state 74:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 76:  items:    Expr -> 'UPPER' 'LPAREN' . Expr 'RPAREN'
+  immediate action: <none>  gotos:state 80:  items:    Expr -> 'UPPER' 'LPAREN' . Expr 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
     action 'EXTENSION' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 72
-    action 'UPPER' (noprec):   shift 75
-    action 'LOWER' (noprec):   shift 78
+    action 'TRIM' (noprec):   shift 76
+    action 'UPPER' (noprec):   shift 79
+    action 'LOWER' (noprec):   shift 82
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -2580,23 +2796,24 @@ state 74:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 66
+    action 'VARIABLE' (noprec):   shift 70
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 65
-    action 'NOTHING' (noprec):   shift 62
-    action 'TRUE' (noprec):   shift 63
-    action 'FALSE' (noprec):   shift 64
+    action 'STRING' (noprec):   shift 69
+    action 'NOTHING' (noprec):   shift 66
+    action 'TRUE' (noprec):   shift 67
+    action 'FALSE' (noprec):   shift 68
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 69
-state 77:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' . 
+  immediate action: <none>  gotos:    goto Expr: 73
+state 81:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' . 
   actions:    action 'STORAGE' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'SOURCECONTROL' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'VARIABLES' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'CONTAINER' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'PARAMETERS' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'SCRIPT' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'TERRABUILD' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'TARGET' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
@@ -2623,13 +2840,14 @@ state 77:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'error' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action '#' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action '$$' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
-  immediate action:   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'  gotos:state 78:  items:    Expr -> 'LOWER' . 'LPAREN' Expr 'RPAREN'
+  immediate action:   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'  gotos:state 82:  items:    Expr -> 'LOWER' . 'LPAREN' Expr 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2641,7 +2859,7 @@ state 77:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   shift 79
+    action 'LPAREN' (noprec):   shift 83
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
@@ -2656,21 +2874,22 @@ state 77:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 79:  items:    Expr -> 'LOWER' 'LPAREN' . Expr 'RPAREN'
+  immediate action: <none>  gotos:state 83:  items:    Expr -> 'LOWER' 'LPAREN' . Expr 'RPAREN'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'VARIABLES' (noprec):   error
     action 'CONTAINER' (noprec):   error
     action 'PARAMETERS' (noprec):   error
+    action 'SCRIPT' (noprec):   error
     action 'TERRABUILD' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
     action 'EXTENSION' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 72
-    action 'UPPER' (noprec):   shift 75
-    action 'LOWER' (noprec):   shift 78
+    action 'TRIM' (noprec):   shift 76
+    action 'UPPER' (noprec):   shift 79
+    action 'LOWER' (noprec):   shift 82
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -2680,23 +2899,24 @@ state 77:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 66
+    action 'VARIABLE' (noprec):   shift 70
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 65
-    action 'NOTHING' (noprec):   shift 62
-    action 'TRUE' (noprec):   shift 63
-    action 'FALSE' (noprec):   shift 64
+    action 'STRING' (noprec):   shift 69
+    action 'NOTHING' (noprec):   shift 66
+    action 'TRUE' (noprec):   shift 67
+    action 'FALSE' (noprec):   shift 68
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 70
-state 80:  items:    Expr -> 'LOWER' 'LPAREN' Expr 'RPAREN' . 
+  immediate action: <none>  gotos:    goto Expr: 74
+state 84:  items:    Expr -> 'LOWER' 'LPAREN' Expr 'RPAREN' . 
   actions:    action 'STORAGE' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'SOURCECONTROL' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'VARIABLES' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'CONTAINER' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'PARAMETERS' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'SCRIPT' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'TERRABUILD' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'TARGET' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'

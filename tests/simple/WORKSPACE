@@ -1,31 +1,61 @@
-# storage: azureblob
-# sourcecontrol: github
+terrabuild {
+  storage = "azureblob"
+  sourcecontrol = "github"
+}
 
-targets:
-  build: [^build]
-  dist: [build]
-  docker: [dist]
-  push: [docker]
-  deploy: [push]
+target build {
+  depends_on = [ ^build ]
+}
 
-environments:
-  debug:
-    configuration: Debug
-    secret_message: tagada
-    workspace: default
+target dist = {
+  depends_on = [ build ]
+}
 
-  release:
-    configuration: Release
-    workspace: default
+target docker {
+  depends_on = [ dist ]
+}
 
-extensions:
-  dotnet:
-    container: mcr.microsoft.com/dotnet/sdk:7.0
-    parameters:
-      configuration: $(configuration)
-  terraform:
-    parameters:
-      workspace: $(workspace)
-  make:
-  npm:
-  docker:
+target push {
+  depends_on = [docker]
+}
+
+target deploy {
+  depends_on [push]
+}
+
+environment debug {
+  variables {
+    configuration = "Debug"
+    secret_message = "tagada"
+    workspace = "default"
+  }
+}
+
+environment release {
+  variables {
+    configuration = "Release"
+    workspace = "default"
+  }
+}
+
+extension dotnet {
+  container = "mcr.microsoft.com/dotnet/sdk:7.0"
+  parameters {
+    configuration = $(configuration)
+  }
+}
+
+extension terraform {
+  parameters {
+    workspace = $(workspace)
+  }
+}
+
+extension make {
+}
+
+extension npm {
+}
+
+extension docker {
+}

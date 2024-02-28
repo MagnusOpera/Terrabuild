@@ -7,6 +7,7 @@ type token =
   | VARIABLES
   | CONTAINER
   | PARAMETERS
+  | SCRIPT
   | TERRABUILD
   | TARGET
   | ENVIRONMENT
@@ -37,6 +38,7 @@ type tokenId =
     | TOKEN_VARIABLES
     | TOKEN_CONTAINER
     | TOKEN_PARAMETERS
+    | TOKEN_SCRIPT
     | TOKEN_TERRABUILD
     | TOKEN_TARGET
     | TOKEN_ENVIRONMENT
@@ -79,6 +81,7 @@ type nonTerminalId =
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_Container
+    | NONTERM_Script
     | NONTERM_Parameters
     | NONTERM_String
     | NONTERM_ListOfString

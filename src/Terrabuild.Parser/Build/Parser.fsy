@@ -27,7 +27,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER
 %token EOF
 %token EXTENSION PROJECT TARGET 
-%token DEPENDENCIES OUTPUTS LABELS PARSER CONTAINER PARAMETERS
+%token DEPENDENCIES OUTPUTS IGNORES LABELS PARSER CONTAINER PARAMETERS SCRIPT
 
 // associativity and precedences
 %left PLUS
@@ -50,9 +50,12 @@ Extension:
 ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents Container { $1.Patch $2 }
+    | ExtensionComponents Script { $1.Patch $2 }
     | ExtensionComponents Parameters { $1.Patch $2 }
 Container:
     | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
+Script:
+    | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
 Parameters:
     | PARAMETERS LBRACE Variables RBRACE { ExtensionComponents.Parameters $3 }
 
@@ -63,12 +66,15 @@ ProjectComponents:
     | /* empty */ { Project.Empty }
     | ProjectComponents ProjectDependencies { $1.Patch $2 }
     | ProjectComponents ProjectOutputs { $1.Patch $2 }
+    | ProjectComponents ProjectIgnores { $1.Patch $2 }
     | ProjectComponents ProjectLabels { $1.Patch $2 }
     | ProjectComponents ProjectParser { $1.Patch $2 }
 ProjectDependencies:
     | DEPENDENCIES EQUAL ListOfString { ProjectComponents.Dependencies $3 }
 ProjectOutputs:
     | OUTPUTS EQUAL ListOfString { ProjectComponents.Outputs $3 }
+ProjectIgnores:
+    | IGNORES EQUAL ListOfString { ProjectComponents.Ignores $3 }
 ProjectLabels:
     | LABELS EQUAL ListOfString { ProjectComponents.Labels $3 }
 ProjectParser:
@@ -79,9 +85,9 @@ Target:
     | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { BuildComponents.Target ($2, $4) }
 TargetComponents:
     | /* empty */ { Target.Empty }
-    | TargetComponents Command { $1.Patch $2 }
-Command:
-    | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Command { Extension = $1; Command = $2; Parameters = $4 } }
+    | TargetComponents Step { $1.Patch $2 }
+Step:
+    | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
 
 String:
     | STRING { $1 }

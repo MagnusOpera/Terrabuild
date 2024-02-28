@@ -11,6 +11,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Parser", "src\Te
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Parser.Tests", "src\Terrabuild.Parser.Tests\Terrabuild.Parser.Tests.fsproj", "{A0C8B452-4229-4548-8205-E04797C271C6}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Scripting", "src\Terrabuild.Scripting\Terrabuild.Scripting.fsproj", "{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Extensibility", "src\Terrabuild.Extensibility\Terrabuild.Extensibility.fsproj", "{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,10 +36,20 @@ Global
 		{A0C8B452-4229-4548-8205-E04797C271C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0C8B452-4229-4548-8205-E04797C271C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0C8B452-4229-4548-8205-E04797C271C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9DE39771-3C5A-47C8-905A-338367C27214} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
 		{246D691A-CB08-4C08-B30A-0F35D792415A} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
 		{A0C8B452-4229-4548-8205-E04797C271C6} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
+		{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
+		{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
 	EndGlobalSection
 EndGlobal

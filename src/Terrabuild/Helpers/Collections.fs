@@ -21,5 +21,5 @@ module Map =
                                       | Some x -> acc |> Map.add k x
                                       | _ -> acc) Map.empty
 
-    let replace addMap sourceMap =
+    let replace sourceMap addMap =
         addMap |> Map.fold (fun acc key value -> Map.add key value acc) sourceMap

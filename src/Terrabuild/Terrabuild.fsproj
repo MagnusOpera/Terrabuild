@@ -19,7 +19,6 @@
     <Compile Include="Helpers/Compression.fs" />
     <Compile Include="Helpers/String.fs" />
     <Compile Include="Helpers/Collections.fs" />
-    <Compile Include="Helpers/Yaml.fs" />
     <Compile Include="Helpers/Json.fs" />
     <Compile Include="Helpers/Exec.fs" />
     <Compile Include="Helpers/Git.fs" />
@@ -28,8 +27,7 @@
     <Compile Include="Helpers/Ansi.fs" />
     <Compile Include="Helpers/Terminal.fs" />
     <Compile Include="Helpers/Progress.fs" />
-    <Compile Include="Extensions/Shell.fs" />
-    <Compile Include="Extensions/Echo.fs" />
+    <Compile Include="Extensions/System.fs" />
     <Compile Include="Core/Configuration.fs" />
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Cache.fs" />
@@ -40,6 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
+   <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
+   <ProjectReference Include="../Terrabuild.Scripting/Terrabuild.Scripting.fsproj" />
    <ProjectReference Include="../Terrabuild.Parser/Terrabuild.Parser.fsproj" />
   </ItemGroup>
 
@@ -53,10 +53,6 @@
   <ItemGroup>
     <None Include="NUGET.md" Pack="true" PackagePath="\" />
     <None Include="..\LICENSE" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Remove="Configuration\**" />
   </ItemGroup>
 
   <PropertyGroup>
