@@ -27,12 +27,11 @@
     <Compile Include="Workspace/Parser.fsi" />
     <Compile Include="Workspace/Parser.fs" />
     <Compile Include="Workspace/Lexer.fs" />
-    <Compile Include="Workspace/FrontEnd.fs" />
     <Compile Include="Build/AST.fs" />
     <Compile Include="Build/Parser.fsi" />
     <Compile Include="Build/Parser.fs" />
     <Compile Include="Build/Lexer.fs" />
-    <Compile Include="Build/FrontEnd.fs" />
+    <Compile Include="FrontEnd.fs" />
   </ItemGroup>
 
   <ItemGroup>

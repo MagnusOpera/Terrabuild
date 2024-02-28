@@ -30,7 +30,6 @@
     <Compile Include="Helpers/Progress.fs" />
     <Compile Include="Extensions/Shell.fs" />
     <Compile Include="Extensions/Echo.fs" />
-    <Compile Include="Configuration/Workspace.fs" />
     <Compile Include="Core/Configuration.fs" />
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Cache.fs" />
@@ -41,7 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-   <ProjectReference Include="../Terrabuild.Configuration/Terrabuild.Configuration.fsproj" />
    <ProjectReference Include="../Terrabuild.Parser/Terrabuild.Parser.fsproj" />
   </ItemGroup>
 

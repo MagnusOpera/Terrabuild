@@ -23,9 +23,6 @@ rule token = parse
     | "trim" { TRIM }
     | "upper" { UPPER }
     | "lower" { LOWER }
-    | quotedString { 
-        let s = lexeme lexbuf |> string
-        STRING (s.Substring(1, s.Length-2)) }
     | "target"     { TARGET }
     | "project"   { PROJECT }
     | "dependencies" { DEPENDENCIES }
@@ -35,10 +32,17 @@ rule token = parse
     | "extension" { EXTENSION }
     | "container" { CONTAINER }
     | "parameters" { PARAMETERS }
+
+    | quotedString { 
+        let s = lexeme lexbuf |> string
+        STRING (s.Substring(1, s.Length-2)) }
+
     | variable   {
         let s = lexeme lexbuf |> string
         VARIABLE (s.Substring(1, s.Length-1)) }
+
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
+
     | "{"        { LBRACE }
     | "}"        { RBRACE }
     | "["        { LSQBRACKET }
