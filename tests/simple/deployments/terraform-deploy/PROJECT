@@ -1,18 +1,15 @@
-builders:
-  terraform:
+extension terraform { }
 
-dependencies:
-  - ../../projects/dotnet-app
+configuration {
+    dependencies = [ "../../projects/dotnet-app" ]
+    ignores = [ "terrabuild.tfstate" ]
+    labels = [ "infra" ]
+}
 
-ignores:
-  - terrabuild.tfstate
+target build {
+    terraform plan { }
+}
 
-steps:
-  build:
-    - (terraform): plan
-
-  deploy:
-    - (terraform): apply
-
-labels:
-  - infra
+target deploy {
+    terraform apply { }
+}

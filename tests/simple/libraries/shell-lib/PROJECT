@@ -1,7 +1,4 @@
-builders:
-  shell:
 
-steps:
-  build:
-    - (shell): echo
-      arguments: "building library1"
+target build {
+    shell echo { message: "building library1" }
+}

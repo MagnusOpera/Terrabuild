@@ -1,30 +1,13 @@
-builders:
-  shell:
-  echo:
-  make:
-    with: Makefile
+extension make { }
 
-dependencies:
-  - ../../libraries/shell-lib
+configuration {
+    dependencies = "../../libraries/shell-lib"
+    outputs = [ "dist" ]
+    labels = [ "app" ]
+}
 
-outputs:
-  - dist
+target build {
+    shell echo { message: "building project1" }
+    make build { secret: $secret_message }
+}
 
-targets:
-  publish: [ dist ]
-
-steps:
-  build:
-    - (echo): "building project1"
-    - (make): build
-      parameters:
-        secret: $(secret_message)
-
-  publish:
-    - (shell): echo
-      arguments: "publishing project1"
-    - (shell): make
-      arguments: publish
-
-labels:
-  - app

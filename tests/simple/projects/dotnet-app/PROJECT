@@ -1,24 +1,28 @@
-builders:
-  dotnet:
-  docker:
-    parameters:
-      image: ghcr.io/magnusopera/dotnet-app
+extension dotnet { }
 
-steps:
-  build:
-    - (dotnet): build
+extension docker {
+    parameters {
+        image: "ghcr.io/magnusopera/dotnet-app"
+    }
+}
 
-  dist:
-    - (dotnet): publish
+configuration {
+    labels = [ "app"
+               "dotnet" ]
+}
 
-  docker:
-    - (docker): build
-      arguments:
-        configuration: $(configuration)
+target build {
+    dotnet build { }
+}
 
-  push:
-    - (docker): push
+target dist {
+    dotnet publish { }
+}
 
-labels:
-  - app
-  - dotnet
+target docker {
+    docker build { configuration: $configuration }
+}
+
+target push {
+    docker push { }
+}

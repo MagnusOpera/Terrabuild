@@ -1,22 +1,18 @@
-terrabuild {
-  storage = "azureblob"
-  sourcecontrol = "github"
-}
 
 target build {
-  depends_on = [ ^build ]
+  depends_on = [ "^build" ]
 }
 
 target dist = {
-  depends_on = [ build ]
+  depends_on = [ "build" ]
 }
 
 target docker {
-  depends_on = [ dist ]
+  depends_on = [ "dist" ]
 }
 
 target push {
-  depends_on = [docker]
+  depends_on = [ "docker" ]
 }
 
 target deploy {
@@ -25,37 +21,28 @@ target deploy {
 
 environment debug {
   variables {
-    configuration = "Debug"
-    secret_message = "tagada"
-    workspace = "default"
+    configuration: "Debug"
+    secret_message: "tagada"
+    workspace: "default"
   }
 }
 
 environment release {
   variables {
-    configuration = "Release"
-    workspace = "default"
+    configuration: "Release"
+    workspace: "default"
   }
 }
 
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:7.0"
   parameters {
-    configuration = $(configuration)
+    configuration: $(configuration)
   }
 }
 
 extension terraform {
   parameters {
-    workspace = $(workspace)
+    workspace: $(workspace)
   }
-}
-
-extension make {
-}
-
-extension npm {
-}
-
-extension docker {
 }

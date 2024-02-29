@@ -1,14 +1,14 @@
-builders:
-  shell:
-  netbuild:
-    use: dotnet
-    with: dotnet-lib.csproj
+extension dotnet { }
 
-steps:
-  build:
-    - (shell): sleep
-      arguments: "1"
-    - (netbuild): build
-      configuration: $(configuration)
-    - (shell): echo
-      arguments: "done lib2"
+configuration {
+  parser = "dotnet"
+}
+
+target build {
+  shell exec { command: "sleep"
+               arguments: "1" }
+
+  dotnet build { configuration: $configuration }
+
+  shell echo { message: "done lib2" }
+}

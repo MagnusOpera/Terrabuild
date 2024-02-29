@@ -1,9 +1,9 @@
-builders:
-  npm:
+extension npm { }
 
-steps:
-  build:
-    - (npm): build
+configuration {
+    labels = [ "app" ]
+}
 
-labels:
-  - app
+target build {
+    npm build { }
+}
