@@ -21,7 +21,7 @@ type Node = {
     ProjectHash: string
     Variables: Map<string, string>
     CommandLines: CommandLine list
-    Outputs: Configuration.Items
+    Outputs: string set
     Cache: Cacheability
 }
 
