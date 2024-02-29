@@ -8,7 +8,7 @@ type token =
   | CONTAINER
   | PARAMETERS
   | SCRIPT
-  | TERRABUILD
+  | CONFIGURATION
   | TARGET
   | ENVIRONMENT
   | EXTENSION
@@ -40,7 +40,7 @@ type tokenId =
     | TOKEN_CONTAINER
     | TOKEN_PARAMETERS
     | TOKEN_SCRIPT
-    | TOKEN_TERRABUILD
+    | TOKEN_CONFIGURATION
     | TOKEN_TARGET
     | TOKEN_ENVIRONMENT
     | TOKEN_EXTENSION
@@ -70,10 +70,10 @@ type nonTerminalId =
     | NONTERM__startWorkspace
     | NONTERM_Workspace
     | NONTERM_WorkspaceComponents
-    | NONTERM_Terrabuild
-    | NONTERM_TerrabuildComponents
-    | NONTERM_TerrabuildStorage
-    | NONTERM_TerrabuildSourceControl
+    | NONTERM_Configuration
+    | NONTERM_ConfigurationComponents
+    | NONTERM_ConfigurationStorage
+    | NONTERM_ConfigurationSourceControl
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn

@@ -2,11 +2,11 @@
 open Terrabuild.Parser.AST
 
 [<RequireQualifiedAccess>]
-type TerrabuildComponents =
+type ConfigurationComponents =
     | Storage of string
     | SourceControl of string
 
-type Terrabuild = {
+type Configuration = {
     Storage: string option
     SourceControl: string option
 }
@@ -17,8 +17,8 @@ with
 
     member this.Patch comp =
         match comp with
-        | TerrabuildComponents.Storage storage -> { this with Storage = Some storage }
-        | TerrabuildComponents.SourceControl sourceControl -> { this with SourceControl = Some sourceControl }
+        | ConfigurationComponents.Storage storage -> { this with Storage = Some storage }
+        | ConfigurationComponents.SourceControl sourceControl -> { this with SourceControl = Some sourceControl }
 
 
 [<RequireQualifiedAccess>]
@@ -55,27 +55,27 @@ with
 
 [<RequireQualifiedAccess>]
 type WorkspaceComponents =
-    | Terrabuild of Terrabuild
+    | Configuration of Configuration
     | Target of string * Target
     | Environment of string * Environment
     | Extension of string * Extension
 
 type Workspace = {
-    Terrabuild: Terrabuild
+    Configuration: Configuration
     Targets: Map<string, Target>
     Environments: Map<string, Environment>
     Extensions: Map<string, Extension>
 }
 with
     static member Empty =
-        { Terrabuild = Terrabuild.Empty
+        { Configuration = Configuration.Empty
           Targets = Map.empty
           Environments = Map.empty
           Extensions = Map.empty }
 
     member this.Patch comp =
         match comp with
-        | WorkspaceComponents.Terrabuild terrabuild -> { this with Terrabuild = terrabuild }
+        | WorkspaceComponents.Configuration configuration -> { this with Configuration = configuration }
         | WorkspaceComponents.Target (name, target) -> { this with Targets = this.Targets |> Map.add name target }
         | WorkspaceComponents.Environment (name, environment) -> { this with Environments = this.Environments |> Map.add name environment }
         | WorkspaceComponents.Extension (name, extension) -> { this with Extensions = this.Extensions |> Map.add name extension }

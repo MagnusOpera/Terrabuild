@@ -154,14 +154,14 @@ let read workspaceDir (options: Options) environment labels variables =
 
     // storage
     let storage =
-        workspaceConfig.Terrabuild.Storage
+        workspaceConfig.Configuration.Storage
         |> Option.bind (fun x -> if options.NoCache then None else Some x)
         |> ExtensionLoaders.loadStorage
 
     // source control
     let sourceControl =
         if options.CI then
-            workspaceConfig.Terrabuild.SourceControl
+            workspaceConfig.Configuration.SourceControl
             |> ExtensionLoaders.loadSourceControl
         else
             ExtensionLoaders.loadSourceControl None

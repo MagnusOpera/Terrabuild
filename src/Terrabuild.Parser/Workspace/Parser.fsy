@@ -27,7 +27,7 @@ let debugPrint s = ignore s
 %token PLUS
 %token TRIM UPPER LOWER
 %token EOF
-%token TERRABUILD TARGET ENVIRONMENT EXTENSION
+%token CONFIGURATION TARGET ENVIRONMENT EXTENSION
 %token STORAGE SOURCECONTROL DEPENDS_ON VARIABLES CONTAINER PARAMETERS SCRIPT
 
 // associativity and precedences
@@ -41,21 +41,21 @@ Workspace:
 
 WorkspaceComponents:
     | /* empty */ { Workspace.Empty }
-    | WorkspaceComponents Terrabuild { $1.Patch $2 }
+    | WorkspaceComponents Configuration { $1.Patch $2 }
     | WorkspaceComponents Target { $1.Patch $2 }
     | WorkspaceComponents Environment { $1.Patch $2 }
     | WorkspaceComponents Extension { $1.Patch $2 }
 
-Terrabuild:
-    | TERRABUILD LBRACE TerrabuildComponents RBRACE { WorkspaceComponents.Terrabuild $3 }
-TerrabuildComponents:
-    | /* empty */ { Terrabuild.Empty }
-    | TerrabuildComponents TerrabuildStorage { $1.Patch $2 }
-    | TerrabuildComponents TerrabuildSourceControl { $1.Patch $2 }
-TerrabuildStorage:
-    | STORAGE EQUAL String { TerrabuildComponents.Storage $3 }
-TerrabuildSourceControl:
-    | SOURCECONTROL EQUAL String { TerrabuildComponents.SourceControl $3 }
+Configuration:
+    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { WorkspaceComponents.Configuration $3 }
+ConfigurationComponents:
+    | /* empty */ { Configuration.Empty }
+    | ConfigurationComponents ConfigurationStorage { $1.Patch $2 }
+    | ConfigurationComponents ConfigurationSourceControl { $1.Patch $2 }
+ConfigurationStorage:
+    | STORAGE EQUAL String { ConfigurationComponents.Storage $3 }
+ConfigurationSourceControl:
+    | SOURCECONTROL EQUAL String { ConfigurationComponents.SourceControl $3 }
 
 Target:
     | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { WorkspaceComponents.Target ($2, $4) }
