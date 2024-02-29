@@ -9,8 +9,8 @@ let test_workspace() =
     printfn $"{workspace}"
 
 [<Test>]
-let test_build() =
-    let content = File.ReadAllText("BUILD")
-    let build = FrontEnd.parseBuild content
+let test_project() =
+    let content = File.ReadAllText("PROJECT")
+    let build = FrontEnd.parseProject content
     printfn $"{build}"
     

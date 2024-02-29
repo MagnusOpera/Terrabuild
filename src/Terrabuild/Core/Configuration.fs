@@ -6,42 +6,6 @@ open System.Collections.Concurrent
 open Terrabuild.Extensibility
 open Terrabuild.Parser.AST
 
-// type ExtensionConfig = {
-//     Version: string option
-//     Container: YamlNodeValue<string>
-//     Parameters: Map<string, YamlNode>
-// }
-
-type Variables = Map<string, string>
-
-// type BuildConfig = {
-//     Storage: string option
-//     SourceControl: string option
-//     Environments: Map<string, Variables>
-//     Targets: Map<string, string set>
-// }
-
-// type BuilderConfig = {
-//     Use: string option
-//     With: string option
-//     Container: YamlNodeValue<string>
-//     Parameters: Map<string, YamlNode>
-// }
-
-// type Items = string set
-// type CommandConfig = Map<string, YamlNode>
-// type TargetRules = string set
-
-// type ProjectConfig = {
-//     Builders: Map<string, BuilderConfig option>
-//     Dependencies: Items
-//     Outputs: Items
-//     Ignores: Items
-//     Targets: Map<string, Items>
-//     Steps: Map<string, CommandConfig list>
-//     Labels: Items
-// }
-
 [<RequireQualifiedAccess>]
 type Options = {
     MaxConcurrency: int
@@ -55,6 +19,7 @@ type ConfigException(msg, ?innerException: Exception) =
 
     static member Raise(msg, ?innerException) =
         ConfigException(msg, ?innerException=innerException) |> raise
+
 
 [<RequireQualifiedAccess>]
 type ContaineredAction = {
@@ -107,7 +72,7 @@ module ExtensionLoaders =
         | _ -> failwith $"Unknown source control '{name}'"
 
 module ProjectConfigParser =
-    open Terrabuild.Parser.Build.AST
+    open Terrabuild.Parser.Project.AST
 
     [<RequireQualifiedAccess>]
     type ProjectDefinition = {
@@ -119,13 +84,13 @@ module ProjectConfigParser =
         Extensions: Map<string, Extension>
     }
 
-    let explore (extensions: Map<string, Extension>) (projectConfig: Terrabuild.Parser.Build.AST.Build) (workspaceDir: string) (projectDir: string) =
+    let explore (extensions: Map<string, Extension>) (projectConfig: Terrabuild.Parser.Project.AST.Project) (workspaceDir: string) (projectDir: string) =
         let extensions =
             extensions
             |> Map.addMap projectConfig.Extensions
 
         let projectInfo =
-            match projectConfig.Project.Parser with
+            match projectConfig.Configuration.Parser with
             | Some parser ->
                 match extensions |> Map.tryFind parser with
                 | None -> failwith $"Extension {parser} is not defined"
@@ -146,17 +111,17 @@ module ProjectConfigParser =
             |> Set.union data
 
         let projectOutputs =
-            mergeOpt (fun project -> project.Outputs) projectConfig.Project.Outputs
+            mergeOpt (fun project -> project.Outputs) projectConfig.Configuration.Outputs
 
         let projectIgnores =
-            mergeOpt (fun project -> project.Ignores) projectConfig.Project.Ignores
+            mergeOpt (fun project -> project.Ignores) projectConfig.Configuration.Ignores
 
         // convert relative dependencies to absolute dependencies respective to workspaceDirectory
         let projectDependencies =
-            mergeOpt (fun project -> project.Dependencies) projectConfig.Project.Dependencies
+            mergeOpt (fun project -> project.Dependencies) projectConfig.Configuration.Dependencies
             |> Set.map (fun dep -> IO.combinePath projectDir dep |> IO.relativePath workspaceDir)
 
-        let labels = projectConfig.Project.Labels
+        let labels = projectConfig.Configuration.Labels
         let projectTargets = projectConfig.Targets
 
         { ProjectDefinition.Dependencies = projectDependencies
@@ -211,7 +176,7 @@ let read workspaceDir (options: Options) environment labels variables =
         if processedNodes.TryAdd(project, true) then
             let projectFile = IO.combinePath projectDir "BUILD"
             let projectContent = File.ReadAllText projectFile
-            let projectConfig = FrontEnd.parseBuild projectContent
+            let projectConfig = FrontEnd.parseProject projectContent
             let projectDef = ProjectConfigParser.explore workspaceConfig.Extensions projectConfig workspaceDir projectDir
 
             // we go depth-first in order to compute node hash right after

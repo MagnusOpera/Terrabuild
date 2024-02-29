@@ -9,6 +9,7 @@ let lexeme = LexBuffer<_>.LexemeString
 
 let doubleQuote = '\"'
 let identifier = ['a'-'z'] ['a'-'z' '0'-'9' '_']*
+let key = identifier ':'
 let variable = '$' identifier
 let quotedString = '\"' [^'\"']+ '\"'
 
@@ -17,15 +18,24 @@ let whitespace = ' ' | '\t'
 let newline    = '\n' | '\r' '\n'
 
 rule token = parse
+    | quotedString { 
+        let s = lexeme lexbuf |> string
+        STRING (s.Substring(1, s.Length-2)) }
+
+    | key {
+        let s = lexeme lexbuf |> string
+        KEY (s.Substring(0, s.Length-1)) }
+
+    | variable   {
+        let s = lexeme lexbuf |> string
+        VARIABLE (s.Substring(1, s.Length-1)) }
+
     | "nothing" { NOTHING }
     | "true" { TRUE }
     | "false" { FALSE }
     | "trim" { TRIM }
     | "upper" { UPPER }
     | "lower" { LOWER }
-    | quotedString { 
-        let s = lexeme lexbuf |> string
-        STRING (s.Substring(1, s.Length-2)) }
     | "terrabuild" { TERRABUILD }
     | "target"     { TARGET }
     | "environment" { ENVIRONMENT }
@@ -36,10 +46,9 @@ rule token = parse
     | "variables" { VARIABLES }
     | "container" { CONTAINER }
     | "parameters" { PARAMETERS }
-    | variable   {
-        let s = lexeme lexbuf |> string
-        VARIABLE (s.Substring(1, s.Length-1)) }
+
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
+
     | "{"        { LBRACE }
     | "}"        { RBRACE }
     | "["        { LSQBRACKET }
@@ -49,6 +58,7 @@ rule token = parse
     | "="        { EQUAL }
     | ","        { COMMA }
     | "+"        { PLUS }
+
     | whitespace { token lexbuf }
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
     | eof        { EOF }

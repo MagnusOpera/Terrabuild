@@ -17,13 +17,13 @@ target publish {
 
 environment release {
   variables {
-    configuration = "Release"
+    configuration: "Release"
   }
 }
 
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
   parameters {
-    configuration = $configuration
+    configuration: $configuration
   }
 }

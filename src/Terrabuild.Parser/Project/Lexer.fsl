@@ -1,7 +1,7 @@
 {
 // module Lexer
 
-open BuildParser  // we need the terminal tokens from the Parser
+open ProjectParser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 
 let lexeme = LexBuffer<_>.LexemeString
@@ -9,6 +9,7 @@ let lexeme = LexBuffer<_>.LexemeString
 
 let doubleQuote = '\"'
 let identifier = ['a'-'z'] ['a'-'z' '0'-'9' '_']*
+let key = identifier ':'
 let variable = '$' identifier
 let quotedString = '\"' [^'\"']+ '\"'
 
@@ -17,6 +18,18 @@ let whitespace = ' ' | '\t'
 let newline    = '\n' | '\r' '\n'
 
 rule token = parse
+    | quotedString { 
+        let s = lexeme lexbuf |> string
+        STRING (s.Substring(1, s.Length-2)) }
+
+    | key {
+        let s = lexeme lexbuf |> string
+        KEY (s.Substring(0, s.Length-1)) }
+
+    | variable   {
+        let s = lexeme lexbuf |> string
+        VARIABLE (s.Substring(1, s.Length-1)) }
+
     | "nothing" { NOTHING }
     | "true" { TRUE }
     | "false" { FALSE }
@@ -24,7 +37,7 @@ rule token = parse
     | "upper" { UPPER }
     | "lower" { LOWER }
     | "target"     { TARGET }
-    | "project"   { PROJECT }
+    | "configuration"   { CONFIGURATION }
     | "dependencies" { DEPENDENCIES }
     | "outputs" { OUTPUTS }
     | "ignores" { IGNORES }
@@ -36,18 +49,10 @@ rule token = parse
     | "parameters" { PARAMETERS }
     | "depends_on" { DEPENDS_ON }
 
-    | quotedString { 
-        let s = lexeme lexbuf |> string
-        STRING (s.Substring(1, s.Length-2)) }
-
-    | variable   {
-        let s = lexeme lexbuf |> string
-        VARIABLE (s.Substring(1, s.Length-1)) }
-
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
 
-    | "{"        { LBRACE }
-    | "}"        { RBRACE }
+    | "{" { LBRACE }
+    | "}" { RBRACE }
     | "["        { LSQBRACKET }
     | "]"        { RSQBRACKET }
     | "("        { LPAREN }
@@ -55,6 +60,7 @@ rule token = parse
     | "="        { EQUAL }
     | ","        { COMMA }
     | "+"        { PLUS }
+
     | whitespace { token lexbuf }
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
     | eof        { EOF }

@@ -1,6 +1,6 @@
 %{ 
 open Terrabuild.Parser.AST
-open Terrabuild.Parser.Build.AST
+open Terrabuild.Parser.Project.AST
 
 
 #if DEBUG
@@ -11,13 +11,14 @@ let debugPrint s = ignore s
 
 %}
  
-%start Build
+%start Project
  
 // terminal tokens
 %token NOTHING TRUE FALSE
 %token <string> STRING
 %token <string> IDENTIFIER
 %token <string> VARIABLE
+%token <string> KEY
 %token LBRACE RBRACE
 %token LSQBRACKET RSQBRACKET
 %token LPAREN RPAREN
@@ -26,27 +27,27 @@ let debugPrint s = ignore s
 %token PLUS
 %token TRIM UPPER LOWER
 %token EOF
-%token EXTENSION PROJECT TARGET 
+%token EXTENSION CONFIGURATION TARGET 
 %token DEPENDENCIES OUTPUTS IGNORES LABELS PARSER CONTAINER PARAMETERS SCRIPT DEPENDS_ON
 
 // associativity and precedences
 %left PLUS
 
-%type <Terrabuild.Parser.Build.AST.Build> Build
+%type <Terrabuild.Parser.Project.AST.Project> Project
 %% 
 
-Build:
-    | BuildComponents EOF { $1 }
+Project:
+    | ProjectComponents EOF { $1 }
 
-BuildComponents:
-    | /* empty */ { Build.Empty }
-    | BuildComponents Extension { $1.Patch $2 }
-    | BuildComponents Project { $1.Patch $2 }
-    | BuildComponents Target { $1.Patch $2 }
+ProjectComponents:
+    | /* empty */ { Project.Empty }
+    | ProjectComponents Extension { $1.Patch $2 }
+    | ProjectComponents Configuration { $1.Patch $2 }
+    | ProjectComponents Target { $1.Patch $2 }
 
 
 Extension:
-    | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { BuildComponents.Extension ($2, $4) }
+    | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { ProjectComponents.Extension ($2, $4) }
 ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents Container { $1.Patch $2 }
@@ -60,29 +61,29 @@ Parameters:
     | PARAMETERS LBRACE Variables RBRACE { ExtensionComponents.Parameters $3 }
 
 
-Project:
-    | PROJECT LBRACE ProjectComponents RBRACE { BuildComponents.Project $3 }
-ProjectComponents:
-    | /* empty */ { Project.Empty }
-    | ProjectComponents ProjectDependencies { $1.Patch $2 }
-    | ProjectComponents ProjectOutputs { $1.Patch $2 }
-    | ProjectComponents ProjectIgnores { $1.Patch $2 }
-    | ProjectComponents ProjectLabels { $1.Patch $2 }
-    | ProjectComponents ProjectParser { $1.Patch $2 }
-ProjectDependencies:
-    | DEPENDENCIES EQUAL ListOfString { ProjectComponents.Dependencies $3 }
-ProjectOutputs:
-    | OUTPUTS EQUAL ListOfString { ProjectComponents.Outputs $3 }
-ProjectIgnores:
-    | IGNORES EQUAL ListOfString { ProjectComponents.Ignores $3 }
-ProjectLabels:
-    | LABELS EQUAL ListOfString { ProjectComponents.Labels $3 }
-ProjectParser:
-    | PARSER EQUAL String { ProjectComponents.Parser $3 }
+Configuration:
+    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { ProjectComponents.Configuration $3 }
+ConfigurationComponents:
+    | /* empty */ { Configuration.Empty }
+    | ConfigurationComponents ConfigurationDependencies { $1.Patch $2 }
+    | ConfigurationComponents ConfigurationOutputs { $1.Patch $2 }
+    | ConfigurationComponents ConfigurationIgnores { $1.Patch $2 }
+    | ConfigurationComponents ConfigurationLabels { $1.Patch $2 }
+    | ConfigurationComponents ConfigurationParser { $1.Patch $2 }
+ConfigurationDependencies:
+    | DEPENDENCIES EQUAL ListOfString { ConfigurationComponents.Dependencies $3 }
+ConfigurationOutputs:
+    | OUTPUTS EQUAL ListOfString { ConfigurationComponents.Outputs $3 }
+ConfigurationIgnores:
+    | IGNORES EQUAL ListOfString { ConfigurationComponents.Ignores $3 }
+ConfigurationLabels:
+    | LABELS EQUAL ListOfString { ConfigurationComponents.Labels $3 }
+ConfigurationParser:
+    | PARSER EQUAL String { ConfigurationComponents.Parser $3 }
 
 
 Target:
-    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { BuildComponents.Target ($2, $4) }
+    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { ProjectComponents.Target ($2, $4) }
 TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents DependsOn { $1.Patch $2 }
@@ -101,10 +102,10 @@ Strings:
     | Strings String { $1 @ [$2] }
 
 Variables:
-    | /* empty */ { Map.empty }
+    | /* empty */ { Map.empty }        
     | Variables Variable { $1.Add $2 }
 Variable:
-    | IDENTIFIER EQUAL Expr { ($1, $3) }
+    | KEY Expr { ($1, $2) }
 
 Expr:
     | NOTHING { Nothing }

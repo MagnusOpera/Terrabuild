@@ -25,6 +25,7 @@ type token =
   | RSQBRACKET
   | LBRACE
   | RBRACE
+  | KEY of (string)
   | VARIABLE of (string)
   | IDENTIFIER of (string)
   | STRING of (string)
@@ -56,6 +57,7 @@ type tokenId =
     | TOKEN_RSQBRACKET
     | TOKEN_LBRACE
     | TOKEN_RBRACE
+    | TOKEN_KEY
     | TOKEN_VARIABLE
     | TOKEN_IDENTIFIER
     | TOKEN_STRING

@@ -1,16 +1,16 @@
 extension dotnet {
   parameters {
-    configuration = $configuration
+    configuration: $configuration
   }
 }
 
 extension docker {
   parameters {
-    image = "ghcr.io/magnusopera/dotnet-app"
+    image: "ghcr.io/magnusopera/dotnet-app"
   }
 }
 
-project {
+configuration {
   dependencies = [ "../../libraries/shell-lib" ]
   outputs = [ "dist" ]
   labels = [ "app"
@@ -29,11 +29,8 @@ target dist {
 }
 
 target docker {
-  shell echo { message = trim("building project1 " + $configuration) }
-  
-  docker build {
-    configuration = $configuration
-  }
+  shell echo { message: trim("building project1 " + $configuration) }  
+  docker build { configuration: $configuration }
 }
 
 target push {
