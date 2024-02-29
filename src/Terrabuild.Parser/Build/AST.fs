@@ -4,31 +4,6 @@ open Terrabuild.Parser.AST
 
 
 [<RequireQualifiedAccess>]
-type ExtensionComponents =
-    | Container of string
-    | Script of string
-    | Parameters of Map<string, Expr>
-
-type Extension = {
-    Container: string option
-    Script: string option
-    Parameters: Map<string, Expr>
-}
-with
-    static member Empty =
-        { Container = None
-          Script = None
-          Parameters = Map.empty }
-
-    member this.Patch comp =
-        match comp with
-        | ExtensionComponents.Container container -> { this with Container = Some container }
-        | ExtensionComponents.Script script -> { this with Script = Some script }
-        | ExtensionComponents.Parameters parameters -> { this with Parameters = parameters }
-
-
-
-[<RequireQualifiedAccess>]
 type ProjectComponents =
     | Dependencies of string list
     | Outputs of string list
@@ -70,17 +45,21 @@ type Step = {
 
 [<RequireQualifiedAccess>]
 type TargetComponents =
+    | DependsOn of string list
     | Step of Step
 
 type Target = {
+    DependsOn: Set<string> option
     Steps: Step list
 }
 with
     static member Empty =
-        { Steps = [] }
+        { DependsOn = None
+          Steps = [] }
 
     member this.Patch comp =
         match comp with
+        | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn |> Set.ofList |> Some }
         | TargetComponents.Step step -> { this with Steps = this.Steps @ [step] }
 
 [<RequireQualifiedAccess>]

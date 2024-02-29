@@ -3,46 +3,44 @@ open System.IO
 open Collections
 open System
 open System.Collections.Concurrent
-open System.Reflection
 open Terrabuild.Extensibility
+open Terrabuild.Parser.AST
 
-type ExtensionConfig = {
-    Version: string option
-    Container: YamlNodeValue<string>
-    Parameters: Map<string, YamlNode>
-}
+// type ExtensionConfig = {
+//     Version: string option
+//     Container: YamlNodeValue<string>
+//     Parameters: Map<string, YamlNode>
+// }
 
 type Variables = Map<string, string>
 
-type BuildConfig = {
-    Storage: string option
-    SourceControl: string option
-    NuGets: string option
-    Environments: Map<string, Variables>
-    Targets: Map<string, string set>
-    Extensions: Map<string, ExtensionConfig option>
-}
+// type BuildConfig = {
+//     Storage: string option
+//     SourceControl: string option
+//     Environments: Map<string, Variables>
+//     Targets: Map<string, string set>
+// }
 
-type BuilderConfig = {
-    Use: string option
-    With: string option
-    Container: YamlNodeValue<string>
-    Parameters: Map<string, YamlNode>
-}
+// type BuilderConfig = {
+//     Use: string option
+//     With: string option
+//     Container: YamlNodeValue<string>
+//     Parameters: Map<string, YamlNode>
+// }
 
-type Items = string set
-type CommandConfig = Map<string, YamlNode>
-type TargetRules = string set
+// type Items = string set
+// type CommandConfig = Map<string, YamlNode>
+// type TargetRules = string set
 
-type ProjectConfig = {
-    Builders: Map<string, BuilderConfig option>
-    Dependencies: Items
-    Outputs: Items
-    Ignores: Items
-    Targets: Map<string, Items>
-    Steps: Map<string, CommandConfig list>
-    Labels: Items
-}
+// type ProjectConfig = {
+//     Builders: Map<string, BuilderConfig option>
+//     Dependencies: Items
+//     Outputs: Items
+//     Ignores: Items
+//     Targets: Map<string, Items>
+//     Steps: Map<string, CommandConfig list>
+//     Labels: Items
+// }
 
 [<RequireQualifiedAccess>]
 type Options = {
@@ -59,7 +57,7 @@ type ConfigException(msg, ?innerException: Exception) =
         ConfigException(msg, ?innerException=innerException) |> raise
 
 [<RequireQualifiedAccess>]
-type ContaineredCommand = {
+type ContaineredAction = {
     Container: string option
     Command: string
     Arguments: string
@@ -67,24 +65,21 @@ type ContaineredCommand = {
 }
 
 [<RequireQualifiedAccess>]
-type Step = {
+type ContaineredTarget = {
     Hash: string
     Variables: Map<string, string>
-    CommandLines: ContaineredCommand list
+    DependsOn: string set
+    Actions: ContaineredAction list
 }
-
-type Steps = Map<string, Step>
 
 [<RequireQualifiedAccess>]
 type Project = {
-    Dependencies: Items
+    Dependencies: string set
     Files: string set
-    Ignores: Items
-    Outputs: Items
-    Targets: Map<string, Items>
-    Steps: Steps
+    Ignores: string set
+    Outputs: string set
+    Targets: Map<string, ContaineredTarget>
     Hash: string
-    Variables: Variables
     Labels: string set
 }
 
@@ -93,23 +88,12 @@ type WorkspaceConfig = {
     Storage: Storages.Storage
     SourceControl: SourceControls.SourceControl
     Directory: string
-    Dependencies: Items
-    Build: BuildConfig
+    Dependencies: string set
     Projects: Map<string, Project>
     Environment: string
 }
 
-
 module ExtensionLoaders =
-    // open Extensions
-
-//     let loadExtension (container: IContainer) name context : IBuilder =
-//         try
-//             let factory = container.Resolve<IExtension>(name)
-//             factory.CreateBuilder(context)
-//         with
-//             ex -> failwith $"Plugin '{name}' not found (is it declared in WORKSPACE?): {ex}"
-
     let loadStorage name : Storages.Storage =
         match name with
         | None -> Storages.Local()
@@ -122,53 +106,37 @@ module ExtensionLoaders =
         | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control '{name}'"
 
-    let runStep (extensions: Map<string, Assembly>) (step: Terrabuild.Parser.Build.AST.Step) =
-        match extensions |> Map.tryFind step.Extension with
-        | None -> failwith $"Unknown extension {step.Extension}"
-        | Some assembly ->
-            let tpe = assembly.GetType("Script")
-            let f = tpe.GetMethod(step.Command)
-            let fArgs: obj array =
-                f.GetParameters()
-                |> Array.map (fun prm ->
-                    match step.Parameters |> Map.tryFind prm.Name with
-                    | Some paramValue -> paramValue
-                    | None -> failwith $"Missing parameter {prm.Name}")
-            let r = f.Invoke(null, fArgs) :?> Terrabuild.Extensibility.Step list
-            r
-
-
 module ProjectConfigParser =
     open Terrabuild.Parser.Build.AST
 
     [<RequireQualifiedAccess>]
     type ProjectDefinition = {
-        Dependencies: Items
-        Ignores: Items
-        Outputs: Items
+        Dependencies: string set
+        Ignores: string set
+        Outputs: string set
         Targets: Map<string, Target>
         Labels: string set
-        Extensions: Map<string, Assembly>
+        Extensions: Map<string, Extension>
     }
 
-    let validate (extensions: Map<string, Assembly>) (projectConfig: Terrabuild.Parser.Build.AST.Build) (workspaceDir: string) (projectDir: string) =
+    let explore (extensions: Map<string, Extension>) (projectConfig: Terrabuild.Parser.Build.AST.Build) (workspaceDir: string) (projectDir: string) =
         let extensions =
-            projectConfig.Extensions
-            |> Map.map (fun _ ext ->
-                match ext.Script with
-                | Some script -> Scripting.loadScript script
-                | _ -> failwith "Missing script file")
-            |> Map.replace extensions
+            extensions
+            |> Map.addMap projectConfig.Extensions
 
         let projectInfo =
             match projectConfig.Project.Parser with
             | Some parser ->
                 match extensions |> Map.tryFind parser with
                 | None -> failwith $"Extension {parser} is not defined"
-                | Some assembly ->
-                    let tpe = assembly.GetType("Script")
-                    let f = tpe.GetMethod("parse")
-                    f.Invoke(null, [| projectDir |]) :?> Terrabuild.Extensibility.ProjectInfo |> Some
+                | Some extension ->
+                    match extension.Script with
+                    | None -> failwith $"Script missing for extension {parser}"
+                    | Some script ->
+                        let assembly = Scripting.loadScript script
+                        let tpe = assembly.GetType("Script")
+                        let f = tpe.GetMethod("parse")
+                        f.Invoke(null, [| projectDir |]) :?> Terrabuild.Extensibility.ProjectInfo |> Some                    
             | _ -> None
 
         let mergeOpt optData data =
@@ -216,7 +184,8 @@ let read workspaceDir (options: Options) environment labels variables =
             | _ -> ConfigException.Raise($"Environment '{environment}' not found")
     let buildVariables =
         variables
-        |> Map.replace envVariables
+        |> Map.map (fun key value -> String value)
+        |> Map.addMap envVariables
 
     // storage
     let storage =
@@ -233,32 +202,17 @@ let read workspaceDir (options: Options) environment labels variables =
             ExtensionLoaders.loadSourceControl None
     let branchOrTag = sourceControl.BranchOrTag
 
-    let extensions =
-        workspaceConfig.Extensions
-        |> Map.map (fun _ ext ->
-            match ext.Script with
-            | Some script -> Scripting.loadScript script
-            | _ -> failwith "Missing script file")
-
     let processedNodes = ConcurrentDictionary<string, bool>()
 
     let rec scanDependency projects project =
         let projectDir = IO.combinePath workspaceDir project
-        // let projectId = IO.combinePath workspaceDir project
-        // let projectDir, projectFile = 
-        //     match projectId with
-        //     | IO.Directory projectDir -> projectDir, "PROJECT"
-        //     | IO.File _ -> ConfigException.Raise($"Dependency '{project}' is not a directory")
-        //     | _ -> failwith $"Failed to find project {projectId}"
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
             let projectFile = IO.combinePath projectDir "BUILD"
             let projectContent = File.ReadAllText projectFile
             let projectConfig = FrontEnd.parseBuild projectContent
-            let projectDef = ProjectConfigParser.validate extensions projectConfig workspaceDir projectDir
-
-            // let projectDef = ProjectConfigParser.parse workspaceDir workspaceConfig projectDir projectFile extensions options.CI
+            let projectDef = ProjectConfigParser.explore workspaceConfig.Extensions projectConfig workspaceDir projectDir
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
@@ -276,48 +230,13 @@ let read workspaceDir (options: Options) environment labels variables =
                     ConfigException.Raise($"Circular dependencies between {project} and {childDependency}")
 
 
-
             // get dependencies on files
             let files = projectDir |> IO.enumerateFilesBut (projectDef.Outputs + projectDef.Ignores) |> Set
             let filesHash =
                 files
                 |> Seq.sort
                 |> Hash.computeFilesSha
-
-            let projectSteps =
-                projectDef.Targets
-                |> Map.map (fun targetId target ->
-                    target.Steps
-                    |> List.collect (fun stepDef ->
-                        let stepParams =
-                            stepDef.Parameters
-                            |> Map.add "nodeHash" (Terrabuild.Parser.AST.Variable "$terrabuild_node_hash")
-                        let stepInfos = ExtensionLoaders.runStep projectDef.Extensions stepDef
-
-                        stepInfos
-                        |> List.map (fun cmd ->
-                            { ContaineredCommand.Container = stepDef.Container
-                              ContaineredCommand.Command = cmd.Command
-                              ContaineredCommand.Arguments = cmd.Arguments
-                              ContaineredCommand.Cache = cmd.Cache })
-                    )
-                )
  
-            let variables =
-                projectDef.StepDefinitions
-                |> Seq.collect (fun l -> l.Value)
-                |> Seq.collect (fun stepDef ->
-                    let prms = Yaml.dumpAsString (YamlNode.Mapping stepDef.Parameters)
-                    String.AllMatches "\$\(([a-zA-Z][_a-zA-Z0-9]+)\)" prms)
-                |> Set
-                |> Set.remove "terrabuild_node_hash"
-                |> Seq.map (fun varName ->
-                    match buildVariables |> Map.tryFind varName with
-                    | Some value -> varName, value
-                    | _ -> ConfigException.Raise($"Variable '{varName}' is not defined in environment '{environment}'"))
-                |> Map
-                |> Map.add "terrabuild_branch_or_tag" (branchOrTag.Replace("/", "-"))
-
             let dependenciesHash =
                 projectDef.Dependencies
                 |> Seq.map (fun dependency -> 
@@ -335,42 +254,50 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> String.join "\n"
                 |> Hash.sha256
 
-            let variables =
-                variables
-                |> Map.add "terrabuild_node_hash" nodeHash
+            let buildVariables =
+                buildVariables
+                |> Map.add "terrabuild_node_hash" (String nodeHash)
 
             let projectSteps =
-                projectSteps
-                |> Map.map (fun _ stepCommandLines ->
-                    // collect variables for this step
-                    let variableNames =
-                        stepCommandLines
-                        |> Seq.collect (fun stepDef -> String.AllMatches "\$\(([a-zA-Z][_a-zA-Z0-9]+)\)" stepDef.Arguments)
-                        |> Set
+                projectDef.Targets
+                |> Map.map (fun targetName target ->
+                    let variables, actions =
+                        target.Steps
+                        |> List.fold (fun (variables, actions) step ->
+                            let extension =
+                                match projectDef.Extensions |> Map.tryFind step.Extension with
+                                | None -> failwith $"Extension {step.Extension} is not defined"
+                                | Some extension -> extension
 
-                    let variableValues =
-                        variableNames
-                        |> Seq.map (fun varName ->
-                            match variables |> Map.tryFind varName with
-                            | Some value -> varName, value
-                            | _ -> ConfigException.Raise($"Variable {varName} is not defined in \"{environment}\""))
-                        |> Map
+                            let assembly = Scripting.loadScript extension.Script.Value // NOTE: Script is always Some
+                            let tpe = assembly.GetType("Script")
+                            let f = tpe.GetMethod(step.Command)
+                            let stepVars: Map<string, string> = Map.empty
+                            let args: obj array = Array.zeroCreate 0 // TODO: compute parameter values using buildVariables and function requirements
+                            let stepActions =
+                                f.Invoke(null, args) :?> Terrabuild.Extensibility.Action list
+                                |> List.map (fun action -> { ContaineredAction.Container = extension.Container
+                                                             ContaineredAction.Command = action.Command
+                                                             ContaineredAction.Arguments = action.Arguments
+                                                             ContaineredAction.Cache = action.Cache })
 
-                    let stepWithValues =
-                        stepCommandLines
-                        |> List.map (fun step ->
-                            { step
-                              with Arguments = variableValues
-                                               |> Map.fold (fun acc key value -> acc |> String.replace $"$({key})" value) step.Arguments })
+                            let variables =
+                                variables
+                                |> Map.addMap stepVars
+
+                            let actions = actions @ stepActions
+
+                            variables, actions
+                        ) (Map.empty, [])
 
                     let variableHash =
-                        variableValues
+                        variables
                         |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
                         |> String.join "\n"
                         |> Hash.sha256
 
                     let stepHash =
-                        stepWithValues
+                        actions
                         |> Seq.map (fun step -> $"{step.Container} {step.Command} {step.Arguments}")
                         |> String.join "\n"
                         |> Hash.sha256
@@ -380,9 +307,18 @@ let read workspaceDir (options: Options) environment labels variables =
                         |> String.join "\n"
                         |> Hash.sha256
 
-                    { Step.Hash = hash
-                      Step.Variables = variableValues
-                      Step.CommandLines = stepWithValues }
+                    let dependsOn =
+                        match target.DependsOn with
+                        | Some dependsOn -> dependsOn
+                        | None ->
+                            match workspaceConfig.Targets |> Map.tryFind targetName with
+                            | Some target -> target.DependsOn
+                            | None -> Set.empty
+
+                    { ContaineredTarget.Hash = hash
+                      ContaineredTarget.Variables = variables
+                      ContaineredTarget.Actions = actions
+                      ContaineredTarget.DependsOn = dependsOn }
                 )
 
             let projectConfig =
@@ -390,10 +326,8 @@ let read workspaceDir (options: Options) environment labels variables =
                   Project.Files = files
                   Project.Outputs = projectDef.Outputs
                   Project.Ignores = projectDef.Ignores
-                  Project.Targets = projectDef.Targets
-                  Project.Steps = projectSteps
+                  Project.Targets = projectSteps
                   Project.Hash = nodeHash
-                  Project.Variables = variables
                   Project.Labels = projectDef.Labels }
 
             projects |> Map.add project projectConfig
@@ -438,6 +372,5 @@ let read workspaceDir (options: Options) environment labels variables =
       WorkspaceConfig.Dependencies = dependencies
       WorkspaceConfig.Storage = storage
       WorkspaceConfig.SourceControl = sourceControl
-      WorkspaceConfig.Build = workspaceConfig
       WorkspaceConfig.Projects = projects
       WorkspaceConfig.Environment = environment }

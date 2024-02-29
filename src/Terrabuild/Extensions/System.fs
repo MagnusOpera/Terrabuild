@@ -3,9 +3,9 @@ open Terrabuild.Extensibility
 
 
 let private buildCmdLine cmd args =
-    { Step.Command = cmd
-      Step.Arguments = args
-      Step.Cache = Cacheability.Always }
+    { Action.Command = cmd
+      Action.Arguments = args
+      Action.Cache = Cacheability.Always }
 
 
 let exec (command: string) (arguments: string option) =

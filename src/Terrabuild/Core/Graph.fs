@@ -32,25 +32,22 @@ type WorkspaceGraph = {
 }
 
 
-let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
+let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
-    let rec buildTarget target project =
-        let nodeId = $"{project}:{target}"
+    let rec buildTarget targetName project =
+        let nodeId = $"{project}:{targetName}"
 
         let processNode () =
             let projectConfig = wsConfig.Projects[project]
 
             // merge targets requirements
-            let buildDependsOn =
-                wsConfig.Build.Targets
-                |> Map.tryFind target
+            let dependsOns =
+                projectConfig.Targets
+                |> Map.tryFind targetName
+                |> Option.map (fun target -> target.DependsOn)
                 |> Option.defaultValue Set.empty
-            let projDependsOn = projectConfig.Targets
-                                |> Map.tryFind target
-                                |> Option.defaultValue Set.empty
-            let dependsOns = buildDependsOn + projDependsOn
 
             // apply on each dependency
             let children, hasInternalDependencies =
@@ -74,11 +71,11 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
 
             // only generate computation node - that is node that generate something
             // barrier nodes are just discarded and dependencies lift level up
-            match projectConfig.Steps |> Map.tryFind target with
-            | Some step ->
+            match projectConfig.Targets |> Map.tryFind targetName with
+            | Some target ->
                 let hashContent = [
-                    yield! step.Variables |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-                    yield! step.CommandLines |> Seq.map (fun cmd -> $"{cmd.Container} {cmd.Command} {cmd.Arguments}")
+                    yield! target.Variables |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
+                    yield! target.Actions |> Seq.map (fun cmd -> $"{cmd.Container} {cmd.Command} {cmd.Arguments}")
                     yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].Hash)
                     yield projectConfig.Hash
                 ]
@@ -91,18 +88,18 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) targets =
                     |> Seq.fold (fun acc nodeId -> acc &&& allNodes[nodeId].Cache) Cacheability.Always
 
                 let cache =
-                    step.CommandLines
+                    target.Actions
                     |> Seq.fold (fun acc cmd -> acc &&& cmd.Cache) childrenCache
 
                 let commandLines =
-                    step.CommandLines
+                    target.Actions
                     |> List.map (fun cmd -> { CommandLine.Container = cmd.Container
                                               CommandLine.Command = cmd.Command
                                               CommandLine.Arguments = cmd.Arguments })
 
                 let node = { Project = project
-                             Target = target
-                             Variables = step.Variables
+                             Target = targetName
+                             Variables = target.Variables
                              CommandLines = commandLines
                              Outputs = projectConfig.Outputs
                              Dependencies = children

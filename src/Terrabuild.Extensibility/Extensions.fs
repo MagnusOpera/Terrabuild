@@ -9,7 +9,7 @@ type Cacheability =
     | Always = 3 // Local + Remote
 
 [<RequireQualifiedAccess>]
-type Step = {
+type Action = {
     Command: string
     Arguments: string
     Cache: Cacheability
