@@ -9,6 +9,7 @@ type token =
   | CONTAINER
   | PARAMETERS
   | SCRIPT
+  | DEPENDS_ON
   | EXTENSION
   | PROJECT
   | TARGET
@@ -40,6 +41,7 @@ type tokenId =
     | TOKEN_CONTAINER
     | TOKEN_PARAMETERS
     | TOKEN_SCRIPT
+    | TOKEN_DEPENDS_ON
     | TOKEN_EXTENSION
     | TOKEN_PROJECT
     | TOKEN_TARGET
@@ -82,6 +84,7 @@ type nonTerminalId =
     | NONTERM_ProjectParser
     | NONTERM_Target
     | NONTERM_TargetComponents
+    | NONTERM_DependsOn
     | NONTERM_Step
     | NONTERM_String
     | NONTERM_ListOfString

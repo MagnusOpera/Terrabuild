@@ -27,7 +27,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER
 %token EOF
 %token EXTENSION PROJECT TARGET 
-%token DEPENDENCIES OUTPUTS IGNORES LABELS PARSER CONTAINER PARAMETERS SCRIPT
+%token DEPENDENCIES OUTPUTS IGNORES LABELS PARSER CONTAINER PARAMETERS SCRIPT DEPENDS_ON
 
 // associativity and precedences
 %left PLUS
@@ -85,7 +85,10 @@ Target:
     | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { BuildComponents.Target ($2, $4) }
 TargetComponents:
     | /* empty */ { Target.Empty }
+    | TargetComponents DependsOn { $1.Patch $2 }
     | TargetComponents Step { $1.Patch $2 }
+DependsOn:
+    | DEPENDS_ON EQUAL ListOfString { TargetComponents.DependsOn $3 }
 Step:
     | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
 

@@ -34,6 +34,7 @@ rule token = parse
     | "extension" { EXTENSION }
     | "container" { CONTAINER }
     | "parameters" { PARAMETERS }
+    | "depends_on" { DEPENDS_ON }
 
     | quotedString { 
         let s = lexeme lexbuf |> string

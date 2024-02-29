@@ -13,3 +13,4 @@ let test_build() =
     let content = File.ReadAllText("BUILD")
     let build = FrontEnd.parseBuild content
     printfn $"{build}"
+    

@@ -19,6 +19,8 @@ project {
 }
 
 target build {
+  depends_on = [ "dist" ]
+
   dotnet build { }  
 }
 
