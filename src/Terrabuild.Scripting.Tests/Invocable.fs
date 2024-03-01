@@ -1,6 +1,5 @@
 module Terrabuild.Scripting.Tests.Project
 
-open System.IO
 open NUnit.Framework
 open FsUnit
 
