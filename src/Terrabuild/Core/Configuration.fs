@@ -59,6 +59,13 @@ type WorkspaceConfig = {
 }
 
 module ExtensionLoaders =
+    let loadExtension name (currentDir: string) (extension: Extension) =
+        match extension.Script with
+        | None -> ConfigException.Raise($"Extension {name} has no script")
+        | Some script ->
+            let scriptFile = IO.combinePath currentDir script
+            Scripting.loadScript scriptFile
+
     let loadStorage name : Storages.Storage =
         match name with
         | None -> Storages.Local()
@@ -136,7 +143,11 @@ module ProjectConfigParser =
 let read workspaceDir (options: Options) environment labels variables =
     let workspaceFile = IO.combinePath workspaceDir "WORKSPACE"
     let workspaceContent = File.ReadAllText workspaceFile
-    let workspaceConfig = FrontEnd.parseWorkspace workspaceContent
+    let workspaceConfig =
+        try
+            FrontEnd.parseWorkspace workspaceContent
+        with exn ->
+            ConfigException.Raise("Failed to read WORKSPACE configuration file", exn)
 
     // variables
     let environments = workspaceConfig.Environments
@@ -149,7 +160,7 @@ let read workspaceDir (options: Options) environment labels variables =
             | _ -> ConfigException.Raise($"Environment '{environment}' not found")
     let buildVariables =
         variables
-        |> Map.map (fun key value -> String value)
+        |> Map.map (fun _ value -> Expr.String value)
         |> Map.addMap envVariables
 
     // storage
@@ -174,9 +185,14 @@ let read workspaceDir (options: Options) environment labels variables =
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
-            let projectFile = IO.combinePath projectDir "BUILD"
+            let projectFile = IO.combinePath projectDir "PROJECT"
             let projectContent = File.ReadAllText projectFile
-            let projectConfig = FrontEnd.parseProject projectContent
+            let projectConfig =
+                try
+                    FrontEnd.parseProject projectContent
+                with exn ->
+                    ConfigException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
+            
             let projectDef = ProjectConfigParser.explore workspaceConfig.Extensions projectConfig workspaceDir projectDir
 
             // we go depth-first in order to compute node hash right after
@@ -221,7 +237,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
             let buildVariables =
                 buildVariables
-                |> Map.add "terrabuild_node_hash" (String nodeHash)
+                |> Map.add "terrabuild_node_hash" (Expr.String nodeHash)
 
             let projectSteps =
                 projectDef.Targets
@@ -234,9 +250,11 @@ let read workspaceDir (options: Options) environment labels variables =
                                 | None -> failwith $"Extension {step.Extension} is not defined"
                                 | Some extension -> extension
 
-                            let assembly = Scripting.loadScript extension.Script.Value // NOTE: Script is always Some
+                            let assembly = ExtensionLoaders.loadExtension step.Extension projectDir extension // NOTE: Script is always Some
                             let tpe = assembly.GetType("Script")
+                            if tpe |> isNull then ConfigException.Raise($"Failed to initialize script {extension.Script}")
                             let f = tpe.GetMethod(step.Command)
+                            if f |> isNull then ConfigException.Raise($"Function {step.Command} not found in script {extension.Script}")
                             let stepVars: Map<string, string> = Map.empty
                             let args: obj array = Array.zeroCreate 0 // TODO: compute parameter values using buildVariables and function requirements
                             let stepActions =

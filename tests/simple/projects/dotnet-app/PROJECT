@@ -1,6 +1,9 @@
-extension dotnet { }
+extension dotnet {
+    script = "../../scripts/dotnet.fsx"
+}
 
 extension docker {
+    script = "../../scripts/docker.fsx"
     parameters {
         image: "ghcr.io/magnusopera/dotnet-app"
     }
@@ -20,7 +23,7 @@ target dist {
 }
 
 target docker {
-    docker build { configuration: $configuration }
+    docker build { }
 }
 
 target push {

@@ -46,6 +46,7 @@ rule token = parse
     | "variables" { VARIABLES }
     | "container" { CONTAINER }
     | "parameters" { PARAMETERS }
+    | "script" { SCRIPT }
 
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
 

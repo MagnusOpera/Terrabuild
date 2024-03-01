@@ -4,7 +4,7 @@ open FSharp.Text.Lexing
 
 let dumpLexer lexer (lexbuff: LexBuffer<char>) =
     let token = lexer lexbuff
-    printfn $"TOKEN = {token}"
+    // printfn $"TOKEN = {token}"
     token
 
 let private parse parser lexer txt =

@@ -8,6 +8,5 @@ configuration {
 
 target build {
     shell echo { message: "building project1" }
-    make build { secret: $secret_message }
+    shell exec { command: "make" arguments: "secret: " + $secret_message }
 }
-

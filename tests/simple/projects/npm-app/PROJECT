@@ -1,4 +1,7 @@
-extension npm { }
+extension npm {
+    script = "../scripts/npm.fsx"
+
+}
 
 configuration {
     labels = [ "app" ]

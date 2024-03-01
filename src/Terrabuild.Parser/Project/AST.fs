@@ -36,7 +36,6 @@ with
 
 
 
-[<RequireQualifiedAccess>]
 type Step = {
     Extension: string
     Command: string

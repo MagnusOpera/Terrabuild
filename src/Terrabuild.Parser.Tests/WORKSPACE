@@ -1,4 +1,4 @@
-terrabuild {
+configuration {
   storage = "azureblob"
   sourcecontrol = "github"
 }
@@ -9,10 +9,6 @@ target build {
 
 target dist {
   depends_on = [ "build" ]
-}
-
-target publish {
-  depends_on = [ "dist" ]
 }
 
 environment release {
@@ -27,3 +23,5 @@ extension dotnet {
     configuration: $configuration
   }
 }
+
+extension docker { }

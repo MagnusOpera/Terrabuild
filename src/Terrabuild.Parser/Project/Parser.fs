@@ -775,7 +775,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 111 "Project/Parser.fsy"
-                                     Nothing 
+                                     Expr.Nothing 
                    )
 # 111 "Project/Parser.fsy"
                  : 'gentype_Expr));
@@ -785,7 +785,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 112 "Project/Parser.fsy"
-                                  Boolean true 
+                                  Expr.Boolean true 
                    )
 # 112 "Project/Parser.fsy"
                  : 'gentype_Expr));
@@ -795,7 +795,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 113 "Project/Parser.fsy"
-                                   Boolean false 
+                                   Expr.Boolean false 
                    )
 # 113 "Project/Parser.fsy"
                  : 'gentype_Expr));
@@ -806,7 +806,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 114 "Project/Parser.fsy"
-                                    String _1 
+                                    Expr.String _1 
                    )
 # 114 "Project/Parser.fsy"
                  : 'gentype_Expr));
@@ -817,7 +817,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 115 "Project/Parser.fsy"
-                                      Variable _1 
+                                      Expr.Variable _1 
                    )
 # 115 "Project/Parser.fsy"
                  : 'gentype_Expr));
@@ -829,7 +829,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 116 "Project/Parser.fsy"
-                                            InfixFunction (_1, Plus, _3) 
+                                            Expr.Function (Function.Plus, [_1; _3]) 
                    )
 # 116 "Project/Parser.fsy"
                  : 'gentype_Expr));
@@ -840,7 +840,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 117 "Project/Parser.fsy"
-                                                     Function (Trim, _3) 
+                                                     Expr.Function (Function.Trim, [_3]) 
                    )
 # 117 "Project/Parser.fsy"
                  : 'gentype_Expr));
@@ -851,7 +851,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 118 "Project/Parser.fsy"
-                                                      Function (Upper, _3) 
+                                                      Expr.Function (Function.Upper, [_3]) 
                    )
 # 118 "Project/Parser.fsy"
                  : 'gentype_Expr));
@@ -862,7 +862,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 119 "Project/Parser.fsy"
-                                                      Function (Lower, _3) 
+                                                      Expr.Function (Function.Lower, [_3]) 
                    )
 # 119 "Project/Parser.fsy"
                  : 'gentype_Expr));

@@ -32,7 +32,3 @@ target docker {
   shell echo { message: trim("building project1 " + $configuration) }  
   docker build { configuration: $configuration }
 }
-
-target push {
-  docker push { }
-}
