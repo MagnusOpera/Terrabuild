@@ -92,7 +92,6 @@ TargetComponents:
 DependsOn:
     | DEPENDS_ON ListOfString { TargetComponents.DependsOn $2 }
 Step:
-    | IDENTIFIER IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
 
 String:

@@ -25,8 +25,8 @@ target build {
 }
 
 target dist {
-  dotnet build
-  dotnet publish
+  dotnet build { }
+  dotnet publish { }
 }
 
 target docker {
