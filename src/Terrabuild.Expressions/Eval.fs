@@ -1,13 +1,6 @@
 ﻿module Terrabuild.Expressions.Eval
 open Terrabuild.Expressions
 
-[<RequireQualifiedAccess>]
-type Value =
-    | Nothing
-    | String of string
-    | Bool of bool
-    | Map of Map<string, Value>
-
 let rec eval (variables: Map<string, string>) (expr: Expr) =
     let rec eval (expr: Expr) =
         match expr with

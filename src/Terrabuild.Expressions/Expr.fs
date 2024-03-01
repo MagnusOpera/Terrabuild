@@ -16,3 +16,10 @@ type Expr =
     | Map of Map<string, Expr>
     | Function of Function * Expr list
 
+
+[<RequireQualifiedAccess>]
+type Value =
+    | Nothing
+    | String of string
+    | Bool of bool
+    | Map of Map<string, Value>

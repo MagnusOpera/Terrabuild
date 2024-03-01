@@ -19,6 +19,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Expressions", "s
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Expressions.Tests", "src\Terrabuild.Expressions.Tests\Terrabuild.Expressions.Tests.fsproj", "{C29E9AB2-DC27-41B7-85DB-0A09785D0D50}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Scripting.Tests", "src\Terrabuild.Scripting.Tests\Terrabuild.Scripting.Tests.fsproj", "{3588B2C9-1990-4615-9CDA-C7289BDC0D1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{C29E9AB2-DC27-41B7-85DB-0A09785D0D50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C29E9AB2-DC27-41B7-85DB-0A09785D0D50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C29E9AB2-DC27-41B7-85DB-0A09785D0D50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3588B2C9-1990-4615-9CDA-C7289BDC0D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3588B2C9-1990-4615-9CDA-C7289BDC0D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3588B2C9-1990-4615-9CDA-C7289BDC0D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3588B2C9-1990-4615-9CDA-C7289BDC0D1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9DE39771-3C5A-47C8-905A-338367C27214} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
@@ -65,5 +71,6 @@ Global
 		{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
 		{0F2A7B77-6B89-4B43-80AF-F72529A8114F} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
 		{C29E9AB2-DC27-41B7-85DB-0A09785D0D50} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
+		{3588B2C9-1990-4615-9CDA-C7289BDC0D1C} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
 	EndGlobalSection
 EndGlobal

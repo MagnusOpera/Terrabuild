@@ -60,12 +60,14 @@ type WorkspaceConfig = {
 }
 
 module ExtensionLoaders =
+    open Terrabuild.Scripting
+
     let loadExtension name (currentDir: string) (extension: Extension) =
         match extension.Script with
         | None -> ConfigException.Raise($"Extension {name} has no script")
         | Some script ->
             let scriptFile = IO.combinePath currentDir script
-            Scripting.loadScript scriptFile
+            loadScript scriptFile
 
     let loadStorage name : Storages.Storage =
         match name with
@@ -78,6 +80,18 @@ module ExtensionLoaders =
         | None -> SourceControls.Local()
         | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control '{name}'"
+
+    let invokeScriptMethod<'r> (script: string) (method: string) (args: Value)=
+        match loadScript script with
+        | Ok script ->
+            match script.GetMethod(method) with
+            | Ok method ->
+                match method.BuildArgs args with
+                | Ok args -> method.Invoke args :?> 'r
+                | Error msg -> ConfigException.Raise(msg)
+            | Error msg -> ConfigException.Raise(msg)
+        | Error msg -> ConfigException.Raise($"File {script} was not found", msg)
+
 
 module ProjectConfigParser =
     open Terrabuild.Parser.Project.AST
@@ -105,11 +119,7 @@ module ProjectConfigParser =
                 | Some extension ->
                     match extension.Script with
                     | None -> failwith $"Script missing for extension {parser}"
-                    | Some script ->
-                        let assembly = Scripting.loadScript script
-                        let tpe = assembly.GetType("Script")
-                        let f = tpe.GetMethod("parse")
-                        f.Invoke(null, [| projectDir |]) :?> Terrabuild.Extensibility.ProjectInfo |> Some                    
+                    | Some script -> ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> script "parse" Value.Nothing |> Some
             | _ -> None
 
         let mergeOpt optData data =
@@ -250,21 +260,16 @@ let read workspaceDir (options: Options) environment labels variables =
                                 match projectDef.Extensions |> Map.tryFind step.Extension with
                                 | None -> failwith $"Extension {step.Extension} is not defined"
                                 | Some extension -> extension
-
-                            let assembly = ExtensionLoaders.loadExtension step.Extension projectDir extension // NOTE: Script is always Some
-                            let tpe = assembly.GetType("Script")
-                            if tpe |> isNull then ConfigException.Raise($"Failed to initialize script {extension.Script}")
-                            let f = tpe.GetMethod(step.Command)
-                            if f |> isNull then ConfigException.Raise($"Function {step.Command} not found in script {extension.Script}")
+    
                             let stepVars: Map<string, string> = Map.empty
-                            let args: obj array = Array.zeroCreate 0 // TODO: compute parameter values using buildVariables and function requirements
+
+                            let stepActions = ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.Action list> step.Extension step.Command (Value.Nothing)
                             let stepActions =
-                                f.Invoke(null, args) :?> Terrabuild.Extensibility.Action list
+                                stepActions
                                 |> List.map (fun action -> { ContaineredAction.Container = extension.Container
                                                              ContaineredAction.Command = action.Command
                                                              ContaineredAction.Arguments = action.Arguments
                                                              ContaineredAction.Cache = action.Cache })
-
                             let variables =
                                 variables
                                 |> Map.addMap stepVars
