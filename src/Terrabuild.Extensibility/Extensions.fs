@@ -15,14 +15,12 @@ type Action = {
     Cache: Cacheability
 }
 
-
 [<RequireQualifiedAccess>]
 type Context = {
     Directory: string
     With: string option
     CI: bool
 }
-
 
 [<RequireQualifiedAccess>]
 type ProjectInfo = {
@@ -31,24 +29,3 @@ type ProjectInfo = {
     Ignores: Set<string>
     Dependencies: Set<string>
 }
-
-
-// type IBaseCommand = interface end
-
-// type ICommand =
-//     inherit IBaseCommand
-//     abstract CreateSteps: unit -> Step list
-
-// type ICommand<'T> =
-//     inherit IBaseCommand
-//     abstract CreateSteps: arguments:'T -> Step list
-
-// type IBuilder =
-//     abstract Container: string option
-//     abstract Dependencies: string list
-//     abstract Outputs: string list
-//     abstract Ignores: string list
-//     abstract CreateCommand: action:string -> IBaseCommand
-
-// type IExtension =
-//     abstract CreateBuilder: Context -> IBuilder
