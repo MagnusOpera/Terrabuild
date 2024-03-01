@@ -24,8 +24,8 @@ let rec eval (variables: Map<string, string>) (expr: Expr) =
             match f, values with
             | Function.Plus, [Value.String left; Value.String right] -> Value.String (left + right)
             | Function.Trim, [Value.String str] -> Value.String (str.Trim())
-            | Function.Upper, [Value.String str] -> Value.String (str.ToUpper())
-            | Function.Lower, [Value.String str] -> Value.String (str.ToUpper())
+            | Function.Upper, [Value.String str] -> Value.String (str.ToUpperInvariant())
+            | Function.Lower, [Value.String str] -> Value.String (str.ToLowerInvariant())
             | _ -> failwith $"Invalid arguments for function {f}"
 
     eval expr
