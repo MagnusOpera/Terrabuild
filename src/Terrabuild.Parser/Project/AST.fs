@@ -1,7 +1,6 @@
 ﻿namespace Terrabuild.Parser.Project.AST
 open Terrabuild.Parser.AST
-
-
+open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]
 type ConfigurationComponents =

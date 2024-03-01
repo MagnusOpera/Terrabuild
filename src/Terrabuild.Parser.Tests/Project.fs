@@ -6,6 +6,7 @@ open FsUnit
 
 open Terrabuild.Parser.AST
 open Terrabuild.Parser.Project.AST
+open Terrabuild.Expressions
 
 [<Test>]
 let parseProject() =

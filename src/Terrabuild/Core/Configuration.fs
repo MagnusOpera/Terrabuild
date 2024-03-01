@@ -5,6 +5,7 @@ open System
 open System.Collections.Concurrent
 open Terrabuild.Extensibility
 open Terrabuild.Parser.AST
+open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]
 type Options = {

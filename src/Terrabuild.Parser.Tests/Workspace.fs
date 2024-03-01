@@ -4,6 +4,7 @@ open NUnit.Framework
 open FsUnit
 open Terrabuild.Parser.AST
 open Terrabuild.Parser.Workspace.AST
+open Terrabuild.Expressions
 
 [<Test>]
 let parseWorkspace() =
