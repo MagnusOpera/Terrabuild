@@ -15,20 +15,20 @@ type Invocable(method: MethodInfo) =
     let convertToNone (prmType: Type) =
         if prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then
             let template = typedefof<Option<_>>
-            let genType = template.MakeGenericType([| prmType |])
+            let genType = template.MakeGenericType([| prmType.GenericTypeArguments[0] |])
             let cases = FSharp.Reflection.FSharpType.GetUnionCases(genType)
-            let none = cases |> Array.find (fun case -> case.Name = "None")
-            FSharp.Reflection.FSharpValue.MakeUnion(none, [| |])
+            let noneCase = cases |> Array.find (fun case -> case.Name = "None")
+            FSharp.Reflection.FSharpValue.MakeUnion(noneCase, [| |])
         else
             failwith $"Unknown parameter type"
 
     let convertToSome (prmType: Type) (value: obj) =
         if prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then
             let template = typedefof<Option<_>>
-            let genType = template.MakeGenericType([| prmType |])
+            let genType = template.MakeGenericType([| prmType.GenericTypeArguments[0] |])
             let cases = FSharp.Reflection.FSharpType.GetUnionCases(genType)
-            let none = cases |> Array.find (fun case -> case.Name = "Some")
-            FSharp.Reflection.FSharpValue.MakeUnion(none, [| value |])
+            let someCase = cases |> Array.find (fun case -> case.Name = "Some")
+            FSharp.Reflection.FSharpValue.MakeUnion(someCase, [| value |])
         else
             failwith $"Unknown parameter type"
 
