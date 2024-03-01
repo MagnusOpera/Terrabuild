@@ -54,9 +54,9 @@ ConfigurationComponents:
     | ConfigurationComponents ConfigurationStorage { $1.Patch $2 }
     | ConfigurationComponents ConfigurationSourceControl { $1.Patch $2 }
 ConfigurationStorage:
-    | STORAGE EQUAL String { ConfigurationComponents.Storage $3 }
+    | STORAGE String { ConfigurationComponents.Storage $2 }
 ConfigurationSourceControl:
-    | SOURCECONTROL EQUAL String { ConfigurationComponents.SourceControl $3 }
+    | SOURCECONTROL String { ConfigurationComponents.SourceControl $2 }
 
 Target:
     | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { WorkspaceComponents.Target ($2, $4) }
@@ -64,7 +64,7 @@ TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents TargetDependsOn { $1.Patch $2 }
 TargetDependsOn:
-    | DEPENDS_ON EQUAL ListOfString { TargetComponents.DependsOn $3 }
+    | DEPENDS_ON ListOfString { TargetComponents.DependsOn $2 }
 
 Environment:
     | ENVIRONMENT IDENTIFIER LBRACE EnvironmentComponents RBRACE { WorkspaceComponents.Environment ($2, $4) }
@@ -82,9 +82,9 @@ ExtensionComponents:
     | ExtensionComponents Script { $1.Patch $2 }
     | ExtensionComponents Parameters { $1.Patch $2 }
 Container:
-    | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
+    | CONTAINER String { ExtensionComponents.Container $2 }
 Script:
-    | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
+    | SCRIPT String { ExtensionComponents.Script $2 }
 Parameters:
     | PARAMETERS LBRACE Variables RBRACE { ExtensionComponents.Parameters $3 }
 

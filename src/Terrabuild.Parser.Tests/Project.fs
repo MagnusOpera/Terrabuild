@@ -34,7 +34,8 @@ let parseProject() =
 
         let distTarget =
             { DependsOn = None
-              Steps = [ { Extension = "dotnet"; Command = "publish"; Parameters = Map.empty } ] }
+              Steps = [ { Extension = "dotnet"; Command = "build"; Parameters = Map.empty }
+                        { Extension = "dotnet"; Command = "publish"; Parameters = Map.empty } ] }
 
         let dockerTarget =
             { DependsOn = None 

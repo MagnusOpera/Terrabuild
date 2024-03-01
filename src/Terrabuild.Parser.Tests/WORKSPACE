@@ -1,14 +1,14 @@
 configuration {
-  storage = "azureblob"
-  sourcecontrol = "github"
+  storage "azureblob"
+  sourcecontrol "github"
 }
 
 target build {
-  depends_on = [ "^build" ]
+  depends_on [ "^build" ]
 }
 
 target dist {
-  depends_on = [ "build" ]
+  depends_on [ "build" ]
 }
 
 environment release {
@@ -18,7 +18,7 @@ environment release {
 }
 
 extension dotnet {
-  container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
+  container "mcr.microsoft.com/dotnet/sdk:8.0.101"
   parameters {
     configuration: $configuration
   }

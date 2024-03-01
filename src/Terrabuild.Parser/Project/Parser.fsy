@@ -55,9 +55,9 @@ ExtensionComponents:
     | ExtensionComponents Script { $1.Patch $2 }
     | ExtensionComponents Parameters { $1.Patch $2 }
 Container:
-    | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
+    | CONTAINER String { ExtensionComponents.Container $2 }
 Script:
-    | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
+    | SCRIPT String { ExtensionComponents.Script $2 }
 Parameters:
     | PARAMETERS LBRACE Variables RBRACE { ExtensionComponents.Parameters $3 }
 
@@ -72,15 +72,15 @@ ConfigurationComponents:
     | ConfigurationComponents ConfigurationLabels { $1.Patch $2 }
     | ConfigurationComponents ConfigurationParser { $1.Patch $2 }
 ConfigurationDependencies:
-    | DEPENDENCIES EQUAL ListOfString { ConfigurationComponents.Dependencies $3 }
+    | DEPENDENCIES ListOfString { ConfigurationComponents.Dependencies $2 }
 ConfigurationOutputs:
-    | OUTPUTS EQUAL ListOfString { ConfigurationComponents.Outputs $3 }
+    | OUTPUTS ListOfString { ConfigurationComponents.Outputs $2 }
 ConfigurationIgnores:
-    | IGNORES EQUAL ListOfString { ConfigurationComponents.Ignores $3 }
+    | IGNORES ListOfString { ConfigurationComponents.Ignores $2 }
 ConfigurationLabels:
-    | LABELS EQUAL ListOfString { ConfigurationComponents.Labels $3 }
+    | LABELS ListOfString { ConfigurationComponents.Labels $2 }
 ConfigurationParser:
-    | PARSER EQUAL String { ConfigurationComponents.Parser $3 }
+    | PARSER String { ConfigurationComponents.Parser $2 }
 
 
 Target:
@@ -90,8 +90,9 @@ TargetComponents:
     | TargetComponents DependsOn { $1.Patch $2 }
     | TargetComponents Step { $1.Patch $2 }
 DependsOn:
-    | DEPENDS_ON EQUAL ListOfString { TargetComponents.DependsOn $3 }
+    | DEPENDS_ON ListOfString { TargetComponents.DependsOn $2 }
 Step:
+    | IDENTIFIER IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
 
 String:

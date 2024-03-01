@@ -1,22 +1,22 @@
 
 target build {
-  depends_on = [ "^build" ]
+  depends_on [ "^build" ]
 }
 
 target dist {
-  depends_on = [ "build" ]
+  depends_on [ "build" ]
 }
 
 target docker {
-  depends_on = [ "dist" ]
+  depends_on [ "dist" ]
 }
 
 target push {
-  depends_on = [ "docker" ]
+  depends_on [ "docker" ]
 }
 
 target deploy {
-  depends_on = [ "push" ]
+  depends_on [ "push" ]
 }
 
 environment debug {
@@ -35,15 +35,15 @@ environment release {
 }
 
 extension dotnet {
-  script = "scripts/dotnet.fsx"
-  container = "mcr.microsoft.com/dotnet/sdk:7.0"
+  script "scripts/dotnet.fsx"
+  container "mcr.microsoft.com/dotnet/sdk:7.0"
   parameters {
     configuration: $configuration
   }
 }
 
 extension terraform {
-    script = "scripts/terraform.fsx"
+    script "scripts/terraform.fsx"
     parameters {
       workspace: $workspace
     }

@@ -11,21 +11,22 @@ extension docker {
 }
 
 configuration {
-  dependencies = [ "../../libraries/shell-lib" ]
-  outputs = [ "dist" ]
-  labels = [ "app"
+  dependencies [ "../../libraries/shell-lib" ]
+  outputs [ "dist" ]
+  labels [ "app"
              "dotnet" ]
-  parser = "dotnet"
+  parser "dotnet"
 }
 
 target build {
-  depends_on = [ "dist" ]
+  depends_on [ "dist" ]
 
   dotnet build { }
 }
 
 target dist {
-  dotnet publish { }
+  dotnet build
+  dotnet publish
 }
 
 target docker {
