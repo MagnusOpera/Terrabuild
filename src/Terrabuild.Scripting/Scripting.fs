@@ -81,25 +81,32 @@ type Invocable(method: MethodInfo) =
             | None -> mapParameter Value.Nothing prm.Name prm.ParameterType
             | Some value -> mapParameter value prm.Name prm.ParameterType) 
 
-    member _.BuildArgs (value: Value) =
+    let buildArgs (value: Value) =
         match value with
         | Value.Map map -> 
             let prms = method.GetParameters()
             mapParameters map prms |> Ok
         | _ -> Error $"Expecting a map for build arguments"
 
-    member _.Invoke (args: obj array) =
+    let invoke args =
         method.Invoke(null, args)
+
+    member _.Invoke<'t> (value: Value) =
+        match buildArgs value with
+        | Ok args -> Ok (invoke args :?> 't)
+        | Error err -> Error err
 
 type Script(assembly: Assembly) =
     let mainType = assembly.GetType("Script")
 
-    member _.GetMethod(name: string) =
-        let method = mainType.GetMethod(name)
-        match method with
-        | null -> Error $"Function {name} is not defined"
-        | method -> Invocable(method) |> Ok
+    let getMethod name =
+        match mainType.GetMethod(name) with
+        | null -> Error $"Function {name} does not exist"
+        | mi -> Ok mi
 
+    member _.GetMethod(name: string) =
+        getMethod name
+        |> Result.map Invocable
 
 let loadScript (scriptFile) =
     let scriptFile = Path.GetFullPath(scriptFile)
@@ -125,4 +132,4 @@ let loadScript (scriptFile) =
             cache <- cache |> Map.add scriptFile script
             Ok script
         with
-            exn -> Error exn
+            exn -> Error (exn.Message)

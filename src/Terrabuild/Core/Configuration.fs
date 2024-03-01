@@ -81,16 +81,16 @@ module ExtensionLoaders =
         | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control '{name}'"
 
-    let invokeScriptMethod<'r> (script: string) (method: string) (args: Value)=
+    let invokeScriptMethod<'r> (script: string) (method: string) (args: Value) =
         match loadScript script with
         | Ok script ->
             match script.GetMethod(method) with
             | Ok method ->
-                match method.BuildArgs args with
-                | Ok args -> method.Invoke args :?> 'r
+                match method.Invoke<'r> args with
+                | Ok result -> result
                 | Error msg -> ConfigException.Raise(msg)
             | Error msg -> ConfigException.Raise(msg)
-        | Error msg -> ConfigException.Raise($"File {script} was not found", msg)
+        | Error msg -> ConfigException.Raise($"File {script} was not found: {msg}")
 
 
 module ProjectConfigParser =

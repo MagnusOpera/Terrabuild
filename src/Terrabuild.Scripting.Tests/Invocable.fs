@@ -31,42 +31,42 @@ let getMethod name =
 let invokeScalar() =
     let method = getMethod "Hello"
     let invocable = Invocable(method)
+
     let args = Value.Map (Map ["name", Value.String "Pierre"])
-    match invocable.BuildArgs args with
-    | Ok args ->
-        let result = invocable.Invoke args
-        result |> should equal "Hello Pierre"
-    | Error err -> failwith $"Failed to build arguments: {err}"
+    let result = invocable.Invoke<string> args
+    match result with
+    | Ok result -> result |> should equal "Hello Pierre"
+    | Error err -> failwith err
 
 [<Test>]
 let invokeRecord() =
     let method = getMethod "HelloArgs"
     let invocable = Invocable(method)
+    
     let args = Value.Map (Map ["args", Value.Map (Map ["Name", Value.String "Pierre"])])
-    match invocable.BuildArgs args with
-    | Ok args ->
-        let result = invocable.Invoke args
-        result |> should equal "Hello Pierre !"
-    | Error err -> failwith $"Failed to build arguments: {err}"
+    let result = invocable.Invoke<string> args
+    match result with
+    | Ok result -> result |> should equal "Hello Pierre !"
+    | Error err -> failwith err
 
 [<Test>]
 let invokeOptionNone() =
     let method = getMethod "HelloOption"
     let invocable = Invocable(method)
+
     let args = Value.Map Map.empty
-    match invocable.BuildArgs args with
-    | Ok args ->
-        let result = invocable.Invoke args
-        result |> should equal "Hello None !"
-    | Error err -> failwith $"Failed to build arguments: {err}"
+    let result = invocable.Invoke<string> args
+    match result with
+    | Ok result -> result |> should equal "Hello None !"
+    | Error err -> failwith err
 
 [<Test>]
 let invokeOptionSome() =
     let method = getMethod "HelloOption"
     let invocable = Invocable(method)
+
     let args = Value.Map (Map ["name", Value.String "Pierre"])
-    match invocable.BuildArgs args with
-    | Ok args ->
-        let result = invocable.Invoke args
-        result |> should equal "Hello Pierre !"
-    | Error err -> failwith $"Failed to build arguments: {err}"
+    let result = invocable.Invoke<string> args
+    match result with
+    | Ok result -> result |> should equal "Hello Pierre !"
+    | Error err -> failwith err
