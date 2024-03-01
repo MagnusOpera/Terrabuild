@@ -10,6 +10,7 @@ open Terrabuild.Expressions
 
 type Arguments = {
     Name: string
+    Address: string option
 }
 
 type Scripting() =
