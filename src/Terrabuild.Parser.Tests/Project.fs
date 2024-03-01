@@ -38,12 +38,13 @@ let parseProject() =
         let dockerTarget =
             { DependsOn = None 
               Steps = [ { Extension = "shell"; Command = "echo"
-                          Parameters = Map ["message", Expr.Function (Function.Trim,
-                                                                      [ Expr.Function (Function.Plus,
-                                                                                       [ Expr.String "building project1 "
-                                                                                         Expr.Variable "configuration" ]) ]) ] }
+                          Parameters = Map [ "message", Expr.Function (Function.Trim,
+                                                                       [ Expr.Function (Function.Plus,
+                                                                                        [ Expr.String "building project1 "
+                                                                                          Expr.Variable "configuration" ]) ]) ] }
                         { Extension = "docker"; Command = "build"
-                          Parameters = Map [ "configuration", Expr.Variable "configuration" ] } ] }
+                          Parameters = Map [ "configuration", Expr.Variable "configuration"
+                                             "arguments", Expr.Map (Map [ "config", Expr.String "Release"]) ] } ] }
 
         { Extensions = Map [ "dotnet", dotnetExt
                              "docker", dockerExt ]
