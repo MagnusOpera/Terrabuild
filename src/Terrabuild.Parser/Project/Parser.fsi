@@ -10,7 +10,7 @@ type token =
   | INIT
   | SCRIPT
   | DEPENDS_ON
-  | DEFAULT
+  | DEFAULTS
   | EXTENSION
   | CONFIGURATION
   | TARGET
@@ -44,7 +44,7 @@ type tokenId =
     | TOKEN_INIT
     | TOKEN_SCRIPT
     | TOKEN_DEPENDS_ON
-    | TOKEN_DEFAULT
+    | TOKEN_DEFAULTS
     | TOKEN_EXTENSION
     | TOKEN_CONFIGURATION
     | TOKEN_TARGET
@@ -79,7 +79,7 @@ type nonTerminalId =
     | NONTERM_Container
     | NONTERM_Script
     | NONTERM_Init
-    | NONTERM_Default
+    | NONTERM_Defaults
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents
     | NONTERM_ConfigurationDependencies

@@ -9,7 +9,7 @@ state 0:  items:    _startWorkspace ->  . Workspace
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> 
     action 'INIT' (noprec):   reduce WorkspaceComponents --> 
     action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> 
-    action 'DEFAULT' (noprec):   reduce WorkspaceComponents --> 
+    action 'DEFAULTS' (noprec):   reduce WorkspaceComponents --> 
     action 'CONFIGURATION' (noprec):   reduce WorkspaceComponents --> 
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> 
@@ -47,7 +47,7 @@ state 1:  items:    _startWorkspace -> Workspace .
     action 'CONTAINER' (noprec):   accept
     action 'INIT' (noprec):   accept
     action 'SCRIPT' (noprec):   accept
-    action 'DEFAULT' (noprec):   accept
+    action 'DEFAULTS' (noprec):   accept
     action 'CONFIGURATION' (noprec):   accept
     action 'TARGET' (noprec):   accept
     action 'ENVIRONMENT' (noprec):   accept
@@ -87,7 +87,7 @@ state 1:  items:    _startWorkspace -> Workspace .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   shift 8
     action 'TARGET' (noprec):   shift 18
     action 'ENVIRONMENT' (noprec):   shift 26
@@ -127,7 +127,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'CONTAINER' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'INIT' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'SCRIPT' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
-    action 'DEFAULT' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
+    action 'DEFAULTS' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'CONFIGURATION' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'TARGET' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
     action 'ENVIRONMENT' (noprec):   reduce Workspace --> WorkspaceComponents 'EOF'
@@ -163,7 +163,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Configuration
     action 'INIT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Configuration
     action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Configuration
-    action 'DEFAULT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Configuration
+    action 'DEFAULTS' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Configuration
     action 'CONFIGURATION' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Configuration
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Configuration
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Configuration
@@ -199,7 +199,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'INIT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
-    action 'DEFAULT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
+    action 'DEFAULTS' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'CONFIGURATION' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Target
@@ -235,7 +235,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'INIT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
-    action 'DEFAULT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
+    action 'DEFAULTS' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'CONFIGURATION' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Environment
@@ -271,7 +271,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'CONTAINER' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'INIT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'SCRIPT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
-    action 'DEFAULT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
+    action 'DEFAULTS' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'CONFIGURATION' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'TARGET' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
     action 'ENVIRONMENT' (noprec):   reduce WorkspaceComponents --> WorkspaceComponents Extension
@@ -307,7 +307,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -343,7 +343,7 @@ state 3:  items:    Workspace -> WorkspaceComponents 'EOF' .
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> 
     action 'INIT' (noprec):   reduce ConfigurationComponents --> 
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> 
-    action 'DEFAULT' (noprec):   reduce ConfigurationComponents --> 
+    action 'DEFAULTS' (noprec):   reduce ConfigurationComponents --> 
     action 'CONFIGURATION' (noprec):   reduce ConfigurationComponents --> 
     action 'TARGET' (noprec):   reduce ConfigurationComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce ConfigurationComponents --> 
@@ -382,7 +382,7 @@ state 10:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -420,7 +420,7 @@ state 11:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'CONTAINER' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'INIT' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
-    action 'DEFAULT' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
+    action 'DEFAULTS' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'CONFIGURATION' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'TARGET' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
@@ -456,7 +456,7 @@ state 11:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationStorage
     action 'INIT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationStorage
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationStorage
-    action 'DEFAULT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationStorage
+    action 'DEFAULTS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationStorage
     action 'CONFIGURATION' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationStorage
     action 'TARGET' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationStorage
     action 'ENVIRONMENT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationStorage
@@ -492,7 +492,7 @@ state 11:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationSourceControl
     action 'INIT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationSourceControl
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationSourceControl
-    action 'DEFAULT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationSourceControl
+    action 'DEFAULTS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationSourceControl
     action 'CONFIGURATION' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationSourceControl
     action 'TARGET' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationSourceControl
     action 'ENVIRONMENT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationSourceControl
@@ -528,7 +528,7 @@ state 11:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -565,7 +565,7 @@ state 15:  items:    ConfigurationStorage -> 'STORAGE' String .
     action 'CONTAINER' (noprec):   reduce ConfigurationStorage --> 'STORAGE' String
     action 'INIT' (noprec):   reduce ConfigurationStorage --> 'STORAGE' String
     action 'SCRIPT' (noprec):   reduce ConfigurationStorage --> 'STORAGE' String
-    action 'DEFAULT' (noprec):   reduce ConfigurationStorage --> 'STORAGE' String
+    action 'DEFAULTS' (noprec):   reduce ConfigurationStorage --> 'STORAGE' String
     action 'CONFIGURATION' (noprec):   reduce ConfigurationStorage --> 'STORAGE' String
     action 'TARGET' (noprec):   reduce ConfigurationStorage --> 'STORAGE' String
     action 'ENVIRONMENT' (noprec):   reduce ConfigurationStorage --> 'STORAGE' String
@@ -601,7 +601,7 @@ state 15:  items:    ConfigurationStorage -> 'STORAGE' String .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -638,7 +638,7 @@ state 17:  items:    ConfigurationSourceControl -> 'SOURCECONTROL' String .
     action 'CONTAINER' (noprec):   reduce ConfigurationSourceControl --> 'SOURCECONTROL' String
     action 'INIT' (noprec):   reduce ConfigurationSourceControl --> 'SOURCECONTROL' String
     action 'SCRIPT' (noprec):   reduce ConfigurationSourceControl --> 'SOURCECONTROL' String
-    action 'DEFAULT' (noprec):   reduce ConfigurationSourceControl --> 'SOURCECONTROL' String
+    action 'DEFAULTS' (noprec):   reduce ConfigurationSourceControl --> 'SOURCECONTROL' String
     action 'CONFIGURATION' (noprec):   reduce ConfigurationSourceControl --> 'SOURCECONTROL' String
     action 'TARGET' (noprec):   reduce ConfigurationSourceControl --> 'SOURCECONTROL' String
     action 'ENVIRONMENT' (noprec):   reduce ConfigurationSourceControl --> 'SOURCECONTROL' String
@@ -674,7 +674,7 @@ state 17:  items:    ConfigurationSourceControl -> 'SOURCECONTROL' String .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -710,7 +710,7 @@ state 17:  items:    ConfigurationSourceControl -> 'SOURCECONTROL' String .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -746,7 +746,7 @@ state 17:  items:    ConfigurationSourceControl -> 'SOURCECONTROL' String .
     action 'CONTAINER' (noprec):   reduce TargetComponents --> 
     action 'INIT' (noprec):   reduce TargetComponents --> 
     action 'SCRIPT' (noprec):   reduce TargetComponents --> 
-    action 'DEFAULT' (noprec):   reduce TargetComponents --> 
+    action 'DEFAULTS' (noprec):   reduce TargetComponents --> 
     action 'CONFIGURATION' (noprec):   reduce TargetComponents --> 
     action 'TARGET' (noprec):   reduce TargetComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce TargetComponents --> 
@@ -784,7 +784,7 @@ state 21:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -821,7 +821,7 @@ state 22:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'CONTAINER' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'INIT' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
-    action 'DEFAULT' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
+    action 'DEFAULTS' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'CONFIGURATION' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'TARGET' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
@@ -857,7 +857,7 @@ state 22:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'CONTAINER' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'INIT' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'SCRIPT' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
-    action 'DEFAULT' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
+    action 'DEFAULTS' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'CONFIGURATION' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'TARGET' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action 'ENVIRONMENT' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
@@ -893,7 +893,7 @@ state 22:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -930,7 +930,7 @@ state 25:  items:    TargetDependsOn -> 'DEPENDS_ON' ListOfString .
     action 'CONTAINER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
     action 'INIT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
     action 'SCRIPT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'DEFAULT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
+    action 'DEFAULTS' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
     action 'CONFIGURATION' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
     action 'TARGET' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
     action 'ENVIRONMENT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
@@ -966,7 +966,7 @@ state 25:  items:    TargetDependsOn -> 'DEPENDS_ON' ListOfString .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1002,7 +1002,7 @@ state 25:  items:    TargetDependsOn -> 'DEPENDS_ON' ListOfString .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1038,7 +1038,7 @@ state 25:  items:    TargetDependsOn -> 'DEPENDS_ON' ListOfString .
     action 'CONTAINER' (noprec):   reduce EnvironmentComponents --> 
     action 'INIT' (noprec):   reduce EnvironmentComponents --> 
     action 'SCRIPT' (noprec):   reduce EnvironmentComponents --> 
-    action 'DEFAULT' (noprec):   reduce EnvironmentComponents --> 
+    action 'DEFAULTS' (noprec):   reduce EnvironmentComponents --> 
     action 'CONFIGURATION' (noprec):   reduce EnvironmentComponents --> 
     action 'TARGET' (noprec):   reduce EnvironmentComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce EnvironmentComponents --> 
@@ -1076,7 +1076,7 @@ state 29:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1113,7 +1113,7 @@ state 30:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'CONTAINER' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'INIT' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
-    action 'DEFAULT' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
+    action 'DEFAULTS' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'CONFIGURATION' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'TARGET' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Environment --> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
@@ -1149,7 +1149,7 @@ state 30:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'CONTAINER' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'INIT' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'SCRIPT' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
-    action 'DEFAULT' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
+    action 'DEFAULTS' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'CONFIGURATION' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'TARGET' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
     action 'ENVIRONMENT' (noprec):   reduce EnvironmentComponents --> EnvironmentComponents EnvironmentVariables
@@ -1185,7 +1185,7 @@ state 30:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1221,7 +1221,7 @@ state 30:  items:    Environment -> 'ENVIRONMENT' 'IDENTIFIER' 'LBRACE' Environm
     action 'CONTAINER' (noprec):   reduce Variables --> 
     action 'INIT' (noprec):   reduce Variables --> 
     action 'SCRIPT' (noprec):   reduce Variables --> 
-    action 'DEFAULT' (noprec):   reduce Variables --> 
+    action 'DEFAULTS' (noprec):   reduce Variables --> 
     action 'CONFIGURATION' (noprec):   reduce Variables --> 
     action 'TARGET' (noprec):   reduce Variables --> 
     action 'ENVIRONMENT' (noprec):   reduce Variables --> 
@@ -1259,7 +1259,7 @@ state 34:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables . 'R
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1296,7 +1296,7 @@ state 35:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
     action 'CONTAINER' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'INIT' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'SCRIPT' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
-    action 'DEFAULT' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
+    action 'DEFAULTS' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'CONFIGURATION' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'TARGET' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce EnvironmentVariables --> 'VARIABLES' 'LBRACE' Variables 'RBRACE'
@@ -1332,7 +1332,7 @@ state 35:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1368,7 +1368,7 @@ state 35:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1404,7 +1404,7 @@ state 35:  items:    EnvironmentVariables -> 'VARIABLES' 'LBRACE' Variables 'RBR
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> 
     action 'INIT' (noprec):   reduce ExtensionComponents --> 
     action 'SCRIPT' (noprec):   reduce ExtensionComponents --> 
-    action 'DEFAULT' (noprec):   reduce ExtensionComponents --> 
+    action 'DEFAULTS' (noprec):   reduce ExtensionComponents --> 
     action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> 
     action 'TARGET' (noprec):   reduce ExtensionComponents --> 
     action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> 
@@ -1437,7 +1437,7 @@ state 39:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     ExtensionComponents -> ExtensionComponents . Container
     ExtensionComponents -> ExtensionComponents . Script
     ExtensionComponents -> ExtensionComponents . Init
-    ExtensionComponents -> ExtensionComponents . Default
+    ExtensionComponents -> ExtensionComponents . Defaults
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
@@ -1445,7 +1445,7 @@ state 39:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'CONTAINER' (noprec):   shift 45
     action 'INIT' (noprec):   shift 49
     action 'SCRIPT' (noprec):   shift 47
-    action 'DEFAULT' (noprec):   shift 53
+    action 'DEFAULTS' (noprec):   shift 53
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1476,7 +1476,7 @@ state 39:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
   immediate action: <none>  gotos:    goto Container: 41
     goto Script: 42
     goto Init: 43
-    goto Default: 44
+    goto Defaults: 44
 state 40:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE' . 
   actions:    action 'STORAGE' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'SOURCECONTROL' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
@@ -1485,7 +1485,7 @@ state 40:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'CONTAINER' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'INIT' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
-    action 'DEFAULT' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
+    action 'DEFAULTS' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'CONFIGURATION' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'TARGET' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
@@ -1521,7 +1521,7 @@ state 40:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
-    action 'DEFAULT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
+    action 'DEFAULTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
@@ -1557,7 +1557,7 @@ state 40:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
-    action 'DEFAULT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'DEFAULTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
@@ -1593,7 +1593,7 @@ state 40:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
     action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
     action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'DEFAULT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'DEFAULTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
     action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
     action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
     action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
@@ -1621,43 +1621,43 @@ state 40:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
     action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
     action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Init  gotos:state 44:  items:    ExtensionComponents -> ExtensionComponents Default . 
-  actions:    action 'STORAGE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'SOURCECONTROL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'VARIABLES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'DEFAULT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'EXTENSION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'EOF' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'TRIM' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'UPPER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'LOWER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'PLUS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'COMMA' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'EQUAL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'LPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'RPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'LSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'RSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'LBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'RBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'KEY' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'VARIABLE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'IDENTIFIER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'STRING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'NOTHING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'TRUE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'FALSE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-    action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Default
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Default  gotos:state 45:  items:    Container -> 'CONTAINER' . String
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Init  gotos:state 44:  items:    ExtensionComponents -> ExtensionComponents Defaults . 
+  actions:    action 'STORAGE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'SOURCECONTROL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'VARIABLES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'DEFAULTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'ENVIRONMENT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'EXTENSION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'EOF' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'TRIM' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'UPPER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'LOWER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'PLUS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'COMMA' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'EQUAL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'LPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'RPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'LSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'RSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'LBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'RBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'KEY' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'VARIABLE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'IDENTIFIER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'STRING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'NOTHING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'TRUE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'FALSE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+    action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Defaults  gotos:state 45:  items:    Container -> 'CONTAINER' . String
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
@@ -1665,7 +1665,7 @@ state 40:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1702,7 +1702,7 @@ state 46:  items:    Container -> 'CONTAINER' String .
     action 'CONTAINER' (noprec):   reduce Container --> 'CONTAINER' String
     action 'INIT' (noprec):   reduce Container --> 'CONTAINER' String
     action 'SCRIPT' (noprec):   reduce Container --> 'CONTAINER' String
-    action 'DEFAULT' (noprec):   reduce Container --> 'CONTAINER' String
+    action 'DEFAULTS' (noprec):   reduce Container --> 'CONTAINER' String
     action 'CONFIGURATION' (noprec):   reduce Container --> 'CONTAINER' String
     action 'TARGET' (noprec):   reduce Container --> 'CONTAINER' String
     action 'ENVIRONMENT' (noprec):   reduce Container --> 'CONTAINER' String
@@ -1738,7 +1738,7 @@ state 46:  items:    Container -> 'CONTAINER' String .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1775,7 +1775,7 @@ state 48:  items:    Script -> 'SCRIPT' String .
     action 'CONTAINER' (noprec):   reduce Script --> 'SCRIPT' String
     action 'INIT' (noprec):   reduce Script --> 'SCRIPT' String
     action 'SCRIPT' (noprec):   reduce Script --> 'SCRIPT' String
-    action 'DEFAULT' (noprec):   reduce Script --> 'SCRIPT' String
+    action 'DEFAULTS' (noprec):   reduce Script --> 'SCRIPT' String
     action 'CONFIGURATION' (noprec):   reduce Script --> 'SCRIPT' String
     action 'TARGET' (noprec):   reduce Script --> 'SCRIPT' String
     action 'ENVIRONMENT' (noprec):   reduce Script --> 'SCRIPT' String
@@ -1811,7 +1811,7 @@ state 48:  items:    Script -> 'SCRIPT' String .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1847,7 +1847,7 @@ state 48:  items:    Script -> 'SCRIPT' String .
     action 'CONTAINER' (noprec):   reduce Variables --> 
     action 'INIT' (noprec):   reduce Variables --> 
     action 'SCRIPT' (noprec):   reduce Variables --> 
-    action 'DEFAULT' (noprec):   reduce Variables --> 
+    action 'DEFAULTS' (noprec):   reduce Variables --> 
     action 'CONFIGURATION' (noprec):   reduce Variables --> 
     action 'TARGET' (noprec):   reduce Variables --> 
     action 'ENVIRONMENT' (noprec):   reduce Variables --> 
@@ -1885,7 +1885,7 @@ state 51:  items:    Init -> 'INIT' 'LBRACE' Variables . 'RBRACE'
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1922,7 +1922,7 @@ state 52:  items:    Init -> 'INIT' 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
     action 'INIT' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'DEFAULT' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'DEFAULTS' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
     action 'CONFIGURATION' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
     action 'TARGET' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
@@ -1950,7 +1950,7 @@ state 52:  items:    Init -> 'INIT' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
     action '#' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
     action '$$' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-  immediate action:   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'  gotos:state 53:  items:    Default -> 'DEFAULT' . 'LBRACE' Variables 'RBRACE'
+  immediate action:   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'  gotos:state 53:  items:    Defaults -> 'DEFAULTS' . 'LBRACE' Variables 'RBRACE'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
@@ -1958,7 +1958,7 @@ state 52:  items:    Init -> 'INIT' 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -1986,7 +1986,7 @@ state 52:  items:    Init -> 'INIT' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 54:  items:    Default -> 'DEFAULT' 'LBRACE' . Variables 'RBRACE'
+  immediate action: <none>  gotos:state 54:  items:    Defaults -> 'DEFAULTS' 'LBRACE' . Variables 'RBRACE'
   actions:    action 'STORAGE' (noprec):   reduce Variables --> 
     action 'SOURCECONTROL' (noprec):   reduce Variables --> 
     action 'DEPENDS_ON' (noprec):   reduce Variables --> 
@@ -1994,7 +1994,7 @@ state 52:  items:    Init -> 'INIT' 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   reduce Variables --> 
     action 'INIT' (noprec):   reduce Variables --> 
     action 'SCRIPT' (noprec):   reduce Variables --> 
-    action 'DEFAULT' (noprec):   reduce Variables --> 
+    action 'DEFAULTS' (noprec):   reduce Variables --> 
     action 'CONFIGURATION' (noprec):   reduce Variables --> 
     action 'TARGET' (noprec):   reduce Variables --> 
     action 'ENVIRONMENT' (noprec):   reduce Variables --> 
@@ -2023,7 +2023,7 @@ state 52:  items:    Init -> 'INIT' 'LBRACE' Variables 'RBRACE' .
     action '#' (noprec):   reduce Variables --> 
     action '$$' (noprec):   reduce Variables --> 
   immediate action: <none>  gotos:    goto Variables: 55
-state 55:  items:    Default -> 'DEFAULT' 'LBRACE' Variables . 'RBRACE'
+state 55:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables . 'RBRACE'
     Variables -> Variables . Variable
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
@@ -2032,7 +2032,7 @@ state 55:  items:    Default -> 'DEFAULT' 'LBRACE' Variables . 'RBRACE'
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2061,43 +2061,43 @@ state 55:  items:    Default -> 'DEFAULT' 'LBRACE' Variables . 'RBRACE'
     action '#' (noprec):   error
     action '$$' (noprec):   error
   immediate action: <none>  gotos:    goto Variable: 63
-state 56:  items:    Default -> 'DEFAULT' 'LBRACE' Variables 'RBRACE' . 
-  actions:    action 'STORAGE' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'SOURCECONTROL' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'DEPENDS_ON' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'VARIABLES' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'CONTAINER' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'INIT' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'SCRIPT' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'DEFAULT' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'CONFIGURATION' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'TARGET' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'ENVIRONMENT' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'EXTENSION' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'EOF' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'TRIM' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'UPPER' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'LOWER' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'PLUS' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'COMMA' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'EQUAL' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'LPAREN' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'RPAREN' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'LSQBRACKET' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'RSQBRACKET' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'LBRACE' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'RBRACE' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'KEY' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'VARIABLE' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'IDENTIFIER' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'STRING' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'NOTHING' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'TRUE' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'FALSE' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action 'error' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action '#' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-    action '$$' (noprec):   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'
-  immediate action:   reduce Default --> 'DEFAULT' 'LBRACE' Variables 'RBRACE'  gotos:state 57:  items:    String -> 'STRING' . 
+state 56:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables 'RBRACE' . 
+  actions:    action 'STORAGE' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'SOURCECONTROL' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'DEPENDS_ON' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'VARIABLES' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'CONTAINER' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'INIT' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'SCRIPT' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'DEFAULTS' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'CONFIGURATION' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'TARGET' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'ENVIRONMENT' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'EXTENSION' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'EOF' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'TRIM' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'UPPER' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'LOWER' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'PLUS' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'COMMA' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'EQUAL' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'LPAREN' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'RPAREN' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'LSQBRACKET' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'RSQBRACKET' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'LBRACE' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'RBRACE' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'KEY' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'VARIABLE' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'IDENTIFIER' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'STRING' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'NOTHING' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'TRUE' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'FALSE' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action 'error' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action '#' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+    action '$$' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
+  immediate action:   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'  gotos:state 57:  items:    String -> 'STRING' . 
   actions:    action 'STORAGE' (noprec):   reduce String --> 'STRING'
     action 'SOURCECONTROL' (noprec):   reduce String --> 'STRING'
     action 'DEPENDS_ON' (noprec):   reduce String --> 'STRING'
@@ -2105,7 +2105,7 @@ state 56:  items:    Default -> 'DEFAULT' 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   reduce String --> 'STRING'
     action 'INIT' (noprec):   reduce String --> 'STRING'
     action 'SCRIPT' (noprec):   reduce String --> 'STRING'
-    action 'DEFAULT' (noprec):   reduce String --> 'STRING'
+    action 'DEFAULTS' (noprec):   reduce String --> 'STRING'
     action 'CONFIGURATION' (noprec):   reduce String --> 'STRING'
     action 'TARGET' (noprec):   reduce String --> 'STRING'
     action 'ENVIRONMENT' (noprec):   reduce String --> 'STRING'
@@ -2141,7 +2141,7 @@ state 56:  items:    Default -> 'DEFAULT' 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   reduce Strings --> 
     action 'INIT' (noprec):   reduce Strings --> 
     action 'SCRIPT' (noprec):   reduce Strings --> 
-    action 'DEFAULT' (noprec):   reduce Strings --> 
+    action 'DEFAULTS' (noprec):   reduce Strings --> 
     action 'CONFIGURATION' (noprec):   reduce Strings --> 
     action 'TARGET' (noprec):   reduce Strings --> 
     action 'ENVIRONMENT' (noprec):   reduce Strings --> 
@@ -2179,7 +2179,7 @@ state 59:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2216,7 +2216,7 @@ state 60:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'CONTAINER' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'INIT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'SCRIPT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'DEFAULT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
+    action 'DEFAULTS' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'CONFIGURATION' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'TARGET' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'ENVIRONMENT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
@@ -2252,7 +2252,7 @@ state 60:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'CONTAINER' (noprec):   reduce Strings --> Strings String
     action 'INIT' (noprec):   reduce Strings --> Strings String
     action 'SCRIPT' (noprec):   reduce Strings --> Strings String
-    action 'DEFAULT' (noprec):   reduce Strings --> Strings String
+    action 'DEFAULTS' (noprec):   reduce Strings --> Strings String
     action 'CONFIGURATION' (noprec):   reduce Strings --> Strings String
     action 'TARGET' (noprec):   reduce Strings --> Strings String
     action 'ENVIRONMENT' (noprec):   reduce Strings --> Strings String
@@ -2289,7 +2289,7 @@ state 60:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2326,7 +2326,7 @@ state 63:  items:    Variables -> Variables Variable .
     action 'CONTAINER' (noprec):   reduce Variables --> Variables Variable
     action 'INIT' (noprec):   reduce Variables --> Variables Variable
     action 'SCRIPT' (noprec):   reduce Variables --> Variables Variable
-    action 'DEFAULT' (noprec):   reduce Variables --> Variables Variable
+    action 'DEFAULTS' (noprec):   reduce Variables --> Variables Variable
     action 'CONFIGURATION' (noprec):   reduce Variables --> Variables Variable
     action 'TARGET' (noprec):   reduce Variables --> Variables Variable
     action 'ENVIRONMENT' (noprec):   reduce Variables --> Variables Variable
@@ -2362,7 +2362,7 @@ state 63:  items:    Variables -> Variables Variable .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2400,7 +2400,7 @@ state 65:  items:    Variable -> 'KEY' Expr .
     action 'CONTAINER' (noprec):   reduce Variable --> 'KEY' Expr
     action 'INIT' (noprec):   reduce Variable --> 'KEY' Expr
     action 'SCRIPT' (noprec):   reduce Variable --> 'KEY' Expr
-    action 'DEFAULT' (noprec):   reduce Variable --> 'KEY' Expr
+    action 'DEFAULTS' (noprec):   reduce Variable --> 'KEY' Expr
     action 'CONFIGURATION' (noprec):   reduce Variable --> 'KEY' Expr
     action 'TARGET' (noprec):   reduce Variable --> 'KEY' Expr
     action 'ENVIRONMENT' (noprec):   reduce Variable --> 'KEY' Expr
@@ -2436,7 +2436,7 @@ state 65:  items:    Variable -> 'KEY' Expr .
     action 'CONTAINER' (noprec):   reduce Expr --> 'NOTHING'
     action 'INIT' (noprec):   reduce Expr --> 'NOTHING'
     action 'SCRIPT' (noprec):   reduce Expr --> 'NOTHING'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'NOTHING'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'NOTHING'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'NOTHING'
     action 'TARGET' (noprec):   reduce Expr --> 'NOTHING'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'NOTHING'
@@ -2472,7 +2472,7 @@ state 65:  items:    Variable -> 'KEY' Expr .
     action 'CONTAINER' (noprec):   reduce Expr --> 'TRUE'
     action 'INIT' (noprec):   reduce Expr --> 'TRUE'
     action 'SCRIPT' (noprec):   reduce Expr --> 'TRUE'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'TRUE'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'TRUE'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'TRUE'
     action 'TARGET' (noprec):   reduce Expr --> 'TRUE'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'TRUE'
@@ -2508,7 +2508,7 @@ state 65:  items:    Variable -> 'KEY' Expr .
     action 'CONTAINER' (noprec):   reduce Expr --> 'FALSE'
     action 'INIT' (noprec):   reduce Expr --> 'FALSE'
     action 'SCRIPT' (noprec):   reduce Expr --> 'FALSE'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'FALSE'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'FALSE'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'FALSE'
     action 'TARGET' (noprec):   reduce Expr --> 'FALSE'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'FALSE'
@@ -2544,7 +2544,7 @@ state 65:  items:    Variable -> 'KEY' Expr .
     action 'CONTAINER' (noprec):   reduce Expr --> 'STRING'
     action 'INIT' (noprec):   reduce Expr --> 'STRING'
     action 'SCRIPT' (noprec):   reduce Expr --> 'STRING'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'STRING'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'STRING'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'STRING'
     action 'TARGET' (noprec):   reduce Expr --> 'STRING'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'STRING'
@@ -2580,7 +2580,7 @@ state 65:  items:    Variable -> 'KEY' Expr .
     action 'CONTAINER' (noprec):   reduce Expr --> 'VARIABLE'
     action 'INIT' (noprec):   reduce Expr --> 'VARIABLE'
     action 'SCRIPT' (noprec):   reduce Expr --> 'VARIABLE'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'VARIABLE'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'VARIABLE'
     action 'TARGET' (noprec):   reduce Expr --> 'VARIABLE'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'VARIABLE'
@@ -2616,7 +2616,7 @@ state 65:  items:    Variable -> 'KEY' Expr .
     action 'CONTAINER' (noprec):   reduce Variables --> 
     action 'INIT' (noprec):   reduce Variables --> 
     action 'SCRIPT' (noprec):   reduce Variables --> 
-    action 'DEFAULT' (noprec):   reduce Variables --> 
+    action 'DEFAULTS' (noprec):   reduce Variables --> 
     action 'CONFIGURATION' (noprec):   reduce Variables --> 
     action 'TARGET' (noprec):   reduce Variables --> 
     action 'ENVIRONMENT' (noprec):   reduce Variables --> 
@@ -2653,7 +2653,7 @@ state 72:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'INIT' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'TARGET' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
@@ -2690,7 +2690,7 @@ state 72:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'INIT' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'SCRIPT' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
-    action 'DEFAULT' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'DEFAULTS' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'CONFIGURATION' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'TARGET' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'ENVIRONMENT' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
@@ -2727,7 +2727,7 @@ state 72:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2764,7 +2764,7 @@ state 72:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2801,7 +2801,7 @@ state 72:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2837,7 +2837,7 @@ state 72:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2874,7 +2874,7 @@ state 78:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2910,7 +2910,7 @@ state 78:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -2947,7 +2947,7 @@ state 80:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'CONTAINER' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'INIT' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'SCRIPT' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'TARGET' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
@@ -2983,7 +2983,7 @@ state 80:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -3019,7 +3019,7 @@ state 80:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -3056,7 +3056,7 @@ state 83:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'CONTAINER' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'INIT' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'SCRIPT' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'TARGET' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
@@ -3092,7 +3092,7 @@ state 83:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -3128,7 +3128,7 @@ state 83:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEFAULT' (noprec):   error
+    action 'DEFAULTS' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'ENVIRONMENT' (noprec):   error
@@ -3165,7 +3165,7 @@ state 86:  items:    Expr -> 'LOWER' 'LPAREN' Expr 'RPAREN' .
     action 'CONTAINER' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'INIT' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'SCRIPT' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
-    action 'DEFAULT' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'DEFAULTS' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'CONFIGURATION' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'TARGET' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'ENVIRONMENT' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'

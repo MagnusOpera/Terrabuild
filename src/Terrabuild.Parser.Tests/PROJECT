@@ -9,7 +9,7 @@ extension docker {
     image: "ghcr.io/magnusopera/dotnet-app"
   }
 
-  default {
+  defaults {
     configuration: $configuration
   }
 }
