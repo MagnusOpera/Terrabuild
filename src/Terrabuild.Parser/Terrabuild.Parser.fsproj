@@ -5,22 +5,27 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <FsYacc Include="Workspace/Parser.fsy">
-        <OtherFlags>-v --module WorkspaceParser -o Workspace/Parser.fs</OtherFlags>
-    </FsYacc>
-    <FsLex Include="Workspace/Lexer.fsl">
-        <OtherFlags>--module WorkspaceLexer --unicode -o Workspace/Lexer.fs</OtherFlags>
-    </FsLex>
+    <Choose>
+        <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch(
+                         $(DefineConstants), '^(.*;)*GENERATE_PARSER(;.*)*$'))">
+            <ItemGroup>
+                <FsYacc Include="Workspace/Parser.fsy">
+                    <OtherFlags>-v --module WorkspaceParser -o Workspace/Parser.fs</OtherFlags>
+                </FsYacc>
+                <FsLex Include="Workspace/Lexer.fsl">
+                    <OtherFlags>--module WorkspaceLexer --unicode -o Workspace/Lexer.fs</OtherFlags>
+                </FsLex>
 
-    <FsYacc Include="Project/Parser.fsy">
-        <OtherFlags>-v --module ProjectParser -o Project/Parser.fs</OtherFlags>
-    </FsYacc>
-    <FsLex Include="Project/Lexer.fsl">
-        <OtherFlags>--module ProjectLexer --unicode -o Project/Lexer.fs</OtherFlags>
-    </FsLex>
-  </ItemGroup>
-  
+                <FsYacc Include="Project/Parser.fsy">
+                    <OtherFlags>-v --module ProjectParser -o Project/Parser.fs</OtherFlags>
+                </FsYacc>
+                <FsLex Include="Project/Lexer.fsl">
+                    <OtherFlags>--module ProjectLexer --unicode -o Project/Lexer.fs</OtherFlags>
+                </FsLex>
+            </ItemGroup>
+        </When>
+    </Choose>
+
   <ItemGroup>
     <Compile Include="AST.fs" />
     <Compile Include="Workspace/AST.fs" />

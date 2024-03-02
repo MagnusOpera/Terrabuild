@@ -4,6 +4,9 @@ version ?= 0.0.0
 build:
 	dotnet build -c $(config)
 
+parser:
+	dotnet build -c $(config) /p:DefineConstants="GENERATE_PARSER"
+
 all:
 	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
 	
