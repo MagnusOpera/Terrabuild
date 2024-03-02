@@ -8,6 +8,10 @@ extension docker {
   init {
     image: "ghcr.io/magnusopera/dotnet-app"
   }
+
+  default {
+    configuration: $configuration
+  }
 }
 
 configuration {
@@ -31,6 +35,5 @@ target dist {
 
 target docker {
   shell echo { message: trim("building project1 " + $configuration) }  
-  docker build { configuration: $configuration
-                 arguments: { config: "Release" } }                 
+  docker build { arguments: { config: "Release" } }                 
 }

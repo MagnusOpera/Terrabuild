@@ -8,6 +8,7 @@ type token =
   | CONTAINER
   | INIT
   | SCRIPT
+  | DEFAULT
   | CONFIGURATION
   | TARGET
   | ENVIRONMENT
@@ -40,6 +41,7 @@ type tokenId =
     | TOKEN_CONTAINER
     | TOKEN_INIT
     | TOKEN_SCRIPT
+    | TOKEN_DEFAULT
     | TOKEN_CONFIGURATION
     | TOKEN_TARGET
     | TOKEN_ENVIRONMENT
@@ -85,6 +87,7 @@ type nonTerminalId =
     | NONTERM_Container
     | NONTERM_Script
     | NONTERM_Init
+    | NONTERM_Default
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings

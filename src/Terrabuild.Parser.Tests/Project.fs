@@ -14,12 +14,14 @@ let parseProject() =
         let dotnetExt =
             { Container = None
               Script = None
-              Init = Map [ "configuration", Expr.Variable "configuration" ]}
+              Init = Map [ "configuration", Expr.Variable "configuration" ]
+              Default = Map.empty }
         
         let dockerExt =
             { Container = None
               Script = None
-              Init = Map [ "image", Expr.String "ghcr.io/magnusopera/dotnet-app"] }
+              Init = Map [ "image", Expr.String "ghcr.io/magnusopera/dotnet-app"]
+              Default = Map [ "configuration", Expr.Variable "configuration"] }
 
         let configuration =
             { Dependencies = Set [ "../../libraries/shell-lib" ] 
@@ -45,8 +47,7 @@ let parseProject() =
                                                                                         [ Expr.String "building project1 "
                                                                                           Expr.Variable "configuration" ]) ]) ] }
                         { Extension = "docker"; Command = "build"
-                          Parameters = Map [ "configuration", Expr.Variable "configuration"
-                                             "arguments", Expr.Map (Map [ "config", Expr.String "Release"]) ] } ] }
+                          Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "Release"]) ] } ] }
 
         { Extensions = Map [ "dotnet", dotnetExt
                              "docker", dockerExt ]
