@@ -26,7 +26,7 @@ type token =
   | LABELS
   | PARSER
   | CONTAINER
-  | PARAMETERS
+  | INIT
   | SCRIPT
   | DEPENDS_ON
   | EXTENSION
@@ -60,7 +60,7 @@ type tokenId =
     | TOKEN_LABELS
     | TOKEN_PARSER
     | TOKEN_CONTAINER
-    | TOKEN_PARAMETERS
+    | TOKEN_INIT
     | TOKEN_SCRIPT
     | TOKEN_DEPENDS_ON
     | TOKEN_EXTENSION
@@ -97,7 +97,7 @@ type nonTerminalId =
     | NONTERM_ExtensionComponents
     | NONTERM_Container
     | NONTERM_Script
-    | NONTERM_Parameters
+    | NONTERM_Init
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents
     | NONTERM_ConfigurationDependencies
@@ -125,7 +125,7 @@ let tagOfToken (t:token) =
   | LABELS  -> 3 
   | PARSER  -> 4 
   | CONTAINER  -> 5 
-  | PARAMETERS  -> 6 
+  | INIT  -> 6 
   | SCRIPT  -> 7 
   | DEPENDS_ON  -> 8 
   | EXTENSION  -> 9 
@@ -161,7 +161,7 @@ let tokenTagToTokenId (tokenIdx:int) =
   | 3 -> TOKEN_LABELS 
   | 4 -> TOKEN_PARSER 
   | 5 -> TOKEN_CONTAINER 
-  | 6 -> TOKEN_PARAMETERS 
+  | 6 -> TOKEN_INIT 
   | 7 -> TOKEN_SCRIPT 
   | 8 -> TOKEN_DEPENDS_ON 
   | 9 -> TOKEN_EXTENSION 
@@ -207,7 +207,7 @@ let prodIdxToNonTerminal (prodIdx:int) =
     | 10 -> NONTERM_ExtensionComponents 
     | 11 -> NONTERM_Container 
     | 12 -> NONTERM_Script 
-    | 13 -> NONTERM_Parameters 
+    | 13 -> NONTERM_Init 
     | 14 -> NONTERM_Configuration 
     | 15 -> NONTERM_ConfigurationComponents 
     | 16 -> NONTERM_ConfigurationComponents 
@@ -257,7 +257,7 @@ let token_to_string (t:token) =
   | LABELS  -> "LABELS" 
   | PARSER  -> "PARSER" 
   | CONTAINER  -> "CONTAINER" 
-  | PARAMETERS  -> "PARAMETERS" 
+  | INIT  -> "INIT" 
   | SCRIPT  -> "SCRIPT" 
   | DEPENDS_ON  -> "DEPENDS_ON" 
   | EXTENSION  -> "EXTENSION" 
@@ -293,7 +293,7 @@ let _fsyacc_dataOfToken (t:token) =
   | LABELS  -> (null : System.Object) 
   | PARSER  -> (null : System.Object) 
   | CONTAINER  -> (null : System.Object) 
-  | PARAMETERS  -> (null : System.Object) 
+  | INIT  -> (null : System.Object) 
   | SCRIPT  -> (null : System.Object) 
   | DEPENDS_ON  -> (null : System.Object) 
   | EXTENSION  -> (null : System.Object) 
@@ -445,12 +445,12 @@ let _fsyacc_reductions ()  =    [|
 # 445 "Project/Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Parameters in
+            let _2 = parseState.GetInput(2) :?> 'gentype_Init in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 56 "Project/Parser.fsy"
-                                                            _1.Patch _2 
+                                                      _1.Patch _2 
                    )
 # 56 "Project/Parser.fsy"
                  : 'gentype_ExtensionComponents));
@@ -483,10 +483,10 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 62 "Project/Parser.fsy"
-                                                                ExtensionComponents.Parameters _3 
+                                                          ExtensionComponents.Init _3 
                    )
 # 62 "Project/Parser.fsy"
-                 : 'gentype_Parameters));
+                 : 'gentype_Init));
 # 490 "Project/Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_ConfigurationComponents in

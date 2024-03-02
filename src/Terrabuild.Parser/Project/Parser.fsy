@@ -29,7 +29,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER
 %token EOF
 %token EXTENSION CONFIGURATION TARGET 
-%token DEPENDENCIES OUTPUTS IGNORES LABELS PARSER CONTAINER PARAMETERS SCRIPT DEPENDS_ON
+%token DEPENDENCIES OUTPUTS IGNORES LABELS PARSER CONTAINER INIT SCRIPT DEPENDS_ON
 
 // associativity and precedences
 %left PLUS
@@ -53,13 +53,13 @@ ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents Container { $1.Patch $2 }
     | ExtensionComponents Script { $1.Patch $2 }
-    | ExtensionComponents Parameters { $1.Patch $2 }
+    | ExtensionComponents Init { $1.Patch $2 }
 Container:
     | CONTAINER String { ExtensionComponents.Container $2 }
 Script:
     | SCRIPT String { ExtensionComponents.Script $2 }
-Parameters:
-    | PARAMETERS LBRACE Variables RBRACE { ExtensionComponents.Parameters $3 }
+Init:
+    | INIT LBRACE Variables RBRACE { ExtensionComponents.Init $3 }
 
 
 Configuration:

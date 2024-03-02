@@ -1,11 +1,11 @@
 extension dotnet {
-  parameters {
+  init {
     configuration: $configuration
   }
 }
 
 extension docker {
-  parameters {
+  init {
     image: "ghcr.io/magnusopera/dotnet-app"
   }
 }

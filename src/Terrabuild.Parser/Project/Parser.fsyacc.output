@@ -8,7 +8,7 @@ state 0:  items:    _startProject ->  . Project
     action 'LABELS' (noprec):   reduce ProjectComponents --> 
     action 'PARSER' (noprec):   reduce ProjectComponents --> 
     action 'CONTAINER' (noprec):   reduce ProjectComponents --> 
-    action 'PARAMETERS' (noprec):   reduce ProjectComponents --> 
+    action 'INIT' (noprec):   reduce ProjectComponents --> 
     action 'SCRIPT' (noprec):   reduce ProjectComponents --> 
     action 'DEPENDS_ON' (noprec):   reduce ProjectComponents --> 
     action 'EXTENSION' (noprec):   reduce ProjectComponents --> 
@@ -46,7 +46,7 @@ state 1:  items:    _startProject -> Project .
     action 'LABELS' (noprec):   accept
     action 'PARSER' (noprec):   accept
     action 'CONTAINER' (noprec):   accept
-    action 'PARAMETERS' (noprec):   accept
+    action 'INIT' (noprec):   accept
     action 'SCRIPT' (noprec):   accept
     action 'DEPENDS_ON' (noprec):   accept
     action 'EXTENSION' (noprec):   accept
@@ -85,7 +85,7 @@ state 1:  items:    _startProject -> Project .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   shift 7
@@ -124,7 +124,7 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
     action 'LABELS' (noprec):   reduce Project --> ProjectComponents 'EOF'
     action 'PARSER' (noprec):   reduce Project --> ProjectComponents 'EOF'
     action 'CONTAINER' (noprec):   reduce Project --> ProjectComponents 'EOF'
-    action 'PARAMETERS' (noprec):   reduce Project --> ProjectComponents 'EOF'
+    action 'INIT' (noprec):   reduce Project --> ProjectComponents 'EOF'
     action 'SCRIPT' (noprec):   reduce Project --> ProjectComponents 'EOF'
     action 'DEPENDS_ON' (noprec):   reduce Project --> ProjectComponents 'EOF'
     action 'EXTENSION' (noprec):   reduce Project --> ProjectComponents 'EOF'
@@ -160,7 +160,7 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
     action 'LABELS' (noprec):   reduce ProjectComponents --> ProjectComponents Extension
     action 'PARSER' (noprec):   reduce ProjectComponents --> ProjectComponents Extension
     action 'CONTAINER' (noprec):   reduce ProjectComponents --> ProjectComponents Extension
-    action 'PARAMETERS' (noprec):   reduce ProjectComponents --> ProjectComponents Extension
+    action 'INIT' (noprec):   reduce ProjectComponents --> ProjectComponents Extension
     action 'SCRIPT' (noprec):   reduce ProjectComponents --> ProjectComponents Extension
     action 'DEPENDS_ON' (noprec):   reduce ProjectComponents --> ProjectComponents Extension
     action 'EXTENSION' (noprec):   reduce ProjectComponents --> ProjectComponents Extension
@@ -196,7 +196,7 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
     action 'LABELS' (noprec):   reduce ProjectComponents --> ProjectComponents Configuration
     action 'PARSER' (noprec):   reduce ProjectComponents --> ProjectComponents Configuration
     action 'CONTAINER' (noprec):   reduce ProjectComponents --> ProjectComponents Configuration
-    action 'PARAMETERS' (noprec):   reduce ProjectComponents --> ProjectComponents Configuration
+    action 'INIT' (noprec):   reduce ProjectComponents --> ProjectComponents Configuration
     action 'SCRIPT' (noprec):   reduce ProjectComponents --> ProjectComponents Configuration
     action 'DEPENDS_ON' (noprec):   reduce ProjectComponents --> ProjectComponents Configuration
     action 'EXTENSION' (noprec):   reduce ProjectComponents --> ProjectComponents Configuration
@@ -232,7 +232,7 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
     action 'LABELS' (noprec):   reduce ProjectComponents --> ProjectComponents Target
     action 'PARSER' (noprec):   reduce ProjectComponents --> ProjectComponents Target
     action 'CONTAINER' (noprec):   reduce ProjectComponents --> ProjectComponents Target
-    action 'PARAMETERS' (noprec):   reduce ProjectComponents --> ProjectComponents Target
+    action 'INIT' (noprec):   reduce ProjectComponents --> ProjectComponents Target
     action 'SCRIPT' (noprec):   reduce ProjectComponents --> ProjectComponents Target
     action 'DEPENDS_ON' (noprec):   reduce ProjectComponents --> ProjectComponents Target
     action 'EXTENSION' (noprec):   reduce ProjectComponents --> ProjectComponents Target
@@ -268,7 +268,7 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -304,7 +304,7 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -340,7 +340,7 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
     action 'LABELS' (noprec):   reduce ExtensionComponents --> 
     action 'PARSER' (noprec):   reduce ExtensionComponents --> 
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> 
-    action 'PARAMETERS' (noprec):   reduce ExtensionComponents --> 
+    action 'INIT' (noprec):   reduce ExtensionComponents --> 
     action 'SCRIPT' (noprec):   reduce ExtensionComponents --> 
     action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> 
     action 'EXTENSION' (noprec):   reduce ExtensionComponents --> 
@@ -373,14 +373,14 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
 state 10:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents . 'RBRACE'
     ExtensionComponents -> ExtensionComponents . Container
     ExtensionComponents -> ExtensionComponents . Script
-    ExtensionComponents -> ExtensionComponents . Parameters
+    ExtensionComponents -> ExtensionComponents . Init
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   shift 15
-    action 'PARAMETERS' (noprec):   shift 19
+    action 'INIT' (noprec):   shift 19
     action 'SCRIPT' (noprec):   shift 17
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -411,7 +411,7 @@ state 10:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action '$$' (noprec):   error
   immediate action: <none>  gotos:    goto Container: 12
     goto Script: 13
-    goto Parameters: 14
+    goto Init: 14
 state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'OUTPUTS' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
@@ -419,7 +419,7 @@ state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'LABELS' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'PARSER' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
-    action 'PARAMETERS' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
+    action 'INIT' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'DEPENDS_ON' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'EXTENSION' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
@@ -455,7 +455,7 @@ state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'LABELS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'PARSER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
-    action 'PARAMETERS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
+    action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
     action 'EXTENSION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Container
@@ -491,7 +491,7 @@ state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'LABELS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'PARSER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
-    action 'PARAMETERS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
+    action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action 'EXTENSION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
@@ -520,50 +520,50 @@ state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Script  gotos:state 14:  items:    ExtensionComponents -> ExtensionComponents Parameters . 
-  actions:    action 'DEPENDENCIES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'OUTPUTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'IGNORES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'LABELS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'PARSER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'PARAMETERS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'EXTENSION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'EOF' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'TRIM' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'UPPER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'LOWER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'PLUS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'COMMA' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'EQUAL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'LPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'RPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'LSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'RSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'LBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'RBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'KEY' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'VARIABLE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'IDENTIFIER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'STRING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'NOTHING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'TRUE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'FALSE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-    action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Parameters
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Parameters  gotos:state 15:  items:    Container -> 'CONTAINER' . String
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Script  gotos:state 14:  items:    ExtensionComponents -> ExtensionComponents Init . 
+  actions:    action 'DEPENDENCIES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'OUTPUTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'IGNORES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'LABELS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'PARSER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'EXTENSION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'EOF' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'TRIM' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'UPPER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'LOWER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'PLUS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'COMMA' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'EQUAL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'LPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'RPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'LSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'RSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'LBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'RBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'KEY' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'VARIABLE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'IDENTIFIER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'STRING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'NOTHING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'TRUE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'FALSE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+    action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Init  gotos:state 15:  items:    Container -> 'CONTAINER' . String
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -600,7 +600,7 @@ state 16:  items:    Container -> 'CONTAINER' String .
     action 'LABELS' (noprec):   reduce Container --> 'CONTAINER' String
     action 'PARSER' (noprec):   reduce Container --> 'CONTAINER' String
     action 'CONTAINER' (noprec):   reduce Container --> 'CONTAINER' String
-    action 'PARAMETERS' (noprec):   reduce Container --> 'CONTAINER' String
+    action 'INIT' (noprec):   reduce Container --> 'CONTAINER' String
     action 'SCRIPT' (noprec):   reduce Container --> 'CONTAINER' String
     action 'DEPENDS_ON' (noprec):   reduce Container --> 'CONTAINER' String
     action 'EXTENSION' (noprec):   reduce Container --> 'CONTAINER' String
@@ -636,7 +636,7 @@ state 16:  items:    Container -> 'CONTAINER' String .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -673,7 +673,7 @@ state 18:  items:    Script -> 'SCRIPT' String .
     action 'LABELS' (noprec):   reduce Script --> 'SCRIPT' String
     action 'PARSER' (noprec):   reduce Script --> 'SCRIPT' String
     action 'CONTAINER' (noprec):   reduce Script --> 'SCRIPT' String
-    action 'PARAMETERS' (noprec):   reduce Script --> 'SCRIPT' String
+    action 'INIT' (noprec):   reduce Script --> 'SCRIPT' String
     action 'SCRIPT' (noprec):   reduce Script --> 'SCRIPT' String
     action 'DEPENDS_ON' (noprec):   reduce Script --> 'SCRIPT' String
     action 'EXTENSION' (noprec):   reduce Script --> 'SCRIPT' String
@@ -702,14 +702,14 @@ state 18:  items:    Script -> 'SCRIPT' String .
     action 'error' (noprec):   reduce Script --> 'SCRIPT' String
     action '#' (noprec):   reduce Script --> 'SCRIPT' String
     action '$$' (noprec):   reduce Script --> 'SCRIPT' String
-  immediate action:   reduce Script --> 'SCRIPT' String  gotos:state 19:  items:    Parameters -> 'PARAMETERS' . 'LBRACE' Variables 'RBRACE'
+  immediate action:   reduce Script --> 'SCRIPT' String  gotos:state 19:  items:    Init -> 'INIT' . 'LBRACE' Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -738,14 +738,14 @@ state 18:  items:    Script -> 'SCRIPT' String .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 20:  items:    Parameters -> 'PARAMETERS' 'LBRACE' . Variables 'RBRACE'
+  immediate action: <none>  gotos:state 20:  items:    Init -> 'INIT' 'LBRACE' . Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   reduce Variables --> 
     action 'OUTPUTS' (noprec):   reduce Variables --> 
     action 'IGNORES' (noprec):   reduce Variables --> 
     action 'LABELS' (noprec):   reduce Variables --> 
     action 'PARSER' (noprec):   reduce Variables --> 
     action 'CONTAINER' (noprec):   reduce Variables --> 
-    action 'PARAMETERS' (noprec):   reduce Variables --> 
+    action 'INIT' (noprec):   reduce Variables --> 
     action 'SCRIPT' (noprec):   reduce Variables --> 
     action 'DEPENDS_ON' (noprec):   reduce Variables --> 
     action 'EXTENSION' (noprec):   reduce Variables --> 
@@ -775,7 +775,7 @@ state 18:  items:    Script -> 'SCRIPT' String .
     action '#' (noprec):   reduce Variables --> 
     action '$$' (noprec):   reduce Variables --> 
   immediate action: <none>  gotos:    goto Variables: 21
-state 21:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables . 'RBRACE'
+state 21:  items:    Init -> 'INIT' 'LBRACE' Variables . 'RBRACE'
     Variables -> Variables . Variable
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
@@ -783,7 +783,7 @@ state 21:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables . 'RBRACE'
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -813,50 +813,50 @@ state 21:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables . 'RBRACE'
     action '#' (noprec):   error
     action '$$' (noprec):   error
   immediate action: <none>  gotos:    goto Variable: 62
-state 22:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables 'RBRACE' . 
-  actions:    action 'DEPENDENCIES' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'OUTPUTS' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'IGNORES' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'LABELS' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'PARSER' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'CONTAINER' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'PARAMETERS' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'SCRIPT' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'DEPENDS_ON' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'EXTENSION' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'CONFIGURATION' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'TARGET' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'EOF' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'TRIM' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'UPPER' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'LOWER' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'PLUS' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'COMMA' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'EQUAL' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'LPAREN' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'RPAREN' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'LSQBRACKET' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'RSQBRACKET' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'LBRACE' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'RBRACE' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'KEY' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'VARIABLE' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'IDENTIFIER' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'STRING' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'NOTHING' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'TRUE' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'FALSE' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action 'error' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action '#' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-    action '$$' (noprec):   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'
-  immediate action:   reduce Parameters --> 'PARAMETERS' 'LBRACE' Variables 'RBRACE'  gotos:state 23:  items:    Configuration -> 'CONFIGURATION' . 'LBRACE' ConfigurationComponents 'RBRACE'
+state 22:  items:    Init -> 'INIT' 'LBRACE' Variables 'RBRACE' . 
+  actions:    action 'DEPENDENCIES' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'OUTPUTS' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'IGNORES' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'LABELS' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'PARSER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'CONTAINER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'INIT' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'SCRIPT' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'DEPENDS_ON' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'EXTENSION' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'CONFIGURATION' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'TARGET' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'EOF' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'TRIM' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'UPPER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'LOWER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'PLUS' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'COMMA' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'EQUAL' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'LPAREN' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'RPAREN' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'LSQBRACKET' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'RSQBRACKET' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'LBRACE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'RBRACE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'KEY' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'VARIABLE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'IDENTIFIER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'STRING' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'NOTHING' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'TRUE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'FALSE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action 'error' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action '#' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+    action '$$' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
+  immediate action:   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'  gotos:state 23:  items:    Configuration -> 'CONFIGURATION' . 'LBRACE' ConfigurationComponents 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -892,7 +892,7 @@ state 22:  items:    Parameters -> 'PARAMETERS' 'LBRACE' Variables 'RBRACE' .
     action 'LABELS' (noprec):   reduce ConfigurationComponents --> 
     action 'PARSER' (noprec):   reduce ConfigurationComponents --> 
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> 
-    action 'PARAMETERS' (noprec):   reduce ConfigurationComponents --> 
+    action 'INIT' (noprec):   reduce ConfigurationComponents --> 
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> 
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationComponents --> 
     action 'EXTENSION' (noprec):   reduce ConfigurationComponents --> 
@@ -934,7 +934,7 @@ state 25:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LABELS' (noprec):   shift 38
     action 'PARSER' (noprec):   shift 40
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -975,7 +975,7 @@ state 26:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LABELS' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'PARSER' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
-    action 'PARAMETERS' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
+    action 'INIT' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'DEPENDS_ON' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'EXTENSION' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
@@ -1011,7 +1011,7 @@ state 26:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LABELS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action 'PARSER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
-    action 'PARAMETERS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
+    action 'INIT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action 'EXTENSION' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
@@ -1047,7 +1047,7 @@ state 26:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LABELS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action 'PARSER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
-    action 'PARAMETERS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
+    action 'INIT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action 'EXTENSION' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
@@ -1083,7 +1083,7 @@ state 26:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LABELS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action 'PARSER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
-    action 'PARAMETERS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
+    action 'INIT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action 'EXTENSION' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
@@ -1119,7 +1119,7 @@ state 26:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LABELS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action 'PARSER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
-    action 'PARAMETERS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
+    action 'INIT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action 'EXTENSION' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
@@ -1155,7 +1155,7 @@ state 26:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LABELS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action 'PARSER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action 'CONTAINER' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
-    action 'PARAMETERS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
+    action 'INIT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action 'SCRIPT' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action 'EXTENSION' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
@@ -1191,7 +1191,7 @@ state 26:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1228,7 +1228,7 @@ state 33:  items:    ConfigurationDependencies -> 'DEPENDENCIES' ListOfString .
     action 'LABELS' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action 'PARSER' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action 'CONTAINER' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
-    action 'PARAMETERS' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
+    action 'INIT' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action 'SCRIPT' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action 'EXTENSION' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
@@ -1264,7 +1264,7 @@ state 33:  items:    ConfigurationDependencies -> 'DEPENDENCIES' ListOfString .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1301,7 +1301,7 @@ state 35:  items:    ConfigurationOutputs -> 'OUTPUTS' ListOfString .
     action 'LABELS' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action 'PARSER' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action 'CONTAINER' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
-    action 'PARAMETERS' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
+    action 'INIT' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action 'SCRIPT' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action 'EXTENSION' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
@@ -1337,7 +1337,7 @@ state 35:  items:    ConfigurationOutputs -> 'OUTPUTS' ListOfString .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1374,7 +1374,7 @@ state 37:  items:    ConfigurationIgnores -> 'IGNORES' ListOfString .
     action 'LABELS' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action 'PARSER' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action 'CONTAINER' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
-    action 'PARAMETERS' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
+    action 'INIT' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action 'SCRIPT' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action 'EXTENSION' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
@@ -1410,7 +1410,7 @@ state 37:  items:    ConfigurationIgnores -> 'IGNORES' ListOfString .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1447,7 +1447,7 @@ state 39:  items:    ConfigurationLabels -> 'LABELS' ListOfString .
     action 'LABELS' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action 'PARSER' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action 'CONTAINER' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
-    action 'PARAMETERS' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
+    action 'INIT' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action 'SCRIPT' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action 'EXTENSION' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
@@ -1483,7 +1483,7 @@ state 39:  items:    ConfigurationLabels -> 'LABELS' ListOfString .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1520,7 +1520,7 @@ state 41:  items:    ConfigurationParser -> 'PARSER' String .
     action 'LABELS' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action 'PARSER' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action 'CONTAINER' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'PARAMETERS' (noprec):   reduce ConfigurationParser --> 'PARSER' String
+    action 'INIT' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action 'SCRIPT' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action 'DEPENDS_ON' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action 'EXTENSION' (noprec):   reduce ConfigurationParser --> 'PARSER' String
@@ -1556,7 +1556,7 @@ state 41:  items:    ConfigurationParser -> 'PARSER' String .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1592,7 +1592,7 @@ state 41:  items:    ConfigurationParser -> 'PARSER' String .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1628,7 +1628,7 @@ state 41:  items:    ConfigurationParser -> 'PARSER' String .
     action 'LABELS' (noprec):   reduce TargetComponents --> 
     action 'PARSER' (noprec):   reduce TargetComponents --> 
     action 'CONTAINER' (noprec):   reduce TargetComponents --> 
-    action 'PARAMETERS' (noprec):   reduce TargetComponents --> 
+    action 'INIT' (noprec):   reduce TargetComponents --> 
     action 'SCRIPT' (noprec):   reduce TargetComponents --> 
     action 'DEPENDS_ON' (noprec):   reduce TargetComponents --> 
     action 'EXTENSION' (noprec):   reduce TargetComponents --> 
@@ -1667,7 +1667,7 @@ state 45:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   shift 49
     action 'EXTENSION' (noprec):   error
@@ -1705,7 +1705,7 @@ state 46:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'LABELS' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'PARSER' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
-    action 'PARAMETERS' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
+    action 'INIT' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'DEPENDS_ON' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'EXTENSION' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
@@ -1741,7 +1741,7 @@ state 46:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'LABELS' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action 'PARSER' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action 'CONTAINER' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
-    action 'PARAMETERS' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
+    action 'INIT' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action 'SCRIPT' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action 'DEPENDS_ON' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action 'EXTENSION' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
@@ -1777,7 +1777,7 @@ state 46:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'LABELS' (noprec):   reduce TargetComponents --> TargetComponents Step
     action 'PARSER' (noprec):   reduce TargetComponents --> TargetComponents Step
     action 'CONTAINER' (noprec):   reduce TargetComponents --> TargetComponents Step
-    action 'PARAMETERS' (noprec):   reduce TargetComponents --> TargetComponents Step
+    action 'INIT' (noprec):   reduce TargetComponents --> TargetComponents Step
     action 'SCRIPT' (noprec):   reduce TargetComponents --> TargetComponents Step
     action 'DEPENDS_ON' (noprec):   reduce TargetComponents --> TargetComponents Step
     action 'EXTENSION' (noprec):   reduce TargetComponents --> TargetComponents Step
@@ -1813,7 +1813,7 @@ state 46:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1850,7 +1850,7 @@ state 50:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'LABELS' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action 'PARSER' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action 'CONTAINER' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
-    action 'PARAMETERS' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
+    action 'INIT' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action 'SCRIPT' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action 'DEPENDS_ON' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action 'EXTENSION' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
@@ -1886,7 +1886,7 @@ state 50:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1922,7 +1922,7 @@ state 50:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -1958,7 +1958,7 @@ state 50:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'LABELS' (noprec):   reduce Variables --> 
     action 'PARSER' (noprec):   reduce Variables --> 
     action 'CONTAINER' (noprec):   reduce Variables --> 
-    action 'PARAMETERS' (noprec):   reduce Variables --> 
+    action 'INIT' (noprec):   reduce Variables --> 
     action 'SCRIPT' (noprec):   reduce Variables --> 
     action 'DEPENDS_ON' (noprec):   reduce Variables --> 
     action 'EXTENSION' (noprec):   reduce Variables --> 
@@ -1996,7 +1996,7 @@ state 54:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables . 'RBR
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2033,7 +2033,7 @@ state 55:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRAC
     action 'LABELS' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action 'PARSER' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
-    action 'PARAMETERS' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
+    action 'INIT' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action 'DEPENDS_ON' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action 'EXTENSION' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
@@ -2069,7 +2069,7 @@ state 55:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRAC
     action 'LABELS' (noprec):   reduce String --> 'STRING'
     action 'PARSER' (noprec):   reduce String --> 'STRING'
     action 'CONTAINER' (noprec):   reduce String --> 'STRING'
-    action 'PARAMETERS' (noprec):   reduce String --> 'STRING'
+    action 'INIT' (noprec):   reduce String --> 'STRING'
     action 'SCRIPT' (noprec):   reduce String --> 'STRING'
     action 'DEPENDS_ON' (noprec):   reduce String --> 'STRING'
     action 'EXTENSION' (noprec):   reduce String --> 'STRING'
@@ -2105,7 +2105,7 @@ state 55:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRAC
     action 'LABELS' (noprec):   reduce Strings --> 
     action 'PARSER' (noprec):   reduce Strings --> 
     action 'CONTAINER' (noprec):   reduce Strings --> 
-    action 'PARAMETERS' (noprec):   reduce Strings --> 
+    action 'INIT' (noprec):   reduce Strings --> 
     action 'SCRIPT' (noprec):   reduce Strings --> 
     action 'DEPENDS_ON' (noprec):   reduce Strings --> 
     action 'EXTENSION' (noprec):   reduce Strings --> 
@@ -2143,7 +2143,7 @@ state 58:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2180,7 +2180,7 @@ state 59:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'LABELS' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'PARSER' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'CONTAINER' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'PARAMETERS' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
+    action 'INIT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'SCRIPT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'DEPENDS_ON' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'EXTENSION' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
@@ -2216,7 +2216,7 @@ state 59:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'LABELS' (noprec):   reduce Strings --> Strings String
     action 'PARSER' (noprec):   reduce Strings --> Strings String
     action 'CONTAINER' (noprec):   reduce Strings --> Strings String
-    action 'PARAMETERS' (noprec):   reduce Strings --> Strings String
+    action 'INIT' (noprec):   reduce Strings --> Strings String
     action 'SCRIPT' (noprec):   reduce Strings --> Strings String
     action 'DEPENDS_ON' (noprec):   reduce Strings --> Strings String
     action 'EXTENSION' (noprec):   reduce Strings --> Strings String
@@ -2253,7 +2253,7 @@ state 59:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2290,7 +2290,7 @@ state 62:  items:    Variables -> Variables Variable .
     action 'LABELS' (noprec):   reduce Variables --> Variables Variable
     action 'PARSER' (noprec):   reduce Variables --> Variables Variable
     action 'CONTAINER' (noprec):   reduce Variables --> Variables Variable
-    action 'PARAMETERS' (noprec):   reduce Variables --> Variables Variable
+    action 'INIT' (noprec):   reduce Variables --> Variables Variable
     action 'SCRIPT' (noprec):   reduce Variables --> Variables Variable
     action 'DEPENDS_ON' (noprec):   reduce Variables --> Variables Variable
     action 'EXTENSION' (noprec):   reduce Variables --> Variables Variable
@@ -2326,7 +2326,7 @@ state 62:  items:    Variables -> Variables Variable .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2364,7 +2364,7 @@ state 64:  items:    Variable -> 'KEY' Expr .
     action 'LABELS' (noprec):   reduce Variable --> 'KEY' Expr
     action 'PARSER' (noprec):   reduce Variable --> 'KEY' Expr
     action 'CONTAINER' (noprec):   reduce Variable --> 'KEY' Expr
-    action 'PARAMETERS' (noprec):   reduce Variable --> 'KEY' Expr
+    action 'INIT' (noprec):   reduce Variable --> 'KEY' Expr
     action 'SCRIPT' (noprec):   reduce Variable --> 'KEY' Expr
     action 'DEPENDS_ON' (noprec):   reduce Variable --> 'KEY' Expr
     action 'EXTENSION' (noprec):   reduce Variable --> 'KEY' Expr
@@ -2400,7 +2400,7 @@ state 64:  items:    Variable -> 'KEY' Expr .
     action 'LABELS' (noprec):   reduce Expr --> 'NOTHING'
     action 'PARSER' (noprec):   reduce Expr --> 'NOTHING'
     action 'CONTAINER' (noprec):   reduce Expr --> 'NOTHING'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'NOTHING'
+    action 'INIT' (noprec):   reduce Expr --> 'NOTHING'
     action 'SCRIPT' (noprec):   reduce Expr --> 'NOTHING'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'NOTHING'
     action 'EXTENSION' (noprec):   reduce Expr --> 'NOTHING'
@@ -2436,7 +2436,7 @@ state 64:  items:    Variable -> 'KEY' Expr .
     action 'LABELS' (noprec):   reduce Expr --> 'TRUE'
     action 'PARSER' (noprec):   reduce Expr --> 'TRUE'
     action 'CONTAINER' (noprec):   reduce Expr --> 'TRUE'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'TRUE'
+    action 'INIT' (noprec):   reduce Expr --> 'TRUE'
     action 'SCRIPT' (noprec):   reduce Expr --> 'TRUE'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'TRUE'
     action 'EXTENSION' (noprec):   reduce Expr --> 'TRUE'
@@ -2472,7 +2472,7 @@ state 64:  items:    Variable -> 'KEY' Expr .
     action 'LABELS' (noprec):   reduce Expr --> 'FALSE'
     action 'PARSER' (noprec):   reduce Expr --> 'FALSE'
     action 'CONTAINER' (noprec):   reduce Expr --> 'FALSE'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'FALSE'
+    action 'INIT' (noprec):   reduce Expr --> 'FALSE'
     action 'SCRIPT' (noprec):   reduce Expr --> 'FALSE'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'FALSE'
     action 'EXTENSION' (noprec):   reduce Expr --> 'FALSE'
@@ -2508,7 +2508,7 @@ state 64:  items:    Variable -> 'KEY' Expr .
     action 'LABELS' (noprec):   reduce Expr --> 'STRING'
     action 'PARSER' (noprec):   reduce Expr --> 'STRING'
     action 'CONTAINER' (noprec):   reduce Expr --> 'STRING'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'STRING'
+    action 'INIT' (noprec):   reduce Expr --> 'STRING'
     action 'SCRIPT' (noprec):   reduce Expr --> 'STRING'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'STRING'
     action 'EXTENSION' (noprec):   reduce Expr --> 'STRING'
@@ -2544,7 +2544,7 @@ state 64:  items:    Variable -> 'KEY' Expr .
     action 'LABELS' (noprec):   reduce Expr --> 'VARIABLE'
     action 'PARSER' (noprec):   reduce Expr --> 'VARIABLE'
     action 'CONTAINER' (noprec):   reduce Expr --> 'VARIABLE'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'VARIABLE'
+    action 'INIT' (noprec):   reduce Expr --> 'VARIABLE'
     action 'SCRIPT' (noprec):   reduce Expr --> 'VARIABLE'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'VARIABLE'
     action 'EXTENSION' (noprec):   reduce Expr --> 'VARIABLE'
@@ -2580,7 +2580,7 @@ state 64:  items:    Variable -> 'KEY' Expr .
     action 'LABELS' (noprec):   reduce Variables --> 
     action 'PARSER' (noprec):   reduce Variables --> 
     action 'CONTAINER' (noprec):   reduce Variables --> 
-    action 'PARAMETERS' (noprec):   reduce Variables --> 
+    action 'INIT' (noprec):   reduce Variables --> 
     action 'SCRIPT' (noprec):   reduce Variables --> 
     action 'DEPENDS_ON' (noprec):   reduce Variables --> 
     action 'EXTENSION' (noprec):   reduce Variables --> 
@@ -2617,7 +2617,7 @@ state 71:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'LABELS' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'PARSER' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'CONTAINER' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
+    action 'INIT' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'SCRIPT' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'EXTENSION' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
@@ -2654,7 +2654,7 @@ state 71:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'LABELS' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'PARSER' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'CONTAINER' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
-    action 'PARAMETERS' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
+    action 'INIT' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'SCRIPT' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'DEPENDS_ON' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'EXTENSION' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
@@ -2691,7 +2691,7 @@ state 71:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2728,7 +2728,7 @@ state 71:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2765,7 +2765,7 @@ state 71:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2801,7 +2801,7 @@ state 71:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2838,7 +2838,7 @@ state 77:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2874,7 +2874,7 @@ state 77:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2911,7 +2911,7 @@ state 79:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'LABELS' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'PARSER' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'CONTAINER' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
+    action 'INIT' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'SCRIPT' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'EXTENSION' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
@@ -2947,7 +2947,7 @@ state 79:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -2983,7 +2983,7 @@ state 79:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -3020,7 +3020,7 @@ state 82:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'LABELS' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'PARSER' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'CONTAINER' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
+    action 'INIT' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'SCRIPT' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'EXTENSION' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
@@ -3056,7 +3056,7 @@ state 82:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -3092,7 +3092,7 @@ state 82:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
     action 'CONTAINER' (noprec):   error
-    action 'PARAMETERS' (noprec):   error
+    action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
     action 'EXTENSION' (noprec):   error
@@ -3129,7 +3129,7 @@ state 85:  items:    Expr -> 'LOWER' 'LPAREN' Expr 'RPAREN' .
     action 'LABELS' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'PARSER' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'CONTAINER' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
-    action 'PARAMETERS' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
+    action 'INIT' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'SCRIPT' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'DEPENDS_ON' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'EXTENSION' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'

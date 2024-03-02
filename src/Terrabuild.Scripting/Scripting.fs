@@ -108,7 +108,7 @@ type Script(assembly: Assembly) =
         getMethod name
         |> Result.map Invocable
 
-let loadScript (scriptFile) =
+let loadScript (references: string list) (scriptFile) =
     let scriptFile = Path.GetFullPath(scriptFile)
     match cache |> Map.tryFind scriptFile with
     | Some script -> Ok script
@@ -121,6 +121,8 @@ let loadScript (scriptFile) =
                 "--targetprofile:netcore"
                 "--target:library"
                 $"--out:{outputDllName}"
+                "--define:TERRABUILD_SCRIPT"
+                for reference in references do $"--reference:{reference}"
             |]
 
             let errors, _ = checker.Compile(compilerArgs) |> Async.RunSynchronously

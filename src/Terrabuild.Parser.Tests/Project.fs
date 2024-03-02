@@ -14,12 +14,12 @@ let parseProject() =
         let dotnetExt =
             { Container = None
               Script = None
-              Parameters = Map [ "configuration", Expr.Variable "configuration" ]}
+              Init = Map [ "configuration", Expr.Variable "configuration" ]}
         
         let dockerExt =
             { Container = None
               Script = None
-              Parameters = Map [ "image", Expr.String "ghcr.io/magnusopera/dotnet-app"] }
+              Init = Map [ "image", Expr.String "ghcr.io/magnusopera/dotnet-app"] }
 
         let configuration =
             { Dependencies = Set [ "../../libraries/shell-lib" ] 

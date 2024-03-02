@@ -18,8 +18,8 @@ type Action = {
 [<RequireQualifiedAccess>]
 type Context = {
     Directory: string
-    With: string option
     CI: bool
+    NodeHash: string
 }
 
 [<RequireQualifiedAccess>]

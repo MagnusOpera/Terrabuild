@@ -1,10 +1,12 @@
 extension dotnet {
     script = "../../scripts/dotnet.fsx"
+
+    init { }
 }
 
 extension docker {
     script = "../../scripts/docker.fsx"
-    parameters {
+    init {
         image: "ghcr.io/magnusopera/dotnet-app"
     }
 }

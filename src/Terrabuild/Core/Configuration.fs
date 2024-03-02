@@ -67,7 +67,7 @@ module ExtensionLoaders =
         | None -> ConfigException.Raise($"Extension {name} has no script")
         | Some script ->
             let scriptFile = IO.combinePath currentDir script
-            loadScript scriptFile
+            loadScript [] scriptFile
 
     let loadStorage name : Storages.Storage =
         match name with
@@ -82,7 +82,7 @@ module ExtensionLoaders =
         | _ -> failwith $"Unknown source control '{name}'"
 
     let invokeScriptMethod<'r> (script: string) (method: string) (args: Value) =
-        match loadScript script with
+        match loadScript [] script with
         | Ok script ->
             match script.GetMethod(method) with
             | Ok method ->

@@ -6,7 +6,7 @@ type token =
   | DEPENDS_ON
   | VARIABLES
   | CONTAINER
-  | PARAMETERS
+  | INIT
   | SCRIPT
   | CONFIGURATION
   | TARGET
@@ -38,7 +38,7 @@ type tokenId =
     | TOKEN_DEPENDS_ON
     | TOKEN_VARIABLES
     | TOKEN_CONTAINER
-    | TOKEN_PARAMETERS
+    | TOKEN_INIT
     | TOKEN_SCRIPT
     | TOKEN_CONFIGURATION
     | TOKEN_TARGET
@@ -84,7 +84,7 @@ type nonTerminalId =
     | NONTERM_ExtensionComponents
     | NONTERM_Container
     | NONTERM_Script
-    | NONTERM_Parameters
+    | NONTERM_Init
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings

@@ -29,7 +29,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER
 %token EOF
 %token CONFIGURATION TARGET ENVIRONMENT EXTENSION
-%token STORAGE SOURCECONTROL DEPENDS_ON VARIABLES CONTAINER PARAMETERS SCRIPT
+%token STORAGE SOURCECONTROL DEPENDS_ON VARIABLES CONTAINER INIT SCRIPT
 
 // associativity and precedences
 %left PLUS
@@ -80,13 +80,13 @@ ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents Container { $1.Patch $2 }
     | ExtensionComponents Script { $1.Patch $2 }
-    | ExtensionComponents Parameters { $1.Patch $2 }
+    | ExtensionComponents Init { $1.Patch $2 }
 Container:
     | CONTAINER String { ExtensionComponents.Container $2 }
 Script:
     | SCRIPT String { ExtensionComponents.Script $2 }
-Parameters:
-    | PARAMETERS LBRACE Variables RBRACE { ExtensionComponents.Parameters $3 }
+Init:
+    | INIT LBRACE Variables RBRACE { ExtensionComponents.Init $3 }
 
 
 String:

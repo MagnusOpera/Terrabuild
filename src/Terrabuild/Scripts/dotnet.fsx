@@ -1,8 +1,11 @@
-#r "Terrabuild.Extensibility.dll"
+#if !TERRABUILD_SCRIPT
+#r "bin/Debug/net8.0/Terrabuild.Extensibility.dll"
+#endif
+
 open Terrabuild.Extensibility
 
 
-let buildCmdLine cmd args =
+let private buildCmdLine cmd args =
     { Action.Command = cmd
       Action.Arguments = args
       Action.Cache = Cacheability.Always }

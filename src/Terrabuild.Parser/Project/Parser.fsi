@@ -7,7 +7,7 @@ type token =
   | LABELS
   | PARSER
   | CONTAINER
-  | PARAMETERS
+  | INIT
   | SCRIPT
   | DEPENDS_ON
   | EXTENSION
@@ -40,7 +40,7 @@ type tokenId =
     | TOKEN_LABELS
     | TOKEN_PARSER
     | TOKEN_CONTAINER
-    | TOKEN_PARAMETERS
+    | TOKEN_INIT
     | TOKEN_SCRIPT
     | TOKEN_DEPENDS_ON
     | TOKEN_EXTENSION
@@ -76,7 +76,7 @@ type nonTerminalId =
     | NONTERM_ExtensionComponents
     | NONTERM_Container
     | NONTERM_Script
-    | NONTERM_Parameters
+    | NONTERM_Init
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents
     | NONTERM_ConfigurationDependencies

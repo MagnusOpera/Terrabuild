@@ -25,7 +25,7 @@ type token =
   | DEPENDS_ON
   | VARIABLES
   | CONTAINER
-  | PARAMETERS
+  | INIT
   | SCRIPT
   | CONFIGURATION
   | TARGET
@@ -58,7 +58,7 @@ type tokenId =
     | TOKEN_DEPENDS_ON
     | TOKEN_VARIABLES
     | TOKEN_CONTAINER
-    | TOKEN_PARAMETERS
+    | TOKEN_INIT
     | TOKEN_SCRIPT
     | TOKEN_CONFIGURATION
     | TOKEN_TARGET
@@ -105,7 +105,7 @@ type nonTerminalId =
     | NONTERM_ExtensionComponents
     | NONTERM_Container
     | NONTERM_Script
-    | NONTERM_Parameters
+    | NONTERM_Init
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
@@ -121,7 +121,7 @@ let tagOfToken (t:token) =
   | DEPENDS_ON  -> 2 
   | VARIABLES  -> 3 
   | CONTAINER  -> 4 
-  | PARAMETERS  -> 5 
+  | INIT  -> 5 
   | SCRIPT  -> 6 
   | CONFIGURATION  -> 7 
   | TARGET  -> 8 
@@ -156,7 +156,7 @@ let tokenTagToTokenId (tokenIdx:int) =
   | 2 -> TOKEN_DEPENDS_ON 
   | 3 -> TOKEN_VARIABLES 
   | 4 -> TOKEN_CONTAINER 
-  | 5 -> TOKEN_PARAMETERS 
+  | 5 -> TOKEN_INIT 
   | 6 -> TOKEN_SCRIPT 
   | 7 -> TOKEN_CONFIGURATION 
   | 8 -> TOKEN_TARGET 
@@ -217,7 +217,7 @@ let prodIdxToNonTerminal (prodIdx:int) =
     | 25 -> NONTERM_ExtensionComponents 
     | 26 -> NONTERM_Container 
     | 27 -> NONTERM_Script 
-    | 28 -> NONTERM_Parameters 
+    | 28 -> NONTERM_Init 
     | 29 -> NONTERM_String 
     | 30 -> NONTERM_ListOfString 
     | 31 -> NONTERM_Strings 
@@ -248,7 +248,7 @@ let token_to_string (t:token) =
   | DEPENDS_ON  -> "DEPENDS_ON" 
   | VARIABLES  -> "VARIABLES" 
   | CONTAINER  -> "CONTAINER" 
-  | PARAMETERS  -> "PARAMETERS" 
+  | INIT  -> "INIT" 
   | SCRIPT  -> "SCRIPT" 
   | CONFIGURATION  -> "CONFIGURATION" 
   | TARGET  -> "TARGET" 
@@ -283,7 +283,7 @@ let _fsyacc_dataOfToken (t:token) =
   | DEPENDS_ON  -> (null : System.Object) 
   | VARIABLES  -> (null : System.Object) 
   | CONTAINER  -> (null : System.Object) 
-  | PARAMETERS  -> (null : System.Object) 
+  | INIT  -> (null : System.Object) 
   | SCRIPT  -> (null : System.Object) 
   | CONFIGURATION  -> (null : System.Object) 
   | TARGET  -> (null : System.Object) 
@@ -604,12 +604,12 @@ let _fsyacc_reductions ()  =    [|
 # 604 "Workspace/Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Parameters in
+            let _2 = parseState.GetInput(2) :?> 'gentype_Init in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 83 "Workspace/Parser.fsy"
-                                                            _1.Patch _2 
+                                                      _1.Patch _2 
                    )
 # 83 "Workspace/Parser.fsy"
                  : 'gentype_ExtensionComponents));
@@ -642,10 +642,10 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 89 "Workspace/Parser.fsy"
-                                                                ExtensionComponents.Parameters _3 
+                                                          ExtensionComponents.Init _3 
                    )
 # 89 "Workspace/Parser.fsy"
-                 : 'gentype_Parameters));
+                 : 'gentype_Init));
 # 649 "Workspace/Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in

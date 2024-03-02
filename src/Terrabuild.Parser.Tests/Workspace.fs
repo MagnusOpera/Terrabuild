@@ -24,11 +24,11 @@ let parseWorkspace() =
         let dotnetExt =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
               Script = None
-              Parameters = Map [ "configuration", Expr.Variable "configuration" ]}
+              Init = Map [ "configuration", Expr.Variable "configuration" ]}
         let dockerExt =
             { Container = None
               Script = None
-              Parameters = Map.empty }
+              Init = Map.empty }
 
         { Configuration = configuration
           Targets = Map [ "build", buildTarget
