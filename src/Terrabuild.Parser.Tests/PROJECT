@@ -18,7 +18,7 @@ configuration {
   dependencies [ "../../libraries/shell-lib" ]
   outputs [ "dist" ]
   labels [ "app"
-             "dotnet" ]
+           "dotnet" ]
   parser "dotnet"
 }
 

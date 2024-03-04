@@ -1,19 +1,19 @@
 extension dotnet {
-    script = "../../scripts/dotnet.fsx"
+    script "../../scripts/dotnet.fsx"
 
     init { }
 }
 
 extension docker {
-    script = "../../scripts/docker.fsx"
+    script "../../scripts/docker.fsx"
     init {
         image: "ghcr.io/magnusopera/dotnet-app"
     }
 }
 
 configuration {
-    labels = [ "app"
-               "dotnet" ]
+    labels [ "app"
+             "dotnet" ]
 }
 
 target build {

@@ -1,9 +1,9 @@
 extension terraform { }
 
 configuration {
-    dependencies = [ "../../projects/dotnet-app" ]
-    ignores = [ "terrabuild.tfstate" ]
-    labels = [ "infra" ]
+    dependencies [ "../../projects/dotnet-app" ]
+    ignores [ "terrabuild.tfstate" ]
+    labels [ "infra" ]
 }
 
 target build {
