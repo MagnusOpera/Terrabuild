@@ -1,11 +1,8 @@
 extension dotnet {
-    script "../../scripts/dotnet.fsx"
-
     init { }
 }
 
 extension docker {
-    script "../../scripts/docker.fsx"
     init {
         image: "ghcr.io/magnusopera/dotnet-app"
     }
