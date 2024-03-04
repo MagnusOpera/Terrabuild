@@ -78,7 +78,6 @@ type nonTerminalId =
     | NONTERM_ExtensionComponents
     | NONTERM_Container
     | NONTERM_Script
-    | NONTERM_Init
     | NONTERM_Defaults
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents

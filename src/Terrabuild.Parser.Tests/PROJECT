@@ -1,16 +1,13 @@
 extension dotnet {
-  init {
+  defaults {
     configuration: $configuration
   }
 }
 
 extension docker {
-  init {
-    image: "ghcr.io/magnusopera/dotnet-app"
-  }
-
   defaults {
     configuration: $configuration
+    image: "ghcr.io/magnusopera/dotnet-app"
   }
 }
 

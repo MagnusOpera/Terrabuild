@@ -92,8 +92,8 @@ state 1:  items:    _startProject -> Project .
     action 'DEPENDS_ON' (noprec):   error
     action 'DEFAULTS' (noprec):   error
     action 'EXTENSION' (noprec):   shift 7
-    action 'CONFIGURATION' (noprec):   shift 28
-    action 'TARGET' (noprec):   shift 47
+    action 'CONFIGURATION' (noprec):   shift 23
+    action 'TARGET' (noprec):   shift 42
     action 'EOF' (noprec):   shift 3
     action 'TRIM' (noprec):   error
     action 'UPPER' (noprec):   error
@@ -383,18 +383,17 @@ state 3:  items:    Project -> ProjectComponents 'EOF' .
 state 10:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents . 'RBRACE'
     ExtensionComponents -> ExtensionComponents . Container
     ExtensionComponents -> ExtensionComponents . Script
-    ExtensionComponents -> ExtensionComponents . Init
     ExtensionComponents -> ExtensionComponents . Defaults
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
     action 'LABELS' (noprec):   error
     action 'PARSER' (noprec):   error
-    action 'CONTAINER' (noprec):   shift 16
-    action 'INIT' (noprec):   shift 20
-    action 'SCRIPT' (noprec):   shift 18
+    action 'CONTAINER' (noprec):   shift 15
+    action 'INIT' (noprec):   error
+    action 'SCRIPT' (noprec):   shift 17
     action 'DEPENDS_ON' (noprec):   error
-    action 'DEFAULTS' (noprec):   shift 24
+    action 'DEFAULTS' (noprec):   shift 19
     action 'EXTENSION' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
@@ -423,8 +422,7 @@ state 10:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action '$$' (noprec):   error
   immediate action: <none>  gotos:    goto Container: 12
     goto Script: 13
-    goto Init: 14
-    goto Defaults: 15
+    goto Defaults: 14
 state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
     action 'OUTPUTS' (noprec):   reduce Extension --> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionComponents 'RBRACE'
@@ -536,44 +534,7 @@ state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
     action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Script
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Script  gotos:state 14:  items:    ExtensionComponents -> ExtensionComponents Init . 
-  actions:    action 'DEPENDENCIES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'OUTPUTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'IGNORES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'LABELS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'PARSER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'CONTAINER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'INIT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'SCRIPT' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'DEPENDS_ON' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'DEFAULTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'EXTENSION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'CONFIGURATION' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'TARGET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'EOF' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'TRIM' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'UPPER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'LOWER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'PLUS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'COMMA' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'EQUAL' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'LPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'RPAREN' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'LSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'RSQBRACKET' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'LBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'RBRACE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'KEY' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'VARIABLE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'IDENTIFIER' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'STRING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'NOTHING' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'TRUE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'FALSE' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-    action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Init
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Init  gotos:state 15:  items:    ExtensionComponents -> ExtensionComponents Defaults . 
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Script  gotos:state 14:  items:    ExtensionComponents -> ExtensionComponents Defaults . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
     action 'OUTPUTS' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
     action 'IGNORES' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
@@ -610,7 +571,7 @@ state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'error' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
     action '#' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
     action '$$' (noprec):   reduce ExtensionComponents --> ExtensionComponents Defaults
-  immediate action:   reduce ExtensionComponents --> ExtensionComponents Defaults  gotos:state 16:  items:    Container -> 'CONTAINER' . String
+  immediate action:   reduce ExtensionComponents --> ExtensionComponents Defaults  gotos:state 15:  items:    Container -> 'CONTAINER' . String
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -640,15 +601,15 @@ state 11:  items:    Extension -> 'EXTENSION' 'IDENTIFIER' 'LBRACE' ExtensionCom
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 61
+    action 'STRING' (noprec):   shift 56
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto String: 17
-state 17:  items:    Container -> 'CONTAINER' String . 
+  immediate action: <none>  gotos:    goto String: 16
+state 16:  items:    Container -> 'CONTAINER' String . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Container --> 'CONTAINER' String
     action 'OUTPUTS' (noprec):   reduce Container --> 'CONTAINER' String
     action 'IGNORES' (noprec):   reduce Container --> 'CONTAINER' String
@@ -685,7 +646,7 @@ state 17:  items:    Container -> 'CONTAINER' String .
     action 'error' (noprec):   reduce Container --> 'CONTAINER' String
     action '#' (noprec):   reduce Container --> 'CONTAINER' String
     action '$$' (noprec):   reduce Container --> 'CONTAINER' String
-  immediate action:   reduce Container --> 'CONTAINER' String  gotos:state 18:  items:    Script -> 'SCRIPT' . String
+  immediate action:   reduce Container --> 'CONTAINER' String  gotos:state 17:  items:    Script -> 'SCRIPT' . String
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -715,15 +676,15 @@ state 17:  items:    Container -> 'CONTAINER' String .
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 61
+    action 'STRING' (noprec):   shift 56
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto String: 19
-state 19:  items:    Script -> 'SCRIPT' String . 
+  immediate action: <none>  gotos:    goto String: 18
+state 18:  items:    Script -> 'SCRIPT' String . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Script --> 'SCRIPT' String
     action 'OUTPUTS' (noprec):   reduce Script --> 'SCRIPT' String
     action 'IGNORES' (noprec):   reduce Script --> 'SCRIPT' String
@@ -760,7 +721,7 @@ state 19:  items:    Script -> 'SCRIPT' String .
     action 'error' (noprec):   reduce Script --> 'SCRIPT' String
     action '#' (noprec):   reduce Script --> 'SCRIPT' String
     action '$$' (noprec):   reduce Script --> 'SCRIPT' String
-  immediate action:   reduce Script --> 'SCRIPT' String  gotos:state 20:  items:    Init -> 'INIT' . 'LBRACE' Variables 'RBRACE'
+  immediate action:   reduce Script --> 'SCRIPT' String  gotos:state 19:  items:    Defaults -> 'DEFAULTS' . 'LBRACE' Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -785,7 +746,7 @@ state 19:  items:    Script -> 'SCRIPT' String .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 21
+    action 'LBRACE' (noprec):   shift 20
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
@@ -797,7 +758,7 @@ state 19:  items:    Script -> 'SCRIPT' String .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 21:  items:    Init -> 'INIT' 'LBRACE' . Variables 'RBRACE'
+  immediate action: <none>  gotos:state 20:  items:    Defaults -> 'DEFAULTS' 'LBRACE' . Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   reduce Variables --> 
     action 'OUTPUTS' (noprec):   reduce Variables --> 
     action 'IGNORES' (noprec):   reduce Variables --> 
@@ -834,8 +795,8 @@ state 19:  items:    Script -> 'SCRIPT' String .
     action 'error' (noprec):   reduce Variables --> 
     action '#' (noprec):   reduce Variables --> 
     action '$$' (noprec):   reduce Variables --> 
-  immediate action: <none>  gotos:    goto Variables: 22
-state 22:  items:    Init -> 'INIT' 'LBRACE' Variables . 'RBRACE'
+  immediate action: <none>  gotos:    goto Variables: 21
+state 21:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables . 'RBRACE'
     Variables -> Variables . Variable
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
@@ -862,8 +823,8 @@ state 22:  items:    Init -> 'INIT' 'LBRACE' Variables . 'RBRACE'
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
-    action 'RBRACE' (noprec):   shift 23
-    action 'KEY' (noprec):   shift 68
+    action 'RBRACE' (noprec):   shift 22
+    action 'KEY' (noprec):   shift 63
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
     action 'STRING' (noprec):   error
@@ -873,159 +834,8 @@ state 22:  items:    Init -> 'INIT' 'LBRACE' Variables . 'RBRACE'
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Variable: 67
-state 23:  items:    Init -> 'INIT' 'LBRACE' Variables 'RBRACE' . 
-  actions:    action 'DEPENDENCIES' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'OUTPUTS' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'IGNORES' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'LABELS' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'PARSER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'CONTAINER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'INIT' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'SCRIPT' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'DEPENDS_ON' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'DEFAULTS' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'EXTENSION' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'CONFIGURATION' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'TARGET' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'EOF' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'TRIM' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'UPPER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'LOWER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'PLUS' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'COMMA' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'EQUAL' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'LPAREN' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'RPAREN' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'LSQBRACKET' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'RSQBRACKET' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'LBRACE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'RBRACE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'KEY' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'VARIABLE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'IDENTIFIER' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'STRING' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'NOTHING' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'TRUE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'FALSE' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action 'error' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action '#' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-    action '$$' (noprec):   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'
-  immediate action:   reduce Init --> 'INIT' 'LBRACE' Variables 'RBRACE'  gotos:state 24:  items:    Defaults -> 'DEFAULTS' . 'LBRACE' Variables 'RBRACE'
-  actions:    action 'DEPENDENCIES' (noprec):   error
-    action 'OUTPUTS' (noprec):   error
-    action 'IGNORES' (noprec):   error
-    action 'LABELS' (noprec):   error
-    action 'PARSER' (noprec):   error
-    action 'CONTAINER' (noprec):   error
-    action 'INIT' (noprec):   error
-    action 'SCRIPT' (noprec):   error
-    action 'DEPENDS_ON' (noprec):   error
-    action 'DEFAULTS' (noprec):   error
-    action 'EXTENSION' (noprec):   error
-    action 'CONFIGURATION' (noprec):   error
-    action 'TARGET' (noprec):   error
-    action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   error
-    action 'UPPER' (noprec):   error
-    action 'LOWER' (noprec):   error
-    action 'PLUS' (noprec):   error
-    action 'COMMA' (noprec):   error
-    action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   error
-    action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 25
-    action 'RBRACE' (noprec):   error
-    action 'KEY' (noprec):   error
-    action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   error
-    action 'NOTHING' (noprec):   error
-    action 'TRUE' (noprec):   error
-    action 'FALSE' (noprec):   error
-    action 'error' (noprec):   error
-    action '#' (noprec):   error
-    action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 25:  items:    Defaults -> 'DEFAULTS' 'LBRACE' . Variables 'RBRACE'
-  actions:    action 'DEPENDENCIES' (noprec):   reduce Variables --> 
-    action 'OUTPUTS' (noprec):   reduce Variables --> 
-    action 'IGNORES' (noprec):   reduce Variables --> 
-    action 'LABELS' (noprec):   reduce Variables --> 
-    action 'PARSER' (noprec):   reduce Variables --> 
-    action 'CONTAINER' (noprec):   reduce Variables --> 
-    action 'INIT' (noprec):   reduce Variables --> 
-    action 'SCRIPT' (noprec):   reduce Variables --> 
-    action 'DEPENDS_ON' (noprec):   reduce Variables --> 
-    action 'DEFAULTS' (noprec):   reduce Variables --> 
-    action 'EXTENSION' (noprec):   reduce Variables --> 
-    action 'CONFIGURATION' (noprec):   reduce Variables --> 
-    action 'TARGET' (noprec):   reduce Variables --> 
-    action 'EOF' (noprec):   reduce Variables --> 
-    action 'TRIM' (noprec):   reduce Variables --> 
-    action 'UPPER' (noprec):   reduce Variables --> 
-    action 'LOWER' (noprec):   reduce Variables --> 
-    action 'PLUS' (noprec):   reduce Variables --> 
-    action 'COMMA' (noprec):   reduce Variables --> 
-    action 'EQUAL' (noprec):   reduce Variables --> 
-    action 'LPAREN' (noprec):   reduce Variables --> 
-    action 'RPAREN' (noprec):   reduce Variables --> 
-    action 'LSQBRACKET' (noprec):   reduce Variables --> 
-    action 'RSQBRACKET' (noprec):   reduce Variables --> 
-    action 'LBRACE' (noprec):   reduce Variables --> 
-    action 'RBRACE' (noprec):   reduce Variables --> 
-    action 'KEY' (noprec):   reduce Variables --> 
-    action 'VARIABLE' (noprec):   reduce Variables --> 
-    action 'IDENTIFIER' (noprec):   reduce Variables --> 
-    action 'STRING' (noprec):   reduce Variables --> 
-    action 'NOTHING' (noprec):   reduce Variables --> 
-    action 'TRUE' (noprec):   reduce Variables --> 
-    action 'FALSE' (noprec):   reduce Variables --> 
-    action 'error' (noprec):   reduce Variables --> 
-    action '#' (noprec):   reduce Variables --> 
-    action '$$' (noprec):   reduce Variables --> 
-  immediate action: <none>  gotos:    goto Variables: 26
-state 26:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables . 'RBRACE'
-    Variables -> Variables . Variable
-  actions:    action 'DEPENDENCIES' (noprec):   error
-    action 'OUTPUTS' (noprec):   error
-    action 'IGNORES' (noprec):   error
-    action 'LABELS' (noprec):   error
-    action 'PARSER' (noprec):   error
-    action 'CONTAINER' (noprec):   error
-    action 'INIT' (noprec):   error
-    action 'SCRIPT' (noprec):   error
-    action 'DEPENDS_ON' (noprec):   error
-    action 'DEFAULTS' (noprec):   error
-    action 'EXTENSION' (noprec):   error
-    action 'CONFIGURATION' (noprec):   error
-    action 'TARGET' (noprec):   error
-    action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   error
-    action 'UPPER' (noprec):   error
-    action 'LOWER' (noprec):   error
-    action 'PLUS' (noprec):   error
-    action 'COMMA' (noprec):   error
-    action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   error
-    action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   error
-    action 'RBRACE' (noprec):   shift 27
-    action 'KEY' (noprec):   shift 68
-    action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   error
-    action 'NOTHING' (noprec):   error
-    action 'TRUE' (noprec):   error
-    action 'FALSE' (noprec):   error
-    action 'error' (noprec):   error
-    action '#' (noprec):   error
-    action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Variable: 67
-state 27:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables 'RBRACE' . 
+  immediate action: <none>  gotos:    goto Variable: 62
+state 22:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables 'RBRACE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
     action 'OUTPUTS' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
     action 'IGNORES' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
@@ -1062,7 +872,7 @@ state 27:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
     action '#' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
     action '$$' (noprec):   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'
-  immediate action:   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'  gotos:state 28:  items:    Configuration -> 'CONFIGURATION' . 'LBRACE' ConfigurationComponents 'RBRACE'
+  immediate action:   reduce Defaults --> 'DEFAULTS' 'LBRACE' Variables 'RBRACE'  gotos:state 23:  items:    Configuration -> 'CONFIGURATION' . 'LBRACE' ConfigurationComponents 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1087,7 +897,7 @@ state 27:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables 'RBRACE' .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 29
+    action 'LBRACE' (noprec):   shift 24
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
@@ -1099,7 +909,7 @@ state 27:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 29:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' . ConfigurationComponents 'RBRACE'
+  immediate action: <none>  gotos:state 24:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' . ConfigurationComponents 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationComponents --> 
     action 'OUTPUTS' (noprec):   reduce ConfigurationComponents --> 
     action 'IGNORES' (noprec):   reduce ConfigurationComponents --> 
@@ -1136,18 +946,18 @@ state 27:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   reduce ConfigurationComponents --> 
     action '#' (noprec):   reduce ConfigurationComponents --> 
     action '$$' (noprec):   reduce ConfigurationComponents --> 
-  immediate action: <none>  gotos:    goto ConfigurationComponents: 30
-state 30:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComponents . 'RBRACE'
+  immediate action: <none>  gotos:    goto ConfigurationComponents: 25
+state 25:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComponents . 'RBRACE'
     ConfigurationComponents -> ConfigurationComponents . ConfigurationDependencies
     ConfigurationComponents -> ConfigurationComponents . ConfigurationOutputs
     ConfigurationComponents -> ConfigurationComponents . ConfigurationIgnores
     ConfigurationComponents -> ConfigurationComponents . ConfigurationLabels
     ConfigurationComponents -> ConfigurationComponents . ConfigurationParser
-  actions:    action 'DEPENDENCIES' (noprec):   shift 37
-    action 'OUTPUTS' (noprec):   shift 39
-    action 'IGNORES' (noprec):   shift 41
-    action 'LABELS' (noprec):   shift 43
-    action 'PARSER' (noprec):   shift 45
+  actions:    action 'DEPENDENCIES' (noprec):   shift 32
+    action 'OUTPUTS' (noprec):   shift 34
+    action 'IGNORES' (noprec):   shift 36
+    action 'LABELS' (noprec):   shift 38
+    action 'PARSER' (noprec):   shift 40
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
@@ -1168,7 +978,7 @@ state 30:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
-    action 'RBRACE' (noprec):   shift 31
+    action 'RBRACE' (noprec):   shift 26
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
@@ -1179,12 +989,12 @@ state 30:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto ConfigurationDependencies: 32
-    goto ConfigurationOutputs: 33
-    goto ConfigurationIgnores: 34
-    goto ConfigurationLabels: 35
-    goto ConfigurationParser: 36
-state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE' . 
+  immediate action: <none>  gotos:    goto ConfigurationDependencies: 27
+    goto ConfigurationOutputs: 28
+    goto ConfigurationIgnores: 29
+    goto ConfigurationLabels: 30
+    goto ConfigurationParser: 31
+state 26:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'OUTPUTS' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action 'IGNORES' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
@@ -1221,7 +1031,7 @@ state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'error' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action '#' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
     action '$$' (noprec):   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'
-  immediate action:   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'  gotos:state 32:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationDependencies . 
+  immediate action:   reduce Configuration --> 'CONFIGURATION' 'LBRACE' ConfigurationComponents 'RBRACE'  gotos:state 27:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationDependencies . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action 'OUTPUTS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action 'IGNORES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
@@ -1258,7 +1068,7 @@ state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'error' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action '#' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
     action '$$' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies
-  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies  gotos:state 33:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationOutputs . 
+  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationDependencies  gotos:state 28:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationOutputs . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action 'OUTPUTS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action 'IGNORES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
@@ -1295,7 +1105,7 @@ state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'error' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action '#' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
     action '$$' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs
-  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs  gotos:state 34:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationIgnores . 
+  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationOutputs  gotos:state 29:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationIgnores . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action 'OUTPUTS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action 'IGNORES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
@@ -1332,7 +1142,7 @@ state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'error' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action '#' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
     action '$$' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores
-  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores  gotos:state 35:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationLabels . 
+  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationIgnores  gotos:state 30:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationLabels . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action 'OUTPUTS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action 'IGNORES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
@@ -1369,7 +1179,7 @@ state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'error' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action '#' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
     action '$$' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels
-  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels  gotos:state 36:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationParser . 
+  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationLabels  gotos:state 31:  items:    ConfigurationComponents -> ConfigurationComponents ConfigurationParser . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action 'OUTPUTS' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action 'IGNORES' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
@@ -1406,7 +1216,7 @@ state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'error' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action '#' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
     action '$$' (noprec):   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser
-  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser  gotos:state 37:  items:    ConfigurationDependencies -> 'DEPENDENCIES' . ListOfString
+  immediate action:   reduce ConfigurationComponents --> ConfigurationComponents ConfigurationParser  gotos:state 32:  items:    ConfigurationDependencies -> 'DEPENDENCIES' . ListOfString
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1429,7 +1239,7 @@ state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   shift 62
+    action 'LSQBRACKET' (noprec):   shift 57
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
@@ -1443,8 +1253,8 @@ state 31:  items:    Configuration -> 'CONFIGURATION' 'LBRACE' ConfigurationComp
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto ListOfString: 38
-state 38:  items:    ConfigurationDependencies -> 'DEPENDENCIES' ListOfString . 
+  immediate action: <none>  gotos:    goto ListOfString: 33
+state 33:  items:    ConfigurationDependencies -> 'DEPENDENCIES' ListOfString . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action 'OUTPUTS' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action 'IGNORES' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
@@ -1481,7 +1291,7 @@ state 38:  items:    ConfigurationDependencies -> 'DEPENDENCIES' ListOfString .
     action 'error' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action '#' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
     action '$$' (noprec):   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString
-  immediate action:   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString  gotos:state 39:  items:    ConfigurationOutputs -> 'OUTPUTS' . ListOfString
+  immediate action:   reduce ConfigurationDependencies --> 'DEPENDENCIES' ListOfString  gotos:state 34:  items:    ConfigurationOutputs -> 'OUTPUTS' . ListOfString
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1504,7 +1314,7 @@ state 38:  items:    ConfigurationDependencies -> 'DEPENDENCIES' ListOfString .
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   shift 62
+    action 'LSQBRACKET' (noprec):   shift 57
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
@@ -1518,8 +1328,8 @@ state 38:  items:    ConfigurationDependencies -> 'DEPENDENCIES' ListOfString .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto ListOfString: 40
-state 40:  items:    ConfigurationOutputs -> 'OUTPUTS' ListOfString . 
+  immediate action: <none>  gotos:    goto ListOfString: 35
+state 35:  items:    ConfigurationOutputs -> 'OUTPUTS' ListOfString . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action 'OUTPUTS' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action 'IGNORES' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
@@ -1556,7 +1366,7 @@ state 40:  items:    ConfigurationOutputs -> 'OUTPUTS' ListOfString .
     action 'error' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action '#' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
     action '$$' (noprec):   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString
-  immediate action:   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString  gotos:state 41:  items:    ConfigurationIgnores -> 'IGNORES' . ListOfString
+  immediate action:   reduce ConfigurationOutputs --> 'OUTPUTS' ListOfString  gotos:state 36:  items:    ConfigurationIgnores -> 'IGNORES' . ListOfString
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1579,7 +1389,7 @@ state 40:  items:    ConfigurationOutputs -> 'OUTPUTS' ListOfString .
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   shift 62
+    action 'LSQBRACKET' (noprec):   shift 57
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
@@ -1593,8 +1403,8 @@ state 40:  items:    ConfigurationOutputs -> 'OUTPUTS' ListOfString .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto ListOfString: 42
-state 42:  items:    ConfigurationIgnores -> 'IGNORES' ListOfString . 
+  immediate action: <none>  gotos:    goto ListOfString: 37
+state 37:  items:    ConfigurationIgnores -> 'IGNORES' ListOfString . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action 'OUTPUTS' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action 'IGNORES' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
@@ -1631,7 +1441,7 @@ state 42:  items:    ConfigurationIgnores -> 'IGNORES' ListOfString .
     action 'error' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action '#' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
     action '$$' (noprec):   reduce ConfigurationIgnores --> 'IGNORES' ListOfString
-  immediate action:   reduce ConfigurationIgnores --> 'IGNORES' ListOfString  gotos:state 43:  items:    ConfigurationLabels -> 'LABELS' . ListOfString
+  immediate action:   reduce ConfigurationIgnores --> 'IGNORES' ListOfString  gotos:state 38:  items:    ConfigurationLabels -> 'LABELS' . ListOfString
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1654,7 +1464,7 @@ state 42:  items:    ConfigurationIgnores -> 'IGNORES' ListOfString .
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   shift 62
+    action 'LSQBRACKET' (noprec):   shift 57
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
@@ -1668,8 +1478,8 @@ state 42:  items:    ConfigurationIgnores -> 'IGNORES' ListOfString .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto ListOfString: 44
-state 44:  items:    ConfigurationLabels -> 'LABELS' ListOfString . 
+  immediate action: <none>  gotos:    goto ListOfString: 39
+state 39:  items:    ConfigurationLabels -> 'LABELS' ListOfString . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action 'OUTPUTS' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action 'IGNORES' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
@@ -1706,7 +1516,7 @@ state 44:  items:    ConfigurationLabels -> 'LABELS' ListOfString .
     action 'error' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action '#' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action '$$' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
-  immediate action:   reduce ConfigurationLabels --> 'LABELS' ListOfString  gotos:state 45:  items:    ConfigurationParser -> 'PARSER' . String
+  immediate action:   reduce ConfigurationLabels --> 'LABELS' ListOfString  gotos:state 40:  items:    ConfigurationParser -> 'PARSER' . String
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1736,15 +1546,15 @@ state 44:  items:    ConfigurationLabels -> 'LABELS' ListOfString .
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 61
+    action 'STRING' (noprec):   shift 56
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto String: 46
-state 46:  items:    ConfigurationParser -> 'PARSER' String . 
+  immediate action: <none>  gotos:    goto String: 41
+state 41:  items:    ConfigurationParser -> 'PARSER' String . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action 'OUTPUTS' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action 'IGNORES' (noprec):   reduce ConfigurationParser --> 'PARSER' String
@@ -1781,7 +1591,7 @@ state 46:  items:    ConfigurationParser -> 'PARSER' String .
     action 'error' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action '#' (noprec):   reduce ConfigurationParser --> 'PARSER' String
     action '$$' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-  immediate action:   reduce ConfigurationParser --> 'PARSER' String  gotos:state 47:  items:    Target -> 'TARGET' . 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
+  immediate action:   reduce ConfigurationParser --> 'PARSER' String  gotos:state 42:  items:    Target -> 'TARGET' . 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1810,7 +1620,7 @@ state 46:  items:    ConfigurationParser -> 'PARSER' String .
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   shift 48
+    action 'IDENTIFIER' (noprec):   shift 43
     action 'STRING' (noprec):   error
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
@@ -1818,7 +1628,7 @@ state 46:  items:    ConfigurationParser -> 'PARSER' String .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 48:  items:    Target -> 'TARGET' 'IDENTIFIER' . 'LBRACE' TargetComponents 'RBRACE'
+  immediate action: <none>  gotos:state 43:  items:    Target -> 'TARGET' 'IDENTIFIER' . 'LBRACE' TargetComponents 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1843,7 +1653,7 @@ state 46:  items:    ConfigurationParser -> 'PARSER' String .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 49
+    action 'LBRACE' (noprec):   shift 44
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
@@ -1855,7 +1665,7 @@ state 46:  items:    ConfigurationParser -> 'PARSER' String .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 49:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' . TargetComponents 'RBRACE'
+  immediate action: <none>  gotos:state 44:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' . TargetComponents 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   reduce TargetComponents --> 
     action 'OUTPUTS' (noprec):   reduce TargetComponents --> 
     action 'IGNORES' (noprec):   reduce TargetComponents --> 
@@ -1892,8 +1702,8 @@ state 46:  items:    ConfigurationParser -> 'PARSER' String .
     action 'error' (noprec):   reduce TargetComponents --> 
     action '#' (noprec):   reduce TargetComponents --> 
     action '$$' (noprec):   reduce TargetComponents --> 
-  immediate action: <none>  gotos:    goto TargetComponents: 50
-state 50:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents . 'RBRACE'
+  immediate action: <none>  gotos:    goto TargetComponents: 45
+state 45:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents . 'RBRACE'
     TargetComponents -> TargetComponents . DependsOn
     TargetComponents -> TargetComponents . Step
   actions:    action 'DEPENDENCIES' (noprec):   error
@@ -1904,7 +1714,7 @@ state 50:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents .
     action 'CONTAINER' (noprec):   error
     action 'INIT' (noprec):   error
     action 'SCRIPT' (noprec):   error
-    action 'DEPENDS_ON' (noprec):   shift 54
+    action 'DEPENDS_ON' (noprec):   shift 49
     action 'DEFAULTS' (noprec):   error
     action 'EXTENSION' (noprec):   error
     action 'CONFIGURATION' (noprec):   error
@@ -1921,10 +1731,10 @@ state 50:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents .
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
-    action 'RBRACE' (noprec):   shift 51
+    action 'RBRACE' (noprec):   shift 46
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   shift 56
+    action 'IDENTIFIER' (noprec):   shift 51
     action 'STRING' (noprec):   error
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
@@ -1932,9 +1742,9 @@ state 50:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto DependsOn: 52
-    goto Step: 53
-state 51:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE' . 
+  immediate action: <none>  gotos:    goto DependsOn: 47
+    goto Step: 48
+state 46:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'OUTPUTS' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action 'IGNORES' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
@@ -1971,7 +1781,7 @@ state 51:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'error' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action '#' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
     action '$$' (noprec):   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
-  immediate action:   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'  gotos:state 52:  items:    TargetComponents -> TargetComponents DependsOn . 
+  immediate action:   reduce Target --> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'  gotos:state 47:  items:    TargetComponents -> TargetComponents DependsOn . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action 'OUTPUTS' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action 'IGNORES' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
@@ -2008,7 +1818,7 @@ state 51:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'error' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action '#' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
     action '$$' (noprec):   reduce TargetComponents --> TargetComponents DependsOn
-  immediate action:   reduce TargetComponents --> TargetComponents DependsOn  gotos:state 53:  items:    TargetComponents -> TargetComponents Step . 
+  immediate action:   reduce TargetComponents --> TargetComponents DependsOn  gotos:state 48:  items:    TargetComponents -> TargetComponents Step . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce TargetComponents --> TargetComponents Step
     action 'OUTPUTS' (noprec):   reduce TargetComponents --> TargetComponents Step
     action 'IGNORES' (noprec):   reduce TargetComponents --> TargetComponents Step
@@ -2045,7 +1855,7 @@ state 51:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'error' (noprec):   reduce TargetComponents --> TargetComponents Step
     action '#' (noprec):   reduce TargetComponents --> TargetComponents Step
     action '$$' (noprec):   reduce TargetComponents --> TargetComponents Step
-  immediate action:   reduce TargetComponents --> TargetComponents Step  gotos:state 54:  items:    DependsOn -> 'DEPENDS_ON' . ListOfString
+  immediate action:   reduce TargetComponents --> TargetComponents Step  gotos:state 49:  items:    DependsOn -> 'DEPENDS_ON' . ListOfString
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -2068,7 +1878,7 @@ state 51:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   shift 62
+    action 'LSQBRACKET' (noprec):   shift 57
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
@@ -2082,8 +1892,8 @@ state 51:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto ListOfString: 55
-state 55:  items:    DependsOn -> 'DEPENDS_ON' ListOfString . 
+  immediate action: <none>  gotos:    goto ListOfString: 50
+state 50:  items:    DependsOn -> 'DEPENDS_ON' ListOfString . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action 'OUTPUTS' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action 'IGNORES' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
@@ -2120,7 +1930,7 @@ state 55:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'error' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action '#' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
     action '$$' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfString
-  immediate action:   reduce DependsOn --> 'DEPENDS_ON' ListOfString  gotos:state 56:  items:    Step -> 'IDENTIFIER' . 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
+  immediate action:   reduce DependsOn --> 'DEPENDS_ON' ListOfString  gotos:state 51:  items:    Step -> 'IDENTIFIER' . 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -2149,7 +1959,7 @@ state 55:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   shift 57
+    action 'IDENTIFIER' (noprec):   shift 52
     action 'STRING' (noprec):   error
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
@@ -2157,7 +1967,7 @@ state 55:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 57:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' . 'LBRACE' Variables 'RBRACE'
+  immediate action: <none>  gotos:state 52:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' . 'LBRACE' Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -2182,7 +1992,7 @@ state 55:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 58
+    action 'LBRACE' (noprec):   shift 53
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
@@ -2194,7 +2004,7 @@ state 55:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 58:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' . Variables 'RBRACE'
+  immediate action: <none>  gotos:state 53:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' . Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   reduce Variables --> 
     action 'OUTPUTS' (noprec):   reduce Variables --> 
     action 'IGNORES' (noprec):   reduce Variables --> 
@@ -2231,8 +2041,8 @@ state 55:  items:    DependsOn -> 'DEPENDS_ON' ListOfString .
     action 'error' (noprec):   reduce Variables --> 
     action '#' (noprec):   reduce Variables --> 
     action '$$' (noprec):   reduce Variables --> 
-  immediate action: <none>  gotos:    goto Variables: 59
-state 59:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables . 'RBRACE'
+  immediate action: <none>  gotos:    goto Variables: 54
+state 54:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables . 'RBRACE'
     Variables -> Variables . Variable
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
@@ -2259,8 +2069,8 @@ state 59:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables . 'RBR
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
-    action 'RBRACE' (noprec):   shift 60
-    action 'KEY' (noprec):   shift 68
+    action 'RBRACE' (noprec):   shift 55
+    action 'KEY' (noprec):   shift 63
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
     action 'STRING' (noprec):   error
@@ -2270,8 +2080,8 @@ state 59:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables . 'RBR
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Variable: 67
-state 60:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE' . 
+  immediate action: <none>  gotos:    goto Variable: 62
+state 55:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action 'OUTPUTS' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action 'IGNORES' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
@@ -2308,7 +2118,7 @@ state 60:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRAC
     action 'error' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action '#' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
     action '$$' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
-  immediate action:   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'  gotos:state 61:  items:    String -> 'STRING' . 
+  immediate action:   reduce Step --> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'  gotos:state 56:  items:    String -> 'STRING' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce String --> 'STRING'
     action 'OUTPUTS' (noprec):   reduce String --> 'STRING'
     action 'IGNORES' (noprec):   reduce String --> 'STRING'
@@ -2345,7 +2155,7 @@ state 60:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRAC
     action 'error' (noprec):   reduce String --> 'STRING'
     action '#' (noprec):   reduce String --> 'STRING'
     action '$$' (noprec):   reduce String --> 'STRING'
-  immediate action:   reduce String --> 'STRING'  gotos:state 62:  items:    ListOfString -> 'LSQBRACKET' . Strings 'RSQBRACKET'
+  immediate action:   reduce String --> 'STRING'  gotos:state 57:  items:    ListOfString -> 'LSQBRACKET' . Strings 'RSQBRACKET'
   actions:    action 'DEPENDENCIES' (noprec):   reduce Strings --> 
     action 'OUTPUTS' (noprec):   reduce Strings --> 
     action 'IGNORES' (noprec):   reduce Strings --> 
@@ -2382,8 +2192,8 @@ state 60:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' Variables 'RBRAC
     action 'error' (noprec):   reduce Strings --> 
     action '#' (noprec):   reduce Strings --> 
     action '$$' (noprec):   reduce Strings --> 
-  immediate action: <none>  gotos:    goto Strings: 63
-state 63:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
+  immediate action: <none>  gotos:    goto Strings: 58
+state 58:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
     Strings -> Strings . String
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
@@ -2408,21 +2218,21 @@ state 63:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
     action 'LPAREN' (noprec):   error
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
-    action 'RSQBRACKET' (noprec):   shift 64
+    action 'RSQBRACKET' (noprec):   shift 59
     action 'LBRACE' (noprec):   error
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 61
+    action 'STRING' (noprec):   shift 56
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto String: 65
-state 64:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' . 
+  immediate action: <none>  gotos:    goto String: 60
+state 59:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'OUTPUTS' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action 'IGNORES' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
@@ -2459,7 +2269,7 @@ state 64:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'error' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action '#' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
     action '$$' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-  immediate action:   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'  gotos:state 65:  items:    Strings -> Strings String . 
+  immediate action:   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'  gotos:state 60:  items:    Strings -> Strings String . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Strings --> Strings String
     action 'OUTPUTS' (noprec):   reduce Strings --> Strings String
     action 'IGNORES' (noprec):   reduce Strings --> Strings String
@@ -2496,7 +2306,7 @@ state 64:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'error' (noprec):   reduce Strings --> Strings String
     action '#' (noprec):   reduce Strings --> Strings String
     action '$$' (noprec):   reduce Strings --> Strings String
-  immediate action:   reduce Strings --> Strings String  gotos:state 66:  items:    Variables -> Variables . Variable
+  immediate action:   reduce Strings --> Strings String  gotos:state 61:  items:    Variables -> Variables . Variable
     Expr -> 'LBRACE' Variables . 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
@@ -2523,8 +2333,8 @@ state 64:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
-    action 'RBRACE' (noprec):   shift 76
-    action 'KEY' (noprec):   shift 68
+    action 'RBRACE' (noprec):   shift 71
+    action 'KEY' (noprec):   shift 63
     action 'VARIABLE' (noprec):   error
     action 'IDENTIFIER' (noprec):   error
     action 'STRING' (noprec):   error
@@ -2534,8 +2344,8 @@ state 64:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Variable: 67
-state 67:  items:    Variables -> Variables Variable . 
+  immediate action: <none>  gotos:    goto Variable: 62
+state 62:  items:    Variables -> Variables Variable . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Variables --> Variables Variable
     action 'OUTPUTS' (noprec):   reduce Variables --> Variables Variable
     action 'IGNORES' (noprec):   reduce Variables --> Variables Variable
@@ -2572,7 +2382,7 @@ state 67:  items:    Variables -> Variables Variable .
     action 'error' (noprec):   reduce Variables --> Variables Variable
     action '#' (noprec):   reduce Variables --> Variables Variable
     action '$$' (noprec):   reduce Variables --> Variables Variable
-  immediate action:   reduce Variables --> Variables Variable  gotos:state 68:  items:    Variable -> 'KEY' . Expr
+  immediate action:   reduce Variables --> Variables Variable  gotos:state 63:  items:    Variable -> 'KEY' . Expr
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -2587,9 +2397,9 @@ state 67:  items:    Variables -> Variables Variable .
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 82
-    action 'UPPER' (noprec):   shift 85
-    action 'LOWER' (noprec):   shift 88
+    action 'TRIM' (noprec):   shift 77
+    action 'UPPER' (noprec):   shift 80
+    action 'LOWER' (noprec):   shift 83
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -2597,20 +2407,20 @@ state 67:  items:    Variables -> Variables Variable .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 75
+    action 'LBRACE' (noprec):   shift 70
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 74
+    action 'VARIABLE' (noprec):   shift 69
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 73
-    action 'NOTHING' (noprec):   shift 70
-    action 'TRUE' (noprec):   shift 71
-    action 'FALSE' (noprec):   shift 72
+    action 'STRING' (noprec):   shift 68
+    action 'NOTHING' (noprec):   shift 65
+    action 'TRUE' (noprec):   shift 66
+    action 'FALSE' (noprec):   shift 67
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 69
-state 69:  items:    Variable -> 'KEY' Expr . 
+  immediate action: <none>  gotos:    goto Expr: 64
+state 64:  items:    Variable -> 'KEY' Expr . 
     Expr -> Expr . 'PLUS' Expr
   actions:    action 'DEPENDENCIES' (noprec):   reduce Variable --> 'KEY' Expr
     action 'OUTPUTS' (noprec):   reduce Variable --> 'KEY' Expr
@@ -2629,7 +2439,7 @@ state 69:  items:    Variable -> 'KEY' Expr .
     action 'TRIM' (noprec):   reduce Variable --> 'KEY' Expr
     action 'UPPER' (noprec):   reduce Variable --> 'KEY' Expr
     action 'LOWER' (noprec):   reduce Variable --> 'KEY' Expr
-    action 'PLUS' (explicit left 9999):   shift 81
+    action 'PLUS' (explicit left 9999):   shift 76
     action 'COMMA' (noprec):   reduce Variable --> 'KEY' Expr
     action 'EQUAL' (noprec):   reduce Variable --> 'KEY' Expr
     action 'LPAREN' (noprec):   reduce Variable --> 'KEY' Expr
@@ -2648,7 +2458,7 @@ state 69:  items:    Variable -> 'KEY' Expr .
     action 'error' (noprec):   reduce Variable --> 'KEY' Expr
     action '#' (noprec):   reduce Variable --> 'KEY' Expr
     action '$$' (noprec):   reduce Variable --> 'KEY' Expr
-  immediate action: <none>  gotos:state 70:  items:    Expr -> 'NOTHING' . 
+  immediate action: <none>  gotos:state 65:  items:    Expr -> 'NOTHING' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'NOTHING'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'NOTHING'
     action 'IGNORES' (noprec):   reduce Expr --> 'NOTHING'
@@ -2685,7 +2495,7 @@ state 69:  items:    Variable -> 'KEY' Expr .
     action 'error' (noprec):   reduce Expr --> 'NOTHING'
     action '#' (noprec):   reduce Expr --> 'NOTHING'
     action '$$' (noprec):   reduce Expr --> 'NOTHING'
-  immediate action:   reduce Expr --> 'NOTHING'  gotos:state 71:  items:    Expr -> 'TRUE' . 
+  immediate action:   reduce Expr --> 'NOTHING'  gotos:state 66:  items:    Expr -> 'TRUE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'TRUE'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'TRUE'
     action 'IGNORES' (noprec):   reduce Expr --> 'TRUE'
@@ -2722,7 +2532,7 @@ state 69:  items:    Variable -> 'KEY' Expr .
     action 'error' (noprec):   reduce Expr --> 'TRUE'
     action '#' (noprec):   reduce Expr --> 'TRUE'
     action '$$' (noprec):   reduce Expr --> 'TRUE'
-  immediate action:   reduce Expr --> 'TRUE'  gotos:state 72:  items:    Expr -> 'FALSE' . 
+  immediate action:   reduce Expr --> 'TRUE'  gotos:state 67:  items:    Expr -> 'FALSE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'FALSE'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'FALSE'
     action 'IGNORES' (noprec):   reduce Expr --> 'FALSE'
@@ -2759,7 +2569,7 @@ state 69:  items:    Variable -> 'KEY' Expr .
     action 'error' (noprec):   reduce Expr --> 'FALSE'
     action '#' (noprec):   reduce Expr --> 'FALSE'
     action '$$' (noprec):   reduce Expr --> 'FALSE'
-  immediate action:   reduce Expr --> 'FALSE'  gotos:state 73:  items:    Expr -> 'STRING' . 
+  immediate action:   reduce Expr --> 'FALSE'  gotos:state 68:  items:    Expr -> 'STRING' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'STRING'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'STRING'
     action 'IGNORES' (noprec):   reduce Expr --> 'STRING'
@@ -2796,7 +2606,7 @@ state 69:  items:    Variable -> 'KEY' Expr .
     action 'error' (noprec):   reduce Expr --> 'STRING'
     action '#' (noprec):   reduce Expr --> 'STRING'
     action '$$' (noprec):   reduce Expr --> 'STRING'
-  immediate action:   reduce Expr --> 'STRING'  gotos:state 74:  items:    Expr -> 'VARIABLE' . 
+  immediate action:   reduce Expr --> 'STRING'  gotos:state 69:  items:    Expr -> 'VARIABLE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'VARIABLE'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'VARIABLE'
     action 'IGNORES' (noprec):   reduce Expr --> 'VARIABLE'
@@ -2833,7 +2643,7 @@ state 69:  items:    Variable -> 'KEY' Expr .
     action 'error' (noprec):   reduce Expr --> 'VARIABLE'
     action '#' (noprec):   reduce Expr --> 'VARIABLE'
     action '$$' (noprec):   reduce Expr --> 'VARIABLE'
-  immediate action:   reduce Expr --> 'VARIABLE'  gotos:state 75:  items:    Expr -> 'LBRACE' . Variables 'RBRACE'
+  immediate action:   reduce Expr --> 'VARIABLE'  gotos:state 70:  items:    Expr -> 'LBRACE' . Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   reduce Variables --> 
     action 'OUTPUTS' (noprec):   reduce Variables --> 
     action 'IGNORES' (noprec):   reduce Variables --> 
@@ -2870,8 +2680,8 @@ state 69:  items:    Variable -> 'KEY' Expr .
     action 'error' (noprec):   reduce Variables --> 
     action '#' (noprec):   reduce Variables --> 
     action '$$' (noprec):   reduce Variables --> 
-  immediate action: <none>  gotos:    goto Variables: 66
-state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' . 
+  immediate action: <none>  gotos:    goto Variables: 61
+state 71:  items:    Expr -> 'LBRACE' Variables 'RBRACE' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action 'IGNORES' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
@@ -2908,7 +2718,7 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action '#' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
     action '$$' (noprec):   reduce Expr --> 'LBRACE' Variables 'RBRACE'
-  immediate action:   reduce Expr --> 'LBRACE' Variables 'RBRACE'  gotos:state 77:  items:    Expr -> Expr . 'PLUS' Expr
+  immediate action:   reduce Expr --> 'LBRACE' Variables 'RBRACE'  gotos:state 72:  items:    Expr -> Expr . 'PLUS' Expr
     Expr -> Expr 'PLUS' Expr . 
   actions:    action 'DEPENDENCIES' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action 'OUTPUTS' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
@@ -2946,7 +2756,7 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'error' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action '#' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
     action '$$' (explicit left 9999):   reduce Expr --> Expr 'PLUS' Expr
-  immediate action: <none>  gotos:state 78:  items:    Expr -> Expr . 'PLUS' Expr
+  immediate action: <none>  gotos:state 73:  items:    Expr -> Expr . 'PLUS' Expr
     Expr -> 'TRIM' 'LPAREN' Expr . 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
@@ -2965,11 +2775,11 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'TRIM' (noprec):   error
     action 'UPPER' (noprec):   error
     action 'LOWER' (noprec):   error
-    action 'PLUS' (explicit left 9999):   shift 81
+    action 'PLUS' (explicit left 9999):   shift 76
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   shift 84
+    action 'RPAREN' (noprec):   shift 79
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
@@ -2984,7 +2794,7 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 79:  items:    Expr -> Expr . 'PLUS' Expr
+  immediate action: <none>  gotos:state 74:  items:    Expr -> Expr . 'PLUS' Expr
     Expr -> 'UPPER' 'LPAREN' Expr . 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
@@ -3003,11 +2813,11 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'TRIM' (noprec):   error
     action 'UPPER' (noprec):   error
     action 'LOWER' (noprec):   error
-    action 'PLUS' (explicit left 9999):   shift 81
+    action 'PLUS' (explicit left 9999):   shift 76
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   shift 87
+    action 'RPAREN' (noprec):   shift 82
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
@@ -3022,7 +2832,7 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 80:  items:    Expr -> Expr . 'PLUS' Expr
+  immediate action: <none>  gotos:state 75:  items:    Expr -> Expr . 'PLUS' Expr
     Expr -> 'LOWER' 'LPAREN' Expr . 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
@@ -3041,11 +2851,11 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'TRIM' (noprec):   error
     action 'UPPER' (noprec):   error
     action 'LOWER' (noprec):   error
-    action 'PLUS' (explicit left 9999):   shift 81
+    action 'PLUS' (explicit left 9999):   shift 76
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
     action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   shift 90
+    action 'RPAREN' (noprec):   shift 85
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
     action 'LBRACE' (noprec):   error
@@ -3060,7 +2870,7 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 81:  items:    Expr -> Expr 'PLUS' . Expr
+  immediate action: <none>  gotos:state 76:  items:    Expr -> Expr 'PLUS' . Expr
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -3075,9 +2885,9 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 82
-    action 'UPPER' (noprec):   shift 85
-    action 'LOWER' (noprec):   shift 88
+    action 'TRIM' (noprec):   shift 77
+    action 'UPPER' (noprec):   shift 80
+    action 'LOWER' (noprec):   shift 83
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -3085,20 +2895,20 @@ state 76:  items:    Expr -> 'LBRACE' Variables 'RBRACE' .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 75
+    action 'LBRACE' (noprec):   shift 70
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 74
+    action 'VARIABLE' (noprec):   shift 69
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 73
-    action 'NOTHING' (noprec):   shift 70
-    action 'TRUE' (noprec):   shift 71
-    action 'FALSE' (noprec):   shift 72
+    action 'STRING' (noprec):   shift 68
+    action 'NOTHING' (noprec):   shift 65
+    action 'TRUE' (noprec):   shift 66
+    action 'FALSE' (noprec):   shift 67
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 77
-state 82:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
+  immediate action: <none>  gotos:    goto Expr: 72
+state 77:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -3119,7 +2929,7 @@ state 82:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   shift 83
+    action 'LPAREN' (noprec):   shift 78
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
@@ -3135,7 +2945,7 @@ state 82:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 83:  items:    Expr -> 'TRIM' 'LPAREN' . Expr 'RPAREN'
+  immediate action: <none>  gotos:state 78:  items:    Expr -> 'TRIM' 'LPAREN' . Expr 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -3150,9 +2960,9 @@ state 82:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 82
-    action 'UPPER' (noprec):   shift 85
-    action 'LOWER' (noprec):   shift 88
+    action 'TRIM' (noprec):   shift 77
+    action 'UPPER' (noprec):   shift 80
+    action 'LOWER' (noprec):   shift 83
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -3160,20 +2970,20 @@ state 82:  items:    Expr -> 'TRIM' . 'LPAREN' Expr 'RPAREN'
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 75
+    action 'LBRACE' (noprec):   shift 70
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 74
+    action 'VARIABLE' (noprec):   shift 69
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 73
-    action 'NOTHING' (noprec):   shift 70
-    action 'TRUE' (noprec):   shift 71
-    action 'FALSE' (noprec):   shift 72
+    action 'STRING' (noprec):   shift 68
+    action 'NOTHING' (noprec):   shift 65
+    action 'TRUE' (noprec):   shift 66
+    action 'FALSE' (noprec):   shift 67
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 78
-state 84:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' . 
+  immediate action: <none>  gotos:    goto Expr: 73
+state 79:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action 'IGNORES' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
@@ -3210,7 +3020,7 @@ state 84:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'error' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action '#' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
     action '$$' (noprec):   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'
-  immediate action:   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'  gotos:state 85:  items:    Expr -> 'UPPER' . 'LPAREN' Expr 'RPAREN'
+  immediate action:   reduce Expr --> 'TRIM' 'LPAREN' Expr 'RPAREN'  gotos:state 80:  items:    Expr -> 'UPPER' . 'LPAREN' Expr 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -3231,7 +3041,7 @@ state 84:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   shift 86
+    action 'LPAREN' (noprec):   shift 81
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
@@ -3247,7 +3057,7 @@ state 84:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 86:  items:    Expr -> 'UPPER' 'LPAREN' . Expr 'RPAREN'
+  immediate action: <none>  gotos:state 81:  items:    Expr -> 'UPPER' 'LPAREN' . Expr 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -3262,9 +3072,9 @@ state 84:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 82
-    action 'UPPER' (noprec):   shift 85
-    action 'LOWER' (noprec):   shift 88
+    action 'TRIM' (noprec):   shift 77
+    action 'UPPER' (noprec):   shift 80
+    action 'LOWER' (noprec):   shift 83
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -3272,20 +3082,20 @@ state 84:  items:    Expr -> 'TRIM' 'LPAREN' Expr 'RPAREN' .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 75
+    action 'LBRACE' (noprec):   shift 70
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 74
+    action 'VARIABLE' (noprec):   shift 69
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 73
-    action 'NOTHING' (noprec):   shift 70
-    action 'TRUE' (noprec):   shift 71
-    action 'FALSE' (noprec):   shift 72
+    action 'STRING' (noprec):   shift 68
+    action 'NOTHING' (noprec):   shift 65
+    action 'TRUE' (noprec):   shift 66
+    action 'FALSE' (noprec):   shift 67
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 79
-state 87:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' . 
+  immediate action: <none>  gotos:    goto Expr: 74
+state 82:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action 'IGNORES' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
@@ -3322,7 +3132,7 @@ state 87:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'error' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action '#' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
     action '$$' (noprec):   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'
-  immediate action:   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'  gotos:state 88:  items:    Expr -> 'LOWER' . 'LPAREN' Expr 'RPAREN'
+  immediate action:   reduce Expr --> 'UPPER' 'LPAREN' Expr 'RPAREN'  gotos:state 83:  items:    Expr -> 'LOWER' . 'LPAREN' Expr 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -3343,7 +3153,7 @@ state 87:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   shift 89
+    action 'LPAREN' (noprec):   shift 84
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
@@ -3359,7 +3169,7 @@ state 87:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 89:  items:    Expr -> 'LOWER' 'LPAREN' . Expr 'RPAREN'
+  immediate action: <none>  gotos:state 84:  items:    Expr -> 'LOWER' 'LPAREN' . Expr 'RPAREN'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -3374,9 +3184,9 @@ state 87:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'CONFIGURATION' (noprec):   error
     action 'TARGET' (noprec):   error
     action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   shift 82
-    action 'UPPER' (noprec):   shift 85
-    action 'LOWER' (noprec):   shift 88
+    action 'TRIM' (noprec):   shift 77
+    action 'UPPER' (noprec):   shift 80
+    action 'LOWER' (noprec):   shift 83
     action 'PLUS' (noprec):   error
     action 'COMMA' (noprec):   error
     action 'EQUAL' (noprec):   error
@@ -3384,20 +3194,20 @@ state 87:  items:    Expr -> 'UPPER' 'LPAREN' Expr 'RPAREN' .
     action 'RPAREN' (noprec):   error
     action 'LSQBRACKET' (noprec):   error
     action 'RSQBRACKET' (noprec):   error
-    action 'LBRACE' (noprec):   shift 75
+    action 'LBRACE' (noprec):   shift 70
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
-    action 'VARIABLE' (noprec):   shift 74
+    action 'VARIABLE' (noprec):   shift 69
     action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 73
-    action 'NOTHING' (noprec):   shift 70
-    action 'TRUE' (noprec):   shift 71
-    action 'FALSE' (noprec):   shift 72
+    action 'STRING' (noprec):   shift 68
+    action 'NOTHING' (noprec):   shift 65
+    action 'TRUE' (noprec):   shift 66
+    action 'FALSE' (noprec):   shift 67
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto Expr: 80
-state 90:  items:    Expr -> 'LOWER' 'LPAREN' Expr 'RPAREN' . 
+  immediate action: <none>  gotos:    goto Expr: 75
+state 85:  items:    Expr -> 'LOWER' 'LPAREN' Expr 'RPAREN' . 
   actions:    action 'DEPENDENCIES' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'OUTPUTS' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'
     action 'IGNORES' (noprec):   reduce Expr --> 'LOWER' 'LPAREN' Expr 'RPAREN'

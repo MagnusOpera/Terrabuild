@@ -53,14 +53,11 @@ ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents Container { $1.Patch $2 }
     | ExtensionComponents Script { $1.Patch $2 }
-    | ExtensionComponents Init { $1.Patch $2 }
     | ExtensionComponents Defaults { $1.Patch $2 }
 Container:
     | CONTAINER String { ExtensionComponents.Container $2 }
 Script:
     | SCRIPT String { ExtensionComponents.Script $2 }
-Init:
-    | INIT LBRACE Variables RBRACE { ExtensionComponents.Init $3 }
 Defaults:
     | DEFAULTS LBRACE Variables RBRACE { ExtensionComponents.Defaults $3 }
 

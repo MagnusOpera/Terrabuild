@@ -8,7 +8,6 @@ open System
 open Microsoft.FSharp.Reflection
 
 let checker = FSharpChecker.Create()
-let mutable cache = Map.empty
 
 type Invocable(method: MethodInfo) =
 
@@ -48,6 +47,8 @@ type Invocable(method: MethodInfo) =
             if value.GetType().IsAssignableTo(prmType) then value
             elif prmType.IsGenericType then convertToSome prmType value
             else failwith $"Can't assign default value to parameter {name}"
+
+        | Value.Object obj -> obj
 
         | Value.Map map ->
             match TypeHelpers.getKind prmType with
@@ -99,39 +100,28 @@ type Invocable(method: MethodInfo) =
 type Script(assembly: Assembly) =
     let mainType = assembly.GetType("Script")
 
-    let getMethod name =
-        match mainType.GetMethod(name) with
-        | null -> Error $"Function {name} does not exist"
-        | mi -> Ok mi
-
     member _.GetMethod(name: string) =
-        getMethod name
-        |> Result.map Invocable
+        match mainType.GetMethod(name) with
+        | null -> Error $"Function {name} does not exist" 
+        | mi -> Invocable(mi) |> Ok
 
 let loadScript (references: string list) (scriptFile) =
     let scriptFile = Path.GetFullPath(scriptFile)
-    match cache |> Map.tryFind scriptFile with
-    | Some script -> Ok script
-    | _ ->
-        try
-            let outputDllName = $"{Path.GetTempFileName()}.dll"
+    let outputDllName = $"{Path.GetTempFileName()}.dll"
 
-            let compilerArgs = [|
-                "-a"; scriptFile
-                "--targetprofile:netcore"
-                "--target:library"
-                $"--out:{outputDllName}"
-                "--define:TERRABUILD_SCRIPT"
-                for reference in references do $"--reference:{reference}"
-            |]
+    let compilerArgs = [|
+        "-a"; scriptFile
+        "--targetprofile:netcore"
+        "--target:library"
+        $"--out:{outputDllName}"
+        "--define:TERRABUILD_SCRIPT"
+        for reference in references do $"--reference:{reference}"
+    |]
 
-            let errors, _ = checker.Compile(compilerArgs) |> Async.RunSynchronously
-            let firstError = errors |> Array.tryFind (fun x -> x.Severity = FSharpDiagnosticSeverity.Error)
-            if firstError <> None then failwithf $"Error while compiling script {scriptFile}: {firstError.Value}"
+    let errors, _ = checker.Compile(compilerArgs) |> Async.RunSynchronously
+    let firstError = errors |> Array.tryFind (fun x -> x.Severity = FSharpDiagnosticSeverity.Error)
+    if firstError <> None then failwithf $"Error while compiling script {scriptFile}: {firstError.Value}"
 
-            let assembly = Assembly.LoadFile outputDllName
-            let script = Script(assembly)
-            cache <- cache |> Map.add scriptFile script
-            Ok script
-        with
-            exn -> Error (exn.Message)
+    let assembly = Assembly.LoadFile outputDllName
+    let script = Script(assembly)
+    script

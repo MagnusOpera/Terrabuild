@@ -72,7 +72,7 @@ EnvironmentComponents:
     | /* empty */ { Environment.Empty }
     | EnvironmentComponents EnvironmentVariables { $1.Patch $2 }
 EnvironmentVariables:
-    | VARIABLES LBRACE Variables RBRACE { EnvironmentComponents.Variables $3 }
+    | VARIABLES LBRACE StringVariables RBRACE { EnvironmentComponents.Variables $3 }
 
 Extension:
     | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { WorkspaceComponents.Extension ($2, $4) }
@@ -80,14 +80,11 @@ ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents Container { $1.Patch $2 }
     | ExtensionComponents Script { $1.Patch $2 }
-    | ExtensionComponents Init { $1.Patch $2 }
     | ExtensionComponents Defaults { $1.Patch $2 }
 Container:
     | CONTAINER String { ExtensionComponents.Container $2 }
 Script:
     | SCRIPT String { ExtensionComponents.Script $2 }
-Init:
-    | INIT LBRACE Variables RBRACE { ExtensionComponents.Init $3 }
 Defaults:
     | DEFAULTS LBRACE Variables RBRACE { ExtensionComponents.Defaults $3 }
 
@@ -98,6 +95,12 @@ ListOfString:
 Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
+
+StringVariables:
+    | /* empty */ { Map.empty }
+    | StringVariables StringVariable { $1.Add $2 }
+StringVariable:
+    | KEY String { ($1, $2) }
 
 Variables:
     | /* empty */ { Map.empty }

@@ -59,15 +59,9 @@ type WorkspaceConfig = {
     Environment: string
 }
 
+
 module ExtensionLoaders =
     open Terrabuild.Scripting
-
-    let loadExtension name (currentDir: string) (extension: Extension) =
-        match extension.Script with
-        | None -> ConfigException.Raise($"Extension {name} has no script")
-        | Some script ->
-            let scriptFile = IO.combinePath currentDir script
-            loadScript [] scriptFile
 
     let loadStorage name : Storages.Storage =
         match name with
@@ -81,17 +75,37 @@ module ExtensionLoaders =
         | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control '{name}'"
 
-    let invokeScriptMethod<'r> (script: string) (method: string) (args: Value) =
-        match loadScript [] script with
-        | Ok script ->
+    let terrabuildDir = System.Reflection.Assembly.GetExecutingAssembly().Location |> IO.parentDirectory
+    let terrabuildExtensibility = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
+
+    let lazyLoadScript name (ext: Extension) =
+        let script =
+            match ext.Script with
+            | Some script -> script
+            | None ->
+                let providedScripts = Set [ "docker"; "dotnet"; "npm"; "shell"; "terraform" ]
+                if providedScripts |> Set.contains name then IO.combinePath terrabuildDir $"Scripts/{name}.fsx"
+                else failwith $"Script is not defined"
+
+        let initScript () =
+            let script = loadScript [ terrabuildExtensibility ] script
+            script
+
+        lazy(initScript())
+
+    let invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: string) (method: string) (args: Value) =
+        printfn $"Invoking method {method} from extension {extension}"
+
+        match scripts |> Map.tryFind extension with
+        | None -> failwith $"Extension {extension} is not defined"
+        | Some extension ->
+            let script = extension.Value
             match script.GetMethod(method) with
             | Ok method ->
                 match method.Invoke<'r> args with
                 | Ok result -> result
                 | Error msg -> ConfigException.Raise(msg)
             | Error msg -> ConfigException.Raise(msg)
-        | Error msg -> ConfigException.Raise($"File {script} was not found: {msg}")
-
 
 module ProjectConfigParser =
     open Terrabuild.Parser.Project.AST
@@ -104,22 +118,26 @@ module ProjectConfigParser =
         Targets: Map<string, Target>
         Labels: string set
         Extensions: Map<string, Extension>
+        Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
     }
 
-    let explore (extensions: Map<string, Extension>) (projectConfig: Terrabuild.Parser.Project.AST.Project) (workspaceDir: string) (projectDir: string) =
+    let load (extensions: Map<string, Extension>) (projectConfig: Terrabuild.Parser.Project.AST.Project) (workspaceDir: string) (projectDir: string) (ci: bool) =
         let extensions =
             extensions
             |> Map.addMap projectConfig.Extensions
 
+        let scripts =
+            extensions
+            |> Map.map ExtensionLoaders.lazyLoadScript
+
         let projectInfo =
             match projectConfig.Configuration.Parser with
             | Some parser ->
-                match extensions |> Map.tryFind parser with
-                | None -> failwith $"Extension {parser} is not defined"
-                | Some extension ->
-                    match extension.Script with
-                    | None -> failwith $"Script missing for extension {parser}"
-                    | Some script -> ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> script "parse" Value.Nothing |> Some
+                let parseContext = 
+                    let context = { Terrabuild.Extensibility.ParseContext.Directory = projectDir
+                                    Terrabuild.Extensibility.ParseContext.CI = ci }
+                    Value.Map (Map [ "context", Value.Object context ])
+                ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts parser "parse" parseContext |> Some
             | _ -> None
 
         let mergeOpt optData data =
@@ -147,7 +165,8 @@ module ProjectConfigParser =
           ProjectDefinition.Outputs = projectOutputs
           ProjectDefinition.Targets = projectTargets
           ProjectDefinition.Labels = labels
-          ProjectDefinition.Extensions = extensions }
+          ProjectDefinition.Extensions = extensions
+          ProjectDefinition.Scripts = scripts }
 
 
 
@@ -171,7 +190,7 @@ let read workspaceDir (options: Options) environment labels variables =
             | _ -> ConfigException.Raise($"Environment '{environment}' not found")
     let buildVariables =
         variables
-        |> Map.map (fun _ value -> Expr.String value)
+        |> Map.map (fun _ value -> value)
         |> Map.addMap envVariables
 
     // storage
@@ -204,7 +223,7 @@ let read workspaceDir (options: Options) environment labels variables =
                 with exn ->
                     ConfigException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
             
-            let projectDef = ProjectConfigParser.explore workspaceConfig.Extensions projectConfig workspaceDir projectDir
+            let projectDef = ProjectConfigParser.load workspaceConfig.Extensions projectConfig workspaceDir projectDir options.CI
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
@@ -248,7 +267,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
             let buildVariables =
                 buildVariables
-                |> Map.add "terrabuild_node_hash" (Expr.String nodeHash)
+                |> Map.add "terrabuild_node_hash" nodeHash
 
             let projectSteps =
                 projectDef.Targets
@@ -257,15 +276,29 @@ let read workspaceDir (options: Options) environment labels variables =
                         target.Steps
                         |> List.fold (fun (variables, actions) step ->
                             let extension =
-                                match projectDef.Extensions |> Map.tryFind step.Extension with
+                                match projectDef.Scripts |> Map.tryFind step.Extension with
                                 | None -> failwith $"Extension {step.Extension} is not defined"
                                 | Some extension -> extension
     
                             let stepVars: Map<string, string> = Map.empty
 
-                            let stepActions = ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.Action list> step.Extension step.Command (Value.Nothing)
+
+                            let extension = projectDef.Extensions[step.Extension]
                             let stepActions =
-                                stepActions
+                                let actionContext = { Terrabuild.Extensibility.ActionContext.Directory = projectDir
+                                                      Terrabuild.Extensibility.ActionContext.CI = options.CI
+                                                      Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash }
+
+                                let stepParameters =
+                                    step.Parameters
+                                    |> Map.add "context" (Expr.Object actionContext)
+                                    |> Expr.Map
+                                    |> Eval.eval buildVariables
+
+                                ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.Action list> projectDef.Scripts
+                                                                                                          step.Extension 
+                                                                                                          step.Command
+                                                                                                          stepParameters
                                 |> List.map (fun action -> { ContaineredAction.Container = extension.Container
                                                              ContaineredAction.Command = action.Command
                                                              ContaineredAction.Arguments = action.Arguments

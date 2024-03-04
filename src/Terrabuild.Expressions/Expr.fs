@@ -15,6 +15,7 @@ type Expr =
     | Variable of name:string
     | Map of Map<string, Expr>
     | Function of Function * Expr list
+    | Object of obj
 
 
 [<RequireQualifiedAccess>]
@@ -23,3 +24,4 @@ type Value =
     | String of string
     | Bool of bool
     | Map of Map<string, Value>
+    | Object of obj

@@ -19,17 +19,15 @@ let parseWorkspace() =
             { DependsOn = Set [ "build" ] }
         
         let envRelease =
-            { Variables = Map [ "configuration", Expr.String "Release" ] }
+            { Variables = Map [ "configuration", "Release" ] }
 
         let dotnetExt =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
               Script = None
-              Init = Map [ "configuration", Expr.Variable "configuration" ]
-              Defaults = Map.empty }
+              Defaults = Map [ "configuration", Expr.Variable "configuration" ] }
         let dockerExt =
             { Container = None
               Script = None
-              Init = Map.empty
               Defaults = Map.empty }
 
         { Configuration = configuration

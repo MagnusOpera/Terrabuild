@@ -86,11 +86,12 @@ type nonTerminalId =
     | NONTERM_ExtensionComponents
     | NONTERM_Container
     | NONTERM_Script
-    | NONTERM_Init
     | NONTERM_Defaults
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
+    | NONTERM_StringVariables
+    | NONTERM_StringVariable
     | NONTERM_Variables
     | NONTERM_Variable
     | NONTERM_Expr

@@ -85,7 +85,8 @@ let processCommandLine () =
         with
             | :? Configuration.ConfigException as ex ->
                 Log.Fatal("Failed with {Exception}", ex)
-                let reason = dumpUnknownException ex |> String.join "\n   "
+                // let reason = dumpUnknownException ex |> String.join "\n   "
+                let reason = ex.ToString()
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
 

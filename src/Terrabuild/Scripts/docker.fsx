@@ -11,32 +11,15 @@ let private buildCmdLine cmd args cache =
       Action.Cache = cache }
 
 
-type Globals = {
-    Context: Context
-    Dockerfile: string
-    Image: string
-}
-
-
-let mutable globals = None
-
-
-
-let init (context: Context) (dockerfile: string option) (image: string) =
+let build (context: Context) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
     let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
-    
-    globals <- Some { Context = context
-                      Dockerfile = dockerfile
-                      Image = image }
+    let nodehash = context.NodeHash
 
-
-let build (arguments: Map<string, string>) =
-    let globals = globals.Value
     let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
-    let buildArgs = $"build --file {globals.Dockerfile} --tag {globals.Image}:{globals.Context.NodeHash} {args} ."
+    let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash} {args} ."
 
-    if globals.Context.CI then
-        let pushArgs = $"push {globals.Image}:{globals.Context.NodeHash}"
+    if context.CI then
+        let pushArgs = $"push {image}:{nodehash}"
         [ buildCmdLine "docker" buildArgs Cacheability.Remote
           buildCmdLine "docker" pushArgs Cacheability.Remote ]
     else

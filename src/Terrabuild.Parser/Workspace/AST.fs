@@ -40,10 +40,10 @@ with
 
 [<RequireQualifiedAccess>]
 type EnvironmentComponents =
-    | Variables of Map<string, Expr>
+    | Variables of Map<string, string>
 
 type Environment = {
-    Variables: Map<string, Expr>
+    Variables: Map<string, string>
 }
 with
     static member Empty =

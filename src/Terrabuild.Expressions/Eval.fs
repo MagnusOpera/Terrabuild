@@ -7,6 +7,7 @@ let rec eval (variables: Map<string, string>) (expr: Expr) =
         | Expr.Nothing -> Value.Nothing
         | Expr.Boolean bool -> Value.Bool bool
         | Expr.String str -> Value.String str
+        | Expr.Object obj -> Value.Object obj
         | Expr.Variable var ->
             match variables |> Map.tryFind var with
             | None -> failwith $"Variable '{var}' is not defined"

@@ -16,7 +16,13 @@ type Action = {
 }
 
 [<RequireQualifiedAccess>]
-type Context = {
+type ParseContext = {
+    Directory: string
+    CI: bool
+}
+
+[<RequireQualifiedAccess>]
+type ActionContext = {
     Directory: string
     CI: bool
     NodeHash: string
