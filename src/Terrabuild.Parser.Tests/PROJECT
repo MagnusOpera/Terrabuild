@@ -35,6 +35,6 @@ target dist {
 }
 
 target docker {
-  @shell echo { message: trim("building project1 " + $configuration) }  
-  @docker build { arguments: { config: "Release" } }                 
+  @shell echo { arguments: trim("building project1 " + $configuration) }
+  @docker build { arguments: { config: "Release" } }
 }
