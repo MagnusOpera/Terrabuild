@@ -63,7 +63,7 @@ type WorkspaceConfig = {
 
 
 [<RequireQualifiedAccess>]
-type ProjectDefinition = {
+type private ProjectDefinition = {
     Dependencies: string set
     Ignores: string set
     Outputs: string set
