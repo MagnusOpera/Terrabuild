@@ -2,10 +2,11 @@ module Terrabuild.Configuration.FrontEnd
 open FSharp.Text.Lexing
 
 
-let private dumpLexer lexer (lexbuff: LexBuffer<char>) =
+let inline private dumpLexer lexer (lexbuff: LexBuffer<char>) =
     let token = lexer lexbuff
     // printfn $"TOKEN = {token}"
     token
+
 
 let private parse parser lexer txt =
     let lexbuf = LexBuffer<_>.FromString txt
