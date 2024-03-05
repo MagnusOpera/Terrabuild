@@ -61,7 +61,7 @@ let parseProject() =
                           "dist", distTarget
                           "docker", dockerTarget ] }
 
-    let content = File.ReadAllText("PROJECT")
+    let content = File.ReadAllText("TestFiles/PROJECT")
     let project = FrontEnd.parseProject content
 
     project

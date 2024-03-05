@@ -3,7 +3,7 @@ module WorkspaceParser
 #nowarn "64";; // turn off warnings that type variables used in production annotations are instantiated to concrete type
 open FSharp.Text.Lexing
 open FSharp.Text.Parsing.ParseHelpers
-# 1 "Workspace/Parser.fsy"
+# 1 "WorkspaceParser/Parser.fsy"
  
 open Terrabuild.Parser.AST
 open Terrabuild.Parser.Workspace.AST
@@ -17,7 +17,7 @@ let debugPrint s = ignore s
 #endif
 
 
-# 20 "Workspace/Parser.fs"
+# 20 "Gen/WorkspaceParser.fs"
 // This type is the type of tokens accepted by the parser
 type token = 
   | STORAGE
@@ -336,7 +336,7 @@ let _fsyacc_reductionSymbolCounts = [|1us; 2us; 0us; 2us; 2us; 2us; 2us; 4us; 0u
 let _fsyacc_productionToNonTerminalTable = [|0us; 1us; 2us; 2us; 2us; 2us; 2us; 3us; 4us; 4us; 4us; 5us; 6us; 7us; 8us; 8us; 9us; 10us; 11us; 11us; 12us; 13us; 14us; 14us; 14us; 14us; 15us; 16us; 17us; 18us; 19us; 20us; 20us; 21us; 22us; 22us; 23us; 23us; 24us; 25us; 25us; 26us; 27us; 27us; 27us; 27us; 27us; 27us; 27us; 27us; 27us; 27us; |]
 let _fsyacc_immediateActions = [|65535us; 49152us; 65535us; 16385us; 16387us; 16388us; 16389us; 16390us; 65535us; 65535us; 65535us; 16391us; 16393us; 16394us; 65535us; 16395us; 65535us; 16396us; 65535us; 65535us; 65535us; 65535us; 16397us; 16399us; 65535us; 16400us; 65535us; 65535us; 65535us; 65535us; 16401us; 16403us; 65535us; 65535us; 65535us; 16404us; 65535us; 65535us; 65535us; 65535us; 16405us; 16407us; 16408us; 16409us; 65535us; 16410us; 65535us; 16411us; 65535us; 65535us; 65535us; 16412us; 16413us; 65535us; 65535us; 16417us; 16419us; 16421us; 65535us; 16422us; 65535us; 16424us; 65535us; 65535us; 16426us; 16427us; 16428us; 16429us; 16430us; 65535us; 16431us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 16433us; 65535us; 65535us; 16434us; 65535us; 65535us; 16435us; |]
 let _fsyacc_reductions ()  =    [| 
-# 339 "Workspace/Parser.fs"
+# 339 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> Terrabuild.Parser.Workspace.AST.Workspace in
             Microsoft.FSharp.Core.Operators.box
@@ -345,578 +345,578 @@ let _fsyacc_reductions ()  =    [|
                       raise (FSharp.Text.Parsing.Accept(Microsoft.FSharp.Core.Operators.box _1))
                    )
                  : 'gentype__startWorkspace));
-# 348 "Workspace/Parser.fs"
+# 348 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 41 "Workspace/Parser.fsy"
+# 41 "WorkspaceParser/Parser.fsy"
                                                      _1 
                    )
-# 41 "Workspace/Parser.fsy"
+# 41 "WorkspaceParser/Parser.fsy"
                  : Terrabuild.Parser.Workspace.AST.Workspace));
-# 359 "Workspace/Parser.fs"
+# 359 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 44 "Workspace/Parser.fsy"
+# 44 "WorkspaceParser/Parser.fsy"
                                          Workspace.Empty 
                    )
-# 44 "Workspace/Parser.fsy"
+# 44 "WorkspaceParser/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
-# 369 "Workspace/Parser.fs"
+# 369 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Configuration in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 45 "Workspace/Parser.fsy"
+# 45 "WorkspaceParser/Parser.fsy"
                                                                _1.Patch _2 
                    )
-# 45 "Workspace/Parser.fsy"
+# 45 "WorkspaceParser/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
-# 381 "Workspace/Parser.fs"
+# 381 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Target in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 46 "Workspace/Parser.fsy"
+# 46 "WorkspaceParser/Parser.fsy"
                                                         _1.Patch _2 
                    )
-# 46 "Workspace/Parser.fsy"
+# 46 "WorkspaceParser/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
-# 393 "Workspace/Parser.fs"
+# 393 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Environment in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 47 "Workspace/Parser.fsy"
+# 47 "WorkspaceParser/Parser.fsy"
                                                              _1.Patch _2 
                    )
-# 47 "Workspace/Parser.fsy"
+# 47 "WorkspaceParser/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
-# 405 "Workspace/Parser.fs"
+# 405 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Extension in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 48 "Workspace/Parser.fsy"
+# 48 "WorkspaceParser/Parser.fsy"
                                                            _1.Patch _2 
                    )
-# 48 "Workspace/Parser.fsy"
+# 48 "WorkspaceParser/Parser.fsy"
                  : 'gentype_WorkspaceComponents));
-# 417 "Workspace/Parser.fs"
+# 417 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_ConfigurationComponents in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 51 "Workspace/Parser.fsy"
+# 51 "WorkspaceParser/Parser.fsy"
                                                                                  WorkspaceComponents.Configuration _3 
                    )
-# 51 "Workspace/Parser.fsy"
+# 51 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Configuration));
-# 428 "Workspace/Parser.fs"
+# 428 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 53 "Workspace/Parser.fsy"
+# 53 "WorkspaceParser/Parser.fsy"
                                          Configuration.Empty 
                    )
-# 53 "Workspace/Parser.fsy"
+# 53 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ConfigurationComponents));
-# 438 "Workspace/Parser.fs"
+# 438 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ConfigurationComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_ConfigurationStorage in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 54 "Workspace/Parser.fsy"
+# 54 "WorkspaceParser/Parser.fsy"
                                                                           _1.Patch _2 
                    )
-# 54 "Workspace/Parser.fsy"
+# 54 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ConfigurationComponents));
-# 450 "Workspace/Parser.fs"
+# 450 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ConfigurationComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_ConfigurationSourceControl in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 55 "Workspace/Parser.fsy"
+# 55 "WorkspaceParser/Parser.fsy"
                                                                                 _1.Patch _2 
                    )
-# 55 "Workspace/Parser.fsy"
+# 55 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ConfigurationComponents));
-# 462 "Workspace/Parser.fs"
+# 462 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_String in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 57 "Workspace/Parser.fsy"
+# 57 "WorkspaceParser/Parser.fsy"
                                             ConfigurationComponents.Storage _2 
                    )
-# 57 "Workspace/Parser.fsy"
+# 57 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ConfigurationStorage));
-# 473 "Workspace/Parser.fs"
+# 473 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_String in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 59 "Workspace/Parser.fsy"
+# 59 "WorkspaceParser/Parser.fsy"
                                                   ConfigurationComponents.SourceControl _2 
                    )
-# 59 "Workspace/Parser.fsy"
+# 59 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ConfigurationSourceControl));
-# 484 "Workspace/Parser.fs"
+# 484 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> string in
             let _4 = parseState.GetInput(4) :?> 'gentype_TargetComponents in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 62 "Workspace/Parser.fsy"
+# 62 "WorkspaceParser/Parser.fsy"
                                                                               WorkspaceComponents.Target (_2, _4) 
                    )
-# 62 "Workspace/Parser.fsy"
+# 62 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Target));
-# 496 "Workspace/Parser.fs"
+# 496 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 64 "Workspace/Parser.fsy"
+# 64 "WorkspaceParser/Parser.fsy"
                                          Target.Empty 
                    )
-# 64 "Workspace/Parser.fsy"
+# 64 "WorkspaceParser/Parser.fsy"
                  : 'gentype_TargetComponents));
-# 506 "Workspace/Parser.fs"
+# 506 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_TargetComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_TargetDependsOn in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 65 "Workspace/Parser.fsy"
+# 65 "WorkspaceParser/Parser.fsy"
                                                               _1.Patch _2 
                    )
-# 65 "Workspace/Parser.fsy"
+# 65 "WorkspaceParser/Parser.fsy"
                  : 'gentype_TargetComponents));
-# 518 "Workspace/Parser.fs"
+# 518 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_ListOfTargets in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 67 "Workspace/Parser.fsy"
+# 67 "WorkspaceParser/Parser.fsy"
                                                       TargetComponents.DependsOn _2 
                    )
-# 67 "Workspace/Parser.fsy"
+# 67 "WorkspaceParser/Parser.fsy"
                  : 'gentype_TargetDependsOn));
-# 529 "Workspace/Parser.fs"
+# 529 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> string in
             let _4 = parseState.GetInput(4) :?> 'gentype_EnvironmentComponents in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 70 "Workspace/Parser.fsy"
+# 70 "WorkspaceParser/Parser.fsy"
                                                                                         WorkspaceComponents.Environment (_2, _4) 
                    )
-# 70 "Workspace/Parser.fsy"
+# 70 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Environment));
-# 541 "Workspace/Parser.fs"
+# 541 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 72 "Workspace/Parser.fsy"
+# 72 "WorkspaceParser/Parser.fsy"
                                          Environment.Empty 
                    )
-# 72 "Workspace/Parser.fsy"
+# 72 "WorkspaceParser/Parser.fsy"
                  : 'gentype_EnvironmentComponents));
-# 551 "Workspace/Parser.fs"
+# 551 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_EnvironmentComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_EnvironmentVariables in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 73 "Workspace/Parser.fsy"
+# 73 "WorkspaceParser/Parser.fsy"
                                                                         _1.Patch _2 
                    )
-# 73 "Workspace/Parser.fsy"
+# 73 "WorkspaceParser/Parser.fsy"
                  : 'gentype_EnvironmentComponents));
-# 563 "Workspace/Parser.fs"
+# 563 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_StringVariables in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 75 "Workspace/Parser.fsy"
+# 75 "WorkspaceParser/Parser.fsy"
                                                                      EnvironmentComponents.Variables _3 
                    )
-# 75 "Workspace/Parser.fsy"
+# 75 "WorkspaceParser/Parser.fsy"
                  : 'gentype_EnvironmentVariables));
-# 574 "Workspace/Parser.fs"
+# 574 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> string in
             let _4 = parseState.GetInput(4) :?> 'gentype_ExtensionComponents in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 78 "Workspace/Parser.fsy"
+# 78 "WorkspaceParser/Parser.fsy"
                                                                                     WorkspaceComponents.Extension (_2, _4) 
                    )
-# 78 "Workspace/Parser.fsy"
+# 78 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Extension));
-# 586 "Workspace/Parser.fs"
+# 586 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 80 "Workspace/Parser.fsy"
+# 80 "WorkspaceParser/Parser.fsy"
                                          Extension.Empty 
                    )
-# 80 "Workspace/Parser.fsy"
+# 80 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
-# 596 "Workspace/Parser.fs"
+# 596 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Container in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 81 "Workspace/Parser.fsy"
+# 81 "WorkspaceParser/Parser.fsy"
                                                            _1.Patch _2 
                    )
-# 81 "Workspace/Parser.fsy"
+# 81 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
-# 608 "Workspace/Parser.fs"
+# 608 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Script in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 82 "Workspace/Parser.fsy"
+# 82 "WorkspaceParser/Parser.fsy"
                                                         _1.Patch _2 
                    )
-# 82 "Workspace/Parser.fsy"
+# 82 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
-# 620 "Workspace/Parser.fs"
+# 620 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Defaults in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 83 "Workspace/Parser.fsy"
+# 83 "WorkspaceParser/Parser.fsy"
                                                           _1.Patch _2 
                    )
-# 83 "Workspace/Parser.fsy"
+# 83 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
-# 632 "Workspace/Parser.fs"
+# 632 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_String in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 85 "Workspace/Parser.fsy"
+# 85 "WorkspaceParser/Parser.fsy"
                                               ExtensionComponents.Container _2 
                    )
-# 85 "Workspace/Parser.fsy"
+# 85 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Container));
-# 643 "Workspace/Parser.fs"
+# 643 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_String in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 87 "Workspace/Parser.fsy"
+# 87 "WorkspaceParser/Parser.fsy"
                                            ExtensionComponents.Script _2 
                    )
-# 87 "Workspace/Parser.fsy"
+# 87 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Script));
-# 654 "Workspace/Parser.fs"
+# 654 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_Variables in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 89 "Workspace/Parser.fsy"
+# 89 "WorkspaceParser/Parser.fsy"
                                                               ExtensionComponents.Defaults _3 
                    )
-# 89 "Workspace/Parser.fsy"
+# 89 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Defaults));
-# 665 "Workspace/Parser.fs"
+# 665 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 92 "Workspace/Parser.fsy"
+# 92 "WorkspaceParser/Parser.fsy"
                                     _1 
                    )
-# 92 "Workspace/Parser.fsy"
+# 92 "WorkspaceParser/Parser.fsy"
                  : 'gentype_String));
-# 676 "Workspace/Parser.fs"
+# 676 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_Strings in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 94 "Workspace/Parser.fsy"
+# 94 "WorkspaceParser/Parser.fsy"
                                                            _2 
                    )
-# 94 "Workspace/Parser.fsy"
+# 94 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ListOfString));
-# 687 "Workspace/Parser.fs"
+# 687 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 96 "Workspace/Parser.fsy"
+# 96 "WorkspaceParser/Parser.fsy"
                                          [] 
                    )
-# 96 "Workspace/Parser.fsy"
+# 96 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Strings));
-# 697 "Workspace/Parser.fs"
+# 697 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Strings in
             let _2 = parseState.GetInput(2) :?> 'gentype_String in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 97 "Workspace/Parser.fsy"
+# 97 "WorkspaceParser/Parser.fsy"
                                             _1 @ [_2] 
                    )
-# 97 "Workspace/Parser.fsy"
+# 97 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Strings));
-# 709 "Workspace/Parser.fs"
+# 709 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_Targets in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 100 "Workspace/Parser.fsy"
+# 100 "WorkspaceParser/Parser.fsy"
                                                            _2 
                    )
-# 100 "Workspace/Parser.fsy"
+# 100 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ListOfTargets));
-# 720 "Workspace/Parser.fs"
+# 720 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 102 "Workspace/Parser.fsy"
+# 102 "WorkspaceParser/Parser.fsy"
                                          [] 
                    )
-# 102 "Workspace/Parser.fsy"
+# 102 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Targets));
-# 730 "Workspace/Parser.fs"
+# 730 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Targets in
             let _2 = parseState.GetInput(2) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 103 "Workspace/Parser.fsy"
+# 103 "WorkspaceParser/Parser.fsy"
                                                 _1 @ [_2] 
                    )
-# 103 "Workspace/Parser.fsy"
+# 103 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Targets));
-# 742 "Workspace/Parser.fs"
+# 742 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 106 "Workspace/Parser.fsy"
+# 106 "WorkspaceParser/Parser.fsy"
                                          Map.empty 
                    )
-# 106 "Workspace/Parser.fsy"
+# 106 "WorkspaceParser/Parser.fsy"
                  : 'gentype_StringVariables));
-# 752 "Workspace/Parser.fs"
+# 752 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_StringVariables in
             let _2 = parseState.GetInput(2) :?> 'gentype_StringVariable in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 107 "Workspace/Parser.fsy"
+# 107 "WorkspaceParser/Parser.fsy"
                                                             _1.Add _2 
                    )
-# 107 "Workspace/Parser.fsy"
+# 107 "WorkspaceParser/Parser.fsy"
                  : 'gentype_StringVariables));
-# 764 "Workspace/Parser.fs"
+# 764 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             let _2 = parseState.GetInput(2) :?> 'gentype_String in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 109 "Workspace/Parser.fsy"
+# 109 "WorkspaceParser/Parser.fsy"
                                         (_1, _2) 
                    )
-# 109 "Workspace/Parser.fsy"
+# 109 "WorkspaceParser/Parser.fsy"
                  : 'gentype_StringVariable));
-# 776 "Workspace/Parser.fs"
+# 776 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 112 "Workspace/Parser.fsy"
+# 112 "WorkspaceParser/Parser.fsy"
                                          Map.empty 
                    )
-# 112 "Workspace/Parser.fsy"
+# 112 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Variables));
-# 786 "Workspace/Parser.fs"
+# 786 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Variables in
             let _2 = parseState.GetInput(2) :?> 'gentype_Variable in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 113 "Workspace/Parser.fsy"
+# 113 "WorkspaceParser/Parser.fsy"
                                                 _1.Add _2 
                    )
-# 113 "Workspace/Parser.fsy"
+# 113 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Variables));
-# 798 "Workspace/Parser.fs"
+# 798 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             let _2 = parseState.GetInput(2) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 115 "Workspace/Parser.fsy"
+# 115 "WorkspaceParser/Parser.fsy"
                                       (_1, _2) 
                    )
-# 115 "Workspace/Parser.fsy"
+# 115 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Variable));
-# 810 "Workspace/Parser.fs"
+# 810 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 118 "Workspace/Parser.fsy"
+# 118 "WorkspaceParser/Parser.fsy"
                                      Expr.Nothing 
                    )
-# 118 "Workspace/Parser.fsy"
+# 118 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 820 "Workspace/Parser.fs"
+# 820 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 119 "Workspace/Parser.fsy"
+# 119 "WorkspaceParser/Parser.fsy"
                                   Expr.Boolean true 
                    )
-# 119 "Workspace/Parser.fsy"
+# 119 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 830 "Workspace/Parser.fs"
+# 830 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 120 "Workspace/Parser.fsy"
+# 120 "WorkspaceParser/Parser.fsy"
                                    Expr.Boolean false 
                    )
-# 120 "Workspace/Parser.fsy"
+# 120 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 840 "Workspace/Parser.fs"
+# 840 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 121 "Workspace/Parser.fsy"
+# 121 "WorkspaceParser/Parser.fsy"
                                     Expr.String _1 
                    )
-# 121 "Workspace/Parser.fsy"
+# 121 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 851 "Workspace/Parser.fs"
+# 851 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 122 "Workspace/Parser.fsy"
+# 122 "WorkspaceParser/Parser.fsy"
                                       Expr.Variable _1 
                    )
-# 122 "Workspace/Parser.fsy"
+# 122 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 862 "Workspace/Parser.fs"
+# 862 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_Variables in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 123 "Workspace/Parser.fsy"
+# 123 "WorkspaceParser/Parser.fsy"
                                                      Expr.Map _2 
                    )
-# 123 "Workspace/Parser.fsy"
+# 123 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 873 "Workspace/Parser.fs"
+# 873 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 124 "Workspace/Parser.fsy"
+# 124 "WorkspaceParser/Parser.fsy"
                                             Expr.Function (Function.Plus, [_1; _3]) 
                    )
-# 124 "Workspace/Parser.fsy"
+# 124 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 885 "Workspace/Parser.fs"
+# 885 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 125 "Workspace/Parser.fsy"
+# 125 "WorkspaceParser/Parser.fsy"
                                                      Expr.Function (Function.Trim, [_3]) 
                    )
-# 125 "Workspace/Parser.fsy"
+# 125 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 896 "Workspace/Parser.fs"
+# 896 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 126 "Workspace/Parser.fsy"
+# 126 "WorkspaceParser/Parser.fsy"
                                                       Expr.Function (Function.Upper, [_3]) 
                    )
-# 126 "Workspace/Parser.fsy"
+# 126 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
-# 907 "Workspace/Parser.fs"
+# 907 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 127 "Workspace/Parser.fsy"
+# 127 "WorkspaceParser/Parser.fsy"
                                                       Expr.Function (Function.Lower, [_3]) 
                    )
-# 127 "Workspace/Parser.fsy"
+# 127 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Expr));
 |]
-# 919 "Workspace/Parser.fs"
+# 919 "Gen/WorkspaceParser.fs"
 let tables : FSharp.Text.Parsing.Tables<_> = 
   { reductions= _fsyacc_reductions ();
     endOfInputTag = _fsyacc_endOfInputTag;

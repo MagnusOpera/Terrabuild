@@ -1,4 +1,4 @@
-        Output file describing compiled parser placed in Project/Parser.fs and Project/Parser.fsi
+        Output file describing compiled parser placed in Gen/ProjectParser.fs and Gen/ProjectParser.fsi
 ------------------------
 states = 
 state 0:  items:    _startProject ->  . Project

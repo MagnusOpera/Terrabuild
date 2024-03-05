@@ -1,5 +1,5 @@
 module WorkspaceLexer
-# 1 "Workspace/Lexer.fsl"
+# 1 "WorkspaceParser/Lexer.fsl"
  
 // module Lexer
 
@@ -8,7 +8,7 @@ open FSharp.Text.Lexing
 
 let lexeme = LexBuffer<_>.LexemeString
 
-# 11 "Workspace/Lexer.fs"
+# 11 "Gen/WorkspaceLexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -317,181 +317,181 @@ let rec _fslex_dummy () = _fslex_dummy()
 and token  lexbuf =
   match _fslex_tables.Interpret(0,lexbuf) with
   | 0 -> ( 
-# 21 "Workspace/Lexer.fsl"
+# 21 "WorkspaceParser/Lexer.fsl"
                                     
                        let s = lexeme lexbuf |> string
                        STRING (s.Substring(1, s.Length-2)) 
-# 324 "Workspace/Lexer.fs"
+# 324 "Gen/WorkspaceLexer.fs"
           )
   | 1 -> ( 
-# 25 "Workspace/Lexer.fsl"
+# 25 "WorkspaceParser/Lexer.fsl"
                           
                        let s = lexeme lexbuf |> string
                        KEY (s.Substring(0, s.Length-1)) 
-# 331 "Workspace/Lexer.fs"
+# 331 "Gen/WorkspaceLexer.fs"
           )
   | 2 -> ( 
-# 29 "Workspace/Lexer.fsl"
+# 29 "WorkspaceParser/Lexer.fsl"
                                  
                        let s = lexeme lexbuf |> string
                        VARIABLE (s.Substring(1, s.Length-1)) 
-# 338 "Workspace/Lexer.fs"
+# 338 "Gen/WorkspaceLexer.fs"
           )
   | 3 -> ( 
-# 33 "Workspace/Lexer.fsl"
+# 33 "WorkspaceParser/Lexer.fsl"
                                  NOTHING 
-# 343 "Workspace/Lexer.fs"
+# 343 "Gen/WorkspaceLexer.fs"
           )
   | 4 -> ( 
-# 34 "Workspace/Lexer.fsl"
+# 34 "WorkspaceParser/Lexer.fsl"
                               TRUE 
-# 348 "Workspace/Lexer.fs"
+# 348 "Gen/WorkspaceLexer.fs"
           )
   | 5 -> ( 
-# 35 "Workspace/Lexer.fsl"
+# 35 "WorkspaceParser/Lexer.fsl"
                                FALSE 
-# 353 "Workspace/Lexer.fs"
+# 353 "Gen/WorkspaceLexer.fs"
           )
   | 6 -> ( 
-# 36 "Workspace/Lexer.fsl"
+# 36 "WorkspaceParser/Lexer.fsl"
                               TRIM 
-# 358 "Workspace/Lexer.fs"
+# 358 "Gen/WorkspaceLexer.fs"
           )
   | 7 -> ( 
-# 37 "Workspace/Lexer.fsl"
+# 37 "WorkspaceParser/Lexer.fsl"
                                UPPER 
-# 363 "Workspace/Lexer.fs"
+# 363 "Gen/WorkspaceLexer.fs"
           )
   | 8 -> ( 
-# 38 "Workspace/Lexer.fsl"
+# 38 "WorkspaceParser/Lexer.fsl"
                                LOWER 
-# 368 "Workspace/Lexer.fs"
+# 368 "Gen/WorkspaceLexer.fs"
           )
   | 9 -> ( 
-# 39 "Workspace/Lexer.fsl"
+# 39 "WorkspaceParser/Lexer.fsl"
                                        CONFIGURATION 
-# 373 "Workspace/Lexer.fs"
+# 373 "Gen/WorkspaceLexer.fs"
           )
   | 10 -> ( 
-# 40 "Workspace/Lexer.fsl"
+# 40 "WorkspaceParser/Lexer.fsl"
                                     TARGET 
-# 378 "Workspace/Lexer.fs"
+# 378 "Gen/WorkspaceLexer.fs"
           )
   | 11 -> ( 
-# 41 "Workspace/Lexer.fsl"
+# 41 "WorkspaceParser/Lexer.fsl"
                                      ENVIRONMENT 
-# 383 "Workspace/Lexer.fs"
+# 383 "Gen/WorkspaceLexer.fs"
           )
   | 12 -> ( 
-# 42 "Workspace/Lexer.fsl"
+# 42 "WorkspaceParser/Lexer.fsl"
                                    EXTENSION 
-# 388 "Workspace/Lexer.fs"
+# 388 "Gen/WorkspaceLexer.fs"
           )
   | 13 -> ( 
-# 43 "Workspace/Lexer.fsl"
+# 43 "WorkspaceParser/Lexer.fsl"
                                   STORAGE 
-# 393 "Workspace/Lexer.fs"
+# 393 "Gen/WorkspaceLexer.fs"
           )
   | 14 -> ( 
-# 44 "Workspace/Lexer.fsl"
+# 44 "WorkspaceParser/Lexer.fsl"
                                        SOURCECONTROL 
-# 398 "Workspace/Lexer.fs"
+# 398 "Gen/WorkspaceLexer.fs"
           )
   | 15 -> ( 
-# 45 "Workspace/Lexer.fsl"
+# 45 "WorkspaceParser/Lexer.fsl"
                                     DEPENDS_ON 
-# 403 "Workspace/Lexer.fs"
+# 403 "Gen/WorkspaceLexer.fs"
           )
   | 16 -> ( 
-# 46 "Workspace/Lexer.fsl"
+# 46 "WorkspaceParser/Lexer.fsl"
                                    VARIABLES 
-# 408 "Workspace/Lexer.fs"
+# 408 "Gen/WorkspaceLexer.fs"
           )
   | 17 -> ( 
-# 47 "Workspace/Lexer.fsl"
+# 47 "WorkspaceParser/Lexer.fsl"
                                    CONTAINER 
-# 413 "Workspace/Lexer.fs"
+# 413 "Gen/WorkspaceLexer.fs"
           )
   | 18 -> ( 
-# 48 "Workspace/Lexer.fsl"
+# 48 "WorkspaceParser/Lexer.fsl"
                                 SCRIPT 
-# 418 "Workspace/Lexer.fs"
+# 418 "Gen/WorkspaceLexer.fs"
           )
   | 19 -> ( 
-# 49 "Workspace/Lexer.fsl"
+# 49 "WorkspaceParser/Lexer.fsl"
                                   DEFAULTS 
-# 423 "Workspace/Lexer.fs"
+# 423 "Gen/WorkspaceLexer.fs"
           )
   | 20 -> ( 
-# 51 "Workspace/Lexer.fsl"
+# 51 "WorkspaceParser/Lexer.fsl"
                                   IDENTIFIER (lexeme lexbuf |> string) 
-# 428 "Workspace/Lexer.fs"
+# 428 "Gen/WorkspaceLexer.fs"
           )
   | 21 -> ( 
-# 53 "Workspace/Lexer.fsl"
+# 53 "WorkspaceParser/Lexer.fsl"
                                   LBRACE 
-# 433 "Workspace/Lexer.fs"
+# 433 "Gen/WorkspaceLexer.fs"
           )
   | 22 -> ( 
-# 54 "Workspace/Lexer.fsl"
+# 54 "WorkspaceParser/Lexer.fsl"
                                   RBRACE 
-# 438 "Workspace/Lexer.fs"
+# 438 "Gen/WorkspaceLexer.fs"
           )
   | 23 -> ( 
-# 55 "Workspace/Lexer.fsl"
+# 55 "WorkspaceParser/Lexer.fsl"
                                   LSQBRACKET 
-# 443 "Workspace/Lexer.fs"
+# 443 "Gen/WorkspaceLexer.fs"
           )
   | 24 -> ( 
-# 56 "Workspace/Lexer.fsl"
+# 56 "WorkspaceParser/Lexer.fsl"
                                   RSQBRACKET 
-# 448 "Workspace/Lexer.fs"
+# 448 "Gen/WorkspaceLexer.fs"
           )
   | 25 -> ( 
-# 57 "Workspace/Lexer.fsl"
+# 57 "WorkspaceParser/Lexer.fsl"
                                   LPAREN 
-# 453 "Workspace/Lexer.fs"
+# 453 "Gen/WorkspaceLexer.fs"
           )
   | 26 -> ( 
-# 58 "Workspace/Lexer.fsl"
+# 58 "WorkspaceParser/Lexer.fsl"
                                   RPAREN 
-# 458 "Workspace/Lexer.fs"
+# 458 "Gen/WorkspaceLexer.fs"
           )
   | 27 -> ( 
-# 59 "Workspace/Lexer.fsl"
+# 59 "WorkspaceParser/Lexer.fsl"
                                   EQUAL 
-# 463 "Workspace/Lexer.fs"
+# 463 "Gen/WorkspaceLexer.fs"
           )
   | 28 -> ( 
-# 60 "Workspace/Lexer.fsl"
+# 60 "WorkspaceParser/Lexer.fsl"
                                   COMMA 
-# 468 "Workspace/Lexer.fs"
+# 468 "Gen/WorkspaceLexer.fs"
           )
   | 29 -> ( 
-# 61 "Workspace/Lexer.fsl"
+# 61 "WorkspaceParser/Lexer.fsl"
                                   PLUS 
-# 473 "Workspace/Lexer.fs"
+# 473 "Gen/WorkspaceLexer.fs"
           )
   | 30 -> ( 
-# 63 "Workspace/Lexer.fsl"
+# 63 "WorkspaceParser/Lexer.fsl"
                                   token lexbuf 
-# 478 "Workspace/Lexer.fs"
+# 478 "Gen/WorkspaceLexer.fs"
           )
   | 31 -> ( 
-# 64 "Workspace/Lexer.fsl"
+# 64 "WorkspaceParser/Lexer.fsl"
                                   lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
-# 483 "Workspace/Lexer.fs"
+# 483 "Gen/WorkspaceLexer.fs"
           )
   | 32 -> ( 
-# 65 "Workspace/Lexer.fsl"
+# 65 "WorkspaceParser/Lexer.fsl"
                                   EOF 
-# 488 "Workspace/Lexer.fs"
+# 488 "Gen/WorkspaceLexer.fs"
           )
   | 33 -> ( 
-# 66 "Workspace/Lexer.fsl"
+# 66 "WorkspaceParser/Lexer.fsl"
                                   failwithf "unrecognized input: '%s'" <| lexeme lexbuf 
-# 493 "Workspace/Lexer.fs"
+# 493 "Gen/WorkspaceLexer.fs"
           )
   | _ -> failwith "token"
 
-# 3000000 "Workspace/Lexer.fs"
+# 3000000 "Gen/WorkspaceLexer.fs"

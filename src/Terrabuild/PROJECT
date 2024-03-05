@@ -1,25 +1,29 @@
-builders:
-  dotnet:
-  docker:
-    use: docker
-    with: Dockerfile
-    parameters:
-      image: ghcr.io/magnusopera/terrabuild
 
-steps:
-  build:
-    - (dotnet): build
+configuration {
+    labels [ "app"
+             "dotnet"]
+}
 
-  dist:
-    - (dotnet): publish
-    - (dotnet): pack
-    - (docker): build
-      arguments:
-        configuration: $(configuration)
+extension @docker {
+  defaults {
+    image: "ghcr.io/magnusopera/terrabuild"
+  }
+}
 
-  publish:
-    - (docker): push
+target build {
+    @dotnet build { }
+}
 
-labels:
-  - app
-  - dotnet
+target dist {
+    @dotnet publish { }
+    @dotnet pack { }
+    @docker build {
+        arguments {
+            configuration: $configuration
+        }
+    }
+}
+
+target publish {
+    @docker push { }
+}

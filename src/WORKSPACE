@@ -1,20 +1,30 @@
-storage: azureblob
-sourcecontrol: github
 
-targets:
-  build: [^build]
-  dist: [build]
-  publish: [dist]
+configuration {
+  storage "azureblob"
+  sourcecontrol "github"
+}
 
-environments:
-  release:
-    configuration: Release
+target build {
+    depends_on [^build]
+}
 
+target dist {
+    depends_on [build]
+}
 
+target publish {
+    depends_on [dist]
+}
 
-extensions:
-  dotnet:
-    container: mcr.microsoft.com/dotnet/sdk:8.0.101
-    parameters:
-      configuration: $(configuration)
-  docker:
+environment release {
+    variables {
+        configuration: "Release"
+    }
+}
+
+extension @dotnet {
+    container "mcr.microsoft.com/dotnet/sdk:8.0.101"
+    parameters {
+        configuration: $configuration
+    }
+}

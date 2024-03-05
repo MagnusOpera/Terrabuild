@@ -1,4 +1,4 @@
-        Output file describing compiled parser placed in Workspace/Parser.fs and Workspace/Parser.fsi
+        Output file describing compiled parser placed in Gen/WorkspaceParser.fs and Gen/WorkspaceParser.fsi
 ------------------------
 states = 
 state 0:  items:    _startWorkspace ->  . Workspace

@@ -38,7 +38,7 @@ let parseWorkspace() =
                              "docker", dockerExt ] }
 
 
-    let content = File.ReadAllText("WORKSPACE")
+    let content = File.ReadAllText("TestFiles/WORKSPACE")
     let workspace = FrontEnd.parseWorkspace content
 
     workspace

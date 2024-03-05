@@ -9,18 +9,18 @@
         <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch(
                          $(DefineConstants), '^(.*;)*GENERATE_PARSER(;.*)*$'))">
             <ItemGroup>
-                <FsYacc Include="Workspace/Parser.fsy">
-                    <OtherFlags>-v --module WorkspaceParser -o Workspace/Parser.fs</OtherFlags>
+                <FsYacc Include="WorkspaceParser/Parser.fsy">
+                    <OtherFlags>-v --module WorkspaceParser -o Gen/WorkspaceParser.fs</OtherFlags>
                 </FsYacc>
-                <FsLex Include="Workspace/Lexer.fsl">
-                    <OtherFlags>--module WorkspaceLexer --unicode -o Workspace/Lexer.fs</OtherFlags>
+                <FsLex Include="WorkspaceParser/Lexer.fsl">
+                    <OtherFlags>--module WorkspaceLexer --unicode -o Gen/WorkspaceLexer.fs</OtherFlags>
                 </FsLex>
 
-                <FsYacc Include="Project/Parser.fsy">
-                    <OtherFlags>-v --module ProjectParser -o Project/Parser.fs</OtherFlags>
+                <FsYacc Include="ProjectParser/Parser.fsy">
+                    <OtherFlags>-v --module ProjectParser -o Gen/ProjectParser.fs</OtherFlags>
                 </FsYacc>
-                <FsLex Include="Project/Lexer.fsl">
-                    <OtherFlags>--module ProjectLexer --unicode -o Project/Lexer.fs</OtherFlags>
+                <FsLex Include="ProjectParser/Lexer.fsl">
+                    <OtherFlags>--module ProjectLexer --unicode -o Gen/ProjectLexer.fs</OtherFlags>
                 </FsLex>
             </ItemGroup>
         </When>
@@ -28,14 +28,14 @@
 
   <ItemGroup>
     <Compile Include="AST.fs" />
-    <Compile Include="Workspace/AST.fs" />
-    <Compile Include="Workspace/Parser.fsi" />
-    <Compile Include="Workspace/Parser.fs" />
-    <Compile Include="Workspace/Lexer.fs" />
-    <Compile Include="Project/AST.fs" />
-    <Compile Include="Project/Parser.fsi" />
-    <Compile Include="Project/Parser.fs" />
-    <Compile Include="Project/Lexer.fs" />
+    <Compile Include="WorkspaceParser/AST.fs" />
+    <Compile Include="ProjectParser/AST.fs" />
+    <Compile Include="Gen/WorkspaceParser.fsi" />
+    <Compile Include="Gen/WorkspaceParser.fs" />
+    <Compile Include="Gen/WorkspaceLexer.fs" />
+    <Compile Include="Gen/ProjectParser.fsi" />
+    <Compile Include="Gen/ProjectParser.fs" />
+    <Compile Include="Gen/ProjectLexer.fs" />
     <Compile Include="FrontEnd.fs" />
   </ItemGroup>
 
