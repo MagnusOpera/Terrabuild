@@ -60,6 +60,19 @@ type WorkspaceConfig = {
 }
 
 
+
+[<RequireQualifiedAccess>]
+type ProjectDefinition = {
+    Dependencies: string set
+    Ignores: string set
+    Outputs: string set
+    Targets: Map<string, Terrabuild.Parser.Project.AST.Target>
+    Labels: string set
+    Extensions: Map<string, Extension>
+    Properties: Map<string, string>
+    Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
+}
+
 module ExtensionLoaders =
     open Terrabuild.Scripting
 
@@ -78,14 +91,14 @@ module ExtensionLoaders =
     let terrabuildDir = System.Reflection.Assembly.GetExecutingAssembly().Location |> IO.parentDirectory
     let terrabuildExtensibility = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
 
-    let lazyLoadScript projectDir name (ext: Extension) =
+    let lazyLoadScript name (ext: Extension) =
         let script =
             match ext.Script with
             | Some script -> script
             | None ->
                 let providedScripts = Set [ "@docker"; "@dotnet"; "@npm"; "@make"; "@shell"; "@terraform" ]
                 if providedScripts |> Set.contains name then IO.combinePath terrabuildDir $"Scripts/{name}.fsx"
-                else failwith $"Script is not defined for extension '{name}' for project '{projectDir}'"
+                else failwith $"Script is not defined for extension '{name}'"
 
         let initScript () =
             let script = loadScript [ terrabuildExtensibility ] script
@@ -107,70 +120,8 @@ module ExtensionLoaders =
         with
         | exn -> ConfigException.Raise($"error while invoking method '{method}' from extension '{extension}'", exn)
 
-module ProjectConfigParser =
-    open Terrabuild.Parser.Project.AST
 
-    [<RequireQualifiedAccess>]
-    type ProjectDefinition = {
-        Dependencies: string set
-        Ignores: string set
-        Outputs: string set
-        Targets: Map<string, Target>
-        Labels: string set
-        Extensions: Map<string, Extension>
-        Properties: Map<string, string>
-        Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
-    }
 
-    let configure (extensions: Map<string, Extension>) (projectConfig: Terrabuild.Parser.Project.AST.Project) (workspaceDir: string) (projectDir: string) (ci: bool) =
-        let extensions =
-            extensions
-            |> Map.addMap projectConfig.Extensions
-
-        let scripts =
-            extensions
-            |> Map.map (ExtensionLoaders.lazyLoadScript projectDir)
-
-        let projectInfo =
-            match projectConfig.Configuration.Parser with
-            | Some parser ->
-                let parseContext = 
-                    let context = { Terrabuild.Extensibility.InitContext.Directory = projectDir
-                                    Terrabuild.Extensibility.InitContext.CI = ci }
-                    Value.Map (Map [ "context", Value.Object context ])
-                ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts parser "__init__" parseContext |> Some
-            | _ -> None
-
-        let mergeOpt optData data =
-            projectInfo
-            |> Option.map optData
-            |> Option.defaultValue Set.empty
-            |> Set.union data
-
-        let projectOutputs =
-            mergeOpt (fun project -> project.Outputs) projectConfig.Configuration.Outputs
-
-        let projectIgnores =
-            mergeOpt (fun project -> project.Ignores) projectConfig.Configuration.Ignores
-
-        // convert relative dependencies to absolute dependencies respective to workspaceDirectory
-        let projectDependencies =
-            mergeOpt (fun project -> project.Dependencies) projectConfig.Configuration.Dependencies
-            |> Set.map (fun dep -> IO.combinePath projectDir dep |> IO.relativePath workspaceDir)
-
-        let labels = projectConfig.Configuration.Labels
-        let projectTargets = projectConfig.Targets
-
-        let properties = projectInfo |> Option.map (fun pi -> pi.Properties) |> Option.defaultValue Map.empty
-
-        { ProjectDefinition.Dependencies = projectDependencies
-          ProjectDefinition.Ignores = projectIgnores
-          ProjectDefinition.Outputs = projectOutputs
-          ProjectDefinition.Targets = projectTargets
-          ProjectDefinition.Labels = labels
-          ProjectDefinition.Extensions = extensions
-          ProjectDefinition.Properties = properties
-          ProjectDefinition.Scripts = scripts }
 
 
 
@@ -218,6 +169,10 @@ let read workspaceDir (options: Options) environment labels variables =
         workspaceConfig.Extensions
         |> Map.add "@shell" Extension.Empty
 
+    let scripts =
+        extensions
+        |> Map.map ExtensionLoaders.lazyLoadScript
+
     let rec scanDependency projects project =
         let projectDir = IO.combinePath workspaceDir project
 
@@ -230,8 +185,59 @@ let read workspaceDir (options: Options) environment labels variables =
                     FrontEnd.parseProject projectContent
                 with exn ->
                     ConfigException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
-            
-            let projectDef = ProjectConfigParser.configure extensions projectConfig workspaceDir projectDir options.CI
+
+            let projectDef =
+                // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
+                // Order is important as we just want to override in the project and reduce as much as possible scripts compilation
+                // In other terms: we only compile what's changed
+                let extensions =
+                    extensions
+                    |> Map.addMap projectConfig.Extensions
+
+                let scripts =
+                    scripts
+                    |> Map.addMap (projectConfig.Extensions |> Map.map ExtensionLoaders.lazyLoadScript)
+
+                let projectInfo =
+                    match projectConfig.Configuration.Parser with
+                    | Some parser ->
+                        let parseContext = 
+                            let context = { Terrabuild.Extensibility.InitContext.Directory = projectDir
+                                            Terrabuild.Extensibility.InitContext.CI = options.CI }
+                            Value.Map (Map [ "context", Value.Object context ])
+                        ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts parser "__init__" parseContext |> Some
+                    | _ -> None
+
+                let mergeOpt optData data =
+                    projectInfo
+                    |> Option.map optData
+                    |> Option.defaultValue Set.empty
+                    |> Set.union data
+
+                let projectOutputs =
+                    mergeOpt (fun project -> project.Outputs) projectConfig.Configuration.Outputs
+
+                let projectIgnores =
+                    mergeOpt (fun project -> project.Ignores) projectConfig.Configuration.Ignores
+
+                // convert relative dependencies to absolute dependencies respective to workspaceDirectory
+                let projectDependencies =
+                    mergeOpt (fun project -> project.Dependencies) projectConfig.Configuration.Dependencies
+                    |> Set.map (fun dep -> IO.combinePath projectDir dep |> IO.relativePath workspaceDir)
+
+                let labels = projectConfig.Configuration.Labels
+                let projectTargets = projectConfig.Targets
+
+                let properties = projectInfo |> Option.map (fun pi -> pi.Properties) |> Option.defaultValue Map.empty
+
+                { ProjectDefinition.Dependencies = projectDependencies
+                  ProjectDefinition.Ignores = projectIgnores
+                  ProjectDefinition.Outputs = projectOutputs
+                  ProjectDefinition.Targets = projectTargets
+                  ProjectDefinition.Labels = labels
+                  ProjectDefinition.Extensions = extensions
+                  ProjectDefinition.Properties = properties
+                  ProjectDefinition.Scripts = scripts }
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
