@@ -1,4 +1,4 @@
-module Terrabuild.Configuration.Project.Lexer
+module internal Terrabuild.Configuration.Project.Lexer
 # 1 "ProjectParser/Lexer.fsl"
  
 // module Lexer

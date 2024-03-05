@@ -10,17 +10,17 @@
                          $(DefineConstants), '^(.*;)*GENERATE_PARSER(;.*)*$'))">
             <ItemGroup>
                 <FsYacc Include="WorkspaceParser/Parser.fsy">
-                    <OtherFlags>--module Terrabuild.Configuration.Workspace.Parser -o Gen/WorkspaceParser.fs</OtherFlags>
+                    <OtherFlags>--internal --module Terrabuild.Configuration.Workspace.Parser -o Gen/WorkspaceParser.fs</OtherFlags>
                 </FsYacc>
                 <FsLex Include="WorkspaceParser/Lexer.fsl">
-                    <OtherFlags>--module Terrabuild.Configuration.Workspace.Lexer --unicode -o Gen/WorkspaceLexer.fs</OtherFlags>
+                    <OtherFlags>--internal --module Terrabuild.Configuration.Workspace.Lexer --unicode -o Gen/WorkspaceLexer.fs</OtherFlags>
                 </FsLex>
 
                 <FsYacc Include="ProjectParser/Parser.fsy">
-                    <OtherFlags>--module Terrabuild.Configuration.Project.Parser -o Gen/ProjectParser.fs</OtherFlags>
+                    <OtherFlags>--internal --module Terrabuild.Configuration.Project.Parser -o Gen/ProjectParser.fs</OtherFlags>
                 </FsYacc>
                 <FsLex Include="ProjectParser/Lexer.fsl">
-                    <OtherFlags>--module Terrabuild.Configuration.Project.Lexer --unicode -o Gen/ProjectLexer.fs</OtherFlags>
+                    <OtherFlags>--internal --module Terrabuild.Configuration.Project.Lexer --unicode -o Gen/ProjectLexer.fs</OtherFlags>
                 </FsLex>
             </ItemGroup>
         </When>
