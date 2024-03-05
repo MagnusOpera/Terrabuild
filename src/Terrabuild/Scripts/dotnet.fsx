@@ -54,7 +54,7 @@ let private buildCmdLine cmd args cache =
 
 let parse (context: InitContext) =
     let projectFile = findProjectFile context.Directory
-    let dependencies = parseDotnetDependencies projectFile
+    let dependencies = Path.Combine(context.Directory, projectFile) |> parseDotnetDependencies 
     let properties = Map [ "projectfile", projectFile ]
     let projectInfo = { ProjectInfo.Properties = properties
                         ProjectInfo.Ignores = Set []

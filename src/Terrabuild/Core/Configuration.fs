@@ -214,6 +214,10 @@ let read workspaceDir (options: Options) environment labels variables =
 
     let processedNodes = ConcurrentDictionary<string, bool>()
 
+    let extensions =
+        workspaceConfig.Extensions
+        |> Map.add "shell" Extension.Empty
+
     let rec scanDependency projects project =
         let projectDir = IO.combinePath workspaceDir project
 
@@ -227,7 +231,7 @@ let read workspaceDir (options: Options) environment labels variables =
                 with exn ->
                     ConfigException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
             
-            let projectDef = ProjectConfigParser.load workspaceConfig.Extensions projectConfig workspaceDir projectDir options.CI
+            let projectDef = ProjectConfigParser.load extensions projectConfig workspaceDir projectDir options.CI
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
@@ -281,7 +285,11 @@ let read workspaceDir (options: Options) environment labels variables =
                         |> List.fold (fun (variables, actions) step ->
                             let stepVars: Map<string, string> = Map.empty
 
-                            let extension = projectDef.Extensions[step.Extension]
+                            let extension = 
+                                match projectDef.Extensions |> Map.tryFind step.Extension with
+                                | Some extension -> extension
+                                | _ -> ConfigException.Raise $"Extension {step.Extension} is not defined"
+
                             let stepActions =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Properties = projectDef.Properties
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
