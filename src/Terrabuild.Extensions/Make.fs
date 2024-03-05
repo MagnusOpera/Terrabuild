@@ -1,15 +1,9 @@
-module Make
-type Dummy = interface end
+namespace Terrabuild.Extensions
 
 open Terrabuild.Extensibility
 
 
-let private buildCmdLine cmd args =
-    { Action.Command = cmd
-      Action.Arguments = args
-      Action.Cache = Cacheability.Always }
-
-
-let __dispatch__ (context: ActionContext) (variables: Map<string, string>) =
-    let args = variables |> Seq.fold (fun acc kvp -> $"{acc} {kvp.Key}=\"{kvp.Value}\"") $"{context.Command}"
-    [ buildCmdLine "make" args ]
+type Make() =
+    static member __dispatch__ (context: ActionContext) (variables: Map<string, string>) =
+        let args = variables |> Seq.fold (fun acc kvp -> $"{acc} {kvp.Key}=\"{kvp.Value}\"") $"{context.Command}"
+        [ Action.Build "make" args Cacheability.Always ]

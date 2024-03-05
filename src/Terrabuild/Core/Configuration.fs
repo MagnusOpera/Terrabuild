@@ -84,12 +84,12 @@ module ExtensionLoaders =
 
     let systemScripts =
         Map [
-            "@docker", typeof<Docker.Dummy>.DeclaringType
-            "@dotnet", typeof<Dotnet.Dummy>.DeclaringType
-            "@make", typeof<Make.Dummy>.DeclaringType
-            "@npm", typeof<Npm.Dummy>.DeclaringType
-            "@shell", typeof<Shell.Dummy>.DeclaringType
-            "@terraform", typeof<Terraform.Dummy>.DeclaringType
+            "@docker", typeof<Terrabuild.Extensions.Docker>
+            "@dotnet", typeof<Terrabuild.Extensions.Dotnet>
+            "@make", typeof<Terrabuild.Extensions.Make>
+            "@npm", typeof<Terrabuild.Extensions.Npm>
+            "@shell", typeof<Terrabuild.Extensions.Shell>
+            "@terraform", typeof<Terrabuild.Extensions.Terraform>
         ]
 
     let systemExtensions =

@@ -14,6 +14,8 @@ type Action = {
     Arguments: string
     Cache: Cacheability
 }
+with
+    static member Build cmd args cache = { Command = cmd; Arguments = args; Cache = cache }
 
 [<RequireQualifiedAccess>]
 type InitContext = {

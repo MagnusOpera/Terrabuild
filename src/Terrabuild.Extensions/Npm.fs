@@ -1,23 +1,18 @@
-module Npm
-type Dummy = interface end
+namespace Terrabuild.Extensions
 
 
 open Terrabuild.Extensibility
 
 
-let private buildCmdLine cmd args =
-    { Action.Command = cmd
-      Action.Arguments = args
-      Action.Cache = Cacheability.Always }
 
+type Npm() =
+    static member install () =
+        [ Action.Build "npm" "ci" Cacheability.Always ]
 
-let install () =
-    [ buildCmdLine "npm" "ci" ]
+    static member build () =
+        [ Action.Build "npm" "ci" Cacheability.Always
+          Action.Build "npm" "run build" Cacheability.Always ]
 
-let build () =
-    [ buildCmdLine "npm" "ci"
-      buildCmdLine "npm" "run build" ]
-
-let test () =
-    [ buildCmdLine "npm" "ci"
-      buildCmdLine "npm" "run test" ]
+    static member test () =
+        [ Action.Build "npm" "ci" Cacheability.Always
+          Action.Build "npm" "run test" Cacheability.Always ]

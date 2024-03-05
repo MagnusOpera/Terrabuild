@@ -1,23 +1,19 @@
-module Terraform
-type Dummy = interface end
+namespace Terrabuild.Extensions
 
 open Terrabuild.Extensibility
 
 
-let buildCmdLine cmd args =
-    { Action.Command = cmd
-      Action.Arguments = args
-      Action.Cache = Cacheability.Always }
+  
+type Terraform() =
+    static member init () =
+        [ Action.Build "terraform" "init -reconfigure" Cacheability.Always ]
 
-let init (workspace: string option) =
-    [ buildCmdLine "terraform" "init -reconfigure" ]
-
-let plan (workspace: string option) =
-    [ buildCmdLine "terraform" "init -reconfigure"
-      if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
-      buildCmdLine "terraform" "plan -out=terrabuild.planfile" ]
-
-let apply (workspace: string option) =
-    [ buildCmdLine "terraform" "init -reconfigure"
-      if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
-      buildCmdLine "terraform" "apply terrabuild.planfile" ]
+    static member plan (workspace: string option) =
+        [ Action.Build "terraform" "init -reconfigure" Cacheability.Always
+          if workspace |> Option.isSome then Action.Build "terraform" $"workspace select {workspace.Value}" Cacheability.Always
+          Action.Build "terraform" "plan -out=terrabuild.planfile" Cacheability.Always ]
+  
+    static member apply (workspace: string option) =
+        [ Action.Build "terraform" "init -reconfigure" Cacheability.Always
+          if workspace |> Option.isSome then Action.Build "terraform" $"workspace select {workspace.Value}" Cacheability.Always
+          Action.Build "terraform" "apply terrabuild.planfile" Cacheability.Always ]

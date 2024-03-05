@@ -1,17 +1,11 @@
-module Shell
-type Dummy = interface end
-
-
+namespace Terrabuild.Extensions
 open Terrabuild.Extensibility
 
 
-let buildCmdLine cmd args =
-    { Action.Command = cmd
-      Action.Arguments = args
-      Action.Cache = Cacheability.Always }
+type Shell() =
 
-let echo (message: string) =
-    [ buildCmdLine "echo" message ]
+    static member echo (message: string) =
+        [ Action.Build "echo" message Cacheability.Always ]
 
-let exec (command:string) (arguments: string) =
-    [ buildCmdLine command arguments ]
+    static member exec (command:string) (arguments: string) =
+        [ Action.Build command arguments Cacheability.Always ]
