@@ -23,4 +23,3 @@ with
         | ExtensionComponents.Container container -> { this with Container = Some container }
         | ExtensionComponents.Script script -> { this with Script = Some script }
         | ExtensionComponents.Defaults defaults -> { this with Defaults = defaults }
-

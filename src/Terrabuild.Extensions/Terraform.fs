@@ -1,8 +1,5 @@
-module Script
-
-#if !TERRABUILD_SCRIPT
-#r "../bin/Debug/net8.0/Terrabuild.Extensibility.dll"
-#endif
+module Terraform
+type Dummy = interface end
 
 open Terrabuild.Extensibility
 

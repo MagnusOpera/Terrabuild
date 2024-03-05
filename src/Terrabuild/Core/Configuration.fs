@@ -74,8 +74,27 @@ type private ProjectDefinition = {
     Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
 }
 
+
+
+
+
+
 module ExtensionLoaders =
     open Terrabuild.Scripting
+
+    let systemScripts =
+        Map [
+            "@docker", typeof<Docker.Dummy>.DeclaringType
+            "@dotnet", typeof<Dotnet.Dummy>.DeclaringType
+            "@make", typeof<Make.Dummy>.DeclaringType
+            "@npm", typeof<Npm.Dummy>.DeclaringType
+            "@shell", typeof<Shell.Dummy>.DeclaringType
+            "@terraform", typeof<Terraform.Dummy>.DeclaringType
+        ]
+
+    let systemExtensions =
+        systemScripts |> Map.map (fun _ _ -> Extension.Empty)
+
 
     let loadStorage name : Storages.Storage =
         match name with
@@ -92,18 +111,14 @@ module ExtensionLoaders =
     let terrabuildDir = System.Reflection.Assembly.GetExecutingAssembly().Location |> IO.parentDirectory
     let terrabuildExtensibility = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
 
-    let lazyLoadScript name (ext: Extension) =
-        let script =
-            match ext.Script with
-            | Some script -> script
-            | None ->
-                let providedScripts = Set [ "@docker"; "@dotnet"; "@npm"; "@make"; "@shell"; "@terraform" ]
-                if providedScripts |> Set.contains name then IO.combinePath terrabuildDir $"Scripts/{name}.fsx"
-                else failwith $"Script is not defined for extension '{name}'"
-
+    let lazyLoadScript (name: string) (ext: Extension) =
         let initScript () =
-            let script = loadScript [ terrabuildExtensibility ] script
-            script
+            match ext.Script with
+            | Some script -> loadScript [ terrabuildExtensibility ] script
+            | _ ->
+                match systemScripts |> Map.tryFind name with
+                | Some sysTpe -> Script(sysTpe)
+                | _ -> failwith $"Script is not defined for extension '{name}'"
 
         lazy(initScript())
 
@@ -120,9 +135,6 @@ module ExtensionLoaders =
                 | _ -> failwith "Extension '{extension} does not provide function '{method}'"
         with
         | exn -> ConfigException.Raise($"error while invoking method '{method}' from extension '{extension}'", exn)
-
-
-
 
 
 
@@ -166,9 +178,9 @@ let read workspaceDir (options: Options) environment labels variables =
 
     let processedNodes = ConcurrentDictionary<string, bool>()
 
-    let extensions =
-        workspaceConfig.Extensions
-        |> Map.add "@shell" Extension.Empty
+    let extensions = 
+        ExtensionLoaders.systemExtensions
+        |> Map.addMap workspaceConfig.Extensions
 
     let scripts =
         extensions

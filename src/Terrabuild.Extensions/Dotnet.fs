@@ -1,15 +1,10 @@
-module Script
-
-#if !TERRABUILD_SCRIPT
-#r "../bin/Debug/net8.0/Terrabuild.Extensibility.dll"
-#endif
+module Dotnet
+type Dummy = interface end
 
 
 open Terrabuild.Extensibility
 open System.Xml.Linq
 open System.IO
-    open System.Xml.Linq
-
 
 
 #nowarn "0077" // op_Explicit

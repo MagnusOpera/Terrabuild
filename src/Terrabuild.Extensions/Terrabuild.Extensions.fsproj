@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Docker.fs" />
+    <Compile Include="Dotnet.fs" />
+    <Compile Include="Make.fs" />
+    <Compile Include="Npm.fs" />
+    <Compile Include="Shell.fs" />
+    <Compile Include="Terraform.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+   <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
+  </ItemGroup>
+
+</Project>

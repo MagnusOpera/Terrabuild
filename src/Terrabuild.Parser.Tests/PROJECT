@@ -1,14 +1,18 @@
-extension dotnet {
+extension @dotnet {
   defaults {
     configuration: $configuration
   }
 }
 
-extension docker {
+extension @docker {
   defaults {
     configuration: $configuration
     image: "ghcr.io/magnusopera/dotnet-app"
   }
+}
+
+extension @toto {
+    script "toto.fsx"
 }
 
 configuration {
@@ -16,21 +20,21 @@ configuration {
   outputs [ "dist" ]
   labels [ "app"
            "dotnet" ]
-  parser "dotnet"
+  parser "@dotnet"
 }
 
 target build {
   depends_on [ "dist" ]
 
-  dotnet build { }
+  @dotnet build { }
 }
 
 target dist {
-  dotnet build { }
-  dotnet publish { }
+  @dotnet build { }
+  @dotnet publish { }
 }
 
 target docker {
-  shell echo { message: trim("building project1 " + $configuration) }  
-  docker build { arguments: { config: "Release" } }                 
+  @shell echo { message: trim("building project1 " + $configuration) }  
+  @docker build { arguments: { config: "Release" } }                 
 }

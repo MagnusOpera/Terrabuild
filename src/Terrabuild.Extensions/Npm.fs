@@ -1,8 +1,6 @@
-module Script
+module Npm
+type Dummy = interface end
 
-#if !TERRABUILD_SCRIPT
-#r "../bin/Debug/net8.0/Terrabuild.Extensibility.dll"
-#endif
 
 open Terrabuild.Extensibility
 

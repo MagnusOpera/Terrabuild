@@ -41,6 +41,7 @@
    <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
    <ProjectReference Include="../Terrabuild.Scripting/Terrabuild.Scripting.fsproj" />
    <ProjectReference Include="../Terrabuild.Parser/Terrabuild.Parser.fsproj" />
+   <ProjectReference Include="../Terrabuild.Extensions/Terrabuild.Extensions.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,13 +55,6 @@
     <None Include="NUGET.md" Pack="true" PackagePath="\" />
     <None Include="..\LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Scripts/*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 
   <PropertyGroup>
     <!-- https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#packing-using-a-nuspec -->

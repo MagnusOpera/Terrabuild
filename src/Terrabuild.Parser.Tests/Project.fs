@@ -27,7 +27,7 @@ let parseProject() =
               Outputs = Set [ "dist" ]
               Ignores = Set.empty
               Labels = Set [ "app"; "dotnet" ]
-              Parser = Some "dotnet" }
+              Parser = Some "@dotnet" }
 
         let buildTarget = 
             { DependsOn = Set [ "dist" ] |> Some
@@ -35,25 +35,25 @@ let parseProject() =
 
         let distTarget =
             { DependsOn = None
-              Steps = [ { Extension = "dotnet"; Command = "build"; Parameters = Map.empty }
-                        { Extension = "dotnet"; Command = "publish"; Parameters = Map.empty } ] }
+              Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty }
+                        { Extension = "@dotnet"; Command = "publish"; Parameters = Map.empty } ] }
 
         let dockerTarget =
             { DependsOn = None 
-              Steps = [ { Extension = "shell"; Command = "echo"
+              Steps = [ { Extension = "@shell"; Command = "echo"
                           Parameters = Map [ "message", Expr.Function (Function.Trim,
                                                                        [ Expr.Function (Function.Plus,
                                                                                         [ Expr.String "building project1 "
                                                                                           Expr.Variable "configuration" ]) ]) ] }
-                        { Extension = "docker"; Command = "build"
+                        { Extension = "@docker"; Command = "build"
                           Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "Release"]) ] } ] }
 
-        { Extensions = Map [ "dotnet", dotnetExt
-                             "docker", dockerExt ]
+        { Extensions = Map [ "@dotnet", dotnetExt
+                             "@docker", dockerExt ]
           Configuration = configuration
-          Targets = Map [ "build", buildTarget
-                          "dist", distTarget
-                          "docker", dockerTarget ] }
+          Targets = Map [ "@build", buildTarget
+                          "@dist", distTarget
+                          "@docker", dockerTarget ] }
 
     let content = File.ReadAllText("PROJECT")
     let project = FrontEnd.parseProject content
