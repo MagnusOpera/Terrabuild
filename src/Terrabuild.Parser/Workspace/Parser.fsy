@@ -96,6 +96,12 @@ Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
 
+ListOfTargets:
+    | LSQBRACKET Targets RSQBRACKET { $2 }
+Targets:
+    | /* empty */ { [] }
+    | Targets IDENTIFIER { $1 @ [$2] }
+
 StringVariables:
     | /* empty */ { Map.empty }
     | StringVariables StringVariable { $1.Add $2 }

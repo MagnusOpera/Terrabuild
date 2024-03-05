@@ -93,6 +93,8 @@ type nonTerminalId =
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
+    | NONTERM_ListOfTargets
+    | NONTERM_Targets
     | NONTERM_Variables
     | NONTERM_Variable
     | NONTERM_Expr

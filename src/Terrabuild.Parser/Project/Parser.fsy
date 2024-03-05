@@ -90,7 +90,7 @@ TargetComponents:
     | TargetComponents DependsOn { $1.Patch $2 }
     | TargetComponents Step { $1.Patch $2 }
 DependsOn:
-    | DEPENDS_ON ListOfString { TargetComponents.DependsOn $2 }
+    | DEPENDS_ON ListOfTargets { TargetComponents.DependsOn $2 }
 Step:
     | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
 
@@ -101,6 +101,12 @@ ListOfString:
 Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
+
+ListOfTargets:
+    | LSQBRACKET Targets RSQBRACKET { $2 }
+Targets:
+    | /* empty */ { [] }
+    | Targets IDENTIFIER { $1 @ [$2] }
 
 Variables:
     | /* empty */ { Map.empty }        

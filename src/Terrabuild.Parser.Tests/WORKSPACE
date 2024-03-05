@@ -4,11 +4,11 @@ configuration {
 }
 
 target build {
-  depends_on [ "^build" ]
+  depends_on [ ^build ]
 }
 
 target dist {
-  depends_on [ "build" ]
+  depends_on [ build ]
 }
 
 environment release {

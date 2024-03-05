@@ -24,7 +24,7 @@ configuration {
 }
 
 target build {
-  depends_on [ "dist" ]
+  depends_on [ dist ]
 
   @dotnet build { }
 }
