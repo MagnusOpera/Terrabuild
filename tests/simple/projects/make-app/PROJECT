@@ -7,6 +7,6 @@ configuration {
 }
 
 target build {
-    @shell echo { message: "building project1" }
+    @shell echo { arguments: "building project1" }
     @make build { variables: { secret: $secret_message } }
 }

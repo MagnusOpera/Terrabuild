@@ -132,7 +132,7 @@ module ExtensionLoaders =
                 match invocable with
                 | Some invocable -> invocable.Invoke<'r> args
                 | None when method <> "__dispatch__" -> invokeScriptMethod scripts extension "__dispatch__" args
-                | _ -> failwith "Extension '{extension} does not provide function '{method}'"
+                | _ -> failwith $"Extension '{extension} does not provide function '{method}'"
         with
         | exn -> ConfigException.Raise($"error while invoking method '{method}' from extension '{extension}'", exn)
 
@@ -310,7 +310,7 @@ let read workspaceDir (options: Options) environment labels variables =
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = options.CI
                                                       Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash
-                                                      Terrabuild.Extensibility.ActionContext.Command = targetName
+                                                      Terrabuild.Extensibility.ActionContext.Command = step.Command
                                                       Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
 
                                 let stepParameters =

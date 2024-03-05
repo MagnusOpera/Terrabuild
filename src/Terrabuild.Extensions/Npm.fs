@@ -6,13 +6,16 @@ open Terrabuild.Extensibility
 
 
 type Npm() =
-    static member install () =
+
+    static member Install () =
         [ Action.Build "npm" "ci" Cacheability.Always ]
 
-    static member build () =
+
+    static member Build () =
         [ Action.Build "npm" "ci" Cacheability.Always
           Action.Build "npm" "run build" Cacheability.Always ]
 
-    static member test () =
+
+    static member Test () =
         [ Action.Build "npm" "ci" Cacheability.Always
           Action.Build "npm" "run test" Cacheability.Always ]

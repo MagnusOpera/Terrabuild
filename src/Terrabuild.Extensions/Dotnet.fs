@@ -11,7 +11,6 @@ open System.IO
 module DotnetHelpers =
 
     let private NsNone = XNamespace.None
-    let private NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003")
 
     let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
 
@@ -52,25 +51,29 @@ type Dotnet() =
                             ProjectInfo.Dependencies = set dependencies }
         projectInfo
 
-    static member build (context: ActionContext) (configuration: string option) =
+
+    static member Build (context: ActionContext) (configuration: string option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue "Debug"
 
         [ Action.Build "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
           Action.Build "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}" Cacheability.Always ]
 
-    static member exec (command: string) (arguments: string option) =
+
+    static member Exec (command: string) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         [ Action.Build command arguments Cacheability.Always ]
 
-    static member pack (context: ActionContext) (configuration: string option) (version: string option) =
+
+    static member Pack (context: ActionContext) (configuration: string option) (version: string option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue "Debug"
         let version = version |> Option.defaultValue "0.0.0"
         // TargetsForTfmSpecificContentInPackage ==> https://github.com/dotnet/fsharp/issues/12320
         [ Action.Build "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage=" Cacheability.Always ]
 
-    static member publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) =
+
+    static member Publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue "Debug"
 
@@ -88,12 +91,14 @@ type Dotnet() =
             | _ -> ""
         [ Action.Build "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}" Cacheability.Always ]
 
-    static member restore (context: ActionContext) =
+
+    static member Restore (context: ActionContext) =
         let projectFile = context.Properties["projectfile"]
 
         [ Action.Build "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local ]
 
-    static member test (context: ActionContext) (configuration: string option) (filter: string option) =
+
+    static member Test (context: ActionContext) (configuration: string option) (filter: string option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue "Debug"
 

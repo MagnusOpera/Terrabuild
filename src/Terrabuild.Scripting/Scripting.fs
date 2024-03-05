@@ -97,7 +97,7 @@ type Invocable(method: MethodInfo) =
 
 type Script(mainType: Type) =
     member _.GetMethod(name: string) =
-        match mainType.GetMethod(name) with
+        match mainType.GetMethod(name, BindingFlags.IgnoreCase ||| BindingFlags.Public ||| BindingFlags.Static) with
         | null -> None
         | mi -> Invocable(mi) |> Some
 

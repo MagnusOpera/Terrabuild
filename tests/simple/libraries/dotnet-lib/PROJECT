@@ -5,10 +5,9 @@ configuration {
 }
 
 target build {
-  @shell exec { command: "sleep"
-               arguments: "1" }
+  @shell sleep { arguments: "1" }
 
   @dotnet build { configuration: $configuration }
 
-  @shell echo { message: "done lib2" }
+  @shell echo { arguments: "done lib2" }
 }

@@ -24,33 +24,35 @@ let execCaptureOutput (workingDir: string) (command: string) (args: string) =
     | _ -> Error (proc.StandardError.ReadToEnd(), proc.ExitCode)
 
 let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: string) (logFile: string) =
-    use logWriter = new StreamWriter(logFile)
-    let writeLock = obj()
+    try
+        use logWriter = new StreamWriter(logFile)
+        let writeLock = obj()
 
-    let inline lockWrite (from: string) (msg: string) =
-        lock writeLock (fun () ->
-            logWriter.WriteLine($"{DateTime.UtcNow} {from} {msg}")
-        )
+        let inline lockWrite (from: string) (msg: string) =
+            lock writeLock (fun () ->
+                logWriter.WriteLine($"{DateTime.UtcNow} {from} {msg}")
+            )
 
-    use proc = new Process()
-    let psi = proc.StartInfo
-    psi.FileName <- command
-    psi.Arguments <- args
-    psi.UseShellExecute <- false
-    psi.WorkingDirectory <- workingDir
-    psi.RedirectStandardOutput <- true
-    psi.RedirectStandardError <- true
+        use proc = new Process()
+        let psi = proc.StartInfo
+        psi.FileName <- command
+        psi.Arguments <- args
+        psi.UseShellExecute <- false
+        psi.WorkingDirectory <- workingDir
+        psi.RedirectStandardOutput <- true
+        psi.RedirectStandardError <- true
 
-    proc.OutputDataReceived.Add(fun e -> lockWrite "OUT" e.Data)
-    proc.ErrorDataReceived.Add(fun e -> lockWrite "ERR" e.Data)
+        proc.OutputDataReceived.Add(fun e -> lockWrite "OUT" e.Data)
+        proc.ErrorDataReceived.Add(fun e -> lockWrite "ERR" e.Data)
 
-    proc.Start() |> ignore
-    proc.BeginOutputReadLine()
-    proc.BeginErrorReadLine()
-    proc.WaitForExit()
+        proc.Start() |> ignore
+        proc.BeginOutputReadLine()
+        proc.BeginErrorReadLine()
+        proc.WaitForExit()
 
-    proc.ExitCode
-
+        proc.ExitCode
+    with
+    | exn -> failwith $"Process '{command} {args} in directory '{workingDir}' failed with error: {exn}"
 
 type BuildQueue(maxItems: int) =
     let completion = new System.Threading.ManualResetEvent(false)

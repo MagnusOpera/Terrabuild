@@ -5,7 +5,7 @@ open Terrabuild.Extensibility
 
 type Docker() =
 
-    static member build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
+    static member Build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
         let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
         let nodehash = context.NodeHash
 
@@ -19,7 +19,8 @@ type Docker() =
         else
             [ Action.Build "docker" buildArgs Cacheability.Local ]
 
-    static member push (context: ActionContext) (image: string) =
+
+    static member Push (context: ActionContext) (image: string) =
         if context.CI then
             let retagArgs = $"buildx imagetools create -t {image}:{context.BranchOrTag} {image}:{context.NodeHash}"
             [ Action.Build "docker" retagArgs Cacheability.Remote ]
