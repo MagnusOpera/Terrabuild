@@ -78,14 +78,14 @@ module ExtensionLoaders =
     let terrabuildDir = System.Reflection.Assembly.GetExecutingAssembly().Location |> IO.parentDirectory
     let terrabuildExtensibility = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
 
-    let lazyLoadScript name (ext: Extension) =
+    let lazyLoadScript projectDir name (ext: Extension) =
         let script =
             match ext.Script with
             | Some script -> script
             | None ->
                 let providedScripts = Set [ "docker"; "dotnet"; "npm"; "shell"; "terraform" ]
                 if providedScripts |> Set.contains name then IO.combinePath terrabuildDir $"Scripts/{name}.fsx"
-                else failwith $"Script is not defined"
+                else failwith $"Script is not defined for extension '{name}' for project '{projectDir}'"
 
         let initScript () =
             let script = loadScript [ terrabuildExtensibility ] script
@@ -94,18 +94,15 @@ module ExtensionLoaders =
         lazy(initScript())
 
     let invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: string) (method: string) (args: Value) =
-        printfn $"Invoking method {method} from extension {extension}"
-
-        match scripts |> Map.tryFind extension with
-        | None -> failwith $"Extension {extension} is not defined"
-        | Some extension ->
-            let script = extension.Value
-            match script.GetMethod(method) with
-            | Ok method ->
-                match method.Invoke<'r> args with
-                | Ok result -> result
-                | Error msg -> ConfigException.Raise(msg)
-            | Error msg -> ConfigException.Raise(msg)
+        try
+            match scripts |> Map.tryFind extension with
+            | None -> failwith $"Extension '{extension}' is not defined"
+            | Some extension ->
+                let script = extension.Value
+                let method = script.GetMethod(method)
+                method.Invoke<'r> args
+        with
+        | exn -> ConfigException.Raise($"error while invoking method '{method}' from extension '{extension}'", exn)
 
 module ProjectConfigParser =
     open Terrabuild.Parser.Project.AST
@@ -122,14 +119,14 @@ module ProjectConfigParser =
         Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
     }
 
-    let load (extensions: Map<string, Extension>) (projectConfig: Terrabuild.Parser.Project.AST.Project) (workspaceDir: string) (projectDir: string) (ci: bool) =
+    let configure (extensions: Map<string, Extension>) (projectConfig: Terrabuild.Parser.Project.AST.Project) (workspaceDir: string) (projectDir: string) (ci: bool) =
         let extensions =
             extensions
             |> Map.addMap projectConfig.Extensions
 
         let scripts =
             extensions
-            |> Map.map ExtensionLoaders.lazyLoadScript
+            |> Map.map (ExtensionLoaders.lazyLoadScript projectDir)
 
         let projectInfo =
             match projectConfig.Configuration.Parser with
@@ -231,7 +228,7 @@ let read workspaceDir (options: Options) environment labels variables =
                 with exn ->
                     ConfigException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
             
-            let projectDef = ProjectConfigParser.load extensions projectConfig workspaceDir projectDir options.CI
+            let projectDef = ProjectConfigParser.configure extensions projectConfig workspaceDir projectDir options.CI
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
@@ -273,10 +270,6 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> String.join "\n"
                 |> Hash.sha256
 
-            let buildVariables =
-                buildVariables
-                |> Map.add "terrabuild_node_hash" nodeHash
-
             let projectSteps =
                 projectDef.Targets
                 |> Map.map (fun targetName target ->
@@ -297,7 +290,8 @@ let read workspaceDir (options: Options) environment labels variables =
                                                       Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash }
 
                                 let stepParameters =
-                                    step.Parameters
+                                    extension.Defaults
+                                    |> Map.addMap step.Parameters
                                     |> Map.add "context" (Expr.Object actionContext)
                                     |> Expr.Map
                                     |> Eval.eval buildVariables

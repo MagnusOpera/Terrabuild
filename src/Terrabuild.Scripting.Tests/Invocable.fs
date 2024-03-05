@@ -34,9 +34,7 @@ let invokeScalar() =
 
     let args = Value.Map (Map ["name", Value.String "Pierre"])
     let result = invocable.Invoke<string> args
-    match result with
-    | Ok result -> result |> should equal "Hello Pierre"
-    | Error err -> failwith err
+    result |> should equal "Hello Pierre"
 
 [<Test>]
 let invokeRecord() =
@@ -45,9 +43,7 @@ let invokeRecord() =
     
     let args = Value.Map (Map ["args", Value.Map (Map ["Name", Value.String "Pierre"])])
     let result = invocable.Invoke<string> args
-    match result with
-    | Ok result -> result |> should equal "Hello Pierre !"
-    | Error err -> failwith err
+    result |> should equal "Hello Pierre !"
 
 [<Test>]
 let invokeOptionNone() =
@@ -56,9 +52,7 @@ let invokeOptionNone() =
 
     let args = Value.Map Map.empty
     let result = invocable.Invoke<string> args
-    match result with
-    | Ok result -> result |> should equal "Hello None !"
-    | Error err -> failwith err
+    result |> should equal "Hello None !"
 
 [<Test>]
 let invokeOptionSome() =
@@ -67,6 +61,4 @@ let invokeOptionSome() =
 
     let args = Value.Map (Map ["name", Value.String "Pierre"])
     let result = invocable.Invoke<string> args
-    match result with
-    | Ok result -> result |> should equal "Hello Pierre !"
-    | Error err -> failwith err
+    result |> should equal "Hello Pierre !"

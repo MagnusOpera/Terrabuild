@@ -86,24 +86,21 @@ type Invocable(method: MethodInfo) =
         match value with
         | Value.Map map -> 
             let prms = method.GetParameters()
-            mapParameters map prms |> Ok
-        | _ -> Error $"Expecting a map for build arguments"
+            mapParameters map prms
+        | _ -> failwith $"Expecting a map for build arguments"
 
     let invoke args =
         method.Invoke(null, args)
 
     member _.Invoke<'t> (value: Value) =
-        match buildArgs value with
-        | Ok args -> Ok (invoke args :?> 't)
-        | Error err -> Error err
+        let args = buildArgs value
+        invoke args :?> 't
 
-type Script(assembly: Assembly) =
-    let mainType = assembly.GetType("Script")
-
+type Script(mainType: Type) =
     member _.GetMethod(name: string) =
         match mainType.GetMethod(name) with
-        | null -> Error $"Function {name} does not exist" 
-        | mi -> Invocable(mi) |> Ok
+        | null -> failwith $"Function {name} does not exist" 
+        | mi -> Invocable(mi)
 
 let loadScript (references: string list) (scriptFile) =
     let scriptFile = Path.GetFullPath(scriptFile)
@@ -123,5 +120,7 @@ let loadScript (references: string list) (scriptFile) =
     if firstError <> None then failwithf $"Error while compiling script {scriptFile}: {firstError.Value}"
 
     let assembly = Assembly.LoadFile outputDllName
-    let script = Script(assembly)
+    let mainType = assembly.GetType("Script")
+    if mainType |> isNull then failwith $"Failed to build script {scriptFile}"
+    let script = Script(mainType)
     script

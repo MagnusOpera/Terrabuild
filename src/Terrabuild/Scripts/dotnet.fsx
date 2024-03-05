@@ -65,7 +65,6 @@ let parse (context: InitContext) =
 let build (context: ActionContext) (configuration: string option) =
     let projectFile = context.Properties["projectfile"]
     let configuration = configuration |> Option.defaultValue "Debug"
-    printfn $"Running dotnet::build"
 
     [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
       buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}" Cacheability.Always ]

@@ -1,12 +1,11 @@
-extension make { }
-
 configuration {
-    dependencies "../../libraries/shell-lib"
+    dependencies [ "../../libraries/shell-lib" ]
     outputs [ "dist" ]
     labels [ "app" ]
 }
 
 target build {
     shell echo { message: "building project1" }
-    shell exec { command: "make" arguments: "secret: " + $secret_message }
+    shell exec { command: "make"
+                 arguments: "secret=" + $secret_message }
 }
