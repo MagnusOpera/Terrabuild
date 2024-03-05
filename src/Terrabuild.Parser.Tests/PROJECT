@@ -4,9 +4,9 @@ configuration {
 }
 
 target build {
-    @dotnet build { }
+    @dotnet build
 }
 
 target test {
-    @dotnet test { }
+    @dotnet test
 }

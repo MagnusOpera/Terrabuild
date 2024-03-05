@@ -12,7 +12,7 @@ extension @docker {
 }
 
 target build {
-    @dotnet build { }
+    @dotnet build
 }
 
 target dist {
