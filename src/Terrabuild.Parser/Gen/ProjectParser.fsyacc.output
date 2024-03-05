@@ -1929,7 +1929,8 @@ state 50:  items:    DependsOn -> 'DEPENDS_ON' ListOfTargets .
     action 'error' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfTargets
     action '#' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfTargets
     action '$$' (noprec):   reduce DependsOn --> 'DEPENDS_ON' ListOfTargets
-  immediate action:   reduce DependsOn --> 'DEPENDS_ON' ListOfTargets  gotos:state 51:  items:    Step -> 'IDENTIFIER' . 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
+  immediate action:   reduce DependsOn --> 'DEPENDS_ON' ListOfTargets  gotos:state 51:  items:    Step -> 'IDENTIFIER' . 'IDENTIFIER'
+    Step -> 'IDENTIFIER' . 'IDENTIFIER' 'LBRACE' Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1966,43 +1967,44 @@ state 50:  items:    DependsOn -> 'DEPENDS_ON' ListOfTargets .
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:state 52:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' . 'LBRACE' Variables 'RBRACE'
-  actions:    action 'DEPENDENCIES' (noprec):   error
-    action 'OUTPUTS' (noprec):   error
-    action 'IGNORES' (noprec):   error
-    action 'LABELS' (noprec):   error
-    action 'PARSER' (noprec):   error
-    action 'CONTAINER' (noprec):   error
-    action 'INIT' (noprec):   error
-    action 'SCRIPT' (noprec):   error
-    action 'DEPENDS_ON' (noprec):   error
-    action 'DEFAULTS' (noprec):   error
-    action 'EXTENSION' (noprec):   error
-    action 'CONFIGURATION' (noprec):   error
-    action 'TARGET' (noprec):   error
-    action 'EOF' (noprec):   error
-    action 'TRIM' (noprec):   error
-    action 'UPPER' (noprec):   error
-    action 'LOWER' (noprec):   error
-    action 'PLUS' (noprec):   error
-    action 'COMMA' (noprec):   error
-    action 'EQUAL' (noprec):   error
-    action 'LPAREN' (noprec):   error
-    action 'RPAREN' (noprec):   error
-    action 'LSQBRACKET' (noprec):   error
-    action 'RSQBRACKET' (noprec):   error
+  immediate action: <none>  gotos:state 52:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' . 
+    Step -> 'IDENTIFIER' 'IDENTIFIER' . 'LBRACE' Variables 'RBRACE'
+  actions:    action 'DEPENDENCIES' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'OUTPUTS' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'IGNORES' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'LABELS' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'PARSER' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'CONTAINER' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'INIT' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'SCRIPT' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'DEPENDS_ON' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'DEFAULTS' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'EXTENSION' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'CONFIGURATION' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'TARGET' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'EOF' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'TRIM' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'UPPER' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'LOWER' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'PLUS' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'COMMA' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'EQUAL' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'LPAREN' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'RPAREN' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'LSQBRACKET' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'RSQBRACKET' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
     action 'LBRACE' (noprec):   shift 53
-    action 'RBRACE' (noprec):   error
-    action 'KEY' (noprec):   error
-    action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   error
-    action 'NOTHING' (noprec):   error
-    action 'TRUE' (noprec):   error
-    action 'FALSE' (noprec):   error
-    action 'error' (noprec):   error
-    action '#' (noprec):   error
-    action '$$' (noprec):   error
+    action 'RBRACE' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'KEY' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'VARIABLE' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'IDENTIFIER' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'STRING' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'NOTHING' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'TRUE' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'FALSE' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action 'error' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action '#' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
+    action '$$' (noprec):   reduce Step --> 'IDENTIFIER' 'IDENTIFIER'
   immediate action: <none>  gotos:state 53:  items:    Step -> 'IDENTIFIER' 'IDENTIFIER' 'LBRACE' . Variables 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   reduce Variables --> 
     action 'OUTPUTS' (noprec):   reduce Variables --> 

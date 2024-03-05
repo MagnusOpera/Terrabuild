@@ -16,11 +16,11 @@ target build {
 }
 
 target dist {
-    @dotnet publish { }
-    @dotnet pack { }
+    @dotnet publish
+    @dotnet pack
     @docker build { arguments: { configuration: $configuration } }
 }
 
 target publish {
-    @docker push { }
+    @docker push
 }
