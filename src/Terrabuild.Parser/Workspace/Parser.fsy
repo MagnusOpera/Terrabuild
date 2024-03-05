@@ -64,7 +64,7 @@ TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents TargetDependsOn { $1.Patch $2 }
 TargetDependsOn:
-    | DEPENDS_ON ListOfString { TargetComponents.DependsOn $2 }
+    | DEPENDS_ON ListOfTargets { TargetComponents.DependsOn $2 }
 
 Environment:
     | ENVIRONMENT IDENTIFIER LBRACE EnvironmentComponents RBRACE { WorkspaceComponents.Environment ($2, $4) }

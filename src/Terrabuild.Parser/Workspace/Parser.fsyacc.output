@@ -885,7 +885,7 @@ state 22:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'error' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action '#' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
     action '$$' (noprec):   reduce TargetComponents --> TargetComponents TargetDependsOn
-  immediate action:   reduce TargetComponents --> TargetComponents TargetDependsOn  gotos:state 24:  items:    TargetDependsOn -> 'DEPENDS_ON' . ListOfString
+  immediate action:   reduce TargetComponents --> TargetComponents TargetDependsOn  gotos:state 24:  items:    TargetDependsOn -> 'DEPENDS_ON' . ListOfTargets
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
@@ -921,44 +921,44 @@ state 22:  items:    Target -> 'TARGET' 'IDENTIFIER' 'LBRACE' TargetComponents '
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto ListOfString: 25
-state 25:  items:    TargetDependsOn -> 'DEPENDS_ON' ListOfString . 
-  actions:    action 'STORAGE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'SOURCECONTROL' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'DEPENDS_ON' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'VARIABLES' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'CONTAINER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'INIT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'SCRIPT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'DEFAULTS' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'CONFIGURATION' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'TARGET' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'ENVIRONMENT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'EXTENSION' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'EOF' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'TRIM' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'UPPER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'LOWER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'PLUS' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'COMMA' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'EQUAL' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'LPAREN' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'RPAREN' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'LSQBRACKET' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'RSQBRACKET' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'LBRACE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'RBRACE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'KEY' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'VARIABLE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'IDENTIFIER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'STRING' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'NOTHING' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'TRUE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'FALSE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action 'error' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action '#' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-    action '$$' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString
-  immediate action:   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfString  gotos:state 26:  items:    Environment -> 'ENVIRONMENT' . 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
+  immediate action: <none>  gotos:    goto ListOfTargets: 25
+state 25:  items:    TargetDependsOn -> 'DEPENDS_ON' ListOfTargets . 
+  actions:    action 'STORAGE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'SOURCECONTROL' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'DEPENDS_ON' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'VARIABLES' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'CONTAINER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'INIT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'SCRIPT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'DEFAULTS' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'CONFIGURATION' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'TARGET' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'ENVIRONMENT' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'EXTENSION' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'EOF' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'TRIM' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'UPPER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'LOWER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'PLUS' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'COMMA' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'EQUAL' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'LPAREN' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'RPAREN' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'LSQBRACKET' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'RSQBRACKET' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'LBRACE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'RBRACE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'KEY' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'VARIABLE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'IDENTIFIER' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'STRING' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'NOTHING' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'TRUE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'FALSE' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action 'error' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action '#' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+    action '$$' (noprec):   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets
+  immediate action:   reduce TargetDependsOn --> 'DEPENDS_ON' ListOfTargets  gotos:state 26:  items:    Environment -> 'ENVIRONMENT' . 'IDENTIFIER' 'LBRACE' EnvironmentComponents 'RBRACE'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
@@ -1948,45 +1948,45 @@ state 51:  items:    Defaults -> 'DEFAULTS' 'LBRACE' Variables 'RBRACE' .
     action 'error' (noprec):   reduce String --> 'STRING'
     action '#' (noprec):   reduce String --> 'STRING'
     action '$$' (noprec):   reduce String --> 'STRING'
-  immediate action:   reduce String --> 'STRING'  gotos:state 53:  items:    ListOfString -> 'LSQBRACKET' . Strings 'RSQBRACKET'
-  actions:    action 'STORAGE' (noprec):   reduce Strings --> 
-    action 'SOURCECONTROL' (noprec):   reduce Strings --> 
-    action 'DEPENDS_ON' (noprec):   reduce Strings --> 
-    action 'VARIABLES' (noprec):   reduce Strings --> 
-    action 'CONTAINER' (noprec):   reduce Strings --> 
-    action 'INIT' (noprec):   reduce Strings --> 
-    action 'SCRIPT' (noprec):   reduce Strings --> 
-    action 'DEFAULTS' (noprec):   reduce Strings --> 
-    action 'CONFIGURATION' (noprec):   reduce Strings --> 
-    action 'TARGET' (noprec):   reduce Strings --> 
-    action 'ENVIRONMENT' (noprec):   reduce Strings --> 
-    action 'EXTENSION' (noprec):   reduce Strings --> 
-    action 'EOF' (noprec):   reduce Strings --> 
-    action 'TRIM' (noprec):   reduce Strings --> 
-    action 'UPPER' (noprec):   reduce Strings --> 
-    action 'LOWER' (noprec):   reduce Strings --> 
-    action 'PLUS' (noprec):   reduce Strings --> 
-    action 'COMMA' (noprec):   reduce Strings --> 
-    action 'EQUAL' (noprec):   reduce Strings --> 
-    action 'LPAREN' (noprec):   reduce Strings --> 
-    action 'RPAREN' (noprec):   reduce Strings --> 
-    action 'LSQBRACKET' (noprec):   reduce Strings --> 
-    action 'RSQBRACKET' (noprec):   reduce Strings --> 
-    action 'LBRACE' (noprec):   reduce Strings --> 
-    action 'RBRACE' (noprec):   reduce Strings --> 
-    action 'KEY' (noprec):   reduce Strings --> 
-    action 'VARIABLE' (noprec):   reduce Strings --> 
-    action 'IDENTIFIER' (noprec):   reduce Strings --> 
-    action 'STRING' (noprec):   reduce Strings --> 
-    action 'NOTHING' (noprec):   reduce Strings --> 
-    action 'TRUE' (noprec):   reduce Strings --> 
-    action 'FALSE' (noprec):   reduce Strings --> 
-    action 'error' (noprec):   reduce Strings --> 
-    action '#' (noprec):   reduce Strings --> 
-    action '$$' (noprec):   reduce Strings --> 
-  immediate action: <none>  gotos:    goto Strings: 54
-state 54:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
-    Strings -> Strings . String
+  immediate action:   reduce String --> 'STRING'  gotos:state 53:  items:    ListOfTargets -> 'LSQBRACKET' . Targets 'RSQBRACKET'
+  actions:    action 'STORAGE' (noprec):   reduce Targets --> 
+    action 'SOURCECONTROL' (noprec):   reduce Targets --> 
+    action 'DEPENDS_ON' (noprec):   reduce Targets --> 
+    action 'VARIABLES' (noprec):   reduce Targets --> 
+    action 'CONTAINER' (noprec):   reduce Targets --> 
+    action 'INIT' (noprec):   reduce Targets --> 
+    action 'SCRIPT' (noprec):   reduce Targets --> 
+    action 'DEFAULTS' (noprec):   reduce Targets --> 
+    action 'CONFIGURATION' (noprec):   reduce Targets --> 
+    action 'TARGET' (noprec):   reduce Targets --> 
+    action 'ENVIRONMENT' (noprec):   reduce Targets --> 
+    action 'EXTENSION' (noprec):   reduce Targets --> 
+    action 'EOF' (noprec):   reduce Targets --> 
+    action 'TRIM' (noprec):   reduce Targets --> 
+    action 'UPPER' (noprec):   reduce Targets --> 
+    action 'LOWER' (noprec):   reduce Targets --> 
+    action 'PLUS' (noprec):   reduce Targets --> 
+    action 'COMMA' (noprec):   reduce Targets --> 
+    action 'EQUAL' (noprec):   reduce Targets --> 
+    action 'LPAREN' (noprec):   reduce Targets --> 
+    action 'RPAREN' (noprec):   reduce Targets --> 
+    action 'LSQBRACKET' (noprec):   reduce Targets --> 
+    action 'RSQBRACKET' (noprec):   reduce Targets --> 
+    action 'LBRACE' (noprec):   reduce Targets --> 
+    action 'RBRACE' (noprec):   reduce Targets --> 
+    action 'KEY' (noprec):   reduce Targets --> 
+    action 'VARIABLE' (noprec):   reduce Targets --> 
+    action 'IDENTIFIER' (noprec):   reduce Targets --> 
+    action 'STRING' (noprec):   reduce Targets --> 
+    action 'NOTHING' (noprec):   reduce Targets --> 
+    action 'TRUE' (noprec):   reduce Targets --> 
+    action 'FALSE' (noprec):   reduce Targets --> 
+    action 'error' (noprec):   reduce Targets --> 
+    action '#' (noprec):   reduce Targets --> 
+    action '$$' (noprec):   reduce Targets --> 
+  immediate action: <none>  gotos:    goto Targets: 54
+state 54:  items:    ListOfTargets -> 'LSQBRACKET' Targets . 'RSQBRACKET'
+    Targets -> Targets . 'IDENTIFIER'
   actions:    action 'STORAGE' (noprec):   error
     action 'SOURCECONTROL' (noprec):   error
     action 'DEPENDS_ON' (noprec):   error
@@ -2014,88 +2014,87 @@ state 54:  items:    ListOfString -> 'LSQBRACKET' Strings . 'RSQBRACKET'
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 52
+    action 'IDENTIFIER' (noprec):   shift 56
+    action 'STRING' (noprec):   error
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto String: 56
-state 55:  items:    ListOfString -> 'LSQBRACKET' Strings 'RSQBRACKET' . 
-  actions:    action 'STORAGE' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'SOURCECONTROL' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'DEPENDS_ON' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'VARIABLES' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'CONTAINER' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'INIT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'SCRIPT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'DEFAULTS' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'CONFIGURATION' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'TARGET' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'ENVIRONMENT' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'EXTENSION' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'EOF' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'TRIM' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'UPPER' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'LOWER' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'PLUS' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'COMMA' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'EQUAL' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'LPAREN' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'RPAREN' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'LSQBRACKET' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'RSQBRACKET' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'LBRACE' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'RBRACE' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'KEY' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'VARIABLE' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'IDENTIFIER' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'STRING' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'NOTHING' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'TRUE' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'FALSE' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action 'error' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action '#' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-    action '$$' (noprec):   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'
-  immediate action:   reduce ListOfString --> 'LSQBRACKET' Strings 'RSQBRACKET'  gotos:state 56:  items:    Strings -> Strings String . 
-  actions:    action 'STORAGE' (noprec):   reduce Strings --> Strings String
-    action 'SOURCECONTROL' (noprec):   reduce Strings --> Strings String
-    action 'DEPENDS_ON' (noprec):   reduce Strings --> Strings String
-    action 'VARIABLES' (noprec):   reduce Strings --> Strings String
-    action 'CONTAINER' (noprec):   reduce Strings --> Strings String
-    action 'INIT' (noprec):   reduce Strings --> Strings String
-    action 'SCRIPT' (noprec):   reduce Strings --> Strings String
-    action 'DEFAULTS' (noprec):   reduce Strings --> Strings String
-    action 'CONFIGURATION' (noprec):   reduce Strings --> Strings String
-    action 'TARGET' (noprec):   reduce Strings --> Strings String
-    action 'ENVIRONMENT' (noprec):   reduce Strings --> Strings String
-    action 'EXTENSION' (noprec):   reduce Strings --> Strings String
-    action 'EOF' (noprec):   reduce Strings --> Strings String
-    action 'TRIM' (noprec):   reduce Strings --> Strings String
-    action 'UPPER' (noprec):   reduce Strings --> Strings String
-    action 'LOWER' (noprec):   reduce Strings --> Strings String
-    action 'PLUS' (noprec):   reduce Strings --> Strings String
-    action 'COMMA' (noprec):   reduce Strings --> Strings String
-    action 'EQUAL' (noprec):   reduce Strings --> Strings String
-    action 'LPAREN' (noprec):   reduce Strings --> Strings String
-    action 'RPAREN' (noprec):   reduce Strings --> Strings String
-    action 'LSQBRACKET' (noprec):   reduce Strings --> Strings String
-    action 'RSQBRACKET' (noprec):   reduce Strings --> Strings String
-    action 'LBRACE' (noprec):   reduce Strings --> Strings String
-    action 'RBRACE' (noprec):   reduce Strings --> Strings String
-    action 'KEY' (noprec):   reduce Strings --> Strings String
-    action 'VARIABLE' (noprec):   reduce Strings --> Strings String
-    action 'IDENTIFIER' (noprec):   reduce Strings --> Strings String
-    action 'STRING' (noprec):   reduce Strings --> Strings String
-    action 'NOTHING' (noprec):   reduce Strings --> Strings String
-    action 'TRUE' (noprec):   reduce Strings --> Strings String
-    action 'FALSE' (noprec):   reduce Strings --> Strings String
-    action 'error' (noprec):   reduce Strings --> Strings String
-    action '#' (noprec):   reduce Strings --> Strings String
-    action '$$' (noprec):   reduce Strings --> Strings String
-  immediate action:   reduce Strings --> Strings String  gotos:state 57:  items:    StringVariables -> StringVariables StringVariable . 
+  immediate action: <none>  gotos:state 55:  items:    ListOfTargets -> 'LSQBRACKET' Targets 'RSQBRACKET' . 
+  actions:    action 'STORAGE' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'SOURCECONTROL' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'DEPENDS_ON' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'VARIABLES' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'CONTAINER' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'INIT' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'SCRIPT' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'DEFAULTS' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'CONFIGURATION' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'TARGET' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'ENVIRONMENT' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'EXTENSION' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'EOF' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'TRIM' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'UPPER' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'LOWER' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'PLUS' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'COMMA' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'EQUAL' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'LPAREN' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'RPAREN' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'LSQBRACKET' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'RSQBRACKET' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'LBRACE' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'RBRACE' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'KEY' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'VARIABLE' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'IDENTIFIER' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'STRING' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'NOTHING' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'TRUE' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'FALSE' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action 'error' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action '#' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+    action '$$' (noprec):   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'
+  immediate action:   reduce ListOfTargets --> 'LSQBRACKET' Targets 'RSQBRACKET'  gotos:state 56:  items:    Targets -> Targets 'IDENTIFIER' . 
+  actions:    action 'STORAGE' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'SOURCECONTROL' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'DEPENDS_ON' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'VARIABLES' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'CONTAINER' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'INIT' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'SCRIPT' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'DEFAULTS' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'CONFIGURATION' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'TARGET' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'ENVIRONMENT' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'EXTENSION' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'EOF' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'TRIM' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'UPPER' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'LOWER' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'PLUS' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'COMMA' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'EQUAL' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'LPAREN' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'RPAREN' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'LSQBRACKET' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'RSQBRACKET' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'LBRACE' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'RBRACE' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'KEY' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'VARIABLE' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'IDENTIFIER' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'STRING' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'NOTHING' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'TRUE' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'FALSE' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action 'error' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action '#' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+    action '$$' (noprec):   reduce Targets --> Targets 'IDENTIFIER'
+  immediate action:   reduce Targets --> Targets 'IDENTIFIER'  gotos:state 57:  items:    StringVariables -> StringVariables StringVariable . 
   actions:    action 'STORAGE' (noprec):   reduce StringVariables --> StringVariables StringVariable
     action 'SOURCECONTROL' (noprec):   reduce StringVariables --> StringVariables StringVariable
     action 'DEPENDS_ON' (noprec):   reduce StringVariables --> StringVariables StringVariable

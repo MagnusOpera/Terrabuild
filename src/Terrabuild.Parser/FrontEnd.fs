@@ -15,7 +15,7 @@ let private parse parser lexer txt =
     | exn ->
         let err = sprintf "Unexpected token '%s' at (%d,%d)"
                           (LexBuffer<_>.LexemeString lexbuf |> string) 
-                          (lexbuf.StartPos.Column + 1) (lexbuf.StartPos.Line + 1)
+                          (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
         failwith err
 
 

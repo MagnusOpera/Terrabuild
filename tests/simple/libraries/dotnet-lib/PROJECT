@@ -1,7 +1,7 @@
 extension @dotnet { }
 
 configuration {
-  parser "@dotnet"
+  parser @dotnet
 }
 
 target build {
