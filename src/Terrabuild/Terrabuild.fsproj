@@ -40,7 +40,7 @@
   <ItemGroup>
    <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
    <ProjectReference Include="../Terrabuild.Scripting/Terrabuild.Scripting.fsproj" />
-   <ProjectReference Include="../Terrabuild.Parser/Terrabuild.Parser.fsproj" />
+   <ProjectReference Include="../Terrabuild.Configuration/Terrabuild.Configuration.fsproj" />
    <ProjectReference Include="../Terrabuild.Extensions/Terrabuild.Extensions.fsproj" />
   </ItemGroup>
 

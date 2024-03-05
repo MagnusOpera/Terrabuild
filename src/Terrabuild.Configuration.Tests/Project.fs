@@ -1,11 +1,13 @@
-module Terrabuild.Parser.Tests.Project
+module Terrabuild.Configuration.Tests.Project
 
 open System.IO
 open NUnit.Framework
 open FsUnit
 
-open Terrabuild.Parser.AST
-open Terrabuild.Parser.Project.AST
+open Terrabuild.Configuration
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.Project.AST
+
 open Terrabuild.Expressions
 
 [<Test>]

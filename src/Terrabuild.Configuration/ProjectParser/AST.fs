@@ -1,5 +1,5 @@
-﻿namespace Terrabuild.Parser.Project.AST
-open Terrabuild.Parser.AST
+﻿module Terrabuild.Configuration.Project.AST
+open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]

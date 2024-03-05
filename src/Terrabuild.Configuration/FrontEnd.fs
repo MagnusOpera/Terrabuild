@@ -1,4 +1,4 @@
-module FrontEnd
+module Terrabuild.Configuration.FrontEnd
 open FSharp.Text.Lexing
 
 
@@ -19,6 +19,6 @@ let private parse parser lexer txt =
         failwith err
 
 
-let parseProject = parse ProjectParser.Project ProjectLexer.token
+let parseProject = parse Project.Parser.Project Project.Lexer.token
 
-let parseWorkspace = parse WorkspaceParser.Workspace WorkspaceLexer.token
+let parseWorkspace = parse Workspace.Parser.Workspace Workspace.Lexer.token

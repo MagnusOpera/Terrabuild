@@ -1,7 +1,7 @@
 {
 // module Lexer
 
-open WorkspaceParser  // we need the terminal tokens from the Parser
+open Terrabuild.Configuration.Project.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 
 let lexeme = LexBuffer<_>.LexemeString
@@ -36,22 +36,23 @@ rule token = parse
     | "trim" { TRIM }
     | "upper" { UPPER }
     | "lower" { LOWER }
-    | "configuration" { CONFIGURATION }
     | "target"     { TARGET }
-    | "environment" { ENVIRONMENT }
-    | "extension" { EXTENSION }
-    | "storage"  { STORAGE }
-    | "sourcecontrol" { SOURCECONTROL }
-    | "depends_on" { DEPENDS_ON }
-    | "variables" { VARIABLES }
-    | "container" { CONTAINER }
+    | "configuration"   { CONFIGURATION }
+    | "dependencies" { DEPENDENCIES }
+    | "outputs" { OUTPUTS }
+    | "ignores" { IGNORES }
+    | "labels" { LABELS }
+    | "parser" { PARSER }
     | "script" { SCRIPT }
+    | "extension" { EXTENSION }
+    | "container" { CONTAINER }
+    | "depends_on" { DEPENDS_ON }
     | "defaults" { DEFAULTS }
 
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
 
-    | "{"        { LBRACE }
-    | "}"        { RBRACE }
+    | "{" { LBRACE }
+    | "}" { RBRACE }
     | "["        { LSQBRACKET }
     | "]"        { RSQBRACKET }
     | "("        { LPAREN }

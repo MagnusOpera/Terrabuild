@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Terrabuild.Parser/Terrabuild.Parser.fsproj" />
+    <ProjectReference Include="../Terrabuild.Configuration/Terrabuild.Configuration.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,5 @@
-﻿namespace Terrabuild.Parser.Workspace.AST
-open Terrabuild.Parser.AST
-open Terrabuild.Expressions
+﻿namespace Terrabuild.Configuration.Workspace.AST
+open Terrabuild.Configuration.AST
 
 [<RequireQualifiedAccess>]
 type ConfigurationComponents =

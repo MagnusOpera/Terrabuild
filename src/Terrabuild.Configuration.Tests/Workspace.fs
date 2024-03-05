@@ -2,8 +2,10 @@ module Terrabuild.Parser.Tests.Workspace
 open System.IO
 open NUnit.Framework
 open FsUnit
-open Terrabuild.Parser.AST
-open Terrabuild.Parser.Workspace.AST
+
+open Terrabuild.Configuration
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.Workspace.AST
 open Terrabuild.Expressions
 
 [<Test>]

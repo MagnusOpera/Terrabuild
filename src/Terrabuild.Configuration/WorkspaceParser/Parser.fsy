@@ -1,6 +1,6 @@
 %{ 
-open Terrabuild.Parser.AST
-open Terrabuild.Parser.Workspace.AST
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.Workspace.AST
 open Terrabuild.Expressions
 
 
@@ -34,7 +34,7 @@ let debugPrint s = ignore s
 // associativity and precedences
 %left PLUS
 
-%type <Terrabuild.Parser.Workspace.AST.Workspace> Workspace
+%type <Terrabuild.Configuration.Workspace.AST.Workspace> Workspace
 %% 
 
 Workspace:

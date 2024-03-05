@@ -4,7 +4,7 @@ open Collections
 open System
 open System.Collections.Concurrent
 open Terrabuild.Extensibility
-open Terrabuild.Parser.AST
+open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]
@@ -56,7 +56,7 @@ type WorkspaceConfig = {
     SourceControl: SourceControls.SourceControl
     Directory: string
     Dependencies: string set
-    Targets: Map<string, Terrabuild.Parser.Workspace.AST.Target>
+    Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
     Environment: string
 }
@@ -68,9 +68,9 @@ type private ProjectDefinition = {
     Dependencies: string set
     Ignores: string set
     Outputs: string set
-    Targets: Map<string, Terrabuild.Parser.Project.AST.Target>
+    Targets: Map<string, Terrabuild.Configuration.Project.AST.Target>
     Labels: string set
-    Extensions: Map<string, Extension>
+    Extensions: Map<string, Terrabuild.Configuration.AST.Extension>
     Properties: Map<string, string>
     Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
 }
@@ -144,7 +144,7 @@ let read workspaceDir (options: Options) environment labels variables =
     let workspaceContent = File.ReadAllText workspaceFile
     let workspaceConfig =
         try
-            FrontEnd.parseWorkspace workspaceContent
+            Terrabuild.Configuration.FrontEnd.parseWorkspace workspaceContent
         with exn ->
             ConfigException.Raise("Failed to read WORKSPACE configuration file", exn)
 
@@ -196,7 +196,7 @@ let read workspaceDir (options: Options) environment labels variables =
             let projectContent = File.ReadAllText projectFile
             let projectConfig =
                 try
-                    FrontEnd.parseProject projectContent
+                    Terrabuild.Configuration.FrontEnd.parseProject projectContent
                 with exn ->
                     ConfigException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
 

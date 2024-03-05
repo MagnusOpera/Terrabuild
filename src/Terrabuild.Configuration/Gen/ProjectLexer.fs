@@ -1,9 +1,9 @@
-module ProjectLexer
+module Terrabuild.Configuration.Project.Lexer
 # 1 "ProjectParser/Lexer.fsl"
  
 // module Lexer
 
-open ProjectParser  // we need the terminal tokens from the Parser
+open Terrabuild.Configuration.Project.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 
 let lexeme = LexBuffer<_>.LexemeString

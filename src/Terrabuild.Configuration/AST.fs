@@ -1,4 +1,4 @@
-namespace Terrabuild.Parser.AST
+namespace Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]

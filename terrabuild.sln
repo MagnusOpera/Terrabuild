@@ -7,9 +7,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild", "src\Terrabuil
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{95B29BFC-EDC1-4700-A95B-D4D545D4505B}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Parser", "src\Terrabuild.Parser\Terrabuild.Parser.fsproj", "{246D691A-CB08-4C08-B30A-0F35D792415A}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Configuration", "src\Terrabuild.Configuration\Terrabuild.Configuration.fsproj", "{246D691A-CB08-4C08-B30A-0F35D792415A}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Parser.Tests", "src\Terrabuild.Parser.Tests\Terrabuild.Parser.Tests.fsproj", "{A0C8B452-4229-4548-8205-E04797C271C6}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Configuration.Tests", "src\Terrabuild.Configuration.Tests\Terrabuild.Configuration.Tests.fsproj", "{A0C8B452-4229-4548-8205-E04797C271C6}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Scripting", "src\Terrabuild.Scripting\Terrabuild.Scripting.fsproj", "{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7}"
 EndProject
