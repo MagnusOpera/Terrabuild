@@ -1,4 +1,3 @@
-extension @make { }
 
 configuration {
     dependencies [ "../../libraries/shell-lib" ]

@@ -1,4 +1,3 @@
-extension @dotnet { }
 
 configuration {
   parser @dotnet

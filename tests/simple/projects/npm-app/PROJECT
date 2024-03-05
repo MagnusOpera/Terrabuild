@@ -1,4 +1,3 @@
-extension @npm { }
 
 configuration {
     labels [ "app" ]

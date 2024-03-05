@@ -1,4 +1,3 @@
-extension @terraform { }
 
 configuration {
     dependencies [ "../../projects/dotnet-app" ]
