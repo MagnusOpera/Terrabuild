@@ -4,12 +4,6 @@
 
 open Terrabuild.Extensibility
 
-type Globals = {
-    Workspace: string option
-}
-
-let mutable globals = None
-
 
 let buildCmdLine cmd args =
     { Action.Command = cmd
@@ -17,20 +11,14 @@ let buildCmdLine cmd args =
       Action.Cache = Cacheability.Always }
 
 let init (workspace: string option) =
-    globals <- Some { Workspace = workspace }
-
     [ buildCmdLine "terraform" "init -reconfigure" ]
 
-let plan () =
-    let globals = globals.Value
-
+let plan (workspace: string option) =
     [ buildCmdLine "terraform" "init -reconfigure"
-      if globals.Workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {globals.Workspace.Value}"
+      if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
       buildCmdLine "terraform" "plan -out=terrabuild.planfile" ]
 
-let apply () =
-    let globals = globals.Value
-
+let apply (workspace: string option) =
     [ buildCmdLine "terraform" "init -reconfigure"
-      if globals.Workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {globals.Workspace.Value}"
+      if workspace |> Option.isSome then buildCmdLine "terraform" $"workspace select {workspace.Value}"
       buildCmdLine "terraform" "apply terrabuild.planfile" ]

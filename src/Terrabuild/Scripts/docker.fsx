@@ -11,7 +11,7 @@ let private buildCmdLine cmd args cache =
       Action.Cache = cache }
 
 
-let build (context: Context) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
+let build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
     let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
     let nodehash = context.NodeHash
 

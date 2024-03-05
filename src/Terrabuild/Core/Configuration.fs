@@ -118,6 +118,7 @@ module ProjectConfigParser =
         Targets: Map<string, Target>
         Labels: string set
         Extensions: Map<string, Extension>
+        Properties: Map<string, string>
         Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
     }
 
@@ -134,8 +135,8 @@ module ProjectConfigParser =
             match projectConfig.Configuration.Parser with
             | Some parser ->
                 let parseContext = 
-                    let context = { Terrabuild.Extensibility.ParseContext.Directory = projectDir
-                                    Terrabuild.Extensibility.ParseContext.CI = ci }
+                    let context = { Terrabuild.Extensibility.InitContext.Directory = projectDir
+                                    Terrabuild.Extensibility.InitContext.CI = ci }
                     Value.Map (Map [ "context", Value.Object context ])
                 ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts parser "parse" parseContext |> Some
             | _ -> None
@@ -160,12 +161,15 @@ module ProjectConfigParser =
         let labels = projectConfig.Configuration.Labels
         let projectTargets = projectConfig.Targets
 
+        let properties = projectInfo |> Option.map (fun pi -> pi.Properties) |> Option.defaultValue Map.empty
+
         { ProjectDefinition.Dependencies = projectDependencies
           ProjectDefinition.Ignores = projectIgnores
           ProjectDefinition.Outputs = projectOutputs
           ProjectDefinition.Targets = projectTargets
           ProjectDefinition.Labels = labels
           ProjectDefinition.Extensions = extensions
+          ProjectDefinition.Properties = properties
           ProjectDefinition.Scripts = scripts }
 
 
@@ -275,17 +279,12 @@ let read workspaceDir (options: Options) environment labels variables =
                     let variables, actions =
                         target.Steps
                         |> List.fold (fun (variables, actions) step ->
-                            let extension =
-                                match projectDef.Scripts |> Map.tryFind step.Extension with
-                                | None -> failwith $"Extension {step.Extension} is not defined"
-                                | Some extension -> extension
-    
                             let stepVars: Map<string, string> = Map.empty
-
 
                             let extension = projectDef.Extensions[step.Extension]
                             let stepActions =
-                                let actionContext = { Terrabuild.Extensibility.ActionContext.Directory = projectDir
+                                let actionContext = { Terrabuild.Extensibility.ActionContext.Properties = projectDef.Properties
+                                                      Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = options.CI
                                                       Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash }
 

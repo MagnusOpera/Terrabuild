@@ -16,13 +16,14 @@ type Action = {
 }
 
 [<RequireQualifiedAccess>]
-type ParseContext = {
+type InitContext = {
     Directory: string
     CI: bool
 }
 
 [<RequireQualifiedAccess>]
 type ActionContext = {
+    Properties: Map<string, string>
     Directory: string
     CI: bool
     NodeHash: string
@@ -30,7 +31,7 @@ type ActionContext = {
 
 [<RequireQualifiedAccess>]
 type ProjectInfo = {
-    ProjectFile: string
+    Properties: Map<string, string>
     Outputs: Set<string>
     Ignores: Set<string>
     Dependencies: Set<string>

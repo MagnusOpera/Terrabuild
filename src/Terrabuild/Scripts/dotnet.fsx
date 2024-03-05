@@ -52,48 +52,38 @@ let private buildCmdLine cmd args cache =
       Action.Cache = cache }
 
 
-type Globals = {
-    ProjectFile: string
-    Configuration: string
-}
+let parse (context: InitContext) =
+    let projectFile = findProjectFile context.Directory
+    let dependencies = parseDotnetDependencies projectFile
+    let properties = Map [ "projectfile", projectFile ]
+    let projectInfo = { ProjectInfo.Properties = properties
+                        ProjectInfo.Ignores = Set []
+                        ProjectInfo.Outputs = Set [ "bin"; "obj" ]
+                        ProjectInfo.Dependencies = set dependencies }
+    projectInfo
 
-
-
-
-
-let mutable globals = None
-
-
-let init (directory: string) (projectFile: string option) (configuration: string option) =
-    printfn $"Running dotnet::init"
-    let projectFile = projectFile |> Option.defaultWith (fun () -> findProjectFile directory)
+let build (context: ActionContext) (configuration: string option) =
+    let projectFile = context.Properties["projectfile"]
     let configuration = configuration |> Option.defaultValue "Debug"
-
-    globals <- Some { ProjectFile = projectFile
-                      Configuration = configuration }
-
-
-
-let build () =
     printfn $"Running dotnet::build"
-    let globals = globals.Value
 
+    [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
+      buildCmdLine "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}" Cacheability.Always ]
 
-    [ buildCmdLine "dotnet" $"restore {globals.ProjectFile} --no-dependencies" Cacheability.Local
-      buildCmdLine "dotnet" $"build {globals.ProjectFile} -m:1 --no-dependencies --no-restore --configuration {globals.Configuration}" Cacheability.Always ]
-
-let exec (command: string) (arguments: string option) =
+let exec (context: ActionContext) (command: string) (arguments: string option) =
     let arguments = arguments |> Option.defaultValue ""
     [ buildCmdLine command arguments Cacheability.Always ]
 
-let pack (version: string option) =
-    let globals = globals.Value
+let pack (context: ActionContext) (configuration: string option) (version: string option) =
+    let projectFile = context.Properties["projectfile"]
+    let configuration = configuration |> Option.defaultValue "Debug"
     let version = version |> Option.defaultValue "0.0.0"
     // TargetsForTfmSpecificContentInPackage ==> https://github.com/dotnet/fsharp/issues/12320
-    [ buildCmdLine "dotnet" $"pack {globals.ProjectFile} --no-restore --no-build --configuration {globals.Configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage=" Cacheability.Always ]
+    [ buildCmdLine "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage=" Cacheability.Always ]
 
-let publish (runtime: string option) (trim: bool option) (single: bool option) =
-    let globals = globals.Value
+let publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) =
+    let projectFile = context.Properties["projectfile"]
+    let configuration = configuration |> Option.defaultValue "Debug"
 
     let runtime =
         match runtime with
@@ -107,14 +97,16 @@ let publish (runtime: string option) (trim: bool option) (single: bool option) =
         match single with
         | Some true -> " --self-contained"
         | _ -> ""
-    [ buildCmdLine "dotnet" $"publish {globals.ProjectFile} --configuration {globals.Configuration}{runtime}{trim}{single}" Cacheability.Always ]
+    [ buildCmdLine "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}" Cacheability.Always ]
 
-let restore() =
-    let globals = globals.Value
+let restore (context: ActionContext) =
+    let projectFile = context.Properties["projectfile"]
 
-    [ buildCmdLine "dotnet" $"restore {globals.ProjectFile} --no-dependencies" Cacheability.Local ]
+    [ buildCmdLine "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local ]
 
-let test (filter: string option) =
-    let globals = globals.Value
+let test (context: ActionContext) (configuration: string option) (filter: string option) =
+    let projectFile = context.Properties["projectfile"]
+    let configuration = configuration |> Option.defaultValue "Debug"
+
     let filter = filter |> Option.defaultValue "true"
-    [ buildCmdLine "dotnet" $"test --no-build --configuration {globals.Configuration} {globals.ProjectFile} --filter \"{filter}\"" Cacheability.Always ]
+    [ buildCmdLine "dotnet" $"test --no-build --configuration {configuration} {projectFile} --filter \"{filter}\"" Cacheability.Always ]

@@ -1,14 +1,14 @@
 extension dotnet {
-    init { }
 }
 
 extension docker {
-    init {
+    defaults {
         image: "ghcr.io/magnusopera/dotnet-app"
     }
 }
 
 configuration {
+    parser "dotnet"
     labels [ "app"
              "dotnet" ]
 }
