@@ -43,11 +43,17 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
             let projectConfig = wsConfig.Projects[project]
 
             // merge targets requirements
-            let dependsOns =
+            let buildDependsOn =
+                wsConfig.Targets
+                |> Map.tryFind targetName
+                |> Option.map (fun ct -> ct.DependsOn)
+                |> Option.defaultValue Set.empty
+            let projDependsOn =
                 projectConfig.Targets
                 |> Map.tryFind targetName
-                |> Option.map (fun target -> target.DependsOn)
+                |> Option.map (fun ct -> ct.DependsOn)
                 |> Option.defaultValue Set.empty
+            let dependsOns = buildDependsOn + projDependsOn
 
             // apply on each dependency
             let children, hasInternalDependencies =

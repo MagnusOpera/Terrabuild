@@ -56,6 +56,7 @@ type WorkspaceConfig = {
     SourceControl: SourceControls.SourceControl
     Directory: string
     Dependencies: string set
+    Targets: Map<string, Terrabuild.Parser.Workspace.AST.Target>
     Projects: Map<string, Project>
     Environment: string
 }
@@ -420,4 +421,5 @@ let read workspaceDir (options: Options) environment labels variables =
       WorkspaceConfig.Storage = storage
       WorkspaceConfig.SourceControl = sourceControl
       WorkspaceConfig.Projects = projects
+      WorkspaceConfig.Targets = workspaceConfig.Targets
       WorkspaceConfig.Environment = environment }
