@@ -1516,7 +1516,7 @@ state 39:  items:    ConfigurationLabels -> 'LABELS' ListOfString .
     action 'error' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action '#' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
     action '$$' (noprec):   reduce ConfigurationLabels --> 'LABELS' ListOfString
-  immediate action:   reduce ConfigurationLabels --> 'LABELS' ListOfString  gotos:state 40:  items:    ConfigurationParser -> 'PARSER' . String
+  immediate action:   reduce ConfigurationLabels --> 'LABELS' ListOfString  gotos:state 40:  items:    ConfigurationParser -> 'PARSER' . 'IDENTIFIER'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error
@@ -1545,53 +1545,52 @@ state 39:  items:    ConfigurationLabels -> 'LABELS' ListOfString .
     action 'RBRACE' (noprec):   error
     action 'KEY' (noprec):   error
     action 'VARIABLE' (noprec):   error
-    action 'IDENTIFIER' (noprec):   error
-    action 'STRING' (noprec):   shift 56
+    action 'IDENTIFIER' (noprec):   shift 41
+    action 'STRING' (noprec):   error
     action 'NOTHING' (noprec):   error
     action 'TRUE' (noprec):   error
     action 'FALSE' (noprec):   error
     action 'error' (noprec):   error
     action '#' (noprec):   error
     action '$$' (noprec):   error
-  immediate action: <none>  gotos:    goto String: 41
-state 41:  items:    ConfigurationParser -> 'PARSER' String . 
-  actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'OUTPUTS' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'IGNORES' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'LABELS' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'PARSER' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'CONTAINER' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'INIT' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'SCRIPT' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'DEPENDS_ON' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'DEFAULTS' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'EXTENSION' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'CONFIGURATION' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'TARGET' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'EOF' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'TRIM' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'UPPER' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'LOWER' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'PLUS' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'COMMA' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'EQUAL' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'LPAREN' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'RPAREN' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'LSQBRACKET' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'RSQBRACKET' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'LBRACE' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'RBRACE' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'KEY' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'VARIABLE' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'IDENTIFIER' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'STRING' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'NOTHING' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'TRUE' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'FALSE' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action 'error' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action '#' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-    action '$$' (noprec):   reduce ConfigurationParser --> 'PARSER' String
-  immediate action:   reduce ConfigurationParser --> 'PARSER' String  gotos:state 42:  items:    Target -> 'TARGET' . 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
+  immediate action: <none>  gotos:state 41:  items:    ConfigurationParser -> 'PARSER' 'IDENTIFIER' . 
+  actions:    action 'DEPENDENCIES' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'OUTPUTS' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'IGNORES' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'LABELS' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'PARSER' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'CONTAINER' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'INIT' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'SCRIPT' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'DEPENDS_ON' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'DEFAULTS' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'EXTENSION' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'CONFIGURATION' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'TARGET' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'EOF' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'TRIM' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'UPPER' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'LOWER' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'PLUS' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'COMMA' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'EQUAL' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'LPAREN' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'RPAREN' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'LSQBRACKET' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'RSQBRACKET' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'LBRACE' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'RBRACE' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'KEY' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'VARIABLE' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'IDENTIFIER' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'STRING' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'NOTHING' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'TRUE' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'FALSE' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action 'error' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action '#' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+    action '$$' (noprec):   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'
+  immediate action:   reduce ConfigurationParser --> 'PARSER' 'IDENTIFIER'  gotos:state 42:  items:    Target -> 'TARGET' . 'IDENTIFIER' 'LBRACE' TargetComponents 'RBRACE'
   actions:    action 'DEPENDENCIES' (noprec):   error
     action 'OUTPUTS' (noprec):   error
     action 'IGNORES' (noprec):   error

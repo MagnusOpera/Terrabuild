@@ -11,7 +11,7 @@ extension @docker {
   }
 }
 
-extension @toto {
+extension toto {
     script "toto.fsx"
 }
 
@@ -20,7 +20,7 @@ configuration {
   outputs [ "dist" ]
   labels [ "app"
            "dotnet" ]
-  parser "@dotnet"
+  parser @dotnet
 }
 
 target build {

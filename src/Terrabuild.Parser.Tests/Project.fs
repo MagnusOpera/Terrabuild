@@ -22,6 +22,11 @@ let parseProject() =
               Defaults = Map [ "configuration", Expr.Variable "configuration"
                                "image", Expr.String "ghcr.io/magnusopera/dotnet-app" ] }
 
+        let totoExt =
+            { Container = None
+              Script = Some "toto.fsx"
+              Defaults = Map.empty }
+
         let configuration =
             { Dependencies = Set [ "../../libraries/shell-lib" ] 
               Outputs = Set [ "dist" ]
@@ -31,7 +36,7 @@ let parseProject() =
 
         let buildTarget = 
             { DependsOn = Set [ "dist" ] |> Some
-              Steps = [ { Extension = "dotnet"; Command = "build"; Parameters = Map.empty } ] }
+              Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
         let distTarget =
             { DependsOn = None
@@ -49,11 +54,12 @@ let parseProject() =
                           Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "Release"]) ] } ] }
 
         { Extensions = Map [ "@dotnet", dotnetExt
-                             "@docker", dockerExt ]
+                             "@docker", dockerExt
+                             "toto", totoExt ]
           Configuration = configuration
-          Targets = Map [ "@build", buildTarget
-                          "@dist", distTarget
-                          "@docker", dockerTarget ] }
+          Targets = Map [ "build", buildTarget
+                          "dist", distTarget
+                          "docker", dockerTarget ] }
 
     let content = File.ReadAllText("PROJECT")
     let project = FrontEnd.parseProject content

@@ -1,6 +1,3 @@
-extension @dotnet {
-}
-
 extension @docker {
     defaults {
         image: "ghcr.io/magnusopera/dotnet-app"

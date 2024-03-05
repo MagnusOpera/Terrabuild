@@ -80,7 +80,7 @@ ConfigurationIgnores:
 ConfigurationLabels:
     | LABELS ListOfString { ConfigurationComponents.Labels $2 }
 ConfigurationParser:
-    | PARSER String { ConfigurationComponents.Parser $2 }
+    | PARSER IDENTIFIER { ConfigurationComponents.Parser $2 }
 
 
 Target:
