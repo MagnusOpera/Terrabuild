@@ -83,7 +83,7 @@ module ExtensionLoaders =
             match ext.Script with
             | Some script -> script
             | None ->
-                let providedScripts = Set [ "docker"; "dotnet"; "npm"; "make"; "shell"; "terraform" ]
+                let providedScripts = Set [ "@docker"; "@dotnet"; "@npm"; "@make"; "@shell"; "@terraform" ]
                 if providedScripts |> Set.contains name then IO.combinePath terrabuildDir $"Scripts/{name}.fsx"
                 else failwith $"Script is not defined for extension '{name}' for project '{projectDir}'"
 
@@ -216,7 +216,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
     let extensions =
         workspaceConfig.Extensions
-        |> Map.add "shell" Extension.Empty
+        |> Map.add "@shell" Extension.Empty
 
     let rec scanDependency projects project =
         let projectDir = IO.combinePath workspaceDir project
@@ -291,7 +291,8 @@ let read workspaceDir (options: Options) environment labels variables =
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = options.CI
                                                       Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash
-                                                      Terrabuild.Extensibility.ActionContext.Command = targetName }
+                                                      Terrabuild.Extensibility.ActionContext.Command = targetName
+                                                      Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
 
                                 let stepParameters =
                                     extension.Defaults

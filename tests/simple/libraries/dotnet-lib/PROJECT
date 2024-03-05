@@ -1,14 +1,14 @@
-extension dotnet { }
+extension @dotnet { }
 
 configuration {
-  parser "dotnet"
+  parser "@dotnet"
 }
 
 target build {
-  shell exec { command: "sleep"
+  @shell exec { command: "sleep"
                arguments: "1" }
 
-  dotnet build { configuration: $configuration }
+  @dotnet build { configuration: $configuration }
 
-  shell echo { message: "done lib2" }
+  @shell echo { message: "done lib2" }
 }

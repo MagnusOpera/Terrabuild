@@ -1,4 +1,4 @@
 
 target build {
-    shell echo { message: "building library1" }
+    @shell echo { message: "building library1" }
 }

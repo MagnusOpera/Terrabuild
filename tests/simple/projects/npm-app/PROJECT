@@ -1,9 +1,9 @@
-extension npm { }
+extension @npm { }
 
 configuration {
     labels [ "app" ]
 }
 
 target build {
-    npm build { }
+    @npm build { }
 }

@@ -29,8 +29,8 @@ let build (context: ActionContext) (dockerfile: string option) (image: string) (
 
 let push (context: ActionContext) (image: string) =
     if context.CI then
-        let retagArgs = $"buildx imagetools create -t {image}:$(terrabuild_branch_or_tag) {image}:{context.NodeHash}"
+        let retagArgs = $"buildx imagetools create -t {image}:{context.BranchOrTag} {image}:{context.NodeHash}"
         [ buildCmdLine "docker" retagArgs Cacheability.Remote ]
     else
-        let tagArgs = $"tag {image}:{context.NodeHash} {image}:$(terrabuild_branch_or_tag)"
+        let tagArgs = $"tag {image}:{context.NodeHash} {image}:{context.BranchOrTag}"
         [ buildCmdLine "docker" tagArgs Cacheability.Local ]

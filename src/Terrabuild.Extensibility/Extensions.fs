@@ -28,6 +28,7 @@ type ActionContext = {
     CI: bool
     NodeHash: string
     Command: string
+    BranchOrTag: string
 }
 
 [<RequireQualifiedAccess>]

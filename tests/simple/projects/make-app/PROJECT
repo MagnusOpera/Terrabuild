@@ -1,4 +1,4 @@
-extension make { }
+extension @make { }
 
 configuration {
     dependencies [ "../../libraries/shell-lib" ]
@@ -7,6 +7,6 @@ configuration {
 }
 
 target build {
-    shell echo { message: "building project1" }
-    make build { variables: { secret: $secret_message } }
+    @shell echo { message: "building project1" }
+    @make build { variables: { secret: $secret_message } }
 }

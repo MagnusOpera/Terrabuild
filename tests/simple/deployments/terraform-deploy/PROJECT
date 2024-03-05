@@ -1,4 +1,4 @@
-extension terraform { }
+extension @terraform { }
 
 configuration {
     dependencies [ "../../projects/dotnet-app" ]
@@ -7,9 +7,9 @@ configuration {
 }
 
 target build {
-    terraform plan { }
+    @terraform plan { }
 }
 
 target deploy {
-    terraform apply { }
+    @terraform apply { }
 }
