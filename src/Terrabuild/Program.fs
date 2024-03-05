@@ -99,7 +99,8 @@ let processCommandLine () =
         let options = { Configuration.Options.NoCache = buildArgs.Contains(RunArgs.NoCache)
                         Configuration.Options.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
-                        Configuration.Options.CI = shared }
+                        Configuration.Options.CI = shared
+                        Configuration.Options.StartedAt = DateTime.UtcNow }
         runTarget wsDir (Set.singleton target) environment labels variables options
 
 
@@ -113,7 +114,8 @@ let processCommandLine () =
         let options = { Configuration.Options.NoCache = targetArgs.Contains(TargetArgs.NoCache)
                         Configuration.Options.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
-                        Configuration.Options.CI = shared }
+                        Configuration.Options.CI = shared
+                        Configuration.Options.StartedAt = DateTime.UtcNow }
         runTarget wsDir (Set targets) environment labels variables options
 
 

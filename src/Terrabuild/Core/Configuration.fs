@@ -13,6 +13,7 @@ type Options = {
     NoCache: bool
     Retry: bool
     CI: bool
+    StartedAt: DateTime
 }
 
 type ConfigException(msg, ?innerException: Exception) =

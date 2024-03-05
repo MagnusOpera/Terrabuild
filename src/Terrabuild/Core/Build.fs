@@ -29,7 +29,8 @@ type BuildSummary = {
     BranchOrTag: string
     StartedAt: DateTime
     EndedAt: DateTime
-    Duration: TimeSpan
+    TotalDuration: TimeSpan
+    BuildDuration: TimeSpan
     Status: BuildStatus
     Targets: string set
     RootNodes: NodeBuildStatus set
@@ -268,7 +269,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         |> Set
 
     let endedAt = DateTime.UtcNow
-    let duration = endedAt - startedAt
+    let buildDuraton = endedAt - startedAt
+    let totalDuration = endedAt - options.StartedAt
 
     let status =
         let isSuccess = dependencies |> Seq.forall isBuildSuccess
@@ -277,9 +279,10 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
     let buildInfo = { BuildSummary.Commit = headCommit
                       BuildSummary.BranchOrTag = branchOrTag
-                      BuildSummary.StartedAt = startedAt
+                      BuildSummary.StartedAt = options.StartedAt
                       BuildSummary.EndedAt = endedAt
-                      BuildSummary.Duration = duration
+                      BuildSummary.BuildDuration = buildDuraton
+                      BuildSummary.TotalDuration = totalDuration
                       BuildSummary.Status = status
                       BuildSummary.Targets = graph.Targets
                       BuildSummary.RootNodes = dependencies }

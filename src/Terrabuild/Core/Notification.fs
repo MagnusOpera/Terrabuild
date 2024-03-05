@@ -75,7 +75,7 @@ type BuildNotification() =
                     | Build.BuildStatus.Success -> Ansi.Emojis.happy
                     | _ -> Ansi.Emojis.sad
 
-                $"{result} Completed in {summary.Duration}"
+                $"{result} Completed in {summary.TotalDuration}"
                 |> Terminal.writeLine
 
                 buildComplete.Set() |> ignore
