@@ -1,5 +1,6 @@
 
 configuration {
+    parser @dotnet
     labels [ "app"
              "dotnet"]
 }
@@ -17,11 +18,7 @@ target build {
 target dist {
     @dotnet publish { }
     @dotnet pack { }
-    @docker build {
-        arguments {
-            configuration: $configuration
-        }
-    }
+    @docker build { arguments: { configuration: $configuration } }
 }
 
 target publish {

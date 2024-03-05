@@ -1,4 +1,8 @@
 
+configuration {
+    parser @dotnet
+}
+
 target build {
     @dotnet build { }
 }
