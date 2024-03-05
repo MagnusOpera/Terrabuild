@@ -13,14 +13,11 @@ let private buildCmdLine cmd args cache =
       Action.Cache = cache }
 
 
-let build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string> option) =
+let build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
     let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
     let nodehash = context.NodeHash
 
-    let args =
-        match arguments with
-        | Some arguments -> arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
-        | _ -> ""
+    let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
     let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash} {args} ."
 
     if context.CI then

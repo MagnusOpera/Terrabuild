@@ -52,7 +52,7 @@ let private buildCmdLine cmd args cache =
       Action.Cache = cache }
 
 
-let parse (context: InitContext) =
+let __init__ (context: InitContext) =
     let projectFile = findProjectFile context.Directory
     let dependencies = Path.Combine(context.Directory, projectFile) |> parseDotnetDependencies 
     let properties = Map [ "projectfile", projectFile ]

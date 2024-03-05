@@ -83,7 +83,7 @@ module ExtensionLoaders =
             match ext.Script with
             | Some script -> script
             | None ->
-                let providedScripts = Set [ "docker"; "dotnet"; "npm"; "shell"; "terraform" ]
+                let providedScripts = Set [ "docker"; "dotnet"; "npm"; "make"; "shell"; "terraform" ]
                 if providedScripts |> Set.contains name then IO.combinePath terrabuildDir $"Scripts/{name}.fsx"
                 else failwith $"Script is not defined for extension '{name}' for project '{projectDir}'"
 
@@ -93,14 +93,17 @@ module ExtensionLoaders =
 
         lazy(initScript())
 
-    let invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: string) (method: string) (args: Value) =
+    let rec invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: string) (method: string) (args: Value) =
         try
             match scripts |> Map.tryFind extension with
             | None -> failwith $"Extension '{extension}' is not defined"
-            | Some extension ->
-                let script = extension.Value
-                let method = script.GetMethod(method)
-                method.Invoke<'r> args
+            | Some extInstance ->
+                let script = extInstance.Value
+                let invocable = script.GetMethod(method)
+                match invocable with
+                | Some invocable -> invocable.Invoke<'r> args
+                | None when method <> "__dispatch__" -> invokeScriptMethod scripts extension "__dispatch__" args
+                | _ -> failwith "Extension '{extension} does not provide function '{method}'"
         with
         | exn -> ConfigException.Raise($"error while invoking method '{method}' from extension '{extension}'", exn)
 
@@ -135,7 +138,7 @@ module ProjectConfigParser =
                     let context = { Terrabuild.Extensibility.InitContext.Directory = projectDir
                                     Terrabuild.Extensibility.InitContext.CI = ci }
                     Value.Map (Map [ "context", Value.Object context ])
-                ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts parser "parse" parseContext |> Some
+                ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts parser "__init__" parseContext |> Some
             | _ -> None
 
         let mergeOpt optData data =
@@ -287,7 +290,8 @@ let read workspaceDir (options: Options) environment labels variables =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Properties = projectDef.Properties
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = options.CI
-                                                      Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash }
+                                                      Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash
+                                                      Terrabuild.Extensibility.ActionContext.Command = targetName }
 
                                 let stepParameters =
                                     extension.Defaults

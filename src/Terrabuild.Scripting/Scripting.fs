@@ -12,41 +12,37 @@ let checker = FSharpChecker.Create()
 type Invocable(method: MethodInfo) =
 
     let convertToNone (prmType: Type) =
-        if prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then
-            let template = typedefof<Option<_>>
-            let genType = template.MakeGenericType([| prmType.GenericTypeArguments[0] |])
-            let cases = FSharp.Reflection.FSharpType.GetUnionCases(genType)
-            let noneCase = cases |> Array.find (fun case -> case.Name = "None")
-            FSharp.Reflection.FSharpValue.MakeUnion(noneCase, [| |])
-        else
-            failwith $"Unknown parameter type"
+        let template = typedefof<Option<_>>
+        let genType = template.MakeGenericType([| prmType.GenericTypeArguments[0] |])
+        let cases = FSharp.Reflection.FSharpType.GetUnionCases(genType)
+        let noneCase = cases |> Array.find (fun case -> case.Name = "None")
+        FSharp.Reflection.FSharpValue.MakeUnion(noneCase, [| |])
 
     let convertToSome (prmType: Type) (value: obj) =
-        if prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then
-            let template = typedefof<Option<_>>
-            let genType = template.MakeGenericType([| prmType.GenericTypeArguments[0] |])
-            let cases = FSharp.Reflection.FSharpType.GetUnionCases(genType)
-            let someCase = cases |> Array.find (fun case -> case.Name = "Some")
-            FSharp.Reflection.FSharpValue.MakeUnion(someCase, [| value |])
-        else
-            failwith $"Unknown parameter type"
-
+        let template = typedefof<Option<_>>
+        let genType = template.MakeGenericType([| prmType.GenericTypeArguments[0] |])
+        let cases = FSharp.Reflection.FSharpType.GetUnionCases(genType)
+        let someCase = cases |> Array.find (fun case -> case.Name = "Some")
+        FSharp.Reflection.FSharpValue.MakeUnion(someCase, [| value |])
 
     let rec mapParameter (value: Value) (name: string) (prmType: Type): obj =
         match value with
         | Value.Nothing ->
-            if prmType.IsGenericType then convertToNone prmType
-            else failwith $"Can't assign default value to parameter {name}"
+            if prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToNone prmType
+            elif prmType.IsGenericType && prmType = typeof<Map<string, string>> then
+                let emptyMap : Map<string, string> = Map.empty
+                emptyMap
+            else failwith $"Can't assign default value to parameter '{name}'"
 
         | Value.Bool value ->
             if value.GetType().IsAssignableTo(prmType) then value
-            elif prmType.IsGenericType then convertToSome prmType value
-            else failwith $"Can't assign default value to parameter {name}"
+            elif prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToSome prmType value
+            else failwith $"Can't assign default value to parameter '{name}'"
 
         | Value.String value ->
             if value.GetType().IsAssignableTo(prmType) then value
-            elif prmType.IsGenericType then convertToSome prmType value
-            else failwith $"Can't assign default value to parameter {name}"
+            elif prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToSome prmType value
+            else failwith $"Can't assign default value to parameter '{name}'"
 
         | Value.Object obj -> obj
 
@@ -73,7 +69,10 @@ type Invocable(method: MethodInfo) =
                             let value = mapParameter Value.Nothing field.Name field.PropertyType
                             value) 
                 ctor(ctorValues)
-            | _ -> failwith $"Can't assign default value to parameter {name}"
+            | TypeHelpers.TypeKind.FsMap ->
+                let values = map |> Map.map (fun name value -> mapParameter value name typeof<string> :?> string)
+                values
+            | _ -> failwith $"Can't assign default value to parameter '{name}'"
 
     let mapParameters (map: Map<string, Value>) (prms: ParameterInfo array) =
         prms
@@ -99,8 +98,8 @@ type Invocable(method: MethodInfo) =
 type Script(mainType: Type) =
     member _.GetMethod(name: string) =
         match mainType.GetMethod(name) with
-        | null -> failwith $"Function {name} does not exist" 
-        | mi -> Invocable(mi)
+        | null -> None
+        | mi -> Invocable(mi) |> Some
 
 let loadScript (references: string list) (scriptFile) =
     let scriptFile = Path.GetFullPath(scriptFile)

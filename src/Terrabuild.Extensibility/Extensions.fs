@@ -27,6 +27,7 @@ type ActionContext = {
     Directory: string
     CI: bool
     NodeHash: string
+    Command: string
 }
 
 [<RequireQualifiedAccess>]
