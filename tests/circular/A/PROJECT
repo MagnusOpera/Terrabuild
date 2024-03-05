@@ -1,6 +1,7 @@
 
 configuration {
-  dependencies [ "../B" "../C" ]
+  dependencies [ "../B"
+                 "../C" ]
 }
 
 target build {
