@@ -39,7 +39,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & Publish
-        run: make publish
+        run: make self-publish
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4

@@ -13,10 +13,13 @@ all:
 self: build
 	dotnet publish src/Terrabuild -o $(PWD)/.out/dotnet
 
-dist: self
+self-dist: self
 	.out/dotnet/Terrabuild dist --workspace src --environment release --retry --debug
 
-publish: self
+self-test: self
+	.out/dotnet/Terrabuild test --workspace src --environment release --retry --debug
+
+self-publish: self
 	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
 test:

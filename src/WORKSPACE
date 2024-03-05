@@ -8,6 +8,10 @@ target build {
     depends_on [^build]
 }
 
+target test {
+    depends_on [build]
+}
+
 target dist {
     depends_on [build]
 }
