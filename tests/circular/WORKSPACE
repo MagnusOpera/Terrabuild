@@ -1,5 +1,16 @@
-targets:
-  build: [^build]
-  publish: [build]
-  docker: [publish, ^publish]
-  push: [docker]
+
+target build {
+  depends_on [^build]
+}
+
+target publish {
+  depends_on [build]
+}
+
+target docker {
+  depends_on [publish ^publish]
+}
+
+target push {
+  depends_on [docker]
+}

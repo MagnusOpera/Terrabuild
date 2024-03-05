@@ -1,6 +1,8 @@
-dependencies:
-  - ../A
-  
-steps:
-  build:
-    - (echo): "building C"
+
+configuration {
+  dependencies ["../A"]
+}
+
+target build {
+  @shell echo { arguments: "building C" }
+}
