@@ -1,6 +1,30 @@
 namespace Terrabuild.Extensibility
 open System
 
+[<RequireQualifiedAccess>]
+type InitContext = {
+    Directory: string
+    CI: bool
+}
+
+[<RequireQualifiedAccess>]
+type ProjectInfo = {
+    Properties: Map<string, string>
+    Outputs: Set<string>
+    Ignores: Set<string>
+    Dependencies: Set<string>
+}
+
+[<RequireQualifiedAccess>]
+type ActionContext = {
+    Directory: string
+    CI: bool
+    Properties: Map<string, string>
+    NodeHash: string
+    Command: string
+    BranchOrTag: string
+}
+
 [<Flags>]
 type Cacheability =
     | Never = 0
@@ -17,26 +41,3 @@ type Action = {
 with
     static member Build cmd args cache = { Command = cmd; Arguments = args; Cache = cache }
 
-[<RequireQualifiedAccess>]
-type InitContext = {
-    Directory: string
-    CI: bool
-}
-
-[<RequireQualifiedAccess>]
-type ActionContext = {
-    Properties: Map<string, string>
-    Directory: string
-    CI: bool
-    NodeHash: string
-    Command: string
-    BranchOrTag: string
-}
-
-[<RequireQualifiedAccess>]
-type ProjectInfo = {
-    Properties: Map<string, string>
-    Outputs: Set<string>
-    Ignores: Set<string>
-    Dependencies: Set<string>
-}
