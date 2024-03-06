@@ -125,8 +125,12 @@ let loadScript (references: string list) (scriptFile) =
         if firstError <> None then failwithf $"Error while compiling script {scriptFile}: {firstError.Value}"
 
         let assembly = Assembly.LoadFile outputDllName
-        let mainType = assembly.GetType("Script")
-        if mainType |> isNull then failwith $"Failed to build script {scriptFile}"
+        let expectedMainTypeName = Path.GetFileNameWithoutExtension(scriptFile)
+        let mainType = 
+            match assembly.GetTypes() |> Seq.tryFind (fun t -> String.Compare(t.Name, expectedMainTypeName, true) = 0) with
+            | Some mainType -> mainType
+            | _ -> failwith $"Failed to identify function scope (either module or root class '{expectedMainTypeName}')"
+
         let script = Script(mainType)
         cache <- cache |> Map.add scriptFile script
         script
