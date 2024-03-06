@@ -1,4 +1,4 @@
-module Terrabuild.Scripting.Tests.Project
+module Terrabuild.Scripting.Invocable.Tests
 
 open NUnit.Framework
 open FsUnit
