@@ -8,6 +8,9 @@ open System
 open Microsoft.FSharp.Reflection
 
 let checker = FSharpChecker.Create()
+let mutable cache = Map.empty
+
+
 
 type Invocable(method: MethodInfo) =
 
@@ -103,23 +106,27 @@ type Script(mainType: Type) =
 
 let loadScript (references: string list) (scriptFile) =
     let scriptFile = Path.GetFullPath(scriptFile)
-    let outputDllName = $"{Path.GetTempFileName()}.dll"
+    match cache |> Map.tryFind scriptFile with
+    | Some script -> script
+    | _ ->
+        let outputDllName = $"{Path.GetTempFileName()}.dll"
 
-    let compilerArgs = [|
-        "-a"; scriptFile
-        "--targetprofile:netcore"
-        "--target:library"
-        $"--out:{outputDllName}"
-        "--define:TERRABUILD_SCRIPT"
-        for reference in references do $"--reference:{reference}"
-    |]
+        let compilerArgs = [|
+            "-a"; scriptFile
+            "--targetprofile:netcore"
+            "--target:library"
+            $"--out:{outputDllName}"
+            "--define:TERRABUILD_SCRIPT"
+            for reference in references do $"--reference:{reference}"
+        |]
 
-    let errors, _ = checker.Compile(compilerArgs) |> Async.RunSynchronously
-    let firstError = errors |> Array.tryFind (fun x -> x.Severity = FSharpDiagnosticSeverity.Error)
-    if firstError <> None then failwithf $"Error while compiling script {scriptFile}: {firstError.Value}"
+        let errors, _ = checker.Compile(compilerArgs) |> Async.RunSynchronously
+        let firstError = errors |> Array.tryFind (fun x -> x.Severity = FSharpDiagnosticSeverity.Error)
+        if firstError <> None then failwithf $"Error while compiling script {scriptFile}: {firstError.Value}"
 
-    let assembly = Assembly.LoadFile outputDllName
-    let mainType = assembly.GetType("Script")
-    if mainType |> isNull then failwith $"Failed to build script {scriptFile}"
-    let script = Script(mainType)
-    script
+        let assembly = Assembly.LoadFile outputDllName
+        let mainType = assembly.GetType("Script")
+        if mainType |> isNull then failwith $"Failed to build script {scriptFile}"
+        let script = Script(mainType)
+        cache <- cache |> Map.add scriptFile script
+        script
