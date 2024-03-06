@@ -213,13 +213,13 @@ let read workspaceDir (options: Options) environment labels variables =
                     |> Map.addMap (projectConfig.Extensions |> Map.map ExtensionLoaders.lazyLoadScript)
 
                 let projectInfo =
-                    match projectConfig.Configuration.Parser with
-                    | Some parser ->
+                    match projectConfig.Configuration.Init with
+                    | Some init ->
                         let parseContext = 
                             let context = { Terrabuild.Extensibility.InitContext.Directory = projectDir
                                             Terrabuild.Extensibility.InitContext.CI = options.CI }
                             Value.Map (Map [ "context", Value.Object context ])
-                        ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts parser "__init__" parseContext |> Some
+                        ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts init "__init__" parseContext |> Some
                     | _ -> None
 
                 let mergeOpt optData data =

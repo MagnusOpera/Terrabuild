@@ -20,7 +20,7 @@ configuration {
   outputs [ "dist" ]
   labels [ "app"
            "dotnet" ]
-  parser @dotnet
+  init @dotnet
 }
 
 target build {

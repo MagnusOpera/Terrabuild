@@ -7,7 +7,7 @@ extension @docker {
 }
 
 configuration {
-    parser @dotnet
+    init @dotnet
     labels [ "app"
              "dotnet" ]
 }

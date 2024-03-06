@@ -42,7 +42,7 @@ rule token = parse
     | "outputs" { OUTPUTS }
     | "ignores" { IGNORES }
     | "labels" { LABELS }
-    | "parser" { PARSER }
+    | "init" { INIT }
     | "script" { SCRIPT }
     | "extension" { EXTENSION }
     | "container" { CONTAINER }

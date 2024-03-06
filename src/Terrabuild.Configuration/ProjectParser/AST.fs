@@ -8,14 +8,14 @@ type ConfigurationComponents =
     | Outputs of string list
     | Ignores of string list
     | Labels of string list
-    | Parser of string
+    | Init of string
 
 type Configuration = {
     Dependencies: Set<string>
     Outputs: Set<string>
     Ignores: Set<string>
     Labels: Set<string>
-    Parser: string option
+    Init: string option
 }
 with
     static member Empty =
@@ -23,7 +23,7 @@ with
           Outputs = Set.empty
           Ignores = Set.empty
           Labels = Set.empty
-          Parser = None }
+          Init = None }
 
     member this.Patch comp =
         match comp with
@@ -31,7 +31,7 @@ with
         | ConfigurationComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList }
         | ConfigurationComponents.Ignores ignores -> { this with Ignores = ignores |> Set.ofList }
         | ConfigurationComponents.Labels labels -> { this with Labels = labels |> Set.ofList }
-        | ConfigurationComponents.Parser parser -> { this with Parser = Some parser }
+        | ConfigurationComponents.Init init -> { this with Init = Some init }
 
 
 

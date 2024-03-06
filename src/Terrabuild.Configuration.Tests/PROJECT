@@ -1,6 +1,6 @@
 
 configuration {
-    parser @dotnet
+    init @dotnet
 }
 
 target build {

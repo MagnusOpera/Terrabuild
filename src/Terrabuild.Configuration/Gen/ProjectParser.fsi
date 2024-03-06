@@ -5,7 +5,6 @@ type token =
   | OUTPUTS
   | IGNORES
   | LABELS
-  | PARSER
   | CONTAINER
   | INIT
   | SCRIPT
@@ -39,7 +38,6 @@ type tokenId =
     | TOKEN_OUTPUTS
     | TOKEN_IGNORES
     | TOKEN_LABELS
-    | TOKEN_PARSER
     | TOKEN_CONTAINER
     | TOKEN_INIT
     | TOKEN_SCRIPT
@@ -85,7 +83,7 @@ type nonTerminalId =
     | NONTERM_ConfigurationOutputs
     | NONTERM_ConfigurationIgnores
     | NONTERM_ConfigurationLabels
-    | NONTERM_ConfigurationParser
+    | NONTERM_ConfigurationInit
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_DependsOn

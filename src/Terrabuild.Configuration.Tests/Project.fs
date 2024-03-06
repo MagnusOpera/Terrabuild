@@ -34,7 +34,7 @@ let parseProject() =
               Outputs = Set [ "dist" ]
               Ignores = Set.empty
               Labels = Set [ "app"; "dotnet" ]
-              Parser = Some "@dotnet" }
+              Init = Some "@dotnet" }
 
         let buildTarget = 
             { DependsOn = Set [ "dist" ] |> Some
