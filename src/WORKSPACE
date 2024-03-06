@@ -27,7 +27,7 @@ environment release {
 }
 
 extension @dotnet {
-    container "mcr.microsoft.com/dotnet/sdk:8.0.101"
+    container "mcr.microsoft.com/dotnet/sdk:8.0.201"
     defaults {
         configuration: $configuration
     }
