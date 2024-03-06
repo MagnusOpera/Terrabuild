@@ -22,6 +22,9 @@ self-test: self
 self-publish: self
 	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
+self-publish-ci: self
+	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug --ci
+
 test:
 	dotnet test
 
