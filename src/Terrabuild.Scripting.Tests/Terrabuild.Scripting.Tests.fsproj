@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="Invocable.fs" />
+    <Compile Include="Scripting.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -20,6 +21,13 @@
 
   <ItemGroup>
     <ProjectReference Include="../Terrabuild.Scripting/Terrabuild.Scripting.fsproj" />
+    <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <Content Include="TestFiles/*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
