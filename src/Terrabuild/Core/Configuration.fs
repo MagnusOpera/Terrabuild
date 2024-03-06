@@ -100,7 +100,7 @@ module ExtensionLoaders =
     let loadStorage name : Storages.Storage =
         match name with
         | None -> Storages.Local()
-        | Some "azureblob" -> Storages.MicrosoftBlobStorage()
+        | Some "azureblob" -> Storages.AzureBlobStorage()
         | _ -> failwith $"Unknown storage '{name}'"
 
     let loadSourceControl name: SourceControls.SourceControl =

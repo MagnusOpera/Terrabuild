@@ -13,7 +13,7 @@
     <Compile Include="SourceControls/GitHub.fs" />
     <Compile Include="Storages/Storages.fs" />
     <Compile Include="Storages/Local.fs" />
-    <Compile Include="Storages/MicrosoftBlobStorage.fs" />
+    <Compile Include="Storages/AzureBlobStorage.fs" />
     <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/IO.fs" />
     <Compile Include="Helpers/Compression.fs" />
