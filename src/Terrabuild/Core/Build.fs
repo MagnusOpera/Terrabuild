@@ -144,6 +144,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
             match summary with
             | Some summary ->
+                Log.Debug("{Hash}: Restoring '{Project}/{Target}' from cache", node.Hash, node.Project, node.Target)
                 match summary.Outputs with
                 | Some outputs ->
                     let files = IO.enumerateFiles outputs
@@ -152,6 +153,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 Some summary
 
             | _ ->
+                Log.Debug("{Hash}: Building '{Project}/{Target}'", node.Hash, node.Project, node.Target)
                 let cacheEntry = cache.CreateEntry options.CI cacheEntryId
                 notification.NodeBuilding node
 
@@ -188,7 +190,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                             let args = $"run --entrypoint {commandLine.Command} --rm -v {homeDir}:/root -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
                             workspaceConfig.Directory, cmd, args
 
-                    Log.Debug("Executing {Command} {Arguments}", cmd, args)
+                    Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.Hash, cmd, args)
                     let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
                     let endedAt = DateTime.UtcNow
                     let duration = endedAt - startedAt
@@ -203,6 +205,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                                     Cache.StepSummary.ExitCode = exitCode }
                     stepLog |> stepLogs.Add
                     lastExitCode <- exitCode
+                    Log.Debug("{Hash}: Execution completed with '{Code}'", node.Hash, exitCode)
 
                 notification.NodeUploading node
                 let afterFiles = FileSystem.createSnapshot projectDirectory node.Outputs
@@ -214,8 +217,12 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
                 let status =
-                    if lastExitCode = 0 then Cache.TaskStatus.Success
-                    else Cache.TaskStatus.Failure
+                    if lastExitCode = 0 then
+                        Log.Debug("{Hash}: Marking as success", node.Hash)
+                        Cache.TaskStatus.Success
+                    else
+                        Log.Debug("{Hash}: Marking as failed", node.Hash)
+                        Cache.TaskStatus.Failure
 
                 let summary = { Cache.TargetSummary.Project = node.Project
                                 Cache.TargetSummary.Target = node.Target
