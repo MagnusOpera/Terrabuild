@@ -35,10 +35,13 @@ type AzureBlobStorage() =
             Log.Debug("AzureBlobStorage: download of '{Id}' successful", id)
             Some tmpFile
         with
-        | exn ->
-            Log.Fatal(exn, "AzureBlobStorage: download of '{Id}' failed", id)
+        | :? Azure.RequestFailedException as exn when exn.Status = 404 ->
+            Log.Fatal("AzureBlobStorage: '{Id}' does not exist", id)
             System.IO.File.Delete(tmpFile)
             None
+        | exn ->
+            Log.Fatal(exn, "AzureBlobStorage: failed to download '{Id}'", id)
+            reraise()
 
     override _.Upload id summaryFile =
         try
