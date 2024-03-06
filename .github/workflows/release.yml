@@ -45,4 +45,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Terrabuild Debug
-          path: terrabuild.*.json
+          path: |
+            terrabuild.options.json
+            terrabuild.config.json
+            terrabuild.graph.json
+            terrabuild.build.json
+            terrabuild.log
