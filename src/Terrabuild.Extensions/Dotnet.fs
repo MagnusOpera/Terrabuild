@@ -89,7 +89,7 @@ type Dotnet() =
             match single with
             | Some true -> " --self-contained"
             | _ -> ""
-        [ Action.Build "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}" Cacheability.Always ]
+        [ Action.Build "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}" Cacheability.Never ]
 
 
     static member Restore (context: ActionContext) =
