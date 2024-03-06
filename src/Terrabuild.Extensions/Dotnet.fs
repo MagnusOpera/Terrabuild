@@ -56,7 +56,7 @@ type Dotnet() =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue "Debug"
 
-        [ Action.Build "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
+        [ Action.Build "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Always
           Action.Build "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}" Cacheability.Always ]
 
 
@@ -89,8 +89,7 @@ type Dotnet() =
             match single with
             | Some true -> " --self-contained"
             | _ -> ""
-        [ Action.Build "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local
-          Action.Build "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}" Cacheability.Always ]
+        [ Action.Build "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}" Cacheability.Always ]
 
 
     static member Restore (context: ActionContext) =
