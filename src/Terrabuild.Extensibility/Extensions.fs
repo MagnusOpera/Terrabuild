@@ -1,4 +1,4 @@
-namespace Terrabuild.Extensibility
+module Terrabuild.Extensibility
 open System
 
 [<RequireQualifiedAccess>]
@@ -32,12 +32,27 @@ type Cacheability =
     | Remote = 2
     | Always = 3 // Local + Remote
 
+
 [<RequireQualifiedAccess>]
 type Action = {
     Command: string
     Arguments: string
-    Cache: Cacheability
 }
-with
-    static member Build cmd args cache = { Command = cmd; Arguments = args; Cache = cache }
 
+[<RequireQualifiedAccess>]
+type ActionBatch = {
+    Cache: Cacheability
+    Actions: Action list
+}
+
+let scope cache =
+    { ActionBatch.Cache = cache
+      ActionBatch.Actions = [] }
+
+let andThen cmd args (batch: ActionBatch) =
+    { batch
+      with ActionBatch.Actions = batch.Actions @ [ { Action.Command = cmd; Action.Arguments = args } ]}
+
+let andIf predicat (action: ActionBatch -> ActionBatch) (batch: ActionBatch) =
+    if predicat then action batch
+    else batch

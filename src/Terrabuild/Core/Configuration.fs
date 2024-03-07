@@ -321,14 +321,16 @@ let read workspaceDir (options: Options) environment labels variables =
                                     |> Expr.Map
                                     |> Eval.eval buildVariables
 
-                                ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.Action list> projectDef.Scripts
-                                                                                                          step.Extension 
-                                                                                                          step.Command
-                                                                                                          stepParameters
+                                let actionGroup =
+                                    ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> projectDef.Scripts
+                                                                                                              step.Extension 
+                                                                                                              step.Command
+                                                                                                              stepParameters
+                                actionGroup.Actions
                                 |> List.map (fun action -> { ContaineredAction.Container = extension.Container
                                                              ContaineredAction.Command = action.Command
                                                              ContaineredAction.Arguments = action.Arguments
-                                                             ContaineredAction.Cache = action.Cache })
+                                                             ContaineredAction.Cache = actionGroup.Cache })
                             let variables =
                                 variables
                                 |> Map.addMap stepVars

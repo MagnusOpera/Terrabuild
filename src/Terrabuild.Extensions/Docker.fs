@@ -14,16 +14,21 @@ type Docker() =
 
         if context.CI then
             let pushArgs = $"push {image}:{nodehash}"
-            [ Action.Build "docker" buildArgs Cacheability.Remote
-              Action.Build "docker" pushArgs Cacheability.Remote ]
+            scope Cacheability.Remote
+            |> andThen "docker" buildArgs
+            |> andThen "docker" pushArgs
         else
-            [ Action.Build "docker" buildArgs Cacheability.Local ]
+            scope Cacheability.Local
+            |> andThen "docker" buildArgs
 
 
     static member Push (context: ActionContext) (image: string) =
         if context.CI then
             let retagArgs = $"buildx imagetools create -t {image}:{context.BranchOrTag} {image}:{context.NodeHash}"
-            [ Action.Build "docker" retagArgs Cacheability.Remote ]
+            scope Cacheability.Remote
+            |> andThen "docker" retagArgs
         else
             let tagArgs = $"tag {image}:{context.NodeHash} {image}:{context.BranchOrTag}"
-            [ Action.Build "docker" tagArgs Cacheability.Local ]
+            scope Cacheability.Local
+            |> andThen "docker" tagArgs
+

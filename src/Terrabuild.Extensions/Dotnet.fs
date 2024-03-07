@@ -56,21 +56,25 @@ type Dotnet() =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue "Debug"
 
-        [ Action.Build "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Always
-          Action.Build "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}" Cacheability.Always ]
+        scope Cacheability.Always
+        |> andThen "dotnet" $"restore {projectFile} --no-dependencies" 
+        |> andThen "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}"
 
 
     static member Exec (command: string) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
-        [ Action.Build command arguments Cacheability.Always ]
+        scope Cacheability.Always
+        |> andThen command arguments
 
 
     static member Pack (context: ActionContext) (configuration: string option) (version: string option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue "Debug"
         let version = version |> Option.defaultValue "0.0.0"
-        // TargetsForTfmSpecificContentInPackage ==> https://github.com/dotnet/fsharp/issues/12320
-        [ Action.Build "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage=" Cacheability.Always ]
+
+        // NOTE for TargetsForTfmSpecificContentInPackage: https://github.com/dotnet/fsharp/issues/12320
+        scope Cacheability.Always
+        |> andThen "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage="
 
 
     static member Publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) =
@@ -89,14 +93,15 @@ type Dotnet() =
             match single with
             | Some true -> " --self-contained"
             | _ -> ""
-        [ Action.Build "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Always
-          Action.Build "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}" Cacheability.Always ]
+        scope Cacheability.Always
+        |> andThen "dotnet" $"restore {projectFile} --no-dependencies" 
+        |> andThen "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}"
 
 
     static member Restore (context: ActionContext) =
         let projectFile = context.Properties["projectfile"]
-
-        [ Action.Build "dotnet" $"restore {projectFile} --no-dependencies" Cacheability.Local ]
+        scope Cacheability.Local
+        |> andThen "dotnet" $"restore {projectFile} --no-dependencies"
 
 
     static member Test (context: ActionContext) (configuration: string option) (filter: string option) =
@@ -104,4 +109,5 @@ type Dotnet() =
         let configuration = configuration |> Option.defaultValue "Debug"
 
         let filter = filter |> Option.defaultValue "true"
-        [ Action.Build "dotnet" $"test --no-build --configuration {configuration} {projectFile} --filter \"{filter}\"" Cacheability.Always ]
+        scope Cacheability.Always
+        |> andThen "dotnet" $"test --no-build --configuration {configuration} {projectFile} --filter \"{filter}\""

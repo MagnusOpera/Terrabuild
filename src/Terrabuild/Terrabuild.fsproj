@@ -27,7 +27,6 @@
     <Compile Include="Helpers/Ansi.fs" />
     <Compile Include="Helpers/Terminal.fs" />
     <Compile Include="Helpers/Progress.fs" />
-    <Compile Include="Extensions/System.fs" />
     <Compile Include="Core/Configuration.fs" />
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Cache.fs" />
