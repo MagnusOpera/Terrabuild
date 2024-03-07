@@ -41,4 +41,5 @@ jobs:
             ./.out/windows/Terrabuild.exe
             ./.out/macos/Terrabuild
             ./.out/linux/Terrabuild
-            ./.out/dotnet/Terrabuild
+            ./.out/dotnet.zip
+

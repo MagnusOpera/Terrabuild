@@ -9,7 +9,8 @@ dist:
 	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
 	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/macos src/Terrabuild
 	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/linux src/Terrabuild
-	dotnet publish -c $(config) -p:PublishSingleFile=true -o $(PWD)/.out/dotnet src/Terrabuild
+	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
+	cd .out/dotnet; zip -r ../dotnet.zip ./*
 
 parser:
 	dotnet build -c $(config) /p:DefineConstants="GENERATE_PARSER"
@@ -24,7 +25,7 @@ self-test: dist
 	.out/dotnet/Terrabuild test --workspace src --environment release --retry --debug
 
 self-publish: dist
-	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
+	dotnet .out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
 test:
 	dotnet test
