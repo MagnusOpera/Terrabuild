@@ -108,8 +108,13 @@ module ExtensionLoaders =
         | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control '{name}'"
 
-    let terrabuildDir = System.Reflection.Assembly.GetExecutingAssembly().Location |> IO.parentDirectory
-    let terrabuildExtensibility = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
+    // NOTE: when app in package as a single file, this break - so instead of providing Terrabuild.Extensibility assembly
+    //       the Terrabuild main file is provided
+    let terrabuildDir = Reflection.Assembly.GetExecutingAssembly().Location |> IO.parentDirectory
+    let terrabuildExtensibility =
+        let path = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
+        if File.Exists(path) then path
+        else Reflection.Assembly.GetExecutingAssembly().Location
 
     let lazyLoadScript (name: string) (ext: Extension) =
         let initScript () =
