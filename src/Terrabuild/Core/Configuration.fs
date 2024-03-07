@@ -108,9 +108,10 @@ module ExtensionLoaders =
         | Some "github" -> SourceControls.GitHub()
         | _ -> failwith $"Unknown source control '{name}'"
 
-    // NOTE: when app in package as a single file, this break - so instead of providing Terrabuild.Extensibility assembly
-    //       the Terrabuild main file is provided
-    let terrabuildDir = Reflection.Assembly.GetExecutingAssembly().Location |> IO.parentDirectory
+    // NOTE: when app in package as a single file, this break - so instead of providing 
+    //       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided
+    //       ¯\_(ツ)_/¯
+    let terrabuildDir = Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> IO.parentDirectory
     let terrabuildExtensibility =
         let path = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
         if File.Exists(path) then path
