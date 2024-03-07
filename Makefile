@@ -4,37 +4,31 @@ version ?= 0.0.0
 build:
 	dotnet build -c $(config)
 
+dist:
+	rm -rf $(PWD)/.out
+	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
+	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/macos src/Terrabuild
+	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/linux src/Terrabuild
+	dotnet publish -c $(config) -p:PublishSingleFile=true -o $(PWD)/.out/dotnet src/Terrabuild
+
 parser:
 	dotnet build -c $(config) /p:DefineConstants="GENERATE_PARSER"
 
 all:
 	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
-	
-self: build
-	dotnet publish src/Terrabuild -o $(PWD)/.out/dotnet
 
-self-dist: self
+self-dist: dist
 	.out/dotnet/Terrabuild dist --workspace src --environment release --retry --debug
 
-self-test: self
+self-test: dist
 	.out/dotnet/Terrabuild test --workspace src --environment release --retry --debug
 
-self-publish: self
+self-publish: dist
 	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
 test:
 	dotnet test
 
-# dist:
-# 	rm -rf $(PWD)/.out
-# 	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
-# 	cd .out/windows; zip -r ../windows.zip ./*
-
-# 	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/macos src/Terrabuild
-# 	cd .out/macos; zip -r ../macos.zip ./*
-
-# 	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/linux src/Terrabuild
-# 	cd .out/linux; zip -r ../linux.zip ./*
 
 
 tests: run-build run-build-nc target usage
