@@ -12,7 +12,6 @@ type Options = {
     MaxConcurrency: int
     NoCache: bool
     Retry: bool
-    CI: bool
     StartedAt: DateTime
 }
 
@@ -162,19 +161,9 @@ let read workspaceDir (options: Options) environment labels variables =
         |> Map.map (fun _ value -> value)
         |> Map.addMap envVariables
 
-    // storage
-    let storage =
-        workspaceConfig.Configuration.Storage
-        |> Option.bind (fun x -> if options.NoCache then None else Some x)
-        |> ExtensionLoaders.loadStorage
+    let storage = Storages.Factory.create()
+    let sourceControl = SourceControls.Factory.create()
 
-    // source control
-    let sourceControl =
-        if options.CI then
-            workspaceConfig.Configuration.SourceControl
-            |> ExtensionLoaders.loadSourceControl
-        else
-            ExtensionLoaders.loadSourceControl None
     let branchOrTag = sourceControl.BranchOrTag
 
     let processedNodes = ConcurrentDictionary<string, bool>()
@@ -217,7 +206,7 @@ let read workspaceDir (options: Options) environment labels variables =
                     | Some init ->
                         let parseContext = 
                             let context = { Terrabuild.Extensibility.InitContext.Directory = projectDir
-                                            Terrabuild.Extensibility.InitContext.CI = options.CI }
+                                            Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
                             Value.Map (Map [ "context", Value.Object context ])
                         ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts init "__init__" parseContext |> Some
                     | _ -> None
@@ -309,7 +298,7 @@ let read workspaceDir (options: Options) environment labels variables =
                             let stepActions =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Properties = projectDef.Properties
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
-                                                      Terrabuild.Extensibility.ActionContext.CI = options.CI
+                                                      Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
                                                       Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash
                                                       Terrabuild.Extensibility.ActionContext.Command = step.Command
                                                       Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
@@ -420,8 +409,8 @@ let read workspaceDir (options: Options) environment labels variables =
 
     { WorkspaceConfig.Directory = workspaceDir
       WorkspaceConfig.Dependencies = dependencies
-      WorkspaceConfig.Storage = storage
-      WorkspaceConfig.SourceControl = sourceControl
       WorkspaceConfig.Projects = projects
       WorkspaceConfig.Targets = workspaceConfig.Targets
-      WorkspaceConfig.Environment = environment }
+      WorkspaceConfig.Environment = environment
+      WorkspaceConfig.SourceControl = sourceControl
+      WorkspaceConfig.Storage = storage }

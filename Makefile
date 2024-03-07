@@ -22,9 +22,6 @@ self-test: self
 self-publish: self
 	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
 
-self-publish-ci: self
-	.out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug --ci
-
 test:
 	dotnet test
 
@@ -54,9 +51,6 @@ run-build:
 run-rebuild:
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --nc
 
-run-build-az:
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --ci
-
 run-dist:
 	dotnet run --project src/Terrabuild -- dist --workspace tests/simple --environment debug --debug
 
@@ -69,21 +63,15 @@ run-push:
 run-deploy:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug
 
-run-deploy-az:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --ci
-
 run-deploy-dev:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev
 
 run-build-app:
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label dotnet --debug
 
-run-deploy-az-retry:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --ci --retry
-
 
 github-tests:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --ci --retry --parallel 4
+	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --retry --parallel 4
 
 usage:
 	dotnet run --project src/Terrabuild -- --help

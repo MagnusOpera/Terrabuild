@@ -28,8 +28,8 @@ let debugPrint s = ignore s
 %token PLUS
 %token TRIM UPPER LOWER
 %token EOF
-%token CONFIGURATION TARGET ENVIRONMENT EXTENSION
-%token STORAGE SOURCECONTROL DEPENDS_ON VARIABLES CONTAINER INIT SCRIPT DEFAULTS
+%token TARGET ENVIRONMENT EXTENSION
+%token DEPENDS_ON VARIABLES CONTAINER INIT SCRIPT DEFAULTS
 
 // associativity and precedences
 %left PLUS
@@ -42,21 +42,9 @@ Workspace:
 
 WorkspaceComponents:
     | /* empty */ { Workspace.Empty }
-    | WorkspaceComponents Configuration { $1.Patch $2 }
     | WorkspaceComponents Target { $1.Patch $2 }
     | WorkspaceComponents Environment { $1.Patch $2 }
     | WorkspaceComponents Extension { $1.Patch $2 }
-
-Configuration:
-    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { WorkspaceComponents.Configuration $3 }
-ConfigurationComponents:
-    | /* empty */ { Configuration.Empty }
-    | ConfigurationComponents ConfigurationStorage { $1.Patch $2 }
-    | ConfigurationComponents ConfigurationSourceControl { $1.Patch $2 }
-ConfigurationStorage:
-    | STORAGE String { ConfigurationComponents.Storage $2 }
-ConfigurationSourceControl:
-    | SOURCECONTROL String { ConfigurationComponents.SourceControl $2 }
 
 Target:
     | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { WorkspaceComponents.Target ($2, $4) }

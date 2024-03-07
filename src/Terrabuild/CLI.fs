@@ -7,7 +7,6 @@ type RunArgs =
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
     | [<Unique; AltCommandLine("--par")>] Parallel of max:int
     | [<Unique; AltCommandLine("--nc")>] NoCache
-    | [<Unique>] CI
     | [<Unique; AltCommandLine("--r")>] Retry
     | [<Unique; AltCommandLine("--l")>] Label of labels:string list
     | [<EqualsAssignment; AltCommandLine("--v")>] Variable of variable:string * value:string
@@ -19,7 +18,6 @@ with
             | Environment _ -> "Environment to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | NoCache -> "Ignore cache when building target."
-            | CI -> "CI mode."
             | Retry -> "Retry failed task."
             | Label _-> "Select projects based on labels."
             | Variable _ -> "Set variable."
@@ -31,7 +29,6 @@ type TargetArgs =
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
     | [<Unique; AltCommandLine("--par")>] Parallel of max:int
     | [<Unique; AltCommandLine("--nc")>] NoCache
-    | [<Unique>] CI
     | [<Unique; AltCommandLine("--r")>] Retry
     | [<Unique; AltCommandLine("--l")>] Label of labels:string list
     | [<EqualsAssignment; AltCommandLine("--v")>] Variable of variable:string * value:string
@@ -44,7 +41,6 @@ with
             | Environment _ -> "Environment to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | NoCache -> "Ignore cache when building target."
-            | CI -> "CI mode."
             | Retry -> "Retry failed task."
             | Label _-> "Select projects based on labels."
             | Variable _ -> "Set variable."

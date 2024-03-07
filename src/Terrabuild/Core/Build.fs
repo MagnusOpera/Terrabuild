@@ -59,7 +59,7 @@ let private isNodeUnsatisfied = function
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
 
     let cacheMode =
-        if options.CI then Cacheability.Always
+        if workspaceConfig.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
     // compute first incoming edges
@@ -154,7 +154,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
             | _ ->
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.Hash, node.Project, node.Target)
-                let cacheEntry = cache.CreateEntry options.CI cacheEntryId
+                let cacheEntry = cache.CreateEntry workspaceConfig.SourceControl.CI cacheEntryId
                 notification.NodeBuilding node
 
                 let beforeFiles = FileSystem.createSnapshot projectDirectory node.Outputs

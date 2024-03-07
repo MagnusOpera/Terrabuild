@@ -1,9 +1,4 @@
 
-configuration {
-  storage "azureblob"
-  sourcecontrol "github"
-}
-
 target build {
     depends_on [^build]
 }

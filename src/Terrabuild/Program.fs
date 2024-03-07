@@ -92,14 +92,12 @@ let processCommandLine () =
 
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
         let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
-        let shared = buildArgs.TryGetResult(RunArgs.CI) |> Option.isSome
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default"
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map Set
         let variables = buildArgs.GetResults(RunArgs.Variable) |> Map
         let options = { Configuration.Options.NoCache = buildArgs.Contains(RunArgs.NoCache)
                         Configuration.Options.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
-                        Configuration.Options.CI = shared
                         Configuration.Options.StartedAt = DateTime.UtcNow }
         runTarget wsDir (Set.singleton target) environment labels variables options
 
@@ -107,14 +105,12 @@ let processCommandLine () =
     let target (targetArgs: ParseResults<TargetArgs>) =
         let targets = targetArgs.GetResult(TargetArgs.Target)
         let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
-        let shared = targetArgs.TryGetResult(TargetArgs.CI) |> Option.isSome
         let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default"
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map Set
         let variables = targetArgs.GetResults(TargetArgs.Variable) |> Map
         let options = { Configuration.Options.NoCache = targetArgs.Contains(TargetArgs.NoCache)
                         Configuration.Options.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
-                        Configuration.Options.CI = shared
                         Configuration.Options.StartedAt = DateTime.UtcNow }
         runTarget wsDir (Set targets) environment labels variables options
 

@@ -11,10 +11,6 @@ open Terrabuild.Expressions
 [<Test>]
 let parseWorkspace() =
     let expectedWorkspace =
-        let configuration = 
-            { Storage = Some "azureblob"
-              SourceControl = Some "github" }
-
         let buildTarget = 
             { DependsOn = Set [ "^build" ] }
         let distTarget =
@@ -32,8 +28,7 @@ let parseWorkspace() =
               Script = None
               Defaults = Map.empty }
 
-        { Configuration = configuration
-          Targets = Map [ "build", buildTarget
+        { Targets = Map [ "build", buildTarget
                           "dist", distTarget ]
           Environments = Map [ "release", envRelease]
           Extensions = Map [ "dotnet", dotnetExt

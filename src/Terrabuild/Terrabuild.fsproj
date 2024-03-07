@@ -11,9 +11,11 @@
     <Compile Include="SourceControls/SourceControls.fs" />
     <Compile Include="SourceControls/Local.fs" />
     <Compile Include="SourceControls/GitHub.fs" />
+    <Compile Include="SourceControls/Factory.fs" />
     <Compile Include="Storages/Storages.fs" />
     <Compile Include="Storages/Local.fs" />
     <Compile Include="Storages/AzureBlobStorage.fs" />
+    <Compile Include="Storages/Factory.fs" />
     <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/IO.fs" />
     <Compile Include="Helpers/Compression.fs" />

@@ -36,12 +36,9 @@ rule token = parse
     | "trim" { TRIM }
     | "upper" { UPPER }
     | "lower" { LOWER }
-    | "configuration" { CONFIGURATION }
     | "target"     { TARGET }
     | "environment" { ENVIRONMENT }
     | "extension" { EXTENSION }
-    | "storage"  { STORAGE }
-    | "sourcecontrol" { SOURCECONTROL }
     | "depends_on" { DEPENDS_ON }
     | "variables" { VARIABLES }
     | "container" { CONTAINER }

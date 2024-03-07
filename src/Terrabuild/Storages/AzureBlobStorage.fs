@@ -27,6 +27,10 @@ type AzureBlobStorage() =
 
         container
 
+    static member Detect() =
+        System.Environment.GetEnvironmentVariable("TERRABUILD_AZURE_BLOB_STORAGE") |>isNull |> not
+
+
     override _.TryDownload id =
         let blobClient = container.GetBlobClient(id)
         let tmpFile = System.IO.Path.GetTempFileName()
@@ -42,6 +46,7 @@ type AzureBlobStorage() =
         | exn ->
             Log.Fatal(exn, "AzureBlobStorage: failed to download '{Id}'", id)
             reraise()
+
 
     override _.Upload id summaryFile =
         try
