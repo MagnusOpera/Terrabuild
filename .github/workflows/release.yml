@@ -38,8 +38,7 @@ jobs:
           generate_release_notes: true
           files: |
             LICENSE
-            ./.out/windows/Terrabuild.exe
-            ./.out/macos/Terrabuild
-            ./.out/linux/Terrabuild
+            ./.out/windows.zip
+            ./.out/macos.zip
+            ./.out/linux.zip
             ./.out/dotnet.zip
-

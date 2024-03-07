@@ -7,8 +7,14 @@ build:
 dist:
 	rm -rf $(PWD)/.out
 	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
+	cd .out/windows; zip -r ../windows.zip ./Terrabuild.exe
+
 	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/macos src/Terrabuild
+	cd .out/macos; zip -r ../macos.zip ./Terrabuild
+
 	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/linux src/Terrabuild
+	cd .out/linux; zip -r ../linux.zip ./Terrabuild
+
 	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
 	cd .out/dotnet; zip -r ../dotnet.zip ./*
 
