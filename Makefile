@@ -25,7 +25,7 @@ self-test: dist
 	.out/dotnet/Terrabuild test --workspace src --environment release --retry --debug
 
 self-publish: dist
-	dotnet .out/dotnet/Terrabuild publish --workspace src --environment release --retry --debug
+	dotnet .out/dotnet/Terrabuild.dll publish --workspace src --environment release --retry --debug
 
 test:
 	dotnet test
