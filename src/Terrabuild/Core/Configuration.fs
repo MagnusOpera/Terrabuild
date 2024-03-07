@@ -161,8 +161,11 @@ let read workspaceDir (options: Options) environment labels variables =
         |> Map.map (fun _ value -> value)
         |> Map.addMap envVariables
 
-    let storage = Storages.Factory.create()
     let sourceControl = SourceControls.Factory.create()
+    let storage = Storages.Factory.create()
+
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {sourceControl.Name}" |> Terminal.writeLine
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} cache is {storage.Name}" |> Terminal.writeLine
 
     let branchOrTag = sourceControl.BranchOrTag
 

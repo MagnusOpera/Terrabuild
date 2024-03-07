@@ -8,3 +8,5 @@ type Local() =
     override _.BranchOrTag = "local"
 
     override _.CI = false
+
+    override _.Name = "Local"

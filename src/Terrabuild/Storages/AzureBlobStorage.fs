@@ -30,6 +30,8 @@ type AzureBlobStorage() =
     static member Detect() =
         System.Environment.GetEnvironmentVariable("TERRABUILD_AZURE_BLOB_STORAGE") |>isNull |> not
 
+    override _.Name = "Azure Blob Storage"
+
 
     override _.TryDownload id =
         let blobClient = container.GetBlobClient(id)

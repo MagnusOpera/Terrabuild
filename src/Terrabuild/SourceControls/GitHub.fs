@@ -20,3 +20,5 @@ type GitHub() =
         branchOrRef
 
     override _.CI = true
+
+    override _.Name = "GitHub"
