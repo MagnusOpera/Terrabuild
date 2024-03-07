@@ -1,0 +1,56 @@
+name: self-build
+
+on: workflow_dispatch
+
+env:
+  TERRABUILD_AZURE_BLOB_STORAGE: ${{ secrets.TERRABUILD_AZURE_BLOB_STORAGE }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write    
+
+    container:
+      image: ghcr.io/magnusopera/terrabuild:7E43F7932DE4658DEE0E017ABF99A149BC971038BBC0E69429927F139F289A54
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    steps:
+      - name: Info
+        run: echo 'Building ${{ github.ref }}'
+
+      - name: Cloning repository
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Tests
+        run: terrabuild publish --workspace src --environment release --retry --debug
+
+      - name: Upload Terrabuild Debug
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: Terrabuild Debug
+          path: |
+            terrabuild.options.json
+            terrabuild.config.json
+            terrabuild.graph.json
+            terrabuild.build.json
+            terrabuild.log
+
+      - name: Upload Terrabuild Cache
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: Terrabuild Cache
+          path: ~/.terrabuild/buildcache/*
