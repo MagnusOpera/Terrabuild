@@ -12,12 +12,6 @@ jobs:
     permissions:
       contents: read
       packages: write    
-
-    container:
-      image: ghcr.io/magnusopera/terrabuild:7E43F7932DE4658DEE0E017ABF99A149BC971038BBC0E69429927F139F289A54
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
         
     steps:
       - name: Info
