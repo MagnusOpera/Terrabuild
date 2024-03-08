@@ -33,6 +33,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install Terrabuild
+        uses: jaxxstorm/action-install-gh-release@v1.10.0
+        with:
+          repo: magnusopera/terrabuild
+          tag: v1
+          platform: linux
+
       - name: Run Tests
         run: terrabuild publish --workspace src --environment release --retry --debug
 

@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <AssemblyName>terrabuild</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SourceControls/SourceControls.fs" />
