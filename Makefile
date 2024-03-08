@@ -7,16 +7,16 @@ build:
 dist:
 	rm -rf $(PWD)/.out
 	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
-	cd .out/windows; zip -r ../windows.zip ./terrabuild.exe
+	cd .out/windows; zip -r ../terrabuild-$(version)-windows-x64.zip ./terrabuild.exe
 
-	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/macos src/Terrabuild
-	cd .out/macos; zip -r ../macos.zip ./terrabuild
+	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/darwin src/Terrabuild
+	cd .out/darwin; zip -r ../terrabuild-$(version)-darwin-x64.zip ./terrabuild
 
 	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/linux src/Terrabuild
-	cd .out/linux; zip -r ../linux.zip ./terrabuild
+	cd .out/linux; zip -r ../terrabuild-$(version)-linux-x64.zip ./terrabuild
 
 	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
-	cd .out/dotnet; zip -r ../dotnet.zip ./*
+	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
 
 parser:
 	dotnet build -c $(config) /p:DefineConstants="GENERATE_PARSER"

@@ -29,16 +29,11 @@ jobs:
           dotnet-version: 8.0.201
 
       - name: Build & Publish
-        run: make dist
+        run: make dist version=${{github.ref_name}}
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           generate_release_notes: true
-          files: |
-            LICENSE
-            ./.out/windows.zip
-            ./.out/macos.zip
-            ./.out/linux.zip
-            ./.out/dotnet.zip
+          files: ./.out/*.zip
