@@ -416,3 +416,6 @@ terraform.tfstate
 .vscode/settings.json
 .out
 .nuget
+
+/tests/scafold/WORKSPACE
+/tests/scafold/**/PROJECT

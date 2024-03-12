@@ -2,6 +2,17 @@ module CLI
 open Argu
 
 [<RequireQualifiedAccess>]
+type ScafoldArgs =
+    | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
+    | [<Unique>] Force
+with
+    interface IArgParserTemplate with
+        member this.Usage =
+            match this with
+            | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Force -> "Default behavior is to not overwrite existing WORKSPACE or PROJECT file. This can be forced."
+
+[<RequireQualifiedAccess>]
 type RunArgs =
     | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
@@ -56,6 +67,7 @@ with
 
 [<RequireQualifiedAccess>]
 type TerrabuildArgs =
+    | [<CliPrefix(CliPrefix.None)>] Scafold of ParseResults<ScafoldArgs>
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Test of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<RunArgs>
@@ -69,6 +81,7 @@ with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
+            | Scafold _ -> "Scafold workspace."
             | Build _ -> "Run target 'build'."
             | Test _ -> "Run target 'test'."
             | Dist _ -> "Run target 'dist'."

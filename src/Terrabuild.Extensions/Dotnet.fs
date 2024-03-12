@@ -55,7 +55,7 @@ type Dotnet() =
         projectInfo
 
 
-    static member Build (context: ActionContext) (configuration: string option) =
+    static member build (context: ActionContext) (configuration: string option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
@@ -64,13 +64,13 @@ type Dotnet() =
         |> andThen "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}"
 
 
-    static member Exec (command: string) (arguments: string option) =
+    static member exec (command: string) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         scope Cacheability.Always
         |> andThen command arguments
 
 
-    static member Pack (context: ActionContext) (configuration: string option) (version: string option) =
+    static member pack (context: ActionContext) (configuration: string option) (version: string option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let version = version |> Option.defaultValue "0.0.0"
@@ -80,7 +80,7 @@ type Dotnet() =
         |> andThen "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage="
 
 
-    static member Publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) =
+    static member publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
@@ -101,13 +101,13 @@ type Dotnet() =
         |> andThen "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}"
 
 
-    static member Restore (context: ActionContext) =
+    static member restore (context: ActionContext) =
         let projectFile = context.Properties["projectfile"]
         scope Cacheability.Local
         |> andThen "dotnet" $"restore {projectFile} --no-dependencies"
 
 
-    static member Test (context: ActionContext) (configuration: string option) (filter: string option) =
+    static member test (context: ActionContext) (configuration: string option) (filter: string option) =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 

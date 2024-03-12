@@ -5,7 +5,7 @@ open Terrabuild.Extensibility
 
 type Docker() =
 
-    static member Build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
+    static member build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
         let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
         let nodehash = context.NodeHash
 
@@ -22,7 +22,7 @@ type Docker() =
             |> andThen "docker" buildArgs
 
 
-    static member Push (context: ActionContext) (image: string) =
+    static member push (context: ActionContext) (image: string) =
         let branchOrTag = context.BranchOrTag.Replace("/", "-")
         if context.CI then
             let retagArgs = $"buildx imagetools create -t {image}:{branchOrTag} {image}:{context.NodeHash}"

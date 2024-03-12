@@ -46,6 +46,21 @@ run-build-multirefs:
 run-build-circular:
 	dotnet run --project src/Terrabuild -- build --workspace tests/circular
 
+run-scafold:
+	dotnet run --project src/Terrabuild -- scafold --workspace tests/scafold
+
+run-rescafold:
+	dotnet run --project src/Terrabuild -- scafold --workspace tests/scafold --force
+
+run-build-scafold:
+	dotnet run --project src/Terrabuild -- build --workspace tests/scafold --debug --retry
+
+run-publish-scafold:
+	dotnet run --project src/Terrabuild -- publish --workspace tests/scafold --debug --retry
+
+run-build-scafold:
+	dotnet run --project src/Terrabuild -- build --workspace tests/scafold --debug --retry
+
 run-build:
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
 

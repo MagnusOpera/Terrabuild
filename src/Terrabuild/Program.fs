@@ -90,6 +90,18 @@ let processCommandLine () =
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
 
+    let scafold (scafoldArgs: ParseResults<ScafoldArgs>) =
+        try
+            let wsDir = scafoldArgs.GetResult(ScafoldArgs.Workspace, defaultValue = ".")
+            let force = scafoldArgs.Contains(ScafoldArgs.Force)
+            Scalfold.scafold wsDir force
+            0
+        with
+        | ex ->
+            let reason = ex.ToString()
+            $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
+            5
+
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
         let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default"
@@ -119,6 +131,7 @@ let processCommandLine () =
         if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
 
     match result with
+    | p when p.Contains(TerrabuildArgs.Scafold) -> p.GetResult(TerrabuildArgs.Scafold) |> scafold
     | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
     | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
     | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"

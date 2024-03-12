@@ -136,9 +136,11 @@ module ExtensionLoaders =
                 let script = extInstance.Value
                 let invocable = script.GetMethod(method)
                 match invocable with
-                | Some invocable -> invocable.Invoke<'r> args
-                | None when method <> "__dispatch__" -> invokeScriptMethod scripts extension "__dispatch__" args
-                | _ -> failwith $"Extension '{extension} does not provide function '{method}'"
+                | Some invocable ->
+                    invocable.Invoke<'r> args
+                | None when method <> "__dispatch__" ->
+                    invokeScriptMethod scripts extension "__dispatch__" args
+                | _ -> ConfigException.Raise $"Extension '{extension} does not provide function '{method}'"
         with
         | exn -> ConfigException.Raise($"error while invoking method '{method}' from extension '{extension}'", exn)
 
@@ -312,12 +314,17 @@ let read workspaceDir (options: Options) environment labels variables =
                                                       Terrabuild.Extensibility.ActionContext.Command = step.Command
                                                       Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
 
+                                let actionVariables =
+                                    buildVariables
+                                    |> Map.add "terrabuild_project" project
+                                    |> Map.add "terrabuild_target" targetName
+
                                 let stepParameters =
                                     extension.Defaults
                                     |> Map.addMap step.Parameters
                                     |> Map.add "context" (Expr.Object actionContext)
                                     |> Expr.Map
-                                    |> Eval.eval buildVariables
+                                    |> Eval.eval actionVariables
 
                                 let actionGroup =
                                     ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> projectDef.Scripts

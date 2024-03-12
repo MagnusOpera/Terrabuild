@@ -22,4 +22,8 @@ let rec eval (variables: Map<string, string>) (expr: Expr) =
             | Function.Lower, [Value.String str] -> Value.String (str.ToLowerInvariant())
             | _ -> failwith $"Invalid arguments for function {f}"
 
-    eval expr
+    try
+        eval expr
+    with
+    | exn ->
+        failwith $"{exn.Message} while evaluating:\n{expr}\nand variables:\n{variables}"
