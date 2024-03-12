@@ -39,6 +39,9 @@ module DotnetHelpers =
             |> List.ofSeq
         refs 
 
+    [<Literal>]
+    let defaultConfiguration = "Release"
+
 
 type Dotnet() =
     static member __init__ (context: InitContext) =
@@ -54,7 +57,7 @@ type Dotnet() =
 
     static member Build (context: ActionContext) (configuration: string option) =
         let projectFile = context.Properties["projectfile"]
-        let configuration = configuration |> Option.defaultValue "Debug"
+        let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectFile} --no-dependencies" 
@@ -69,7 +72,7 @@ type Dotnet() =
 
     static member Pack (context: ActionContext) (configuration: string option) (version: string option) =
         let projectFile = context.Properties["projectfile"]
-        let configuration = configuration |> Option.defaultValue "Debug"
+        let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let version = version |> Option.defaultValue "0.0.0"
 
         // NOTE for TargetsForTfmSpecificContentInPackage: https://github.com/dotnet/fsharp/issues/12320
@@ -79,7 +82,7 @@ type Dotnet() =
 
     static member Publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) =
         let projectFile = context.Properties["projectfile"]
-        let configuration = configuration |> Option.defaultValue "Debug"
+        let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
         let runtime =
             match runtime with
@@ -106,7 +109,7 @@ type Dotnet() =
 
     static member Test (context: ActionContext) (configuration: string option) (filter: string option) =
         let projectFile = context.Properties["projectfile"]
-        let configuration = configuration |> Option.defaultValue "Debug"
+        let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
         let filter = filter |> Option.defaultValue "true"
         scope Cacheability.Always
