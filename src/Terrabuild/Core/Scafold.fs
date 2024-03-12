@@ -223,7 +223,8 @@ let scafold workspaceDir force =
     let projects = findProjectInDir workspaceDir |> List.ofSeq
 
     projects
-    |> Seq.iter (fun project -> 
+    |> Seq.iter (fun project ->
+        printfn $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} PROJECT {project.Directory}"
         let projectFile = IO.combinePath project.Directory "PROJECT"
         let projectContent = project |> genProject
         File.WriteAllLines(projectFile, projectContent)
@@ -237,6 +238,7 @@ let scafold workspaceDir force =
         |> List.collect (fun p -> p.Others )
     let extensions = mainExtensions @ otherExtensions |> Set
 
+    printfn $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} WORKSPACE"
     let workspaceFile = IO.combinePath workspaceDir "WORKSPACE"
     let workspaceContent = genWorkspace extensions
     File.WriteAllLines(workspaceFile, workspaceContent)
