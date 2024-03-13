@@ -66,7 +66,7 @@ let extConfigs =
         Extension.Dotnet, { Init = true
                             Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
                             Defaults = Map [ "configuration", "$configuration" ]
-                            Actions = Map [ Target.Build, [ "publish" ] ] }
+                            Actions = Map [ Target.Build, [ "build"; "publish" ] ] }
 
         Extension.Gradle, { Init = true
                             Container = Some "gradle:jdk21"
@@ -85,7 +85,7 @@ let extConfigs =
 
         Extension.Docker, { Init = false
                             Container = None
-                            Defaults = Map [ "image", "\"ghcr.io/<orgname>/\" + $terrabuild_project"
+                            Defaults = Map [ "image", "\"ghcr.io/example/\" + $terrabuild_project"
                                              "arguments", "{ configuration: $configuration }" ]
                             Actions = Map [ Target.Build, [ "build" ]
                                             Target.Publish, [ "push" ] ] }
