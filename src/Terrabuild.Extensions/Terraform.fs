@@ -6,6 +6,13 @@ open Terrabuild.Extensibility
   
 type Terraform() =
 
+    static member __init__() =
+        let projectInfo = { ProjectInfo.Properties = Map.empty
+                            ProjectInfo.Ignores = Set [ ".terraform"; "*.tfstate" ]
+                            ProjectInfo.Outputs = Set [ "*.planfile" ]
+                            ProjectInfo.Dependencies = Set.empty }
+        projectInfo
+
     static member init () =
         scope Cacheability.Always
         |> andThen "terraform" "init -reconfigure"

@@ -73,7 +73,7 @@ let extConfigs =
                             Defaults = Map [ "configuration", "$configuration" ]
                             Actions = Map [ Target.Build, [ "build" ]] }
 
-        Extension.Npm, { Init = false
+        Extension.Npm, { Init = true
                          Container = Some "node:20"
                          Defaults = Map.empty
                          Actions = Map [ Target.Build, [ "build" ] ] }
@@ -90,7 +90,7 @@ let extConfigs =
                             Actions = Map [ Target.Build, [ "build" ]
                                             Target.Publish, [ "push" ] ] }
 
-        Extension.Terraform, { Init = false
+        Extension.Terraform, { Init = true
                                Container = Some "hashicorp/terraform:1.7"
                                Defaults = Map.empty
                                Actions = Map [ Target.Build, [ "plan" ]
