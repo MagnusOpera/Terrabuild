@@ -15,6 +15,12 @@ target publish {
     depends_on [dist]
 }
 
+environment debug {
+    variables {
+        configuration: "Debug"
+    }
+}
+
 environment release {
     variables {
         configuration: "Release"

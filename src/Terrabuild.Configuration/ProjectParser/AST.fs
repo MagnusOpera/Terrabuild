@@ -30,7 +30,7 @@ with
         | ConfigurationComponents.Dependencies dependencies -> { this with Dependencies = dependencies |> Set.ofList }
         | ConfigurationComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList }
         | ConfigurationComponents.Ignores ignores -> { this with Ignores = ignores |> Set.ofList }
-        | ConfigurationComponents.Labels labels -> { this with Labels = labels |> Set.ofList }
+        | ConfigurationComponents.Labels labels -> { this with Labels = labels |> Set.ofList |> Set.map (fun x -> x.ToLowerInvariant()) }
         | ConfigurationComponents.Init init -> { this with Init = Some init }
 
 

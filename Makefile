@@ -24,14 +24,14 @@ parser:
 all:
 	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
 
-self-dist: dist
-	.out/dotnet/terrabuild dist --workspace src --environment release --retry --debug
+self-dist:
+	.out/dotnet/terrabuild dist --workspace src --environment $(config) --retry --debug
 
-self-test: dist
-	.out/dotnet/terrabuild test --workspace src --environment release --retry --debug
+self-test:
+	.out/dotnet/terrabuild test --workspace src --environment $(config) --retry --debug
 
-self-publish: dist
-	dotnet .out/dotnet/terrabuild.dll publish --workspace src --environment release --retry --debug
+self-publish:
+	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug
 
 test:
 	dotnet test

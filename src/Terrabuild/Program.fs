@@ -104,9 +104,9 @@ let processCommandLine () =
 
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
         let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
-        let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default"
-        let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map Set
-        let variables = buildArgs.GetResults(RunArgs.Variable) |> Map
+        let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLowerInvariant
+        let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLowerInvariant |> Set)
+        let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLowerInvariant, v) |> Map
         let options = { Configuration.Options.NoCache = buildArgs.Contains(RunArgs.NoCache)
                         Configuration.Options.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
@@ -115,11 +115,11 @@ let processCommandLine () =
 
 
     let target (targetArgs: ParseResults<TargetArgs>) =
-        let targets = targetArgs.GetResult(TargetArgs.Target)
+        let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLowerInvariant
         let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
-        let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default"
-        let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map Set
-        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Map
+        let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLowerInvariant
+        let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLowerInvariant |> Set)
+        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLowerInvariant, v) |> Map
         let options = { Configuration.Options.NoCache = targetArgs.Contains(TargetArgs.NoCache)
                         Configuration.Options.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
