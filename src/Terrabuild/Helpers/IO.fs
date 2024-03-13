@@ -64,6 +64,16 @@ let enumerateFilesBut (ignores: string set) rootdir =
         |> List.ofSeq
     result
 
+let enumerateFilesMatch (matches: string set) rootdir =
+    let matcher = Matcher()
+    matcher.AddIncludePatterns(matches)
+
+    let result =
+        matcher.GetResultsInFullPath(rootdir)
+        |> List.ofSeq
+    result
+
+
 let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
     for entry in entries do
         let relative = relativePath baseDir entry

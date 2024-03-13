@@ -9,8 +9,8 @@ type Npm() =
 
     static member __init__() =
         let projectInfo = { ProjectInfo.Properties = Map.empty
-                            ProjectInfo.Ignores = Set [ "node_modules" ]
-                            ProjectInfo.Outputs = Set [ "dist" ]
+                            ProjectInfo.Ignores = Set [ "node_modules/" ]
+                            ProjectInfo.Outputs = Set [ "dist/" ]
                             ProjectInfo.Dependencies = Set.empty }
         projectInfo
 

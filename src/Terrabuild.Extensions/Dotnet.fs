@@ -51,7 +51,7 @@ type Dotnet() =
         let properties = Map [ "projectfile", projectFile ]
         let projectInfo = { ProjectInfo.Properties = properties
                             ProjectInfo.Ignores = Set []
-                            ProjectInfo.Outputs = Set [ "bin"; "obj" ]
+                            ProjectInfo.Outputs = Set [ "bin/"; "obj/" ]
                             ProjectInfo.Dependencies = set dependencies }
         projectInfo
 

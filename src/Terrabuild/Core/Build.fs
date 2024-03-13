@@ -138,8 +138,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
             // clean outputs if leaf node (otherwise outputs are layered on top of previous ones)
             if node.IsLeaf then
-                node.Outputs
-                |> Seq.map (IO.combinePath projectDirectory)
+                IO.enumerateFilesMatch node.Outputs projectDirectory
                 |> Seq.iter IO.deleteAny
 
             match summary with
