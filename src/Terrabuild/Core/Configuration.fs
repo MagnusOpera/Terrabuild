@@ -82,6 +82,12 @@ type private ProjectDefinition = {
 module ExtensionLoaders =
     open Terrabuild.Scripting
 
+    type InvocationResult<'t> =
+        | Success of 't
+        | ScriptNotFound
+        | TargetNotFound
+        | ErrorTarget of Exception
+
     let systemScripts =
         Map [
             "@docker", typeof<Terrabuild.Extensions.Docker>
@@ -128,22 +134,28 @@ module ExtensionLoaders =
 
         lazy(initScript())
 
-    let rec invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: string) (method: string) (args: Value) =
-        try
-            match scripts |> Map.tryFind extension with
-            | None -> failwith $"Extension '{extension}' is not defined"
-            | Some extInstance ->
+    let invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: string) (method: string) (args: Value) =
+        match scripts |> Map.tryFind extension with
+        | None -> ScriptNotFound
+
+        | Some extInstance ->
+            let rec invokeScriptMethod (method: string) =
                 let script = extInstance.Value
                 let invocable = script.GetMethod(method)
                 match invocable with
                 | Some invocable ->
-                    invocable.Invoke<'r> args
-                | None when method <> "__dispatch__" ->
-                    invokeScriptMethod scripts extension "__dispatch__" args
-                | _ -> ConfigException.Raise $"Extension '{extension} does not provide function '{method}'"
-        with
-        | exn -> ConfigException.Raise($"error while invoking method '{method}' from extension '{extension}'", exn)
+                    try
+                        Success (invocable.Invoke<'r> args)
+                    with
+                    | exn -> ErrorTarget exn
+                | None ->
+                    match method with
+                    | "__init__"
+                    | "__defaults__" 
+                    | "__dispatch__"-> TargetNotFound
+                    | _ -> invokeScriptMethod "__dispatch__"
 
+            invokeScriptMethod method
 
 
 let read workspaceDir (options: Options) environment labels variables =
@@ -219,7 +231,13 @@ let read workspaceDir (options: Options) environment labels variables =
                             let context = { Terrabuild.Extensibility.InitContext.Directory = projectDir
                                             Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
                             Value.Map (Map [ "context", Value.Object context ])
-                        ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts init "__init__" parseContext |> Some
+                        
+                        let result = ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts init "__init__" parseContext
+                        match result with
+                        | ExtensionLoaders.Success result -> Some result
+                        | ExtensionLoaders.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
+                        | ExtensionLoaders.TargetNotFound -> None // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
+                        | ExtensionLoaders.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
                     | _ -> None
 
                 let mergeOpt optData data =
@@ -327,10 +345,17 @@ let read workspaceDir (options: Options) environment labels variables =
                                     |> Eval.eval actionVariables
 
                                 let actionGroup =
-                                    ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> projectDef.Scripts
-                                                                                                              step.Extension 
-                                                                                                              step.Command
-                                                                                                              stepParameters
+                                    let result = ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> projectDef.Scripts
+                                                                                                                           step.Extension 
+                                                                                                                           step.Command
+                                                                                                                           stepParameters
+                                    match result with
+                                    | ExtensionLoaders.Success result -> result
+                                    | ExtensionLoaders.ScriptNotFound -> ConfigException.Raise $"Script {step.Extension} was not found"
+                                    | ExtensionLoaders.TargetNotFound -> ConfigException.Raise $"Script {step.Extension} has no function {step.Command}"
+                                    | ExtensionLoaders.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
+
+
                                 actionGroup.Actions
                                 |> List.map (fun action -> { ContaineredAction.Container = extension.Container
                                                              ContaineredAction.Command = action.Command

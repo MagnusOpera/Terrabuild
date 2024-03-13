@@ -58,9 +58,6 @@ run-build-scafold:
 run-publish-scafold:
 	dotnet run --project src/Terrabuild -- publish --workspace tests/scafold --debug --retry
 
-run-build-scafold:
-	dotnet run --project src/Terrabuild -- build --workspace tests/scafold --debug --retry
-
 run-build:
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
 

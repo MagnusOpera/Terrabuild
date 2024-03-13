@@ -13,6 +13,7 @@ type Terraform() =
                             ProjectInfo.Dependencies = Set.empty }
         projectInfo
 
+
     static member init () =
         scope Cacheability.Always
         |> andThen "terraform" "init -reconfigure"

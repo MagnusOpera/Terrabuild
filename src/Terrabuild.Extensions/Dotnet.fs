@@ -44,6 +44,7 @@ module DotnetHelpers =
 
 
 type Dotnet() =
+
     static member __init__ (context: InitContext) =
         let projectFile = DotnetHelpers.findProjectFile context.Directory
         let dependencies = Path.Combine(context.Directory, projectFile) |> DotnetHelpers.parseDotnetDependencies 

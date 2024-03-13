@@ -11,12 +11,14 @@ module GradleHelpers =
 
 
 type Gradle() =
+
     static member __init__ () =
         let projectInfo = { ProjectInfo.Properties = Map.empty
                             ProjectInfo.Ignores = Set []
                             ProjectInfo.Outputs = Set [ "build/classes" ]
                             ProjectInfo.Dependencies = Set.empty }
         projectInfo
+
 
     static member build (configuration: string option) =
         let configuration = configuration |> Option.defaultValue GradleHelpers.defaultConfiguration

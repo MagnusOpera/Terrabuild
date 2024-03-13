@@ -28,7 +28,6 @@ type Project = {
 
 
 type ExtensionConfiguration = {
-    Init: bool
     Container: string option
     Defaults: Map<string, string>
     Actions: Map<Target, string list>
@@ -63,35 +62,29 @@ let extMarkers = [
 
 let extConfigs =
     Map [ 
-        Extension.Dotnet, { Init = true
-                            Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
+        Extension.Dotnet, { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
                             Defaults = Map [ "configuration", "$configuration" ]
                             Actions = Map [ Target.Build, [ "build"; "publish" ] ] }
 
-        Extension.Gradle, { Init = true
-                            Container = Some "gradle:jdk21"
+        Extension.Gradle, { Container = Some "gradle:jdk21"
                             Defaults = Map [ "configuration", "$configuration" ]
                             Actions = Map [ Target.Build, [ "build" ]] }
 
-        Extension.Npm, { Init = true
-                         Container = Some "node:20"
+        Extension.Npm, { Container = Some "node:20"
                          Defaults = Map.empty
                          Actions = Map [ Target.Build, [ "build" ] ] }
 
-        Extension.Make, { Init = false
-                          Container = None
+        Extension.Make, { Container = None
                           Defaults = Map.empty
                           Actions = Map [ Target.Build, [ "build" ] ] }
 
-        Extension.Docker, { Init = false
-                            Container = None
+        Extension.Docker, { Container = None
                             Defaults = Map [ "image", "\"ghcr.io/example/\" + $terrabuild_project"
                                              "arguments", "{ configuration: $configuration }" ]
                             Actions = Map [ Target.Build, [ "build" ]
                                             Target.Publish, [ "push" ] ] }
 
-        Extension.Terraform, { Init = true
-                               Container = Some "hashicorp/terraform:1.7"
+        Extension.Terraform, { Container = Some "hashicorp/terraform:1.7"
                                Defaults = Map.empty
                                Actions = Map [ Target.Build, [ "plan" ]
                                                Target.Deploy, [ "apply" ] ] }
@@ -179,16 +172,10 @@ let genProject (project: Project) =
 
     seq {
 
-        let config = extConfigs |> Map.find project.Type
-
-        // determine if extension must init
-        let doInit = config.Init
-
-        // generate configuration
-        if doInit then
-            yield "configuration {"
-            yield $"    init {project.Type |> toExtension}"
-            yield "}"
+        // generate configuration with default init
+        yield "configuration {"
+        yield $"    init {project.Type |> toExtension}"
+        yield "}"
 
         // generate targets
         let allTargets =
