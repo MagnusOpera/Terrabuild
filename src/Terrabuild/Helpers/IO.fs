@@ -1,5 +1,7 @@
 module IO
 open System.IO
+open Microsoft.Extensions.FileSystemGlobbing
+open Collections
 
 let fullPath path =
     Path.GetFullPath(path)
@@ -53,25 +55,14 @@ let enumerateMatchingFiles pattern rootdir =
     Directory.EnumerateFiles(rootdir, pattern, SearchOption.AllDirectories)
     |> List.ofSeq
 
-let enumerateFilesBut ignores rootdir =
-    let ignores = ignores |> Set.map (combinePath rootdir)
-    let rec enumerateFilesBut dir =
-        seq {
-            if ignores |> Set.contains dir |> not then
-                let files =
-                    Directory.EnumerateFiles(dir)
-                    |> Seq.filter (fun file -> ignores |> Seq.exists (fun ignore -> file.StartsWith(ignore)) |> not)
-                yield! files
+let enumerateFilesBut (ignores: string set) rootdir =
+    let matcher = Matcher()
+    matcher.AddInclude("*").AddExcludePatterns(ignores)
 
-                let dirs =
-                    Directory.EnumerateDirectories(dir)
-
-                for dir in dirs do
-                    yield! enumerateFilesBut dir
-        }
-
-    let res = enumerateFilesBut rootdir |> List.ofSeq
-    res
+    let result =
+        matcher.GetResultsInFullPath(rootdir)
+        |> List.ofSeq
+    result
 
 let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
     for entry in entries do

@@ -401,6 +401,10 @@ let read workspaceDir (options: Options) environment labels variables =
                       ContaineredTarget.DependsOn = dependsOn }
                 )
 
+            let files =
+                files
+                |> Set.map (IO.relativePath projectDir)
+
             let projectConfig =
                 { Project.Dependencies = projectDef.Dependencies
                   Project.Files = files
