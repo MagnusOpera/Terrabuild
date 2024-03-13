@@ -1,7 +1,6 @@
 module SourceControls.Factory
 
-let create(): SourceControl =
-    if GitHub.Detect() then
-        GitHub()
-    else
-        Local()
+let create (local: bool): SourceControl =
+    if local then Local()
+    elif GitHub.Detect() then GitHub()
+    else Local()

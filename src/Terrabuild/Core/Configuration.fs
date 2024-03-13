@@ -10,7 +10,8 @@ open Terrabuild.Expressions
 [<RequireQualifiedAccess>]
 type Options = {
     MaxConcurrency: int
-    NoCache: bool
+    Force: bool
+    Local: bool
     Retry: bool
     StartedAt: DateTime
 }
@@ -181,8 +182,13 @@ let read workspaceDir (options: Options) environment labels variables =
         |> Map.map (fun _ value -> value)
         |> Map.addMap envVariables
 
-    let sourceControl = SourceControls.Factory.create()
+    let sourceControl = SourceControls.Factory.create options.Local
     let storage = Storages.Factory.create()
+
+    if options.Force then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
+    if options.Local then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} local mode requested" |> Terminal.writeLine
 
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {sourceControl.Name}" |> Terminal.writeLine
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} cache is {storage.Name}" |> Terminal.writeLine

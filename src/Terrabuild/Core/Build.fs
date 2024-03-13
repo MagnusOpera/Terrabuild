@@ -125,7 +125,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
             // check first if it's possible to restore previously built state
             let summary =
-                if options.NoCache || node.Cache = Cacheability.Never then None
+                if options.Force || node.Cache = Cacheability.Never then None
                 else
                     // determine if step node can be reused or not
                     let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)

@@ -17,7 +17,8 @@ type RunArgs =
     | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
     | [<Unique; AltCommandLine("--par")>] Parallel of max:int
-    | [<Unique; AltCommandLine("--nc")>] NoCache
+    | [<Unique>] Local
+    | [<Unique>] Force
     | [<Unique; AltCommandLine("--r")>] Retry
     | [<Unique; AltCommandLine("--l")>] Label of labels:string list
     | [<EqualsAssignment; AltCommandLine("--v")>] Variable of variable:string * value:string
@@ -28,7 +29,8 @@ with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Environment _ -> "Environment to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
-            | NoCache -> "Ignore cache when building target."
+            | Local -> "Local build - use no CI information."
+            | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | Label _-> "Select projects based on labels."
             | Variable _ -> "Set variable."
@@ -39,7 +41,8 @@ type TargetArgs =
     | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
     | [<Unique; AltCommandLine("--env")>] Environment of name:string
     | [<Unique; AltCommandLine("--par")>] Parallel of max:int
-    | [<Unique; AltCommandLine("--nc")>] NoCache
+    | [<Unique>] Local
+    | [<Unique>] Force
     | [<Unique; AltCommandLine("--r")>] Retry
     | [<Unique; AltCommandLine("--l")>] Label of labels:string list
     | [<EqualsAssignment; AltCommandLine("--v")>] Variable of variable:string * value:string
@@ -51,7 +54,8 @@ with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Environment _ -> "Environment to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
-            | NoCache -> "Ignore cache when building target."
+            | Local -> "Local build - use no CI information."
+            | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | Label _-> "Select projects based on labels."
             | Variable _ -> "Set variable."

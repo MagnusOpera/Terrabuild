@@ -32,6 +32,10 @@ module Emojis =
     let noentry = "⛔️"
     let cyclone = "🌀"
     let prohibited = "🚫"
+    let gear = "⚙️"
+    let clockwise = "↻"
+    let bang = "!"
+
 
 module Styles =
     let reset = csi 0

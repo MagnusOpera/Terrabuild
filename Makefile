@@ -62,7 +62,7 @@ run-build:
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
 
 run-rebuild:
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --nc
+	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --force
 
 run-dist:
 	dotnet run --project src/Terrabuild -- dist --workspace tests/simple --environment debug --debug

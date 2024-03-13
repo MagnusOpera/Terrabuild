@@ -107,7 +107,8 @@ let processCommandLine () =
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLowerInvariant
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLowerInvariant |> Set)
         let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLowerInvariant, v) |> Map
-        let options = { Configuration.Options.NoCache = buildArgs.Contains(RunArgs.NoCache)
+        let options = { Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
+                        Configuration.Options.Local = buildArgs.Contains(RunArgs.Local)
                         Configuration.Options.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
@@ -120,7 +121,8 @@ let processCommandLine () =
         let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLowerInvariant
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLowerInvariant |> Set)
         let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLowerInvariant, v) |> Map
-        let options = { Configuration.Options.NoCache = targetArgs.Contains(TargetArgs.NoCache)
+        let options = { Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
+                        Configuration.Options.Local = targetArgs.Contains(TargetArgs.Local)
                         Configuration.Options.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount)
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
