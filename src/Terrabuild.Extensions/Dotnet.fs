@@ -112,6 +112,6 @@ type Dotnet() =
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
-        let filter = filter |> Option.defaultValue "true"
+        let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
         scope Cacheability.Always
-        |> andThen "dotnet" $"test --no-build --configuration {configuration} {projectFile} --filter \"{filter}\""
+        |> andThen "dotnet" $"test --no-build --configuration {configuration} {projectFile}{filter}"
