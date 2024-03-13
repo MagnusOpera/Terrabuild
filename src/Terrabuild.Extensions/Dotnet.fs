@@ -40,7 +40,7 @@ module DotnetHelpers =
         refs 
 
     [<Literal>]
-    let defaultConfiguration = "Release"
+    let defaultConfiguration = "Debug"
 
 
 type Dotnet() =

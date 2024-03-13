@@ -16,7 +16,6 @@ type Extension =
 [<RequireQualifiedAccess>]
 type Target =
     | Build
-    | Dist
     | Publish
     | Deploy
 
@@ -37,6 +36,19 @@ type ExtensionConfiguration = {
 
 
 
+let targetConfigs =
+    Map [
+        Target.Build, [ "^build" ]
+        Target.Publish, [ "build" ]
+        Target.Deploy, [ "publish" ]
+    ]
+
+let envConfigs =
+    Map [
+        "default", Map [ "configuration", "Debug" ]
+        "release", Map [ "configuration", "Release" ]
+    ]
+
 
 // NOTE: order is important, first found is main extension
 let extMarkers = [
@@ -54,8 +66,7 @@ let extConfigs =
         Extension.Dotnet, { Init = true
                             Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
                             Defaults = Map [ "configuration", "$configuration" ]
-                            Actions = Map [ Target.Build, [ "build" ]
-                                            Target.Dist, [ "publish" ] ] }
+                            Actions = Map [ Target.Build, [ "publish" ] ] }
 
         Extension.Gradle, { Init = true
                             Container = Some "gradle:jdk21"
@@ -76,7 +87,7 @@ let extConfigs =
                             Container = None
                             Defaults = Map [ "image", "\"ghcr.io/<orgname>/\" + $terrabuild_project"
                                              "arguments", "{ configuration: $configuration }" ]
-                            Actions = Map [ Target.Dist, [ "build" ]
+                            Actions = Map [ Target.Build, [ "build" ]
                                             Target.Publish, [ "push" ] ] }
 
         Extension.Terraform, { Init = false
@@ -121,33 +132,22 @@ let toExtension (pt: Extension) = $"@{pt |> toLower}"
 
 let genWorkspace (extensions: Extension set) =
     seq {
-        "target build {"
-        "  depends_on [ ^build ]"
-        "}"
-        ""
-        "target dist {"
-        "  depends_on [ build ]"
-        "}"
-        ""
-        "target publish {"
-        "  depends_on [ dist ]"
-        "}"
-        ""
-        "target deploy {"
-        "  depends_on [ publish ]"
-        "}"
-        ""
-        "environment default {"
-        "  variables {"
-        "    configuration: \"Debug\""
-        "  }"
-        "}"
-        ""
-        "environment release {"
-        "  variables {"
-        "    configuration: \"Release\""
-        "  }"
-        "}"
+        for (KeyValue(target, dependsOn)) in targetConfigs do
+            ""
+            $"target {target |> toLower} {{"
+            let listDependsOn = String.concat " " dependsOn
+            $"  depends_on [ {listDependsOn} ]"
+            "}"
+
+        for (KeyValue(env, variables)) in envConfigs do
+            ""
+            $"environment {env} {{"
+            if variables.Count > 0 then
+                "  variables {"
+                for (KeyValue(name, value)) in variables do
+                    $"    {name}: \"{value}\""
+                "  }"
+            "}"
 
         for extension in extensions do
             let config = extConfigs |> Map.find extension

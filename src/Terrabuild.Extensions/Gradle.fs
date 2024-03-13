@@ -7,7 +7,7 @@ open Terrabuild.Extensibility
 module GradleHelpers =
 
     [<Literal>]
-    let defaultConfiguration = "Release"
+    let defaultConfiguration = "Debug"
 
 
 type Gradle() =
