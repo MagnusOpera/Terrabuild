@@ -49,6 +49,8 @@ rule token = parse
     | "depends_on" { DEPENDS_ON }
     | "defaults" { DEFAULTS }
 
+    | "#" { singleLineComment lexbuf }
+
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
 
     | "{" { LBRACE }
@@ -65,3 +67,8 @@ rule token = parse
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
     | eof        { EOF }
     | _          { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
+
+and singleLineComment = parse
+    | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | eof        { EOF }
+    | _          { singleLineComment lexbuf }

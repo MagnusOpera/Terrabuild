@@ -1,6 +1,10 @@
-target build {
+# comment at top of file
+
+target build { # comment at end of line
   depends_on [ ^build ]
 }
+
+# comment in the middle of the file
 
 target dist {
   depends_on [ build ]
@@ -20,3 +24,9 @@ extension dotnet {
 }
 
 extension docker { }
+
+# multiple comments at the end
+# multiple comments at the end
+
+# multiple comments at the end
+
