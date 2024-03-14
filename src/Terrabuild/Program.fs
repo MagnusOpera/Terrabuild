@@ -90,11 +90,11 @@ let processCommandLine () =
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
 
-    let scafold (scafoldArgs: ParseResults<ScafoldArgs>) =
+    let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
         try
-            let wsDir = scafoldArgs.GetResult(ScafoldArgs.Workspace, defaultValue = ".")
-            let force = scafoldArgs.Contains(ScafoldArgs.Force)
-            Scalfold.scafold wsDir force
+            let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")
+            let force = scaffoldArgs.Contains(ScaffoldArgs.Force)
+            Scalffold.scaffold wsDir force
             0
         with
         | ex ->
@@ -135,7 +135,7 @@ let processCommandLine () =
         if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
 
     match result with
-    | p when p.Contains(TerrabuildArgs.Scafold) -> p.GetResult(TerrabuildArgs.Scafold) |> scafold
+    | p when p.Contains(TerrabuildArgs.Scaffold) -> p.GetResult(TerrabuildArgs.Scaffold) |> scaffold
     | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
     | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
     | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"

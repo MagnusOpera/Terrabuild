@@ -1,4 +1,4 @@
-module Scalfold
+module Scalffold
 open System
 open System.IO
 open Collections
@@ -121,7 +121,7 @@ let rec findProjectInDir dir =
 
 
 let toLower s = s.ToString().ToLowerInvariant()
-let toExtension (pt: Extension) = $"@{pt |> toLower}"
+let toExtension (pt: Extension) = pt |> toLower
 
 let genWorkspace (extensions: Extension set) =
     seq {
@@ -149,7 +149,7 @@ let genWorkspace (extensions: Extension set) =
             let declare = container <> None || variables <> Map.empty
             if declare then
                 ""
-                $"extension {extension |> toExtension} {{"
+                $"extension @{extension |> toExtension} {{"
                 match container with
                 | Some container ->
                     $"  container \"{container}\""
@@ -172,9 +172,18 @@ let genProject (project: Project) =
 
     seq {
 
+        match extensions with
+        | main :: others ->
+            yield "# WARNING: multiple project types detected!"
+            yield $"# - @{main |> toExtension} (main)"
+            for other in others do
+                yield $"# - @{other |> toExtension}"
+            yield ""
+        | _ -> ()
+
         // generate configuration with default init
         yield "configuration {"
-        yield $"    init {project.Type |> toExtension}"
+        yield $"    init @{project.Type |> toExtension}"
         yield "}"
 
         // generate targets
@@ -192,11 +201,11 @@ let genProject (project: Project) =
             yield ""
             yield $"target {targetType |> toLower} {{"
             for (projType, cmd) in cmds do
-                yield $"    {projType |> toExtension} {cmd}"
+                yield $"    @{projType |> toExtension} {cmd}"
             yield "}"
     }
 
-let scafold workspaceDir force =
+let scaffold workspaceDir force =
     // check we won't override files first
     if force |> not then
         let workspaceExists = workspaceDir |> IO.enumerateMatchingFiles "WORKSPACE" |> Seq.tryHead

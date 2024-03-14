@@ -2,7 +2,7 @@ module CLI
 open Argu
 
 [<RequireQualifiedAccess>]
-type ScafoldArgs =
+type ScaffoldArgs =
     | [<Unique; AltCommandLine("--ws")>] Workspace of path:string
     | [<Unique>] Force
 with
@@ -71,7 +71,7 @@ with
 
 [<RequireQualifiedAccess>]
 type TerrabuildArgs =
-    | [<CliPrefix(CliPrefix.None)>] Scafold of ParseResults<ScafoldArgs>
+    | [<CliPrefix(CliPrefix.None)>] Scaffold of ParseResults<ScaffoldArgs>
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Test of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<RunArgs>
@@ -85,7 +85,7 @@ with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
-            | Scafold _ -> "Scafold workspace."
+            | Scaffold _ -> "Scaffold workspace."
             | Build _ -> "Run target 'build'."
             | Test _ -> "Run target 'test'."
             | Dist _ -> "Run target 'dist'."

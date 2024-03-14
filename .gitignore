@@ -418,5 +418,5 @@ terraform.tfstate
 .nuget
 .mono
 
-/tests/scafold/WORKSPACE
-/tests/scafold/**/PROJECT
+/tests/scaffold/WORKSPACE
+/tests/scaffold/**/PROJECT
