@@ -9,6 +9,7 @@ open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]
 type Options = {
+    Debug: bool
     MaxConcurrency: int
     Force: bool
     Local: bool
@@ -234,7 +235,8 @@ let read workspaceDir (options: Options) environment labels variables =
                     match projectConfig.Configuration.Init with
                     | Some init ->
                         let parseContext = 
-                            let context = { Terrabuild.Extensibility.InitContext.Directory = projectDir
+                            let context = { Terrabuild.Extensibility.InitContext.Debug = options.Debug
+                                            Terrabuild.Extensibility.InitContext.Directory = projectDir
                                             Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
                             Value.Map (Map [ "context", Value.Object context ])
                         
@@ -331,7 +333,8 @@ let read workspaceDir (options: Options) environment labels variables =
                                 | _ -> ConfigException.Raise $"Extension {step.Extension} is not defined"
 
                             let stepActions =
-                                let actionContext = { Terrabuild.Extensibility.ActionContext.Properties = projectDef.Properties
+                                let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
+                                                      Terrabuild.Extensibility.ActionContext.Properties = projectDef.Properties
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
                                                       Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash

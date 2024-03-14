@@ -50,19 +50,23 @@ type Dotnet() =
         let dependencies = Path.Combine(context.Directory, projectFile) |> DotnetHelpers.parseDotnetDependencies 
         let properties = Map [ "projectfile", projectFile ]
         let projectInfo = { ProjectInfo.Properties = properties
-                            ProjectInfo.Ignores = Set []
-                            ProjectInfo.Outputs = Set [ "bin/"; "obj/" ]
+                            ProjectInfo.Ignores = Set [ "**/*.binlog" ]
+                            ProjectInfo.Outputs = Set [ "bin/"; "obj/"; "**/*.binlog" ]
                             ProjectInfo.Dependencies = set dependencies }
         projectInfo
 
 
-    static member build (context: ActionContext) (configuration: string option) =
+    static member build (context: ActionContext) (configuration: string option) (log: bool option)=
         let projectFile = context.Properties["projectfile"]
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
+        let logger =
+            match log with
+            | Some true -> " -bl"
+            | _ -> ""
 
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectFile} --no-dependencies" 
-        |> andThen "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}"
+        |> andThen "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}{logger}"
 
 
     static member exec (command: string) (arguments: string option) =

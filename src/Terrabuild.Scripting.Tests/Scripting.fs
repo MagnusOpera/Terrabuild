@@ -10,7 +10,7 @@ open Terrabuild.Expressions
 let loadScript() =
     let script = Terrabuild.Scripting.loadScript [ "Terrabuild.Extensibility.dll" ] "TestFiles/Toto.fsx"
     let invocable = script.GetMethod("Tagada")
-    let context = { InitContext.Directory = "this is a path"; InitContext.CI = false }
+    let context = { InitContext.Debug= false; InitContext.Directory = "this is a path"; InitContext.CI = false }
     let args = Value.Map (Map [ "context", Value.Object context])
     let res = invocable.Value.Invoke args
     res |> should equal context.Directory

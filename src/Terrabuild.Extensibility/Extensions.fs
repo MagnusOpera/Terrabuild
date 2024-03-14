@@ -3,6 +3,7 @@ open System
 
 [<RequireQualifiedAccess>]
 type InitContext = {
+    Debug: bool
     Directory: string
     CI: bool
 }
@@ -17,6 +18,7 @@ type ProjectInfo = {
 
 [<RequireQualifiedAccess>]
 type ActionContext = {
+    Debug: bool
     Directory: string
     CI: bool
     Properties: Map<string, string>
