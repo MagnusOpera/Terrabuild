@@ -173,13 +173,14 @@ let genProject (project: Project) =
     seq {
 
         match extensions with
+        | _ :: [] -> ()
         | main :: others ->
             yield "# WARNING: multiple project types detected!"
             yield $"# - @{main |> toExtension} (main)"
             for other in others do
                 yield $"# - @{other |> toExtension}"
             yield ""
-        | _ -> ()
+        | _ -> failwith "Missing project types" // NOTE: this can't happen
 
         // generate configuration with default init
         yield "configuration {"
