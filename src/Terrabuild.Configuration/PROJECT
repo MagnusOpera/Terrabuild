@@ -1,5 +1,5 @@
 
-project @dotnet {
+configuration @dotnet {
 }
 
 target build {

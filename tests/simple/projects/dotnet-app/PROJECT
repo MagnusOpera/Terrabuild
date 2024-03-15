@@ -6,7 +6,7 @@ extension @docker {
     }
 }
 
-project @dotnet {
+configuration @dotnet {
     labels [ "app"
              "dotnet" ]
 }

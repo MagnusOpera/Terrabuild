@@ -1,5 +1,5 @@
 
-project {
+configuration {
     labels [ "app" ]
 }
 

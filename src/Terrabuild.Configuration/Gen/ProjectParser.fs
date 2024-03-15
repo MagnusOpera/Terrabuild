@@ -30,7 +30,7 @@ type token =
   | DEPENDS_ON
   | DEFAULTS
   | EXTENSION
-  | PROJECT
+  | CONFIGURATION
   | TARGET
   | EOF
   | TRIM
@@ -64,7 +64,7 @@ type tokenId =
     | TOKEN_DEPENDS_ON
     | TOKEN_DEFAULTS
     | TOKEN_EXTENSION
-    | TOKEN_PROJECT
+    | TOKEN_CONFIGURATION
     | TOKEN_TARGET
     | TOKEN_EOF
     | TOKEN_TRIM
@@ -130,7 +130,7 @@ let tagOfToken (t:token) =
   | DEPENDS_ON  -> 7 
   | DEFAULTS  -> 8 
   | EXTENSION  -> 9 
-  | PROJECT  -> 10 
+  | CONFIGURATION  -> 10 
   | TARGET  -> 11 
   | EOF  -> 12 
   | TRIM  -> 13 
@@ -166,7 +166,7 @@ let tokenTagToTokenId (tokenIdx:int) =
   | 7 -> TOKEN_DEPENDS_ON 
   | 8 -> TOKEN_DEFAULTS 
   | 9 -> TOKEN_EXTENSION 
-  | 10 -> TOKEN_PROJECT 
+  | 10 -> TOKEN_CONFIGURATION 
   | 11 -> TOKEN_TARGET 
   | 12 -> TOKEN_EOF 
   | 13 -> TOKEN_TRIM 
@@ -265,7 +265,7 @@ let token_to_string (t:token) =
   | DEPENDS_ON  -> "DEPENDS_ON" 
   | DEFAULTS  -> "DEFAULTS" 
   | EXTENSION  -> "EXTENSION" 
-  | PROJECT  -> "PROJECT" 
+  | CONFIGURATION  -> "CONFIGURATION" 
   | TARGET  -> "TARGET" 
   | EOF  -> "EOF" 
   | TRIM  -> "TRIM" 
@@ -301,7 +301,7 @@ let _fsyacc_dataOfToken (t:token) =
   | DEPENDS_ON  -> (null : System.Object) 
   | DEFAULTS  -> (null : System.Object) 
   | EXTENSION  -> (null : System.Object) 
-  | PROJECT  -> (null : System.Object) 
+  | CONFIGURATION  -> (null : System.Object) 
   | TARGET  -> (null : System.Object) 
   | EOF  -> (null : System.Object) 
   | TRIM  -> (null : System.Object) 
@@ -498,7 +498,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 66 "ProjectParser/Parser.fsy"
-                                                                           ProjectComponents.Configuration _3 
+                                                                                 ProjectComponents.Configuration _3 
                    )
 # 66 "ProjectParser/Parser.fsy"
                  : 'gentype_Configuration));
@@ -510,7 +510,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 67 "ProjectParser/Parser.fsy"
-                                                                                      ConfigurationComponents.Init _2 |> _4.Patch |> ProjectComponents.Configuration 
+                                                                                            ConfigurationComponents.Init _2 |> _4.Patch |> ProjectComponents.Configuration 
                    )
 # 67 "ProjectParser/Parser.fsy"
                  : 'gentype_Configuration));

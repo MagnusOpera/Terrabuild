@@ -11,7 +11,7 @@ type token =
   | DEPENDS_ON
   | DEFAULTS
   | EXTENSION
-  | PROJECT
+  | CONFIGURATION
   | TARGET
   | EOF
   | TRIM
@@ -44,7 +44,7 @@ type tokenId =
     | TOKEN_DEPENDS_ON
     | TOKEN_DEFAULTS
     | TOKEN_EXTENSION
-    | TOKEN_PROJECT
+    | TOKEN_CONFIGURATION
     | TOKEN_TARGET
     | TOKEN_EOF
     | TOKEN_TRIM
