@@ -39,7 +39,9 @@ jobs:
         run: make github-tests
 
       - name: Build
-        run: make self-publish
+        run: |
+          make dist
+          make self-publish
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
