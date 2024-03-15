@@ -10,19 +10,25 @@ module GradleHelpers =
     let defaultConfiguration = "Debug"
 
 
+/// <summary>
+/// Add support for Gradle build.
+/// </summary>
 type Gradle() =
 
+    /// <summary>
+    /// Provides default values for project.
+    /// </summary>
+    /// <param name="outputs">Includes `build/classes/`.</param>
     static member __init__ () =
-        let projectInfo = { ProjectInfo.Properties = Map.empty
-                            ProjectInfo.Ignores = Set []
-                            ProjectInfo.Outputs = Set [ "build/classes/" ]
-                            ProjectInfo.Dependencies = Set.empty }
+        let projectInfo = { ProjectInfo.Default with Outputs = Set [ "build/classes/" ] }
         projectInfo
 
-
+    /// <summary>
+    /// Invoke build task `assemble` for `configuration`.
+    /// </summary>
+    /// <param name="configuration" demo="&quot;Release&quot;">Configuration to invoke `assemble`. Default is `Debug`.</param>
     static member build (configuration: string option) =
         let configuration = configuration |> Option.defaultValue GradleHelpers.defaultConfiguration
 
         scope Cacheability.Always
         |> andThen "gradlew" $"assemble{configuration}" 
-

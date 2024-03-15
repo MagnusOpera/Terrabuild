@@ -43,21 +43,36 @@ module DotnetHelpers =
     let defaultConfiguration = "Debug"
 
 
+/// <summary>
+/// Add support for .net projects.
+/// </summary>
+
 type Dotnet() =
 
+    /// <summary>
+    /// Provides default values for project.
+    /// </summary>
+    /// <param name="ignores">Ignores `**/*.binlog`.</param>
+    /// <param name="outputs">Includes `bin`, `obj`, and '**/*.binlog'.</param>
+    /// <param name="dependencies">Dependencies parsed from project file.</param>
     static member __init__ (context: InitContext) =
         let projectFile = DotnetHelpers.findProjectFile context.Directory
         let dependencies = Path.Combine(context.Directory, projectFile) |> DotnetHelpers.parseDotnetDependencies 
-        let properties = Map [ "projectfile", projectFile ]
-        let projectInfo = { ProjectInfo.Properties = properties
-                            ProjectInfo.Ignores = Set [ "**/*.binlog" ]
-                            ProjectInfo.Outputs = Set [ "bin/"; "obj/"; "**/*.binlog" ]
-                            ProjectInfo.Dependencies = set dependencies }
+        let projectInfo =
+            { ProjectInfo.Default
+              with Ignores = Set [ "**/*.binlog" ]
+                   Outputs = Set [ "bin/"; "obj/"; "**/*.binlog" ]
+                   Dependencies = set dependencies }
         projectInfo
 
-
-    static member build (context: ActionContext) (configuration: string option) (log: bool option)=
-        let projectFile = context.Properties["projectfile"]
+    /// <summary title="Build project.">
+    /// Build project and ensure packages are available first.
+    /// </summary>
+    /// <param name="configuration" demo="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
+    /// <param name="projectfile" demo="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
+    /// <param name="log" demo="true">Enable binlog for the build.</param>
+    static member build (configuration: string option) (projectfile: string option) (log: bool option)=
+        let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let logger =
             match log with
@@ -65,28 +80,45 @@ type Dotnet() =
             | _ -> ""
 
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectFile} --no-dependencies" 
-        |> andThen "dotnet" $"build {projectFile} -m:1 --no-dependencies --no-restore --configuration {configuration}{logger}"
+        |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
+        |> andThen "dotnet" $"build {projectfile} -m:1 --no-dependencies --no-restore --configuration {configuration}{logger}"
 
-
+    /// <summary>
+    /// Run a dotnet command.
+    /// </summary>
+    /// <param name="command" demo="&quot;format&quot;">Command to execute.</param>
+    /// <param name="arguments" demo="&quot;--verify-no-changes&quot;">Arguments for command.</param>
     static member exec (command: string) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         scope Cacheability.Always
         |> andThen command arguments
 
 
-    static member pack (context: ActionContext) (configuration: string option) (version: string option) =
-        let projectFile = context.Properties["projectfile"]
+    /// <summary>
+    /// Pack a project.
+    /// </summary>
+    /// <param name="configuration" demo="&quot;Release&quot;">Configuration for pack command.</param>
+    /// <param name="projectfile" demo="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
+    /// <param name="version" demo="&quot;1.0.0&quot;">Version for pack command.</param>
+    static member pack (configuration: string option) (projectfile: string option) (version: string option) =
+        let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let version = version |> Option.defaultValue "0.0.0"
 
         // NOTE for TargetsForTfmSpecificContentInPackage: https://github.com/dotnet/fsharp/issues/12320
         scope Cacheability.Always
-        |> andThen "dotnet" $"pack {projectFile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage="
+        |> andThen "dotnet" $"pack {projectfile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage="
 
-
-    static member publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) =
-        let projectFile = context.Properties["projectfile"]
+    /// <summary>
+    /// Publish a project.
+    /// </summary>
+    /// <param name="configuration" demo="&quot;Release&quot;">Configuration for publish command.</param>
+    /// <param name="projectfile" demo="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
+    /// <param name="runtime" demo="&quot;linux-x64&quot;">Runtime for publish.</param>
+    /// <param name="trim" demo="true">Instruct to trim published project.</param>
+    /// <param name="single" demo="true">Instruct to publish project as self-contained.</param>
+    static member publish (configuration: string option) (projectfile: string option) (runtime: string option) (trim: bool option) (single: bool option) =
+        let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
         let runtime =
@@ -102,20 +134,28 @@ type Dotnet() =
             | Some true -> " --self-contained"
             | _ -> ""
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectFile} --no-dependencies" 
-        |> andThen "dotnet" $"publish {projectFile} --configuration {configuration}{runtime}{trim}{single}"
+        |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
+        |> andThen "dotnet" $"publish {projectfile} --configuration {configuration}{runtime}{trim}{single}"
 
-
-    static member restore (context: ActionContext) =
-        let projectFile = context.Properties["projectfile"]
+    /// <summary>
+    /// Restore packages.
+    /// </summary>
+    /// <param name="projectfile" demo="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
+    static member restore (projectfile: string option) =
+        let projectfile = projectfile |> Option.defaultValue ""
         scope Cacheability.Local
-        |> andThen "dotnet" $"restore {projectFile} --no-dependencies"
+        |> andThen "dotnet" $"restore {projectfile} --no-dependencies"
 
 
-    static member test (context: ActionContext) (configuration: string option) (filter: string option) =
-        let projectFile = context.Properties["projectfile"]
+    /// <summary>
+    /// Test project.
+    /// </summary>
+    /// <param name="configuration" demo="&quot;Release&quot;">Configuration for publish command.</param>
+    /// <param name="projectfile" demo="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
+    static member test (configuration: string option) (projectfile: string option) (filter: string option) =
+        let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
         scope Cacheability.Always
-        |> andThen "dotnet" $"test --no-build --configuration {configuration} {projectFile}{filter}"
+        |> andThen "dotnet" $"test --no-build --configuration {configuration} {filter} {projectfile}"
