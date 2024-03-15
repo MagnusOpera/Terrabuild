@@ -15,6 +15,13 @@ type ProjectInfo = {
     Ignores: Set<string>
     Dependencies: Set<string>
 }
+with
+    static member Default = {
+        Properties = Map.empty
+        Outputs = Set.empty
+        Ignores = Set.empty
+        Dependencies = Set.empty
+    }
 
 [<RequireQualifiedAccess>]
 type ActionContext = {

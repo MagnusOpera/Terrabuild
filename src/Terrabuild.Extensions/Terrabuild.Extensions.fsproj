@@ -10,6 +10,7 @@
     <Compile Include="Gradle.fs" />
     <Compile Include="Make.fs" />
     <Compile Include="Npm.fs" />
+    <Compile Include="Null.fs" />
     <Compile Include="Shell.fs" />
     <Compile Include="Terraform.fs" />
   </ItemGroup>
