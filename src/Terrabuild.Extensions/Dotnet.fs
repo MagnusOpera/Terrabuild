@@ -53,7 +53,7 @@ type Dotnet() =
     /// Provides default values for project.
     /// </summary>
     /// <param name="ignores">Ignores `**/*.binlog`.</param>
-    /// <param name="outputs">Includes `bin`, `obj`, and '**/*.binlog'.</param>
+    /// <param name="outputs">Includes `bin`, `obj`, and `**/*.binlog`.</param>
     /// <param name="dependencies">Dependencies parsed from project file.</param>
     static member __init__ (context: InitContext) =
         let projectFile = DotnetHelpers.findProjectFile context.Directory
