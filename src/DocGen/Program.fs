@@ -157,6 +157,7 @@ let writeExtension extensionDir (extension: Extension) =
 
 [<EntryPoint>]
 let main args =
+    if args.Length <> 2 then failwith "Usage: DocGen <xml-doc-file> <output-dir>"
     let doc = XmlDoc.load args[0]
     let outputDir = args[1]
     if doc.Assembly.Name <> "Terrabuild.Extensions" then failwith "Expecting documentation for Terrabuild.Extensions"
