@@ -69,3 +69,26 @@ let parseProject() =
     project
     |> should equal expectedProject
     
+[<Test>]
+let parseProject2() =
+    let expectedProject =
+        let configuration =
+            { Dependencies = None
+              Outputs = None
+              Ignores = None
+              Labels = Set.empty
+              Init = Some "@dotnet" }
+
+        let buildTarget = 
+            { DependsOn = None
+              Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
+
+        { Extensions = Map.empty
+          Configuration = configuration
+          Targets = Map [ "build", buildTarget ]  }
+
+    let content = File.ReadAllText("TestFiles/PROJECT2")
+    let project = FrontEnd.parseProject content
+
+    project
+    |> should equal expectedProject

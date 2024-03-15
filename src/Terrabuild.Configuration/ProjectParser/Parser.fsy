@@ -64,6 +64,7 @@ Defaults:
 
 Configuration:
     | CONFIGURATION LBRACE ConfigurationComponents RBRACE { ProjectComponents.Configuration $3 }
+    | CONFIGURATION IDENTIFIER { ConfigurationComponents.Init $2 |> Configuration.Empty.Patch |> ProjectComponents.Configuration }
     | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { ConfigurationComponents.Init $2 |> $4.Patch |> ProjectComponents.Configuration }
 ConfigurationComponents:
     | /* empty */ { Configuration.Empty }

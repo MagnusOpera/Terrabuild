@@ -171,20 +171,13 @@ let genProject (project: Project) =
     let extensions = project.Type :: project.Others
 
     seq {
-
-        match extensions with
-        | _ :: [] -> ()
-        | main :: others ->
-            yield "# WARNING: multiple project types detected!"
-            yield $"# - @{main |> toExtension} (main)"
-            for other in others do
-                yield $"# - @{other |> toExtension}"
-            yield ""
-        | _ -> failwith "Missing project types" // NOTE: this can't happen
-
         // generate project block with default initializer
-        yield $"configuration @{project.Type |> toExtension} {{"
-        yield "}"
+        match extensions with
+        | main :: others when others <> [] ->
+            let exts = others |> Seq.map toExtension |> String.join " "
+            yield $"# WARNING: other project types detected: {exts}"
+        | _ -> ()
+        yield $"configuration @{project.Type |> toExtension}"
 
         // generate targets
         let allTargets =
