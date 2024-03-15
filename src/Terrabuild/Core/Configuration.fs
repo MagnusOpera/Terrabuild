@@ -245,33 +245,29 @@ let read workspaceDir (options: Options) environment labels variables =
                         
                         let result = ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts init "__init__" parseContext
                         match result with
-                        | ExtensionLoaders.Success result -> Some result
+                        | ExtensionLoaders.Success result -> result
                         | ExtensionLoaders.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
-                        | ExtensionLoaders.TargetNotFound -> None // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
+                        | ExtensionLoaders.TargetNotFound -> ProjectInfo.Default // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
                         | ExtensionLoaders.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
-                    | _ -> None
+                    | _ -> ProjectInfo.Default
 
-                let mergeOpt optData data =
+                let projectInfo = {
                     projectInfo
-                    |> Option.map optData
-                    |> Option.defaultValue Set.empty
-                    |> Set.union data
+                    with Ignores = projectConfig.Configuration.Ignores |> Option.defaultValue projectInfo.Ignores
+                         Outputs = projectConfig.Configuration.Outputs |> Option.defaultValue projectInfo.Outputs
+                         Dependencies = projectConfig.Configuration.Dependencies |> Option.defaultValue projectInfo.Dependencies }
 
-                let projectOutputs =
-                    mergeOpt (fun project -> project.Outputs) projectConfig.Configuration.Outputs
+                let properties = projectInfo.Properties
+                let labels = projectConfig.Configuration.Labels
 
-                let projectIgnores =
-                    mergeOpt (fun project -> project.Ignores) projectConfig.Configuration.Ignores
-
+                let projectOutputs = projectInfo.Outputs
+                let projectIgnores = projectInfo.Ignores
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let projectDependencies =
-                    mergeOpt (fun project -> project.Dependencies) projectConfig.Configuration.Dependencies
+                    projectInfo.Dependencies
                     |> Set.map (fun dep -> IO.combinePath projectDir dep |> IO.relativePath workspaceDir)
 
-                let labels = projectConfig.Configuration.Labels
                 let projectTargets = projectConfig.Targets
-
-                let properties = projectInfo |> Option.map (fun pi -> pi.Properties) |> Option.defaultValue Map.empty
 
                 { ProjectDefinition.Dependencies = projectDependencies
                   ProjectDefinition.Ignores = projectIgnores

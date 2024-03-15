@@ -11,25 +11,25 @@ type ConfigurationComponents =
     | Init of string
 
 type Configuration = {
-    Dependencies: Set<string>
-    Outputs: Set<string>
-    Ignores: Set<string>
+    Dependencies: Set<string> option
+    Outputs: Set<string> option
+    Ignores: Set<string> option
     Labels: Set<string>
     Init: string option
 }
 with
     static member Empty =
-        { Dependencies = Set.empty
-          Outputs = Set.empty
-          Ignores = Set.empty
+        { Dependencies = None
+          Outputs = None
+          Ignores = None
           Labels = Set.empty
           Init = None }
 
     member this.Patch comp =
         match comp with
-        | ConfigurationComponents.Dependencies dependencies -> { this with Dependencies = dependencies |> Set.ofList }
-        | ConfigurationComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList }
-        | ConfigurationComponents.Ignores ignores -> { this with Ignores = ignores |> Set.ofList }
+        | ConfigurationComponents.Dependencies dependencies -> { this with Dependencies = dependencies |> Set.ofList |> Some }
+        | ConfigurationComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList |> Some }
+        | ConfigurationComponents.Ignores ignores -> { this with Ignores = ignores |> Set.ofList |> Some }
         | ConfigurationComponents.Labels labels -> { this with Labels = labels |> Set.ofList |> Set.map (fun x -> x.ToLowerInvariant()) }
         | ConfigurationComponents.Init init -> { this with Init = Some init }
 

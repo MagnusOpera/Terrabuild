@@ -30,9 +30,9 @@ let parseProject() =
               Defaults = Map.empty }
 
         let configuration =
-            { Dependencies = Set [ "../../libraries/shell-lib" ] 
-              Outputs = Set [ "dist" ]
-              Ignores = Set.empty
+            { Dependencies = Set [ "../../libraries/shell-lib" ] |> Some
+              Outputs = Set [ "dist" ] |> Some
+              Ignores = None
               Labels = Set [ "app"; "dotnet" ]
               Init = Some "@dotnet" }
 
