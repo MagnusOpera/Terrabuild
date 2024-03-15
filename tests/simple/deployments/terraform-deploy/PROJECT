@@ -1,5 +1,5 @@
 
-configuration {
+project {
     dependencies [ "../../projects/dotnet-app" ]
     ignores [ "terrabuild.tfstate" ]
     labels [ "infra" ]

@@ -28,7 +28,7 @@ let debugPrint s = ignore s
 %token PLUS
 %token TRIM UPPER LOWER
 %token EOF
-%token EXTENSION CONFIGURATION TARGET 
+%token EXTENSION PROJECT TARGET 
 %token DEPENDENCIES OUTPUTS IGNORES LABELS CONTAINER INIT SCRIPT DEPENDS_ON DEFAULTS
 
 // associativity and precedences
@@ -63,14 +63,14 @@ Defaults:
 
 
 Configuration:
-    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { ProjectComponents.Configuration $3 }
+    | PROJECT LBRACE ConfigurationComponents RBRACE { ProjectComponents.Configuration $3 }
+    | PROJECT IDENTIFIER LBRACE ConfigurationComponents RBRACE { ConfigurationComponents.Init $2 |> $4.Patch |> ProjectComponents.Configuration }
 ConfigurationComponents:
     | /* empty */ { Configuration.Empty }
     | ConfigurationComponents ConfigurationDependencies { $1.Patch $2 }
     | ConfigurationComponents ConfigurationOutputs { $1.Patch $2 }
     | ConfigurationComponents ConfigurationIgnores { $1.Patch $2 }
     | ConfigurationComponents ConfigurationLabels { $1.Patch $2 }
-    | ConfigurationComponents ConfigurationInit { $1.Patch $2 }
 ConfigurationDependencies:
     | DEPENDENCIES ListOfString { ConfigurationComponents.Dependencies $2 }
 ConfigurationOutputs:
@@ -79,8 +79,6 @@ ConfigurationIgnores:
     | IGNORES ListOfString { ConfigurationComponents.Ignores $2 }
 ConfigurationLabels:
     | LABELS ListOfString { ConfigurationComponents.Labels $2 }
-ConfigurationInit:
-    | INIT IDENTIFIER { ConfigurationComponents.Init $2 }
 
 
 Target:

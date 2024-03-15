@@ -11,7 +11,7 @@ type token =
   | DEPENDS_ON
   | DEFAULTS
   | EXTENSION
-  | CONFIGURATION
+  | PROJECT
   | TARGET
   | EOF
   | TRIM
@@ -44,7 +44,7 @@ type tokenId =
     | TOKEN_DEPENDS_ON
     | TOKEN_DEFAULTS
     | TOKEN_EXTENSION
-    | TOKEN_CONFIGURATION
+    | TOKEN_PROJECT
     | TOKEN_TARGET
     | TOKEN_EOF
     | TOKEN_TRIM
@@ -83,7 +83,6 @@ type nonTerminalId =
     | NONTERM_ConfigurationOutputs
     | NONTERM_ConfigurationIgnores
     | NONTERM_ConfigurationLabels
-    | NONTERM_ConfigurationInit
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_DependsOn

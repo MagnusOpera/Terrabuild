@@ -1,5 +1,5 @@
 
-configuration {
+project {
   dependencies [ "../B" "../C" ]
 }
 

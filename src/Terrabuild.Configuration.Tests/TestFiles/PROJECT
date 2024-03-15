@@ -19,12 +19,11 @@ extension toto {
 
 # comment in the middle of the file
 
-configuration {
+project @dotnet {
   dependencies [ "../../libraries/shell-lib" ]
   outputs [ "dist" ]
   labels [ "app"
            "dotnet" ]
-  init @dotnet
 }
 
 target build {

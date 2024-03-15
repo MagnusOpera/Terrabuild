@@ -182,9 +182,8 @@ let genProject (project: Project) =
             yield ""
         | _ -> failwith "Missing project types" // NOTE: this can't happen
 
-        // generate configuration with default init
-        yield "configuration {"
-        yield $"    init @{project.Type |> toExtension}"
+        // generate project block with default initializer
+        yield $"project @{project.Type |> toExtension} {{"
         yield "}"
 
         // generate targets

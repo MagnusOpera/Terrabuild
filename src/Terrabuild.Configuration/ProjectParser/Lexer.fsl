@@ -15,7 +15,7 @@ let quotedString = '\"' [^'\"']+ '\"'
 
 let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
 let whitespace = ' ' | '\t'
-let newline    = '\n' | '\r' '\n'
+let newline = '\n' | '\r' '\n'
 
 rule token = parse
     | quotedString { 
@@ -26,7 +26,7 @@ rule token = parse
         let s = lexeme lexbuf |> string
         KEY (s.Substring(0, s.Length-1)) }
 
-    | variable   {
+    | variable {
         let s = lexeme lexbuf |> string
         VARIABLE (s.Substring(1, s.Length-1)) }
 
@@ -36,13 +36,13 @@ rule token = parse
     | "trim" { TRIM }
     | "upper" { UPPER }
     | "lower" { LOWER }
-    | "target"     { TARGET }
-    | "configuration"   { CONFIGURATION }
+
+    | "target" { TARGET }
+    | "project" { PROJECT }
     | "dependencies" { DEPENDENCIES }
     | "outputs" { OUTPUTS }
     | "ignores" { IGNORES }
     | "labels" { LABELS }
-    | "init" { INIT }
     | "script" { SCRIPT }
     | "extension" { EXTENSION }
     | "container" { CONTAINER }
@@ -55,20 +55,20 @@ rule token = parse
 
     | "{" { LBRACE }
     | "}" { RBRACE }
-    | "["        { LSQBRACKET }
-    | "]"        { RSQBRACKET }
-    | "("        { LPAREN }
-    | ")"        { RPAREN }
-    | "="        { EQUAL }
-    | ","        { COMMA }
-    | "+"        { PLUS }
+    | "[" { LSQBRACKET }
+    | "]" { RSQBRACKET }
+    | "(" { LPAREN }
+    | ")" { RPAREN }
+    | "=" { EQUAL }
+    | "," { COMMA }
+    | "+" { PLUS }
 
     | whitespace { token lexbuf }
-    | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
-    | eof        { EOF }
-    | _          { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
+    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | eof { EOF }
+    | _ { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
 
 and singleLineComment = parse
-    | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
-    | eof        { EOF }
-    | _          { singleLineComment lexbuf }
+    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | eof { EOF }
+    | _ { singleLineComment lexbuf }
