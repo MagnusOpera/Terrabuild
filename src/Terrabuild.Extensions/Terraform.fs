@@ -9,8 +9,8 @@ type Terraform() =
     /// <summary>
     /// Provides default values for project.
     /// </summary>
-    /// <param name="ignores">Ignores `.terraform/`and `*.tfstate/`.</param>
-    /// <param name="outputs">Includes `*.planfile`.</param>
+    /// <param name="ignores" example="[ &quot;.terraform/&quot; &quot;*.tfstate/&quot; ]">Default values.</param>
+    /// <param name="outputs" example="[ &quot;*.planfile&quot; ]">Default values.</param>
     static member __init__() =
         let projectInfo = 
             { ProjectInfo.Default
@@ -32,7 +32,7 @@ type Terraform() =
     /// * select workspace
     /// * run plan
     /// </summary>
-    /// <param name="workspace" demo="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
+    /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     static member plan (workspace: string option) =
         scope Cacheability.Always
         |> andThen "terraform" "init -reconfigure"
@@ -46,7 +46,7 @@ type Terraform() =
     /// * select workspace
     /// * apply plan
     /// </summary>
-    /// <param name="workspace" demo="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
+    /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     static member apply (workspace: string option) =
         scope Cacheability.Always
         |> andThen "terraform" "init -reconfigure" 

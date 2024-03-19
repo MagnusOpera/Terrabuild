@@ -1,11 +1,21 @@
 ﻿open System.IO
 open System.Text.RegularExpressions
+open FSharp.Data
+
+
+type Documentation = XmlProvider<"Examples/Terrabuild.Extensions.xml">
+
+let load (filename: string) =
+    let content = File.ReadAllText(filename)
+    let result = Documentation.Parse(content)
+    result
+
 
 type Parameter = {
     Name: string
     Required: bool
     Summary: string
-    Demo: string
+    Example: string
 }
 
 type Command = {
@@ -40,13 +50,13 @@ let (|Extension|Command|) s =
 
 
 
-let buildExtensions (members: XmlDoc.Member seq) =
+let buildExtensions (members: Documentation.Member seq) =
     // first find extensions
     let extensions =
         members
         |> Seq.choose (fun m ->
             match m.Name with
-            | Extension name when name <> "null" -> Some { Name = name; Summary = m.Summary.Body; Commands = List.empty }
+            | Extension name when name <> "null" -> Some { Name = name; Summary = m.Summary.Value; Commands = List.empty }
             | _ -> None)
         |> Seq.map (fun ext -> ext.Name, ext)
         |> Map.ofSeq
@@ -64,17 +74,17 @@ let buildExtensions (members: XmlDoc.Member seq) =
                     |> Option.ofObj
                     |> Option.defaultValue Array.empty
                     |> Seq.map (fun prm -> { Name = prm.Name
-                                             Summary = prm.Body.Trim()
-                                             Required = prm.Required
-                                             Demo = prm.Demo })
+                                             Summary = prm.Value.Trim()
+                                             Required = prm.Required |> Option.defaultValue false
+                                             Example = prm.Example.Value })
                     |> List.ofSeq
                 let cmd = { Name = match name with
-                                   | "__dispatch__" -> "command"
+                                   | "__dispatch__" -> "<command>"
                                    | _ -> name
-                            Title = m.Summary.Title |> Option.ofObj
-                            Summary = m.Summary.Body.Trim()
+                            Title = m.Summary.Title
+                            Summary = m.Summary.Value.Trim()
                             Parameters = prms
-                            Weight = if m.Summary.Weight = 0 then None else Some m.Summary.Weight }
+                            Weight = m.Summary.Weight }
                 ext.Commands <- ext.Commands @ [cmd]
         | _ -> ())
 
@@ -103,7 +113,7 @@ let writeCommand extensionDir (command: Command) (extension: Extension) =
             | prms ->
                 $"@{extension.Name} {command.Name} {{"
                 for prm in prms do
-                    $"    {prm.Name} {prm.Demo}"
+                    $"    {prm.Name} {prm.Example}"
                 "}"
             "```"
             $"## Argument Reference"
@@ -145,11 +155,18 @@ let writeExtension extensionDir (extension: Extension) =
             | Some init ->
                 ""
                 $"## Project Initializer"
+                init.Summary
                 "```"
                 $"configuration @{extension.Name}"
                 "```"
-                init.Summary
-                for prm in init.Parameters do $"* `{prm.Name}` - {prm.Summary}"
+                "Same as:"
+                "```"
+                $"configuration @{extension.Name} {{"
+                for prm in init.Parameters do
+                    $"    {prm.Name} {prm.Example}"
+                "}"
+                "```"
+
             | _ -> ()
     ]
     File.WriteAllLines(extensionFile, extensionContent)
@@ -158,7 +175,7 @@ let writeExtension extensionDir (extension: Extension) =
 [<EntryPoint>]
 let main args =
     if args.Length <> 2 then failwith "Usage: DocGen <xml-doc-file> <output-dir>"
-    let doc = XmlDoc.load args[0]
+    let doc = load args[0]
     let outputDir = args[1]
     if doc.Assembly.Name <> "Terrabuild.Extensions" then failwith "Expecting documentation for Terrabuild.Extensions"
 

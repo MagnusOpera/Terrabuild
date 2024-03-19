@@ -12,8 +12,8 @@ type Npm() =
     /// <summary>
     /// Provides default values.
     /// </summary>
-    /// <param name="ignores">Ignores `node_modules/`</param>
-    /// <param name="outputs">Includes `dist/`</param>
+    /// <param name="ignores" example="[ &quot;node_modules/&quot; ]">Default values.</param>
+    /// <param name="outputs" example="[ &quot;dist/&quot; ]">Default values.</param>
     static member __init__() =
         let projectInfo = 
             { ProjectInfo.Default

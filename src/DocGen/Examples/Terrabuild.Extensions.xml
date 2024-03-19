@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>
+			Terrabuild.Extensions
+		</name>
+	</assembly>
+	<members>
+		<member name="M:Terrabuild.Extensions.Docker.push(Terrabuild.Extensibility.ActionContext,System.String)">
+			<summary>
+				Push a docker image to registry.
+			</summary>
+			<param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">
+				Docker image to build.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Docker.build(Terrabuild.Extensibility.ActionContext,Microsoft.FSharp.Core.FSharpOption{System.String},System.String,Microsoft.FSharp.Collections.FSharpMap{System.String,System.String})">
+			<summary>
+				Build a Dockerfile.
+			</summary>
+			<param name="dockerfile" example="&quot;Dockerfile&quot;">
+				Use alternative Dockerfile. Default is Dockerfile.
+			</param>
+			<param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">
+				Docker image to build.
+			</param>
+			<param name="arguments" example="{ configuration: &quot;Release&quot; }">
+				Arguments to build image (see Dockerfile [ARG](https://docs.docker.com/reference/dockerfile/#arg)).
+			</param>
+		</member>
+		<member name="T:Terrabuild.Extensions.Docker">
+			<summary>
+				`terraform` extension provides commands to handle a Terraform project.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Dotnet.test(Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.String})">
+			<summary>
+				Test project.
+			</summary>
+			<param name="configuration" example="&quot;Release&quot;">
+				Configuration for publish command.
+			</param>
+			<param name="projectfile" example="&quot;project.fsproj&quot;">
+				Force usage of project file for publish.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Dotnet.restore(Microsoft.FSharp.Core.FSharpOption{System.String})">
+			<summary>
+				Restore packages.
+			</summary>
+			<param name="projectfile" example="&quot;project.fsproj&quot;">
+				Force usage of project file for publish.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Dotnet.publish(Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.Boolean},Microsoft.FSharp.Core.FSharpOption{System.Boolean})">
+			<summary>
+				Publish a project.
+			</summary>
+			<param name="configuration" example="&quot;Release&quot;">
+				Configuration for publish command.
+			</param>
+			<param name="projectfile" example="&quot;project.fsproj&quot;">
+				Force usage of project file for publish.
+			</param>
+			<param name="runtime" example="&quot;linux-x64&quot;">
+				Runtime for publish.
+			</param>
+			<param name="trim" example="true">
+				Instruct to trim published project.
+			</param>
+			<param name="single" example="true">
+				Instruct to publish project as self-contained.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Dotnet.pack(Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.String})">
+			<summary>
+				Pack a project.
+			</summary>
+			<param name="configuration" example="&quot;Release&quot;">
+				Configuration for pack command.
+			</param>
+			<param name="projectfile" example="&quot;project.fsproj&quot;">
+				Force usage of project file for build.
+			</param>
+			<param name="version" example="&quot;1.0.0&quot;">
+				Version for pack command.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Dotnet.exec(System.String,Microsoft.FSharp.Core.FSharpOption{System.String})">
+			<summary>
+				Run a dotnet command.
+			</summary>
+			<param name="command" example="&quot;format&quot;">
+				Command to execute.
+			</param>
+			<param name="arguments" example="&quot;--verify-no-changes&quot;">
+				Arguments for command.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Dotnet.build(Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.String},Microsoft.FSharp.Core.FSharpOption{System.Boolean})">
+			<summary title="Build project.">
+				Build project and ensure packages are available first.
+			</summary>
+			<param name="configuration" example="&quot;Release&quot;">
+				Configuration to use to build project. Default is `Debug`.
+			</param>
+			<param name="projectfile" example="&quot;project.fsproj&quot;">
+				Force usage of project file for build.
+			</param>
+			<param name="log" example="true">
+				Enable binlog for the build.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Dotnet.__init__(Terrabuild.Extensibility.InitContext)">
+			<summary>
+				Provides default values for project.
+			</summary>
+			<param name="ignores" example="[ &quot;**/*.binlog&quot; ]">
+				Ignores
+			</param>
+			<param name="outputs" example="[ &quot;bin/&quot; &quot;obj/&quot; &quot;**/*.binlog&quot;]">
+				Includes
+			</param>
+			<param name="dependencies" example="[ ]">
+				Dependencies
+			</param>
+		</member>
+		<member name="T:Terrabuild.Extensions.Dotnet">
+			<summary>
+				Add support for .net projects.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Gradle.build(Microsoft.FSharp.Core.FSharpOption{System.String})">
+			<summary>
+				Invoke build task `assemble` for `configuration`.
+			</summary>
+			<param name="configuration" example="&quot;Release&quot;">
+				Configuration to invoke `assemble`. Default is `Debug`.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Gradle.__init__">
+			<summary>
+				Provides default values for project.
+			</summary>
+			<param name="outputs" example="[ &quot;build/classes/&quot; ]">
+				Includes
+			</param>
+		</member>
+		<member name="T:Terrabuild.Extensions.Gradle">
+			<summary>
+				Add support for Gradle build.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Make.__dispatch__(Terrabuild.Extensibility.ActionContext,Microsoft.FSharp.Collections.FSharpMap{System.String,System.String})">
+			<summary>
+				Invoke make target.
+			</summary>
+			<param name="variables" example="{ configuration: &quot;Release&quot; }">
+				Variables to pass to make target.
+			</param>
+		</member>
+		<member name="T:Terrabuild.Extensions.Make">
+			<summary>
+				`make` extension provides support for Makefile.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Npm.test">
+			<summary>
+				Run `test` script.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Npm.install">
+			<summary>
+				Install packages using lock file.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Npm.build">
+			<summary>
+				Run `build` script.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Npm.__init__">
+			<summary>
+				Provides default values.
+			</summary>
+			<param name="ignores" example="[ &quot;node_modules/&quot; ]">
+				Ignores
+			</param>
+			<param name="outputs" example="[ &quot;dist/&quot; ]">
+				Includes
+			</param>
+		</member>
+		<member name="T:Terrabuild.Extensions.Npm">
+			<summary>
+				Provides support for `npm`.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Null.__init__(Terrabuild.Extensibility.InitContext)">
+			<summary>
+				Fake init.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Null.__dispatch__(Terrabuild.Extensibility.ActionContext)">
+			<summary>
+				Fake dispatch.
+			</summary>
+		</member>
+		<member name="T:Terrabuild.Extensions.Null">
+			<summary>
+				`null` extension is for testing purpose. It supports fake `init` and fake `dispatch`.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Shell.__dispatch__(Terrabuild.Extensibility.ActionContext,Microsoft.FSharp.Core.FSharpOption{System.String})">
+			<summary>
+				Run a shell command using provided arguments.
+			</summary>
+			<param name="command" example="echo">
+				Command to run.
+			</param>
+			<param name="arguments" example="&quot;Hello Terrabuild&quot;">
+				Arguments to pass to command.
+			</param>
+		</member>
+		<member name="T:Terrabuild.Extensions.Shell">
+			<summary>
+				Provides support for running shell commands.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Terraform.plan(Microsoft.FSharp.Core.FSharpOption{System.String})">
+			<summary weight="2" title="Generate plan file.">
+				This command generates the planfile:
+				* initialize Terraform
+				* select workspace
+				* run plan
+			</summary>
+			<param name="workspace" example="&quot;dev&quot;">
+				Workspace to use. Use `default` if not provided.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Terraform.init">
+			<summary weight="1">
+				Init Terraform.
+			</summary>
+		</member>
+		<member name="M:Terrabuild.Extensions.Terraform.apply(Microsoft.FSharp.Core.FSharpOption{System.String})">
+			<summary weight="3" title="Apply plan file.">
+				Apply the plan file:
+				* initialize Terraform
+				* select workspace
+				* apply plan
+			</summary>
+			<param name="workspace" example="&quot;dev&quot;">
+				Workspace to use. Use `default` if not provided.
+			</param>
+		</member>
+		<member name="M:Terrabuild.Extensions.Terraform.__init__">
+			<summary>
+				Provides default values for project.
+			</summary>
+			<param name="ignores" example="[ &quot;.terraform/&quot; &quot;*.tfstate/&quot; ]">
+				Ignores
+			</param>
+			<param name="outputs" example="[ &quot;*.planfile&quot; ]">
+				Includes
+			</param>
+		</member>
+		<member name="T:Terrabuild.Extensions.Terraform">
+			<summary>
+				`terraform` extension provides commands to handle a Terraform project.
+			</summary>
+		</member>
+	</members>
+</doc>

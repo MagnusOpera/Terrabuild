@@ -18,7 +18,7 @@ type Gradle() =
     /// <summary>
     /// Provides default values for project.
     /// </summary>
-    /// <param name="outputs">Includes `build/classes/`.</param>
+    /// <param name="outputs" example="[ &quot;build/classes/&quot; ]">Default values.</param>
     static member __init__ () =
         let projectInfo = { ProjectInfo.Default with Outputs = Set [ "build/classes/" ] }
         projectInfo
@@ -26,7 +26,7 @@ type Gradle() =
     /// <summary>
     /// Invoke build task `assemble` for `configuration`.
     /// </summary>
-    /// <param name="configuration" demo="&quot;Release&quot;">Configuration to invoke `assemble`. Default is `Debug`.</param>
+    /// <param name="configuration" example="&quot;Release&quot;">Configuration to invoke `assemble`. Default is `Debug`.</param>
     static member build (configuration: string option) =
         let configuration = configuration |> Option.defaultValue GradleHelpers.defaultConfiguration
 
