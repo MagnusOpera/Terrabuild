@@ -8,8 +8,9 @@ open Terrabuild.Extensibility
 type Shell() =
 
     /// <summary>
-    /// Run the shell `command` using provided arguments.
+    /// Run a shell `command` using provided arguments.
     /// </summary>
+    /// <param name="__dispatch__" example="echo">Example.</param>
     /// <param name="arguments" example="&quot;Hello Terrabuild&quot;">Arguments to pass to command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""

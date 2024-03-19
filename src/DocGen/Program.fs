@@ -78,9 +78,7 @@ let buildExtensions (members: Documentation.Member seq) =
                                              Required = prm.Required |> Option.defaultValue false
                                              Example = prm.Example.Value })
                     |> List.ofSeq
-                let cmd = { Name = match name with
-                                   | "__dispatch__" -> "<command>"
-                                   | _ -> name
+                let cmd = { Name = name
                             Title = m.Summary.Title
                             Summary = m.Summary.Value.Trim()
                             Parameters = prms
@@ -102,18 +100,32 @@ let writeCommand extensionDir (command: Command) (extension: Extension) =
         let commandFile = Path.Combine(extensionDir, $"{command.Name}.md")
         let commandContent = [
             "---"
-            $"title: \"{command.Name}\""
+            match command.Name with
+            | "__dispatch__" -> $"title: \"<command>\""
+            | _ -> $"title: \"{command.Name}\""
             if command.Weight |> Option.isSome then $"weight: {command.Weight.Value}"
             "---"
             ""
             command.Summary
+
+            let name =
+                match command.Parameters |> List.tryFind (fun x -> x.Name = command.Name) with
+                | Some nameOverride -> nameOverride.Example
+                | _ -> command.Name
+
+            match command.Name with
+            | "__dispatch__" -> $"Example for command `{name}`:"
+            | _ -> ()
             "```"
+                    
             match command.Parameters with
-            | [] -> $"@{extension.Name} {command.Name}"
+            | [] -> $"@{extension.Name} {name}"
             | prms ->
-                $"@{extension.Name} {command.Name} {{"
+                $"@{extension.Name} {name} {{"
                 for prm in prms do
-                    $"    {prm.Name} {prm.Example}"
+                    match prm.Name with
+                    | "__dispatch__" -> ()
+                    | _ -> $"    {prm.Name} {prm.Example}"
                 "}"
             "```"
             $"## Argument Reference"
@@ -122,8 +134,11 @@ let writeCommand extensionDir (command: Command) (extension: Extension) =
             | prms ->
                 "The following arguments are supported:"
                 for prm in prms do
-                    let required = if prm.Required then "Required" else "Optional"
-                    $"* `{prm.Name}` - ({required}) {prm.Summary}"
+                    match prm.Name with
+                    | "__dispatch__" -> ()
+                    | _ ->
+                        let required = if prm.Required then "Required" else "Optional"
+                        $"* `{prm.Name}` - ({required}) {prm.Summary}"
         ]
         File.WriteAllLines(commandFile, commandContent)
 
@@ -147,7 +162,10 @@ let writeExtension extensionDir (extension: Extension) =
             "|---------|-------------|"
             for cmd in extension.Commands do
                 match cmd.Name with
-                | "__init__" -> ()
+                | "__init__" ->
+                    ()
+                | "__dispatch__" ->
+                    $"| [&lt;command&gt;](/docs/extensions/{extension.Name}/{cmd.Name}) | {cmd.Title |> Option.defaultValue cmd.Summary} |"
                 | _ ->
                     $"| [{cmd.Name}](/docs/extensions/{extension.Name}/{cmd.Name}) | {cmd.Title |> Option.defaultValue cmd.Summary} |"
 

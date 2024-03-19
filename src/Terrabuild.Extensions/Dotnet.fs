@@ -84,14 +84,14 @@ type Dotnet() =
         |> andThen "dotnet" $"build {projectfile} -m:1 --no-dependencies --no-restore --configuration {configuration}{logger}"
 
     /// <summary>
-    /// Run a dotnet command.
+    /// Run a dotnet `command`.
     /// </summary>
-    /// <param name="command" example="&quot;format&quot;">Command to execute.</param>
+    /// <param name="__dispatch__" example="format">Example.</param>
     /// <param name="arguments" example="&quot;--verify-no-changes&quot;">Arguments for command.</param>
-    static member exec (command: string) (arguments: string option) =
+    static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         scope Cacheability.Always
-        |> andThen command arguments
+        |> andThen (context.Command) arguments
 
 
     /// <summary>
