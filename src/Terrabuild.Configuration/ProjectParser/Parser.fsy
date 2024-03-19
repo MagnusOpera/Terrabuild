@@ -101,14 +101,12 @@ ListOfString:
 Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
-    | Strings String COMMA { $1 @ [$2] }
 
 ListOfTargets:
     | LSQBRACKET Targets RSQBRACKET { $2 }
 Targets:
     | /* empty */ { [] }
     | Targets IDENTIFIER { $1 @ [$2] }
-    | Targets IDENTIFIER COMMA { $1 @ [$2] }
 
 Variables:
     | /* empty */ { Map.empty }        

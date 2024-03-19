@@ -22,7 +22,8 @@ extension dummy {
 configuration @dotnet {
   dependencies = [ "../../libraries/shell-lib" ]
   outputs = [ "dist" ]
-  labels = [ "app", "dotnet", ]
+  labels = [ "app"
+             "dotnet" ]
 }
 
 target build {
