@@ -72,7 +72,6 @@ type private ProjectDefinition = {
     Targets: Map<string, Terrabuild.Configuration.Project.AST.Target>
     Labels: string set
     Extensions: Map<string, Terrabuild.Configuration.AST.Extension>
-    Properties: Map<string, string>
     Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
 }
 
@@ -257,7 +256,6 @@ let read workspaceDir (options: Options) environment labels variables =
                          Outputs = projectConfig.Configuration.Outputs |> Option.defaultValue projectInfo.Outputs
                          Dependencies = projectConfig.Configuration.Dependencies |> Option.defaultValue projectInfo.Dependencies }
 
-                let properties = projectInfo.Properties
                 let labels = projectConfig.Configuration.Labels
 
                 let projectOutputs = projectInfo.Outputs
@@ -275,7 +273,6 @@ let read workspaceDir (options: Options) environment labels variables =
                   ProjectDefinition.Targets = projectTargets
                   ProjectDefinition.Labels = labels
                   ProjectDefinition.Extensions = extensions
-                  ProjectDefinition.Properties = properties
                   ProjectDefinition.Scripts = scripts }
 
             // we go depth-first in order to compute node hash right after
@@ -333,7 +330,6 @@ let read workspaceDir (options: Options) environment labels variables =
 
                             let stepActions =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
-                                                      Terrabuild.Extensibility.ActionContext.Properties = projectDef.Properties
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
                                                       Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash

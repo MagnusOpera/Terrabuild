@@ -10,14 +10,12 @@ type InitContext = {
 
 [<RequireQualifiedAccess>]
 type ProjectInfo = {
-    Properties: Map<string, string>
     Outputs: Set<string>
     Ignores: Set<string>
     Dependencies: Set<string>
 }
 with
     static member Default = {
-        Properties = Map.empty
         Outputs = Set.empty
         Ignores = Set.empty
         Dependencies = Set.empty
@@ -28,7 +26,6 @@ type ActionContext = {
     Debug: bool
     Directory: string
     CI: bool
-    Properties: Map<string, string>
     NodeHash: string
     Command: string
     BranchOrTag: string
