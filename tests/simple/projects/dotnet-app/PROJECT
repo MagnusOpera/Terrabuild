@@ -1,14 +1,14 @@
 
 extension @docker {
-    defaults {
+    defaults = {
         image: "ghcr.io/magnusopera/dotnet-app"
         arguments: { configuration: $configuration }
     }
 }
 
 configuration @dotnet {
-    labels [ "app"
-             "dotnet" ]
+    labels = [ "app"
+               "dotnet" ]
 }
 
 target build {

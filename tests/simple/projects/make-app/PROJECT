@@ -1,8 +1,8 @@
 
 configuration {
-    dependencies [ "../../libraries/shell-lib" ]
-    outputs [ "dist" ]
-    labels [ "app" ]
+    dependencies = [ "../../libraries/shell-lib" ]
+    outputs = [ "dist" ]
+    labels = [ "app" ]
 }
 
 target build {

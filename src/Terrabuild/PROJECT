@@ -1,11 +1,11 @@
 
 configuration @dotnet {
-    labels [ "app"
-             "dotnet"]
+    labels = [ "app"
+               "dotnet"]
 }
 
 extension @docker {
-  defaults {
+  defaults = {
     image: "ghcr.io/magnusopera/terrabuild"
   }
 }

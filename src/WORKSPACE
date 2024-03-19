@@ -1,35 +1,35 @@
 
 target build {
-    depends_on [^build]
+    depends_on = [^build]
 }
 
 target test {
-    depends_on [build]
+    depends_on = [build]
 }
 
 target dist {
-    depends_on [build]
+    depends_on = [build]
 }
 
 target publish {
-    depends_on [dist]
+    depends_on = [dist]
 }
 
 environment debug {
-    variables {
+    variables = {
         configuration: "Debug"
     }
 }
 
 environment release {
-    variables {
+    variables = {
         configuration: "Release"
     }
 }
 
 extension @dotnet {
-    container "mcr.microsoft.com/dotnet/sdk:8.0.201"
-    defaults {
+    container = "mcr.microsoft.com/dotnet/sdk:8.0.201"
+    defaults = {
         configuration: $configuration
     }
 }

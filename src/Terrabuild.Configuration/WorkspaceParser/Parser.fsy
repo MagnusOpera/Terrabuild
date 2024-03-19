@@ -47,20 +47,22 @@ WorkspaceComponents:
     | WorkspaceComponents Extension { $1.Patch $2 }
 
 Target:
+    | TARGET IDENTIFIER { WorkspaceComponents.Target ($2, Target.Empty) }
     | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { WorkspaceComponents.Target ($2, $4) }
 TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents TargetDependsOn { $1.Patch $2 }
 TargetDependsOn:
-    | DEPENDS_ON ListOfTargets { TargetComponents.DependsOn $2 }
+    | DEPENDS_ON EQUAL ListOfTargets { TargetComponents.DependsOn $3 }
 
 Environment:
+    | ENVIRONMENT IDENTIFIER { WorkspaceComponents.Environment ($2, Environment.Empty) }
     | ENVIRONMENT IDENTIFIER LBRACE EnvironmentComponents RBRACE { WorkspaceComponents.Environment ($2, $4) }
 EnvironmentComponents:
     | /* empty */ { Environment.Empty }
     | EnvironmentComponents EnvironmentVariables { $1.Patch $2 }
 EnvironmentVariables:
-    | VARIABLES LBRACE StringVariables RBRACE { EnvironmentComponents.Variables $3 }
+    | VARIABLES EQUAL LBRACE StringVariables RBRACE { EnvironmentComponents.Variables $4 }
 
 Extension:
     | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { WorkspaceComponents.Extension ($2, $4) }
@@ -70,11 +72,11 @@ ExtensionComponents:
     | ExtensionComponents Script { $1.Patch $2 }
     | ExtensionComponents Defaults { $1.Patch $2 }
 Container:
-    | CONTAINER String { ExtensionComponents.Container $2 }
+    | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
 Script:
-    | SCRIPT String { ExtensionComponents.Script $2 }
+    | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
 Defaults:
-    | DEFAULTS LBRACE Variables RBRACE { ExtensionComponents.Defaults $3 }
+    | DEFAULTS EQUAL LBRACE Variables RBRACE { ExtensionComponents.Defaults $4 }
 
 String:
     | STRING { $1 }
@@ -83,12 +85,14 @@ ListOfString:
 Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
+    | Strings String COMMA { $1 @ [$2] }
 
 ListOfTargets:
     | LSQBRACKET Targets RSQBRACKET { $2 }
 Targets:
     | /* empty */ { [] }
     | Targets IDENTIFIER { $1 @ [$2] }
+    | Targets IDENTIFIER COMMA { $1 @ [$2] }
 
 StringVariables:
     | /* empty */ { Map.empty }

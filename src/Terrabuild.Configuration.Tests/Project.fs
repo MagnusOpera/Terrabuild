@@ -13,22 +13,6 @@ open Terrabuild.Expressions
 [<Test>]
 let parseProject() =
     let expectedProject =
-        let dotnetExt =
-            { Container = None
-              Script = None
-              Defaults = Map [ "configuration", Expr.Variable "configuration" ] }
-        
-        let dockerExt =
-            { Container = None
-              Script = None
-              Defaults = Map [ "configuration", Expr.Variable "configuration"
-                               "image", Expr.String "ghcr.io/magnusopera/dotnet-app" ] }
-
-        let totoExt =
-            { Container = None
-              Script = Some "toto.fsx"
-              Defaults = Map.empty }
-
         let configuration =
             { Dependencies = Set [ "../../libraries/shell-lib" ] |> Some
               Outputs = Set [ "dist" ] |> Some
@@ -36,16 +20,29 @@ let parseProject() =
               Labels = Set [ "app"; "dotnet" ]
               Init = Some "@dotnet" }
 
-        let buildTarget = 
+
+        let extDotnet =
+            { Container = None
+              Script = None
+              Defaults = Map [ "configuration", Expr.Variable "configuration" ] }        
+        let extDocker =
+            { Container = None
+              Script = None
+              Defaults = Map [ "configuration", Expr.Variable "configuration"
+                               "image", Expr.String "ghcr.io/magnusopera/dotnet-app" ] }
+        let extDummy =
+            { Container = None
+              Script = Some "dummy.fsx"
+              Defaults = Map.empty }
+
+        let targetBuild = 
             { DependsOn = Set [ "dist" ] |> Some
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
-
-        let distTarget =
+        let targetDist =
             { DependsOn = None
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty }
                         { Extension = "@dotnet"; Command = "publish"; Parameters = Map.empty } ] }
-
-        let dockerTarget =
+        let targetDocker =
             { DependsOn = None 
               Steps = [ { Extension = "@shell"; Command = "echo"
                           Parameters = Map [ "arguments", Expr.Function (Function.Trim,
@@ -55,13 +52,13 @@ let parseProject() =
                         { Extension = "@docker"; Command = "build"
                           Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "Release"]) ] } ] }
 
-        { Extensions = Map [ "@dotnet", dotnetExt
-                             "@docker", dockerExt
-                             "toto", totoExt ]
+        { Extensions = Map [ "@dotnet", extDotnet
+                             "@docker", extDocker
+                             "dummy", extDummy ]
           Configuration = configuration
-          Targets = Map [ "build", buildTarget
-                          "dist", distTarget
-                          "docker", dockerTarget ] }
+          Targets = Map [ "build", targetBuild
+                          "dist", targetDist
+                          "docker", targetDocker ] }
 
     let content = File.ReadAllText("TestFiles/PROJECT")
     let project = FrontEnd.parseProject content

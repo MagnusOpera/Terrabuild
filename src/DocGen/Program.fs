@@ -125,7 +125,7 @@ let writeCommand extensionDir (command: Command) (extension: Extension) =
                 for prm in prms do
                     match prm.Name with
                     | "__dispatch__" -> ()
-                    | _ -> $"    {prm.Name} {prm.Example}"
+                    | _ -> $"    {prm.Name} = {prm.Example}"
                 "}"
             "```"
             $"## Argument Reference"
@@ -181,7 +181,7 @@ let writeExtension extensionDir (extension: Extension) =
                 "```"
                 $"configuration @{extension.Name} {{"
                 for prm in init.Parameters do
-                    $"    {prm.Name} {prm.Example}"
+                    $"    {prm.Name} = {prm.Example}"
                 "}"
                 "```"
 

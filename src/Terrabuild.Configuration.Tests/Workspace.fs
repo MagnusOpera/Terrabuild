@@ -11,28 +11,34 @@ open Terrabuild.Expressions
 [<Test>]
 let parseWorkspace() =
     let expectedWorkspace =
-        let buildTarget = 
+        let targetBuild = 
             { DependsOn = Set [ "^build" ] }
-        let distTarget =
+        let targetDist =
             { DependsOn = Set [ "build" ] }
-        
+        let targetDummy =
+            { DependsOn = Set.empty }
+
         let envRelease =
             { Variables = Map [ "configuration", "Release" ] }
+        let envDummy =
+            { Variables = Map.empty }
 
-        let dotnetExt =
+        let extDotnet =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
               Script = None
               Defaults = Map [ "configuration", Expr.Variable "configuration" ] }
-        let dockerExt =
+        let extDocker =
             { Container = None
               Script = None
               Defaults = Map.empty }
 
-        { Targets = Map [ "build", buildTarget
-                          "dist", distTarget ]
-          Environments = Map [ "release", envRelease]
-          Extensions = Map [ "dotnet", dotnetExt
-                             "docker", dockerExt ] }
+        { Targets = Map [ "build", targetBuild
+                          "dist", targetDist
+                          "dummy", targetDummy ]
+          Environments = Map [ "release", envRelease
+                               "dummy", envDummy ]
+          Extensions = Map [ "dotnet", extDotnet
+                             "docker", extDocker ] }
 
 
     let content = File.ReadAllText("TestFiles/WORKSPACE")

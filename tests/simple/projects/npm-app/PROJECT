@@ -1,6 +1,6 @@
 
 configuration {
-    labels [ "app" ]
+    labels = [ "app" ]
 }
 
 target build {

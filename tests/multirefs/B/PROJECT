@@ -1,6 +1,6 @@
 
 configuration {
-    dependencies [ "../C" ]
+    dependencies = [ "../C" ]
 }
 
 target build {

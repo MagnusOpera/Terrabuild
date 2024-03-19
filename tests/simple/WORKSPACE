@@ -1,26 +1,26 @@
 
 target build {
-  depends_on [ ^build ]
+  depends_on = [ ^build ]
 }
 
 target dist {
-  depends_on [ build ]
+  depends_on = [ build ]
 }
 
 target docker {
-  depends_on [ dist ]
+  depends_on = [ dist ]
 }
 
 target push {
-  depends_on [ docker ]
+  depends_on = [ docker ]
 }
 
 target deploy {
-  depends_on [ push ]
+  depends_on = [ push ]
 }
 
 environment debug {
-  variables {
+  variables = {
     configuration: "Debug"
     secret_message: "tagada"
     workspace: "default"
@@ -28,21 +28,21 @@ environment debug {
 }
 
 environment release {
-  variables {
+  variables = {
     configuration: "Release"
     workspace: "default"
   }
 }
 
 extension @dotnet {
-  container "mcr.microsoft.com/dotnet/sdk:7.0"
-  defaults {
+  container = "mcr.microsoft.com/dotnet/sdk:7.0"
+  defaults = {
     configuration: $configuration
   }
 }
 
 extension @terraform {
-    defaults {
+    defaults = {
       workspace: $workspace
     }
 }

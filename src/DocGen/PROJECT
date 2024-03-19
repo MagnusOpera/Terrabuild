@@ -1,0 +1,6 @@
+
+configuration @dotnet
+
+target build {
+    @dotnet build
+}

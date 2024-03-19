@@ -55,11 +55,11 @@ ExtensionComponents:
     | ExtensionComponents Script { $1.Patch $2 }
     | ExtensionComponents Defaults { $1.Patch $2 }
 Container:
-    | CONTAINER String { ExtensionComponents.Container $2 }
+    | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
 Script:
-    | SCRIPT String { ExtensionComponents.Script $2 }
+    | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
 Defaults:
-    | DEFAULTS LBRACE Variables RBRACE { ExtensionComponents.Defaults $3 }
+    | DEFAULTS EQUAL LBRACE Variables RBRACE { ExtensionComponents.Defaults $4 }
 
 
 Configuration:
@@ -73,13 +73,13 @@ ConfigurationComponents:
     | ConfigurationComponents ConfigurationIgnores { $1.Patch $2 }
     | ConfigurationComponents ConfigurationLabels { $1.Patch $2 }
 ConfigurationDependencies:
-    | DEPENDENCIES ListOfString { ConfigurationComponents.Dependencies $2 }
+    | DEPENDENCIES EQUAL ListOfString { ConfigurationComponents.Dependencies $3 }
 ConfigurationOutputs:
-    | OUTPUTS ListOfString { ConfigurationComponents.Outputs $2 }
+    | OUTPUTS EQUAL ListOfString { ConfigurationComponents.Outputs $3 }
 ConfigurationIgnores:
-    | IGNORES ListOfString { ConfigurationComponents.Ignores $2 }
+    | IGNORES EQUAL ListOfString { ConfigurationComponents.Ignores $3 }
 ConfigurationLabels:
-    | LABELS ListOfString { ConfigurationComponents.Labels $2 }
+    | LABELS EQUAL ListOfString { ConfigurationComponents.Labels $3 }
 
 
 Target:
@@ -89,7 +89,7 @@ TargetComponents:
     | TargetComponents DependsOn { $1.Patch $2 }
     | TargetComponents Step { $1.Patch $2 }
 DependsOn:
-    | DEPENDS_ON ListOfTargets { TargetComponents.DependsOn $2 }
+    | DEPENDS_ON EQUAL ListOfTargets { TargetComponents.DependsOn $3 }
 Step:
     | IDENTIFIER IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
@@ -101,12 +101,14 @@ ListOfString:
 Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
+    | Strings String COMMA { $1 @ [$2] }
 
 ListOfTargets:
     | LSQBRACKET Targets RSQBRACKET { $2 }
 Targets:
     | /* empty */ { [] }
     | Targets IDENTIFIER { $1 @ [$2] }
+    | Targets IDENTIFIER COMMA { $1 @ [$2] }
 
 Variables:
     | /* empty */ { Map.empty }        

@@ -129,14 +129,14 @@ let genWorkspace (extensions: Extension set) =
             ""
             $"target {target |> toLower} {{"
             let listDependsOn = String.concat " " dependsOn
-            $"  depends_on [ {listDependsOn} ]"
+            $"  depends_on = [ {listDependsOn} ]"
             "}"
 
         for (KeyValue(env, variables)) in envConfigs do
             ""
             $"environment {env} {{"
             if variables.Count > 0 then
-                "  variables {"
+                "  variables = {"
                 for (KeyValue(name, value)) in variables do
                     $"    {name}: \"{value}\""
                 "  }"
@@ -152,11 +152,11 @@ let genWorkspace (extensions: Extension set) =
                 $"extension @{extension |> toExtension} {{"
                 match container with
                 | Some container ->
-                    $"  container \"{container}\""
+                    $"  container = \"{container}\""
                 | _ -> ()
 
                 if variables <> Map.empty then
-                    "  defaults {"
+                    "  defaults = {"
                     for (KeyValue(key, value)) in variables do
                         $"    {key}: {value}"
                     "  }"

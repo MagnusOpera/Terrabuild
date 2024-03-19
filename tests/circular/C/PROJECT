@@ -1,6 +1,6 @@
 
 configuration {
-  dependencies [ "../A" ]
+  dependencies = [ "../A" ]
 }
 
 target build {

@@ -9,7 +9,7 @@ let lexeme = LexBuffer<_>.LexemeString
 
 let doubleQuote = '\"'
 let identifier = ['@' '^']? ['a'-'z'] ['a'-'z' '0'-'9' '_']*
-let key = identifier ':'
+let key = identifier ' '* ':'
 let variable = '$' identifier
 let quotedString = '\"' [^'\"']+ '\"'
 
@@ -24,7 +24,7 @@ rule token = parse
 
     | key {
         let s = lexeme lexbuf |> string
-        KEY (s.Substring(0, s.Length-1)) }
+        KEY (s.Substring(0, s.Length-1).TrimEnd()) }
 
     | variable {
         let s = lexeme lexbuf |> string
