@@ -8,21 +8,24 @@ open System.Text.RegularExpressions
 
 let private (|Regex|_|) pattern input =
     let m = Regex.Match(input, pattern)
-    if m.Success then Some(List.tail [ for g in m.Groups -> g.Value ])
-    else None
+    if m.Success then
+        List.tail [ for g in m.Groups -> g.Value ] |> Some
+    else
+        None
+
+let private findProject = function
+    | Regex "^Project\(.*\) = \".*\", \"(.*)\", .*$" [projectFile] ->
+        Some projectFile
+    | _ ->
+        None
 
 let __init__ (context: InitContext) =
     let dependencies =
-        Path.Combine(context.Directory, "*.sln")
-        |> Directory.EnumerateFiles |> Seq.head
+        Directory.EnumerateFiles(context.Directory, "*.sln") |> Seq.head
         |> File.ReadLines
-        |> Seq.choose (fun line ->
-            match line with
-            | Regex "Project\(.*\) = \".*\", \"(.*)\", .*" [projectFile] -> Some projectFile
-            | _ -> None)
-        |> Set.ofSeq
+        |> Seq.choose findProject
 
     { ProjectInfo.Default
       with Ignores = Set.empty
            Outputs = Set.empty
-           Dependencies = set dependencies }
+           Dependencies = Set dependencies }
