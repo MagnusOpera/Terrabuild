@@ -186,16 +186,18 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                             let whoami =
                                 Log.Debug("Identifying USER for {container}", container)
                                 match Exec.execCaptureOutput workspaceConfig.Directory cmd args with
-                                | Exec.Success (whoami, _) -> whoami
-                                | _ -> "root"
+                                | Exec.Success (whoami, 0) -> whoami.Trim()
+                                | _ ->
+                                    Log.Debug("USER identification failed for {container}: using root", container)
+                                    "root"
 
-                            Log.Debug("User USER {whoami} for {container}", whoami, container)
+                            Log.Debug("Using USER {whoami} for {container}", whoami, container)
 
                             // NOTE:
                             //  - run command into a dedicated container (entrypoint)
                             //  - whole workspace is mapped in the container and current directory is set to project directory (volume + workdir)
                             //  - redirect home directory as well because we want to mutualize side effects (if any) for this step
-                            let args = $"run --privileged --entrypoint {commandLine.Command} --rm -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
+                            let args = $"run --entrypoint {commandLine.Command} --rm -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
                             workspaceConfig.Directory, cmd, args
 
                     Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.Hash, cmd, args)
