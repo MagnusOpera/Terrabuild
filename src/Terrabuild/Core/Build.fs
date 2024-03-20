@@ -49,14 +49,16 @@ type IBuildNotification =
     abstract NodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
 
 
-
 let private isNodeUnsatisfied = function
     | NodeBuildStatus.Failure nodeInfo -> Some nodeInfo
     | NodeBuildStatus.Unfulfilled nodeInfo -> Some nodeInfo
     | NodeBuildStatus.Success _ -> None
 
 
+
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
+
+    let containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
     let cacheMode =
         if workspaceConfig.SourceControl.CI then Cacheability.Always
@@ -161,6 +163,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 let stepLogs = List<Cache.StepSummary>()
                 let mutable lastExitCode = 0
                 let mutable cmdLineIndex = 0
+
                 while cmdLineIndex < node.CommandLines.Length && lastExitCode = 0 do
                     let startedAt = DateTime.UtcNow
                     let commandLine = node.CommandLines[cmdLineIndex]
@@ -173,31 +176,34 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     cmdLineIndex <- cmdLineIndex + 1
 
                     let workDir, cmd, args =
+                        let cmd = "docker"
+                        let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
+
+                        let getContainerUser (container: string) =
+                            match containerInfos.TryGetValue(container) with
+                            | true, whoami ->
+                                Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
+                                whoami
+                            | _ ->
+                                // discover USER
+                                let args = $"run --rm --name {node.Hash} --entrypoint whoami {container}"
+                                let whoami =
+                                    Log.Debug("Identifying USER for {container}", container)
+                                    match Exec.execCaptureOutput workspaceConfig.Directory cmd args with
+                                    | Exec.Success (whoami, 0) -> whoami.Trim()
+                                    | _ ->
+                                        Log.Debug("USER identification failed for {container}: using root", container)
+                                        "root"
+
+                                Log.Debug("Using USER {whoami} for {container}", whoami, container)
+                                containerInfos.TryAdd(container, whoami) |> ignore
+                                whoami
+
                         match commandLine.Container with
-                        | None
-                        | Some null ->
-                            projectDirectory, commandLine.Command, commandLine.Arguments
+                        | None -> projectDirectory, commandLine.Command, commandLine.Arguments
                         | Some container ->
-                            let cmd = "docker"
-                            let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
-
-                            // discover USER
-                            let args = $"run --rm --entrypoint whoami {container}"
-                            let whoami =
-                                Log.Debug("Identifying USER for {container}", container)
-                                match Exec.execCaptureOutput workspaceConfig.Directory cmd args with
-                                | Exec.Success (whoami, 0) -> whoami.Trim()
-                                | _ ->
-                                    Log.Debug("USER identification failed for {container}: using root", container)
-                                    "root"
-
-                            Log.Debug("Using USER {whoami} for {container}", whoami, container)
-
-                            // NOTE:
-                            //  - run command into a dedicated container (entrypoint)
-                            //  - whole workspace is mapped in the container and current directory is set to project directory (volume + workdir)
-                            //  - redirect home directory as well because we want to mutualize side effects (if any) for this step
-                            let args = $"run --entrypoint {commandLine.Command} --rm -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
+                            let whoami = getContainerUser container
+                            let args = $"run --rm --entrypoint {commandLine.Command} --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
                             workspaceConfig.Directory, cmd, args
 
                     Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.Hash, cmd, args)

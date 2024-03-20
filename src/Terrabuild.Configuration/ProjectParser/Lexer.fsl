@@ -50,6 +50,7 @@ rule token = parse
     | "defaults" { DEFAULTS }
 
     | "#" { singleLineComment lexbuf }
+    | "//" { singleLineComment lexbuf }
 
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
 

@@ -2,6 +2,7 @@ module Scalffold
 open System
 open System.IO
 open Collections
+open Microsoft.Extensions.FileSystemGlobbing
 
 
 [<RequireQualifiedAccess>]
@@ -78,7 +79,7 @@ let extConfigs =
                           Defaults = Map.empty
                           Actions = Map [ Target.Build, [ "build" ] ] }
 
-        Extension.Docker, { Container = None
+        Extension.Docker, { Container = Some "docker:25.0"
                             Defaults = Map [ "image", "\"ghcr.io/example/\" + $terrabuild_project"
                                              "arguments", "{ configuration: $configuration }" ]
                             Actions = Map [ Target.Build, [ "build" ]
@@ -198,11 +199,24 @@ let genProject (project: Project) =
             yield "}"
     }
 
+let findBut (file: string) (rootDir: string) =
+    let excludes = [ "**/node_modules/"; "**/bin/"; "**/obj/"; "**/build/classes/" ]
+
+    let matcher = Matcher()
+    matcher.AddInclude(file).AddExcludePatterns(excludes)
+    let result =
+        matcher.GetResultsInFullPath(rootDir)
+        |> List.ofSeq
+    result
+
+let findWorkspace = findBut "**/WORKSPACE"
+let findProject = findBut "**/PROJECT"
+
 let scaffold workspaceDir force =
     // check we won't override files first
     if force |> not then
-        let workspaceExists = workspaceDir |> IO.enumerateMatchingFiles "WORKSPACE" |> Seq.tryHead
-        let projectExists = workspaceDir |> IO.enumerateMatchingFiles "PROJECT" |> Seq.tryHead
+        let workspaceExists = workspaceDir |> findWorkspace |> Seq.tryHead
+        let projectExists = workspaceDir |> findProject |> Seq.tryHead
 
         match workspaceExists, projectExists with
         | Some file, _ -> failwith $"WORKSPACE file found '{file}'"

@@ -70,18 +70,23 @@ type Dotnet() =
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
+    /// <param name="maxcpucount" example="1">Max worker processes to build the project.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
-    static member build (configuration: string option) (projectfile: string option) (log: bool option)=
+    static member build (configuration: string option) (projectfile: string option) (maxcpucount: int option) (log: bool option)=
         let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let logger =
             match log with
             | Some true -> " -bl"
             | _ -> ""
+        let maxcpucount =
+            match maxcpucount with
+            | Some maxcpucount -> $" -maxcpucount:{maxcpucount}"
+            | _ -> ""
 
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
-        |> andThen "dotnet" $"build {projectfile} -m:1 --no-dependencies --no-restore --configuration {configuration}{logger}"
+        |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore --configuration {configuration}{maxcpucount}{logger}"
 
     /// <summary>
     /// Run a dotnet `command`.
@@ -135,7 +140,7 @@ type Dotnet() =
             | _ -> ""
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
-        |> andThen "dotnet" $"publish {projectfile} --configuration {configuration}{runtime}{trim}{single}"
+        |> andThen "dotnet" $"publish {projectfile} --no-dependencies --no-restore --configuration {configuration}{runtime}{trim}{single}"
 
     /// <summary>
     /// Restore packages.
@@ -152,6 +157,7 @@ type Dotnet() =
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration for publish command.</param>
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
+    /// <param name="filter" example="&quot;TestCategory!=integration&quot;">Run selected unit tests.</param>
     static member test (configuration: string option) (projectfile: string option) (filter: string option) =
         let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
