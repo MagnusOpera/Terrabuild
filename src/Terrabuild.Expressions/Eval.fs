@@ -7,6 +7,7 @@ let rec eval (variables: Map<string, string>) (expr: Expr) =
         | Expr.Nothing -> Value.Nothing
         | Expr.Boolean bool -> Value.Bool bool
         | Expr.String str -> Value.String str
+        | Expr.Number num -> Value.Number num
         | Expr.Object obj -> Value.Object obj
         | Expr.Variable var ->
             match variables |> Map.tryFind var with
@@ -17,9 +18,22 @@ let rec eval (variables: Map<string, string>) (expr: Expr) =
             let values = exprs |> List.map eval
             match f, values with
             | Function.Plus, [Value.String left; Value.String right] -> Value.String (left + right)
+            | Function.Plus, [Value.String left; Value.Nothing] -> Value.String (left)
+            | Function.Plus, [Value.Nothing; Value.String right] -> Value.String (right)
+
+            | Function.Plus, [Value.Number left; Value.Number right] -> Value.Number (left + right)
+            | Function.Plus, [Value.Number left; Value.Nothing] -> Value.Number (left)
+            | Function.Plus, [Value.Nothing; Value.Number right] -> Value.Number (right)
+
             | Function.Trim, [Value.String str] -> Value.String (str.Trim())
+            | Function.Trim, [Value.Nothing] -> Value.Nothing
+
             | Function.Upper, [Value.String str] -> Value.String (str.ToUpperInvariant())
+            | Function.Upper, [Value.Nothing] -> Value.Nothing
+
             | Function.Lower, [Value.String str] -> Value.String (str.ToLowerInvariant())
+            | Function.Lower, [Value.Nothing] -> Value.Nothing
+
             | _ -> failwith $"Invalid arguments for function {f}"
 
     try

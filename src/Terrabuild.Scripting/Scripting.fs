@@ -47,6 +47,11 @@ type Invocable(method: MethodInfo) =
             elif prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToSome prmType value
             else failwith $"Can't assign default value to parameter '{name}'"
 
+        | Value.Number value ->
+            if value.GetType().IsAssignableTo(prmType) then value
+            elif prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToSome prmType value
+            else failwith $"Can't assign default value to parameter '{name}'"
+
         | Value.Object obj -> obj
 
         | Value.Map map ->

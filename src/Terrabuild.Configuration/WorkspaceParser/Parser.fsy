@@ -20,6 +20,8 @@ let debugPrint s = ignore s
 %token <string> IDENTIFIER
 %token <string> VARIABLE
 %token <string> KEY
+%token <int> NUMBER
+
 %token LBRACE RBRACE
 %token LSQBRACKET RSQBRACKET
 %token LPAREN RPAREN
@@ -109,6 +111,7 @@ Expr:
     | TRUE { Expr.Boolean true }
     | FALSE { Expr.Boolean false }
     | STRING { Expr.String $1 }
+    | NUMBER { Expr.Number $1 }
     | VARIABLE { Expr.Variable $1 }
     | LBRACE Variables RBRACE { Expr.Map $2 }
     | Expr PLUS Expr { Expr.Function (Function.Plus, [$1; $3]) }

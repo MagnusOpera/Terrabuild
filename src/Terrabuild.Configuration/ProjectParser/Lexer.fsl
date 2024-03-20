@@ -30,6 +30,11 @@ rule token = parse
         let s = lexeme lexbuf |> string
         VARIABLE (s.Substring(1, s.Length-1)) }
 
+    | number {
+        let s = lexeme lexbuf |> int
+        NUMBER (s)
+    }
+
     | "nothing" { NOTHING }
     | "true" { TRUE }
     | "false" { FALSE }

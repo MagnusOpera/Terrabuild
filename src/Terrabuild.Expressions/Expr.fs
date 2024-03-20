@@ -12,16 +12,18 @@ type Expr =
     | Nothing
     | Boolean of value:bool
     | String of value:string
-    | Variable of name:string
+    | Number of value:int
     | Map of Map<string, Expr>
-    | Function of Function * Expr list
     | Object of obj
+    | Variable of name:string
+    | Function of Function * Expr list
 
 
 [<RequireQualifiedAccess>]
 type Value =
     | Nothing
-    | String of string
     | Bool of bool
+    | String of string
+    | Number of int
     | Map of Map<string, Value>
     | Object of obj
