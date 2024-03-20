@@ -63,15 +63,15 @@ let extMarkers = [
 
 let extConfigs =
     Map [ 
-        Extension.Dotnet, { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0"
+        Extension.Dotnet, { Container = None //Some "mcr.microsoft.com/dotnet/sdk:8.0"
                             Defaults = Map [ "configuration", "$configuration" ]
                             Actions = Map [ Target.Build, [ "build"; "publish" ] ] }
 
-        Extension.Gradle, { Container = Some "gradle:jdk21"
+        Extension.Gradle, { Container = None //Some "gradle:jdk21"
                             Defaults = Map [ "configuration", "$configuration" ]
                             Actions = Map [ Target.Build, [ "build" ]] }
 
-        Extension.Npm, { Container = Some "node:20"
+        Extension.Npm, { Container = None //Some "node:20"
                          Defaults = Map.empty
                          Actions = Map [ Target.Build, [ "build" ] ] }
 
@@ -79,13 +79,13 @@ let extConfigs =
                           Defaults = Map.empty
                           Actions = Map [ Target.Build, [ "build" ] ] }
 
-        Extension.Docker, { Container = Some "docker:25.0"
+        Extension.Docker, { Container = None //Some "docker:25.0"
                             Defaults = Map [ "image", "\"ghcr.io/example/\" + $terrabuild_project"
                                              "arguments", "{ configuration: $configuration }" ]
                             Actions = Map [ Target.Build, [ "build" ]
                                             Target.Publish, [ "push" ] ] }
 
-        Extension.Terraform, { Container = Some "hashicorp/terraform:1.7"
+        Extension.Terraform, { Container = None //Some "hashicorp/terraform:1.7"
                                Defaults = Map.empty
                                Actions = Map [ Target.Build, [ "plan" ]
                                                Target.Deploy, [ "apply" ] ] }
