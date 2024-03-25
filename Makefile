@@ -94,8 +94,6 @@ usage:
 	dotnet run --project src/Terrabuild -- --help
 	dotnet run --project src/Terrabuild -- build --help
 	dotnet run --project src/Terrabuild -- run --help
-	dotnet run --project src/Terrabuild -- serve --help
-	dotnet run --project src/Terrabuild -- clear --help
 
 clear-cache:
 	dotnet run --project src/Terrabuild -- clear --buildcache
