@@ -13,11 +13,12 @@ type CommandLine = {
 }
 
 type Node = {
+    Id: string
+    Hash: string
     Project: string
     Target: string
     Dependencies: string set
     IsLeaf: bool
-    Hash: string
     ProjectHash: string
     Variables: Map<string, string>
     CommandLines: CommandLine list
@@ -103,14 +104,15 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                                               CommandLine.Command = cmd.Command
                                               CommandLine.Arguments = cmd.Arguments })
 
-                let node = { Project = project
+                let node = { Id = nodeId
+                             Hash = hash
+                             Project = project
                              Target = targetName
                              Variables = target.Variables
                              CommandLines = commandLines
                              Outputs = projectConfig.Outputs
                              Dependencies = children
                              IsLeaf = isLeaf
-                             Hash = hash
                              ProjectHash = projectConfig.Hash
                              Cache = cache }
                 if allNodes.TryAdd(nodeId, node) |> not then
@@ -128,8 +130,42 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
         |> Set
 
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {allNodes.Count} tasks to evaluate" |> Terminal.writeLine
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {rootNodes.Count} artifacts expected" |> Terminal.writeLine
 
     { Targets = targets
       Nodes = allNodes |> Map.ofDict
       RootNodes = rootNodes }
+
+
+let graph (graph: WorkspaceGraph) =
+    let projects =
+        graph.Nodes.Values
+        |> Seq.groupBy (fun x -> x.Project)
+        |> Map.ofSeq
+        |> Map.map (fun _ v -> v |> List.ofSeq)
+
+    let colors =
+        projects
+        |> Map.map (fun k v ->
+            let hash = Hash.sha256 k
+            $"#{hash.Substring(0, 3)}")
+
+    let mermaid = seq {
+        "flowchart LR"
+        $"classDef bold stroke:black,stroke-width:3px"
+
+        // declare colors
+        for (KeyValue(project, color)) in colors do
+            $"classDef {project} fill:{color}"
+
+        // nodes and arrows
+        for (KeyValue(nodeId, node)) in graph.Nodes do
+            let srcNode = graph.Nodes |> Map.find nodeId
+            for dependency in node.Dependencies do
+                let dstNode = graph.Nodes |> Map.find dependency
+                $"{srcNode.Hash}([{srcNode.Id}]) --> {dstNode.Hash}([{dstNode.Id}])"
+
+            $"class {srcNode.Hash} {srcNode.Project}"
+            if graph.RootNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} bold"
+    }
+
+    mermaid

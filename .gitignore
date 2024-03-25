@@ -410,6 +410,7 @@ node_modules
 Makefile2
 init.sh
 terrabuild.*.json
+terrabuild.*.mermaid
 terrabuild.planfile
 terraform.tfstate
 .terraform

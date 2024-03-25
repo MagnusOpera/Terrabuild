@@ -9,6 +9,7 @@ open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]
 type Options = {
+    WhatIf: bool
     Debug: bool
     MaxConcurrency: int
     Force: bool

@@ -80,6 +80,7 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<TargetArgs>
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
+    | [<Unique; Inherit>] WhatIf
     | [<Hidden; Unique; Inherit>] Debug
 with
     interface IArgParserTemplate with
@@ -94,4 +95,5 @@ with
             | Serve _ -> "Run target 'serve'."
             | Run _ -> "Run specified targets."
             | Clear _ -> "Clear specified caches."
+            | WhatIf -> "Prepare the action but do not apply."
             | Debug -> "Enable logging and debug dumps."

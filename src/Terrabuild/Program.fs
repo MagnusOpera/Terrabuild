@@ -43,6 +43,7 @@ let processCommandLine () =
     let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
     let result = parser.ParseCommandLine()
     let debug = result.Contains(TerrabuildArgs.Debug)
+    let whatIf = result.Contains(TerrabuildArgs.WhatIf)
     if debug then
         Log.Logger <-
             LoggerConfiguration()
@@ -52,35 +53,39 @@ let processCommandLine () =
 
     let runTarget wsDir target environment labels variables (options: Configuration.Options) =
         try
-            if debug then
+            if options.Debug then
                 let jsonOptions = Json.Serialize options
                 jsonOptions |> IO.writeTextFile "terrabuild.options.json"
 
             $"{Ansi.Emojis.box} Reading configuration" |> Terminal.writeLine
             let config = Configuration.read wsDir options environment labels variables
 
-            if debug then
+            if options.Debug then
                 let jsonConfig = Json.Serialize config
                 jsonConfig |> IO.writeTextFile "terrabuild.config.json"
 
             $"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}" |> Terminal.writeLine
             let graph = Graph.buildGraph config target
 
-            if debug then
+            if options.Debug then
                 let jsonGraph = Json.Serialize graph
                 jsonGraph |> IO.writeTextFile "terrabuild.graph.json"
+                let mermaid = Graph.graph graph |> String.join "\n"
+                mermaid |> IO.writeTextFile "terrabuild.graph.mermaid"
 
-            let cache = Cache.Cache(config.Storage) :> Cache.ICache
-            let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            let build = Build.run config graph cache buildNotification options
-            buildNotification.WaitCompletion()
+            if options.WhatIf then 0
+            else
+                let cache = Cache.Cache(config.Storage) :> Cache.ICache
+                let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+                let build = Build.run config graph cache buildNotification options
+                buildNotification.WaitCompletion()
 
-            if debug then
-                let jsonBuild = Json.Serialize build
-                jsonBuild |> IO.writeTextFile "terrabuild.build.json"
+                if options.Debug then
+                    let jsonBuild = Json.Serialize build
+                    jsonBuild |> IO.writeTextFile "terrabuild.build.json"
 
-            if build.Status = Build.BuildStatus.Success then 0
-            else 5
+                if build.Status = Build.BuildStatus.Success then 0
+                else 5
 
         with
             | :? Configuration.ConfigException as ex ->
@@ -107,7 +112,8 @@ let processCommandLine () =
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLowerInvariant
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLowerInvariant |> Set)
         let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLowerInvariant, v) |> Map
-        let options = { Configuration.Options.Debug = debug
+        let options = { Configuration.Options.WhatIf = whatIf
+                        Configuration.Options.Debug = debug
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
                         Configuration.Options.Local = buildArgs.Contains(RunArgs.Local)
                         Configuration.Options.MaxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount / 2)
@@ -122,7 +128,8 @@ let processCommandLine () =
         let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLowerInvariant
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLowerInvariant |> Set)
         let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLowerInvariant, v) |> Map
-        let options = { Configuration.Options.Debug = debug
+        let options = { Configuration.Options.WhatIf = whatIf
+                        Configuration.Options.Debug = debug
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
                         Configuration.Options.Local = targetArgs.Contains(TargetArgs.Local)
                         Configuration.Options.MaxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount / 2)
