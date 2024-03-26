@@ -43,12 +43,13 @@ type ContaineredTarget = {
 
 [<RequireQualifiedAccess>]
 type Project = {
+    Id: string
+    Hash: string
     Dependencies: string set
     Files: string set
     Ignores: string set
     Outputs: string set
     Targets: Map<string, ContaineredTarget>
-    Hash: string
     Labels: string set
 }
 
@@ -411,12 +412,13 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> Set.map (IO.relativePath projectDir)
 
             let projectConfig =
-                { Project.Dependencies = projectDef.Dependencies
+                { Project.Id = project
+                  Project.Hash = nodeHash
+                  Project.Dependencies = projectDef.Dependencies
                   Project.Files = files
                   Project.Outputs = projectDef.Outputs
                   Project.Ignores = projectDef.Ignores
                   Project.Targets = projectSteps
-                  Project.Hash = nodeHash
                   Project.Labels = projectDef.Labels }
 
             projects |> Map.add project projectConfig
