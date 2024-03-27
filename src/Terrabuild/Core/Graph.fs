@@ -1,4 +1,6 @@
 module Graph
+open System
+open System.Collections.Generic
 open System.Collections.Concurrent
 open Collections
 open Terrabuild.Extensibility
@@ -23,6 +25,8 @@ type Node = {
     Outputs: string set
     Cache: Cacheability
     IsLeaf: bool
+
+    TargetHash: string
     CommandLines: CommandLine list
 }
 
@@ -114,7 +118,8 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                              Dependencies = children
                              IsLeaf = isLeaf
                              ProjectHash = projectConfig.Hash
-                             Cache = cache }
+                             Cache = cache
+                             TargetHash = target.Hash }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     failwith "Unexpected graph building race"
                 [ nodeId ]
@@ -146,7 +151,6 @@ let optimize (graph: WorkspaceGraph) =
     for (key, values) in partitions do
         printfn $"{key} => {values |> Seq.length}"
         printfn ""
-
 
 
 let graph (graph: WorkspaceGraph) =
@@ -182,3 +186,95 @@ let graph (graph: WorkspaceGraph) =
     }
 
     mermaid
+
+
+
+
+
+
+
+let optimizeGraph (graph: WorkspaceGraph) =
+    let startedAt = DateTime.UtcNow
+
+    // compute first incoming edges
+    let reverseIncomings =
+        graph.Nodes
+        |> Map.map (fun _ _ -> List<string>())
+    for KeyValue(nodeId, node) in graph.Nodes do
+        for dependency in node.Dependencies do
+            reverseIncomings[dependency].Add(nodeId)
+
+    let allNodes =
+        graph.Nodes
+        |> Map.map (fun _ _ -> ref 0)
+
+    let refCounts =
+        reverseIncomings
+        |> Seq.collect (fun kvp -> kvp.Value)
+        |> Seq.countBy (id)
+        |> Map
+        |> Map.map (fun _ value -> ref value)
+
+    let readyNodes =
+        allNodes
+        |> Map.addMap refCounts
+
+    let nodeTags = Concurrent.ConcurrentDictionary<string, string>()
+
+    // optimization is like building but instead of running actions
+    // we just propagate an infection to determine clusters
+    // it's a bit like a painter algorithm unless we check compatibilities before infecting
+    let buildQueue = Exec.BuildQueue(1)
+    let rec scheduleNode (nodeId: string) =
+        let node = graph.Nodes[nodeId]
+
+        let nodeTag =
+            // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
+            if node.Dependencies = Set.empty then
+                node.TargetHash
+            else
+                // collect tags from dependencies
+                // if they are the same then infect this node with children virus iif it's unique
+                // otherwise mutate the virus in new variant
+                let childrenTags =
+                    node.Dependencies
+                    |> Set.map (fun dependency -> (nodeTags[dependency], graph.Nodes[dependency].TargetHash))
+                    |> List.ofSeq
+                match childrenTags with
+                | [tag, hash] when hash = node.TargetHash -> tag
+                | _ -> $"{node.TargetHash}-{nodeId}"
+        nodeTags.TryAdd(nodeId, nodeTag) |> ignore
+
+
+        let buildAction () = 
+            // schedule children nodes if ready
+            let triggers = reverseIncomings[nodeId]                
+            for trigger in triggers do
+                let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
+                if newValue = 0 then
+                    readyNodes[trigger].Value <- -1 // mark node as scheduled
+                    scheduleNode trigger
+
+        buildQueue.Enqueue buildAction
+
+
+    readyNodes
+    |> Map.filter (fun _ value -> value.Value = 0)
+    |> Map.iter (fun key _ -> scheduleNode key)
+
+    // wait only if we have something to do
+    buildQueue.WaitCompletion()
+
+    let endedAt = DateTime.UtcNow
+    let optimizationDuration = endedAt - startedAt
+    printfn $"Optimization = {optimizationDuration}"
+
+    let clusters =
+        nodeTags
+        |> Seq.groupBy (fun kvp -> kvp.Value)
+        |> Map.ofSeq
+        |> Map.map (fun k v -> v |> Seq.length)
+
+    printfn $"clusters = {clusters.Count}"
+    for (KeyValue(cluster, count)) in clusters do
+        printfn $"{cluster} => {count}"

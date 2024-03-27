@@ -57,6 +57,7 @@ let private isNodeUnsatisfied = function
 
 
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
+    let startedAt = DateTime.UtcNow
 
     let containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
@@ -274,7 +275,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
 
     notification.BuildStarted graph
-    let startedAt = DateTime.UtcNow
 
     readyNodes
     |> Map.filter (fun _ value -> value.Value = 0)
@@ -292,7 +292,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         |> Set
 
     let endedAt = DateTime.UtcNow
-    let buildDuraton = endedAt - startedAt
+    let buildDuration = endedAt - startedAt
     let totalDuration = endedAt - options.StartedAt
 
     let status =
@@ -304,7 +304,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                       BuildSummary.BranchOrTag = branchOrTag
                       BuildSummary.StartedAt = options.StartedAt
                       BuildSummary.EndedAt = endedAt
-                      BuildSummary.BuildDuration = buildDuraton
+                      BuildSummary.BuildDuration = buildDuration
                       BuildSummary.TotalDuration = totalDuration
                       BuildSummary.Status = status
                       BuildSummary.Targets = graph.Targets
