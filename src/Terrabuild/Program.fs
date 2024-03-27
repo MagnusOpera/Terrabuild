@@ -73,6 +73,9 @@ let processCommandLine () =
                 let mermaid = Graph.graph graph |> String.join "\n"
                 mermaid |> IO.writeTextFile "terrabuild.graph.mermaid"
 
+                graph |> Graph.optimize
+
+
             if options.WhatIf then 0
             else
                 let cache = Cache.Cache(config.Storage) :> Cache.ICache

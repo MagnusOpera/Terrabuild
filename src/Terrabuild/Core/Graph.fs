@@ -18,12 +18,12 @@ type Node = {
     Project: string
     Target: string
     Dependencies: string set
-    IsLeaf: bool
     ProjectHash: string
     Variables: Map<string, string>
-    CommandLines: CommandLine list
     Outputs: string set
     Cache: Cacheability
+    IsLeaf: bool
+    CommandLines: CommandLine list
 }
 
 type WorkspaceGraph = {
@@ -134,6 +134,19 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
     { Targets = targets
       Nodes = allNodes |> Map.ofDict
       RootNodes = rootNodes }
+
+
+let optimize (graph: WorkspaceGraph) =
+    let partitions =
+        graph.Nodes.Values
+        |> Seq.groupBy (fun x -> x.CommandLines)
+
+    printfn $"nodes = {graph.Nodes.Count}"
+    printfn $"partition = {partitions |> Seq.length}"
+    for (key, values) in partitions do
+        printfn $"{key} => {values |> Seq.length}"
+        printfn ""
+
 
 
 let graph (graph: WorkspaceGraph) =
