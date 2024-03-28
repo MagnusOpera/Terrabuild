@@ -26,8 +26,9 @@ module DotnetHelpers =
     let findProjectFile (directory: string) =
         let projects =
             ext2projType.Keys
+            |> Seq.map (fun k -> $"*{k}")
             |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(directory, ext))
-        projects |> Seq.exactlyOne |> Path.GetFileName
+        projects |> Seq.exactlyOne
 
     let parseDotnetDependencies (projectFile: string) =
         let xdoc = XDocument.Load (projectFile)
@@ -75,7 +76,7 @@ module DotnetHelpers =
 
         seq {
             yield "Microsoft Visual Studio Solution File, Format Version 12.00"
-            yield "# Visual Studio 14"
+            yield "# Visual Studio 17"
 
             for project in projects do
                 let fileName = project
@@ -85,7 +86,7 @@ module DotnetHelpers =
                                     prjType
                                     (fileName |> Path.GetFileNameWithoutExtension)
                                     fileName
-                                    (guids.[fileName])
+                                    (guids[fileName])
                                   yield "EndProject"
                 | None -> failwith $"Unsupported project {fileName}"
 
@@ -98,8 +99,8 @@ module DotnetHelpers =
             yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
             for project in projects do
                 let guid = guids[project]
-                yield $"\t\t{guid}.{configuration}|Any CPU.ActiveCfg = {configuration}|Any CPU"
-                yield $"\t\t{guid}.{configuration}|Any CPU.Build.0 = {configuration}|Any CPU"
+                yield $"\t\t{{{guid}}}.{configuration}|Any CPU.ActiveCfg = {configuration}|Any CPU"
+                yield $"\t\t{{{guid}}}.{configuration}|Any CPU.Build.0 = {configuration}|Any CPU"
             yield "\tEndGlobalSection"
 
             yield "EndGlobal"
@@ -122,7 +123,7 @@ type Dotnet() =
     /// <param name="dependencies" example="[ &lt;ProjectReference /&gt; from project ]">Default values.</param>
     static member __init__ (context: InitContext) =
         let projectFile = DotnetHelpers.findProjectFile context.Directory
-        let dependencies = Path.Combine(context.Directory, projectFile) |> DotnetHelpers.parseDotnetDependencies 
+        let dependencies = projectFile |> DotnetHelpers.parseDotnetDependencies 
         let projectInfo =
             { ProjectInfo.Default
               with Ignores = Set [ "**/*.binlog" ]
@@ -183,13 +184,13 @@ type Dotnet() =
                 | _ -> ""
 
             // generate temp solution file
-            let slnfile = Path.GetTempFileName()
+            let slnfile = Path.ChangeExtension(Path.GetTempFileName(), ".sln")
             let slnContent = DotnetHelpers.GenerateSolutionContent projectFiles configuration
             File.WriteAllLines(slnfile, slnContent)
 
             scope Cacheability.Always
             |> andThen "dotnet" $"restore {slnfile} --no-dependencies" 
-            |> andThen "dotnet" $"build {slnfile} --no-dependencies --no-restore --configuration {configuration}{maxcpucount}{logger}"
+            |> andThen "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{maxcpucount}{logger}"
             |> Some
         | _ ->
             None

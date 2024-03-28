@@ -6,6 +6,7 @@ open System.Collections.Concurrent
 open Terrabuild.Extensibility
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
+open Terrabuild.Configuration.Project.AST
 
 [<RequireQualifiedAccess>]
 type Options = {
@@ -25,13 +26,23 @@ type ConfigException(msg, ?innerException: Exception) =
         ConfigException(msg, ?innerException=innerException) |> raise
 
 
+type RawStep = {
+    Extension: string
+    Command: string
+    Parameters: Value
+    Context: ActionContext
+}
+
 [<RequireQualifiedAccess>]
 type ContaineredAction = {
+    Step: RawStep
+
     Container: string option
     Command: string
     Arguments: string
     Cache: Cacheability
 }
+
 
 [<RequireQualifiedAccess>]
 type ContaineredTarget = {
@@ -51,6 +62,8 @@ type Project = {
     Outputs: string set
     Targets: Map<string, ContaineredTarget>
     Labels: string set
+
+    Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
 }
 
 [<RequireQualifiedAccess>]
@@ -278,11 +291,19 @@ let read workspaceDir (options: Options) environment labels variables =
                                     | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
 
 
+                                let rawStep = {
+                                    RawStep.Extension = step.Extension
+                                    RawStep.Command = step.Command
+                                    RawStep.Parameters = stepParameters
+                                    RawStep.Context = actionContext
+                                }
+
                                 actionGroup.Actions
                                 |> List.map (fun action -> { ContaineredAction.Container = extension.Container
                                                              ContaineredAction.Command = action.Command
                                                              ContaineredAction.Arguments = action.Arguments
-                                                             ContaineredAction.Cache = actionGroup.Cache })
+                                                             ContaineredAction.Cache = actionGroup.Cache
+                                                             ContaineredAction.Step = rawStep })
                             let variables =
                                 variables
                                 |> Map.addMap stepVars
@@ -335,7 +356,8 @@ let read workspaceDir (options: Options) environment labels variables =
                   Project.Outputs = projectDef.Outputs
                   Project.Ignores = projectDef.Ignores
                   Project.Targets = projectSteps
-                  Project.Labels = projectDef.Labels }
+                  Project.Labels = projectDef.Labels
+                  Project.Scripts = projectDef.Scripts }
 
             projects |> Map.add project projectConfig
         else

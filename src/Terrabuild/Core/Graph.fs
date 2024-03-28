@@ -4,6 +4,7 @@ open System.Collections.Generic
 open System.Collections.Concurrent
 open Collections
 open Terrabuild.Extensibility
+open Terrabuild.Expressions
 
 type Paths = string set
 
@@ -193,7 +194,7 @@ let graph (graph: WorkspaceGraph) =
 
 
 
-let optimizeGraph (graph: WorkspaceGraph) =
+let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) =
     let startedAt = DateTime.UtcNow
 
     // compute first incoming edges
@@ -219,7 +220,8 @@ let optimizeGraph (graph: WorkspaceGraph) =
         allNodes
         |> Map.addMap refCounts
 
-    let nodeTags = Concurrent.ConcurrentDictionary<string, string>()
+    // map a node to a cluster
+    let clusters = Concurrent.ConcurrentDictionary<string, string>()
 
     // optimization is like building but instead of running actions
     // pragmatically, it's inspired from virus infection :-)
@@ -241,12 +243,12 @@ let optimizeGraph (graph: WorkspaceGraph) =
                 // otherwise mutate the virus in new variant
                 let childrenTags =
                     node.Dependencies
-                    |> Set.map (fun dependency -> (nodeTags[dependency], graph.Nodes[dependency].TargetHash))
+                    |> Set.map (fun dependency -> (clusters[dependency], graph.Nodes[dependency].TargetHash))
                     |> List.ofSeq
                 match childrenTags with
                 | [tag, hash] when hash = node.TargetHash -> tag
                 | _ -> $"{node.TargetHash}-{nodeId}"
-        nodeTags.TryAdd(nodeId, nodeTag) |> ignore
+        clusters.TryAdd(nodeId, nodeTag) |> ignore
 
 
         let buildAction () = 
@@ -272,12 +274,61 @@ let optimizeGraph (graph: WorkspaceGraph) =
     let optimizationDuration = endedAt - startedAt
     printfn $"Optimization = {optimizationDuration}"
 
-    let clusters =
-        nodeTags
-        |> Seq.groupBy (fun kvp -> kvp.Value)
+    // find a project for each cluster
+    let optimizers =
+        clusters
+        |> Seq.map (fun kvp -> kvp.Value, kvp.Key)
+        |> Seq.groupBy fst
         |> Map.ofSeq
-        |> Map.map (fun k v -> v |> Seq.length)
+        |> Map.map (fun _ nodeIds -> nodeIds |> Seq.map snd |> Set.ofSeq)
+
+    // invoke __optimize__ function on each cluster
+    let mutable optimizedClusters = Map.empty
+    for (KeyValue(cluster, nodeIds)) in optimizers do
+        printfn $"Optimizing cluster {cluster}"
+        let oneNodeId = nodeIds |> Seq.head
+        let oneNode = graph.Nodes |> Map.find oneNodeId
+        let projects =
+            nodeIds
+            |> Set.map (fun nodeId ->
+                let node = graph.Nodes |> Map.find nodeId
+                IO.combinePath wsConfig.Directory node.Project |> IO.fullPath)
+
+        // get hands on target
+        let project = wsConfig.Projects |> Map.find oneNode.Project
+        let target = project.Targets |> Map.find oneNode.Target
+
+        let optimizeAction (action: Configuration.ContaineredAction) =
+            let context = action.Step.Context
+            let context = {
+                OptimizeContext.Debug = context.Debug
+                OptimizeContext.CI = context.CI
+                OptimizeContext.Command = context.Command
+                OptimizeContext.BranchOrTag = context.BranchOrTag
+                OptimizeContext.Directories = projects
+            }
+            let parameters = 
+                match action.Step.Parameters with
+                | Value.Map map -> Value.Map (map |> Map.add "context" (Value.Object context))
+                | _ -> failwith "internal error"
+
+            let result = Extensions.invokeScriptMethod<ActionBatch option> project.Scripts action.Step.Extension "__optimize__" parameters
+            match result with
+            | Extensions.InvocationResult.Success actionBatch -> actionBatch
+            | _ -> None
+
+        let optimizedActions =
+            target.Actions
+            |> List.choose optimizeAction
+
+        // did we optimize everything ?
+        if optimizedActions.Length = target.Actions.Length then
+            optimizedClusters <- optimizedClusters |> Map.add cluster optimizedActions
 
     printfn $"clusters = {clusters.Count}"
     for (KeyValue(cluster, count)) in clusters do
         printfn $"{cluster} => {count}"
+
+    printfn $"Optimized clusters = {optimizedClusters.Count}"
+    for (KeyValue(cluster, actions)) in optimizedClusters do
+        printfn $"{cluster} => {actions}"

@@ -77,8 +77,8 @@ let invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: stri
             | None ->
                 match method with
                 | "__init__"
-                | "__defaults__" 
-                | "__dispatch__"-> TargetNotFound
+                | "__dispatch__"
+                | "__optimize__" -> TargetNotFound
                 | _ -> invokeScriptMethod "__dispatch__"
 
         invokeScriptMethod method

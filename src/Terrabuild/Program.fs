@@ -74,7 +74,7 @@ let processCommandLine () =
                 mermaid |> IO.writeTextFile "terrabuild.graph.mermaid"
 
                 graph |> Graph.optimize
-                graph |> Graph.optimizeGraph
+                graph |> Graph.optimizeGraph config
 
 
             if options.WhatIf then 0
@@ -94,8 +94,9 @@ let processCommandLine () =
         with
             | :? Configuration.ConfigException as ex ->
                 Log.Fatal("Failed with {Exception}", ex)
-                let reason = dumpUnknownException ex |> String.join "\n   "
-                // let reason = ex.ToString()
+                let reason = 
+                    if options.Debug then ex.ToString()
+                    else dumpUnknownException ex |> String.join "\n   "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
 
