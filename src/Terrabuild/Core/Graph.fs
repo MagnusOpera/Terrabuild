@@ -222,8 +222,11 @@ let optimizeGraph (graph: WorkspaceGraph) =
     let nodeTags = Concurrent.ConcurrentDictionary<string, string>()
 
     // optimization is like building but instead of running actions
-    // we just propagate an infection to determine clusters
-    // it's a bit like a painter algorithm unless we check compatibilities before infecting
+    // pragmatically, it's inspired from virus infection :-)
+    // this starts with leaf nodes (patients 0) - but with same virus even they are not related (leaf nodes have no dependencies by definition)
+    // then the infection propagates to parents if they are compatible
+    // if they are not compatible - the virus mutates and continue its propagation up to the root nodes
+    // nodeTags dictionary holds a mapping of nodes to virus variant - they are our clusters
     let buildQueue = Exec.BuildQueue(1)
     let rec scheduleNode (nodeId: string) =
         let node = graph.Nodes[nodeId]
