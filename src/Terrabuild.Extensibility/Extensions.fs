@@ -31,6 +31,15 @@ type ActionContext = {
     BranchOrTag: string
 }
 
+[<RequireQualifiedAccess>]
+type OptimizeContext = {
+    Debug: bool
+    Directories: Set<string>
+    CI: bool
+    Command: string
+    BranchOrTag: string
+}
+
 [<Flags>]
 type Cacheability =
     | Never = 0

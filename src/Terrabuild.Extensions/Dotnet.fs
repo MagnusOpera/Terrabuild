@@ -14,16 +14,18 @@ module DotnetHelpers =
 
     let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
 
-    let private knownProjectExtensions =
-        [ "*.pssproj"
-          "*.csproj"
-          "*.vbproj"
-          "*.fsproj"
-          "*.sqlproj" ]
+    let private ext2projType = Map [ (".csproj",  "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                                     (".fsproj",  "F2A71F9B-5D33-465A-A702-920D77279786")
+                                     (".vbproj",  "F184B08F-C81C-45F6-A57F-5ABD9991F28F") 
+                                     (".pssproj", "F5034706-568F-408A-B7B3-4D38C6DB8A32")
+                                     (".sqlproj", "00D1A9C2-B5F0-4AF3-8072-F6C62B433612")
+                                     (".dcproj",  "E53339B2-1760-4266-BCC7-CA923CBCF16C")]
+
+
 
     let findProjectFile (directory: string) =
         let projects =
-            knownProjectExtensions
+            ext2projType.Keys
             |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(directory, ext))
         projects |> Seq.exactlyOne |> Path.GetFileName
 
@@ -41,6 +43,69 @@ module DotnetHelpers =
 
     [<Literal>]
     let defaultConfiguration = "Debug"
+
+
+
+
+
+
+    let ext2ProjectType ext = ext2projType |> Map.tryFind ext
+
+    let GenerateGuidFromString (input : string) =
+        use md5 = System.Security.Cryptography.MD5.Create()
+        let inputBytes = System.Text.Encoding.GetEncoding(0).GetBytes(input)
+        let hashBytes = md5.ComputeHash(inputBytes)
+        let hashGuid = System.Guid(hashBytes)
+        hashGuid
+
+    let ToVSGuid (guid : System.Guid) =
+        guid.ToString("D").ToUpperInvariant()
+
+
+    let GenerateSolutionContent (projects : Set<string>) (configuration: string) =
+        let string2guid s =
+            s
+            |> GenerateGuidFromString 
+            |> ToVSGuid
+
+        let guids =
+            projects
+            |> Seq.map (fun x -> x, string2guid x)
+            |> Map
+
+        seq {
+            yield "Microsoft Visual Studio Solution File, Format Version 12.00"
+            yield "# Visual Studio 14"
+
+            for project in projects do
+                let fileName = project
+                let projectType = fileName |> Path.GetExtension |> ext2ProjectType
+                match projectType with
+                | Some prjType -> yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}"""
+                                    prjType
+                                    (fileName |> Path.GetFileNameWithoutExtension)
+                                    fileName
+                                    (guids.[fileName])
+                                  yield "EndProject"
+                | None -> failwith $"Unsupported project {fileName}"
+
+            yield "Global"
+
+            yield "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution"
+            yield $"\t\t{configuration}|Any CPU = {configuration}|Any CPU"
+            yield "\tEndGlobalSection"
+
+            yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
+            for project in projects do
+                let guid = guids[project]
+                yield $"\t\t{guid}.{configuration}|Any CPU.ActiveCfg = {configuration}|Any CPU"
+                yield $"\t\t{guid}.{configuration}|Any CPU.Build.0 = {configuration}|Any CPU"
+            yield "\tEndGlobalSection"
+
+            yield "EndGlobal"
+        }
+
+
 
 
 /// <summary>
@@ -72,7 +137,7 @@ type Dotnet() =
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
     /// <param name="maxcpucount" example="1">Max worker processes to build the project.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
-    static member build (configuration: string option) (projectfile: string option) (maxcpucount: int option) (log: bool option)=
+    static member build (projectfile: string option) (configuration: string option) (maxcpucount: int option) (log: bool option) =
         let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let logger =
@@ -98,6 +163,36 @@ type Dotnet() =
         scope Cacheability.Always
         |> andThen (context.Command) arguments
 
+
+    static member __optimize__ (context: OptimizeContext) (configuration: string option) (maxcpucount: int option) (log: bool option) =
+        match context.Command with
+        | "build" ->
+            // collect projects first
+            let projectFiles =
+                context.Directories
+                |> Set.map DotnetHelpers.findProjectFile
+
+            let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
+            let logger =
+                match log with
+                | Some true -> " -bl"
+                | _ -> ""
+            let maxcpucount =
+                match maxcpucount with
+                | Some maxcpucount -> $" -maxcpucount:{maxcpucount}"
+                | _ -> ""
+
+            // generate temp solution file
+            let slnfile = Path.GetTempFileName()
+            let slnContent = DotnetHelpers.GenerateSolutionContent projectFiles configuration
+            File.WriteAllLines(slnfile, slnContent)
+
+            scope Cacheability.Always
+            |> andThen "dotnet" $"restore {slnfile} --no-dependencies" 
+            |> andThen "dotnet" $"build {slnfile} --no-dependencies --no-restore --configuration {configuration}{maxcpucount}{logger}"
+            |> Some
+        | _ ->
+            None
 
     /// <summary>
     /// Pack a project.
