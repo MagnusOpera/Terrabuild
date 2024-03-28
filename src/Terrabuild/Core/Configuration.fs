@@ -80,90 +80,6 @@ type private ProjectDefinition = {
 
 
 
-
-
-module ExtensionLoaders =
-    open Terrabuild.Scripting
-
-    type InvocationResult<'t> =
-        | Success of 't
-        | ScriptNotFound
-        | TargetNotFound
-        | ErrorTarget of Exception
-
-    // well-know provided extensions
-    // do not forget to add reference when adding new implementation
-    let systemScripts =
-        Map [
-            "@docker", typeof<Terrabuild.Extensions.Docker>
-            "@dotnet", typeof<Terrabuild.Extensions.Dotnet>
-            "@make", typeof<Terrabuild.Extensions.Make>
-            "@npm", typeof<Terrabuild.Extensions.Npm>
-            "@null", typeof<Terrabuild.Extensions.Null>
-            "@shell", typeof<Terrabuild.Extensions.Shell>
-            "@terraform", typeof<Terrabuild.Extensions.Terraform>
-        ]
-
-    let systemExtensions =
-        systemScripts |> Map.map (fun _ _ -> Extension.Empty)
-
-
-    let loadStorage name : Storages.Storage =
-        match name with
-        | None -> Storages.Local()
-        | Some "azureblob" -> Storages.AzureBlobStorage()
-        | _ -> failwith $"Unknown storage '{name}'"
-
-    let loadSourceControl name: SourceControls.SourceControl =
-        match name with
-        | None -> SourceControls.Local()
-        | Some "github" -> SourceControls.GitHub()
-        | _ -> failwith $"Unknown source control '{name}'"
-
-    // NOTE: when app in package as a single file, this break - so instead of providing 
-    //       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided
-    //       ¯\_(ツ)_/¯
-    let terrabuildDir = Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> IO.parentDirectory
-    let terrabuildExtensibility =
-        let path = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
-        if File.Exists(path) then path
-        else Reflection.Assembly.GetExecutingAssembly().Location
-
-    let lazyLoadScript (name: string) (ext: Extension) =
-        let initScript () =
-            match ext.Script with
-            | Some script -> loadScript [ terrabuildExtensibility ] script
-            | _ ->
-                match systemScripts |> Map.tryFind name with
-                | Some sysTpe -> Script(sysTpe)
-                | _ -> failwith $"Script is not defined for extension '{name}'"
-
-        lazy(initScript())
-
-    let invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: string) (method: string) (args: Value) =
-        match scripts |> Map.tryFind extension with
-        | None -> ScriptNotFound
-
-        | Some extInstance ->
-            let rec invokeScriptMethod (method: string) =
-                let script = extInstance.Value
-                let invocable = script.GetMethod(method)
-                match invocable with
-                | Some invocable ->
-                    try
-                        Success (invocable.Invoke<'r> args)
-                    with
-                    | exn -> ErrorTarget exn
-                | None ->
-                    match method with
-                    | "__init__"
-                    | "__defaults__" 
-                    | "__dispatch__"-> TargetNotFound
-                    | _ -> invokeScriptMethod "__dispatch__"
-
-            invokeScriptMethod method
-
-
 let read workspaceDir (options: Options) environment labels variables =
     let workspaceFile = IO.combinePath workspaceDir "WORKSPACE"
     let workspaceContent = File.ReadAllText workspaceFile
@@ -203,12 +119,12 @@ let read workspaceDir (options: Options) environment labels variables =
     let processedNodes = ConcurrentDictionary<string, bool>()
 
     let extensions = 
-        ExtensionLoaders.systemExtensions
+        Extensions.systemExtensions
         |> Map.addMap workspaceConfig.Extensions
 
     let scripts =
         extensions
-        |> Map.map ExtensionLoaders.lazyLoadScript
+        |> Map.map Extensions.lazyLoadScript
 
     let rec scanDependency projects project =
         let projectDir = IO.combinePath workspaceDir project
@@ -233,7 +149,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
                 let scripts =
                     scripts
-                    |> Map.addMap (projectConfig.Extensions |> Map.map ExtensionLoaders.lazyLoadScript)
+                    |> Map.addMap (projectConfig.Extensions |> Map.map Extensions.lazyLoadScript)
 
                 let projectInfo =
                     match projectConfig.Configuration.Init with
@@ -244,12 +160,12 @@ let read workspaceDir (options: Options) environment labels variables =
                                             Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
                             Value.Map (Map [ "context", Value.Object context ])
                         
-                        let result = ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts init "__init__" parseContext
+                        let result = Extensions.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts init "__init__" parseContext
                         match result with
-                        | ExtensionLoaders.Success result -> result
-                        | ExtensionLoaders.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
-                        | ExtensionLoaders.TargetNotFound -> ProjectInfo.Default // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
-                        | ExtensionLoaders.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
+                        | Extensions.Success result -> result
+                        | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
+                        | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
+                        | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
                     | _ -> ProjectInfo.Default
 
                 let projectInfo = {
@@ -351,15 +267,15 @@ let read workspaceDir (options: Options) environment labels variables =
                                     |> Eval.eval actionVariables
 
                                 let actionGroup =
-                                    let result = ExtensionLoaders.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> projectDef.Scripts
-                                                                                                                           step.Extension 
-                                                                                                                           step.Command
-                                                                                                                           stepParameters
+                                    let result = Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> projectDef.Scripts
+                                                                                                                     step.Extension 
+                                                                                                                     step.Command
+                                                                                                                     stepParameters
                                     match result with
-                                    | ExtensionLoaders.Success result -> result
-                                    | ExtensionLoaders.ScriptNotFound -> ConfigException.Raise $"Script {step.Extension} was not found"
-                                    | ExtensionLoaders.TargetNotFound -> ConfigException.Raise $"Script {step.Extension} has no function {step.Command}"
-                                    | ExtensionLoaders.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
+                                    | Extensions.Success result -> result
+                                    | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {step.Extension} was not found"
+                                    | Extensions.TargetNotFound -> ConfigException.Raise $"Script {step.Extension} has no function {step.Command}"
+                                    | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
 
 
                                 actionGroup.Actions
