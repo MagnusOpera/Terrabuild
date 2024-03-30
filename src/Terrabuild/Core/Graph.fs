@@ -8,12 +8,6 @@ open Terrabuild.Expressions
 
 type Paths = string set
 
-[<RequireQualifiedAccess>]
-type CommandLine = {
-    Container: string option
-    Command: string
-    Arguments: string
-}
 
 type Node = {
     Id: string
@@ -28,7 +22,7 @@ type Node = {
     IsLeaf: bool
 
     TargetHash: string
-    CommandLines: CommandLine list
+    CommandLines: Configuration.ContaineredActionBatch list
 }
 
 type WorkspaceGraph = {
@@ -87,7 +81,9 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
             | Some target ->
                 let hashContent = [
                     yield! target.Variables |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-                    yield! target.Actions |> Seq.map (fun cmd -> $"{cmd.Container} {cmd.Command} {cmd.Arguments}")
+                    yield! target.Actions |> Seq.collect (fun batch -> 
+                        batch.Actions |> Seq.map (fun cmd ->
+                            $"{batch.Container} {cmd.Command} {cmd.Arguments}"))
                     yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].Hash)
                     yield projectConfig.Hash
                 ]
@@ -103,18 +99,12 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                     target.Actions
                     |> Seq.fold (fun acc cmd -> acc &&& cmd.Cache) childrenCache
 
-                let commandLines =
-                    target.Actions
-                    |> List.map (fun cmd -> { CommandLine.Container = cmd.Container
-                                              CommandLine.Command = cmd.Command
-                                              CommandLine.Arguments = cmd.Arguments })
-
                 let node = { Id = nodeId
                              Hash = hash
                              Project = project
                              Target = targetName
                              Variables = target.Variables
-                             CommandLines = commandLines
+                             CommandLines = target.Actions
                              Outputs = projectConfig.Outputs
                              Dependencies = children
                              IsLeaf = isLeaf
@@ -194,7 +184,7 @@ let graph (graph: WorkspaceGraph) =
 
 
 
-let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) =
+let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configuration.Options) (graph: WorkspaceGraph) =
     let startedAt = DateTime.UtcNow
 
     // compute first incoming edges
@@ -288,34 +278,33 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGra
         printfn $"Optimizing cluster {cluster}"
         let oneNodeId = nodeIds |> Seq.head
         let oneNode = graph.Nodes |> Map.find oneNodeId
-        let projects =
-            nodeIds
-            |> Set.map (fun nodeId ->
-                let node = graph.Nodes |> Map.find nodeId
-                IO.combinePath wsConfig.Directory node.Project |> IO.fullPath)
-
+ 
         // get hands on target
         let project = wsConfig.Projects |> Map.find oneNode.Project
         let target = project.Targets |> Map.find oneNode.Target
 
-        let optimizeAction (action: Configuration.ContaineredAction) =
-            let context = action.Step.Context
-            let context = {
-                OptimizeContext.Debug = context.Debug
-                OptimizeContext.CI = context.CI
-                OptimizeContext.Command = context.Command
-                OptimizeContext.BranchOrTag = context.BranchOrTag
-                OptimizeContext.Directories = projects
-            }
-            let parameters = 
-                match action.Step.Parameters with
-                | Value.Map map -> Value.Map (map |> Map.add "context" (Value.Object context))
-                | _ -> failwith "internal error"
+        let bulkParameters = [ ]
 
-            let result = Extensions.invokeScriptMethod<ActionBatch option> project.Scripts action.Step.Extension "__optimize__" parameters
-            match result with
-            | Extensions.InvocationResult.Success actionBatch -> actionBatch
-            | _ -> None
+        let optimizeAction (action: Configuration.ContaineredActionBatch) =
+            action.BulkContext
+            |> Option.map (fun context ->
+                let optContext = {
+                    OptimizeContext.Debug = options.Debug
+                    OptimizeContext.CI = wsConfig.SourceControl.CI
+                    OptimizeContext.BranchOrTag = wsConfig.SourceControl.BranchOrTag
+                    OptimizeContext.BulkParameters = bulkParameters
+                }
+                let parameters = 
+                    match context.Arguments with
+                    | Value.Map map -> Value.Map (map |> Map.add "context" (Value.Object optContext))
+                    | _ -> failwith "internal error"
+
+                let optCommand = $"bulk_{context.Command}"
+                let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
+                match result with
+                | Extensions.InvocationResult.Success actionBatch -> Some actionBatch
+                | _ -> None
+            )
 
         let optimizedActions =
             target.Actions

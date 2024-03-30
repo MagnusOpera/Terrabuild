@@ -74,7 +74,7 @@ let processCommandLine () =
                 mermaid |> IO.writeTextFile "terrabuild.graph.mermaid"
 
                 graph |> Graph.optimize
-                graph |> Graph.optimizeGraph config
+                graph |> Graph.optimizeGraph config options
 
 
             if options.WhatIf then 0

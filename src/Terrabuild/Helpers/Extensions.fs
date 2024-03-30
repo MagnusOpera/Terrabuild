@@ -60,13 +60,16 @@ let lazyLoadScript (name: string) (ext: Extension) =
 
     lazy(initScript())
 
-let invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: string) (method: string) (args: Value) =
+let getScript (extension: string) (scripts: Map<string, Lazy<Script>>) =
     match scripts |> Map.tryFind extension with
-    | None -> ScriptNotFound
+    | None -> None
+    | Some script -> script.Value |> Some
 
-    | Some extInstance ->
+let invokeScriptMethod<'r> (method: string) (args: Value) (script: Script option) =
+    match script with
+    | None -> ScriptNotFound
+    | Some script ->
         let rec invokeScriptMethod (method: string) =
-            let script = extInstance.Value
             let invocable = script.GetMethod(method)
             match invocable with
             | Some invocable ->
@@ -82,4 +85,3 @@ let invokeScriptMethod<'r> (scripts: Map<string, Lazy<Script>>) (extension: stri
                 | _ -> invokeScriptMethod "__dispatch__"
 
         invokeScriptMethod method
-

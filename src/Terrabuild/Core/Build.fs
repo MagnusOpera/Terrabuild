@@ -159,61 +159,65 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 let cacheEntry = cache.CreateEntry workspaceConfig.SourceControl.CI cacheEntryId
                 notification.NodeBuilding node
 
+                // NOTE:
+                //  we use ProjectHash here because it's interesting from a cache perspective
+                //  some binaries could have been cached in homedir, let's reuse them if available
+                let homeDir = cache.CreateHomeDir node.ProjectHash
+
+                let allCommands =
+                    node.CommandLines
+                    |> List.collect (fun batch ->
+                        batch.Actions |> List.map (fun commandLine ->
+                            let cmd = "docker"
+                            let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
+
+                            let getContainerUser (container: string) =
+                                match containerInfos.TryGetValue(container) with
+                                | true, whoami ->
+                                    Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
+                                    whoami
+                                | _ ->
+                                    // discover USER
+                                    let args = $"run --rm --name {node.Hash} --entrypoint whoami {container}"
+                                    let whoami =
+                                        Log.Debug("Identifying USER for {container}", container)
+                                        match Exec.execCaptureOutput workspaceConfig.Directory cmd args with
+                                        | Exec.Success (whoami, 0) -> whoami.Trim()
+                                        | _ ->
+                                            Log.Debug("USER identification failed for {container}: using root", container)
+                                            "root"
+
+                                    Log.Debug("Using USER {whoami} for {container}", whoami, container)
+                                    containerInfos.TryAdd(container, whoami) |> ignore
+                                    whoami
+
+                            match batch.Container with
+                            | None -> projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container
+                            | Some container ->
+                                let whoami = getContainerUser container
+                                let args = $"run --rm --entrypoint {commandLine.Command} --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
+                                workspaceConfig.Directory, cmd, args, batch.Container))
+
+
                 let beforeFiles = FileSystem.createSnapshot projectDirectory node.Outputs
 
                 let stepLogs = List<Cache.StepSummary>()
                 let mutable lastExitCode = 0
                 let mutable cmdLineIndex = 0
 
-                while cmdLineIndex < node.CommandLines.Length && lastExitCode = 0 do
+                while cmdLineIndex < allCommands.Length && lastExitCode = 0 do
                     let startedAt = DateTime.UtcNow
-                    let commandLine = node.CommandLines[cmdLineIndex]
-                    let logFile = cacheEntry.NextLogFile()
-                    
-                    // NOTE:
-                    //  we use ProjectHash here because it's interesting from a cache perspective
-                    //  some binaries could have been cached in homedir, let's reuse them if available
-                    let homeDir = cache.CreateHomeDir node.ProjectHash
+                    let workDir, cmd, args, container = allCommands[cmdLineIndex]
+                    let logFile = cacheEntry.NextLogFile()                    
                     cmdLineIndex <- cmdLineIndex + 1
-
-                    let workDir, cmd, args =
-                        let cmd = "docker"
-                        let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
-
-                        let getContainerUser (container: string) =
-                            match containerInfos.TryGetValue(container) with
-                            | true, whoami ->
-                                Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
-                                whoami
-                            | _ ->
-                                // discover USER
-                                let args = $"run --rm --name {node.Hash} --entrypoint whoami {container}"
-                                let whoami =
-                                    Log.Debug("Identifying USER for {container}", container)
-                                    match Exec.execCaptureOutput workspaceConfig.Directory cmd args with
-                                    | Exec.Success (whoami, 0) -> whoami.Trim()
-                                    | _ ->
-                                        Log.Debug("USER identification failed for {container}: using root", container)
-                                        "root"
-
-                                Log.Debug("Using USER {whoami} for {container}", whoami, container)
-                                containerInfos.TryAdd(container, whoami) |> ignore
-                                whoami
-
-                        match commandLine.Container with
-                        | None -> projectDirectory, commandLine.Command, commandLine.Arguments
-                        | Some container ->
-                            let whoami = getContainerUser container
-                            let args = $"run --rm --entrypoint {commandLine.Command} --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
-                            workspaceConfig.Directory, cmd, args
 
                     Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.Hash, cmd, args)
                     let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
                     let endedAt = DateTime.UtcNow
                     let duration = endedAt - startedAt
-                    let stepLog = { Cache.StepSummary.Command = commandLine.Command
-                                    Cache.StepSummary.Arguments = commandLine.Arguments
-                                    Cache.StepSummary.Container = commandLine.Container
+                    let stepLog = { Cache.StepSummary.Command = cmd
+                                    Cache.StepSummary.Arguments = args
+                                    Cache.StepSummary.Container = container
                                     Cache.StepSummary.Variables = node.Variables
                                     Cache.StepSummary.StartedAt = startedAt
                                     Cache.StepSummary.EndedAt = endedAt

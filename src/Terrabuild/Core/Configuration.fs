@@ -26,21 +26,22 @@ type ConfigException(msg, ?innerException: Exception) =
         ConfigException(msg, ?innerException=innerException) |> raise
 
 
-type RawStep = {
-    Extension: string
+type BulkContext = {
+    Script: Terrabuild.Scripting.Script
     Command: string
-    Parameters: Value
-    Context: ActionContext
+    Parameter: string
+    Arguments: Value
 }
 
-[<RequireQualifiedAccess>]
-type ContaineredAction = {
-    Step: RawStep
 
-    Container: string option
-    Command: string
-    Arguments: string
+
+[<RequireQualifiedAccess>]
+type ContaineredActionBatch = {
+    BulkContext: BulkContext option
+
     Cache: Cacheability
+    Container: string option
+    Actions: Action list
 }
 
 
@@ -49,7 +50,7 @@ type ContaineredTarget = {
     Hash: string
     Variables: Map<string, string>
     DependsOn: string set
-    Actions: ContaineredAction list
+    Actions: ContaineredActionBatch list
 }
 
 [<RequireQualifiedAccess>]
@@ -62,8 +63,6 @@ type Project = {
     Outputs: string set
     Targets: Map<string, ContaineredTarget>
     Labels: string set
-
-    Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
 }
 
 [<RequireQualifiedAccess>]
@@ -173,7 +172,10 @@ let read workspaceDir (options: Options) environment labels variables =
                                             Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
                             Value.Map (Map [ "context", Value.Object context ])
                         
-                        let result = Extensions.invokeScriptMethod<Terrabuild.Extensibility.ProjectInfo> scripts init "__init__" parseContext
+                        let result =
+                            Extensions.getScript init scripts
+                            |> Extensions.invokeScriptMethod<ProjectInfo> "__init__" parseContext
+
                         match result with
                         | Extensions.Success result -> result
                         | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
@@ -280,35 +282,37 @@ let read workspaceDir (options: Options) environment labels variables =
                                     |> Eval.eval actionVariables
 
                                 let actionGroup =
-                                    let result = Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> projectDef.Scripts
-                                                                                                                     step.Extension 
-                                                                                                                     step.Command
-                                                                                                                     stepParameters
+                                    let result =
+                                        Extensions.getScript step.Extension projectDef.Scripts
+                                        |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> step.Command stepParameters
                                     match result with
                                     | Extensions.Success result -> result
                                     | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {step.Extension} was not found"
                                     | Extensions.TargetNotFound -> ConfigException.Raise $"Script {step.Extension} has no function {step.Command}"
                                     | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
 
+                                let bulkContext =
+                                    actionGroup.BulkParameter
+                                    |> Option.map (fun parameter ->
+                                        let script = Extensions.getScript step.Extension projectDef.Scripts
+                                        { Parameter = parameter
+                                          Script = script.Value
+                                          Command = step.Command
+                                          Arguments = stepParameters })
 
-                                let rawStep = {
-                                    RawStep.Extension = step.Extension
-                                    RawStep.Command = step.Command
-                                    RawStep.Parameters = stepParameters
-                                    RawStep.Context = actionContext
+                                let containedActionBatch = {
+                                    ContaineredActionBatch.BulkContext = bulkContext
+                                    ContaineredActionBatch.Container = extension.Container
+                                    ContaineredActionBatch.Cache = actionGroup.Cache
+                                    ContaineredActionBatch.Actions = actionGroup.Actions
                                 }
+                                containedActionBatch
 
-                                actionGroup.Actions
-                                |> List.map (fun action -> { ContaineredAction.Container = extension.Container
-                                                             ContaineredAction.Command = action.Command
-                                                             ContaineredAction.Arguments = action.Arguments
-                                                             ContaineredAction.Cache = actionGroup.Cache
-                                                             ContaineredAction.Step = rawStep })
                             let variables =
                                 variables
                                 |> Map.addMap stepVars
 
-                            let actions = actions @ stepActions
+                            let actions = actions @ [ stepActions ]
 
                             variables, actions
                         ) (Map.empty, [])
@@ -321,7 +325,9 @@ let read workspaceDir (options: Options) environment labels variables =
 
                     let stepHash =
                         actions
-                        |> Seq.map (fun step -> $"{step.Container} {step.Command} {step.Arguments}")
+                        |> Seq.collect (fun batch ->
+                            batch.Actions |> Seq.map(fun step ->
+                                $"{batch.Container} {step.Command} {step.Arguments}"))
                         |> String.join "\n"
                         |> Hash.sha256
 
@@ -356,8 +362,7 @@ let read workspaceDir (options: Options) environment labels variables =
                   Project.Outputs = projectDef.Outputs
                   Project.Ignores = projectDef.Ignores
                   Project.Targets = projectSteps
-                  Project.Labels = projectDef.Labels
-                  Project.Scripts = projectDef.Scripts }
+                  Project.Labels = projectDef.Labels }
 
             projects |> Map.add project projectConfig
         else

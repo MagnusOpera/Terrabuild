@@ -1,6 +1,5 @@
 namespace Terrabuild.Extensions
 
-
 open Terrabuild.Extensibility
 open System.Xml.Linq
 open System.IO
@@ -63,7 +62,7 @@ module DotnetHelpers =
         guid.ToString("D").ToUpperInvariant()
 
 
-    let GenerateSolutionContent (projects : Set<string>) (configuration: string) =
+    let GenerateSolutionContent (projects : string list) (configuration: string) =
         let string2guid s =
             s
             |> GenerateGuidFromString 
@@ -107,8 +106,6 @@ module DotnetHelpers =
         }
 
 
-
-
 /// <summary>
 /// Add support for .net projects.
 /// </summary>
@@ -127,9 +124,38 @@ type Dotnet() =
         let projectInfo =
             { ProjectInfo.Default
               with Ignores = Set [ "**/*.binlog" ]
-                   Outputs = Set [ "bin/"; "obj/"; "**/*.binlog" ]
+                   Outputs = Set [ "bin/"; "obj/"; "**/*.binlog"; "obj/*.json"; "obj/*.props"; "obj/*.targets" ]
                    Dependencies = set dependencies }
         projectInfo
+
+
+    static member bulk_build (context: OptimizeContext) (configuration: string option) (log: bool option) =
+        let projects =
+            context.BulkParameters
+            |> List.ofSeq
+
+        let configuration =
+            configuration
+            |> Option.defaultValue DotnetHelpers.defaultConfiguration
+            |> sprintf " --configuration {%s}"
+
+        let logger =
+            match log with
+            | Some true -> " -bl"
+            | _ -> ""
+
+        // generate temp solution file
+        let slnfile = Path.ChangeExtension(Path.GetTempFileName(), ".sln")
+        let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
+        File.WriteAllLines(slnfile, slnContent)
+
+        let actions = [
+            action "dotnet" $"restore {slnfile} --no-dependencies" 
+            action "dotnet" $"build {slnfile} --no-restore{configuration}{logger}"
+        ]
+        actions
+
+
 
     /// <summary title="Build project.">
     /// Build project and ensure packages are available first.
@@ -138,9 +164,12 @@ type Dotnet() =
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
     /// <param name="maxcpucount" example="1">Max worker processes to build the project.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
-    static member build (projectfile: string option) (configuration: string option) (maxcpucount: int option) (log: bool option) =
-        let projectfile = projectfile |> Option.defaultValue ""
-        let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
+    static member build (context: ActionContext) (projectfile: string option) (configuration: string option) (maxcpucount: int option) (log: bool option) =
+        let projectfile = projectfile |> Option.defaultWith (fun () -> DotnetHelpers.findProjectFile context.Directory) |> Path.GetFullPath
+        let configuration =
+            configuration
+            |> Option.defaultValue DotnetHelpers.defaultConfiguration
+            |> sprintf " --configuration {%s}"
         let logger =
             match log with
             | Some true -> " -bl"
@@ -152,7 +181,9 @@ type Dotnet() =
 
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
-        |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore --configuration {configuration}{maxcpucount}{logger}"
+        |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore{configuration}{logger}{maxcpucount}"
+        |> withBulk projectfile
+
 
     /// <summary>
     /// Run a dotnet `command`.
@@ -164,36 +195,6 @@ type Dotnet() =
         scope Cacheability.Always
         |> andThen (context.Command) arguments
 
-
-    static member __optimize__ (context: OptimizeContext) (configuration: string option) (maxcpucount: int option) (log: bool option) =
-        match context.Command with
-        | "build" ->
-            // collect projects first
-            let projectFiles =
-                context.Directories
-                |> Set.map DotnetHelpers.findProjectFile
-
-            let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
-            let logger =
-                match log with
-                | Some true -> " -bl"
-                | _ -> ""
-            let maxcpucount =
-                match maxcpucount with
-                | Some maxcpucount -> $" -maxcpucount:{maxcpucount}"
-                | _ -> ""
-
-            // generate temp solution file
-            let slnfile = Path.ChangeExtension(Path.GetTempFileName(), ".sln")
-            let slnContent = DotnetHelpers.GenerateSolutionContent projectFiles configuration
-            File.WriteAllLines(slnfile, slnContent)
-
-            scope Cacheability.Always
-            |> andThen "dotnet" $"restore {slnfile} --no-dependencies" 
-            |> andThen "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{maxcpucount}{logger}"
-            |> Some
-        | _ ->
-            None
 
     /// <summary>
     /// Pack a project.

@@ -23,3 +23,7 @@ module Map =
 
     let addMap addMap sourceMap =
         addMap |> Map.fold (fun acc key value -> Map.add key value acc) sourceMap
+
+module List =
+    let cast<'t> s =
+        s |> Seq.cast<'t> |> List.ofSeq
