@@ -29,7 +29,6 @@ type ConfigException(msg, ?innerException: Exception) =
 type BulkContext = {
     Script: Terrabuild.Scripting.Script
     Command: string
-    Parameter: string
     Arguments: Value
 }
 
@@ -292,13 +291,13 @@ let read workspaceDir (options: Options) environment labels variables =
                                     | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
 
                                 let bulkContext =
-                                    actionGroup.BulkParameter
-                                    |> Option.map (fun parameter ->
+                                    if actionGroup.Bulkable then
                                         let script = Extensions.getScript step.Extension projectDef.Scripts
-                                        { Parameter = parameter
-                                          Script = script.Value
-                                          Command = step.Command
-                                          Arguments = stepParameters })
+                                        Some { Script = script.Value
+                                               Command = step.Command
+                                               Arguments = stepParameters }
+                                    else
+                                        None
 
                                 let containedActionBatch = {
                                     ContaineredActionBatch.BulkContext = bulkContext

@@ -37,7 +37,7 @@ type OptimizeContext = {
     Debug: bool
     CI: bool
     BranchOrTag: string
-    BulkParameters: string list
+    ProjectPaths: string list
 }
 
 [<Flags>]
@@ -55,19 +55,20 @@ type Action = {
 }
 
 let action cmd args = 
-    { Action.Command = cmd; Action.Arguments = args }
+    { Action.Command = cmd
+      Action.Arguments = args }
 
 [<RequireQualifiedAccess>]
 type ActionBatch = {
     Cache: Cacheability
     Actions: Action list
-    BulkParameter: string option
+    Bulkable: bool
 }
 
 let scope cache =
     { ActionBatch.Cache = cache
       ActionBatch.Actions = []
-      ActionBatch.BulkParameter = None }
+      ActionBatch.Bulkable = false }
 
 let andThen cmd args (batch: ActionBatch) =
     let action = action cmd args
@@ -78,6 +79,5 @@ let andIf predicat (action: ActionBatch -> ActionBatch) (batch: ActionBatch) =
     if predicat then action batch
     else batch
 
-let withBulk parameter (batch: ActionBatch) =
-    { batch with
-        BulkParameter = Some parameter }
+let bulkable (batch: ActionBatch) =
+    { batch with Bulkable = true }

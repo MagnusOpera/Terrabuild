@@ -131,8 +131,8 @@ type Dotnet() =
 
     static member bulk_build (context: OptimizeContext) (configuration: string option) (log: bool option) =
         let projects =
-            context.BulkParameters
-            |> List.ofSeq
+            context.ProjectPaths
+            |> List.map DotnetHelpers.findProjectFile
 
         let configuration =
             configuration
@@ -165,7 +165,7 @@ type Dotnet() =
     /// <param name="maxcpucount" example="1">Max worker processes to build the project.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
     static member build (context: ActionContext) (projectfile: string option) (configuration: string option) (maxcpucount: int option) (log: bool option) =
-        let projectfile = projectfile |> Option.defaultWith (fun () -> DotnetHelpers.findProjectFile context.Directory) |> Path.GetFullPath
+        let projectfile = projectfile |> Option.defaultValue ""
         let configuration =
             configuration
             |> Option.defaultValue DotnetHelpers.defaultConfiguration
@@ -182,7 +182,7 @@ type Dotnet() =
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
         |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore{configuration}{logger}{maxcpucount}"
-        |> withBulk projectfile
+        |> bulkable
 
 
     /// <summary>

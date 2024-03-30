@@ -265,16 +265,17 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
     printfn $"Optimization = {optimizationDuration}"
 
     // find a project for each cluster
-    let optimizers =
+    let clusterNodes =
         clusters
         |> Seq.map (fun kvp -> kvp.Value, kvp.Key)
         |> Seq.groupBy fst
         |> Map.ofSeq
+        |> Map.filter (fun _ v -> v |> Seq.length > 1)
         |> Map.map (fun _ nodeIds -> nodeIds |> Seq.map snd |> Set.ofSeq)
 
     // invoke __optimize__ function on each cluster
     let mutable optimizedClusters = Map.empty
-    for (KeyValue(cluster, nodeIds)) in optimizers do
+    for (KeyValue(cluster, nodeIds)) in clusterNodes do
         printfn $"Optimizing cluster {cluster}"
         let oneNodeId = nodeIds |> Seq.head
         let oneNode = graph.Nodes |> Map.find oneNodeId
@@ -283,7 +284,12 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
         let project = wsConfig.Projects |> Map.find oneNode.Project
         let target = project.Targets |> Map.find oneNode.Target
 
-        let bulkParameters = [ ]
+        let projectPaths =
+            nodeIds
+            |> Seq.map (fun nodeId ->
+                let node = graph.Nodes |> Map.find nodeId
+                IO.combinePath wsConfig.Directory node.Project)
+            |> List.ofSeq
 
         let optimizeAction (action: Configuration.ContaineredActionBatch) =
             action.BulkContext
@@ -292,7 +298,7 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                     OptimizeContext.Debug = options.Debug
                     OptimizeContext.CI = wsConfig.SourceControl.CI
                     OptimizeContext.BranchOrTag = wsConfig.SourceControl.BranchOrTag
-                    OptimizeContext.BulkParameters = bulkParameters
+                    OptimizeContext.ProjectPaths = projectPaths
                 }
                 let parameters = 
                     match context.Arguments with
@@ -315,8 +321,8 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
             optimizedClusters <- optimizedClusters |> Map.add cluster optimizedActions
 
     printfn $"clusters = {clusters.Count}"
-    for (KeyValue(cluster, count)) in clusters do
-        printfn $"{cluster} => {count}"
+    for (KeyValue(cluster, nodes)) in clusterNodes do
+        printfn $"{cluster} => {nodes.Count}"
 
     printfn $"Optimized clusters = {optimizedClusters.Count}"
     for (KeyValue(cluster, actions)) in optimizedClusters do
