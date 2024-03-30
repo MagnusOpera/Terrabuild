@@ -29,7 +29,7 @@ type ConfigException(msg, ?innerException: Exception) =
 type BulkContext = {
     Script: Terrabuild.Scripting.Script
     Command: string
-    Arguments: Value
+    Context: Value
 }
 
 
@@ -273,17 +273,18 @@ let read workspaceDir (options: Options) environment labels variables =
                                     |> Map.add "terrabuild_project" project
                                     |> Map.add "terrabuild_target" targetName
 
-                                let stepParameters =
+                                let actionContext =
                                     extension.Defaults
                                     |> Map.addMap step.Parameters
                                     |> Map.add "context" (Expr.Object actionContext)
                                     |> Expr.Map
                                     |> Eval.eval actionVariables
 
+                                let script = Extensions.getScript step.Extension projectDef.Scripts
                                 let actionGroup =
                                     let result =
-                                        Extensions.getScript step.Extension projectDef.Scripts
-                                        |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> step.Command stepParameters
+                                        script
+                                        |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> step.Command actionContext
                                     match result with
                                     | Extensions.Success result -> result
                                     | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {step.Extension} was not found"
@@ -292,10 +293,9 @@ let read workspaceDir (options: Options) environment labels variables =
 
                                 let bulkContext =
                                     if actionGroup.Bulkable then
-                                        let script = Extensions.getScript step.Extension projectDef.Scripts
                                         Some { Script = script.Value
                                                Command = step.Command
-                                               Arguments = stepParameters }
+                                               Context = actionContext }
                                     else
                                         None
 

@@ -301,7 +301,7 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                     OptimizeContext.ProjectPaths = projectPaths
                 }
                 let parameters = 
-                    match context.Arguments with
+                    match context.Context with
                     | Value.Map map -> Value.Map (map |> Map.add "context" (Value.Object optContext))
                     | _ -> failwith "internal error"
 
