@@ -12,7 +12,6 @@ type StepSummary = {
     Command: string
     Arguments: string
     Container: string option
-    Variables: Map<string, string>
     StartedAt: DateTime
     EndedAt: DateTime
     Duration: TimeSpan
