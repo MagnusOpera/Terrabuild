@@ -87,8 +87,7 @@ type BuildNotification() =
                     | NodeStatus.Downloading -> spinnerDownload, frequencyDownload
                     | NodeStatus.Uploading -> spinnerUpload, frequencyUpload
                     | NodeStatus.Building -> spinnerBuilding, frequencyBuilding
-                let label = $"{node.Label} {node.Project}"
-                renderer.Update node.Hash label spinner frequency
+                renderer.Update node.Hash node.Label spinner frequency
                 scheduleUpdate ()
                 return! messageLoop ()
 

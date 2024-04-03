@@ -52,3 +52,7 @@ let (|Integer|_|) (s: string) =
     match Int32.TryParse(s) with
     | true, i -> Some i
     | _ -> None
+
+let cut m (s: string) =
+    if s.Length > m then s.Substring(0, m) + "..."
+    else s

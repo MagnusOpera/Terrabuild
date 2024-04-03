@@ -5,6 +5,8 @@ type Snapshot = {
     TimestampedFiles: Map<string, DateTime>
 }
 with
+    static member Empty = { TimestampedFiles = Map.empty }
+
     static member (-) (afterOutputs: Snapshot, beforeOutputs: Snapshot) =
         let newOutputs =
             afterOutputs.TimestampedFiles

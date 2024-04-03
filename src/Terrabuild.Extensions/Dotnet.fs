@@ -179,6 +179,7 @@ type Dotnet() =
             | _ -> ""
 
         scope Cacheability.Always
+        |> andThen "dotnet" $"clean {projectfile}" 
         |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
         |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore{configuration}{logger}{maxcpucount}"
         |> bulkable

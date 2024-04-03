@@ -101,7 +101,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                              Hash = hash
                              Project = project
                              Target = targetName
-                             Label = targetName
+                             Label = $"{targetName} {project}"
                              CommandLines = target.Actions
                              Outputs = projectConfig.Outputs
                              Dependencies = children
@@ -260,10 +260,6 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
     // wait only if we have something to do
     buildQueue.WaitCompletion()
 
-    let endedAt = DateTime.UtcNow
-    let optimizationDuration = endedAt - startedAt
-    printfn $"Optimization = {optimizationDuration}"
-
     // find a project for each cluster
     let clusterNodes =
         clusters
@@ -277,7 +273,6 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
         let oneNodeId = nodeIds |> Seq.head
         let oneNode = graph.Nodes |> Map.find oneNodeId
 
-        printfn $"Optimizing cluster {cluster}"
         if nodeIds.Count > 1 then
             let nodes =
                 nodeIds
@@ -325,22 +320,18 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
 
             // did we optimize everything ?
             if optimizedActions.Length = target.Actions.Length then
-                let projectName =
-                    let name =
-                        nodes
-                        |> Seq.map (fun node -> node.Project)
-                        |> String.join " "
-                    if name.Length > 80 then
-                        name.Substring(0, 80) + "..."
-                    else
-                        name
+                let projectList =
+                    nodes
+                    |> Seq.map (fun node -> node.Project)
+                    |> String.join " "
+                    |> String.cut 50
 
                 let clusterNode = {
                     Node.Id = cluster
                     Node.Hash = cluster
-                    Node.Project = projectName
+                    Node.Project = projectList
                     Node.Target = oneNode.Target
-                    Node.Label = oneNode.Target
+                    Node.Label = $"{oneNode.Target} {projectList}"
                     Node.Dependencies = Set.empty
                     ProjectHash = cluster
                     Outputs = Set.empty
@@ -359,9 +350,13 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                     let node = { node with
                                     Dependencies = Set.singleton cluster
                                     IsLeaf = false
-                                    Label = $"post-{node.Target}"
+                                    Label = $"post-{node.Target} {node.Project}"
                                     CommandLines = List.Empty }
                     graph <- { graph with
                                     Nodes = graph.Nodes |> Map.add node.Id node }
+
+    let endedAt = DateTime.UtcNow
+    let optimizationDuration = endedAt - startedAt
+    printfn $"Optimization = {optimizationDuration}"
 
     graph

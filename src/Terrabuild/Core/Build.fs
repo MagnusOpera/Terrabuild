@@ -141,9 +141,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     | _ -> None
 
             // clean outputs if leaf node (otherwise outputs are layered on top of previous ones)
-            if node.IsLeaf then
-                IO.enumerateFilesMatch node.Outputs projectDirectory
-                |> Seq.iter IO.deleteAny
+            // if node.IsLeaf then
+            //     IO.enumerateFilesMatch node.Outputs projectDirectory
+            //     |> Seq.iter IO.deleteAny
 
             match summary with
             | Some summary ->
@@ -200,7 +200,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                                 workspaceConfig.Directory, cmd, args, batch.Container))
 
 
-                let beforeFiles = FileSystem.createSnapshot projectDirectory node.Outputs
+                let beforeFiles = FileSystem.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
 
                 let stepLogs = List<Cache.StepSummary>()
                 let mutable lastExitCode = 0
