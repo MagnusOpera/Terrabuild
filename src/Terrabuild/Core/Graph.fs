@@ -323,10 +323,20 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
 
             // did we optimize everything ?
             if optimizedActions.Length = target.Actions.Length then
+                let projectName =
+                    let name =
+                        nodes
+                        |> Seq.map (fun node -> node.Project)
+                        |> String.join " "
+                    if name.Length > 80 then
+                        name.Substring(0, 80) + "..."
+                    else
+                        name
+
                 let clusterNode = {
                     Node.Id = cluster
                     Node.Hash = cluster
-                    Node.Project = cluster
+                    Node.Project = projectName
                     Node.Target = oneNode.Target
                     Node.Dependencies = Set.empty
                     ProjectHash = cluster
@@ -345,6 +355,7 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                 for node in nodes do
                     let node = { node with
                                     Dependencies = Set.singleton cluster
+                                    IsLeaf = false
                                     CommandLines = List.Empty }
                     graph <- { graph with
                                     Nodes = graph.Nodes |> Map.add node.Id node }
