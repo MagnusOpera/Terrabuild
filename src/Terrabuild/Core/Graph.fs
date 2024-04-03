@@ -319,14 +319,14 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                     nodes
                     |> Seq.map (fun node -> node.Project)
                     |> String.join " "
-                    |> String.cut 50
+                    |> String.cut 80
 
                 let clusterNode = {
                     Node.Id = cluster
                     Node.Hash = cluster
-                    Node.Project = projectList
+                    Node.Project = $"bulk/{cluster}"
                     Node.Target = oneNode.Target
-                    Node.Label = $"{oneNode.Target} {projectList}"
+                    Node.Label = $"bulk-{oneNode.Target} {projectList}"
                     Node.Dependencies = Set.empty
                     ProjectHash = cluster
                     Outputs = Set.empty
