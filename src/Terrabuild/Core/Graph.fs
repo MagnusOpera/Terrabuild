@@ -13,6 +13,7 @@ type Node = {
     Hash: string
     Project: string
     Target: string
+    Label: string
     Dependencies: string set
     ProjectHash: string
     Outputs: string set
@@ -100,6 +101,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                              Hash = hash
                              Project = project
                              Target = targetName
+                             Label = targetName
                              CommandLines = target.Actions
                              Outputs = projectConfig.Outputs
                              Dependencies = children
@@ -338,6 +340,7 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                     Node.Hash = cluster
                     Node.Project = projectName
                     Node.Target = oneNode.Target
+                    Node.Label = oneNode.Target
                     Node.Dependencies = Set.empty
                     ProjectHash = cluster
                     Outputs = Set.empty
@@ -356,6 +359,7 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                     let node = { node with
                                     Dependencies = Set.singleton cluster
                                     IsLeaf = false
+                                    Label = $"post-{node.Target}"
                                     CommandLines = List.Empty }
                     graph <- { graph with
                                     Nodes = graph.Nodes |> Map.add node.Id node }
