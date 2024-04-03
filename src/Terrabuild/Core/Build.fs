@@ -37,9 +37,14 @@ type BuildSummary = {
 }
 
 
+type BulkNode = {
+    CommandLines: Configuration.ContaineredActionBatch list
+    Nodes: Graph.Node list
+}
+
 type BuildNode =
     | Node of Graph.Node
-    | BulkNode of Graph.Node list
+    | BulkNode of BulkNode
 
 
 type WorkspaceBuild = {

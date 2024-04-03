@@ -28,7 +28,6 @@ type WorkspaceGraph = {
     RootNodes: string set
 }
 
-
 let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
