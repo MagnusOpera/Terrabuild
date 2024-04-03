@@ -45,7 +45,7 @@ type ContaineredBulkActionBatch = {
 
 
 [<RequireQualifiedAccess>]
-type BulkNode = {
+type GroupNode = {
     Id: string
     Dependencies: string set
     Nodes: string set
@@ -53,14 +53,14 @@ type BulkNode = {
 }
 
 [<RequireQualifiedAccess>]
-type BuildNode =
-    | Node of Graph.Node
-    | BulkNode of BulkNode
+type Cluster =
+    | Single of Graph.Node
+    | Group of GroupNode
 
 
 type WorkspaceBuild = {
     Targets: string set
-    Nodes: Map<string, BuildNode>
+    Clusters: Map<string, Cluster>
     RootNodes: string set
 }
 
@@ -447,17 +447,9 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
         let oneNodeId = nodeIds |> Seq.head
         let oneNode = graph.Nodes |> Map.find oneNodeId
 
-        if nodeIds.Count = 1 then
-            // rewrite dependencies to clusters
-            let dependencies =
-                oneNode.Dependencies
-                |> Set.map (fun dependencyId -> clusters[dependencyId])
-            let oneNode = { oneNode
-                            with Dependencies = dependencies }
-            optimizedClusters <- optimizedClusters |> Map.add oneNodeId (BuildNode.Node oneNode)
-        else
+        if nodeIds.Count > 1 then
             printfn $"Optimizing cluster {cluster}"
-            let nodes = 
+            let nodes =
                 nodeIds
                 |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
                 |> List.ofSeq
@@ -507,12 +499,34 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                 let dependencies =
                     nodes
                     |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
+
+                let dependenciesToClusters =
+                    dependencies
                     |> Set.map (fun dependencyId -> clusters[dependencyId])
-                let bulkNode = { BulkNode.Dependencies = dependencies
-                                 BulkNode.Id = cluster
-                                 BulkNode.CommandLines = optimizedActions
-                                 BulkNode.Nodes = nodeIds }
-                optimizedClusters <- optimizedClusters |> Map.add cluster (BuildNode.BulkNode bulkNode)
+                    |> Set.remove cluster
+
+                let bulkNode = { GroupNode.Dependencies = dependenciesToClusters
+                                 GroupNode.Id = cluster
+                                 GroupNode.CommandLines = optimizedActions
+                                 GroupNode.Nodes = nodeIds }
+                optimizedClusters <- optimizedClusters |> Map.add cluster (Cluster.Group bulkNode)
+
+    // now add simple nodes
+    for (KeyValue(cluster, nodeIds)) in clusterNodes do
+        if nodeIds.Count = 1 || (not <| optimizedClusters.ContainsKey(cluster)) then
+            let nodes =
+                nodeIds
+                |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
+                |> List.ofSeq
+
+            for node in nodes do
+                // rewrite dependencies to clusters
+                let dependencies =
+                    node.Dependencies
+                    |> Set.map (fun dependencyId -> clusters[dependencyId])
+                let oneNode = { node
+                                with Dependencies = dependencies }
+                optimizedClusters <- optimizedClusters |> Map.add oneNode.Id (Cluster.Single oneNode)
 
 
     let rootNodes =
@@ -521,7 +535,7 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
 
     let buildGraph = {
         WorkspaceBuild.Targets = graph.Targets
-        WorkspaceBuild.Nodes = optimizedClusters
+        WorkspaceBuild.Clusters = optimizedClusters
         WorkspaceBuild.RootNodes = rootNodes }
 
     buildGraph
