@@ -27,3 +27,13 @@ module Map =
 module List =
     let cast<'t> s =
         s |> Seq.cast<'t> |> List.ofSeq
+
+module Set =
+    let choose<'t,'r when 't: comparison and 'r: comparison> (f: 't -> 'r option) (s: Set<'t>) =
+        let r = seq {
+            for e in s do
+                match f e with
+                | Some e -> e
+                | _ -> ()
+        }
+        r |> Set.ofSeq
