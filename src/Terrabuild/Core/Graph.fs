@@ -18,7 +18,6 @@ type Node = {
     ProjectHash: string
     Outputs: string set
     Cache: Cacheability
-    IsLeaf: bool
 
     TargetHash: string
     CommandLines: Configuration.ContaineredActionBatch list
@@ -70,9 +69,6 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                     children <- children + (childDependencies |> Set)
                 children, hasInternalDependencies
 
-            // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
-            let isLeaf = hasInternalDependencies |> not
-
             // only generate computation node - that is node that generate something
             // barrier nodes are just discarded and dependencies lift level up
             match projectConfig.Targets |> Map.tryFind targetName with
@@ -103,9 +99,8 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                              Target = targetName
                              Label = $"{targetName} {project}"
                              CommandLines = target.Actions
-                             Outputs = projectConfig.Outputs
+                             Outputs = target.Outputs
                              Dependencies = children
-                             IsLeaf = isLeaf
                              ProjectHash = projectConfig.Hash
                              Cache = cache
                              TargetHash = target.Hash }
@@ -336,7 +331,6 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                     ProjectHash = cluster
                     Outputs = Set.empty
                     Cache = oneNode.Cache
-                    IsLeaf = oneNode.IsLeaf
 
                     TargetHash = cluster
                     CommandLines = optimizedActions
@@ -349,7 +343,6 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                 for node in nodes do
                     let node = { node with
                                     Dependencies = Set.singleton cluster
-                                    IsLeaf = false
                                     Label = $"post-{node.Target} {node.Project}"
                                     CommandLines = List.Empty }
                     graph <- { graph with

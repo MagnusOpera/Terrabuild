@@ -49,6 +49,7 @@ type ContaineredTarget = {
     Hash: string
     Variables: Map<string, string>
     DependsOn: string set
+    Outputs: string set
     Actions: ContaineredActionBatch list
 }
 
@@ -58,8 +59,6 @@ type Project = {
     Hash: string
     Dependencies: string set
     Files: string set
-    Ignores: string set
-    Outputs: string set
     Targets: Map<string, ContaineredTarget>
     Labels: string set
 }
@@ -250,9 +249,9 @@ let read workspaceDir (options: Options) environment labels variables =
             let projectSteps =
                 projectDef.Targets
                 |> Map.map (fun targetName target ->
-                    let variables, actions =
+                    let (variables, init), actions =
                         target.Steps
-                        |> List.fold (fun (variables, actions) step ->
+                        |> List.fold (fun ((variables, init), actions) step ->
                             let stepVars: Map<string, string> = Map.empty
 
                             let extension = 
@@ -313,8 +312,27 @@ let read workspaceDir (options: Options) environment labels variables =
 
                             let actions = actions @ [ stepActions ]
 
-                            variables, actions
-                        ) (Map.empty, [])
+                            (variables, init), actions
+                        ) ((Map.empty, None), [])
+
+                    let outputs =
+                        match init with
+                        | None -> projectDef.Outputs
+                        | Some init ->
+                            let parseContext = 
+                                let context = { Terrabuild.Extensibility.InitContext.Debug = options.Debug
+                                                Terrabuild.Extensibility.InitContext.Directory = projectDir
+                                                Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
+                                Value.Map (Map [ "context", Value.Object context ])
+
+                            let result =
+                                Extensions.getScript init scripts
+                                |> Extensions.invokeScriptMethod<ProjectInfo> "__init__" parseContext
+                            match result with
+                            | Extensions.Success result -> result.Outputs
+                            | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
+                            | Extensions.TargetNotFound -> projectDef.Outputs // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
+                            | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
 
                     let variableHash =
                         variables
@@ -346,7 +364,8 @@ let read workspaceDir (options: Options) environment labels variables =
                     { ContaineredTarget.Hash = hash
                       ContaineredTarget.Variables = variables
                       ContaineredTarget.Actions = actions
-                      ContaineredTarget.DependsOn = dependsOn }
+                      ContaineredTarget.DependsOn = dependsOn
+                      ContaineredTarget.Outputs = outputs }
                 )
 
             let files =
@@ -358,8 +377,6 @@ let read workspaceDir (options: Options) environment labels variables =
                   Project.Hash = nodeHash
                   Project.Dependencies = projectDef.Dependencies
                   Project.Files = files
-                  Project.Outputs = projectDef.Outputs
-                  Project.Ignores = projectDef.Ignores
                   Project.Targets = projectSteps
                   Project.Labels = projectDef.Labels }
 

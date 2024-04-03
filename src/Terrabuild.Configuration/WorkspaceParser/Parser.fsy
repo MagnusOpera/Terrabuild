@@ -55,7 +55,7 @@ TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents TargetDependsOn { $1.Patch $2 }
 TargetDependsOn:
-    | DEPENDS_ON EQUAL ListOfTargets { TargetComponents.DependsOn $3 }
+    | DEPENDS_ON EQUAL ListOfIdentifiers { TargetComponents.DependsOn $3 }
 
 Environment:
     | ENVIRONMENT IDENTIFIER { WorkspaceComponents.Environment ($2, Environment.Empty) }
@@ -70,14 +70,14 @@ Extension:
     | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { WorkspaceComponents.Extension ($2, $4) }
 ExtensionComponents:
     | /* empty */ { Extension.Empty }
-    | ExtensionComponents Container { $1.Patch $2 }
-    | ExtensionComponents Script { $1.Patch $2 }
-    | ExtensionComponents Defaults { $1.Patch $2 }
-Container:
+    | ExtensionComponents ExtensionContainer { $1.Patch $2 }
+    | ExtensionComponents ExtensionScript { $1.Patch $2 }
+    | ExtensionComponents ExtensionDefaults { $1.Patch $2 }
+ExtensionContainer:
     | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
-Script:
+ExtensionScript:
     | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
-Defaults:
+ExtensionDefaults:
     | DEFAULTS EQUAL LBRACE Variables RBRACE { ExtensionComponents.Defaults $4 }
 
 String:
@@ -88,11 +88,11 @@ Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
 
-ListOfTargets:
-    | LSQBRACKET Targets RSQBRACKET { $2 }
-Targets:
+ListOfIdentifiers:
+    | LSQBRACKET Identifiers RSQBRACKET { $2 }
+Identifiers:
     | /* empty */ { [] }
-    | Targets IDENTIFIER { $1 @ [$2] }
+    | Identifiers IDENTIFIER { $1 @ [$2] }
 
 StringVariables:
     | /* empty */ { Map.empty }

@@ -97,14 +97,14 @@ type nonTerminalId =
     | NONTERM_EnvironmentVariables
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
-    | NONTERM_Container
-    | NONTERM_Script
-    | NONTERM_Defaults
+    | NONTERM_ExtensionContainer
+    | NONTERM_ExtensionScript
+    | NONTERM_ExtensionDefaults
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
-    | NONTERM_ListOfTargets
-    | NONTERM_Targets
+    | NONTERM_ListOfIdentifiers
+    | NONTERM_Identifiers
     | NONTERM_StringVariables
     | NONTERM_StringVariable
     | NONTERM_Variables
@@ -206,16 +206,16 @@ let prodIdxToNonTerminal (prodIdx:int) =
     | 18 -> NONTERM_ExtensionComponents 
     | 19 -> NONTERM_ExtensionComponents 
     | 20 -> NONTERM_ExtensionComponents 
-    | 21 -> NONTERM_Container 
-    | 22 -> NONTERM_Script 
-    | 23 -> NONTERM_Defaults 
+    | 21 -> NONTERM_ExtensionContainer 
+    | 22 -> NONTERM_ExtensionScript 
+    | 23 -> NONTERM_ExtensionDefaults 
     | 24 -> NONTERM_String 
     | 25 -> NONTERM_ListOfString 
     | 26 -> NONTERM_Strings 
     | 27 -> NONTERM_Strings 
-    | 28 -> NONTERM_ListOfTargets 
-    | 29 -> NONTERM_Targets 
-    | 30 -> NONTERM_Targets 
+    | 28 -> NONTERM_ListOfIdentifiers 
+    | 29 -> NONTERM_Identifiers 
+    | 30 -> NONTERM_Identifiers 
     | 31 -> NONTERM_StringVariables 
     | 32 -> NONTERM_StringVariables 
     | 33 -> NONTERM_StringVariable 
@@ -429,12 +429,12 @@ let _fsyacc_reductions ()  =    [|
                  : 'gentype_TargetComponents));
 # 430 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _3 = parseState.GetInput(3) :?> 'gentype_ListOfTargets in
+            let _3 = parseState.GetInput(3) :?> 'gentype_ListOfIdentifiers in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 58 "WorkspaceParser/Parser.fsy"
-                                                            TargetComponents.DependsOn _3 
+                                                                TargetComponents.DependsOn _3 
                    )
 # 58 "WorkspaceParser/Parser.fsy"
                  : 'gentype_TargetDependsOn));
@@ -519,36 +519,36 @@ let _fsyacc_reductions ()  =    [|
 # 519 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Container in
+            let _2 = parseState.GetInput(2) :?> 'gentype_ExtensionContainer in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 73 "WorkspaceParser/Parser.fsy"
-                                                           _1.Patch _2 
+                                                                    _1.Patch _2 
                    )
 # 73 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
 # 531 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Script in
+            let _2 = parseState.GetInput(2) :?> 'gentype_ExtensionScript in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 74 "WorkspaceParser/Parser.fsy"
-                                                        _1.Patch _2 
+                                                                 _1.Patch _2 
                    )
 # 74 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
 # 543 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Defaults in
+            let _2 = parseState.GetInput(2) :?> 'gentype_ExtensionDefaults in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 75 "WorkspaceParser/Parser.fsy"
-                                                          _1.Patch _2 
+                                                                   _1.Patch _2 
                    )
 # 75 "WorkspaceParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
@@ -562,7 +562,7 @@ let _fsyacc_reductions ()  =    [|
                                                     ExtensionComponents.Container _3 
                    )
 # 77 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_Container));
+                 : 'gentype_ExtensionContainer));
 # 566 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_String in
@@ -573,7 +573,7 @@ let _fsyacc_reductions ()  =    [|
                                                  ExtensionComponents.Script _3 
                    )
 # 79 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_Script));
+                 : 'gentype_ExtensionScript));
 # 577 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _4 = parseState.GetInput(4) :?> 'gentype_Variables in
@@ -584,7 +584,7 @@ let _fsyacc_reductions ()  =    [|
                                                                     ExtensionComponents.Defaults _4 
                    )
 # 81 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_Defaults));
+                 : 'gentype_ExtensionDefaults));
 # 588 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
@@ -631,15 +631,15 @@ let _fsyacc_reductions ()  =    [|
                  : 'gentype_Strings));
 # 632 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _2 = parseState.GetInput(2) :?> 'gentype_Targets in
+            let _2 = parseState.GetInput(2) :?> 'gentype_Identifiers in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 92 "WorkspaceParser/Parser.fsy"
-                                                           _2 
+                                                               _2 
                    )
 # 92 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_ListOfTargets));
+                 : 'gentype_ListOfIdentifiers));
 # 643 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
@@ -649,19 +649,19 @@ let _fsyacc_reductions ()  =    [|
                                          [] 
                    )
 # 94 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_Targets));
+                 : 'gentype_Identifiers));
 # 653 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_Targets in
+            let _1 = parseState.GetInput(1) :?> 'gentype_Identifiers in
             let _2 = parseState.GetInput(2) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 95 "WorkspaceParser/Parser.fsy"
-                                                _1 @ [_2] 
+                                                    _1 @ [_2] 
                    )
 # 95 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_Targets));
+                 : 'gentype_Identifiers));
 # 665 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box

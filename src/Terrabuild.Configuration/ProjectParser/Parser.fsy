@@ -53,14 +53,14 @@ Extension:
     | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { ProjectComponents.Extension ($2, $4) }
 ExtensionComponents:
     | /* empty */ { Extension.Empty }
-    | ExtensionComponents Container { $1.Patch $2 }
-    | ExtensionComponents Script { $1.Patch $2 }
-    | ExtensionComponents Defaults { $1.Patch $2 }
-Container:
+    | ExtensionComponents ExtensionContainer { $1.Patch $2 }
+    | ExtensionComponents ExtensionScript { $1.Patch $2 }
+    | ExtensionComponents ExtensionDefaults { $1.Patch $2 }
+ExtensionContainer:
     | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
-Script:
+ExtensionScript:
     | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
-Defaults:
+ExtensionDefaults:
     | DEFAULTS EQUAL LBRACE Variables RBRACE { ExtensionComponents.Defaults $4 }
 
 
@@ -88,11 +88,11 @@ Target:
     | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { ProjectComponents.Target ($2, $4) }
 TargetComponents:
     | /* empty */ { Target.Empty }
-    | TargetComponents DependsOn { $1.Patch $2 }
-    | TargetComponents Step { $1.Patch $2 }
-DependsOn:
-    | DEPENDS_ON EQUAL ListOfTargets { TargetComponents.DependsOn $3 }
-Step:
+    | TargetComponents TargetDependsOn { $1.Patch $2 }
+    | TargetComponents TargetStep { $1.Patch $2 }
+TargetDependsOn:
+    | DEPENDS_ON EQUAL ListOfIdentifiers { TargetComponents.DependsOn $3 }
+TargetStep:
     | IDENTIFIER IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
 
@@ -104,11 +104,11 @@ Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
 
-ListOfTargets:
-    | LSQBRACKET Targets RSQBRACKET { $2 }
-Targets:
+ListOfIdentifiers:
+    | LSQBRACKET Identifiers RSQBRACKET { $2 }
+Identifiers:
     | /* empty */ { [] }
-    | Targets IDENTIFIER { $1 @ [$2] }
+    | Identifiers IDENTIFIER { $1 @ [$2] }
 
 Variables:
     | /* empty */ { Map.empty }        

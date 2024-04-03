@@ -97,9 +97,9 @@ type nonTerminalId =
     | NONTERM_ProjectComponents
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
-    | NONTERM_Container
-    | NONTERM_Script
-    | NONTERM_Defaults
+    | NONTERM_ExtensionContainer
+    | NONTERM_ExtensionScript
+    | NONTERM_ExtensionDefaults
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents
     | NONTERM_ConfigurationDependencies
@@ -108,13 +108,13 @@ type nonTerminalId =
     | NONTERM_ConfigurationLabels
     | NONTERM_Target
     | NONTERM_TargetComponents
-    | NONTERM_DependsOn
-    | NONTERM_Step
+    | NONTERM_TargetDependsOn
+    | NONTERM_TargetStep
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
-    | NONTERM_ListOfTargets
-    | NONTERM_Targets
+    | NONTERM_ListOfIdentifiers
+    | NONTERM_Identifiers
     | NONTERM_Variables
     | NONTERM_Variable
     | NONTERM_Expr
@@ -210,9 +210,9 @@ let prodIdxToNonTerminal (prodIdx:int) =
     | 8 -> NONTERM_ExtensionComponents 
     | 9 -> NONTERM_ExtensionComponents 
     | 10 -> NONTERM_ExtensionComponents 
-    | 11 -> NONTERM_Container 
-    | 12 -> NONTERM_Script 
-    | 13 -> NONTERM_Defaults 
+    | 11 -> NONTERM_ExtensionContainer 
+    | 12 -> NONTERM_ExtensionScript 
+    | 13 -> NONTERM_ExtensionDefaults 
     | 14 -> NONTERM_Configuration 
     | 15 -> NONTERM_Configuration 
     | 16 -> NONTERM_Configuration 
@@ -229,16 +229,16 @@ let prodIdxToNonTerminal (prodIdx:int) =
     | 27 -> NONTERM_TargetComponents 
     | 28 -> NONTERM_TargetComponents 
     | 29 -> NONTERM_TargetComponents 
-    | 30 -> NONTERM_DependsOn 
-    | 31 -> NONTERM_Step 
-    | 32 -> NONTERM_Step 
+    | 30 -> NONTERM_TargetDependsOn 
+    | 31 -> NONTERM_TargetStep 
+    | 32 -> NONTERM_TargetStep 
     | 33 -> NONTERM_String 
     | 34 -> NONTERM_ListOfString 
     | 35 -> NONTERM_Strings 
     | 36 -> NONTERM_Strings 
-    | 37 -> NONTERM_ListOfTargets 
-    | 38 -> NONTERM_Targets 
-    | 39 -> NONTERM_Targets 
+    | 37 -> NONTERM_ListOfIdentifiers 
+    | 38 -> NONTERM_Identifiers 
+    | 39 -> NONTERM_Identifiers 
     | 40 -> NONTERM_Variables 
     | 41 -> NONTERM_Variables 
     | 42 -> NONTERM_Variable 
@@ -433,36 +433,36 @@ let _fsyacc_reductions ()  =    [|
 # 433 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Container in
+            let _2 = parseState.GetInput(2) :?> 'gentype_ExtensionContainer in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 56 "ProjectParser/Parser.fsy"
-                                                           _1.Patch _2 
+                                                                    _1.Patch _2 
                    )
 # 56 "ProjectParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
 # 445 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Script in
+            let _2 = parseState.GetInput(2) :?> 'gentype_ExtensionScript in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 57 "ProjectParser/Parser.fsy"
-                                                        _1.Patch _2 
+                                                                 _1.Patch _2 
                    )
 # 57 "ProjectParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
 # 457 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExtensionComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Defaults in
+            let _2 = parseState.GetInput(2) :?> 'gentype_ExtensionDefaults in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 58 "ProjectParser/Parser.fsy"
-                                                          _1.Patch _2 
+                                                                   _1.Patch _2 
                    )
 # 58 "ProjectParser/Parser.fsy"
                  : 'gentype_ExtensionComponents));
@@ -476,7 +476,7 @@ let _fsyacc_reductions ()  =    [|
                                                     ExtensionComponents.Container _3 
                    )
 # 60 "ProjectParser/Parser.fsy"
-                 : 'gentype_Container));
+                 : 'gentype_ExtensionContainer));
 # 480 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_String in
@@ -487,7 +487,7 @@ let _fsyacc_reductions ()  =    [|
                                                  ExtensionComponents.Script _3 
                    )
 # 62 "ProjectParser/Parser.fsy"
-                 : 'gentype_Script));
+                 : 'gentype_ExtensionScript));
 # 491 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _4 = parseState.GetInput(4) :?> 'gentype_Variables in
@@ -498,7 +498,7 @@ let _fsyacc_reductions ()  =    [|
                                                                     ExtensionComponents.Defaults _4 
                    )
 # 64 "ProjectParser/Parser.fsy"
-                 : 'gentype_Defaults));
+                 : 'gentype_ExtensionDefaults));
 # 502 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_ConfigurationComponents in
@@ -660,38 +660,38 @@ let _fsyacc_reductions ()  =    [|
 # 660 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_TargetComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_DependsOn in
+            let _2 = parseState.GetInput(2) :?> 'gentype_TargetDependsOn in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 91 "ProjectParser/Parser.fsy"
-                                                        _1.Patch _2 
+                                                              _1.Patch _2 
                    )
 # 91 "ProjectParser/Parser.fsy"
                  : 'gentype_TargetComponents));
 # 672 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_TargetComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Step in
+            let _2 = parseState.GetInput(2) :?> 'gentype_TargetStep in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 92 "ProjectParser/Parser.fsy"
-                                                   _1.Patch _2 
+                                                         _1.Patch _2 
                    )
 # 92 "ProjectParser/Parser.fsy"
                  : 'gentype_TargetComponents));
 # 684 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _3 = parseState.GetInput(3) :?> 'gentype_ListOfTargets in
+            let _3 = parseState.GetInput(3) :?> 'gentype_ListOfIdentifiers in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 94 "ProjectParser/Parser.fsy"
-                                                            TargetComponents.DependsOn _3 
+                                                                TargetComponents.DependsOn _3 
                    )
 # 94 "ProjectParser/Parser.fsy"
-                 : 'gentype_DependsOn));
+                 : 'gentype_TargetDependsOn));
 # 695 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
@@ -703,7 +703,7 @@ let _fsyacc_reductions ()  =    [|
                                                    TargetComponents.Step { Extension = _1; Command = _2; Parameters = Map.empty } 
                    )
 # 96 "ProjectParser/Parser.fsy"
-                 : 'gentype_Step));
+                 : 'gentype_TargetStep));
 # 707 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
@@ -716,7 +716,7 @@ let _fsyacc_reductions ()  =    [|
                                                                            TargetComponents.Step { Extension = _1; Command = _2; Parameters = _4 } 
                    )
 # 97 "ProjectParser/Parser.fsy"
-                 : 'gentype_Step));
+                 : 'gentype_TargetStep));
 # 720 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
@@ -763,15 +763,15 @@ let _fsyacc_reductions ()  =    [|
                  : 'gentype_Strings));
 # 764 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _2 = parseState.GetInput(2) :?> 'gentype_Targets in
+            let _2 = parseState.GetInput(2) :?> 'gentype_Identifiers in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 108 "ProjectParser/Parser.fsy"
-                                                           _2 
+                                                               _2 
                    )
 # 108 "ProjectParser/Parser.fsy"
-                 : 'gentype_ListOfTargets));
+                 : 'gentype_ListOfIdentifiers));
 # 775 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
@@ -781,19 +781,19 @@ let _fsyacc_reductions ()  =    [|
                                          [] 
                    )
 # 110 "ProjectParser/Parser.fsy"
-                 : 'gentype_Targets));
+                 : 'gentype_Identifiers));
 # 785 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_Targets in
+            let _1 = parseState.GetInput(1) :?> 'gentype_Identifiers in
             let _2 = parseState.GetInput(2) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 111 "ProjectParser/Parser.fsy"
-                                                _1 @ [_2] 
+                                                    _1 @ [_2] 
                    )
 # 111 "ProjectParser/Parser.fsy"
-                 : 'gentype_Targets));
+                 : 'gentype_Identifiers));
 # 797 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box

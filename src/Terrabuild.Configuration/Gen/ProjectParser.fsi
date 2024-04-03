@@ -76,9 +76,9 @@ type nonTerminalId =
     | NONTERM_ProjectComponents
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
-    | NONTERM_Container
-    | NONTERM_Script
-    | NONTERM_Defaults
+    | NONTERM_ExtensionContainer
+    | NONTERM_ExtensionScript
+    | NONTERM_ExtensionDefaults
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents
     | NONTERM_ConfigurationDependencies
@@ -87,13 +87,13 @@ type nonTerminalId =
     | NONTERM_ConfigurationLabels
     | NONTERM_Target
     | NONTERM_TargetComponents
-    | NONTERM_DependsOn
-    | NONTERM_Step
+    | NONTERM_TargetDependsOn
+    | NONTERM_TargetStep
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
-    | NONTERM_ListOfTargets
-    | NONTERM_Targets
+    | NONTERM_ListOfIdentifiers
+    | NONTERM_Identifiers
     | NONTERM_Variables
     | NONTERM_Variable
     | NONTERM_Expr

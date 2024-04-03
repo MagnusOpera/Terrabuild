@@ -76,14 +76,14 @@ type nonTerminalId =
     | NONTERM_EnvironmentVariables
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
-    | NONTERM_Container
-    | NONTERM_Script
-    | NONTERM_Defaults
+    | NONTERM_ExtensionContainer
+    | NONTERM_ExtensionScript
+    | NONTERM_ExtensionDefaults
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
-    | NONTERM_ListOfTargets
-    | NONTERM_Targets
+    | NONTERM_ListOfIdentifiers
+    | NONTERM_Identifiers
     | NONTERM_StringVariables
     | NONTERM_StringVariable
     | NONTERM_Variables
