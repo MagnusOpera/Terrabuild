@@ -397,16 +397,25 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
             if node.Dependencies = Set.empty then
                 node.TargetHash
             else
-                // collect tags from dependencies
-                // if they are the same then infect this node with children virus iif it's unique
-                // otherwise mutate the virus in new variant
-                let childrenTags =
+                // check all actions are bulkable
+                let bulkable =
                     node.Dependencies
-                    |> Set.map (fun dependency -> (clusters[dependency], graph.Nodes[dependency].TargetHash))
-                    |> List.ofSeq
-                match childrenTags with
-                | [tag, hash] when hash = node.TargetHash -> tag
-                | _ -> $"{node.TargetHash}-{nodeId}"
+                    |> Seq.forall (fun dependency ->
+                        let node = graph.Nodes[dependency]
+                        node.CommandLines |> List.forall (fun cmd -> cmd.BulkContext <> None))
+
+                if bulkable |> not then $"{node.TargetHash}-{nodeId}"
+                else
+                    // collect tags from dependencies
+                    // if they are the same then infect this node with children virus iif it's unique
+                    // otherwise mutate the virus in new variant
+                    let childrenTags =
+                        node.Dependencies
+                        |> Set.map (fun dependency -> (clusters[dependency], graph.Nodes[dependency].TargetHash))
+                        |> List.ofSeq
+                    match childrenTags with
+                    | [tag, hash] when hash = node.TargetHash -> tag
+                    | _ -> $"{node.TargetHash}-{nodeId}"
         clusters.TryAdd(nodeId, nodeTag) |> ignore
 
 
@@ -448,7 +457,9 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
         let oneNode = graph.Nodes |> Map.find oneNodeId
 
         printfn $"Optimizing cluster {cluster}"
-        if nodeIds.Count > 1 then
+        if nodeIds.Count = 1 then
+            optimizedClusters <- optimizedClusters |> Map.add cluster (Cluster.Single oneNode)
+        else
             let nodes =
                 nodeIds
                 |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
@@ -481,11 +492,8 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                     let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
                     match result with
                     | Extensions.InvocationResult.Success actionBatch ->
-                        let bulkActionBatch = {
-                            ContaineredBulkActionBatch.Actions = actionBatch
-                            ContaineredBulkActionBatch.Container = action.Container
-                        }
-                        Some bulkActionBatch
+                        Some { ContaineredBulkActionBatch.Actions = actionBatch
+                               ContaineredBulkActionBatch.Container = action.Container }
                     | _ -> None
                 )
 
@@ -508,32 +516,9 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
                                  GroupNode.Nodes = nodes }
                 optimizedClusters <- optimizedClusters |> Map.add cluster (Cluster.Group bulkNode)
 
-    // now add simple nodes
-    for (KeyValue(cluster, nodeIds)) in clusterNodes do
-        if not <| optimizedClusters.ContainsKey(cluster) then
-            let nodes =
-                nodeIds
-                |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
-                |> List.ofSeq
-
-            for node in nodes do
-                let clusterDependencies =
-                    node.Dependencies
-                    |> Set.map (fun dependencyId -> clusters[dependencyId])
-
-                let node = { node with Dependencies = clusterDependencies }
-                optimizedClusters <- optimizedClusters |> Map.add cluster (Cluster.Single node)
-
-    // now rewrite all dependencies
-    // for (KeyValue(nodeId, cluster)) in optimizedClusters do
-    //     match cluster with
-    //     | Cluster.Group group ->
-    //         group.Dependencies
-    //         |> Set.iter (fun nodeId ->
-    //             match optimizedClusters.TryFind(nodeId) with
-    //             | None -> optimizedClusters <- optimizedClusters |> Map.add nodeId newGroup
-    //             | Some _ -> ())
-    //     | _ -> ()
+            // optimization failed
+            else
+                failwith "Failed to optimize"
 
     let rootNodes =
         graph.RootNodes
