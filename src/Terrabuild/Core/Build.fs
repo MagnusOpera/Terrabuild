@@ -37,11 +37,22 @@ type BuildSummary = {
 }
 
 
-type BulkNode = {
-    CommandLines: Configuration.ContaineredActionBatch list
-    Nodes: Graph.Node list
+[<RequireQualifiedAccess>]
+type ContaineredBulkActionBatch = {
+    Container: string option
+    Actions: Action list
 }
 
+
+[<RequireQualifiedAccess>]
+type BulkNode = {
+    Id: string
+    Dependencies: string set
+    Nodes: string set
+    CommandLines: ContaineredBulkActionBatch list
+}
+
+[<RequireQualifiedAccess>]
 type BuildNode =
     | Node of Graph.Node
     | BulkNode of BulkNode
@@ -428,63 +439,97 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
         |> Seq.map (fun kvp -> kvp.Value, kvp.Key)
         |> Seq.groupBy fst
         |> Map.ofSeq
-        |> Map.filter (fun _ v -> v |> Seq.length > 1)
         |> Map.map (fun _ nodeIds -> nodeIds |> Seq.map snd |> Set.ofSeq)
 
     // invoke __optimize__ function on each cluster
     let mutable optimizedClusters = Map.empty
     for (KeyValue(cluster, nodeIds)) in clusterNodes do
-        printfn $"Optimizing cluster {cluster}"
         let oneNodeId = nodeIds |> Seq.head
         let oneNode = graph.Nodes |> Map.find oneNodeId
- 
-        // get hands on target
-        let project = wsConfig.Projects |> Map.find oneNode.Project
-        let target = project.Targets |> Map.find oneNode.Target
 
-        let projectPaths =
-            nodeIds
-            |> Seq.map (fun nodeId ->
-                let node = graph.Nodes |> Map.find nodeId
-                IO.combinePath wsConfig.Directory node.Project)
-            |> List.ofSeq
+        if nodeIds.Count = 1 then
+            // rewrite dependencies to clusters
+            let dependencies =
+                oneNode.Dependencies
+                |> Set.map (fun dependencyId -> clusters[dependencyId])
+            let oneNode = { oneNode
+                            with Dependencies = dependencies }
+            optimizedClusters <- optimizedClusters |> Map.add oneNodeId (BuildNode.Node oneNode)
+        else
+            printfn $"Optimizing cluster {cluster}"
+            let nodes = 
+                nodeIds
+                |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
+                |> List.ofSeq
+    
+            // get hands on target
+            let project = wsConfig.Projects |> Map.find oneNode.Project
+            let target = project.Targets |> Map.find oneNode.Target
 
-        let optimizeAction (action: Configuration.ContaineredActionBatch) =
-            action.BulkContext
-            |> Option.map (fun context ->
-                let optContext = {
-                    OptimizeContext.Debug = options.Debug
-                    OptimizeContext.CI = wsConfig.SourceControl.CI
-                    OptimizeContext.BranchOrTag = wsConfig.SourceControl.BranchOrTag
-                    OptimizeContext.ProjectPaths = projectPaths
-                }
-                let parameters = 
-                    match context.Context with
-                    | Terrabuild.Expressions.Value.Map map ->
-                         map
-                         |> Map.add "context" (Terrabuild.Expressions.Value.Object optContext)
-                         |> Terrabuild.Expressions.Value.Map
-                    | _ -> failwith "internal error"
+            let projectPaths = nodes |> List.map (fun node -> IO.combinePath wsConfig.Directory node.Project)
 
-                let optCommand = $"bulk_{context.Command}"
-                let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
-                match result with
-                | Extensions.InvocationResult.Success actionBatch -> Some actionBatch
-                | _ -> None
-            )
+            let optimizeAction (action: Configuration.ContaineredActionBatch) =
+                action.BulkContext
+                |> Option.bind (fun context ->
+                    let optContext = {
+                        OptimizeContext.Debug = options.Debug
+                        OptimizeContext.CI = wsConfig.SourceControl.CI
+                        OptimizeContext.BranchOrTag = wsConfig.SourceControl.BranchOrTag
+                        OptimizeContext.ProjectPaths = projectPaths
+                    }
+                    let parameters = 
+                        match context.Context with
+                        | Terrabuild.Expressions.Value.Map map ->
+                            map
+                            |> Map.add "context" (Terrabuild.Expressions.Value.Object optContext)
+                            |> Terrabuild.Expressions.Value.Map
+                        | _ -> failwith "internal error"
 
-        let optimizedActions =
-            target.Actions
-            |> List.choose optimizeAction
+                    let optCommand = $"bulk_{context.Command}"
+                    let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
+                    match result with
+                    | Extensions.InvocationResult.Success actionBatch ->
+                        let bulkActionBatch = {
+                            ContaineredBulkActionBatch.Actions = actionBatch
+                            ContaineredBulkActionBatch.Container = action.Container
+                        }
+                        Some bulkActionBatch
+                    | _ -> None
+                )
 
-        // did we optimize everything ?
-        if optimizedActions.Length = target.Actions.Length then
-            optimizedClusters <- optimizedClusters |> Map.add cluster optimizedActions
+            let optimizedActions =
+                target.Actions
+                |> List.choose optimizeAction
 
-    printfn $"clusters = {clusters.Count}"
-    for (KeyValue(cluster, nodes)) in clusterNodes do
-        printfn $"{cluster} => {nodes.Count}"
+            // did we optimize everything ?
+            if optimizedActions.Length = target.Actions.Length then
+                // compute new dependencies (remap to cluster)
+                let dependencies =
+                    nodes
+                    |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
+                    |> Set.map (fun dependencyId -> clusters[dependencyId])
+                let bulkNode = { BulkNode.Dependencies = dependencies
+                                 BulkNode.Id = cluster
+                                 BulkNode.CommandLines = optimizedActions
+                                 BulkNode.Nodes = nodeIds }
+                optimizedClusters <- optimizedClusters |> Map.add cluster (BuildNode.BulkNode bulkNode)
 
-    printfn $"Optimized clusters = {optimizedClusters.Count}"
-    for (KeyValue(cluster, actions)) in optimizedClusters do
-        printfn $"{cluster} => {actions}"
+
+    let rootNodes =
+        graph.RootNodes
+        |> Set.map (fun nodeId -> clusters[nodeId])
+
+    let buildGraph = {
+        WorkspaceBuild.Targets = graph.Targets
+        WorkspaceBuild.Nodes = optimizedClusters
+        WorkspaceBuild.RootNodes = rootNodes }
+
+    buildGraph
+
+    // printfn $"clusters = {clusters.Count}"
+    // for (KeyValue(cluster, nodes)) in clusterNodes do
+    //     printfn $"{cluster} => {nodes.Count}"
+
+    // printfn $"Optimized clusters = {optimizedClusters.Count}"
+    // for (KeyValue(cluster, actions)) in optimizedClusters do
+    //     printfn $"{cluster} => {actions}"

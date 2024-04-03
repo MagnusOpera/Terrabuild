@@ -73,10 +73,13 @@ let processCommandLine () =
                 let mermaid = Graph.graph graph |> String.join "\n"
                 mermaid |> IO.writeTextFile "terrabuild.graph.mermaid"
 
+            let buildGraph = graph |> Build.optimizeGraph config options
+            if options.Debug then
+                let jsonBuildGraph = Json.Serialize buildGraph
+                jsonBuildGraph |> IO.writeTextFile "terrabuild.buildgraph.json"
+
             if options.WhatIf then 0
             else
-                graph |> Build.optimizeGraph config options
-
                 let cache = Cache.Cache(config.Storage) :> Cache.ICache
                 let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
                 let build = Build.run config graph cache buildNotification options
