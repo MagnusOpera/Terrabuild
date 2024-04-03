@@ -259,7 +259,7 @@ let read workspaceDir (options: Options) environment labels variables =
                                 | Some extension -> extension
                                 | _ -> ConfigException.Raise $"Extension {step.Extension} is not defined"
 
-                            let stepActions =
+                            let stepActions, init =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
@@ -304,7 +304,7 @@ let read workspaceDir (options: Options) environment labels variables =
                                     ContaineredActionBatch.Cache = actionGroup.Cache
                                     ContaineredActionBatch.Actions = actionGroup.Actions
                                 }
-                                containedActionBatch
+                                containedActionBatch, Some step.Extension
 
                             let variables =
                                 variables
@@ -331,7 +331,7 @@ let read workspaceDir (options: Options) environment labels variables =
                             match result with
                             | Extensions.Success result -> result.Outputs
                             | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
-                            | Extensions.TargetNotFound -> projectDef.Outputs // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
+                            | Extensions.TargetNotFound -> Set.empty // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
                             | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
 
                     let variableHash =
