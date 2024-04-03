@@ -383,9 +383,9 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
     let clusters = Concurrent.ConcurrentDictionary<string, string>()
 
     // optimization is like building but instead of running actions
-    // pragmatically, it's inspired from virus infection :-)
-    // this starts with leaf nodes (patients 0) - but with same virus even they are not related (leaf nodes have no dependencies by definition)
-    // then the infection propagates to parents if they are compatible
+    // conceptually, it's inspired from virus infection :-)
+    // this starts spontaneously with leaf nodes (patients 0) - same virus even they are not related (leaf nodes have no dependencies by definition)
+    // then the infection flows to parents if they are compatible
     // if they are not compatible - the virus mutates and continue its propagation up to the root nodes
     // nodeTags dictionary holds a mapping of nodes to virus variant - they are our clusters
     let buildQueue = Exec.BuildQueue(1)
@@ -530,11 +530,3 @@ let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configurat
         WorkspaceBuild.RootNodes = rootNodes }
 
     buildGraph
-
-    // printfn $"clusters = {clusters.Count}"
-    // for (KeyValue(cluster, nodes)) in clusterNodes do
-    //     printfn $"{cluster} => {nodes.Count}"
-
-    // printfn $"Optimized clusters = {optimizedClusters.Count}"
-    // for (KeyValue(cluster, actions)) in optimizedClusters do
-    //     printfn $"{cluster} => {actions}"
