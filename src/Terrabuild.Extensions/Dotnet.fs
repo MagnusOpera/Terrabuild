@@ -137,7 +137,6 @@ type Dotnet() =
         let configuration =
             configuration
             |> Option.defaultValue DotnetHelpers.defaultConfiguration
-            |> sprintf " --configuration {%s}"
 
         let logger =
             match log with
@@ -151,7 +150,7 @@ type Dotnet() =
 
         let actions = [
             action "dotnet" $"restore {slnfile} --no-dependencies" 
-            action "dotnet" $"build {slnfile} --no-restore{configuration}{logger}"
+            action "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{logger}"
         ]
         actions
 
