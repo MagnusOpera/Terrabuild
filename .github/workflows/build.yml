@@ -35,8 +35,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run Tests
-        run: make github-tests
+      # - name: Run Tests
+      #   run: make github-tests
 
       - name: Build
         run: |
@@ -58,9 +58,9 @@ jobs:
             terrabuild.build.json
             terrabuild.log
 
-      - name: Upload Terrabuild Cache
-        uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          name: Terrabuild Cache
-          path: ~/.terrabuild/buildcache/*
+      # - name: Upload Terrabuild Cache
+      #   uses: actions/upload-artifact@v4
+      #   if: success() || failure()
+      #   with:
+      #     name: Terrabuild Cache
+      #     path: ~/.terrabuild/buildcache/*

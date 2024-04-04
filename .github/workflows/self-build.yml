@@ -52,9 +52,9 @@ jobs:
             terrabuild.build.json
             terrabuild.log
 
-      - name: Upload Terrabuild Cache
-        uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          name: Terrabuild Cache
-          path: ~/.terrabuild/buildcache/*
+      # - name: Upload Terrabuild Cache
+      #   uses: actions/upload-artifact@v4
+      #   if: success() || failure()
+      #   with:
+      #     name: Terrabuild Cache
+      #     path: ~/.terrabuild/buildcache/*
