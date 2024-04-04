@@ -169,7 +169,7 @@ let graph (graph: WorkspaceGraph) =
 
 
 
-let optimizeGraph (wsConfig: Configuration.WorkspaceConfig) (options: Configuration.Options) (graph: WorkspaceGraph) =
+let bulkOptimize (wsConfig: Configuration.WorkspaceConfig) (options: Configuration.Options) (graph: WorkspaceGraph) =
     let startedAt = DateTime.UtcNow
     let mutable graph = graph
 

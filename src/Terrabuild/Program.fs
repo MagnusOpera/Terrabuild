@@ -73,7 +73,7 @@ let processCommandLine () =
                 let mermaid = Graph.graph graph |> String.join "\n"
                 mermaid |> IO.writeTextFile "terrabuild.graph.mermaid"
 
-            let buildGraph = graph |> Graph.optimizeGraph config options
+            let buildGraph = graph |> Graph.bulkOptimize config options
             if options.Debug then
                 let jsonBuildGraph = Json.Serialize buildGraph
                 jsonBuildGraph |> IO.writeTextFile "terrabuild.buildgraph.json"
