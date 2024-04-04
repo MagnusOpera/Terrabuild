@@ -8,7 +8,7 @@ let lexeme = LexBuffer<_>.LexemeString
 }
 
 let doubleQuote = '\"'
-let identifier = ['@' '^']? ['a'-'z'] ['a'-'z' '0'-'9' '_']*
+let identifier = ['@' '^']? ['a'-'z'] ('_'? ['a'-'z' '0'-'9']+)*
 let key = identifier ' '* ':'
 let variable = '$' identifier
 let quotedString = '\"' [^'\"']+ '\"'

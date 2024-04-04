@@ -297,7 +297,7 @@ let bulkOptimize (wsConfig: Configuration.WorkspaceConfig) (options: Configurati
                             |> Terrabuild.Expressions.Value.Map
                         | _ -> failwith "internal error"
 
-                    let optCommand = $"bulk_{context.Command}"
+                    let optCommand = $"__{context.Command}__"
                     let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
                     match result with
                     | Extensions.InvocationResult.Success actionBatch ->

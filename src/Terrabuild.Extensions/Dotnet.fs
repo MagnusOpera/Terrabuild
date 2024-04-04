@@ -129,7 +129,7 @@ type Dotnet() =
         projectInfo
 
 
-    static member bulk_build (context: OptimizeContext) (configuration: string option) (log: bool option) =
+    static member __build__ (context: OptimizeContext) (configuration: string option) (log: bool option) =
         let projects =
             context.ProjectPaths
             |> List.map DotnetHelpers.findProjectFile
