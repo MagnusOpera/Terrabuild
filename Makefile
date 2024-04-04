@@ -6,6 +6,11 @@ build:
 
 dist:
 	rm -rf $(PWD)/.out
+	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
+	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
+
+dist-all:
+	rm -rf $(PWD)/.out
 	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
 	cd .out/windows; zip -r ../terrabuild-$(version)-windows-x64.zip ./terrabuild.exe
 
