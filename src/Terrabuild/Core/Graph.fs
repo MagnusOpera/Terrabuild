@@ -243,7 +243,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                         |> List.ofSeq
                     match childrenTags with
                     | [tag, hash] when hash = node.TargetHash ->
-                        printfn $"{node.Label} ==> assigned to cluster {tag}"
+                        // printfn $"{node.Label} ==> assigned to cluster {tag}"
                         tag
                     | _ ->
                         // printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since optimization failed"

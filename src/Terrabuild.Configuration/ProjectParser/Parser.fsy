@@ -89,9 +89,12 @@ Target:
 TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents TargetDependsOn { $1.Patch $2 }
+    | TargetComponents TargetOutputs { $1.Patch $2 }
     | TargetComponents TargetStep { $1.Patch $2 }
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfIdentifiers { TargetComponents.DependsOn $3 }
+TargetOutputs:
+    | OUTPUTS EQUAL ListOfString { TargetComponents.Outputs $3 }
 TargetStep:
     | IDENTIFIER IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }

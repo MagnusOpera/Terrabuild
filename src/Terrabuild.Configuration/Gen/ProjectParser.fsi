@@ -88,6 +88,7 @@ type nonTerminalId =
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn
+    | NONTERM_TargetOutputs
     | NONTERM_TargetStep
     | NONTERM_String
     | NONTERM_ListOfString

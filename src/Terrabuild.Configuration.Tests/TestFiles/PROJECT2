@@ -1,5 +1,6 @@
 configuration @dotnet
 
 target build {
+  outputs = [ "*.dll" ]
   @dotnet build
 }

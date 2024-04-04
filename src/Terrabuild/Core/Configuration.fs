@@ -251,7 +251,7 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> Map.map (fun targetName target ->
                     let (variables, init), actions =
                         target.Steps
-                        |> List.fold (fun ((variables, init), actions) step ->
+                        |> List.fold (fun ((variables, _), actions) step ->
                             let stepVars: Map<string, string> = Map.empty
 
                             let extension = 
@@ -316,23 +316,26 @@ let read workspaceDir (options: Options) environment labels variables =
                         ) ((Map.empty, None), [])
 
                     let outputs =
-                        match init with
-                        | None -> projectDef.Outputs
-                        | Some init ->
-                            let parseContext = 
-                                let context = { Terrabuild.Extensibility.InitContext.Debug = options.Debug
-                                                Terrabuild.Extensibility.InitContext.Directory = projectDir
-                                                Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
-                                Value.Map (Map [ "context", Value.Object context ])
+                        match target.Outputs with
+                        | Some targets -> targets
+                        | _ ->
+                            match init with
+                            | None -> projectDef.Outputs
+                            | Some init ->
+                                let parseContext = 
+                                    let context = { Terrabuild.Extensibility.InitContext.Debug = options.Debug
+                                                    Terrabuild.Extensibility.InitContext.Directory = projectDir
+                                                    Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
+                                    Value.Map (Map [ "context", Value.Object context ])
 
-                            let result =
-                                Extensions.getScript init scripts
-                                |> Extensions.invokeScriptMethod<ProjectInfo> "__init__" parseContext
-                            match result with
-                            | Extensions.Success result -> result.Outputs
-                            | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
-                            | Extensions.TargetNotFound -> Set.empty // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
-                            | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
+                                let result =
+                                    Extensions.getScript init scripts
+                                    |> Extensions.invokeScriptMethod<ProjectInfo> "__init__" parseContext
+                                match result with
+                                | Extensions.Success result -> result.Outputs
+                                | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
+                                | Extensions.TargetNotFound -> Set.empty // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
+                                | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
 
                     let variableHash =
                         variables

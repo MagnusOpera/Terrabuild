@@ -44,20 +44,24 @@ type Step = {
 [<RequireQualifiedAccess>]
 type TargetComponents =
     | DependsOn of string list
+    | Outputs of string list
     | Step of Step
 
 type Target = {
     DependsOn: Set<string> option
+    Outputs: Set<string> option
     Steps: Step list
 }
 with
     static member Empty =
         { DependsOn = None
+          Outputs = None
           Steps = [] }
 
     member this.Patch comp =
         match comp with
         | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn |> Set.ofList |> Some }
+        | TargetComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList |> Some }
         | TargetComponents.Step step -> { this with Steps = this.Steps @ [step] }
 
 [<RequireQualifiedAccess>]
