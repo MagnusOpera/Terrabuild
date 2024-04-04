@@ -145,6 +145,7 @@ let graph (graph: WorkspaceGraph) =
         // nodes and arrows
         for (KeyValue(nodeId, node)) in graph.Nodes do
             let srcNode = graph.Nodes |> Map.find nodeId
+            $"{srcNode.Hash}([{srcNode.Label}])"
             for dependency in node.Dependencies do
                 let dstNode = graph.Nodes |> Map.find dependency
                 $"{srcNode.Hash}([{srcNode.Label}]) --> {dstNode.Hash}([{dstNode.Label}])"
@@ -194,6 +195,12 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         if wsConfig.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
+    let isBuildable (node: Node) =
+        let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
+        let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
+        if options.Force || node.Cache = Cacheability.Never then true
+        else not <| cache.Exists useRemoteCache cacheEntryId
+
     // optimization is like building but instead of running actions
     // conceptually, it's inspired from virus infection :-)
     // this starts spontaneously with leaf nodes (patients 0) - same virus even they are not related (leaf nodes have no dependencies by definition)
@@ -205,18 +212,13 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         let node = graph.Nodes[nodeId]
 
         let nodeTag =
-            // check node must be built
-            let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
-            let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
-            let buildable = 
-                if options.Force || node.Cache = Cacheability.Never then true
-                else not <| cache.Exists useRemoteCache cacheEntryId
-
             // if not is already built then no bulk build
-            if buildable |> not then
+            if node |> isBuildable |> not then
+                printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since no build required"
                 $"{node.TargetHash}-{nodeId}"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
             elif node.Dependencies = Set.empty then
+                printfn $"{node.Label} ==> assigned to cluster {node.TargetHash} since no dependencies"
                 node.TargetHash
             else
                 // check all actions are bulkable
@@ -224,18 +226,28 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                     node.Dependencies
                     |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BulkContext <> None))
                
-                if bulkable |> not then $"{node.TargetHash}-{nodeId}"
+                if bulkable |> not then
+                    printfn $"{node.Label} ==> no cluster {node.TargetHash}-{nodeId} since not bulkable"
+                    $"{node.TargetHash}-{nodeId}"
                 else
                     // collect tags from dependencies
                     // if they are the same then infect this node with children virus iif it's unique
                     // otherwise mutate the virus in new variant
                     let childrenTags =
                         node.Dependencies
-                        |> Set.map (fun dependency -> (clusters[dependency], graph.Nodes[dependency].TargetHash))
+                        |> Set.choose (fun dependency ->
+                            let dependencyNode = graph.Nodes[dependency]
+                            if dependencyNode |> isBuildable then Some (clusters[dependency], dependencyNode.TargetHash)
+                            else None
+                        )
                         |> List.ofSeq
                     match childrenTags with
-                    | [tag, hash] when hash = node.TargetHash -> tag
-                    | _ -> $"{node.TargetHash}-{nodeId}"
+                    | [tag, hash] when hash = node.TargetHash ->
+                        printfn $"{node.Label} ==> assigned to cluster {tag}"
+                        tag
+                    | _ ->
+                        printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since optimization failed"
+                        $"{node.TargetHash}-{nodeId}"
         clusters.TryAdd(nodeId, nodeTag) |> ignore
 
 
@@ -364,7 +376,9 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
     if options.Debug then
         printfn "Found following clusters:"
         for (KeyValue(cluster, nodeIds)) in clusterNodes do
-            printfn $"    {cluster} => {nodeIds.Count}"
+            printfn $"    cluster {cluster}:"
+            for nodeId in nodeIds do
+                printfn $"        {nodeId}"
         printfn $"Optimization = {optimizationDuration}"
 
     graph
