@@ -388,10 +388,7 @@ let read workspaceDir (options: Options) environment labels variables =
             projects
 
     and scanDependencies projects dependencies =
-        let mutable projects = projects
-        for project in dependencies do
-            projects <- scanDependency projects project
-        projects
+        dependencies |> Seq.fold scanDependency projects
 
     // scan for projects
     let rec findDependencies dir =
