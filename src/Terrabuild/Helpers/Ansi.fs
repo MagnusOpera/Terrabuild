@@ -35,6 +35,7 @@ module Emojis =
     let gear = "⚙️"
     let clockwise = "↻"
     let bang = "!"
+    let recycle = "♻︎"
 
 
 module Styles =

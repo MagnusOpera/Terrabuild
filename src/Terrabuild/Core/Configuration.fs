@@ -241,7 +241,7 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> Hash.sha256
 
             // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
-            let nodeHash =
+            let projectHash =
                 [ project; filesHash; dependenciesHash ]
                 |> String.join "\n"
                 |> Hash.sha256
@@ -265,11 +265,11 @@ let read workspaceDir (options: Options) environment labels variables =
                                 | Some extension -> extension
                                 | _ -> ConfigException.Raise $"Extension {step.Extension} is not defined"
 
-                            let stepActions, init =
+                            let stepActions, outputs =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
-                                                      Terrabuild.Extensibility.ActionContext.NodeHash = nodeHash
+                                                      Terrabuild.Extensibility.ActionContext.NodeHash = projectHash
                                                       Terrabuild.Extensibility.ActionContext.Command = step.Command
                                                       Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
 
@@ -373,7 +373,7 @@ let read workspaceDir (options: Options) environment labels variables =
 
             let projectConfig =
                 { Project.Id = project
-                  Project.Hash = nodeHash
+                  Project.Hash = projectHash
                   Project.Dependencies = projectDef.Dependencies
                   Project.Files = files
                   Project.Targets = projectSteps

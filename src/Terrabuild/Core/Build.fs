@@ -47,7 +47,7 @@ type IBuildNotification =
     abstract NodeDownloading: node:Graph.Node -> unit
     abstract NodeBuilding: node:Graph.Node -> unit
     abstract NodeUploading: node:Graph.Node -> unit
-    abstract NodeCompleted: node:Graph.Node -> summary:Cache.TargetSummary option -> unit
+    abstract NodeCompleted: node:Graph.Node -> restored: bool -> summary:Cache.TargetSummary option -> unit
 
 
 let private isNodeUnsatisfied = function
@@ -148,7 +148,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     let files = IO.enumerateFiles outputs
                     IO.copyFiles projectDirectory outputs files |> ignore
                 | _ -> ()
-                Some summary
+                Some summary, true
 
             | _ ->
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.Hash, node.Project, node.Target)
@@ -246,9 +246,9 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                                 Cache.TargetSummary.Outputs = outputs
                                 Cache.TargetSummary.Status = status }
                 cacheEntry.Complete summary
-                Some summary
+                Some summary, false
         else
-            None
+            None, false
 
     // this is the core of the build
     // schedule first nodes with no incoming edges
@@ -258,8 +258,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
         let node = graph.Nodes[nodeId]
 
         let buildAction () = 
-            let summary = buildNode node
-            notification.NodeCompleted node summary
+            let summary, restored = buildNode node
+            notification.NodeCompleted node restored summary
 
             // schedule children nodes if ready
             let triggers = reverseIncomings[nodeId]                

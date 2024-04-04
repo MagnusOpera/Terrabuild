@@ -57,7 +57,7 @@ let enumerateMatchingFiles pattern rootdir =
 
 let enumerateFilesBut (ignores: string set) rootdir =
     let matcher = Matcher()
-    matcher.AddInclude("*").AddExcludePatterns(ignores)
+    matcher.AddInclude("**/*").AddExcludePatterns(ignores)
 
     let result =
         matcher.GetResultsInFullPath(rootdir)

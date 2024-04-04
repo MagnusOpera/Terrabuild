@@ -5,13 +5,13 @@ open Ansi.Emojis
 
 [<RequireQualifiedAccess>]
 type ProgressStatus =
-    | Success
-    | Fail
+    | Success of restored:bool
+    | Fail of restored:bool
     | Running of startedAt:DateTime * spinner:string * frequency:double
 
 type ProgressItem = {
     Id: string
-    Label: string
+    mutable Label: string
     mutable Status: ProgressStatus
 }
 
@@ -30,8 +30,12 @@ type ProgressRenderer() =
 
     let printableStatus item =
         match item.Status with
-        | ProgressStatus.Success -> green + " " + checkmark + reset
-        | ProgressStatus.Fail -> red + " " + crossmark + reset
+        | ProgressStatus.Success restored ->
+            let icon = if restored then clockwise else checkmark            
+            green + " " + icon + reset
+        | ProgressStatus.Fail restored ->
+            let icon = if restored then clockwise else crossmark
+            red + " " + icon + reset
         | ProgressStatus.Running (startedAt, spinner, frequency) ->
             let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequency) |> int
             let offset = diff % spinner.Length
@@ -63,10 +67,10 @@ type ProgressRenderer() =
             items <- item :: items
             printableItem item |> Terminal.writeLine |> Terminal.flush
 
-    member _.Complete (id: string) (label: string) (success: bool) =
+    member _.Complete (id: string) (label: string) (success: bool) (restored: bool)=
         let status =
-            if success then ProgressStatus.Success
-            else ProgressStatus.Fail
+            if success then ProgressStatus.Success restored
+            else ProgressStatus.Fail restored
 
         let item =
             match items |> List.tryFindIndex (fun item -> item.Id = id) with
