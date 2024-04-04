@@ -37,3 +37,6 @@ module Set =
                 | _ -> ()
         }
         r |> Set.ofSeq
+
+    let collect f s =
+        s |> Seq.collect f |> Set.ofSeq

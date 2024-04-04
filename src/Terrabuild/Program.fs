@@ -78,6 +78,8 @@ let processCommandLine () =
             if options.Debug then
                 let jsonBuildGraph = Json.Serialize buildGraph
                 jsonBuildGraph |> IO.writeTextFile "terrabuild.buildgraph.json"
+                let mermaid = Graph.graph buildGraph |> String.join "\n"
+                mermaid |> IO.writeTextFile "terrabuild.buildgraph.mermaid"
 
             if options.WhatIf then 0
             else

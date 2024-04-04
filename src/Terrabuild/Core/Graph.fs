@@ -53,21 +53,16 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
             let dependsOns = buildDependsOn + projDependsOn
 
             // apply on each dependency
-            let children, hasInternalDependencies =
-                let mutable children = Set.empty
-                let mutable hasInternalDependencies = false
-
-                for dependsOn in dependsOns do
+            let children =
+                dependsOns
+                |> Set.fold (fun acc dependsOn ->
                     let childDependencies =
                         match dependsOn with
                         | String.Regex "^\^([a-zA-Z][_a-zA-Z0-9]+)$" [ parentDependsOn ] ->
-                            projectConfig.Dependencies
-                            |> Seq.collect (buildTarget parentDependsOn)
+                            projectConfig.Dependencies |> Set.collect (buildTarget parentDependsOn)
                         | _ ->
-                            hasInternalDependencies <- true
                             buildTarget dependsOn project
-                    children <- children + (childDependencies |> Set)
-                children, hasInternalDependencies
+                    acc + childDependencies) Set.empty
 
             // only generate computation node - that is node that generate something
             // barrier nodes are just discarded and dependencies lift level up
@@ -106,12 +101,12 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                              TargetHash = target.Hash }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     failwith "Unexpected graph building race"
-                [ nodeId ]
+                Set.singleton nodeId
             | _ ->
-                children |> List.ofSeq
+                children
 
         if processedNodes.TryAdd(nodeId, true) then processNode()
-        else [ nodeId ]
+        else Set.singleton nodeId
 
     let rootNodes =
         wsConfig.Dependencies |> Seq.collect (fun dependency ->
@@ -152,7 +147,7 @@ let graph (graph: WorkspaceGraph) =
             let srcNode = graph.Nodes |> Map.find nodeId
             for dependency in node.Dependencies do
                 let dstNode = graph.Nodes |> Map.find dependency
-                $"{srcNode.Hash}([{srcNode.Id}]) --> {dstNode.Hash}([{dstNode.Id}])"
+                $"{srcNode.Hash}([{srcNode.Label}]) --> {dstNode.Hash}([{dstNode.Label}])"
 
             $"class {srcNode.Hash} {srcNode.Project}"
             if graph.RootNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} bold"
@@ -218,16 +213,16 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                 else not <| cache.Exists useRemoteCache cacheEntryId
 
             // if not is already built then no bulk build
-            if buildable |> not then $"{node.TargetHash}-{nodeId}"
+            if buildable |> not then
+                $"{node.TargetHash}-{nodeId}"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
-            elif node.Dependencies = Set.empty then node.TargetHash
+            elif node.Dependencies = Set.empty then
+                node.TargetHash
             else
                 // check all actions are bulkable
                 let bulkable =
                     node.Dependencies
                     |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BulkContext <> None))
-
-                printfn $"{node.Target} {node.Project} ==> bulkable:{bulkable} buildable:{buildable}"
                
                 if bulkable |> not then $"{node.TargetHash}-{nodeId}"
                 else
