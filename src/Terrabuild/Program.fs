@@ -51,57 +51,72 @@ let processCommandLine () =
                 .WriteTo.File("terrabuild.log")
                 .CreateLogger()
 
+
     let runTarget wsDir target environment labels variables (options: Configuration.Options) =
-        try
-            if options.Debug then
-                let jsonOptions = Json.Serialize options
-                jsonOptions |> IO.writeTextFile "terrabuild.options.json"
+        let launchDir = Environment.CurrentDirectory
 
-            $"{Ansi.Emojis.box} Reading configuration" |> Terminal.writeLine
-            let config = Configuration.read wsDir options environment labels variables
+        let logFile name = IO.combinePath launchDir name
 
-            if options.Debug then
-                let jsonConfig = Json.Serialize config
-                jsonConfig |> IO.writeTextFile "terrabuild.config.json"
+        let runTarget () =
+            try
+                if options.Debug then
+                    let jsonOptions = Json.Serialize options
+                    jsonOptions |> IO.writeTextFile (logFile "terrabuild.options.json")
 
-            $"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}" |> Terminal.writeLine
-            let graph = Graph.buildGraph config target
-
-            if options.Debug then
-                let jsonGraph = Json.Serialize graph
-                jsonGraph |> IO.writeTextFile "terrabuild.graph.json"
-                let mermaid = Graph.graph graph |> String.join "\n"
-                mermaid |> IO.writeTextFile "terrabuild.graph.mermaid"
-
-            let cache = Cache.Cache(config.Storage) :> Cache.ICache
-            let buildGraph = Graph.optimize config graph cache options
-            if options.Debug then
-                let jsonBuildGraph = Json.Serialize buildGraph
-                jsonBuildGraph |> IO.writeTextFile "terrabuild.buildgraph.json"
-                let mermaid = Graph.graph buildGraph |> String.join "\n"
-                mermaid |> IO.writeTextFile "terrabuild.buildgraph.mermaid"
-
-            if options.WhatIf then 0
-            else
-                let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-                let build = Build.run config buildGraph cache buildNotification options
-                buildNotification.WaitCompletion()
+                $"{Ansi.Emojis.box} Reading configuration" |> Terminal.writeLine
+                let config = Configuration.read options environment labels variables
 
                 if options.Debug then
-                    let jsonBuild = Json.Serialize build
-                    jsonBuild |> IO.writeTextFile "terrabuild.build.json"
+                    let jsonConfig = Json.Serialize config
+                    jsonConfig |> IO.writeTextFile (logFile "terrabuild.config.json")
 
-                if build.Status = Build.BuildStatus.Success then 0
-                else 5
+                $"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}" |> Terminal.writeLine
+                let graph = Graph.buildGraph config target
 
-        with
-            | :? Configuration.ConfigException as ex ->
-                Log.Fatal("Failed with {Exception}", ex)
-                let reason = 
-                    if options.Debug then ex.ToString()
-                    else dumpUnknownException ex |> String.join "\n   "
-                $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
-                5
+                if options.Debug then
+                    let jsonGraph = Json.Serialize graph
+                    jsonGraph |> IO.writeTextFile (logFile "terrabuild.graph.json")
+                    let mermaid = Graph.graph graph |> String.join "\n"
+                    mermaid |> IO.writeTextFile (logFile "terrabuild.graph.mermaid")
+
+                let cache = Cache.Cache(config.Storage) :> Cache.ICache
+                let buildGraph = Graph.optimize config graph cache options
+                if options.Debug then
+                    let jsonBuildGraph = Json.Serialize buildGraph
+                    jsonBuildGraph |> IO.writeTextFile (logFile "terrabuild.buildgraph.json")
+                    let mermaid = Graph.graph buildGraph |> String.join "\n"
+                    mermaid |> IO.writeTextFile (logFile "terrabuild.buildgraph.mermaid")
+
+                if options.WhatIf then 0
+                else
+                    let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+                    let build = Build.run config buildGraph cache buildNotification options
+                    buildNotification.WaitCompletion()
+
+                    if options.Debug then
+                        let jsonBuild = Json.Serialize build
+                        jsonBuild |> IO.writeTextFile (logFile "terrabuild.build.json")
+
+                    if build.Status = Build.BuildStatus.Success then 0
+                    else 5
+
+            with
+                | :? Configuration.ConfigException as ex ->
+                    Log.Fatal("Failed with {Exception}", ex)
+                    let reason = 
+                        if options.Debug then ex.ToString()
+                        else dumpUnknownException ex |> String.join "\n   "
+                    $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
+                    5
+
+        // WARNING: current process directory is changed to root of workspace
+        try
+            Environment.CurrentDirectory <- wsDir
+            runTarget()
+        finally
+            Environment.CurrentDirectory <- launchDir
+
+
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
         try

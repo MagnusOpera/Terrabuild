@@ -60,6 +60,8 @@ let private isNodeUnsatisfied = function
 let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
+    let workspaceDir = Environment.CurrentDirectory
+
     let containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
     let cacheMode =
@@ -120,10 +122,10 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
         if isAllSatisfied then
             let projectDirectory =
-                match IO.combinePath workspaceConfig.Directory node.Project with
+                match node.Project with
                 | IO.Directory projectDirectory -> projectDirectory
                 | IO.File projectFile -> IO.parentDirectory projectFile
-                | _ -> System.IO.Path.GetTempPath()
+                | _ -> workspaceDir
 
             let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
 
@@ -165,7 +167,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     |> List.collect (fun batch ->
                         batch.Actions |> List.map (fun commandLine ->
                             let cmd = "docker"
-                            let wsDir = IO.combinePath Environment.CurrentDirectory workspaceConfig.Directory
+                            let wsDir = Environment.CurrentDirectory
 
                             let getContainerUser (container: string) =
                                 match containerInfos.TryGetValue(container) with
@@ -177,7 +179,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                                     let args = $"run --rm --name {node.Hash} --entrypoint whoami {container}"
                                     let whoami =
                                         Log.Debug("Identifying USER for {container}", container)
-                                        match Exec.execCaptureOutput workspaceConfig.Directory cmd args with
+                                        match Exec.execCaptureOutput workspaceDir cmd args with
                                         | Exec.Success (whoami, 0) -> whoami.Trim()
                                         | _ ->
                                             Log.Debug("USER identification failed for {container}: using root", container)
@@ -192,7 +194,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                             | Some container ->
                                 let whoami = getContainerUser container
                                 let args = $"run --rm --entrypoint {commandLine.Command} --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
-                                workspaceConfig.Directory, cmd, args, batch.Container))
+                                workspaceDir, cmd, args, batch.Container))
 
 
                 let beforeFiles = FileSystem.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs

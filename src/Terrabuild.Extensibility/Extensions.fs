@@ -36,6 +36,8 @@ type ActionContext = {
 type OptimizeContext = {
     Debug: bool
     CI: bool
+    TempDir: string
+    NodeHash: string
     BranchOrTag: string
     ProjectPaths: string list
 }

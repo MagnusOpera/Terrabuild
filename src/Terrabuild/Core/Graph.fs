@@ -293,7 +293,19 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
             let project = wsConfig.Projects |> Map.find oneNode.Project
             let target = project.Targets |> Map.find oneNode.Target
 
-            let projectPaths = nodes |> List.map (fun node -> IO.combinePath wsConfig.Directory node.Project |> IO.fullPath)
+            let projectPaths = nodes |> List.map (fun node -> node.Project |> IO.fullPath)
+
+            // cluster dependencies gather all nodeIds dependencies
+            // nodes forming the cluster are removed (no-self dependencies)
+            let clusterDependencies =
+                nodes
+                |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
+            let clusterDependencies = clusterDependencies - nodeIds
+
+            let clusterHash =
+                clusterDependencies
+                |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Hash)
+                |> Hash.sha256list
 
             let optimizeAction (action: Configuration.ContaineredActionBatch) =
                 action.BulkContext
@@ -303,6 +315,8 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                         OptimizeContext.CI = wsConfig.SourceControl.CI
                         OptimizeContext.BranchOrTag = wsConfig.SourceControl.BranchOrTag
                         OptimizeContext.ProjectPaths = projectPaths
+                        OptimizeContext.TempDir = ".terrabuild"
+                        OptimizeContext.NodeHash = clusterHash
                     }
                     let parameters = 
                         match context.Context with
@@ -335,18 +349,6 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                     |> Seq.map (fun node -> node.Project)
                     |> String.join " "
                     |> String.cut 80
-
-                // cluster dependencies gather all nodeIds dependencies
-                // nodes forming the cluster are removed (no-self dependencies)
-                let clusterDependencies =
-                    nodes
-                    |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
-                let clusterDependencies = clusterDependencies - nodeIds
-
-                let clusterHash =
-                    clusterDependencies
-                    |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Hash)
-                    |> Hash.sha256list
 
                 let clusterNode = {
                     Node.Id = cluster

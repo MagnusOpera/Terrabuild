@@ -144,7 +144,7 @@ type Dotnet() =
             | _ -> ""
 
         // generate temp solution file
-        let slnfile = Path.ChangeExtension(Path.GetTempFileName(), ".sln")
+        let slnfile = Path.Combine(context.TempDir, $"{context.NodeHash}.sln")
         let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
         File.WriteAllLines(slnfile, slnContent)
 

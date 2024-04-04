@@ -67,7 +67,6 @@ type Project = {
 type WorkspaceConfig = {
     Storage: Storages.Storage
     SourceControl: SourceControls.SourceControl
-    Directory: string
     Dependencies: string set
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
@@ -90,14 +89,16 @@ type private ProjectDefinition = {
 
 
 
-let read workspaceDir (options: Options) environment labels variables =
-    let workspaceFile = IO.combinePath workspaceDir "WORKSPACE"
-    let workspaceContent = File.ReadAllText workspaceFile
+let read (options: Options) environment labels variables =
+    let workspaceContent = File.ReadAllText "WORKSPACE"
     let workspaceConfig =
         try
             Terrabuild.Configuration.FrontEnd.parseWorkspace workspaceContent
         with exn ->
             ConfigException.Raise("Failed to read WORKSPACE configuration file", exn)
+
+    let workspaceDir = Environment.CurrentDirectory
+    IO.createDirectory ".terrabuild"
 
     // variables
     let environments = workspaceConfig.Environments
@@ -137,7 +138,7 @@ let read workspaceDir (options: Options) environment labels variables =
         |> Map.map Extensions.lazyLoadScript
 
     let rec scanDependency projects project =
-        let projectDir = IO.combinePath workspaceDir project
+        let projectDir = project
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
@@ -399,7 +400,7 @@ let read workspaceDir (options: Options) environment labels variables =
         }
 
     let dependencies =
-        workspaceDir
+        "."
         |> findDependencies
         |> Set
 
@@ -414,8 +415,7 @@ let read workspaceDir (options: Options) environment labels variables =
         | _ -> projects.Keys
         |> Set
 
-    { WorkspaceConfig.Directory = workspaceDir
-      WorkspaceConfig.Dependencies = dependencies
+    { WorkspaceConfig.Dependencies = dependencies
       WorkspaceConfig.Projects = projects
       WorkspaceConfig.Targets = workspaceConfig.Targets
       WorkspaceConfig.Environment = environment
