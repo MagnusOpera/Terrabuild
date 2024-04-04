@@ -61,25 +61,25 @@ let action cmd args =
       Action.Arguments = args }
 
 [<RequireQualifiedAccess>]
-type ActionBatch = {
+type ActionSequence = {
     Cache: Cacheability
     Actions: Action list
-    Bulkable: bool
+    Batchable: bool
 }
 
 let scope cache =
-    { ActionBatch.Cache = cache
-      ActionBatch.Actions = []
-      ActionBatch.Bulkable = false }
+    { ActionSequence.Cache = cache
+      ActionSequence.Actions = []
+      ActionSequence.Batchable = false }
 
-let andThen cmd args (batch: ActionBatch) =
+let andThen cmd args (batch: ActionSequence) =
     let action = action cmd args
     { batch with
-        ActionBatch.Actions = batch.Actions @ [ action ] }
+        ActionSequence.Actions = batch.Actions @ [ action ] }
 
-let andIf predicat (action: ActionBatch -> ActionBatch) (batch: ActionBatch) =
+let andIf predicat (action: ActionSequence -> ActionSequence) (batch: ActionSequence) =
     if predicat then action batch
     else batch
 
-let bulkable (batch: ActionBatch) =
-    { batch with Bulkable = true }
+let batchable (batch: ActionSequence) =
+    { batch with Batchable = true }

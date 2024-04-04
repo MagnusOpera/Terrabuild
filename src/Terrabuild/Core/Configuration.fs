@@ -26,7 +26,7 @@ type ConfigException(msg, ?innerException: Exception) =
         ConfigException(msg, ?innerException=innerException) |> raise
 
 
-type BulkContext = {
+type BatchContext = {
     Script: Terrabuild.Scripting.Script
     Command: string
     Context: Value
@@ -36,7 +36,7 @@ type BulkContext = {
 
 [<RequireQualifiedAccess>]
 type ContaineredActionBatch = {
-    BulkContext: BulkContext option
+    BatchContext: BatchContext option
 
     Cache: Cacheability
     Container: string option
@@ -290,15 +290,15 @@ let read (options: Options) environment labels variables =
                                 let actionGroup =
                                     let result =
                                         script
-                                        |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionBatch> step.Command actionContext
+                                        |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionSequence> step.Command actionContext
                                     match result with
                                     | Extensions.Success result -> result
                                     | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {step.Extension} was not found"
                                     | Extensions.TargetNotFound -> ConfigException.Raise $"Script {step.Extension} has no function {step.Command}"
                                     | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
 
-                                let bulkContext =
-                                    if actionGroup.Bulkable then
+                                let batchContext =
+                                    if actionGroup.Batchable then
                                         Some { Script = script.Value
                                                Command = step.Command
                                                Context = actionContext }
@@ -306,7 +306,7 @@ let read (options: Options) environment labels variables =
                                         None
 
                                 let containedActionBatch = {
-                                    ContaineredActionBatch.BulkContext = bulkContext
+                                    ContaineredActionBatch.BatchContext = batchContext
                                     ContaineredActionBatch.Container = extension.Container
                                     ContaineredActionBatch.Cache = actionGroup.Cache
                                     ContaineredActionBatch.Actions = actionGroup.Actions

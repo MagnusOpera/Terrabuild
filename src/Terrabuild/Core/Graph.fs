@@ -198,7 +198,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         if wsConfig.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
-    let isBuildable (node: Node) =
+    let isCached (node: Node) =
         let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
         let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
         if options.Force || node.Cache = Cacheability.Never then true
@@ -215,8 +215,8 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         let node = graph.Nodes[nodeId]
 
         let nodeTag =
-            // if not is already built then no bulk build
-            if node |> isBuildable |> not then
+            // if not is already built then no batch build
+            if node |> isCached |> not then
                 // printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since no build required"
                 $"{node.TargetHash}-{nodeId}"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
@@ -224,13 +224,13 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                 // printfn $"{node.Label} ==> assigned to cluster {node.TargetHash} since no dependencies"
                 node.TargetHash
             else
-                // check all actions are bulkable
-                let bulkable =
+                // check all actions are bacthable
+                let batchable =
                     node.Dependencies
-                    |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BulkContext <> None))
+                    |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BatchContext <> None))
                
-                if bulkable |> not then
-                    // printfn $"{node.Label} ==> no cluster {node.TargetHash}-{nodeId} since not bulkable"
+                if batchable |> not then
+                    // printfn $"{node.Label} ==> no cluster {node.TargetHash}-{nodeId} since not batchable"
                     $"{node.TargetHash}-{nodeId}"
                 else
                     // collect tags from dependencies
@@ -240,7 +240,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                         node.Dependencies
                         |> Set.choose (fun dependency ->
                             let dependencyNode = graph.Nodes[dependency]
-                            if dependencyNode |> isBuildable then Some (clusters[dependency], dependencyNode.TargetHash)
+                            if dependencyNode |> isCached then Some (clusters[dependency], dependencyNode.TargetHash)
                             else None
                         )
                         |> List.ofSeq
@@ -311,7 +311,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                 |> Hash.sha256list
 
             let optimizeAction (action: Configuration.ContaineredActionBatch) =
-                action.BulkContext
+                action.BatchContext
                 |> Option.bind (fun context ->
                     let optContext = {
                         OptimizeContext.Debug = options.Debug
@@ -334,7 +334,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                     match result with
                     | Extensions.InvocationResult.Success actionBatch ->
                         Some { 
-                            Configuration.ContaineredActionBatch.BulkContext = None
+                            Configuration.ContaineredActionBatch.BatchContext = None
                             Configuration.ContaineredActionBatch.Cache = action.Cache
                             Configuration.ContaineredActionBatch.Container = action.Container
                             Configuration.ContaineredActionBatch.Actions = actionBatch }
@@ -356,9 +356,9 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                 let clusterNode = {
                     Node.Id = cluster
                     Node.Hash = clusterHash
-                    Node.Project = $"bulk/{cluster}"
+                    Node.Project = $"batch/{cluster}"
                     Node.Target = oneNode.Target
-                    Node.Label = $"bulk-{oneNode.Target} {projectList}"
+                    Node.Label = $"batch-{oneNode.Target} {projectList}"
                     Node.Dependencies = clusterDependencies
                     ProjectHash = clusterHash
                     Outputs = Set.empty
