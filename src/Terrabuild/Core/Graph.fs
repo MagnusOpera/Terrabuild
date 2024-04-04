@@ -214,11 +214,11 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         let nodeTag =
             // if not is already built then no bulk build
             if node |> isBuildable |> not then
-                printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since no build required"
+                // printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since no build required"
                 $"{node.TargetHash}-{nodeId}"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
             elif node.Dependencies = Set.empty then
-                printfn $"{node.Label} ==> assigned to cluster {node.TargetHash} since no dependencies"
+                // printfn $"{node.Label} ==> assigned to cluster {node.TargetHash} since no dependencies"
                 node.TargetHash
             else
                 // check all actions are bulkable
@@ -227,7 +227,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                     |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BulkContext <> None))
                
                 if bulkable |> not then
-                    printfn $"{node.Label} ==> no cluster {node.TargetHash}-{nodeId} since not bulkable"
+                    // printfn $"{node.Label} ==> no cluster {node.TargetHash}-{nodeId} since not bulkable"
                     $"{node.TargetHash}-{nodeId}"
                 else
                     // collect tags from dependencies
@@ -246,7 +246,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                         printfn $"{node.Label} ==> assigned to cluster {tag}"
                         tag
                     | _ ->
-                        printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since optimization failed"
+                        // printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since optimization failed"
                         $"{node.TargetHash}-{nodeId}"
         clusters.TryAdd(nodeId, nodeTag) |> ignore
 
@@ -378,12 +378,12 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
     let endedAt = DateTime.UtcNow
     let optimizationDuration = endedAt - startedAt
 
-    if options.Debug then
-        printfn "Found following clusters:"
-        for (KeyValue(cluster, nodeIds)) in clusterNodes do
-            printfn $"    cluster {cluster}:"
-            for nodeId in nodeIds do
-                printfn $"        {nodeId}"
-        printfn $"Optimization = {optimizationDuration}"
+    // if options.Debug then
+    //     printfn "Found following clusters:"
+    //     for (KeyValue(cluster, nodeIds)) in clusterNodes do
+    //         printfn $"    cluster {cluster}:"
+    //         for nodeId in nodeIds do
+    //             printfn $"        {nodeId}"
+    //     printfn $"Optimization = {optimizationDuration}"
 
     graph
