@@ -58,7 +58,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
                 |> Set.fold (fun acc dependsOn ->
                     let childDependencies =
                         match dependsOn with
-                        | String.Regex "^\^([a-zA-Z][_a-zA-Z0-9]+)$" [ parentDependsOn ] ->
+                        | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
                             projectConfig.Dependencies |> Set.collect (buildTarget parentDependsOn)
                         | _ ->
                             buildTarget dependsOn project
