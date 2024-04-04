@@ -246,12 +246,18 @@ let read workspaceDir (options: Options) environment labels variables =
                 |> String.join "\n"
                 |> Hash.sha256
 
+            let parseContext = 
+                let context = { Terrabuild.Extensibility.InitContext.Debug = options.Debug
+                                Terrabuild.Extensibility.InitContext.Directory = projectDir
+                                Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
+                Value.Map (Map [ "context", Value.Object context ])
+
             let projectSteps =
                 projectDef.Targets
                 |> Map.map (fun targetName target ->
-                    let (variables, init), actions =
+                    let (variables, outputs), actions =
                         target.Steps
-                        |> List.fold (fun ((variables, _), actions) step ->
+                        |> List.fold (fun ((variables, outputs), actions) step ->
                             let stepVars: Map<string, string> = Map.empty
 
                             let extension = 
@@ -304,7 +310,19 @@ let read workspaceDir (options: Options) environment labels variables =
                                     ContaineredActionBatch.Cache = actionGroup.Cache
                                     ContaineredActionBatch.Actions = actionGroup.Actions
                                 }
-                                containedActionBatch, Some step.Extension
+
+                                let newOutputs =
+                                    let init = step.Extension
+                                    let result =
+                                        Extensions.getScript init scripts
+                                        |> Extensions.invokeScriptMethod<ProjectInfo> "__init__" parseContext
+                                    match result with
+                                    | Extensions.Success result -> result.Outputs
+                                    | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
+                                    | Extensions.TargetNotFound -> Set.empty // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
+                                    | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
+
+                                containedActionBatch, (outputs + newOutputs)
 
                             let variables =
                                 variables
@@ -312,30 +330,8 @@ let read workspaceDir (options: Options) environment labels variables =
 
                             let actions = actions @ [ stepActions ]
 
-                            (variables, init), actions
-                        ) ((Map.empty, None), [])
-
-                    let outputs =
-                        match target.Outputs with
-                        | Some targets -> targets
-                        | _ ->
-                            match init with
-                            | None -> projectDef.Outputs
-                            | Some init ->
-                                let parseContext = 
-                                    let context = { Terrabuild.Extensibility.InitContext.Debug = options.Debug
-                                                    Terrabuild.Extensibility.InitContext.Directory = projectDir
-                                                    Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
-                                    Value.Map (Map [ "context", Value.Object context ])
-
-                                let result =
-                                    Extensions.getScript init scripts
-                                    |> Extensions.invokeScriptMethod<ProjectInfo> "__init__" parseContext
-                                match result with
-                                | Extensions.Success result -> result.Outputs
-                                | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
-                                | Extensions.TargetNotFound -> Set.empty // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
-                                | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
+                            (variables, outputs), actions
+                        ) ((Map.empty, projectDef.Outputs), [])
 
                     let variableHash =
                         variables
