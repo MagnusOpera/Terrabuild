@@ -140,11 +140,6 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                     | Some summary -> Some summary
                     | _ -> None
 
-            // clean outputs if leaf node (otherwise outputs are layered on top of previous ones)
-            // if node.IsLeaf then
-            //     IO.enumerateFilesMatch node.Outputs projectDirectory
-            //     |> Seq.iter IO.deleteAny
-
             match summary with
             | Some summary ->
                 Log.Debug("{Hash}: Restoring '{Project}/{Target}' from cache", node.Hash, node.Project, node.Target)

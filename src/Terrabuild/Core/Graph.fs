@@ -343,14 +343,19 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                     |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
                 let clusterDependencies = clusterDependencies - nodeIds
 
+                let clusterHash =
+                    clusterDependencies
+                    |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Hash)
+                    |> Hash.sha256list
+
                 let clusterNode = {
                     Node.Id = cluster
-                    Node.Hash = cluster
+                    Node.Hash = clusterHash
                     Node.Project = $"bulk/{cluster}"
                     Node.Target = oneNode.Target
                     Node.Label = $"bulk-{oneNode.Target} {projectList}"
                     Node.Dependencies = clusterDependencies
-                    ProjectHash = cluster
+                    ProjectHash = clusterHash
                     Outputs = Set.empty
                     Cache = oneNode.Cache
 
