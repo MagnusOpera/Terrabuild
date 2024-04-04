@@ -150,7 +150,7 @@ type Dotnet() =
 
         let actions = [
             action "dotnet" $"restore {slnfile} --no-dependencies" 
-            action "dotnet" $"build {slnfile} --no-dependencies --no-restore --configuration {configuration}{logger}"
+            action "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{logger}"
         ]
         actions
 
