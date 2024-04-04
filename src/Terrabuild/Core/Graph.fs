@@ -321,13 +321,20 @@ let bulkOptimize (wsConfig: Configuration.WorkspaceConfig) (options: Configurati
                     |> String.join " "
                     |> String.cut 80
 
+                // cluster dependencies gather all nodeIds dependencies
+                // nodes forming the cluster are removed (no-self dependencies)
+                let clusterDependencies =
+                    nodes
+                    |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
+                let clusterDependencies = clusterDependencies - nodeIds
+
                 let clusterNode = {
                     Node.Id = cluster
                     Node.Hash = cluster
                     Node.Project = $"bulk/{cluster}"
                     Node.Target = oneNode.Target
                     Node.Label = $"bulk-{oneNode.Target} {projectList}"
-                    Node.Dependencies = Set.empty
+                    Node.Dependencies = clusterDependencies
                     ProjectHash = cluster
                     Outputs = Set.empty
                     Cache = oneNode.Cache
