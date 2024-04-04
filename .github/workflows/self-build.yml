@@ -47,6 +47,8 @@ jobs:
             terrabuild.config.json
             terrabuild.graph.json
             terrabuild.graph.mermaid
+            terrabuild.buildgraph.json
+            terrabuild.buildgraph.mermaid
             terrabuild.build.json
             terrabuild.log
 
