@@ -165,11 +165,7 @@ let graph (graph: WorkspaceGraph) =
 
 
 
-
-
-
-
-let bulkOptimize (wsConfig: Configuration.WorkspaceConfig) (options: Configuration.Options) (graph: WorkspaceGraph) =
+let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (cache: Cache.ICache)  (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
     let mutable graph = graph
 
@@ -199,6 +195,10 @@ let bulkOptimize (wsConfig: Configuration.WorkspaceConfig) (options: Configurati
     // map a node to a cluster
     let clusters = Concurrent.ConcurrentDictionary<string, string>()
 
+    let cacheMode =
+        if wsConfig.SourceControl.CI then Cacheability.Always
+        else Cacheability.Remote
+
     // optimization is like building but instead of running actions
     // conceptually, it's inspired from virus infection :-)
     // this starts spontaneously with leaf nodes (patients 0) - same virus even they are not related (leaf nodes have no dependencies by definition)
@@ -210,17 +210,25 @@ let bulkOptimize (wsConfig: Configuration.WorkspaceConfig) (options: Configurati
         let node = graph.Nodes[nodeId]
 
         let nodeTag =
+            // check node must be built
+            let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
+            let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
+            let buildable = 
+                if options.Force || node.Cache = Cacheability.Never then true
+                else not <| cache.Exists useRemoteCache cacheEntryId
+
+            // if not is already built then no bulk build
+            if buildable |> not then $"{node.TargetHash}-{nodeId}"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
-            if node.Dependencies = Set.empty then
-                node.TargetHash
+            elif node.Dependencies = Set.empty then node.TargetHash
             else
                 // check all actions are bulkable
                 let bulkable =
                     node.Dependencies
-                    |> Seq.forall (fun dependency ->
-                        let node = graph.Nodes[dependency]
-                        node.CommandLines |> List.forall (fun cmd -> cmd.BulkContext <> None))
+                    |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BulkContext <> None))
 
+                printfn $"{node.Target} {node.Project} ==> bulkable:{bulkable} buildable:{buildable}"
+               
                 if bulkable |> not then $"{node.TargetHash}-{nodeId}"
                 else
                     // collect tags from dependencies
@@ -357,6 +365,11 @@ let bulkOptimize (wsConfig: Configuration.WorkspaceConfig) (options: Configurati
 
     let endedAt = DateTime.UtcNow
     let optimizationDuration = endedAt - startedAt
-    printfn $"Optimization = {optimizationDuration}"
+
+    if options.Debug then
+        printfn "Found following clusters:"
+        for (KeyValue(cluster, nodeIds)) in clusterNodes do
+            printfn $"    {cluster} => {nodeIds.Count}"
+        printfn $"Optimization = {optimizationDuration}"
 
     graph

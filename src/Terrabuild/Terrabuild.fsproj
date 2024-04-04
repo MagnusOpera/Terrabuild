@@ -30,8 +30,8 @@
     <Compile Include="Helpers/Extensions.fs" />
     <Compile Include="Core/Scaffold.fs" />
     <Compile Include="Core/Configuration.fs" />
-    <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Cache.fs" />
+    <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Build.fs" />
     <Compile Include="Core/Notification.fs" />
     <Compile Include="CLI.fs" />

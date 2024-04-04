@@ -7,7 +7,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/Terrabuild/bin/Debug/net8.0/Terrabuild.dll",
-            "args": ["publish", "--workspace", "../clients/tessan/telemedicine", "--debug", "-p", "1" ],
+            "args": ["publish", "--workspace", "../clients/tessan/telemedicine", "--debug", "--whatif", "-p", "1" ],
             // "args": ["build", "--workspace", "tests/scaffold", "--retry", "--par", "1" ],
             // "args": ["build", "--workspace", "tests/simple", "--environment", "debug", "--debug"],
             // "args": ["run", "push", "--workspace", "tests/simple", "--environment", "debug", "--label", "app", "--debug", "--retry"],

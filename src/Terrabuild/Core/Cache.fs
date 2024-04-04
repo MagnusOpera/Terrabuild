@@ -34,6 +34,7 @@ type IEntry =
     abstract Complete: summary:TargetSummary -> unit
 
 type ICache =
+    abstract Exists: useRemote:bool -> id:string -> bool
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
     abstract CreateEntry: useRemote:bool -> id:string -> IEntry
     abstract CreateHomeDir: nodeHash:string -> string
@@ -123,6 +124,21 @@ type Cache(storage: Storages.Storage) =
     let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
 
     interface ICache with
+        member _.Exists useRemote id : bool =
+            match cachedSummaries.TryGetValue(id) with
+            | true, _ -> true
+            | _ ->
+                let entryDir = IO.combinePath buildCacheDirectory id
+                let completeFile = IO.combinePath entryDir completeFilename
+
+
+                match completeFile with
+                | IO.File _ -> true
+                | _ ->
+                    if useRemote then storage.Exists $"{id}/logs"
+                    else false
+
+
         member _.TryGetSummary useRemote id : TargetSummary option =
 
             match cachedSummaries.TryGetValue(id) with

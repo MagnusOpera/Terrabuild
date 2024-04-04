@@ -33,6 +33,18 @@ type AzureBlobStorage() =
     override _.Name = "Azure Blob Storage"
 
 
+    override _.Exists id =
+        let blobClient = container.GetBlobClient(id)
+        try
+            let res = blobClient.Exists()
+            res.Value
+        with
+        | :? Azure.RequestFailedException as exn when exn.Status = 404 -> false
+        | exn ->
+            Log.Fatal(exn, "AzureBlobStorage: failed to download '{Id}'", id)
+            reraise()
+
+
     override _.TryDownload id =
         let blobClient = container.GetBlobClient(id)
         let tmpFile = System.IO.Path.GetTempFileName()
