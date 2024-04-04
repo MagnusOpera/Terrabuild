@@ -133,6 +133,7 @@ type Dotnet() =
         let projects =
             context.ProjectPaths
             |> List.map DotnetHelpers.findProjectFile
+            |> List.map (fun path -> Path.GetRelativePath(context.TempDir, path))
 
         let configuration =
             configuration

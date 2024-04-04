@@ -162,6 +162,9 @@ let graph (graph: WorkspaceGraph) =
 
 
 let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (cache: Cache.ICache)  (options: Configuration.Options) =
+    let tmpDir =
+        IO.combinePath Environment.CurrentDirectory ".terrabuild"
+
     let startedAt = DateTime.UtcNow
     let mutable graph = graph
 
@@ -293,7 +296,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
             let project = wsConfig.Projects |> Map.find oneNode.Project
             let target = project.Targets |> Map.find oneNode.Target
 
-            let projectPaths = nodes |> List.map (fun node -> node.Project |> IO.fullPath)
+            let projectPaths = nodes |> List.map (fun node -> node.Project)
 
             // cluster dependencies gather all nodeIds dependencies
             // nodes forming the cluster are removed (no-self dependencies)
@@ -378,7 +381,6 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                                     Nodes = graph.Nodes |> Map.add node.Id node }
 
     let endedAt = DateTime.UtcNow
-    let optimizationDuration = endedAt - startedAt
 
     // if options.Debug then
     //     printfn "Found following clusters:"
@@ -386,6 +388,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
     //         printfn $"    cluster {cluster}:"
     //         for nodeId in nodeIds do
     //             printfn $"        {nodeId}"
+    //     let optimizationDuration = endedAt - startedAt
     //     printfn $"Optimization = {optimizationDuration}"
 
     graph

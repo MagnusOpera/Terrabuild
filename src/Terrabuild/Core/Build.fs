@@ -125,7 +125,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                 match node.Project with
                 | IO.Directory projectDirectory -> projectDirectory
                 | IO.File projectFile -> IO.parentDirectory projectFile
-                | _ -> workspaceDir
+                | _ -> "."
 
             let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
 
@@ -193,7 +193,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
                             | None -> projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container
                             | Some container ->
                                 let whoami = getContainerUser container
-                                let args = $"run --rm --entrypoint {commandLine.Command} --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{node.Project} {container} {commandLine.Arguments}"
+                                let args = $"run --rm --entrypoint {commandLine.Command} --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} {container} {commandLine.Arguments}"
                                 workspaceDir, cmd, args, batch.Container))
 
 
