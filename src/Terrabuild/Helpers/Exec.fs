@@ -64,19 +64,19 @@ type BuildQueue(maxItems: int) =
     member _.Enqueue (action: unit -> unit) =
         let rec trySchedule () =
             match queue.Count, inFlight with
-            | (0, 0) -> completion.Set() |> ignore
+            | (0, 0) ->
+                completion.Set() |> ignore
             | (n, _) when 0 < n && inFlight < maxItems ->
                 inFlight <- inFlight + 1
-                queue.Dequeue() |> runTask
+                let action = queue.Dequeue()
+                async {
+                    action()
+                    lock queueLock (fun () ->
+                        inFlight <- inFlight - 1
+                        trySchedule()
+                    )
+                } |> Async.Start
             | _ -> ()
-        and runTask action =
-            async {
-                action()
-                lock queueLock (fun () ->
-                    inFlight <- inFlight - 1
-                    trySchedule()
-                )
-            } |> Async.Start
 
         lock queueLock (fun () ->
             totalTasks <- totalTasks + 1

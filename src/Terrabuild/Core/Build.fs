@@ -256,30 +256,24 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     // schedule first nodes with no incoming edges
     // on completion schedule released nodes
     let buildQueue = Exec.BuildQueue(options.MaxConcurrency)
-    let rec scheduleNode (nodeId: string) =
+    let rec queueAction (nodeId: string) =
         let node = graph.Nodes[nodeId]
+        let summary, restored = buildNode node
+        notification.NodeCompleted node restored summary
 
-        let buildAction () = 
-            let summary, restored = buildNode node
-            notification.NodeCompleted node restored summary
-
-            // schedule children nodes if ready
-            let triggers = reverseIncomings[nodeId]                
-            for trigger in triggers do
-                let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
-                if newValue = 0 then
-                    readyNodes[trigger].Value <- -1 // mark node as scheduled
-                    scheduleNode trigger
-
-        notification.NodeScheduled node
-        buildQueue.Enqueue buildAction
-
+        // schedule children nodes if ready
+        let triggers = reverseIncomings[nodeId]
+        for trigger in triggers do
+            let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
+            if newValue = 0 then
+                readyNodes[trigger].Value <- -1 // mark node as scheduled
+                buildQueue.Enqueue (fun () -> queueAction trigger)
 
     notification.BuildStarted graph
 
     readyNodes
     |> Map.filter (fun _ value -> value.Value = 0)
-    |> Map.iter (fun key _ -> scheduleNode key)
+    |> Map.iter (fun key _ -> buildQueue.Enqueue (fun () -> queueAction key))
 
     // wait only if we have something to do
     buildQueue.WaitCompletion()

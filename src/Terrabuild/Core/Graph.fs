@@ -164,7 +164,6 @@ let graph (graph: WorkspaceGraph) =
 
 let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (cache: Cache.ICache)  (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
-    let mutable graph = graph
 
     // compute first incoming edges
     let reverseIncomings =
@@ -189,9 +188,6 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         allNodes
         |> Map.addMap refCounts
 
-    // map a node to a cluster
-    let clusters = Concurrent.ConcurrentDictionary<string, string*string>()
-
     let cacheMode =
         if wsConfig.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
@@ -202,29 +198,22 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         if options.Force || node.Cache = Cacheability.Never then true
         else not <| cache.Exists useRemoteCache cacheEntryId
 
-    // optimization is like building but instead of running actions
-    // conceptually, it's inspired from virus infection :-)
-    // this starts spontaneously with leaf nodes (patients 0) - same virus even they are not related (leaf nodes have no dependencies by definition)
-    // then the infection flows to parents if they are compatible
-    // if they are not compatible - the virus mutates and continue its propagation up to the root nodes
-    // nodeTags dictionary holds a mapping of nodes to virus variant - they are our clusters
-    let buildQueue = Exec.BuildQueue(1)
-    let rec scheduleNode (nodeId: string) =
-        let node = graph.Nodes[nodeId]
-
+    // map a node to a cluster
+    let clusters = Concurrent.ConcurrentDictionary<string, string*string>()
+    let computeCluster (node: Node) =
         let nodeTag, reason =
             // if not is already built then no batch build
             if node |> isCached |> not then
-                $"{node.TargetHash}-{nodeId}", "not batchable/no build required"
+                $"{node.TargetHash}-{node.Id}", "not batchable/no build required"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
             else
                 // check all actions are batchable
                 let batchable =
                     node.Dependencies
-                    |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BatchContext <> None))
+                    |> Set.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BatchContext <> None))
 
                 if batchable |> not then
-                    $"{node.TargetHash}-{nodeId}", "not batchable"
+                    $"{node.TargetHash}-{node.Id}", "not batchable"
                 else
                     // collect tags from dependencies
                     // if they are the same then infect this node with children virus iif it's unique
@@ -244,26 +233,33 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                         node.TargetHash, "batchable/no impacting dependencies"
                     | childrenTags ->
                         let tags = childrenTags |> List.map fst |> String.join "/"
-                        $"{node.TargetHash}-{nodeId}", $"not batchable/multiple tags: {tags}"
-        clusters.TryAdd(nodeId, (nodeTag, reason)) |> ignore
-        Log.Debug("Node {node} ({label}) is assigned tag {tag} with reason {reason}", nodeId, node.Label, nodeTag, reason)
+                        $"{node.TargetHash}-{node.Id}", $"not batchable/multiple tags: {tags}"
+        clusters.TryAdd(node.Id, (nodeTag, reason)) |> ignore
+        Log.Debug("Node {node} ({label}) is assigned tag {tag} with reason {reason}", node.Id, node.Label, nodeTag, reason)
 
 
-        let buildAction () = 
-            // schedule children nodes if ready
-            let triggers = reverseIncomings[nodeId]                
-            for trigger in triggers do
-                let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
-                if newValue = 0 then
-                    readyNodes[trigger].Value <- -1 // mark node as scheduled
-                    scheduleNode trigger
+    // optimization is like building but instead of running actions
+    // conceptually, it's inspired from virus infection :-)
+    // this starts spontaneously with leaf nodes (patients 0) - same virus even they are not related (leaf nodes have no dependencies by definition)
+    // then the infection flows to parents if they are compatible
+    // if they are not compatible - the virus mutates and continue its propagation up to the root nodes
+    // nodeTags dictionary holds a mapping of nodes to virus variant - they are our clusters
+    let buildQueue = Exec.BuildQueue(1)
+    let rec queueAction (nodeId: string) =
+        let node = graph.Nodes[nodeId]
+        computeCluster node
 
-        buildQueue.Enqueue buildAction
-
+        // schedule children nodes if ready
+        let triggers = reverseIncomings[nodeId]
+        for trigger in triggers do
+            let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
+            if newValue = 0 then
+                readyNodes[trigger].Value <- -1 // mark node as scheduled
+                buildQueue.Enqueue (fun () -> queueAction trigger)
 
     readyNodes
     |> Map.filter (fun _ value -> value.Value = 0)
-    |> Map.iter (fun key _ -> scheduleNode key)
+    |> Map.iter (fun key _ -> buildQueue.Enqueue (fun () -> queueAction key))
 
     // wait only if we have something to do
     buildQueue.WaitCompletion()
@@ -277,6 +273,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         |> Map.map (fun _ nodeIds -> nodeIds |> Seq.map snd |> Set.ofSeq)
 
     // invoke __optimize__ function on each cluster
+    let mutable graph = graph
     for (KeyValue(cluster, nodeIds)) in clusterNodes do
         let oneNodeId = nodeIds |> Seq.head
         let oneNode = graph.Nodes |> Map.find oneNodeId
