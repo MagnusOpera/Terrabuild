@@ -374,6 +374,10 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                                     CommandLines = List.Empty }
                     graph <- { graph with
                                     Nodes = graph.Nodes |> Map.add node.Id node }
+            else
+                Log.Debug("Failed to optimize cluster {cluster}")
+        else
+            Log.Debug("Cluster {cluster} has only 1 node")
 
     let endedAt = DateTime.UtcNow
 
