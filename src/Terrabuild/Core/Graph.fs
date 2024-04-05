@@ -4,6 +4,7 @@ open System.Collections.Generic
 open System.Collections.Concurrent
 open Collections
 open Terrabuild.Extensibility
+open Serilog
 
 type Paths = string set
 
@@ -162,9 +163,6 @@ let graph (graph: WorkspaceGraph) =
 
 
 let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (cache: Cache.ICache)  (options: Configuration.Options) =
-    let tmpDir =
-        IO.combinePath Environment.CurrentDirectory ".terrabuild"
-
     let startedAt = DateTime.UtcNow
     let mutable graph = graph
 
@@ -192,7 +190,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         |> Map.addMap refCounts
 
     // map a node to a cluster
-    let clusters = Concurrent.ConcurrentDictionary<string, string>()
+    let clusters = Concurrent.ConcurrentDictionary<string, string*string>()
 
     let cacheMode =
         if wsConfig.SourceControl.CI then Cacheability.Always
@@ -214,15 +212,14 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
     let rec scheduleNode (nodeId: string) =
         let node = graph.Nodes[nodeId]
 
-        let nodeTag =
+        let nodeTag, reason =
             // if not is already built then no batch build
             if node |> isCached |> not then
-                // printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since no build required"
-                $"{node.TargetHash}-{nodeId}"
+                $"{node.TargetHash}-{nodeId}", "no build required"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
             elif node.Dependencies = Set.empty then
                 // printfn $"{node.Label} ==> assigned to cluster {node.TargetHash} since no dependencies"
-                node.TargetHash
+                node.TargetHash, "no dependencies"
             else
                 // check all actions are bacthable
                 let batchable =
@@ -230,8 +227,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                     |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BatchContext <> None))
                
                 if batchable |> not then
-                    // printfn $"{node.Label} ==> no cluster {node.TargetHash}-{nodeId} since not batchable"
-                    $"{node.TargetHash}-{nodeId}"
+                    $"{node.TargetHash}-{nodeId}", "not batchable"
                 else
                     // collect tags from dependencies
                     // if they are the same then infect this node with children virus iif it's unique
@@ -240,18 +236,16 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                         node.Dependencies
                         |> Set.choose (fun dependency ->
                             let dependencyNode = graph.Nodes[dependency]
-                            if dependencyNode |> isCached then Some (clusters[dependency], dependencyNode.TargetHash)
-                            else None
-                        )
+                            if dependencyNode |> isCached then Some (clusters[dependency] |> fst, dependencyNode.TargetHash)
+                            else None)
                         |> List.ofSeq
                     match childrenTags with
                     | [tag, hash] when hash = node.TargetHash ->
-                        // printfn $"{node.Label} ==> assigned to cluster {tag}"
-                        tag
+                        tag, "diffusion"
                     | _ ->
-                        // printfn $"{node.Label} ==> new cluster {node.TargetHash}-{nodeId} since optimization failed"
-                        $"{node.TargetHash}-{nodeId}"
-        clusters.TryAdd(nodeId, nodeTag) |> ignore
+                        $"{node.TargetHash}-{nodeId}", "multiple tags"
+        clusters.TryAdd(nodeId, (nodeTag, reason)) |> ignore
+        Log.Debug("Node {node} ({label}) is assigned tag {tag} with reason {reason}", nodeId, node.Label, nodeTag, reason)
 
 
         let buildAction () = 
@@ -276,7 +270,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
     // find a project for each cluster
     let clusterNodes =
         clusters
-        |> Seq.map (fun kvp -> kvp.Value, kvp.Key)
+        |> Seq.map (fun kvp -> kvp.Value |> fst, kvp.Key)
         |> Seq.groupBy fst
         |> Map.ofSeq
         |> Map.map (fun _ nodeIds -> nodeIds |> Seq.map snd |> Set.ofSeq)
@@ -382,13 +376,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
 
     let endedAt = DateTime.UtcNow
 
-    // if options.Debug then
-    //     printfn "Found following clusters:"
-    //     for (KeyValue(cluster, nodeIds)) in clusterNodes do
-    //         printfn $"    cluster {cluster}:"
-    //         for nodeId in nodeIds do
-    //             printfn $"        {nodeId}"
-    //     let optimizationDuration = endedAt - startedAt
-    //     printfn $"Optimization = {optimizationDuration}"
+    let optimizationDuration = endedAt - startedAt
+    Log.Debug("Optimization: {duration}", optimizationDuration)
 
     graph

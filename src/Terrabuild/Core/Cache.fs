@@ -121,23 +121,28 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
 
 
 type Cache(storage: Storages.Storage) =
+    let cachedExists = System.Collections.Concurrent.ConcurrentDictionary<string, bool>()
     let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
 
     interface ICache with
         member _.Exists useRemote id : bool =
-            match cachedSummaries.TryGetValue(id) with
-            | true, _ -> true
+            match cachedExists.TryGetValue(id) with
+            | true, res -> res
             | _ ->
-                let entryDir = IO.combinePath buildCacheDirectory id
-                let completeFile = IO.combinePath entryDir completeFilename
+                let res =
+                    match cachedSummaries.TryGetValue(id) with
+                    | true, _ -> true
+                    | _ ->
+                        let entryDir = IO.combinePath buildCacheDirectory id
+                        let completeFile = IO.combinePath entryDir completeFilename
 
-
-                match completeFile with
-                | IO.File _ -> true
-                | _ ->
-                    if useRemote then storage.Exists $"{id}/logs"
-                    else false
-
+                        match completeFile with
+                        | IO.File _ -> true
+                        | _ ->
+                            if useRemote then storage.Exists $"{id}/logs"
+                            else false
+                cachedExists.TryAdd(id, res) |> ignore
+                res
 
         member _.TryGetSummary useRemote id : TargetSummary option =
 
