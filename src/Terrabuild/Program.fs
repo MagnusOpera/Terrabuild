@@ -64,7 +64,7 @@ let processCommandLine () =
                 let jsonOptions = Json.Serialize options
                 jsonOptions |> IO.writeTextFile (logFile "options.json")
 
-            $"{Ansi.Emojis.box} Reading configuration for {environment} environment" |> Terminal.writeLine
+            $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
             let config = Configuration.read options environment labels variables
 
             if options.Debug then
