@@ -127,22 +127,28 @@ type Cache(storage: Storages.Storage) =
     interface ICache with
         member _.Exists useRemote id : bool =
             match cachedExists.TryGetValue(id) with
-            | true, res -> res
+            | true, _ ->
+                true
             | _ ->
-                let res =
-                    match cachedSummaries.TryGetValue(id) with
-                    | true, _ -> true
-                    | _ ->
-                        let entryDir = IO.combinePath buildCacheDirectory id
-                        let completeFile = IO.combinePath entryDir completeFilename
+                match cachedSummaries.TryGetValue(id) with
+                | true, _ ->
+                    cachedExists.TryAdd(id, true) |> ignore
+                    true
+                | _ ->
+                    let entryDir = IO.combinePath buildCacheDirectory id
+                    let completeFile = IO.combinePath entryDir completeFilename
 
-                        match completeFile with
-                        | IO.File _ -> true
-                        | _ ->
+                    match completeFile with
+                    | IO.File _ ->
+                        cachedExists.TryAdd(id, true) |> ignore
+                        true
+                    | _ ->
+                        // NOTE: probably overcaching here but since Exists is not used after TryGetSummary it's ok
+                        let res =
                             if useRemote then storage.Exists $"{id}/logs"
                             else false
-                cachedExists.TryAdd(id, res) |> ignore
-                res
+                        cachedExists.TryAdd(id, res) |> ignore
+                        res
 
         member _.TryGetSummary useRemote id : TargetSummary option =
 
