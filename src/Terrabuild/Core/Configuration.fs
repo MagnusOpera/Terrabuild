@@ -166,20 +166,20 @@ let read (options: Options) environment labels variables =
                     match projectConfig.Configuration.Init with
                     | Some init ->
                         let parseContext = 
-                            let context = { Terrabuild.Extensibility.InitContext.Debug = options.Debug
-                                            Terrabuild.Extensibility.InitContext.Directory = projectDir
-                                            Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
+                            let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
+                                            Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
+                                            Terrabuild.Extensibility.ExtensionContext.CI = sourceControl.CI }
                             Value.Map (Map [ "context", Value.Object context ])
                         
                         let result =
                             Extensions.getScript init scripts
-                            |> Extensions.invokeScriptMethod<ProjectInfo> "__init__" parseContext
+                            |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
 
                         match result with
                         | Extensions.Success result -> result
                         | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
-                        | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
-                        | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
+                        | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
+                        | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __defaults__ of script {init}" exn
                     | _ -> ProjectInfo.Default
 
                 let projectInfo = {
@@ -248,9 +248,9 @@ let read (options: Options) environment labels variables =
                 |> Hash.sha256
 
             let parseContext = 
-                let context = { Terrabuild.Extensibility.InitContext.Debug = options.Debug
-                                Terrabuild.Extensibility.InitContext.Directory = projectDir
-                                Terrabuild.Extensibility.InitContext.CI = sourceControl.CI }
+                let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
+                                Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
+                                Terrabuild.Extensibility.ExtensionContext.CI = sourceControl.CI }
                 Value.Map (Map [ "context", Value.Object context ])
 
             let projectSteps =
@@ -316,12 +316,12 @@ let read (options: Options) environment labels variables =
                                     let init = step.Extension
                                     let result =
                                         Extensions.getScript init scripts
-                                        |> Extensions.invokeScriptMethod<ProjectInfo> "__init__" parseContext
+                                        |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
                                     match result with
                                     | Extensions.Success result -> result.Outputs
                                     | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
-                                    | Extensions.TargetNotFound -> Set.empty // NOTE: if __init__ is not found - this will silently use default configuration, probably emit warning
-                                    | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __init__ of script {init}" exn
+                                    | Extensions.TargetNotFound -> Set.empty // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
+                                    | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __defaults__ of script {init}" exn
 
                                 containedActionBatch, (outputs + newOutputs)
 

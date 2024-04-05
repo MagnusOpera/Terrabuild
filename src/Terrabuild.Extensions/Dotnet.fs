@@ -118,7 +118,7 @@ type Dotnet() =
     /// <param name="ignores" example="[ &quot;**/*.binlog&quot; ]">Default values.</param>
     /// <param name="outputs" example="[ &quot;bin/&quot; &quot;obj/&quot; &quot;**/*.binlog&quot; ]">Default values.</param>
     /// <param name="dependencies" example="[ &lt;ProjectReference /&gt; from project ]">Default values.</param>
-    static member __init__ (context: InitContext) =
+    static member __defaults__ (context: ExtensionContext) =
         let projectFile = DotnetHelpers.findProjectFile context.Directory
         let dependencies = projectFile |> DotnetHelpers.parseDotnetDependencies 
         let projectInfo =

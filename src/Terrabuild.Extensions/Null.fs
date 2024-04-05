@@ -9,8 +9,8 @@ type Null() =
     /// <summary>
     /// Fake init.
     /// </summary>
-    static member __init__ (context: InitContext) =
-        if context.Debug then printfn "__init__ invoked"
+    static member __defaults__ (context: ExtensionContext) =
+        if context.Debug then printfn "__defaults__ invoked"
         ProjectInfo.Default
 
     /// <summary>

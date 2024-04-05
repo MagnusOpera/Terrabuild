@@ -12,7 +12,7 @@ let private (|Regex|_|) pattern input =
     if m.Success then Some(List.tail [ for g in m.Groups -> g.Value ])
     else None
 
-let __init__ () =
+let __defaults__ () =
     let dependencies =
         Directory.EnumerateFiles("*.sln") |> Seq.head
         |> File.ReadLines

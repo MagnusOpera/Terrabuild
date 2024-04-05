@@ -79,9 +79,7 @@ let invokeScriptMethod<'r> (method: string) (args: Value) (script: Script option
                 | exn -> ErrorTarget exn
             | None ->
                 match method with
-                | "__init__"
-                | "__dispatch__"
-                | "__optimize__" -> TargetNotFound
+                | method when method.StartsWith("__") -> TargetNotFound
                 | _ -> invokeScriptMethod "__dispatch__"
 
         invokeScriptMethod method

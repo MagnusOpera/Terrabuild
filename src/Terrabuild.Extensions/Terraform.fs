@@ -11,7 +11,7 @@ type Terraform() =
     /// </summary>
     /// <param name="ignores" example="[ &quot;.terraform/&quot; &quot;*.tfstate/&quot; ]">Default values.</param>
     /// <param name="outputs" example="[ &quot;*.planfile&quot; ]">Default values.</param>
-    static member __init__() =
+    static member __defaults__() =
         let projectInfo = 
             { ProjectInfo.Default
               with Ignores = Set [ ".terraform/"; "*.tfstate/" ]

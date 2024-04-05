@@ -2,7 +2,7 @@ module Terrabuild.Extensibility
 open System
 
 [<RequireQualifiedAccess>]
-type InitContext = {
+type ExtensionContext = {
     Debug: bool
     Directory: string
     CI: bool

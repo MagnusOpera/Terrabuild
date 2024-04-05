@@ -95,7 +95,7 @@ let buildExtensions (members: Documentation.Member seq) =
 
 let writeCommand extensionDir (command: Command) (batchCommand: Command option) (extension: Extension) =
     match command.Name with
-    | "__init__" -> ()
+    | "__defaults__" -> ()
     | name when name.StartsWith("__") -> ()
     | _ ->
         let commandFile = Path.Combine(extensionDir, $"{command.Name}.md")
@@ -126,7 +126,7 @@ let writeCommand extensionDir (command: Command) (batchCommand: Command option) 
                 for prm in prms do
                     match prm.Name with
                     | "context" -> ()
-                    | _ -> $"    {prm.Name} = {prm.Example}"
+                    | _ -> $"    {prm.Name}: {prm.Example}"
                 "}"
             "```"
 
@@ -155,7 +155,7 @@ let writeCommand extensionDir (command: Command) (batchCommand: Command option) 
                     for prm in prms do
                         match prm.Name with
                         | "context" -> ()
-                        | _ -> $"    {prm.Name} = {prm.Example}"
+                        | _ -> $"    {prm.Name}: {prm.Example}"
                     "}"
                 "```"
 
@@ -194,7 +194,7 @@ let writeExtension extensionDir (extension: Extension) =
             "|---------|-------------|"
             for cmd in extension.Commands do
                 match cmd.Name with
-                | "__init__" ->
+                | "__defaults__" ->
                     ()
                 | "__dispatch__" ->
                     $"| [&lt;command&gt;](/docs/extensions/{extension.Name}/{cmd.Name}) | {cmd.Title |> Option.defaultValue cmd.Summary} |"
@@ -202,7 +202,7 @@ let writeExtension extensionDir (extension: Extension) =
                 | _ ->
                     $"| [{cmd.Name}](/docs/extensions/{extension.Name}/{cmd.Name}) | {cmd.Title |> Option.defaultValue cmd.Summary} |"
 
-            match extension.Commands |> List.tryFind (fun cmd -> cmd.Name = "__init__") with
+            match extension.Commands |> List.tryFind (fun cmd -> cmd.Name = "__defaults__") with
             | Some init ->
                 ""
                 $"## Project Initializer"

@@ -10,7 +10,7 @@ open Terrabuild.Expressions
 let loadScript() =
     let script = Terrabuild.Scripting.loadScript [ "Terrabuild.Extensibility.dll" ] "TestFiles/Toto.fsx"
     let invocable = script.GetMethod("Tagada")
-    let context = { InitContext.Debug= false; InitContext.Directory = "this is a path"; InitContext.CI = false }
+    let context = { ExtensionContext.Debug= false; ExtensionContext.Directory = "this is a path"; ExtensionContext.CI = false }
     let args = Value.Map (Map [ "context", Value.Object context])
     let res = invocable.Value.Invoke args
     res |> should equal context.Directory
@@ -24,8 +24,8 @@ let loadScriptWithError() =
 let loadVSSolution() =
     let testDir = System.IO.Path.Combine(NUnit.Framework.TestContext.CurrentContext.TestDirectory, "TestFiles")
     let script = Terrabuild.Scripting.loadScript [ "Terrabuild.Extensibility.dll" ] "TestFiles/VSSolution.fsx"
-    let invocable = script.GetMethod("__init__")
-    let context = { InitContext.Debug= false; InitContext.Directory = testDir; InitContext.CI = false }
+    let invocable = script.GetMethod("__defaults__")
+    let context = { ExtensionContext.Debug= false; ExtensionContext.Directory = testDir; ExtensionContext.CI = false }
     let args = Value.Map (Map [ "context", Value.Object context])
 
     let res = invocable.Value.Invoke<Terrabuild.Extensibility.ProjectInfo> args

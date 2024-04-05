@@ -19,7 +19,7 @@ let private findProject = function
     | _ ->
         None
 
-let __init__ (context: InitContext) =
+let __defaults__ (context: InitContext) =
     let dependencies =
         Directory.EnumerateFiles(context.Directory, "*.sln") |> Seq.head
         |> File.ReadLines

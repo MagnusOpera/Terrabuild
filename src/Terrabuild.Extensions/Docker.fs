@@ -10,7 +10,7 @@ type Docker() =
     /// </summary>
     /// <param name="dockerfile" example="&quot;Dockerfile&quot;">Use alternative Dockerfile. Default is Dockerfile.</param>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
-    /// <param name="arguments" example="{ configuration: &quot;Release&quot; }">Arguments to build image (see Dockerfile [ARG](https://docs.docker.com/reference/dockerfile/#arg)).</param> 
+    /// <param name="arguments" example="{ configuration: &quot;Release&quot; }">Named arguments to build image (see Dockerfile [ARG](https://docs.docker.com/reference/dockerfile/#arg)).</param> 
     static member build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
         let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
         let nodehash = context.NodeHash
