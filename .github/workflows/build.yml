@@ -49,14 +49,7 @@ jobs:
         with:
           name: Terrabuild Debug
           path: |
-            terrabuild.options.json
-            terrabuild.config.json
-            terrabuild.graph.json
-            terrabuild.graph.mermaid
-            terrabuild.buildgraph.json
-            terrabuild.buildgraph.mermaid
-            terrabuild.build.json
-            terrabuild.log
+            terrabuild-debug.*
 
       # - name: Upload Terrabuild Cache
       #   uses: actions/upload-artifact@v4

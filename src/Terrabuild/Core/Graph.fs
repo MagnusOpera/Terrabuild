@@ -215,17 +215,14 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         let nodeTag, reason =
             // if not is already built then no batch build
             if node |> isCached |> not then
-                $"{node.TargetHash}-{nodeId}", "no build required"
+                $"{node.TargetHash}-{nodeId}", "not batchable/no build required"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
-            elif node.Dependencies = Set.empty then
-                // printfn $"{node.Label} ==> assigned to cluster {node.TargetHash} since no dependencies"
-                node.TargetHash, "no dependencies"
             else
-                // check all actions are bacthable
+                // check all actions are batchable
                 let batchable =
                     node.Dependencies
                     |> Seq.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BatchContext <> None))
-               
+
                 if batchable |> not then
                     $"{node.TargetHash}-{nodeId}", "not batchable"
                 else
@@ -239,11 +236,15 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                             if dependencyNode |> isCached then Some (clusters[dependency] |> fst, dependencyNode.TargetHash)
                             else None)
                         |> List.ofSeq
+
                     match childrenTags with
                     | [tag, hash] when hash = node.TargetHash ->
-                        tag, "diffusion"
-                    | _ ->
-                        $"{node.TargetHash}-{nodeId}", "multiple tags"
+                        tag, "batchable/diffusion"
+                    | [] ->
+                        node.TargetHash, "batchable/no impacting dependencies"
+                    | childrenTags ->
+                        let tags = childrenTags |> List.map fst |> String.join "/"
+                        $"{node.TargetHash}-{nodeId}", $"not batchable/multiple tags: {tags}"
         clusters.TryAdd(nodeId, (nodeTag, reason)) |> ignore
         Log.Debug("Node {node} ({label}) is assigned tag {tag} with reason {reason}", nodeId, node.Label, nodeTag, reason)
 

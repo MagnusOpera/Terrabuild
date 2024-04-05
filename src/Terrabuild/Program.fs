@@ -44,48 +44,47 @@ let processCommandLine () =
     let result = parser.ParseCommandLine()
     let debug = result.Contains(TerrabuildArgs.Debug)
     let whatIf = result.Contains(TerrabuildArgs.WhatIf)
+
+    let launchDir = Environment.CurrentDirectory
+    let logFile name = IO.combinePath launchDir $"terrabuild-debug.{name}"
+
     if debug then
         Log.Logger <-
             LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File("terrabuild.log")
+                .WriteTo.File(logFile "log")
                 .CreateLogger()
 
-
     let runTarget wsDir target environment labels variables (options: Configuration.Options) =
-        let launchDir = Environment.CurrentDirectory
-
-        let logFile name = IO.combinePath launchDir name
-
         let runTarget () =
             try
                 if options.Debug then
                     let jsonOptions = Json.Serialize options
-                    jsonOptions |> IO.writeTextFile (logFile "terrabuild.options.json")
+                    jsonOptions |> IO.writeTextFile (logFile "options.json")
 
                 $"{Ansi.Emojis.box} Reading configuration" |> Terminal.writeLine
                 let config = Configuration.read options environment labels variables
 
                 if options.Debug then
                     let jsonConfig = Json.Serialize config
-                    jsonConfig |> IO.writeTextFile (logFile "terrabuild.config.json")
+                    jsonConfig |> IO.writeTextFile (logFile "config.json")
 
                 $"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}" |> Terminal.writeLine
                 let graph = Graph.buildGraph config target
 
                 if options.Debug then
                     let jsonGraph = Json.Serialize graph
-                    jsonGraph |> IO.writeTextFile (logFile "terrabuild.graph.json")
+                    jsonGraph |> IO.writeTextFile (logFile "graph.json")
                     let mermaid = Graph.graph graph |> String.join "\n"
-                    mermaid |> IO.writeTextFile (logFile "terrabuild.graph.mermaid")
+                    mermaid |> IO.writeTextFile (logFile "graph.mermaid")
 
                 let cache = Cache.Cache(config.Storage) :> Cache.ICache
                 let buildGraph = Graph.optimize config graph cache options
                 if options.Debug then
                     let jsonBuildGraph = Json.Serialize buildGraph
-                    jsonBuildGraph |> IO.writeTextFile (logFile "terrabuild.buildgraph.json")
+                    jsonBuildGraph |> IO.writeTextFile (logFile "buildgraph.json")
                     let mermaid = Graph.graph buildGraph |> String.join "\n"
-                    mermaid |> IO.writeTextFile (logFile "terrabuild.buildgraph.mermaid")
+                    mermaid |> IO.writeTextFile (logFile "buildgraph.mermaid")
 
                 if options.WhatIf then 0
                 else
@@ -95,7 +94,7 @@ let processCommandLine () =
 
                     if options.Debug then
                         let jsonBuild = Json.Serialize build
-                        jsonBuild |> IO.writeTextFile (logFile "terrabuild.build.json")
+                        jsonBuild |> IO.writeTextFile (logFile "build.json")
 
                     if build.Status = Build.BuildStatus.Success then 0
                     else 5

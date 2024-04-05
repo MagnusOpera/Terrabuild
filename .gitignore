@@ -409,8 +409,7 @@ dist
 node_modules
 Makefile2
 init.sh
-terrabuild.*.json
-terrabuild.*.mermaid
+terrabuild-debug.*
 terrabuild.planfile
 terraform.tfstate
 .terraform
