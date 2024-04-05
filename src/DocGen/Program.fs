@@ -93,9 +93,10 @@ let buildExtensions (members: Documentation.Member seq) =
 
 
 
-let writeCommand extensionDir (command: Command) (extension: Extension) =
+let writeCommand extensionDir (command: Command) (batchCommand: Command option) (extension: Extension) =
     match command.Name with
     | "__init__" -> ()
+    | name when name.StartsWith("__") -> ()
     | _ ->
         let commandFile = Path.Combine(extensionDir, $"{command.Name}.md")
         let commandContent = [
@@ -116,18 +117,19 @@ let writeCommand extensionDir (command: Command) (extension: Extension) =
             match command.Name with
             | "__dispatch__" -> $"Example for command `{name}`:"
             | _ -> ()
+
             "```"
-                    
             match command.Parameters with
             | [] -> $"@{extension.Name} {name}"
             | prms ->
                 $"@{extension.Name} {name} {{"
                 for prm in prms do
                     match prm.Name with
-                    | "__dispatch__" -> ()
+                    | "context" -> ()
                     | _ -> $"    {prm.Name} = {prm.Example}"
                 "}"
             "```"
+
             $"## Argument Reference"
             match command.Parameters with
             | [] -> "This command does not accept arguments."
@@ -135,10 +137,40 @@ let writeCommand extensionDir (command: Command) (extension: Extension) =
                 "The following arguments are supported:"
                 for prm in prms do
                     match prm.Name with
-                    | "__dispatch__" -> ()
+                    | "context" -> ()
                     | _ ->
                         let required = if prm.Required then "Required" else "Optional"
                         $"* `{prm.Name}` - ({required}) {prm.Summary}"
+
+            match batchCommand with
+            | Some batchCommand ->
+                "## Batch Reference"
+                batchCommand.Summary
+
+                "```"
+                match batchCommand.Parameters with
+                | [] -> $"@{extension.Name} {name}"
+                | prms ->
+                    $"@{extension.Name} {name} {{"
+                    for prm in prms do
+                        match prm.Name with
+                        | "context" -> ()
+                        | _ -> $"    {prm.Name} = {prm.Example}"
+                    "}"
+                "```"
+
+                ""
+                "The following arguments are supported:"
+                match batchCommand.Parameters with
+                | [] -> "This command does not accept arguments."
+                | prms ->
+                    for prm in prms do
+                        match prm.Name with
+                        | "context" -> ()
+                        | _ ->
+                            let required = if prm.Required then "Required" else "Optional"
+                            $"* `{prm.Name}` - ({required}) {prm.Summary}"
+            | _ -> ()
         ]
         File.WriteAllLines(commandFile, commandContent)
 
@@ -166,6 +198,7 @@ let writeExtension extensionDir (extension: Extension) =
                     ()
                 | "__dispatch__" ->
                     $"| [&lt;command&gt;](/docs/extensions/{extension.Name}/{cmd.Name}) | {cmd.Title |> Option.defaultValue cmd.Summary} |"
+                | name when name.StartsWith("__") -> ()
                 | _ ->
                     $"| [{cmd.Name}](/docs/extensions/{extension.Name}/{cmd.Name}) | {cmd.Title |> Option.defaultValue cmd.Summary} |"
 
@@ -211,7 +244,8 @@ let main args =
 
         // generate extension commands
         for cmd in extension.Commands do
-            writeCommand extensionDir cmd extension
+            let batchCmd = extension.Commands |> List.tryFind (fun x -> x.Name = $"__{cmd.Name}__")
+            writeCommand extensionDir cmd batchCmd extension
 
     // cleanup
     printfn "Cleaning output"

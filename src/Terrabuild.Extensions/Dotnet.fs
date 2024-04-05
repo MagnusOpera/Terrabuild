@@ -129,6 +129,11 @@ type Dotnet() =
         projectInfo
 
 
+    /// <summary title="Batch build multiple projects.">
+    /// The `build` command supports building multiple projects in the same batch.
+    /// </summary>
+    /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
+    /// <param name="log" example="true">Enable binlog for the build.</param>
     static member __build__ (context: OptimizeContext) (configuration: string option) (log: bool option) =
         let projects =
             context.ProjectPaths
