@@ -306,12 +306,12 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                 action.BatchContext
                 |> Option.bind (fun context ->
                     let optContext = {
-                        OptimizeContext.Debug = options.Debug
-                        OptimizeContext.CI = wsConfig.SourceControl.CI
-                        OptimizeContext.BranchOrTag = wsConfig.SourceControl.BranchOrTag
-                        OptimizeContext.ProjectPaths = projectPaths
-                        OptimizeContext.TempDir = ".terrabuild"
-                        OptimizeContext.NodeHash = clusterHash
+                        BatchContext.Debug = options.Debug
+                        BatchContext.CI = wsConfig.SourceControl.CI
+                        BatchContext.BranchOrTag = wsConfig.SourceControl.BranchOrTag
+                        BatchContext.ProjectPaths = projectPaths
+                        BatchContext.TempDir = ".terrabuild"
+                        BatchContext.NodeHash = clusterHash
                     }
                     let parameters = 
                         match context.Context with

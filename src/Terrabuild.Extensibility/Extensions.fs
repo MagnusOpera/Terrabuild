@@ -33,7 +33,7 @@ type ActionContext = {
 
 
 [<RequireQualifiedAccess>]
-type OptimizeContext = {
+type BatchContext = {
     Debug: bool
     CI: bool
     TempDir: string
