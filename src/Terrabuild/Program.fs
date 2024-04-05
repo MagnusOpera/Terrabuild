@@ -64,14 +64,14 @@ let processCommandLine () =
                 let jsonOptions = Json.Serialize options
                 jsonOptions |> IO.writeTextFile (logFile "options.json")
 
-            $"{Ansi.Emojis.box} Reading configuration" |> Terminal.writeLine
+            $"{Ansi.Emojis.box} Reading configuration for {environment} environment" |> Terminal.writeLine
             let config = Configuration.read options environment labels variables
 
             if options.Debug then
                 let jsonConfig = Json.Serialize config
                 jsonConfig |> IO.writeTextFile (logFile "config.json")
 
-            $"{Ansi.Emojis.popcorn} Constructing graph for {config.Environment}" |> Terminal.writeLine
+            $"{Ansi.Emojis.popcorn} Constructing graph" |> Terminal.writeLine
             let graph = Graph.buildGraph config target
 
             if options.Debug then
@@ -90,6 +90,10 @@ let processCommandLine () =
 
             if options.WhatIf then 0
             else
+                let targets = graph.Targets |> String.join ","
+                let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
+                $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
+
                 let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
                 let build = Build.run config buildGraph cache buildNotification options
                 buildNotification.WaitCompletion()

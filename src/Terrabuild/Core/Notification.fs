@@ -49,9 +49,6 @@ type BuildNotification() =
             let! msg = inbox.Receive()
             match msg with
             | PrinterProtocol.BuildStarted graph -> 
-                let targets = graph.Targets |> String.join ","
-                let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
-                $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
                 scheduleUpdate ()
                 return! messageLoop () 
 

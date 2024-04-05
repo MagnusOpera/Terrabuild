@@ -114,7 +114,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
             targets |> Seq.collect (fun target -> buildTarget target dependency))
         |> Set
 
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {allNodes.Count} tasks to evaluate" |> Terminal.writeLine
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {allNodes.Count} tasks to run" |> Terminal.writeLine
 
     { Targets = targets
       Nodes = allNodes |> Map.ofDict
