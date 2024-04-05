@@ -26,7 +26,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0.201
+          dotnet-version: 8.0.203
 
       - name: Build & Publish
         run: make dist-all version=${{github.ref_name}}
