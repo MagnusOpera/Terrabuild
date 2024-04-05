@@ -6,15 +6,16 @@ open System
 
 let computeFilesSha files =
     use ms = new MemoryStream()
-    let sha256 = SHA256.Create()
 
     let computeFileSha file =
+        let sha256 = SHA256.Create()
         use hFile = File.Open(file, FileMode.Open)
         hFile |> sha256.ComputeHash |> ms.Write
 
     files |> Seq.iter computeFileSha
 
     ms.Position <- 0
+    let sha256 = SHA256.Create()
     let hash = ms |> sha256.ComputeHash |> Convert.ToHexString
     hash
 
