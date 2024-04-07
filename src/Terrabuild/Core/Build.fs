@@ -13,35 +13,35 @@ type NodeInfo = {
 }
 
 [<RequireQualifiedAccess>]
-type NodeBuildStatus =
+type NodeStatus =
     | Success of NodeInfo
     | Failure of NodeInfo
     | Unfulfilled of NodeInfo
 
 [<RequireQualifiedAccess>]
-type BuildStatus =
+type Status =
     | Success
     | Failure
 
 [<RequireQualifiedAccess>]
-type BuildSummary = {
+type Summary = {
     Commit: string
     BranchOrTag: string
     StartedAt: DateTime
     EndedAt: DateTime
     TotalDuration: TimeSpan
     BuildDuration: TimeSpan
-    Status: BuildStatus
+    Status: Status
     Targets: string set
-    RootNodes: NodeBuildStatus set
+    RootNodes: NodeStatus set
 }
 
 
 type IBuildNotification =
     abstract WaitCompletion: unit -> unit
 
-    abstract BuildStarted: graph:Graph.WorkspaceGraph -> unit
-    abstract BuildCompleted: summary:BuildSummary -> unit
+    abstract BuildStarted: graph:Graph.Workspace -> unit
+    abstract BuildCompleted: summary:Summary -> unit
 
     abstract NodeScheduled: node:Graph.Node -> unit
     abstract NodeDownloading: node:Graph.Node -> unit
@@ -51,13 +51,13 @@ type IBuildNotification =
 
 
 let private isNodeUnsatisfied = function
-    | NodeBuildStatus.Failure nodeInfo -> Some nodeInfo
-    | NodeBuildStatus.Unfulfilled nodeInfo -> Some nodeInfo
-    | NodeBuildStatus.Success _ -> None
+    | NodeStatus.Failure nodeInfo -> Some nodeInfo
+    | NodeStatus.Unfulfilled nodeInfo -> Some nodeInfo
+    | NodeStatus.Success _ -> None
 
 
 
-let run (configuration: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
+let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
     let workspaceDir = Environment.CurrentDirectory
@@ -92,7 +92,7 @@ let run (configuration: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGr
         |> Map.addMap refCounts
 
     let isBuildSuccess = function
-        | NodeBuildStatus.Success _ -> true
+        | NodeStatus.Success _ -> true
         | _ -> false
 
     // collect dependencies status
@@ -108,9 +108,9 @@ let run (configuration: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGr
         match cache.TryGetSummary false cacheEntryId with
         | Some summary -> 
             match summary.Status with
-            | Cache.TaskStatus.Success -> NodeBuildStatus.Success nodeInfo
-            | Cache.TaskStatus.Failure -> NodeBuildStatus.Failure nodeInfo
-        | _ -> NodeBuildStatus.Unfulfilled nodeInfo
+            | Cache.TaskStatus.Success -> NodeStatus.Success nodeInfo
+            | Cache.TaskStatus.Failure -> NodeStatus.Failure nodeInfo
+        | _ -> NodeStatus.Unfulfilled nodeInfo
 
     let buildNode (node: Graph.Node) =
         notification.NodeDownloading node
@@ -292,18 +292,18 @@ let run (configuration: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGr
 
     let status =
         let isSuccess = dependencies |> Seq.forall isBuildSuccess
-        if isSuccess then BuildStatus.Success
-        else BuildStatus.Failure
+        if isSuccess then Status.Success
+        else Status.Failure
 
-    let buildInfo = { BuildSummary.Commit = headCommit
-                      BuildSummary.BranchOrTag = branchOrTag
-                      BuildSummary.StartedAt = options.StartedAt
-                      BuildSummary.EndedAt = endedAt
-                      BuildSummary.BuildDuration = buildDuration
-                      BuildSummary.TotalDuration = totalDuration
-                      BuildSummary.Status = status
-                      BuildSummary.Targets = graph.Targets
-                      BuildSummary.RootNodes = dependencies }
+    let buildInfo = { Summary.Commit = headCommit
+                      Summary.BranchOrTag = branchOrTag
+                      Summary.StartedAt = options.StartedAt
+                      Summary.EndedAt = endedAt
+                      Summary.BuildDuration = buildDuration
+                      Summary.TotalDuration = totalDuration
+                      Summary.Status = status
+                      Summary.Targets = graph.Targets
+                      Summary.RootNodes = dependencies }
     notification.BuildCompleted buildInfo
     buildInfo
 

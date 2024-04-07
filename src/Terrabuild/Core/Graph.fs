@@ -24,13 +24,13 @@ type Node = {
     CommandLines: Configuration.ContaineredActionBatch list
 }
 
-type WorkspaceGraph = {
+type Workspace = {
     Targets: string set
     Nodes: Map<string, Node>
     RootNodes: string set
 }
 
-let buildGraph (configuration: Configuration.WorkspaceConfig) (targets: string set) =
+let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
@@ -122,7 +122,7 @@ let buildGraph (configuration: Configuration.WorkspaceConfig) (targets: string s
 
 
 
-let graph (graph: WorkspaceGraph) =
+let graph (graph: Workspace) =
     let projects =
         graph.Nodes.Values
         |> Seq.groupBy (fun x -> x.Project)
@@ -162,7 +162,7 @@ let graph (graph: WorkspaceGraph) =
 
 
 
-let optimize (configuration: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (cache: Cache.ICache)  (options: Configuration.Options) =
+let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
     // compute first incoming edges

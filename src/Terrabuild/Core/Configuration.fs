@@ -52,7 +52,7 @@ type ContaineredTarget = {
 }
 
 [<RequireQualifiedAccess>]
-type ProjectConfig = {
+type Project = {
     Id: string
     Hash: string
     Dependencies: string set
@@ -62,12 +62,12 @@ type ProjectConfig = {
 }
 
 [<RequireQualifiedAccess>]
-type WorkspaceConfig = {
+type Workspace = {
     Storage: Storages.Storage
     SourceControl: SourceControls.SourceControl
     Dependencies: string set
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
-    Projects: Map<string, ProjectConfig>
+    Projects: Map<string, Project>
     Environment: string
 }
 
@@ -192,7 +192,7 @@ let read workspaceDir environment labels variables (options: Options) =
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
-            let projects: Map<string, ProjectConfig> =
+            let projects: Map<string, Project> =
                 try
                     scanDependencies projects projectDef.Dependencies
                 with
@@ -356,12 +356,12 @@ let read workspaceDir environment labels variables (options: Options) =
                 |> Set.map (IO.relativePath projectDir)
 
             let projectConfig =
-                { ProjectConfig.Id = project
-                  ProjectConfig.Hash = projectHash
-                  ProjectConfig.Dependencies = projectDef.Dependencies
-                  ProjectConfig.Files = files
-                  ProjectConfig.Targets = projectSteps
-                  ProjectConfig.Labels = projectDef.Labels }
+                { Project.Id = project
+                  Project.Hash = projectHash
+                  Project.Dependencies = projectDef.Dependencies
+                  Project.Files = files
+                  Project.Targets = projectSteps
+                  Project.Labels = projectDef.Labels }
 
             projects |> Map.add project projectConfig
         else
@@ -398,9 +398,9 @@ let read workspaceDir environment labels variables (options: Options) =
         | _ -> projects.Keys
         |> Set
 
-    { WorkspaceConfig.Dependencies = dependencies
-      WorkspaceConfig.Projects = projects
-      WorkspaceConfig.Targets = workspaceConfig.Targets
-      WorkspaceConfig.Environment = environment
-      WorkspaceConfig.SourceControl = sourceControl
-      WorkspaceConfig.Storage = storage }
+    { Workspace.Dependencies = dependencies
+      Workspace.Projects = projects
+      Workspace.Targets = workspaceConfig.Targets
+      Workspace.Environment = environment
+      Workspace.SourceControl = sourceControl
+      Workspace.Storage = storage }

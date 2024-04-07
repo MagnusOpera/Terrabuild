@@ -24,8 +24,8 @@ type NodeStatus =
 
 [<RequireQualifiedAccess>]
 type PrinterProtocol =
-    | BuildStarted of graph:Graph.WorkspaceGraph
-    | BuildCompleted of summary:Build.BuildSummary
+    | BuildStarted of graph:Graph.Workspace
+    | BuildCompleted of summary:Build.Summary
     | NodeStatusChanged of node:Graph.Node * status:NodeStatus
     | NodeCompleted of node:Graph.Node * restored:bool * summary:Cache.TargetSummary option
     | Render
@@ -69,7 +69,7 @@ type BuildNotification() =
 
                 let result =
                     match summary.Status with
-                    | Build.BuildStatus.Success -> Ansi.Emojis.happy
+                    | Build.Status.Success -> Ansi.Emojis.happy
                     | _ -> Ansi.Emojis.sad
 
                 $"{result} Completed in {summary.TotalDuration}"
@@ -123,7 +123,7 @@ type BuildNotification() =
             PrinterProtocol.BuildStarted graph
             |> printerAgent.Post
 
-        member _.BuildCompleted(summary: Build.BuildSummary) = 
+        member _.BuildCompleted(summary: Build.Summary) = 
             PrinterProtocol.BuildCompleted summary
             |> printerAgent.Post
 

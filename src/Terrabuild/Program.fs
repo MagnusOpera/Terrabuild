@@ -103,7 +103,7 @@ let processCommandLine () =
                     let jsonBuild = Json.Serialize build
                     jsonBuild |> IO.writeTextFile (logFile "build.json")
 
-                if build.Status = Build.BuildStatus.Success then 0
+                if build.Status = Build.Status.Success then 0
                 else 5
         with
             | :? Configuration.ConfigException as ex ->
