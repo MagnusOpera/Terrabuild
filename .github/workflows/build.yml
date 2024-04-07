@@ -40,7 +40,6 @@ jobs:
 
       - name: Build
         run: |
-          make dist
           make self-publish
 
       - name: Upload Terrabuild Debug

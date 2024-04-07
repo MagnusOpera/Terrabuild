@@ -4,6 +4,9 @@ version ?= 0.0.0
 build:
 	dotnet build -c $(config)
 
+clean-logs:
+	rm terrabuild-debug.*
+
 dist:
 	rm -rf $(PWD)/.out
 	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
@@ -33,16 +36,16 @@ parser:
 all:
 	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
 
-self-dist:
+self-dist: dist clean-logs
 	.out/dotnet/terrabuild dist --workspace src --environment $(config) --retry --debug
 
-self-test:
+self-test: dist clean-logs
 	.out/dotnet/terrabuild test --workspace src --environment $(config) --retry --debug
 
-self-publish:
+self-publish: dist clean-logs
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug
 
-self-check: dist
+self-check: dist clean-logs
 	rm terrabuild-debug.*
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug --whatif
 
@@ -71,10 +74,10 @@ run-build-scaffold:
 run-publish-scaffold:
 	dotnet run --project src/Terrabuild -- publish --workspace tests/scaffold --debug --retry
 
-run-build:
+run-build: clean-logs
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
 
-run-rebuild:
+run-rebuild: clean-logs
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --force
 
 run-dist:
