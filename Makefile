@@ -45,7 +45,6 @@ self-publish: dist clean
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug
 
 self-check: dist clean
-	rm terrabuild-debug.*
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug --whatif
 
 test:
