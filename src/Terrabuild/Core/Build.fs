@@ -306,9 +306,3 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.RootNodes = dependencies }
     notification.BuildCompleted buildInfo
     buildInfo
-
-
-
-
-
-
