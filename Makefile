@@ -35,16 +35,16 @@ parser:
 all:
 	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
 
-self-dist: dist clean
+self-dist: clean dist
 	.out/dotnet/terrabuild dist --workspace src --environment $(config) --retry --debug
 
-self-test: dist clean
+self-test: clean dist
 	.out/dotnet/terrabuild test --workspace src --environment $(config) --retry --debug
 
-self-publish: dist clean
+self-publish: clean dist
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug
 
-self-check: dist clean
+self-check: clean dist
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug --whatif
 
 test:
