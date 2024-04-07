@@ -6,7 +6,7 @@ open Microsoft.Extensions.FileSystemGlobbing
 
 
 [<RequireQualifiedAccess>]
-type Extension =
+type ExtensionType =
     | Dotnet
     | Gradle
     | Npm
@@ -23,12 +23,12 @@ type Target =
 
 type Project = {
     Directory: string
-    Type: Extension
-    Others: Extension list
+    Type: ExtensionType
+    Others: ExtensionType list
 }
 
 
-type ExtensionConfiguration = {
+type Extension = {
     Container: string option
     Defaults: Map<string, string>
     Actions: Map<Target, string list>
@@ -52,43 +52,43 @@ let envConfigs =
 
 // NOTE: order is important, first found is main extension
 let extMarkers = [
-    Extension.Dotnet, "*.*proj"
-    Extension.Gradle, "build.gradle"
-    Extension.Npm, "package.json"
-    Extension.Make, "Makefile"
-    Extension.Docker, "Dockerfile"
-    Extension.Terraform, ".terraform.lock.hcl"
+    ExtensionType.Dotnet, "*.*proj"
+    ExtensionType.Gradle, "build.gradle"
+    ExtensionType.Npm, "package.json"
+    ExtensionType.Make, "Makefile"
+    ExtensionType.Docker, "Dockerfile"
+    ExtensionType.Terraform, ".terraform.lock.hcl"
 ]
 
 
 let extConfigs =
     Map [ 
-        Extension.Dotnet, { Container = None //Some "mcr.microsoft.com/dotnet/sdk:8.0"
-                            Defaults = Map [ "configuration", "$configuration" ]
-                            Actions = Map [ Target.Build, [ "build"; "publish" ] ] }
+        ExtensionType.Dotnet, { Container = None //Some "mcr.microsoft.com/dotnet/sdk:8.0"
+                                Defaults = Map [ "configuration", "$configuration" ]
+                                Actions = Map [ Target.Build, [ "build"; "publish" ] ] }
 
-        Extension.Gradle, { Container = None //Some "gradle:jdk21"
-                            Defaults = Map [ "configuration", "$configuration" ]
-                            Actions = Map [ Target.Build, [ "build" ]] }
+        ExtensionType.Gradle, { Container = None //Some "gradle:jdk21"
+                                Defaults = Map [ "configuration", "$configuration" ]
+                                Actions = Map [ Target.Build, [ "build" ]] }
 
-        Extension.Npm, { Container = None //Some "node:20"
-                         Defaults = Map.empty
-                         Actions = Map [ Target.Build, [ "build" ] ] }
+        ExtensionType.Npm, { Container = None //Some "node:20"
+                             Defaults = Map.empty
+                             Actions = Map [ Target.Build, [ "build" ] ] }
 
-        Extension.Make, { Container = None
-                          Defaults = Map.empty
-                          Actions = Map [ Target.Build, [ "build" ] ] }
+        ExtensionType.Make, { Container = None
+                              Defaults = Map.empty
+                              Actions = Map [ Target.Build, [ "build" ] ] }
 
-        Extension.Docker, { Container = None //Some "docker:25.0"
-                            Defaults = Map [ "image", "\"ghcr.io/example/\" + $terrabuild_project"
-                                             "arguments", "{ configuration: $configuration }" ]
-                            Actions = Map [ Target.Build, [ "build" ]
-                                            Target.Publish, [ "push" ] ] }
+        ExtensionType.Docker, { Container = None //Some "docker:25.0"
+                                Defaults = Map [ "image", "\"ghcr.io/example/\" + $terrabuild_project"
+                                                 "arguments", "{ configuration: $configuration }" ]
+                                Actions = Map [ Target.Build, [ "build" ]
+                                                Target.Publish, [ "push" ] ] }
 
-        Extension.Terraform, { Container = None //Some "hashicorp/terraform:1.7"
-                               Defaults = Map.empty
-                               Actions = Map [ Target.Build, [ "plan" ]
-                                               Target.Deploy, [ "apply" ] ] }
+        ExtensionType.Terraform, { Container = None //Some "hashicorp/terraform:1.7"
+                                   Defaults = Map.empty
+                                   Actions = Map [ Target.Build, [ "plan" ]
+                                                   Target.Deploy, [ "apply" ] ] }
     ]
 
 
@@ -122,9 +122,9 @@ let rec findProjectInDir dir =
 
 
 let toLower s = s.ToString().ToLowerInvariant()
-let toExtension (pt: Extension) = pt |> toLower
+let toExtension (pt: ExtensionType) = pt |> toLower
 
-let genWorkspace (extensions: Extension set) =
+let genWorkspace (extensions: ExtensionType set) =
     seq {
         for (KeyValue(target, dependsOn)) in targetConfigs do
             ""
