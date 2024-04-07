@@ -30,7 +30,7 @@ type WorkspaceGraph = {
     RootNodes: string set
 }
 
-let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
+let buildGraph (configuration: Configuration.WorkspaceConfig) (targets: string set) =
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
@@ -38,11 +38,11 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
         let nodeId = $"{project}:{targetName}"
 
         let processNode () =
-            let projectConfig = wsConfig.Projects[project]
+            let projectConfig = configuration.Projects[project]
 
             // merge targets requirements
             let buildDependsOn =
-                wsConfig.Targets
+                configuration.Targets
                 |> Map.tryFind targetName
                 |> Option.map (fun ct -> ct.DependsOn)
                 |> Option.defaultValue Set.empty
@@ -110,7 +110,7 @@ let buildGraph (wsConfig: Configuration.WorkspaceConfig) (targets: string set) =
         else Set.singleton nodeId
 
     let rootNodes =
-        wsConfig.Dependencies |> Seq.collect (fun dependency ->
+        configuration.Dependencies |> Seq.collect (fun dependency ->
             targets |> Seq.collect (fun target -> buildTarget target dependency))
         |> Set
 
@@ -162,7 +162,7 @@ let graph (graph: WorkspaceGraph) =
 
 
 
-let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (cache: Cache.ICache)  (options: Configuration.Options) =
+let optimize (configuration: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (cache: Cache.ICache)  (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
     // compute first incoming edges
@@ -189,7 +189,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
         |> Map.addMap refCounts
 
     let cacheMode =
-        if wsConfig.SourceControl.CI then Cacheability.Always
+        if configuration.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
     let isCached (node: Node) =
@@ -285,7 +285,7 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                 |> List.ofSeq
 
             // get hands on target
-            let project = wsConfig.Projects |> Map.find oneNode.Project
+            let project = configuration.Projects |> Map.find oneNode.Project
             let target = project.Targets |> Map.find oneNode.Target
 
             let projectPaths = nodes |> List.map (fun node -> node.Project)
@@ -307,8 +307,8 @@ let optimize (wsConfig: Configuration.WorkspaceConfig) (graph: WorkspaceGraph) (
                 |> Option.bind (fun context ->
                     let optContext = {
                         BatchContext.Debug = options.Debug
-                        BatchContext.CI = wsConfig.SourceControl.CI
-                        BatchContext.BranchOrTag = wsConfig.SourceControl.BranchOrTag
+                        BatchContext.CI = configuration.SourceControl.CI
+                        BatchContext.BranchOrTag = configuration.SourceControl.BranchOrTag
                         BatchContext.ProjectPaths = projectPaths
                         BatchContext.TempDir = ".terrabuild"
                         BatchContext.NodeHash = clusterHash

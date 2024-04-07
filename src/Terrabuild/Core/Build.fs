@@ -57,7 +57,7 @@ let private isNodeUnsatisfied = function
 
 
 
-let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
+let run (configuration: Configuration.WorkspaceConfig) (graph: Graph.WorkspaceGraph) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
     let workspaceDir = Environment.CurrentDirectory
@@ -65,7 +65,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     let containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
     let cacheMode =
-        if workspaceConfig.SourceControl.CI then Cacheability.Always
+        if configuration.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
     // compute first incoming edges
@@ -154,7 +154,7 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
 
             | _ ->
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.Hash, node.Project, node.Target)
-                let cacheEntry = cache.CreateEntry workspaceConfig.SourceControl.CI cacheEntryId
+                let cacheEntry = cache.CreateEntry configuration.SourceControl.CI cacheEntryId
                 notification.NodeBuilding node
 
                 // NOTE:
@@ -278,8 +278,8 @@ let run (workspaceConfig: Configuration.WorkspaceConfig) (graph: Graph.Workspace
     // wait only if we have something to do
     buildQueue.WaitCompletion()
 
-    let headCommit = workspaceConfig.SourceControl.HeadCommit
-    let branchOrTag = workspaceConfig.SourceControl.BranchOrTag
+    let headCommit = configuration.SourceControl.HeadCommit
+    let branchOrTag = configuration.SourceControl.BranchOrTag
 
     let dependencies =
         graph.RootNodes

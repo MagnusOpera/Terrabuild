@@ -32,8 +32,6 @@ type BatchContext = {
     Context: Value
 }
 
-
-
 [<RequireQualifiedAccess>]
 type ContaineredActionBatch = {
     BatchContext: BatchContext option
@@ -54,7 +52,7 @@ type ContaineredTarget = {
 }
 
 [<RequireQualifiedAccess>]
-type Project = {
+type ProjectConfig = {
     Id: string
     Hash: string
     Dependencies: string set
@@ -69,36 +67,21 @@ type WorkspaceConfig = {
     SourceControl: SourceControls.SourceControl
     Dependencies: string set
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
-    Projects: Map<string, Project>
+    Projects: Map<string, ProjectConfig>
     Environment: string
 }
 
 
-
-[<RequireQualifiedAccess>]
-type private ProjectDefinition = {
-    Dependencies: string set
-    Ignores: string set
-    Outputs: string set
-    Targets: Map<string, Terrabuild.Configuration.Project.AST.Target>
-    Labels: string set
-    Extensions: Map<string, Terrabuild.Configuration.AST.Extension>
-    Scripts: Map<string, Lazy<Terrabuild.Scripting.Script>>
-}
-
-
-
-
-let read (options: Options) environment labels variables =
-    let workspaceContent = File.ReadAllText "WORKSPACE"
+let read workspaceDir environment labels variables (options: Options) =
+    let workspaceContent = IO.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
             Terrabuild.Configuration.FrontEnd.parseWorkspace workspaceContent
         with exn ->
             ConfigException.Raise("Failed to read WORKSPACE configuration file", exn)
 
-    let workspaceDir = Environment.CurrentDirectory
-    IO.createDirectory ".terrabuild"
+    // create temporary folder so extension can expose files to docker containers (folder must within workspaceDir hierarchy)
+    IO.combinePath workspaceDir ".terrabuild" |> IO.createDirectory
 
     // variables
     let environments = workspaceConfig.Environments
@@ -199,17 +182,17 @@ let read (options: Options) environment labels variables =
 
                 let projectTargets = projectConfig.Targets
 
-                { ProjectDefinition.Dependencies = projectDependencies
-                  ProjectDefinition.Ignores = projectIgnores
-                  ProjectDefinition.Outputs = projectOutputs
-                  ProjectDefinition.Targets = projectTargets
-                  ProjectDefinition.Labels = labels
-                  ProjectDefinition.Extensions = extensions
-                  ProjectDefinition.Scripts = scripts }
+                {| Dependencies = projectDependencies
+                   Ignores = projectIgnores
+                   Outputs = projectOutputs
+                   Targets = projectTargets
+                   Labels = labels
+                   Extensions = extensions
+                   Scripts = scripts |}
 
             // we go depth-first in order to compute node hash right after
             // NOTE: this could lead to a memory usage problem
-            let projects: Map<string, Project> =
+            let projects: Map<string, ProjectConfig> =
                 try
                     scanDependencies projects projectDef.Dependencies
                 with
@@ -373,12 +356,12 @@ let read (options: Options) environment labels variables =
                 |> Set.map (IO.relativePath projectDir)
 
             let projectConfig =
-                { Project.Id = project
-                  Project.Hash = projectHash
-                  Project.Dependencies = projectDef.Dependencies
-                  Project.Files = files
-                  Project.Targets = projectSteps
-                  Project.Labels = projectDef.Labels }
+                { ProjectConfig.Id = project
+                  ProjectConfig.Hash = projectHash
+                  ProjectConfig.Dependencies = projectDef.Dependencies
+                  ProjectConfig.Files = files
+                  ProjectConfig.Targets = projectSteps
+                  ProjectConfig.Labels = projectDef.Labels }
 
             projects |> Map.add project projectConfig
         else

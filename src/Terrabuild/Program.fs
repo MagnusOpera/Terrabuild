@@ -58,6 +58,7 @@ let processCommandLine () =
 
     let runTarget wsDir target environment labels variables (options: Configuration.Options) =
         try
+            let wsDir = wsDir |> IO.fullPath
             Environment.CurrentDirectory <- wsDir
 
             if options.Debug then
@@ -65,7 +66,7 @@ let processCommandLine () =
                 jsonOptions |> IO.writeTextFile (logFile "options.json")
 
             $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
-            let config = Configuration.read options environment labels variables
+            let config = Configuration.read wsDir environment labels variables options
 
             if options.Debug then
                 let jsonConfig = Json.Serialize config
@@ -170,7 +171,7 @@ let processCommandLine () =
     | p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> targetShortcut "serve"
     | p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> target
     | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear; 0
-    | _ -> printfn $"{parser.PrintUsage()}"; 0
+    | _ -> parser.PrintUsage() |> Terminal.writeLine; 0
 
 [<EntryPoint>]
 let main _ =
