@@ -11,21 +11,7 @@ type InvocationResult<'t> =
     | TargetNotFound
     | ErrorTarget of Exception
 
-// well-know provided extensions
-// do not forget to add reference when adding new implementation
-let systemScripts =
-    Map [
-        "@docker", typeof<Terrabuild.Extensions.Docker>
-        "@dotnet", typeof<Terrabuild.Extensions.Dotnet>
-        "@make", typeof<Terrabuild.Extensions.Make>
-        "@npm", typeof<Terrabuild.Extensions.Npm>
-        "@null", typeof<Terrabuild.Extensions.Null>
-        "@shell", typeof<Terrabuild.Extensions.Shell>
-        "@terraform", typeof<Terrabuild.Extensions.Terraform>
-    ]
-
-let systemExtensions =
-    systemScripts |> Map.map (fun _ _ -> Extension.Empty)
+let systemExtensions = Terrabuild.Extensions.Factory.systemScripts |> Map.map (fun _ _ -> Extension.Empty)
 
 // NOTE: when app in package as a single file, this break - so instead of providing 
 //       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided
@@ -41,7 +27,7 @@ let lazyLoadScript (name: string) (ext: Extension) =
         match ext.Script with
         | Some script -> loadScript [ terrabuildExtensibility ] script
         | _ ->
-            match systemScripts |> Map.tryFind name with
+            match Terrabuild.Extensions.Factory.systemScripts |> Map.tryFind name with
             | Some sysTpe -> Script(sysTpe)
             | _ -> failwith $"Script is not defined for extension '{name}'"
 
