@@ -4,7 +4,7 @@ open System.Security.Cryptography
 open System
 
 
-let computeFilesSha files =
+let sha256files files =
     use ms = new MemoryStream()
 
     let computeFileSha file =
@@ -30,5 +30,5 @@ let sha256 (s: string) =
     let hash = ms |> sha256.ComputeHash |> Convert.ToHexString
     hash
 
-let sha256list lines =
+let sha256strings (lines: string seq) =
     lines |> String.join "\n" |> sha256

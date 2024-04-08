@@ -2,5 +2,5 @@ module toto
 open Terrabuild.Extensibility
 
 
-let tagada (context: InitContext) =
+let tagada (context: ExtensionContext) =
     context.Directory

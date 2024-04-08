@@ -27,19 +27,6 @@ let systemScripts =
 let systemExtensions =
     systemScripts |> Map.map (fun _ _ -> Extension.Empty)
 
-
-let loadStorage name : Storages.Storage =
-    match name with
-    | None -> Storages.Local()
-    | Some "azureblob" -> Storages.AzureBlobStorage()
-    | _ -> failwith $"Unknown storage '{name}'"
-
-let loadSourceControl name: SourceControls.SourceControl =
-    match name with
-    | None -> SourceControls.Local()
-    | Some "github" -> SourceControls.GitHub()
-    | _ -> failwith $"Unknown source control '{name}'"
-
 // NOTE: when app in package as a single file, this break - so instead of providing 
 //       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided
 //       ¯\_(ツ)_/¯

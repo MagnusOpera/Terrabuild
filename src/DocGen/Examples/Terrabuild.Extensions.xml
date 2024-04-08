@@ -111,7 +111,7 @@
 				Enable binlog for the build.
 			</param>
 		</member>
-		<member name="M:Terrabuild.Extensions.Dotnet.__init__(Terrabuild.Extensibility.InitContext)">
+		<member name="M:Terrabuild.Extensions.Dotnet.__init__(Terrabuild.Extensibility.ExtensionContext)">
 			<summary>
 				Provides default values for project.
 			</summary>
@@ -195,7 +195,7 @@
 				Provides support for `npm`.
 			</summary>
 		</member>
-		<member name="M:Terrabuild.Extensions.Null.__init__(Terrabuild.Extensibility.InitContext)">
+		<member name="M:Terrabuild.Extensions.Null.__init__(Terrabuild.Extensibility.ExtensionContext)">
 			<summary>
 				Fake init.
 			</summary>

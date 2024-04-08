@@ -226,7 +226,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                     Log.Debug("{Hash}: Execution completed with '{Code}'", node.Hash, exitCode)
 
                 notification.NodeUploading node
-                let afterFiles = FileSystem.createSnapshot projectDirectory node.Outputs
+                let afterFiles = FileSystem.createSnapshot node.Outputs projectDirectory
 
                 // keep only new or modified files
                 let newFiles = afterFiles - beforeFiles

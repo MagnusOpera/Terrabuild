@@ -1,0 +1,10 @@
+
+configuration @dotnet { }
+
+target build {
+    @dotnet build
+}
+
+target test {
+    @dotnet test
+}

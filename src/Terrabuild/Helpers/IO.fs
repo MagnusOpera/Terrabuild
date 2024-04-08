@@ -64,7 +64,7 @@ let enumerateFilesBut (ignores: string set) rootdir =
         |> List.ofSeq
     result
 
-let enumerateFilesMatch (matches: string set) rootdir =
+let enumerateFilesMatch (matches: string seq) rootdir =
     let matcher = Matcher()
     matcher.AddIncludePatterns(matches)
 

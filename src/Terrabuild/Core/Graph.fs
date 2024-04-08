@@ -78,7 +78,7 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
                     yield projectConfig.Hash
                 ]
 
-                let hash = hashContent |> Hash.sha256list
+                let hash = hashContent |> Hash.sha256strings
 
                 // compute cacheability of this node
                 let childrenCache =
@@ -300,7 +300,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
             let clusterHash =
                 clusterDependencies
                 |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Hash)
-                |> Hash.sha256list
+                |> Hash.sha256strings
 
             let optimizeAction (action: Configuration.ContaineredActionBatch) =
                 action.BatchContext

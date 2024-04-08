@@ -17,7 +17,7 @@ with
             |> List.ofSeq
         newOutputs
 
-let createSnapshot projectDirectory outputs =
+let createSnapshot outputs projectDirectory =
     let files =
         IO.enumerateFilesMatch outputs projectDirectory
         |> Seq.map (fun output -> output, System.IO.File.GetLastWriteTimeUtc output)

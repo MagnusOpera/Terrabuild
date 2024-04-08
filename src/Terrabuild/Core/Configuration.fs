@@ -34,11 +34,11 @@ type BatchContext = {
 
 [<RequireQualifiedAccess>]
 type ContaineredActionBatch = {
-    BatchContext: BatchContext option
-
     Cache: Cacheability
-    Container: string option
     Actions: Action list
+
+    Container: string option
+    BatchContext: BatchContext option
 }
 
 
@@ -72,7 +72,7 @@ type Workspace = {
 }
 
 
-let read workspaceDir environment labels variables (options: Options) =
+let read workspaceDir environment labels variables (sourceControl: SourceControls.SourceControl) (storage: Storages.Storage) (options: Options) =
     let workspaceContent = IO.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
@@ -96,9 +96,6 @@ let read workspaceDir environment labels variables (options: Options) =
         variables
         |> Map.map (fun _ value -> value)
         |> Map.addMap envVariables
-
-    let sourceControl = SourceControls.Factory.create options.Local
-    let storage = Storages.Factory.create()
 
     if options.Force then
         $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
@@ -211,7 +208,7 @@ let read workspaceDir environment labels variables (options: Options) =
             let filesHash =
                 files
                 |> Seq.sort
-                |> Hash.computeFilesSha
+                |> Hash.sha256files
  
             let dependenciesHash =
                 projectDef.Dependencies

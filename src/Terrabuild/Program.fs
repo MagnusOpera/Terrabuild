@@ -65,8 +65,11 @@ let processCommandLine () =
                 let jsonOptions = Json.Serialize options
                 jsonOptions |> IO.writeTextFile (logFile "options.json")
 
+            let sourceControl = SourceControls.Factory.create options.Local
+            let storage = Storages.Factory.create()
+
             $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
-            let config = Configuration.read wsDir environment labels variables options
+            let config = Configuration.read wsDir environment labels variables sourceControl storage options
 
             if options.Debug then
                 let jsonConfig = Json.Serialize config
@@ -129,9 +132,9 @@ let processCommandLine () =
 
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
         let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
-        let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLowerInvariant
-        let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLowerInvariant |> Set)
-        let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLowerInvariant, v) |> Map
+        let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLower
+        let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
+        let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, v) |> Map
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
@@ -143,11 +146,11 @@ let processCommandLine () =
 
 
     let target (targetArgs: ParseResults<TargetArgs>) =
-        let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLowerInvariant
+        let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLower
         let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
-        let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLowerInvariant
-        let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLowerInvariant |> Set)
-        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLowerInvariant, v) |> Map
+        let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLower
+        let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
+        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, v) |> Map
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)

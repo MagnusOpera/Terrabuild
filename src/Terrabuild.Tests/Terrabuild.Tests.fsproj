@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Helpers/FileSystem.fs" />
+    <Compile Include="Helpers/Collections.fs" />
+    <Compile Include="Helpers/Hash.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
