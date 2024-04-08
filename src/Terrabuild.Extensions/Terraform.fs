@@ -33,11 +33,14 @@ type Terraform() =
     /// * run plan
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
-    static member plan (workspace: string option) =
+    /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
+    static member plan (workspace: string option) (variables: Map<string, string>) =
+        let vars = variables |> Seq.fold (fun acc (KeyValue(key, value)) -> acc + $" -var=\"{key}={value}\"") ""
+
         scope Cacheability.Always
         |> andThen "terraform" "init -reconfigure"
         |> andIf (workspace |> Option.isSome) (fun batch -> batch |> andThen "terraform" $"workspace select {workspace.Value}")
-        |> andThen "terraform" "plan -out=terrabuild.planfile"
+        |> andThen "terraform" $"plan -out=terrabuild.planfile{vars}"
   
 
     /// <summary weight="3" title="Apply plan file.">
