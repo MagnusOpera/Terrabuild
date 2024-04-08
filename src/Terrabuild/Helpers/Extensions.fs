@@ -13,8 +13,8 @@ type InvocationResult<'t> =
 
 let systemExtensions = Terrabuild.Extensions.Factory.systemScripts |> Map.map (fun _ _ -> Extension.Empty)
 
-// NOTE: when app in package as a single file, this break - so instead of providing 
-//       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided
+// NOTE: when app in package as a single file, Terrabuild.Assembly can't be found... So instead of providing 
+//       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided instead
 //       ¯\_(ツ)_/¯
 let terrabuildDir = Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> IO.parentDirectory
 let terrabuildExtensibility =
