@@ -2,9 +2,5 @@
 configuration @dotnet { }
 
 target build {
-  @shell sleep { arguments: "1" }
-
   @dotnet build { configuration: $configuration }
-
-  @shell echo { arguments: "done lib2" }
 }
