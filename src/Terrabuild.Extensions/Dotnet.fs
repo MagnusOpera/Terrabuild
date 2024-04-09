@@ -134,7 +134,7 @@ type Dotnet() =
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
-    static member __build__ (context: BatchContext) (configuration: string option) (log: bool option) =
+    static member __build__ (context: BatchContext) (configuration: string option) (log: bool option) (version: string option) =
         let projects =
             context.ProjectPaths
             |> List.map DotnetHelpers.findProjectFile
@@ -149,6 +149,11 @@ type Dotnet() =
             | Some true -> " -bl"
             | _ -> ""
 
+        let version =
+            match version with
+            | Some version -> $" -p:Version={version}"
+            | _ -> ""
+
         // generate temp solution file
         let slnfile = Path.Combine(context.TempDir, $"{context.NodeHash}.sln")
         let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
@@ -156,7 +161,7 @@ type Dotnet() =
 
         let actions = [
             action "dotnet" $"restore {slnfile} --no-dependencies" 
-            action "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{logger}"
+            action "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{logger}{version}"
         ]
         actions
 
@@ -167,25 +172,32 @@ type Dotnet() =
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
-    /// <param name="maxcpucount" example="1">Max worker processes to build the project.</param>
+    /// <param name="parallel" example="1">Max worker processes to build the project.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
-    static member build (context: ActionContext) (projectfile: string option) (configuration: string option) (maxcpucount: int option) (log: bool option) =
+    static member build (projectfile: string option) (configuration: string option) (``parallel``: int option) (log: bool option) (version: string option) =
         let projectfile = projectfile |> Option.defaultValue ""
         let configuration =
             configuration
             |> Option.defaultValue DotnetHelpers.defaultConfiguration
+
         let logger =
             match log with
             | Some true -> " -bl"
             | _ -> ""
+
         let maxcpucount =
-            match maxcpucount with
+            match ``parallel`` with
             | Some maxcpucount -> $" -maxcpucount:{maxcpucount}"
+            | _ -> ""
+
+        let version =
+            match version with
+            | Some version -> $" -p:Version={version}"
             | _ -> ""
 
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
-        |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore --configuration {configuration}{logger}{maxcpucount}"
+        |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore --configuration {configuration}{logger}{maxcpucount}{version}"
         |> batchable
 
 
