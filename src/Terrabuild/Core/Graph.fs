@@ -19,6 +19,7 @@ type Node = {
     ProjectHash: string
     Outputs: string set
     Cache: Cacheability
+    IsLeaf: bool
 
     TargetHash: string
     CommandLines: Configuration.ContaineredActionBatch list
@@ -54,16 +55,19 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
             let dependsOns = buildDependsOn + projDependsOn
 
             // apply on each dependency
-            let children =
+            let children, hasInternalDependencies =
                 dependsOns
-                |> Set.fold (fun acc dependsOn ->
-                    let childDependencies =
+                |> Set.fold (fun (acc, hasInternalDependencies) dependsOn ->
+                    let childDependencies, hasInternalDependencies =
                         match dependsOn with
                         | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
-                            projectConfig.Dependencies |> Set.collect (buildTarget parentDependsOn)
+                            projectConfig.Dependencies |> Set.collect (buildTarget parentDependsOn), hasInternalDependencies
                         | _ ->
-                            buildTarget dependsOn project
-                    acc + childDependencies) Set.empty
+                            buildTarget dependsOn project, true
+                    acc + childDependencies, hasInternalDependencies) (Set.empty, false)
+
+            // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
+            let isLeaf = hasInternalDependencies |> not
 
             // only generate computation node - that is node that generate something
             // barrier nodes are just discarded and dependencies lift level up
@@ -99,6 +103,7 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
                              Dependencies = children
                              ProjectHash = projectConfig.Hash
                              Cache = cache
+                             IsLeaf = isLeaf
                              TargetHash = target.Hash }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     failwith "Unexpected graph building race"
@@ -355,6 +360,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     ProjectHash = clusterHash
                     Outputs = Set.empty
                     Cache = oneNode.Cache
+                    IsLeaf = oneNode.IsLeaf
 
                     TargetHash = cluster
                     CommandLines = optimizedActions

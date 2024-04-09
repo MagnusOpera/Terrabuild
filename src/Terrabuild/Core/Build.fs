@@ -197,7 +197,9 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                 workspaceDir, cmd, args, batch.Container))
 
 
-                let beforeFiles = IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
+                let beforeFiles =
+                    if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
+                    else IO.createSnapshot node.Outputs projectDirectory
 
                 let stepLogs = List<Cache.StepSummary>()
                 let mutable lastExitCode = 0
