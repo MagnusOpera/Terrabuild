@@ -1,7 +1,14 @@
 ﻿module Terrabuild.Expressions.Eval
 open Terrabuild.Expressions
 
-let rec eval (versions: Map<string, string>) (variables: Map<string, string>) (expr: Expr) =
+type EvaluationContext = {
+    WorkspaceDir: string
+    ProjectDir: string
+    Versions: Map<string, string>
+    Variables: Map<string, string>
+}
+
+let rec eval (context: EvaluationContext) (expr: Expr) =
     let rec eval (expr: Expr) =
         match expr with
         | Expr.Nothing -> Value.Nothing
@@ -10,7 +17,7 @@ let rec eval (versions: Map<string, string>) (variables: Map<string, string>) (e
         | Expr.Number num -> Value.Number num
         | Expr.Object obj -> Value.Object obj
         | Expr.Variable var ->
-            match variables |> Map.tryFind var with
+            match context.Variables |> Map.tryFind var with
             | None -> failwith $"Variable '{var}' is not defined"
             | Some str -> Value.String str
         | Expr.Map map -> map |> Map.map (fun _ expr -> eval expr) |> Value.Map
@@ -34,10 +41,13 @@ let rec eval (versions: Map<string, string>) (variables: Map<string, string>) (e
             | Function.Lower, [Value.String str] -> Value.String (str.ToLowerInvariant())
             | Function.Lower, [Value.Nothing] -> Value.Nothing
 
-            | Function.Version, [Value.String str] -> 
-                match versions |> Map.tryFind str with
+            | Function.Version, [Value.String str] ->
+                let projectPath = System.IO.Path.Combine(context.ProjectDir, str)
+                let projectName = System.IO.Path.GetRelativePath(context.WorkspaceDir, projectPath)
+
+                match context.Versions |> Map.tryFind projectName with
                 | Some version -> Value.String version
-                | _ -> failwith $"Invalid project reference {str}"
+                | _ -> failwith $"Invalid project reference {projectName}"
 
             | _ -> failwith $"Invalid arguments for function {f}"
 
@@ -45,4 +55,4 @@ let rec eval (versions: Map<string, string>) (variables: Map<string, string>) (e
         eval expr
     with
     | exn ->
-        failwith $"{exn.Message} while evaluating:\n{expr}\nand variables:\n{variables}"
+        failwith $"{exn.Message} while evaluating:\n{expr}\nand variables:\n{context.Variables}"

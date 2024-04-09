@@ -260,12 +260,19 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                                     |> Map.add "terrabuild_project" project
                                     |> Map.add "terrabuild_target" targetName
 
+                                let evaluationContext = {
+                                    Eval.EvaluationContext.WorkspaceDir = workspaceDir
+                                    Eval.EvaluationContext.ProjectDir = projectDir
+                                    Eval.EvaluationContext.Versions = versions
+                                    Eval.EvaluationContext.Variables = actionVariables
+                                }
+
                                 let actionContext =
                                     extension.Defaults
                                     |> Map.addMap step.Parameters
                                     |> Map.add "context" (Expr.Object actionContext)
                                     |> Expr.Map
-                                    |> Eval.eval versions actionVariables
+                                    |> Eval.eval evaluationContext
 
                                 let script = Extensions.getScript step.Extension projectDef.Scripts
                                 let actionGroup =
