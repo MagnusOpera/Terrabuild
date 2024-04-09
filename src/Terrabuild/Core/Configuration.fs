@@ -115,6 +115,7 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
 
     let scripts =
         extensions
+        |> Map.map (fun _ _ -> None)
         |> Map.map Extensions.lazyLoadScript
 
     let rec scanDependency projects project =
@@ -138,9 +139,13 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                     extensions
                     |> Map.addMap projectConfig.Extensions
 
+                let projectScripts =
+                    projectConfig.Extensions
+                    |> Map.map (fun _ ext -> ext.Script |> Option.map (FS.workspaceRelative workspaceDir projectDir))
+
                 let scripts =
                     scripts
-                    |> Map.addMap (projectConfig.Extensions |> Map.map Extensions.lazyLoadScript)
+                    |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
 
                 let projectInfo =
                     match projectConfig.Configuration.Init with
@@ -237,9 +242,9 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
             let projectSteps =
                 projectDef.Targets
                 |> Map.map (fun targetName target ->
-                    let (variables, outputs), actions =
+                    let variables, actions =
                         target.Steps
-                        |> List.fold (fun ((variables, outputs), actions) step ->
+                        |> List.fold (fun (variables, actions) step ->
                             let stepVars: Map<string, string> = Map.empty
 
                             let extension = 
@@ -247,7 +252,7 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                                 | Some extension -> extension
                                 | _ -> ConfigException.Raise $"Extension {step.Extension} is not defined"
 
-                            let stepActions, outputs =
+                            let stepActions =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
@@ -300,18 +305,7 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                                     ContaineredActionBatch.Actions = actionGroup.Actions
                                 }
 
-                                let newOutputs =
-                                    let init = step.Extension
-                                    let result =
-                                        Extensions.getScript init scripts
-                                        |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
-                                    match result with
-                                    | Extensions.Success result -> result.Outputs
-                                    | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
-                                    | Extensions.TargetNotFound -> Set.empty // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-                                    | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __defaults__ of script {init}" exn
-
-                                containedActionBatch, (outputs + newOutputs)
+                                containedActionBatch
 
                             let variables =
                                 variables
@@ -319,8 +313,8 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
 
                             let actions = actions @ [ stepActions ]
 
-                            (variables, outputs), actions
-                        ) ((Map.empty, projectDef.Outputs), [])
+                            variables, actions
+                        ) (Map.empty, [])
 
                     let variableHash =
                         variables
@@ -348,6 +342,11 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                             match workspaceConfig.Targets |> Map.tryFind targetName with
                             | Some target -> target.DependsOn
                             | None -> Set.empty
+
+                    let outputs =
+                        match target.Outputs with
+                        | Some outputs -> outputs
+                        | _ -> projectDef.Outputs
 
                     { ContaineredTarget.Hash = hash
                       ContaineredTarget.Variables = variables

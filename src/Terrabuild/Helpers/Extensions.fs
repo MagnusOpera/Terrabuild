@@ -22,9 +22,9 @@ let terrabuildExtensibility =
     if File.Exists(path) then path
     else Reflection.Assembly.GetExecutingAssembly().Location
 
-let lazyLoadScript (name: string) (ext: Extension) =
+let lazyLoadScript (name: string) (script: string option) =
     let initScript () =
-        match ext.Script with
+        match script with
         | Some script -> loadScript [ terrabuildExtensibility ] script
         | _ ->
             match Terrabuild.Extensions.Factory.systemScripts |> Map.tryFind name with
