@@ -9,4 +9,8 @@
     <Compile Include="Eval.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../Terrabuild.Common/Terrabuild.Common.fsproj" />
+  </ItemGroup>
+ 
 </Project>

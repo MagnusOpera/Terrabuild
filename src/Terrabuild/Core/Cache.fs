@@ -46,18 +46,18 @@ let private completeFilename = ".complete"
 
 let private buildCacheDirectory =
     let homeDir = Environment.GetEnvironmentVariable("HOME")
-    let cacheDir = IO.combinePath homeDir ".terrabuild/buildcache"
+    let cacheDir = FS.combinePath homeDir ".terrabuild/buildcache"
     IO.createDirectory cacheDir
     cacheDir
 
 let private homeDirectory =
     let homeDir = Environment.GetEnvironmentVariable("HOME")
-    let cacheDir = IO.combinePath homeDir ".terrabuild/home"
+    let cacheDir = FS.combinePath homeDir ".terrabuild/home"
     IO.createDirectory cacheDir
     cacheDir
 
 let private markEntryAsCompleted reason entryDir =
-    let completeFile = IO.combinePath entryDir completeFilename
+    let completeFile = FS.combinePath entryDir completeFilename
     File.WriteAllText(completeFile, reason)
 
 let clearBuildCache () =
@@ -66,13 +66,13 @@ let clearBuildCache () =
 type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.Storage) =
     let mutable logNum = 0
 
-    let logsDir = IO.combinePath entryDir "logs"
-    let outputsDir = IO.combinePath entryDir "outputs"
+    let logsDir = FS.combinePath entryDir "logs"
+    let outputsDir = FS.combinePath entryDir "outputs"
 
     do
         match entryDir with
-        | IO.Directory _ | IO.File _ -> IO.deleteAny entryDir
-        | IO.None _ -> ()
+        | FS.Directory _ | FS.File _ -> IO.deleteAny entryDir
+        | FS.None _ -> ()
         IO.createDirectory entryDir
         IO.createDirectory logsDir
         // NOTE: outputs is created on demand only
@@ -86,7 +86,7 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
                      Outputs = summary.Outputs
                                |> Option.map (fun outputs -> IO.getFilename outputs) }
 
-        let summaryFile = IO.combinePath logsDir summaryFilename
+        let summaryFile = FS.combinePath logsDir summaryFilename
         summary |> Json.Serialize |> IO.writeTextFile summaryFile
 
     let upload (storage: Storages.Storage) =
@@ -110,7 +110,7 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
         member _.NextLogFile () =
             logNum <- logNum + 1
             let filename = $"step{logNum}.log"
-            IO.combinePath logsDir filename
+            FS.combinePath logsDir filename
 
         member _.Outputs = outputsDir
 
@@ -135,11 +135,11 @@ type Cache(storage: Storages.Storage) =
                     cachedExists.TryAdd(id, true) |> ignore
                     true
                 | _ ->
-                    let entryDir = IO.combinePath buildCacheDirectory id
-                    let completeFile = IO.combinePath entryDir completeFilename
+                    let entryDir = FS.combinePath buildCacheDirectory id
+                    let completeFile = FS.combinePath entryDir completeFilename
 
                     match completeFile with
-                    | IO.File _ ->
+                    | FS.File _ ->
                         cachedExists.TryAdd(id, true) |> ignore
                         true
                     | _ ->
@@ -155,18 +155,18 @@ type Cache(storage: Storages.Storage) =
             match cachedSummaries.TryGetValue(id) with
             | true, summary -> Some summary
             | _ ->
-                let entryDir = IO.combinePath buildCacheDirectory id
-                let logsDir = IO.combinePath entryDir "logs"
-                let outputsDir = IO.combinePath entryDir "outputs"
-                let summaryFile = IO.combinePath logsDir summaryFilename
-                let completeFile = IO.combinePath entryDir completeFilename
+                let entryDir = FS.combinePath buildCacheDirectory id
+                let logsDir = FS.combinePath entryDir "logs"
+                let outputsDir = FS.combinePath entryDir "outputs"
+                let summaryFile = FS.combinePath logsDir summaryFilename
+                let completeFile = FS.combinePath entryDir completeFilename
 
                 let load () =
                     let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
                     let summary = { summary
                                     with Steps = summary.Steps
                                                  |> List.map (fun stepLog -> { stepLog
-                                                                               with Log = IO.combinePath logsDir stepLog.Log })
+                                                                               with Log = FS.combinePath logsDir stepLog.Log })
                                          Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
                     cachedSummaries.TryAdd(summaryFile, summary) |> ignore
                     summary
@@ -205,7 +205,7 @@ type Cache(storage: Storages.Storage) =
                         None
 
                 match completeFile with
-                | IO.File _ ->
+                | FS.File _ ->
                     load() |> Some
                 | _ ->
                     // cleanup everything - it's not valid anyway
@@ -216,9 +216,9 @@ type Cache(storage: Storages.Storage) =
 
 
         member _.CreateEntry useRemote id : IEntry =
-            let entryDir = IO.combinePath buildCacheDirectory id
+            let entryDir = FS.combinePath buildCacheDirectory id
             NewEntry(entryDir, useRemote, id, storage)
 
         member _.CreateHomeDir nodeHash: string =
-            let homeDir = IO.combinePath homeDirectory nodeHash
+            let homeDir = FS.combinePath homeDirectory nodeHash
             homeDir

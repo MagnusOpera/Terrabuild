@@ -16,9 +16,9 @@ let systemExtensions = Terrabuild.Extensions.Factory.systemScripts |> Map.map (f
 // NOTE: when app in package as a single file, Terrabuild.Assembly can't be found... So instead of providing 
 //       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided instead
 //       ¯\_(ツ)_/¯
-let terrabuildDir = Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> IO.parentDirectory
+let terrabuildDir = Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> FS.parentDirectory
 let terrabuildExtensibility =
-    let path = IO.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
+    let path = FS.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
     if File.Exists(path) then path
     else Reflection.Assembly.GetExecutingAssembly().Location
 

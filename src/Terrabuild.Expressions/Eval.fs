@@ -42,12 +42,10 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
             | Function.Lower, [Value.Nothing] -> Value.Nothing
 
             | Function.Version, [Value.String str] ->
-                let projectPath = System.IO.Path.Combine(context.ProjectDir, str)
-                let projectName = System.IO.Path.GetRelativePath(context.WorkspaceDir, projectPath)
-
+                let projectName = FS.workspaceRelative context.WorkspaceDir context.ProjectDir str
                 match context.Versions |> Map.tryFind projectName with
                 | Some version -> Value.String version
-                | _ -> failwith $"Invalid project reference {projectName}"
+                | _ -> failwith $"Unknown project reference {str}"
 
             | _ -> failwith $"Invalid arguments for function {f}"
 

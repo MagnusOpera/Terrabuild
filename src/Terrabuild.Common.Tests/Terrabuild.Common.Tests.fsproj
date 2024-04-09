@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Helpers/IO.fs" />
-    <Compile Include="Helpers/FileSystem.fs" />
-    <Compile Include="Helpers/Collections.fs" />
-    <Compile Include="Helpers/Hash.fs" />
+    <Compile Include="IO.fs" />
+    <Compile Include="FS.fs" />
+    <Compile Include="Collections.fs" />
+    <Compile Include="Hash.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Terrabuild/Terrabuild.fsproj" />
+    <ProjectReference Include="../Terrabuild.Common/Terrabuild.Common.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

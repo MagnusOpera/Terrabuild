@@ -73,7 +73,7 @@ type Workspace = {
 
 
 let read workspaceDir environment labels variables (sourceControl: SourceControls.SourceControl) (storage: Storages.Storage) (options: Options) =
-    let workspaceContent = IO.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
+    let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
             Terrabuild.Configuration.FrontEnd.parseWorkspace workspaceContent
@@ -81,7 +81,7 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
             ConfigException.Raise("Failed to read WORKSPACE configuration file", exn)
 
     // create temporary folder so extension can expose files to docker containers (folder must within workspaceDir hierarchy)
-    IO.combinePath workspaceDir ".terrabuild" |> IO.createDirectory
+    FS.combinePath workspaceDir ".terrabuild" |> IO.createDirectory
 
     // variables
     let environments = workspaceConfig.Environments
@@ -122,7 +122,7 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
 
         // process only unknown dependency
         if processedNodes.TryAdd(project, true) then
-            let projectFile = IO.combinePath projectDir "PROJECT"
+            let projectFile = FS.combinePath projectDir "PROJECT"
             let projectContent = File.ReadAllText projectFile
             let projectConfig =
                 try
@@ -175,7 +175,7 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                 // convert relative dependencies to absolute dependencies respective to workspaceDirectory
                 let projectDependencies =
                     projectInfo.Dependencies
-                    |> Set.map (fun dep -> IO.combinePath projectDir dep |> IO.relativePath workspaceDir)
+                    |> Set.map (fun dep -> FS.workspaceRelative workspaceDir projectDir dep)
 
                 let projectTargets = projectConfig.Targets
 
@@ -358,7 +358,7 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
 
             let files =
                 files
-                |> Set.map (IO.relativePath projectDir)
+                |> Set.map (FS.relativePath projectDir)
 
             let projectConfig =
                 { Project.Id = project
@@ -378,10 +378,10 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
     // scan for projects
     let rec findDependencies dir =
         seq {
-            let projectFile =  IO.combinePath dir "PROJECT" 
+            let projectFile =  FS.combinePath dir "PROJECT" 
             match projectFile with
-            | IO.File file ->
-                file |> IO.parentDirectory |> IO.relativePath workspaceDir
+            | FS.File file ->
+                file |> FS.parentDirectory |> FS.relativePath workspaceDir
             | _ ->
                 for subdir in dir |> IO.enumerateDirs do
                     yield! findDependencies subdir

@@ -123,8 +123,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         if isAllSatisfied then
             let projectDirectory =
                 match node.Project with
-                | IO.Directory projectDirectory -> projectDirectory
-                | IO.File projectFile -> IO.parentDirectory projectFile
+                | FS.Directory projectDirectory -> projectDirectory
+                | FS.File projectFile -> FS.parentDirectory projectFile
                 | _ -> "."
 
             let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
@@ -197,7 +197,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                 workspaceDir, cmd, args, batch.Container))
 
 
-                let beforeFiles = FileSystem.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
+                let beforeFiles = IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
 
                 let stepLogs = List<Cache.StepSummary>()
                 let mutable lastExitCode = 0
@@ -226,7 +226,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                     Log.Debug("{Hash}: Execution completed with '{Code}'", node.Hash, exitCode)
 
                 notification.NodeUploading node
-                let afterFiles = FileSystem.createSnapshot node.Outputs projectDirectory
+                let afterFiles = IO.createSnapshot node.Outputs projectDirectory
 
                 // keep only new or modified files
                 let newFiles = afterFiles - beforeFiles

@@ -47,7 +47,7 @@ let processCommandLine () =
     let debug = result.Contains(TerrabuildArgs.Debug)
     let whatIf = result.Contains(TerrabuildArgs.WhatIf)
 
-    let logFile name = IO.combinePath launchDir $"terrabuild-debug.{name}"
+    let logFile name = FS.combinePath launchDir $"terrabuild-debug.{name}"
 
     if debug then
         Log.Logger <-
@@ -58,7 +58,7 @@ let processCommandLine () =
 
     let runTarget wsDir target environment labels variables (options: Configuration.Options) =
         try
-            let wsDir = wsDir |> IO.fullPath
+            let wsDir = wsDir |> FS.fullPath
             Environment.CurrentDirectory <- wsDir
 
             if options.Debug then

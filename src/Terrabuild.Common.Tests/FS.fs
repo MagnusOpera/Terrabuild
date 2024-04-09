@@ -1,5 +1,5 @@
-module Terrabuild.Tests.IO
-open IO
+module Terrabuild.Tests.FS
+open FS
 open FsUnit
 open NUnit.Framework
 
@@ -16,7 +16,7 @@ let ``verify combine path``() =
 [<Test>]
 let ``verify path classification``() =
     match "TestFiles" with
-    | Directory path -> path |> should equal "TestFiles"
+    | FS.Directory path -> path |> should equal "TestFiles"
     | _ -> Assert.Inconclusive()
 
     match "TestFiles/toto.txt" with
@@ -31,8 +31,27 @@ let ``verify path classification``() =
 let ``verify path absolute/relative``() =
     let workDir = TestContext.CurrentContext.WorkDirectory
 
-    let fullPath = IO.fullPath "TestFiles/toto.txt"
+    let fullPath = FS.fullPath "TestFiles/toto.txt"
     fullPath |> should equal (combinePath workDir "TestFiles/toto.txt")
 
     let relativePath = fullPath |> relativePath workDir
     relativePath |> should equal "TestFiles/toto.txt"
+
+[<Test>]
+let ``verify relative workspace conversion``() =
+    let workspaceDir = "/home/toto/src"
+    let currentDir = "/home/toto/src/project"
+    
+    workspaceRelative workspaceDir currentDir "tagada"
+    |> should equal "project/tagada"
+
+    workspaceRelative workspaceDir currentDir "../project/tagada"
+    |> should equal "project/tagada"
+
+[<Test>]
+let ``verify absolute workspace conversion``() =
+    let workspaceDir = "/home/toto/src"
+    let currentDir = "/home/toto/src/project"
+    
+    workspaceRelative workspaceDir currentDir "/tagada"
+    |> should equal "tagada"

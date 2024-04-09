@@ -228,7 +228,7 @@ let scaffold workspaceDir force =
     projects
     |> Seq.iter (fun project ->
         printfn $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} PROJECT {project.Directory}"
-        let projectFile = IO.combinePath project.Directory "PROJECT"
+        let projectFile = FS.combinePath project.Directory "PROJECT"
         let projectContent = project |> genProject
         File.WriteAllLines(projectFile, projectContent)
     )
@@ -242,13 +242,13 @@ let scaffold workspaceDir force =
     let extensions = mainExtensions @ otherExtensions |> Set
 
     printfn $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} WORKSPACE"
-    let workspaceFile = IO.combinePath workspaceDir "WORKSPACE"
+    let workspaceFile = FS.combinePath workspaceDir "WORKSPACE"
     let workspaceContent = genWorkspace extensions
     File.WriteAllLines(workspaceFile, workspaceContent)
 
     // exclude terrabuild temp folder
     let terrabuildLines = [ "# Terrabuild temporary folder"; ".terrabuild" ]
-    match IO.combinePath workspaceDir ".gitignore" with
-    | IO.File file -> File.AppendAllLines(file, terrabuildLines)
-    | IO.None file -> File.WriteAllLines(file, terrabuildLines)
+    match FS.combinePath workspaceDir ".gitignore" with
+    | FS.File file -> File.AppendAllLines(file, terrabuildLines)
+    | FS.None file -> File.WriteAllLines(file, terrabuildLines)
     | _ -> ()

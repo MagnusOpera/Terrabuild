@@ -8,17 +8,11 @@
   <ItemGroup>
     <Compile Include="SourceControls/SourceControls.fs" />
     <Compile Include="Storages/Storages.fs" />
-    <Compile Include="Helpers/Collections.fs" />
     <Compile Include="Helpers/Threading.fs" />
-    <Compile Include="Helpers/IO.fs" />
     <Compile Include="Helpers/Compression.fs" />
-    <Compile Include="Helpers/String.fs" />
     <Compile Include="Helpers/Json.fs" />
     <Compile Include="Helpers/Exec.fs" />
     <Compile Include="Helpers/Git.fs" />
-    <Compile Include="Helpers/Hash.fs" />
-    <Compile Include="Helpers/FileSystem.fs" />
-    <Compile Include="Helpers/Ansi.fs" />
     <Compile Include="Helpers/Terminal.fs" />
     <Compile Include="Helpers/Progress.fs" />
     <Compile Include="Helpers/Extensions.fs" />
@@ -39,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+   <ProjectReference Include="../Terrabuild.Common/Terrabuild.Common.fsproj" />
    <ProjectReference Include="../Terrabuild.Extensibility/Terrabuild.Extensibility.fsproj" />
    <ProjectReference Include="../Terrabuild.Scripting/Terrabuild.Scripting.fsproj" />
    <ProjectReference Include="../Terrabuild.Configuration/Terrabuild.Configuration.fsproj" />
@@ -50,7 +45,6 @@
     <PackageReference Include="FSharp.SystemTextJson" Version="1.2.42" />
     <PackageReference Include="Argu" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

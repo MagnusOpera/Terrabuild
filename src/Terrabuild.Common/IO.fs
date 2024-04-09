@@ -2,18 +2,7 @@ module IO
 open System.IO
 open Microsoft.Extensions.FileSystemGlobbing
 open Collections
-
-let fullPath path =
-    Path.GetFullPath(path)
-
-let combinePath parent child =
-    Path.Combine(parent, child)
-
-let relativePath fromDir toDir =
-    Path.GetRelativePath(fromDir, toDir)
-
-let parentDirectory (path: string) =
-    Path.GetDirectoryName(path)
+open System
 
 let createDirectory (path: string) =
     Directory.CreateDirectory(path) |> ignore
@@ -33,15 +22,10 @@ let getFilename (p: string) =
 let moveFile source destination =
     File.Move(source, destination, true)
 
-let (|File|Directory|None|) entry =
-    if File.Exists(entry) then File entry
-    elif Directory.Exists(entry) then Directory entry
-    else None entry
-
 let deleteAny entry =
     match entry with
-    | File file -> File.Delete(file)
-    | Directory directory -> Directory.Delete(directory, true)
+    | FS.File file -> File.Delete(file)
+    | FS.Directory directory -> Directory.Delete(directory, true)
     | _ -> ()
 
 let enumerateDirs rootDir =
@@ -76,10 +60,35 @@ let enumerateFilesMatch (matches: string seq) rootdir =
 
 let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
     for entry in entries do
-        let relative = relativePath baseDir entry
-        let target = combinePath targetDir relative
-        let targetDir = parentDirectory target
+        let relative = FS.relativePath baseDir entry
+        let target = FS.combinePath targetDir relative
+        let targetDir = FS.parentDirectory target
         Directory.CreateDirectory targetDir |> ignore
         File.Copy(entry, target, true)
     if entries |> List.isEmpty then None
     else Some targetDir
+
+
+
+type Snapshot = {
+    TimestampedFiles: Map<string, DateTime>
+}
+with
+    static member Empty = { TimestampedFiles = Map.empty }
+
+    static member (-) (afterOutputs: Snapshot, beforeOutputs: Snapshot) =
+        let newOutputs =
+            afterOutputs.TimestampedFiles
+            |> Seq.choose (fun afterOutput ->
+                match beforeOutputs.TimestampedFiles |> Map.tryFind afterOutput.Key with
+                | Some prevWriteDate when afterOutput.Value = prevWriteDate -> None
+                | _ -> Some afterOutput.Key)
+            |> List.ofSeq
+        newOutputs
+
+let createSnapshot outputs projectDirectory =
+    let files =
+        enumerateFilesMatch outputs projectDirectory
+        |> Seq.map (fun output -> output, System.IO.File.GetLastWriteTimeUtc output)
+        |> Map
+    { TimestampedFiles = files }
