@@ -1,14 +1,16 @@
 
 configuration @terraform {
-    dependencies = [ "../../projects/dotnet-app" ]
+    dependencies = [ "../../projects/dotnet-app"
+                     "../../projects/npm-app" ]
     ignores = [ "terrabuild.tfstate" ]
     labels = [ "infra" ]
 }
 
 target build {
-    @terraform plan { variables: {
-        dotnet_app_version: version("projects/dotnet-app")
-    }}
+    @terraform plan { 
+        variables: { dotnet_app_version: version("projects/dotnet-app")
+                     npm_app_version: version("projects/npm-app") }
+    }
 }
 
 target deploy {
