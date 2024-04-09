@@ -8,15 +8,18 @@ type CaptureResult =
     | Success of string*int
     | Error of string*int
 
-let execCaptureOutput (workingDir: string) (command: string) (args: string) =
+let private createProcess workingDir command args =
     let psi = ProcessStartInfo (FileName = command,
                                 Arguments = args,
                                 UseShellExecute = false,
                                 WorkingDirectory = workingDir,
                                 RedirectStandardOutput = true,
                                 RedirectStandardError = true)
+    new Process(StartInfo = psi)
 
-    use proc = Process.Start (psi)
+let execCaptureOutput (workingDir: string) (command: string) (args: string) =
+    use proc = createProcess workingDir command args
+    proc.Start() |> ignore
     proc.WaitForExit()
 
     match proc.ExitCode with
@@ -29,22 +32,11 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
         let writeLock = obj()
 
         let inline lockWrite (from: string) (msg: string) =
-            lock writeLock (fun () ->
-                logWriter.WriteLine($"{DateTime.UtcNow} {from} {msg}")
-            )
+            lock writeLock (fun () -> logWriter.WriteLine($"{DateTime.UtcNow} {from} {msg}"))
 
-        use proc = new Process()
-        let psi = proc.StartInfo
-        psi.FileName <- command
-        psi.Arguments <- args
-        psi.UseShellExecute <- false
-        psi.WorkingDirectory <- workingDir
-        psi.RedirectStandardOutput <- true
-        psi.RedirectStandardError <- true
-
+        use proc = createProcess workingDir command args
         proc.OutputDataReceived.Add(fun e -> lockWrite "OUT" e.Data)
         proc.ErrorDataReceived.Add(fun e -> lockWrite "ERR" e.Data)
-
         proc.Start() |> ignore
         proc.BeginOutputReadLine()
         proc.BeginErrorReadLine()
@@ -67,15 +59,20 @@ type BuildQueue(maxItems: int) =
             | (0, 0) ->
                 completion.Set() |> ignore
             | (n, _) when 0 < n && inFlight < maxItems ->
-                inFlight <- inFlight + 1
-                let action = queue.Dequeue()
-                async {
-                    action()
-                    lock queueLock (fun () ->
-                        inFlight <- inFlight - 1
-                        trySchedule()
-                    )
-                } |> Async.Start
+                // feed the pipe the most we can
+                let rec schedule() =
+                    inFlight <- inFlight + 1
+                    let action = queue.Dequeue()
+                    async {
+                        action()
+                        lock queueLock (fun () ->
+                            inFlight <- inFlight - 1
+                            trySchedule()
+                        )
+                    } |> Async.Start
+                    if 0 < queue.Count && inFlight < maxItems then
+                        schedule()
+                schedule()
             | _ -> ()
 
         lock queueLock (fun () ->
