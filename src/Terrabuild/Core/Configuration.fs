@@ -184,7 +184,13 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
 
                 let projectTargets = projectConfig.Targets
 
+                let includes =
+                    projectScripts
+                    |> Seq.choose (fun (KeyValue(_, script)) -> script)
+                    |> Set.ofSeq
+
                 {| Dependencies = projectDependencies
+                   Includes = includes
                    Ignores = projectIgnores
                    Outputs = projectOutputs
                    Targets = projectTargets
@@ -209,7 +215,10 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
 
 
             // get dependencies on files
-            let files = projectDir |> IO.enumerateFilesBut (projectDef.Outputs + projectDef.Ignores) |> Set
+            let files =
+                projectDir |> IO.enumerateFilesBut (projectDef.Outputs + projectDef.Ignores)
+                |> Set
+                |> Set.union projectDef.Includes
             let filesHash =
                 files
                 |> Seq.sort
@@ -232,12 +241,6 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
             let projectHash =
                 [ project; filesHash; dependenciesHash ]
                 |> Hash.sha256strings
-
-            let parseContext = 
-                let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
-                                Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
-                                Terrabuild.Extensibility.ExtensionContext.CI = sourceControl.CI }
-                Value.Map (Map [ "context", Value.Object context ])
 
             let projectSteps =
                 projectDef.Targets
@@ -319,21 +322,18 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                     let variableHash =
                         variables
                         |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-                        |> String.join "\n"
-                        |> Hash.sha256
+                        |> Hash.sha256strings
 
                     let stepHash =
                         actions
                         |> Seq.collect (fun batch ->
                             batch.Actions |> Seq.map(fun step ->
                                 $"{batch.Container} {step.Command} {step.Arguments}"))
-                        |> String.join "\n"
-                        |> Hash.sha256
+                        |> Hash.sha256strings
 
                     let hash =
                         [ stepHash; variableHash ]
-                        |> String.join "\n"
-                        |> Hash.sha256
+                        |> Hash.sha256strings
 
                     let dependsOn =
                         match target.DependsOn with
