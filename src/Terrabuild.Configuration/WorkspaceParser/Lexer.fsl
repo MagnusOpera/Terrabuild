@@ -41,6 +41,7 @@ rule token = parse
     | "trim" { TRIM }
     | "upper" { UPPER }
     | "lower" { LOWER }
+    | "version" { VERSION }
 
     | "target" { TARGET }
     | "environment" { ENVIRONMENT }

@@ -6,6 +6,7 @@ type Function =
     | Trim
     | Upper
     | Lower
+    | Version
 
 [<RequireQualifiedAccessAttribute>]
 type Expr =

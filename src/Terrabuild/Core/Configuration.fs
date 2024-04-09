@@ -210,22 +210,23 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                 |> Seq.sort
                 |> Hash.sha256files
  
-            let dependenciesHash =
+            let versions =
                 projectDef.Dependencies
                 |> Seq.map (fun dependency -> 
                     match projects |> Map.tryFind dependency with
-                    | Some project -> project.Hash
-                    | _ -> ConfigException.Raise($"Circular dependencies between '{project}' and '{dependency}'")
-                )
+                    | Some project -> dependency, project.Hash
+                    | _ -> ConfigException.Raise($"Circular dependencies between '{project}' and '{dependency}'"))
+                |> Map.ofSeq
+
+            let dependenciesHash =
+                versions.Values
                 |> Seq.sort
-                |> String.join "\n"
-                |> Hash.sha256
+                |> Hash.sha256strings
 
             // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
             let projectHash =
                 [ project; filesHash; dependenciesHash ]
-                |> String.join "\n"
-                |> Hash.sha256
+                |> Hash.sha256strings
 
             let parseContext = 
                 let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
@@ -264,7 +265,7 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                                     |> Map.addMap step.Parameters
                                     |> Map.add "context" (Expr.Object actionContext)
                                     |> Expr.Map
-                                    |> Eval.eval actionVariables
+                                    |> Eval.eval versions actionVariables
 
                                 let script = Extensions.getScript step.Extension projectDef.Scripts
                                 let actionGroup =

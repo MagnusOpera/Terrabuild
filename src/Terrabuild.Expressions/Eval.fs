@@ -1,7 +1,7 @@
 ﻿module Terrabuild.Expressions.Eval
 open Terrabuild.Expressions
 
-let rec eval (variables: Map<string, string>) (expr: Expr) =
+let rec eval (versions: Map<string, string>) (variables: Map<string, string>) (expr: Expr) =
     let rec eval (expr: Expr) =
         match expr with
         | Expr.Nothing -> Value.Nothing
@@ -33,6 +33,11 @@ let rec eval (variables: Map<string, string>) (expr: Expr) =
 
             | Function.Lower, [Value.String str] -> Value.String (str.ToLowerInvariant())
             | Function.Lower, [Value.Nothing] -> Value.Nothing
+
+            | Function.Version, [Value.String str] -> 
+                match versions |> Map.tryFind str with
+                | Some version -> Value.String version
+                | _ -> failwith $"Invalid project reference {str}"
 
             | _ -> failwith $"Invalid arguments for function {f}"
 

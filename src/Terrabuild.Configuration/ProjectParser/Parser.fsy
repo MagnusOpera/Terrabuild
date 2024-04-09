@@ -28,7 +28,7 @@ let debugPrint s = ignore s
 %token EQUAL
 %token COMMA
 %token PLUS
-%token TRIM UPPER LOWER
+%token TRIM UPPER LOWER VERSION
 %token EOF
 %token EXTENSION CONFIGURATION TARGET 
 %token DEPENDENCIES OUTPUTS IGNORES LABELS CONTAINER INIT SCRIPT DEPENDS_ON DEFAULTS
@@ -66,8 +66,8 @@ ExtensionDefaults:
 
 Configuration:
     | CONFIGURATION LBRACE ConfigurationComponents RBRACE { ProjectComponents.Configuration $3 }
-    | CONFIGURATION IDENTIFIER { ConfigurationComponents.Init $2 |> Configuration.Empty.Patch |> ProjectComponents.Configuration }
     | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { ConfigurationComponents.Init $2 |> $4.Patch |> ProjectComponents.Configuration }
+    | CONFIGURATION IDENTIFIER { ConfigurationComponents.Init $2 |> Configuration.Empty.Patch |> ProjectComponents.Configuration }
 ConfigurationComponents:
     | /* empty */ { Configuration.Empty }
     | ConfigurationComponents ConfigurationDependencies { $1.Patch $2 }
@@ -131,3 +131,4 @@ Expr:
     | TRIM LPAREN Expr RPAREN { Expr.Function (Function.Trim, [$3]) }
     | UPPER LPAREN Expr RPAREN { Expr.Function (Function.Upper, [$3]) }
     | LOWER LPAREN Expr RPAREN { Expr.Function (Function.Lower, [$3]) }
+    | VERSION LPAREN Expr RPAREN { Expr.Function (Function.Version, [$3]) }

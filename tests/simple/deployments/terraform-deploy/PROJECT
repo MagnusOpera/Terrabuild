@@ -1,12 +1,14 @@
 
-configuration {
+configuration @terraform {
     dependencies = [ "../../projects/dotnet-app" ]
     ignores = [ "terrabuild.tfstate" ]
     labels = [ "infra" ]
 }
 
 target build {
-    @terraform plan { }
+    @terraform plan { variables: {
+        dotnet_app_version: version("projects/dotnet-app")
+    }}
 }
 
 target deploy {

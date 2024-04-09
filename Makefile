@@ -73,7 +73,7 @@ run-publish-scaffold:
 	dotnet run --project src/Terrabuild -- publish --workspace tests/scaffold --debug --retry
 
 run-build: clean
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug
+	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --debug
 
 run-rebuild: clean
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --force
@@ -88,7 +88,7 @@ run-push:
 	dotnet run --project src/Terrabuild -- run push --workspace tests/simple --environment debug --label app --debug --retry
 
 run-deploy:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug
+	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --retry
 
 run-deploy-dev:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev

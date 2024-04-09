@@ -28,7 +28,7 @@ let debugPrint s = ignore s
 %token EQUAL
 %token COMMA
 %token PLUS
-%token TRIM UPPER LOWER
+%token TRIM UPPER LOWER VERSION
 %token EOF
 %token TARGET ENVIRONMENT EXTENSION
 %token DEPENDS_ON VARIABLES CONTAINER INIT SCRIPT DEFAULTS
@@ -118,3 +118,4 @@ Expr:
     | TRIM LPAREN Expr RPAREN { Expr.Function (Function.Trim, [$3]) }
     | UPPER LPAREN Expr RPAREN { Expr.Function (Function.Upper, [$3]) }
     | LOWER LPAREN Expr RPAREN { Expr.Function (Function.Lower, [$3]) }
+    | VERSION LPAREN Expr RPAREN { Expr.Function (Function.Version, [$3]) }

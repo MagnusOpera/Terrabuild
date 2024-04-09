@@ -17,6 +17,7 @@ type token =
   | TRIM
   | UPPER
   | LOWER
+  | VERSION
   | PLUS
   | COMMA
   | EQUAL
@@ -51,6 +52,7 @@ type tokenId =
     | TOKEN_TRIM
     | TOKEN_UPPER
     | TOKEN_LOWER
+    | TOKEN_VERSION
     | TOKEN_PLUS
     | TOKEN_COMMA
     | TOKEN_EQUAL
