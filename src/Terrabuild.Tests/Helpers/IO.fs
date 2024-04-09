@@ -24,7 +24,7 @@ let ``verify path classification``() =
     | _ -> Assert.Inconclusive()
 
     match "TestFiles/unknown.txt" with
-    | None -> Assert.Pass()
+    | None path -> path |> should equal "TestFiles/unknown.txt"
     | _ -> Assert.Inconclusive()
 
 [<Test>]

@@ -36,7 +36,7 @@ let moveFile source destination =
 let (|File|Directory|None|) entry =
     if File.Exists(entry) then File entry
     elif Directory.Exists(entry) then Directory entry
-    else None
+    else None entry
 
 let deleteAny entry =
     match entry with

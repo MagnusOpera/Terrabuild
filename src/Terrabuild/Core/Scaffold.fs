@@ -245,3 +245,10 @@ let scaffold workspaceDir force =
     let workspaceFile = IO.combinePath workspaceDir "WORKSPACE"
     let workspaceContent = genWorkspace extensions
     File.WriteAllLines(workspaceFile, workspaceContent)
+
+    // exclude terrabuild temp folder
+    let terrabuildLines = [ "# Terrabuild temporary folder"; ".terrabuild" ]
+    match IO.combinePath workspaceDir ".gitignore" with
+    | IO.File file -> File.AppendAllLines(file, terrabuildLines)
+    | IO.None file -> File.WriteAllLines(file, terrabuildLines)
+    | _ -> ()

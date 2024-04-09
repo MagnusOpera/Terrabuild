@@ -420,3 +420,4 @@ terraform.tfstate
 
 /tests/scaffold/WORKSPACE
 /tests/scaffold/**/PROJECT
+/tests/scaffold/.gitignore

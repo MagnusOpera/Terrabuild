@@ -72,7 +72,7 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
     do
         match entryDir with
         | IO.Directory _ | IO.File _ -> IO.deleteAny entryDir
-        | IO.None -> ()
+        | IO.None _ -> ()
         IO.createDirectory entryDir
         IO.createDirectory logsDir
         // NOTE: outputs is created on demand only
