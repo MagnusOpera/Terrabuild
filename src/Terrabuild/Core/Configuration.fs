@@ -80,8 +80,8 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
         with exn ->
             ConfigException.Raise("Failed to read WORKSPACE configuration file", exn)
 
-    // create temporary folder so extension can expose files to docker containers (folder must within workspaceDir hierarchy)
-    FS.combinePath workspaceDir ".terrabuild" |> IO.createDirectory
+    // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
+    if options.WhatIf |> not then FS.combinePath workspaceDir ".terrabuild" |> IO.createDirectory
 
     // variables
     let environments = workspaceConfig.Environments
