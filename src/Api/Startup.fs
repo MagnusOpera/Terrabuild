@@ -22,6 +22,7 @@ open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
 open System.Text
 
+
 type Startup(config: IConfiguration) =
 
     member _.ConfigureServices(services: IServiceCollection) =
@@ -43,7 +44,15 @@ type Startup(config: IConfiguration) =
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero)) |> ignore
 
-        services.AddControllers() |> ignore
+        services
+            .AddCors(fun options -> options.AddDefaultPolicy(fun builder ->
+                builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod() |> ignore)) |> ignore
+        services
+            .AddControllers()
+            .AddJsonOptions(fun options ->
+                FSharpJson.Configure options.JsonSerializerOptions)
+             |> ignore
+
 
     member _.Configure (app: IApplicationBuilder, env: IWebHostEnvironment) =
         if (env.IsDevelopment()) then
@@ -52,6 +61,8 @@ type Startup(config: IConfiguration) =
         app
             .UseAuthentication()
             .UseAuthorization() |> ignore
+
+        app.UseCors() |> ignore
 
         app
             .UseHttpsRedirection()

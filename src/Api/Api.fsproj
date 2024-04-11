@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="AspNetExtensions.fs" />
+    <Compile Include="FSharpJson.fs" />
     <Compile Include="AppSettings.fs" />
     <Compile Include="Controllers/Authentication.fs" />
     <Compile Include="Startup.fs" />
@@ -14,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
+    <PackageReference Include="FSharp.SystemTextJson" Version="0.14.8" />
   </ItemGroup>
 
 </Project>

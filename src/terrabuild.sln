@@ -3,33 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild", "src\Terrabuild\Terrabuild.fsproj", "{9DE39771-3C5A-47C8-905A-338367C27214}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild", "Terrabuild\Terrabuild.fsproj", "{9DE39771-3C5A-47C8-905A-338367C27214}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{95B29BFC-EDC1-4700-A95B-D4D545D4505B}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Configuration", "src\Terrabuild.Configuration\Terrabuild.Configuration.fsproj", "{246D691A-CB08-4C08-B30A-0F35D792415A}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Configuration", "Terrabuild.Configuration\Terrabuild.Configuration.fsproj", "{246D691A-CB08-4C08-B30A-0F35D792415A}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Configuration.Tests", "src\Terrabuild.Configuration.Tests\Terrabuild.Configuration.Tests.fsproj", "{A0C8B452-4229-4548-8205-E04797C271C6}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Configuration.Tests", "Terrabuild.Configuration.Tests\Terrabuild.Configuration.Tests.fsproj", "{A0C8B452-4229-4548-8205-E04797C271C6}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Scripting", "src\Terrabuild.Scripting\Terrabuild.Scripting.fsproj", "{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Scripting", "Terrabuild.Scripting\Terrabuild.Scripting.fsproj", "{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Extensibility", "src\Terrabuild.Extensibility\Terrabuild.Extensibility.fsproj", "{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Extensibility", "Terrabuild.Extensibility\Terrabuild.Extensibility.fsproj", "{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Expressions", "src\Terrabuild.Expressions\Terrabuild.Expressions.fsproj", "{0F2A7B77-6B89-4B43-80AF-F72529A8114F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Expressions", "Terrabuild.Expressions\Terrabuild.Expressions.fsproj", "{0F2A7B77-6B89-4B43-80AF-F72529A8114F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Expressions.Tests", "src\Terrabuild.Expressions.Tests\Terrabuild.Expressions.Tests.fsproj", "{C29E9AB2-DC27-41B7-85DB-0A09785D0D50}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Expressions.Tests", "Terrabuild.Expressions.Tests\Terrabuild.Expressions.Tests.fsproj", "{C29E9AB2-DC27-41B7-85DB-0A09785D0D50}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Scripting.Tests", "src\Terrabuild.Scripting.Tests\Terrabuild.Scripting.Tests.fsproj", "{3588B2C9-1990-4615-9CDA-C7289BDC0D1C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Scripting.Tests", "Terrabuild.Scripting.Tests\Terrabuild.Scripting.Tests.fsproj", "{3588B2C9-1990-4615-9CDA-C7289BDC0D1C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Extensions", "src\Terrabuild.Extensions\Terrabuild.Extensions.fsproj", "{7BECEA85-8495-4517-98CE-90F37C590450}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Extensions", "Terrabuild.Extensions\Terrabuild.Extensions.fsproj", "{7BECEA85-8495-4517-98CE-90F37C590450}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DocGen", "src\DocGen\DocGen.fsproj", "{A7F43B4F-2316-49CE-9B86-FDEE89C3DDC7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Common.Tests", "Terrabuild.Common.Tests\Terrabuild.Common.Tests.fsproj", "{7A32DD67-85F1-4CB8-88AB-AA2BDF517887}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Common.Tests", "src\Terrabuild.Common.Tests\Terrabuild.Common.Tests.fsproj", "{7A32DD67-85F1-4CB8-88AB-AA2BDF517887}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Common", "Terrabuild.Common\Terrabuild.Common.fsproj", "{82A553AA-3FA9-423A-A3E7-1C88FC8034D3}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Common", "src\Terrabuild.Common\Terrabuild.Common.fsproj", "{82A553AA-3FA9-423A-A3E7-1C88FC8034D3}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Api", "src\Api\Api.fsproj", "{0422E4A3-C55A-4D50-98A6-B673D5B6AA39}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Api", "Api\Api.fsproj", "{0422E4A3-C55A-4D50-98A6-B673D5B6AA39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,10 +74,6 @@ Global
 		{7BECEA85-8495-4517-98CE-90F37C590450}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BECEA85-8495-4517-98CE-90F37C590450}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BECEA85-8495-4517-98CE-90F37C590450}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A7F43B4F-2316-49CE-9B86-FDEE89C3DDC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A7F43B4F-2316-49CE-9B86-FDEE89C3DDC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A7F43B4F-2316-49CE-9B86-FDEE89C3DDC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A7F43B4F-2316-49CE-9B86-FDEE89C3DDC7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7A32DD67-85F1-4CB8-88AB-AA2BDF517887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7A32DD67-85F1-4CB8-88AB-AA2BDF517887}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A32DD67-85F1-4CB8-88AB-AA2BDF517887}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -94,18 +88,5 @@ Global
 		{0422E4A3-C55A-4D50-98A6-B673D5B6AA39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{9DE39771-3C5A-47C8-905A-338367C27214} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{246D691A-CB08-4C08-B30A-0F35D792415A} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{A0C8B452-4229-4548-8205-E04797C271C6} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{09F2DC5E-E496-410B-97A9-87CAAD6FF8D7} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{071DF86D-C0A0-40AE-BE3C-A5FEE3C05A36} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{0F2A7B77-6B89-4B43-80AF-F72529A8114F} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{C29E9AB2-DC27-41B7-85DB-0A09785D0D50} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{3588B2C9-1990-4615-9CDA-C7289BDC0D1C} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{7BECEA85-8495-4517-98CE-90F37C590450} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{A7F43B4F-2316-49CE-9B86-FDEE89C3DDC7} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{7A32DD67-85F1-4CB8-88AB-AA2BDF517887} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{82A553AA-3FA9-423A-A3E7-1C88FC8034D3} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
-		{0422E4A3-C55A-4D50-98A6-B673D5B6AA39} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
 	EndGlobalSection
 EndGlobal

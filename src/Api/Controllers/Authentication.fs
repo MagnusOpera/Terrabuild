@@ -7,6 +7,7 @@ open System.Threading.Tasks
 open Microsoft.AspNetCore.Mvc
 open Microsoft.Extensions.Logging
 open Api
+open Microsoft.AspNetCore.Authorization
 
 
 type LoginInput = {
@@ -20,6 +21,10 @@ type LoginInput = {
 type AuthController (logger : ILogger<AuthController>) =
     inherit ControllerBase()
 
-    [<HttpPost>]
+    [<HttpPost; AllowAnonymous>]
     member _.Login(input: LoginInput) =
         printfn $"{input}"
+
+    [<HttpGet>]
+    member _.Logout() =
+        ()

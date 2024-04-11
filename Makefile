@@ -1,8 +1,17 @@
 config ?= Debug
 version ?= 0.0.0
 
-build:
-	dotnet build -c $(config)
+.PHONY: src tools tests
+
+src:
+	dotnet build -c $(config) src/terrabuild.sln
+
+tools:
+	dotnet build -c $(config) tools/tools.sln
+
+tests:
+	dotnet test src/terrabuild.sln
+
 
 clean:
 	-rm terrabuild-debug.*
@@ -27,7 +36,7 @@ dist-all: clean
 
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(config)
-	dotnet run --project src/DocGen -- src/Terrabuild.Extensions/bin/$(config)/net8.0/Terrabuild.Extensions.xml ../websites/terrabuild.io/content/docs/extensions
+	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(config)/net8.0/Terrabuild.Extensions.xml ../websites/terrabuild.io/content/docs/extensions
 
 parser:
 	dotnet build -c $(config) /p:DefineConstants="GENERATE_PARSER"
@@ -46,9 +55,6 @@ self-publish: clean dist
 
 self-check: clean dist
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug --whatif
-
-test:
-	dotnet test
 
 
 
