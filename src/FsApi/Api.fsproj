@@ -8,14 +8,22 @@
     <Compile Include="AspNetExtensions.fs" />
     <Compile Include="FSharpJson.fs" />
     <Compile Include="AppSettings.fs" />
+    <Compile Include="Helpers/JWT.fs" />
     <Compile Include="Controllers/Authentication.fs" />
+    <Compile Include="Controllers/Store.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
+   <ProjectReference Include="../Terrabuild.Common/Terrabuild.Common.fsproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
     <PackageReference Include="FSharp.SystemTextJson" Version="0.14.8" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
 </Project>

@@ -3,8 +3,11 @@ version ?= 0.0.0
 
 .PHONY: src tools tests
 
+build:
+	dotnet build -c $(config) terrabuild.sln
+
 src:
-	dotnet build -c $(config) src/terrabuild.sln
+	dotnet build -c $(config) src/src.sln
 
 tools:
 	dotnet build -c $(config) tools/tools.sln

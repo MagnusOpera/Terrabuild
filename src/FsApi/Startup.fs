@@ -21,6 +21,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
 open System.Text
+open Microsoft.OpenApi.Models
 
 
 type Startup(config: IConfiguration) =
@@ -29,6 +30,7 @@ type Startup(config: IConfiguration) =
         let sectionSettings = config.GetSection("AppSettings")
         services.Configure<AppSettings>(sectionSettings) |> ignore
         let appSettings = sectionSettings.Get<AppSettings>()
+        printfn $"AppSettings = {appSettings}"
 
         services.AddSingleton(appSettings) |> ignore
         services
@@ -48,6 +50,7 @@ type Startup(config: IConfiguration) =
             .AddCors(fun options -> options.AddDefaultPolicy(fun builder ->
                 builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod() |> ignore)) |> ignore
         services
+            .AddSwaggerGen(fun c -> c.SwaggerDoc("v1", OpenApiInfo(Title = "Api", Version = "v1.0")))
             .AddControllers()
             .AddJsonOptions(fun options ->
                 FSharpJson.Configure options.JsonSerializerOptions)
@@ -57,6 +60,10 @@ type Startup(config: IConfiguration) =
     member _.Configure (app: IApplicationBuilder, env: IWebHostEnvironment) =
         if (env.IsDevelopment()) then
             app.UseDeveloperExceptionPage() |> ignore
+            app
+                .UseSwagger()
+                .UseSwaggerUI(fun builder ->
+                    builder.RoutePrefix <- "swagger") |> ignore
 
         app
             .UseAuthentication()

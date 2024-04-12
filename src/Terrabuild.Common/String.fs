@@ -23,3 +23,6 @@ let (|Regex|_|) pattern input =
 let cut m (s: string) =
     if s.Length > m then s.Substring(0, m) + "..."
     else s
+
+let startsWith (start: string) (s: string) =
+    s.StartsWith(start)

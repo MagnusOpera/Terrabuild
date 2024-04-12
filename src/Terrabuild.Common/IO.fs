@@ -16,8 +16,11 @@ let writeTextFile filename content =
 let getTempFilename () =
     Path.GetTempFileName()
 
-let getFilename (p: string) =
-    Path.GetFileName(p)
+let getFilename (path: string) =
+    Path.GetFileName(path)
+
+let exists path =
+    Path.Exists(path)
 
 let moveFile source destination =
     File.Move(source, destination, true)
