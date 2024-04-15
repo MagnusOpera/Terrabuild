@@ -4,6 +4,7 @@ open System.Text.Json.Serialization
 open Microsoft.Extensions.Configuration
 open System.Text.Json.Nodes
 open System
+open System.Collections.Generic
 
 
 let Configure (options: JsonSerializerOptions) =
@@ -27,27 +28,21 @@ let Deserialize<'t> (json: string) =
     JsonSerializer.Deserialize<'t>(json, Settings)
 
 
-let rec ToJson (config: IConfiguration): JsonNode =
-    match config.GetChildren() |> Seq.tryHead with
-    | Some child when child.Path.EndsWith(":0") ->
-        let arrElement = JsonArray()
-        for arrayChild in config.GetChildren() do
-            arrElement.Add(ToJson arrayChild)
-        arrElement
-    | _ ->
-        let objElement = JsonObject()
-        for child in config.GetChildren() do
-            objElement.Add(child.Key, ToJson child)
-        match config with
-        | :? IConfigurationSection as section when objElement.Count = 0 ->
-            match bool.TryParse(section.Value) with
-            | true, boolean -> JsonValue.Create(boolean)
+let rec ToJson (section: IConfigurationSection): JsonNode =
+    let children = section.GetChildren() |> Array.ofSeq
+    if children.Length = 0 then
+        match bool.TryParse(section.Value) with
+        | true, bool -> JsonValue.Create(bool)
+        | _ ->
+            match Decimal.TryParse(section.Value) with
+            | true, decimal -> JsonValue.Create(decimal)
             | _ ->
-                match Decimal.TryParse(section.Value) with
-                | true, decimal -> JsonValue.Create(decimal)
-                | _ ->
-                    match Int64.TryParse(section.Value) with
-                    | true, int -> JsonValue.Create(int)
-                    | _ -> JsonValue.Create(section.Value)
-        | _ -> objElement
-
+                match Int64.TryParse(section.Value) with
+                | true, int64 -> JsonValue.Create(int64)
+                | _ -> JsonValue.Create(section.Value)
+    elif children[0].Path.EndsWith(":0") then
+        let arrElement = children |> Array.map (fun child -> ToJson child) |> JsonArray
+        arrElement
+    else
+        let objElement = children |> Array.map (fun child -> KeyValuePair.Create(child.Key, ToJson child)) |> JsonObject
+        objElement
