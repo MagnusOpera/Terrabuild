@@ -8,13 +8,21 @@ type AuthSettings = {
 
 [<RequireQualifiedAccess>]
 type StoreType =
-    | Local = 0
+    | Local
+    | Azure
 
-[<CLIMutable>]
-type StoreSettings = {
-    Type: StoreType
-    Uri: string
+type LocalSettings = {
+    Url: string
 }
+
+type AzureSettings = {
+    Account: string
+    Key: string
+}
+
+type StoreSettings =
+    | Local of LocalSettings
+    | Azure of AzureSettings
 
 [<CLIMutable>]
 type AppSettings = {

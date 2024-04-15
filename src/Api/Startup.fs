@@ -27,9 +27,23 @@ open Microsoft.OpenApi.Models
 type Startup(config: IConfiguration) =
 
     member _.ConfigureServices(services: IServiceCollection) =
-        let sectionSettings = config.GetSection("AppSettings")
-        services.Configure<AppSettings>(sectionSettings) |> ignore
-        let appSettings = sectionSettings.Get<AppSettings>()
+
+        let rec toJson (config: IConfigurationSection) =
+            let mutable elements: Map<string, obj> = Map.empty
+            for child in config.GetChildren() do
+                let key = child.Key
+                let value: obj =
+                    match child.Value with
+                    | null -> toJson child
+                    | x -> x
+                elements <- elements |> Map.add key value
+            elements
+
+        let sectionSettings = config.GetSection("AppSettings") |> toJson
+        let json = FSharpJson.Serialize sectionSettings
+        printfn $"Json AppSettings = {json}"
+
+        let appSettings = FSharpJson.Serialize sectionSettings |> FSharpJson.Deserialize<AppSettings>
         printfn $"AppSettings = {appSettings}"
 
         services.AddSingleton(appSettings) |> ignore

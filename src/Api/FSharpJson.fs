@@ -10,7 +10,8 @@ let Configure (options: JsonSerializerOptions) =
     options.PropertyNamingPolicy <- JsonNamingPolicy.CamelCase
     options.PropertyNameCaseInsensitive <- true    
     options.Converters.Clear()
-    options.Converters.Add(JsonFSharpConverter(JsonUnionEncoding.FSharpLuLike, unionTagCaseInsensitive = true))
+    // options.Converters.Add(JsonFSharpConverter(JsonUnionEncoding.FSharpLuLike, unionTagCaseInsensitive = true))
+    options.Converters.Add(JsonStringEnumConverter())
 
 let Settings =
     let options = JsonSerializerOptions()
