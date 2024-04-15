@@ -41,8 +41,9 @@ let rec ToJson (section: IConfigurationSection): JsonNode =
                 | true, int64 -> JsonValue.Create(int64)
                 | _ -> JsonValue.Create(section.Value)
     elif children[0].Path.EndsWith(":0") then
-        let arrElement = children |> Array.map (fun child -> ToJson child) |> JsonArray
+        let arrElement = children |> Array.map ToJson |> JsonArray
         arrElement
     else
-        let objElement = children |> Array.map (fun child -> KeyValuePair.Create(child.Key, ToJson child)) |> JsonObject
+        let kvpOf (child: IConfigurationSection) = KeyValuePair(child.Key, ToJson child)
+        let objElement = children |> Array.map kvpOf |> JsonObject
         objElement
