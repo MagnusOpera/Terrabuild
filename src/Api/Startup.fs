@@ -22,28 +22,16 @@ open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
 open System.Text
 open Microsoft.OpenApi.Models
-
+open System.Text.Json.Nodes
 
 type Startup(config: IConfiguration) =
 
     member _.ConfigureServices(services: IServiceCollection) =
-
-        let rec toJson (config: IConfigurationSection) =
-            let mutable elements: Map<string, obj> = Map.empty
-            for child in config.GetChildren() do
-                let key = child.Key
-                let value: obj =
-                    match child.Value with
-                    | null -> toJson child
-                    | x -> x
-                elements <- elements |> Map.add key value
-            elements
-
-        let sectionSettings = config.GetSection("AppSettings") |> toJson
-        let json = FSharpJson.Serialize sectionSettings
+        let jsonSettings = config.GetSection("AppSettings") |> FSharpJson.ToJson
+        let json = jsonSettings.ToJsonString()
         printfn $"Json AppSettings = {json}"
 
-        let appSettings = FSharpJson.Serialize sectionSettings |> FSharpJson.Deserialize<AppSettings>
+        let appSettings = FSharpJson.Deserialize<AppSettings> json
         printfn $"AppSettings = {appSettings}"
 
         services.AddSingleton(appSettings) |> ignore
