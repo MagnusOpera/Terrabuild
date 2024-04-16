@@ -36,7 +36,10 @@ type Startup(config: IConfiguration) =
 
         services.AddSingleton(appSettings) |> ignore
         services
-            .AddAuthentication()
+            .AddAuthentication(fun options ->
+                options.DefaultAuthenticateScheme <- JwtBearerDefaults.AuthenticationScheme
+                options.DefaultChallengeScheme <- JwtBearerDefaults.AuthenticationScheme
+                options.DefaultScheme <- JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(fun options ->
                 options.RequireHttpsMetadata <- false
                 options.SaveToken <- false

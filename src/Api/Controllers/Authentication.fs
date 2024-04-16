@@ -25,16 +25,21 @@ type LoginOutput = {
 
 [<ApiController>]
 [<Route("auth")>]
+[<Authorize>]
 type AuthController (logger : ILogger<AuthController>, appSettings: AppSettings) =
     inherit ControllerBase()
 
-
     [<HttpPost; AllowAnonymous>]
     member _.Login(input: CredentialsInput): ActionResult<LoginOutput> =
-        printfn $"{input}"
-        let token = JWT.createToken input.Organization input.Email appSettings.Auth.Secret
-        let response = { AuthToken = token; RefreshToken = "troulala" }
-        !> response
+        match appSettings.Store with
+        | Local _ ->
+            let token = JWT.createToken input.Organization input.Email appSettings.Auth.Secret 60 appSettings.Auth
+            let refreshToken = JWT.createToken input.Organization input.Email appSettings.Auth.Secret 60 appSettings.Auth
+            !> { AuthToken = token; RefreshToken = refreshToken }
+        // | Azure _ ->
+        //     let token = JWT.createToken input.Organization input.Email appSettings.Auth.Secret 60 appSettings.Auth
+        //     let refreshToken = JWT.createToken input.Organization input.Email appSettings.Auth.Secret 60 appSettings.Auth
+        //     !> { AuthToken = token; RefreshToken = refreshToken }
 
     [<HttpPatch; AllowAnonymous>]
     member _.Refresh(input: TokenInput): ActionResult<LoginOutput> =
@@ -47,4 +52,3 @@ type AuthController (logger : ILogger<AuthController>, appSettings: AppSettings)
     [<HttpDelete>]
     member _.Logout(): ActionResult =
         base.Ok()
-    

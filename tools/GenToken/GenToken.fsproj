@@ -11,7 +11,7 @@
  
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Api/Api.csproj" />
+    <ProjectReference Include="../../src/Api/Api.fsproj" />
   </ItemGroup>
 
 </Project>
