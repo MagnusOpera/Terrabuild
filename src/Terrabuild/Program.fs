@@ -2,6 +2,7 @@
 open CLI
 open System
 open Serilog
+open System.Net.Http
 
 let rec dumpKnownException (ex: Exception) =
     seq {
@@ -166,21 +167,27 @@ let processCommandLine () =
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
 
-    match result with
-    | p when p.Contains(TerrabuildArgs.Scaffold) -> p.GetResult(TerrabuildArgs.Scaffold) |> scaffold
-    | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
-    | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
-    | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"
-    | p when p.Contains(TerrabuildArgs.Publish) -> p.GetResult(TerrabuildArgs.Publish) |> targetShortcut "publish"
-    | p when p.Contains(TerrabuildArgs.Deploy) -> p.GetResult(TerrabuildArgs.Publish) |> targetShortcut "deploy"
-    | p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> targetShortcut "serve"
-    | p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> target
-    | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear; 0
+    let login (loginArgs: ParseResults<LoginArgs>) =
+        let token = loginArgs.GetResult(LoginArgs.Token)
+        Auth.loginToken token
+
+    match result.GetAllResults() with
+    | TerrabuildArgs.Scaffold arg :: _ -> scaffold arg
+    | TerrabuildArgs.Build arg :: _ -> targetShortcut "build" arg
+    | TerrabuildArgs.Test arg :: _ -> targetShortcut "test" arg
+    | TerrabuildArgs.Dist arg :: _ -> targetShortcut "dist" arg
+    | TerrabuildArgs.Publish arg :: _ -> targetShortcut "publish" arg
+    | TerrabuildArgs.Deploy arg :: _ -> targetShortcut "deploy" arg
+    | TerrabuildArgs.Serve arg :: _ -> targetShortcut "serve" arg
+    | TerrabuildArgs.Run arg :: _ -> target arg
+    | TerrabuildArgs.Clear arg :: _ -> clear arg; 0
+    | TerrabuildArgs.Login arg :: _ ->  login arg; 0
     | _ -> parser.PrintUsage() |> Terminal.writeLine; 0
 
 [<EntryPoint>]
 let main _ =
     try
+        DotNetEnv.Env.TraversePath().Load() |> ignore
         Terminal.hideCursor()
         Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
         let ret = processCommandLine()

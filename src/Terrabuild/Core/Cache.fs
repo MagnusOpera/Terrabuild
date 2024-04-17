@@ -28,6 +28,16 @@ type TargetSummary = {
     Status: TaskStatus
 }
 
+
+
+[<RequireQualifiedAccess>]
+type Configuration = {
+    Url: string
+    Token: string
+}
+
+
+
 type IEntry =
     abstract NextLogFile: unit -> string
     abstract Outputs: string with get
@@ -44,15 +54,16 @@ let private summaryFilename = "summary.json"
 
 let private completeFilename = ".complete"
 
+let terrabuildHome =
+    FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
+
 let private buildCacheDirectory =
-    let homeDir = Environment.GetEnvironmentVariable("HOME")
-    let cacheDir = FS.combinePath homeDir ".terrabuild/buildcache"
+    let cacheDir = FS.combinePath terrabuildHome "buildcache"
     IO.createDirectory cacheDir
     cacheDir
 
 let private homeDirectory =
-    let homeDir = Environment.GetEnvironmentVariable("HOME")
-    let cacheDir = FS.combinePath homeDir ".terrabuild/home"
+    let cacheDir = FS.combinePath terrabuildHome "home"
     IO.createDirectory cacheDir
     cacheDir
 
@@ -62,6 +73,11 @@ let private markEntryAsCompleted reason entryDir =
 
 let clearBuildCache () =
     IO.deleteAny buildCacheDirectory
+
+let writeConfig (config: Configuration) =
+    let tokenFile = FS.combinePath terrabuildHome "config.json"
+    let content = Json.Serialize config
+    File.WriteAllText(tokenFile, content)
 
 type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.Storage) =
     let mutable logNum = 0

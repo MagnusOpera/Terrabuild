@@ -70,6 +70,15 @@ with
             | BuildCache -> "Clear build cache."
 
 [<RequireQualifiedAccess>]
+type LoginArgs =
+    | [<Mandatory; ExactlyOnce>] Token of token:string
+with
+    interface IArgParserTemplate with
+        member this.Usage =
+            match this with
+            | Token _ -> "Token to connect to store"
+
+[<RequireQualifiedAccess>]
 type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Scaffold of ParseResults<ScaffoldArgs>
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<RunArgs>
@@ -80,6 +89,8 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<TargetArgs>
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
+    | [<CliPrefix(CliPrefix.None)>] Login of ParseResults<LoginArgs>
+    | [<CliPrefix(CliPrefix.None)>] Logout
     | [<Unique; Inherit>] WhatIf
     | [<Hidden; Unique; Inherit>] Debug
 with
@@ -95,5 +106,7 @@ with
             | Serve _ -> "Run target 'serve'."
             | Run _ -> "Run specified targets."
             | Clear _ -> "Clear specified caches."
+            | Login _ -> "Log in to artifact store"
+            | Logout -> "Disconnect from artifact store"
             | WhatIf -> "Prepare the action but do not apply."
             | Debug -> "Enable logging and debug dumps."

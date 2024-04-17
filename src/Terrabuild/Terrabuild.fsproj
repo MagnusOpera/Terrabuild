@@ -16,9 +16,10 @@
     <Compile Include="Helpers/Terminal.fs" />
     <Compile Include="Helpers/Progress.fs" />
     <Compile Include="Helpers/Extensions.fs" />
+    <Compile Include="Core/Cache.fs" />
+    <Compile Include="Core/Auth.fs" />
     <Compile Include="Core/Scaffold.fs" />
     <Compile Include="Core/Configuration.fs" />
-    <Compile Include="Core/Cache.fs" />
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Build.fs" />
     <Compile Include="Core/Notification.fs" />
@@ -45,6 +46,8 @@
     <PackageReference Include="FSharp.SystemTextJson" Version="1.2.42" />
     <PackageReference Include="Argu" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <!-- <PackageReference Include="FSharp.Data" Version="6.2.0" /> -->
+    <PackageReference Include="DotNetEnv" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

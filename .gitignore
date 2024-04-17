@@ -422,3 +422,4 @@ terraform.tfstate
 /tests/scaffold/**/PROJECT
 /tests/scaffold/.gitignore
 .local-store
+.env
