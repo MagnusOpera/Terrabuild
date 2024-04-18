@@ -4,6 +4,7 @@ open System
 open System.Net.Http
 open System.Text
 open System.Net
+open FSharp.Data
 
 [<RequireQualifiedAccess>]
 type TokenInput = {
@@ -21,19 +22,17 @@ let httpClient = new HttpClient()
 let login space token =
     // try exchanging this token with a real token
     // if successful token is validated
-    let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
-    let url = Uri(Uri(baseUrl), "/auth").ToString()
-    let webRequest = new HttpRequestMessage(HttpMethod.Patch, url)
-    let request =
-        { TokenInput.Space = space; TokenInput.Token = token }
-        |> FSharpJson.Serialize
-    webRequest.Content <- new StringContent(request, UnicodeEncoding.UTF8, "application/json")
-    let webResponse = httpClient.Send(webRequest)
-    if webResponse.StatusCode = HttpStatusCode.OK then
+    try
+        let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
+        let url = Uri(Uri(baseUrl), "/auth").ToString()
+        let request =
+            { TokenInput.Space = space; TokenInput.Token = token }
+            |> FSharpJson.Serialize
+        let headers = [ 
+            "Accept", "application/json"
+            "Content-Type", "application/json"]
         let response =
-            webResponse.Content.ReadAsStringAsync()
-            |> Async.AwaitTask
-            |> Async.RunSynchronously
+            Http.RequestString(url = url, headers = headers, body = TextRequest request, httpMethod = HttpMethod.Patch)
             |> FSharpJson.Deserialize<LoginOutput>
 
         // token is validated, can go to disk
@@ -45,9 +44,18 @@ let login space token =
 
         Cache.addSpaceAuth spaceAuth
         0
-    else
-        $"{Ansi.Emojis.bomb} {webResponse.StatusCode}: please check permissions with your administrator." |> Terminal.writeLine
-        5
+    with
+        | :? WebException as ex ->
+            let errorCode =
+                match ex.InnerException with
+                | :? WebException as innerEx ->
+                    match innerEx.Response with
+                    | :? HttpWebResponse as hwr -> hwr.StatusCode.ToString()
+                    | _ -> ex.Message
+                | _ -> ex.Message
+
+            $"{Ansi.Emojis.bomb} {errorCode}: please check permissions with your administrator." |> Terminal.writeLine
+            5
 
 let logout space =
     Cache.removeSpaceAuth space

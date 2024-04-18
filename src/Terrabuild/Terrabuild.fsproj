@@ -43,6 +43,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageReference Include="FSharp.Data" Version="6.4.0" />
     <PackageReference Include="FSharp.SystemTextJson" Version="1.2.42" />
     <PackageReference Include="Argu" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
