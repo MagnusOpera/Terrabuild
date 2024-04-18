@@ -30,10 +30,15 @@ type TargetSummary = {
 
 
 
+type SpaceAuth = {
+    Url: string
+    Space: string
+    Token: string
+}
+
 [<RequireQualifiedAccess>]
 type Configuration = {
-    Url: string
-    Token: string
+    Spaces: SpaceAuth list
 }
 
 
@@ -74,10 +79,32 @@ let private markEntryAsCompleted reason entryDir =
 let clearBuildCache () =
     IO.deleteAny buildCacheDirectory
 
-let writeConfig (config: Configuration) =
-    let tokenFile = FS.combinePath terrabuildHome "config.json"
-    let content = Json.Serialize config
-    File.WriteAllText(tokenFile, content)
+
+let removeSpaceAuth (space: string) =
+    let configFile = FS.combinePath terrabuildHome "config.json"
+    let config =
+        if File.Exists configFile then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
+        else { Configuration.Spaces = [] }
+
+    let config = { config with Spaces = config.Spaces |> List.filter (fun auth -> auth.Space <> space) }
+    config
+    |> Json.Serialize
+    |> IO.writeTextFile configFile
+
+let addSpaceAuth (spaceAuth: SpaceAuth) =
+    let configFile = FS.combinePath terrabuildHome "config.json"
+    let config =
+        if File.Exists configFile then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
+        else { Configuration.Spaces = [] }
+
+    let config = { config with Spaces = config.Spaces |> List.filter (fun auth -> auth.Space <> spaceAuth.Space) }
+    let config = { config with Spaces = config.Spaces @ [spaceAuth] }
+
+    config
+    |> Json.Serialize
+    |> IO.writeTextFile configFile
+
+
 
 type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.Storage) =
     let mutable logNum = 0

@@ -43,8 +43,8 @@ rule token = parse
     | "lower" { LOWER }
     | "version" { VERSION }
 
-    | "target" { TARGET }
     | "configuration" { CONFIGURATION }
+    | "target" { TARGET }
     | "dependencies" { DEPENDENCIES }
     | "outputs" { OUTPUTS }
     | "ignores" { IGNORES }

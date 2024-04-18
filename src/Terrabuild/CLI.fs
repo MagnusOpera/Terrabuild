@@ -71,12 +71,23 @@ with
 
 [<RequireQualifiedAccess>]
 type LoginArgs =
+    | [<Mandatory; ExactlyOnce>] Space of space:string
     | [<Mandatory; ExactlyOnce>] Token of token:string
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
+            | Space _ -> "Space slug"
             | Token _ -> "Token to connect to store"
+
+[<RequireQualifiedAccess>]
+type LogoutArgs =
+    | [<Mandatory; ExactlyOnce>] Space of space:string
+with
+    interface IArgParserTemplate with
+        member this.Usage =
+            match this with
+            | Space _ -> "Space slug"
 
 [<RequireQualifiedAccess>]
 type TerrabuildArgs =
@@ -90,7 +101,7 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<TargetArgs>
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
     | [<CliPrefix(CliPrefix.None)>] Login of ParseResults<LoginArgs>
-    | [<CliPrefix(CliPrefix.None)>] Logout
+    | [<CliPrefix(CliPrefix.None)>] Logout of ParseResults<LogoutArgs>
     | [<Unique; Inherit>] WhatIf
     | [<Hidden; Unique; Inherit>] Debug
 with
@@ -107,6 +118,6 @@ with
             | Run _ -> "Run specified targets."
             | Clear _ -> "Clear specified caches."
             | Login _ -> "Log in to artifact store"
-            | Logout -> "Disconnect from artifact store"
+            | Logout _ -> "Disconnect from artifact store"
             | WhatIf -> "Prepare the action but do not apply."
             | Debug -> "Enable logging and debug dumps."

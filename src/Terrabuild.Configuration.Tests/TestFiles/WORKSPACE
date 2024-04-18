@@ -1,5 +1,9 @@
 # comment at top of file
 
+configuration {
+    space = "magnusopera/default"
+}
+
 target build { # comment at end of line
   depends_on = [ ^build ]
 }

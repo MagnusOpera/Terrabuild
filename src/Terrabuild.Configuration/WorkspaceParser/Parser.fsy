@@ -30,8 +30,8 @@ let debugPrint s = ignore s
 %token PLUS
 %token TRIM UPPER LOWER VERSION
 %token EOF
-%token TARGET ENVIRONMENT EXTENSION
-%token DEPENDS_ON VARIABLES CONTAINER INIT SCRIPT DEFAULTS
+%token CONFIGURATION TARGET ENVIRONMENT EXTENSION
+%token SPACE DEPENDS_ON VARIABLES CONTAINER INIT SCRIPT DEFAULTS
 
 // associativity and precedences
 %left PLUS
@@ -44,9 +44,18 @@ Workspace:
 
 WorkspaceComponents:
     | /* empty */ { Workspace.Empty }
+    | WorkspaceComponents Configuration { $1.Patch $2 }
     | WorkspaceComponents Target { $1.Patch $2 }
     | WorkspaceComponents Environment { $1.Patch $2 }
     | WorkspaceComponents Extension { $1.Patch $2 }
+
+Configuration:
+    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { WorkspaceComponents.Configuration $3 }
+ConfigurationComponents:
+    | /* empty */ { Configuration.Empty }
+    | ConfigurationComponents ConfigurationSpace { $1.Patch $2 }
+ConfigurationSpace:
+    | SPACE EQUAL String { ConfigurationComponents.Space $3 }
 
 Target:
     | TARGET IDENTIFIER { WorkspaceComponents.Target ($2, Target.Empty) }

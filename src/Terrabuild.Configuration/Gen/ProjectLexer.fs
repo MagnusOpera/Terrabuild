@@ -342,7 +342,7 @@ let trans : uint16[] array =
     (* State 164 *)
      [| 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 163us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 164us; 65535us; |];
     |] 
-let actions : uint16[] = [|65535us; 0us; 2us; 1us; 2us; 0us; 65535us; 37us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 37us; 37us; 3us; 37us; 22us; 37us; 25us; 26us; 27us; 28us; 29us; 30us; 31us; 32us; 33us; 34us; 35us; 37us; 36us; 37us; 35us; 23us; 3us; 65535us; 3us; 3us; 3us; 2us; 65535us; 2us; 65535us; 2us; 24us; 1us; 65535us; 24us; 65535us; 24us; 24us; 24us; 24us; 24us; 24us; 10us; 24us; 24us; 24us; 8us; 24us; 24us; 24us; 24us; 5us; 7us; 24us; 24us; 24us; 11us; 24us; 24us; 24us; 24us; 17us; 24us; 24us; 24us; 24us; 24us; 14us; 24us; 24us; 24us; 24us; 24us; 4us; 24us; 24us; 24us; 24us; 9us; 24us; 24us; 24us; 16us; 24us; 24us; 24us; 24us; 24us; 15us; 24us; 24us; 24us; 6us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 18us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 65535us; 24us; 20us; 24us; 24us; 24us; 24us; 13us; 24us; 24us; 24us; 24us; 21us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 19us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 12us; 65535us; 0us; 65535us; |]
+let actions : uint16[] = [|65535us; 0us; 2us; 1us; 2us; 0us; 65535us; 37us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 37us; 37us; 3us; 37us; 22us; 37us; 25us; 26us; 27us; 28us; 29us; 30us; 31us; 32us; 33us; 34us; 35us; 37us; 36us; 37us; 35us; 23us; 3us; 65535us; 3us; 3us; 3us; 2us; 65535us; 2us; 65535us; 2us; 24us; 1us; 65535us; 24us; 65535us; 24us; 24us; 24us; 24us; 24us; 24us; 10us; 24us; 24us; 24us; 8us; 24us; 24us; 24us; 24us; 5us; 7us; 24us; 24us; 24us; 12us; 24us; 24us; 24us; 24us; 17us; 24us; 24us; 24us; 24us; 24us; 14us; 24us; 24us; 24us; 24us; 24us; 4us; 24us; 24us; 24us; 24us; 9us; 24us; 24us; 24us; 16us; 24us; 24us; 24us; 24us; 24us; 15us; 24us; 24us; 24us; 6us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 18us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 65535us; 24us; 20us; 24us; 24us; 24us; 24us; 13us; 24us; 24us; 24us; 24us; 21us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 19us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 24us; 11us; 65535us; 0us; 65535us; |]
 let _fslex_tables = FSharp.Text.Lexing.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 // Rule token
@@ -414,12 +414,12 @@ and token  lexbuf =
           )
   | 11 -> ( 
 # 46 "ProjectParser/Lexer.fsl"
-                                TARGET 
+                                       CONFIGURATION 
 # 418 "Gen/ProjectLexer.fs"
           )
   | 12 -> ( 
 # 47 "ProjectParser/Lexer.fsl"
-                                       CONFIGURATION 
+                                TARGET 
 # 423 "Gen/ProjectLexer.fs"
           )
   | 13 -> ( 

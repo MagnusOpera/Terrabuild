@@ -1,4 +1,8 @@
 
+configuration {
+    space = "magnusopera/default"
+}
+
 target build {
   depends_on = [ ^build ]
 }

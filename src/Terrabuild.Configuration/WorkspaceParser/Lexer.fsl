@@ -43,9 +43,12 @@ rule token = parse
     | "lower" { LOWER }
     | "version" { VERSION }
 
+    | "configuration" { CONFIGURATION }
     | "target" { TARGET }
     | "environment" { ENVIRONMENT }
     | "extension" { EXTENSION }
+    
+    | "space" { SPACE }
     | "depends_on" { DEPENDS_ON }
     | "variables" { VARIABLES }
     | "container" { CONTAINER }

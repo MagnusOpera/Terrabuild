@@ -32,7 +32,8 @@ let parseWorkspace() =
               Script = None
               Defaults = Map.empty }
 
-        { Targets = Map [ "build", targetBuild
+        { Space = Some "magnusopera/default"
+          Targets = Map [ "build", targetBuild
                           "dist", targetDist
                           "dummy", targetDummy ]
           Environments = Map [ "release", envRelease

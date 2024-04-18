@@ -168,8 +168,13 @@ let processCommandLine () =
         if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
 
     let login (loginArgs: ParseResults<LoginArgs>) =
+        let space = loginArgs.GetResult(LoginArgs.Space)
         let token = loginArgs.GetResult(LoginArgs.Token)
-        Auth.loginToken token
+        Auth.login space token
+
+    let logout (loginArgs: ParseResults<LogoutArgs>) =
+        let space = loginArgs.GetResult(LogoutArgs.Space)
+        Auth.logout space
 
     match result.GetAllResults() with
     | TerrabuildArgs.Scaffold arg :: _ -> scaffold arg
@@ -181,7 +186,8 @@ let processCommandLine () =
     | TerrabuildArgs.Serve arg :: _ -> targetShortcut "serve" arg
     | TerrabuildArgs.Run arg :: _ -> target arg
     | TerrabuildArgs.Clear arg :: _ -> clear arg; 0
-    | TerrabuildArgs.Login arg :: _ ->  login arg; 0
+    | TerrabuildArgs.Login arg :: _ ->  login arg
+    | TerrabuildArgs.Logout arg :: _ ->  logout arg; 0
     | _ -> parser.PrintUsage() |> Terminal.writeLine; 0
 
 [<EntryPoint>]

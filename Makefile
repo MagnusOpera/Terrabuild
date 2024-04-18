@@ -1,7 +1,7 @@
 config ?= Debug
 version ?= 0.0.0
 
-.PHONY: src tools tests
+.PHONY: src tools
 
 build:
 	dotnet build -c $(config) terrabuild.sln
@@ -12,8 +12,8 @@ src:
 tools:
 	dotnet build -c $(config) tools/tools.sln
 
-tests:
-	dotnet test src/terrabuild.sln
+test:
+	dotnet test terrabuild.sln
 
 
 clean:
