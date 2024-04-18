@@ -28,9 +28,9 @@ let login space token =
         let request =
             { TokenInput.Space = space; TokenInput.Token = token }
             |> FSharpJson.Serialize
-        let headers = [ 
-            "Accept", "application/json"
-            "Content-Type", "application/json"]
+        let headers = [
+            HttpRequestHeaders.Accept HttpContentTypes.Json
+            HttpRequestHeaders.ContentType HttpContentTypes.Json ]
         let response =
             Http.RequestString(url = url, headers = headers, body = TextRequest request, httpMethod = HttpMethod.Patch)
             |> FSharpJson.Deserialize<LoginOutput>
