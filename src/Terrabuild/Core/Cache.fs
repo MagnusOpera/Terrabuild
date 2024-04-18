@@ -30,15 +30,9 @@ type TargetSummary = {
 
 
 
-type SpaceAuth = {
-    Url: string
-    Space: string
-    Token: string
-}
-
 [<RequireQualifiedAccess>]
 type Configuration = {
-    Spaces: SpaceAuth list
+    Token: string option
 }
 
 
@@ -80,25 +74,24 @@ let clearBuildCache () =
     IO.deleteAny buildCacheDirectory
 
 
-let removeSpaceAuth (space: string) =
+let removeAuthToken () =
     let configFile = FS.combinePath terrabuildHome "config.json"
     let config =
         if File.Exists configFile then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
-        else { Configuration.Spaces = [] }
+        else { Configuration.Token = None }
 
-    let config = { config with Spaces = config.Spaces |> List.filter (fun auth -> auth.Space <> space) }
+    let config = { config with Token = None }
     config
     |> Json.Serialize
     |> IO.writeTextFile configFile
 
-let addSpaceAuth (spaceAuth: SpaceAuth) =
+let addAuthToken (token: string) =
     let configFile = FS.combinePath terrabuildHome "config.json"
     let config =
         if File.Exists configFile then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
-        else { Configuration.Spaces = [] }
+        else { Token = None }
 
-    let config = { config with Spaces = config.Spaces |> List.filter (fun auth -> auth.Space <> spaceAuth.Space) }
-    let config = { config with Spaces = config.Spaces @ [spaceAuth] }
+    let config = { config with Token = Some token }
 
     config
     |> Json.Serialize

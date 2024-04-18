@@ -7,42 +7,27 @@ open System.Net
 open FSharp.Data
 
 [<RequireQualifiedAccess>]
-type TokenInput = {
-    Space: string
+type CheckTokenInput = {
     Token: string
 }
 
-[<RequireQualifiedAccess>]
-type LoginOutput = {
-    AccessToken: string
-}
-
-
 let httpClient = new HttpClient()
-let login space token =
+let login token =
     // try exchanging this token with a real token
     // if successful token is validated
     try
         let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
         let url = Uri(Uri(baseUrl), "/auth").ToString()
         let request =
-            { TokenInput.Space = space; TokenInput.Token = token }
+            { CheckTokenInput.Token = token }
             |> FSharpJson.Serialize
         let headers = [
             HttpRequestHeaders.Accept HttpContentTypes.Json
             HttpRequestHeaders.ContentType HttpContentTypes.Json ]
-        let response =
-            Http.RequestString(url = url, headers = headers, body = TextRequest request, httpMethod = HttpMethod.Patch)
-            |> FSharpJson.Deserialize<LoginOutput>
+        let response = Http.Request(url = url, headers = headers, body = TextRequest request, httpMethod = HttpMethod.Options)
 
         // token is validated, can go to disk
-        let spaceAuth = {
-            Cache.SpaceAuth.Url = url
-            Cache.SpaceAuth.Space = space
-            Cache.SpaceAuth.Token = token
-        }
-
-        Cache.addSpaceAuth spaceAuth
+        Cache.addAuthToken token
         0
     with
         | :? WebException as ex ->
@@ -57,5 +42,5 @@ let login space token =
             $"{Ansi.Emojis.bomb} {errorCode}: please check permissions with your administrator." |> Terminal.writeLine
             5
 
-let logout space =
-    Cache.removeSpaceAuth space
+let logout () =
+    Cache.removeAuthToken()
