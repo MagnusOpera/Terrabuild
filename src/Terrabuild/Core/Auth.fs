@@ -84,4 +84,4 @@ let createAccessToken space token =
                     | _ -> ex.Message
                 | _ -> ex.Message
 
-            failwith $"{Ansi.Emojis.bomb} {errorCode}: please check permissions with your administrator."
+            failwith $"{Ansi.Emojis.bomb} {errorCode}: please check permissions with your administrator to access space {space}."
