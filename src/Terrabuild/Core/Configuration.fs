@@ -73,6 +73,8 @@ type Workspace = {
 
 
 let read workspaceDir environment labels variables (sourceControl: SourceControls.SourceControl) (options: Options) =
+    $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
+
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try

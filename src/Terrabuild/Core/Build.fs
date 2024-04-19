@@ -58,6 +58,10 @@ let private isNodeUnsatisfied = function
 
 
 let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
+    let targets = graph.Targets |> String.join ","
+    let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
+    $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
+
     let startedAt = DateTime.UtcNow
 
     let workspaceDir = Environment.CurrentDirectory

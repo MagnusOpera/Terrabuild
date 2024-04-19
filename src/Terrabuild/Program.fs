@@ -67,19 +67,13 @@ let processCommandLine () =
                 jsonOptions |> IO.writeTextFile (logFile "options.json")
 
             let sourceControl = SourceControls.Factory.create options.Local
-
-            $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
             let config = Configuration.read wsDir environment labels variables sourceControl options
-
-            // build storage
             let storage = Storages.Factory.create config.Space
-            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} cache is {storage.Name}" |> Terminal.writeLine
 
             if options.Debug then
                 let jsonConfig = Json.Serialize config
                 jsonConfig |> IO.writeTextFile (logFile "config.json")
 
-            $"{Ansi.Emojis.popcorn} Constructing graph" |> Terminal.writeLine
             let graph = Graph.buildGraph config target
 
             if options.Debug then
@@ -98,10 +92,6 @@ let processCommandLine () =
 
             if options.WhatIf then 0
             else
-                let targets = graph.Targets |> String.join ","
-                let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
-                $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
-
                 let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
                 let build = Build.run config buildGraph cache buildNotification options
                 buildNotification.WaitCompletion()

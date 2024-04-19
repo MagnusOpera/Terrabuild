@@ -32,6 +32,8 @@ type Workspace = {
 }
 
 let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
+    $"{Ansi.Emojis.popcorn} Constructing graph" |> Terminal.writeLine
+
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
