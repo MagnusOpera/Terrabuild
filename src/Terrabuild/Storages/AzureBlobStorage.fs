@@ -1,40 +1,36 @@
 namespace Storages
 open Azure.Storage.Blobs
 open Serilog
+open FSharp.Data
+open System
 
-type AzureBlobStorage() =
+
+type AzureArtifactLocationOutput = {
+    Uri: string
+}
+
+type AzureBlobStorage(accessToken: string) =
     inherit Storage()
 
-    let connString =
-        let connString = System.Environment.GetEnvironmentVariable("TERRABUILD_AZURE_BLOB_STORAGE")
-        if connString |> isNull then failwith "Please configure TERRABUILD_AZURE_BLOB_STORAGE environment variable"
-        connString
-
-    let client = BlobServiceClient(connString)
-
-    let container =
-        let container = client.GetBlobContainerClient("buildcache")
-
-        // ensure container is created (in case we need to write to blob storage)
-        try
-            Log.Debug("AzureBlobStorage: creating Azure Blob Storage container")
-            container.CreateIfNotExists() |> ignore
-            Log.Debug("AzureBlobStorage: container created")
-        with
-        | exn ->
-            Log.Fatal(exn, "AzureBlobStorage: container creation failed")
-            reraise()
-
-        container
-
-    static member Detect() =
-        System.Environment.GetEnvironmentVariable("TERRABUILD_AZURE_BLOB_STORAGE") |>isNull |> not
+    let getBlobClient path =
+        let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
+        let url = Uri(Uri(baseUrl), $"/artifact?path={path}").ToString()
+        let headers = [
+            HttpRequestHeaders.Accept HttpContentTypes.Json
+            HttpRequestHeaders.ContentType HttpContentTypes.Json
+            HttpRequestHeaders.Authorization $"Bearer {accessToken}" ]
+        let response =
+            Http.RequestString(url = url, headers = headers, httpMethod = HttpMethod.Get)
+            |> FSharpJson.Deserialize<AzureArtifactLocationOutput>
+        let uri = Uri(response.Uri)
+        let container = BlobContainerClient(uri)
+        let blobClient = container.GetBlobClient(path)
+        blobClient
 
     override _.Name = "Azure Blob Storage"
 
-
     override _.Exists id =
-        let blobClient = container.GetBlobClient(id)
+        let blobClient = getBlobClient id
         try
             let res = blobClient.Exists()
             res.Value
@@ -46,7 +42,7 @@ type AzureBlobStorage() =
 
 
     override _.TryDownload id =
-        let blobClient = container.GetBlobClient(id)
+        let blobClient = getBlobClient id
         let tmpFile = System.IO.Path.GetTempFileName()
         try
             blobClient.DownloadTo(tmpFile) |> ignore
@@ -64,7 +60,7 @@ type AzureBlobStorage() =
 
     override _.Upload id summaryFile =
         try
-            let blobClient = container.GetBlobClient(id)
+            let blobClient = getBlobClient id
             blobClient.Upload(summaryFile, true) |> ignore
             Log.Debug("AzureBlobStorage: upload of '{Id}' successful", id)
         with

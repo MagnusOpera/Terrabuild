@@ -97,7 +97,13 @@ let addAuthToken (token: string) =
     |> Json.Serialize
     |> IO.writeTextFile configFile
 
+let readAuthToken () =
+    let configFile = FS.combinePath terrabuildHome "config.json"
+    let config =
+        if File.Exists configFile then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
+        else { Configuration.Token = None }
 
+    config.Token
 
 type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.Storage) =
     let mutable logNum = 0

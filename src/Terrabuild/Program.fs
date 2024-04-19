@@ -67,10 +67,13 @@ let processCommandLine () =
                 jsonOptions |> IO.writeTextFile (logFile "options.json")
 
             let sourceControl = SourceControls.Factory.create options.Local
-            let storage = Storages.Factory.create()
 
             $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
-            let config = Configuration.read wsDir environment labels variables sourceControl storage options
+            let config = Configuration.read wsDir environment labels variables sourceControl options
+
+            // build storage
+            let storage = Storages.Factory.create config.Space
+            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} cache is {storage.Name}" |> Terminal.writeLine
 
             if options.Debug then
                 let jsonConfig = Json.Serialize config
@@ -85,7 +88,7 @@ let processCommandLine () =
                 let mermaid = Graph.graph graph |> String.join "\n"
                 mermaid |> IO.writeTextFile (logFile "graph.mermaid")
 
-            let cache = Cache.Cache(config.Storage) :> Cache.ICache
+            let cache = Cache.Cache(storage) :> Cache.ICache
             let buildGraph = Graph.optimize config graph cache options
             if options.Debug then
                 let jsonBuildGraph = Json.Serialize buildGraph

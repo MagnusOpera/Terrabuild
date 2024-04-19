@@ -1,7 +1,11 @@
 module Storages.Factory
 
-let create(): Storage =
-    if AzureBlobStorage.Detect() then
-        AzureBlobStorage()
-    else
-        Local()
+let create (space: string option): Storage =
+    match space with
+    | None -> Local()
+    | Some space ->
+        match Cache.readAuthToken() with
+        | None -> Local()
+        | Some authToken ->
+            let accessToken = Auth.createAccessToken space authToken
+            AzureBlobStorage accessToken

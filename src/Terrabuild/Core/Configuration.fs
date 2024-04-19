@@ -63,7 +63,7 @@ type Project = {
 
 [<RequireQualifiedAccess>]
 type Workspace = {
-    Storage: Storages.Storage
+    Space: string option
     SourceControl: SourceControls.SourceControl
     Dependencies: string set
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
@@ -72,7 +72,7 @@ type Workspace = {
 }
 
 
-let read workspaceDir environment labels variables (sourceControl: SourceControls.SourceControl) (storage: Storages.Storage) (options: Options) =
+let read workspaceDir environment labels variables (sourceControl: SourceControls.SourceControl) (options: Options) =
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
@@ -103,7 +103,6 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
         $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} local mode requested" |> Terminal.writeLine
 
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {sourceControl.Name}" |> Terminal.writeLine
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} cache is {storage.Name}" |> Terminal.writeLine
 
     let branchOrTag = sourceControl.BranchOrTag
 
@@ -402,9 +401,9 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
         | _ -> projects.Keys
         |> Set
 
-    { Workspace.Dependencies = dependencies
+    { Workspace.Space = workspaceConfig.Space
+      Workspace.Dependencies = dependencies
       Workspace.Projects = projects
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Environment = environment
-      Workspace.SourceControl = sourceControl
-      Workspace.Storage = storage }
+      Workspace.SourceControl = sourceControl }
