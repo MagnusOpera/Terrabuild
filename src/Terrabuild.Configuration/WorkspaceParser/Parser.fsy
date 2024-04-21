@@ -31,7 +31,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER VERSION
 %token EOF
 %token CONFIGURATION TARGET ENVIRONMENT EXTENSION
-%token SPACE DEPENDS_ON VARIABLES CONTAINER INIT SCRIPT DEFAULTS
+%token SPACE DEPENDS_ON REBUILD VARIABLES CONTAINER INIT SCRIPT DEFAULTS
 
 // associativity and precedences
 %left PLUS
@@ -63,8 +63,11 @@ Target:
 TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents TargetDependsOn { $1.Patch $2 }
+    | TargetComponents TargetRebuild { $1.Patch $2 }
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfIdentifiers { TargetComponents.DependsOn $3 }
+TargetRebuild:
+    | REBUILD EQUAL Bool { TargetComponents.Rebuild $3 }
 
 Environment:
     | ENVIRONMENT IDENTIFIER { WorkspaceComponents.Environment ($2, Environment.Empty) }
@@ -88,6 +91,10 @@ ExtensionScript:
     | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
 ExtensionDefaults:
     | DEFAULTS EQUAL LBRACE Variables RBRACE { ExtensionComponents.Defaults $4 }
+
+Bool:
+    | TRUE { true }
+    | FALSE { false }
 
 String:
     | STRING { $1 }

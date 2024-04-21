@@ -1,6 +1,7 @@
 configuration @dotnet
 
 target build {
+  rebuild = true
   outputs = [ "*.dll" ]
   @dotnet build
 }

@@ -44,23 +44,27 @@ type Step = {
 [<RequireQualifiedAccess>]
 type TargetComponents =
     | DependsOn of string list
+    | Rebuild of bool
     | Outputs of string list
     | Step of Step
 
 type Target = {
     DependsOn: Set<string> option
+    Rebuild: bool option
     Outputs: Set<string> option
     Steps: Step list
 }
 with
     static member Empty =
         { DependsOn = None
+          Rebuild = None
           Outputs = None
           Steps = [] }
 
     member this.Patch comp =
         match comp with
         | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn |> Set.ofList |> Some }
+        | TargetComponents.Rebuild rebuild -> { this with Rebuild = Some rebuild }
         | TargetComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList |> Some }
         | TargetComponents.Step step -> { this with Steps = this.Steps @ [step] }
 

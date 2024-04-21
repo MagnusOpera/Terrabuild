@@ -31,7 +31,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER VERSION
 %token EOF
 %token EXTENSION CONFIGURATION TARGET 
-%token DEPENDENCIES OUTPUTS IGNORES LABELS CONTAINER INIT SCRIPT DEPENDS_ON DEFAULTS
+%token DEPENDENCIES OUTPUTS IGNORES LABELS CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS
 
 // associativity and precedences
 %left PLUS
@@ -89,15 +89,22 @@ Target:
 TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents TargetDependsOn { $1.Patch $2 }
+    | TargetComponents TargetRebuild { $1.Patch $2 }
     | TargetComponents TargetOutputs { $1.Patch $2 }
     | TargetComponents TargetStep { $1.Patch $2 }
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfIdentifiers { TargetComponents.DependsOn $3 }
+TargetRebuild:
+    | REBUILD EQUAL Bool { TargetComponents.Rebuild $3 }
 TargetOutputs:
     | OUTPUTS EQUAL ListOfString { TargetComponents.Outputs $3 }
 TargetStep:
     | IDENTIFIER IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
+
+Bool:
+    | TRUE { true }
+    | FALSE { false }
 
 String:
     | STRING { $1 }

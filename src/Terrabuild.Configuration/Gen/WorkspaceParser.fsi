@@ -3,6 +3,7 @@ module internal Terrabuild.Configuration.Workspace.Parser
 type token = 
   | SPACE
   | DEPENDS_ON
+  | REBUILD
   | VARIABLES
   | CONTAINER
   | INIT
@@ -37,6 +38,7 @@ type token =
 type tokenId = 
     | TOKEN_SPACE
     | TOKEN_DEPENDS_ON
+    | TOKEN_REBUILD
     | TOKEN_VARIABLES
     | TOKEN_CONTAINER
     | TOKEN_INIT
@@ -80,6 +82,7 @@ type nonTerminalId =
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn
+    | NONTERM_TargetRebuild
     | NONTERM_Environment
     | NONTERM_EnvironmentComponents
     | NONTERM_EnvironmentVariables
@@ -88,6 +91,7 @@ type nonTerminalId =
     | NONTERM_ExtensionContainer
     | NONTERM_ExtensionScript
     | NONTERM_ExtensionDefaults
+    | NONTERM_Bool
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings

@@ -4,17 +4,21 @@ open Terrabuild.Configuration.AST
 [<RequireQualifiedAccess>]
 type TargetComponents =
     | DependsOn of string list
+    | Rebuild of bool
 
 type Target = {
     DependsOn: Set<string>
+    Rebuild: bool
 }
 with
     static member Empty =
-        { DependsOn = Set.empty }
+        { DependsOn = Set.empty
+          Rebuild = false }
 
     member this.Patch comp =
         match comp with
         | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn |> Set.ofList }
+        | TargetComponents.Rebuild rebuild -> { this with Rebuild = rebuild }
 
 
 [<RequireQualifiedAccess>]

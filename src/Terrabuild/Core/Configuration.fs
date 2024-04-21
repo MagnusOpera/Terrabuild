@@ -246,6 +246,14 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
             let projectSteps =
                 projectDef.Targets
                 |> Map.map (fun targetName target ->
+                    let rebuild =
+                        match target.Rebuild with
+                        | Some rebuild -> rebuild
+                        | None ->
+                            match workspaceConfig.Targets |> Map.tryFind targetName with
+                            | Some target -> target.Rebuild
+                            | None -> false
+                    
                     let variables, actions =
                         target.Steps
                         |> List.fold (fun (variables, actions) step ->
@@ -302,10 +310,15 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                                     else
                                         None
 
+                                // rebuild semantic is implemented by tweaking cacheability
+                                let cache = 
+                                    if rebuild then Cacheability.Never
+                                    else actionGroup.Cache
+
                                 let containedActionBatch = {
                                     ContaineredActionBatch.BatchContext = batchContext
                                     ContaineredActionBatch.Container = extension.Container
-                                    ContaineredActionBatch.Cache = actionGroup.Cache
+                                    ContaineredActionBatch.Cache = cache
                                     ContaineredActionBatch.Actions = actionGroup.Actions
                                 }
 

@@ -18,23 +18,6 @@ let whitespace = ' ' | '\t'
 let newline = '\n' | '\r' '\n'
 
 rule token = parse
-    | quotedString { 
-        let s = lexeme lexbuf |> string
-        STRING (s.Substring(1, s.Length-2)) }
-
-    | key {
-        let s = lexeme lexbuf |> string
-        KEY (s.Substring(0, s.Length-1).TrimEnd()) }
-
-    | variable {
-        let s = lexeme lexbuf |> string
-        VARIABLE (s.Substring(1, s.Length-1)) }
-
-    | number {
-        let s = lexeme lexbuf |> int
-        NUMBER (s)
-    }
-
     | "nothing" { NOTHING }
     | "true" { TRUE }
     | "false" { FALSE }
@@ -53,12 +36,30 @@ rule token = parse
     | "extension" { EXTENSION }
     | "container" { CONTAINER }
     | "depends_on" { DEPENDS_ON }
+    | "rebuild" { REBUILD }
     | "defaults" { DEFAULTS }
 
     | "#" { singleLineComment lexbuf }
     | "//" { singleLineComment lexbuf }
 
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
+
+    | quotedString { 
+        let s = lexeme lexbuf |> string
+        STRING (s.Substring(1, s.Length-2)) }
+
+    | key {
+        let s = lexeme lexbuf |> string
+        KEY (s.Substring(0, s.Length-1).TrimEnd()) }
+
+    | variable {
+        let s = lexeme lexbuf |> string
+        VARIABLE (s.Substring(1, s.Length-1)) }
+
+    | number {
+        let s = lexeme lexbuf |> int
+        NUMBER (s)
+    }
 
     | "{" { LBRACE }
     | "}" { RBRACE }

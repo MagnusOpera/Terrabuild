@@ -18,6 +18,42 @@ let whitespace = ' ' | '\t'
 let newline = '\n' | '\r' '\n'
 
 rule token = parse
+    | "nothing" { NOTHING }
+    | "true" { TRUE }
+    | "false" { FALSE }
+    | "trim" { TRIM }
+    | "upper" { UPPER }
+    | "lower" { LOWER }
+    | "version" { VERSION }
+
+    | "configuration" { CONFIGURATION }
+    | "target" { TARGET }
+    | "environment" { ENVIRONMENT }
+    | "extension" { EXTENSION }
+    
+    | "space" { SPACE }
+    | "depends_on" { DEPENDS_ON }
+    | "rebuild" { REBUILD }
+    | "variables" { VARIABLES }
+    | "container" { CONTAINER }
+    | "script" { SCRIPT }
+    | "defaults" { DEFAULTS }
+
+    | "{" { LBRACE }
+    | "}" { RBRACE }
+    | "[" { LSQBRACKET }
+    | "]" { RSQBRACKET }
+    | "(" { LPAREN }
+    | ")" { RPAREN }
+    | "=" { EQUAL }
+    | "," { COMMA }
+    | "+" { PLUS }
+
+    | "#" { singleLineComment lexbuf }
+    | "//" { singleLineComment lexbuf }
+
+    | identifier { IDENTIFIER (lexeme lexbuf |> string) }
+
     | quotedString { 
         let s = lexeme lexbuf |> string
         STRING (s.Substring(1, s.Length-2)) }
@@ -34,41 +70,6 @@ rule token = parse
         let s = lexeme lexbuf |> int
         NUMBER (s)
     }
-
-    | "nothing" { NOTHING }
-    | "true" { TRUE }
-    | "false" { FALSE }
-    | "trim" { TRIM }
-    | "upper" { UPPER }
-    | "lower" { LOWER }
-    | "version" { VERSION }
-
-    | "configuration" { CONFIGURATION }
-    | "target" { TARGET }
-    | "environment" { ENVIRONMENT }
-    | "extension" { EXTENSION }
-    
-    | "space" { SPACE }
-    | "depends_on" { DEPENDS_ON }
-    | "variables" { VARIABLES }
-    | "container" { CONTAINER }
-    | "script" { SCRIPT }
-    | "defaults" { DEFAULTS }
-
-    | "#" { singleLineComment lexbuf }
-    | "//" { singleLineComment lexbuf }
-
-    | identifier { IDENTIFIER (lexeme lexbuf |> string) }
-
-    | "{" { LBRACE }
-    | "}" { RBRACE }
-    | "[" { LSQBRACKET }
-    | "]" { RSQBRACKET }
-    | "(" { LPAREN }
-    | ")" { RPAREN }
-    | "=" { EQUAL }
-    | "," { COMMA }
-    | "+" { PLUS }
 
     | whitespace { token lexbuf }
     | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
