@@ -7,18 +7,18 @@ type TargetComponents =
     | Rebuild of bool
 
 type Target = {
-    DependsOn: Set<string>
-    Rebuild: bool
+    DependsOn: Set<string> option
+    Rebuild: bool option
 }
 with
     static member Empty =
-        { DependsOn = Set.empty
-          Rebuild = false }
+        { DependsOn = None
+          Rebuild = None }
 
     member this.Patch comp =
         match comp with
-        | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn |> Set.ofList }
-        | TargetComponents.Rebuild rebuild -> { this with Rebuild = rebuild }
+        | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn |> Set.ofList |> Some }
+        | TargetComponents.Rebuild rebuild -> { this with Rebuild = rebuild |> Some }
 
 
 [<RequireQualifiedAccess>]

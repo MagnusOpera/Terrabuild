@@ -246,14 +246,18 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
             let projectSteps =
                 projectDef.Targets
                 |> Map.map (fun targetName target ->
+                    // use value from project target
+                    // otherwise use workspace target
+                    // defaults to allow caching
                     let rebuild =
-                        match target.Rebuild with
-                        | Some rebuild -> rebuild
-                        | None ->
-                            match workspaceConfig.Targets |> Map.tryFind targetName with
-                            | Some target -> target.Rebuild
-                            | None -> false
-                    
+                        target.Rebuild
+                        |> Option.defaultWith (fun () ->
+                            workspaceConfig.Targets
+                            |> Map.tryFind targetName
+                            |> Option.bind (fun target -> target.Rebuild)
+                            |> Option.defaultValue false
+                        )
+
                     let variables, actions =
                         target.Steps
                         |> List.fold (fun (variables, actions) step ->
@@ -349,13 +353,17 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
                         [ stepHash; variableHash ]
                         |> Hash.sha256strings
 
+                    // use value from project target
+                    // otherwise use workspace target
+                    // defaults to no dependencies
                     let dependsOn =
-                        match target.DependsOn with
-                        | Some dependsOn -> dependsOn
-                        | None ->
-                            match workspaceConfig.Targets |> Map.tryFind targetName with
-                            | Some target -> target.DependsOn
-                            | None -> Set.empty
+                        target.DependsOn
+                        |> Option.defaultWith (fun () ->
+                            workspaceConfig.Targets
+                            |> Map.tryFind targetName
+                            |> Option.bind (fun target -> target.DependsOn)
+                            |> Option.defaultValue Set.empty
+                        )
 
                     let outputs =
                         match target.Outputs with
