@@ -35,6 +35,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Env
+        run: |
+          env
+          git config user.email
+
       # - name: Run Tests
       #   run: make github-tests
 
