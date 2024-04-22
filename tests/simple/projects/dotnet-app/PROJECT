@@ -1,6 +1,5 @@
 
 extension @docker {
-    container = "docker:25.0"
     defaults = {
         image: "ghcr.io/magnusopera/dotnet-app"
         arguments: { configuration: $configuration }

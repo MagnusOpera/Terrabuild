@@ -1,4 +1,8 @@
 
+configuration {
+    space = "magnusopera/terrabuild"
+}
+
 target build {
     depends_on = [^build]
 }

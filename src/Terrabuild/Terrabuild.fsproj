@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="SourceControls/SourceControls.fs" />
     <Compile Include="Storages/Storages.fs" />
+    <Compile Include="ApiClient.fs" />
     <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/Compression.fs" />
     <Compile Include="Helpers/Json.fs" />
