@@ -35,9 +35,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Env
-        run: echo ${{ github.event.pusher.email }}
-
       # - name: Run Tests
       #   run: make github-tests
 
