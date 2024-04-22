@@ -36,15 +36,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Env
-        run: |
-          echo ${{ github.event.schedule.user.login }}
-          echo ${{ github.actor }}
-          git config user.email
+        if: always()
+        run: echo ${{ github.event.schedule.user.login }}
+
+      - name: Env
+        if: always()
+        run: echo ${{ github.actor }}
+
+      - name: Env
+        if: always()
+        run: git config user.email
+
 
       # - name: Run Tests
       #   run: make github-tests
 
       - name: Build
+        if: always()
         run: |
           make self-publish
 
