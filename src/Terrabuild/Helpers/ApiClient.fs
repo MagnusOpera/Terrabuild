@@ -7,7 +7,7 @@ let private apiUrl =
     let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
     Uri(baseUrl)
 
-let inline private request<'req, 'resp> method (path: string) (request: 'req) =
+let inline private request<'req, 'resp> method (path: string) (request: 'req): 'resp =
     let url = Uri(apiUrl, path).ToString()
     let body =
         if typeof<'req> <> typeof<Unit> then request |> FSharpJson.Serialize |> TextRequest |> Some
@@ -43,11 +43,11 @@ module Auth =
         AccessToken: string
     }
 
-    let authenticate token =
+    let authenticate token: Unit =
         { AuthenticateInput.Token = token }
-        |> options<AuthenticateInput, Unit> "/auth" 
+        |> options "/auth" 
 
-    let loginSpace space token =
+    let loginSpace space token: LoginSpaceOutput =
         { LoginSpaceInput.Space = space
           LoginSpaceInput.Token = token }
-        |> post<LoginSpaceInput, LoginSpaceOutput> "/auth"
+        |> post "/auth"
