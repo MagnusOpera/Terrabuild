@@ -35,30 +35,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Env
-        if: always()
-        run: echo ${{ github.event.schedule.user.login }}
-
-      - name: Env
-        if: always()
-        run: echo ${{ github.actor }}
-
-      - name: Env
-        if: always()
-        run: git config user.email
-
-
       # - name: Run Tests
       #   run: make github-tests
 
       - name: Build
-        if: always()
         run: |
           make self-publish
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
-        if: success() || failure()
+        if: always()
         with:
           name: Terrabuild Debug
           path: |
