@@ -37,7 +37,8 @@ jobs:
 
       - name: Env
         run: |
-          env
+          echo ${{ github.event.schedule.user.login }}
+          echo ${{ github.actor }}
           git config user.email
 
       # - name: Run Tests
