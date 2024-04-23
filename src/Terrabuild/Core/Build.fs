@@ -258,7 +258,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                 Cache.TargetSummary.Outputs = outputs
                                 Cache.TargetSummary.Status = status }
                 let files, size = cacheEntry.Complete summary
-                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target files size (status = Cache.TaskStatus.Success))
+                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.Hash files size (status = Cache.TaskStatus.Success))
                 Some summary, false
         else
             None, false
