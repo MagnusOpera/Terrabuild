@@ -68,7 +68,10 @@ let processCommandLine () =
 
             let sourceControl = SourceControls.Factory.create options.Local
             let config = Configuration.read wsDir environment labels variables sourceControl options
-            let storage = Storages.Factory.create config.Space
+
+            let token = Cache.readAuthToken()
+            let api = ApiClient.create token config.Space
+            let storage = Storages.Factory.create api
 
             if options.Debug then
                 let jsonConfig = Json.Serialize config
@@ -93,7 +96,7 @@ let processCommandLine () =
             if options.WhatIf then 0
             else
                 let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-                let build = Build.run config buildGraph cache buildNotification options
+                let build = Build.run config buildGraph cache api buildNotification options
                 buildNotification.WaitCompletion()
 
                 if options.Debug then

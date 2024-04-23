@@ -36,11 +36,16 @@ type Configuration = {
 }
 
 
+type ArtifactInfo = {
+    Path: string
+    Size: int
+}
+
 
 type IEntry =
     abstract NextLogFile: unit -> string
     abstract Outputs: string with get
-    abstract Complete: summary:TargetSummary -> unit
+    abstract Complete: summary:TargetSummary -> (string list * int)
 
 type ICache =
     abstract Exists: useRemote:bool -> id:string -> bool
@@ -131,23 +136,6 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
         let summaryFile = FS.combinePath logsDir summaryFilename
         summary |> Json.Serialize |> IO.writeTextFile summaryFile
 
-    let upload (storage: Storages.Storage) =
-        let uploadDir sourceDir name =
-            let tarFile = IO.getTempFilename()
-            let compressFile = IO.getTempFilename()
-            try
-                sourceDir |> Compression.tar tarFile
-                tarFile |> Compression.compress compressFile
-                storage.Upload $"{id}/{name}" compressFile
-            finally
-                IO.deleteAny compressFile
-                IO.deleteAny tarFile
-
-        if useRemote then
-            if Directory.Exists outputsDir then
-                uploadDir outputsDir "outputs"
-            uploadDir logsDir "logs"
-
     interface IEntry with
         member _.NextLogFile () =
             logNum <- logNum + 1
@@ -157,9 +145,33 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
         member _.Outputs = outputsDir
 
         member _.Complete summary =
+            let upload () =
+                let uploadDir sourceDir name =
+                    let path = $"{id}/{name}"
+                    let tarFile = IO.getTempFilename()
+                    let compressFile = IO.getTempFilename()
+                    try
+                        sourceDir |> Compression.tar tarFile
+                        tarFile |> Compression.compress compressFile
+                        storage.Upload path compressFile
+                        path, IO.size compressFile
+                    finally
+                        IO.deleteAny compressFile
+                        IO.deleteAny tarFile
+
+                if useRemote then
+                    let fileSizes = [
+                        if Directory.Exists outputsDir then uploadDir outputsDir "outputs"
+                        uploadDir logsDir "logs"
+                    ]
+                    fileSizes |> List.fold (fun (files, size) (file, fileSize) -> file :: files, fileSize+size) ([], 0)
+                else
+                    [], 0
+
             summary |> write
-            storage |> upload
+            let files, size = upload()
             entryDir |> markEntryAsCompleted "local"
+            files, size
 
 
 type Cache(storage: Storages.Storage) =

@@ -28,18 +28,3 @@ let login token =
 let logout () =
     Cache.removeAuthToken()
 
-let createAccessToken space token =
-    try
-        let response = ApiClient.Auth.loginSpace space token
-        response.AccessToken
-    with
-        | :? WebException as ex ->
-            let errorCode =
-                match ex.InnerException with
-                | :? WebException as innerEx ->
-                    match innerEx.Response with
-                    | :? HttpWebResponse as hwr -> hwr.StatusCode.ToString()
-                    | _ -> ex.Message
-                | _ -> ex.Message
-
-            failwith $"{Ansi.Emojis.bomb} {errorCode}: please check permissions with your administrator to access space {space}."

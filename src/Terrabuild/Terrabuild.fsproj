@@ -8,7 +8,6 @@
   <ItemGroup>
     <Compile Include="SourceControls/SourceControls.fs" />
     <Compile Include="Storages/Storages.fs" />
-    <Compile Include="Helpers/ApiClient.fs" />
     <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/Compression.fs" />
     <Compile Include="Helpers/Json.fs" />
@@ -17,6 +16,7 @@
     <Compile Include="Helpers/Terminal.fs" />
     <Compile Include="Helpers/Progress.fs" />
     <Compile Include="Helpers/Extensions.fs" />
+    <Compile Include="Api/Client.fs" />
     <Compile Include="Core/Cache.fs" />
     <Compile Include="Core/Auth.fs" />
     <Compile Include="Core/Scaffold.fs" />

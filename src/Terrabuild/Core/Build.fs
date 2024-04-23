@@ -57,12 +57,16 @@ let private isNodeUnsatisfied = function
 
 
 
-let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (notification: IBuildNotification) (options: Configuration.Options) =
+let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (api: ApiClient.IClient option) (notification: IBuildNotification) (options: Configuration.Options) =
     let targets = graph.Targets |> String.join ","
     let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
     $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
 
     let startedAt = DateTime.UtcNow
+    notification.BuildStarted graph
+    let buildId =
+        api |> Option.map (fun api -> api.BuildStart configuration.SourceControl.BranchOrTag configuration.SourceControl.HeadCommit graph.Targets "FIXME")
+        |> Option.defaultValue ""
 
     let workspaceDir = Environment.CurrentDirectory
 
@@ -253,7 +257,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                 Cache.TargetSummary.Steps = stepLogs |> List.ofSeq
                                 Cache.TargetSummary.Outputs = outputs
                                 Cache.TargetSummary.Status = status }
-                cacheEntry.Complete summary
+                let files, size = cacheEntry.Complete summary
+                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target files size (status = Cache.TaskStatus.Success))
                 Some summary, false
         else
             None, false
@@ -274,8 +279,6 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
             if newValue = 0 then
                 readyNodes[trigger].Value <- -1 // mark node as scheduled
                 buildQueue.Enqueue (fun () -> queueAction trigger)
-
-    notification.BuildStarted graph
 
     readyNodes
     |> Map.filter (fun _ value -> value.Value = 0)
@@ -311,4 +314,5 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.Targets = graph.Targets
                       Summary.RootNodes = dependencies }
     notification.BuildCompleted buildInfo
+    api |> Option.iter (fun api -> api.BuildComplete buildId (status = Status.Success))
     buildInfo

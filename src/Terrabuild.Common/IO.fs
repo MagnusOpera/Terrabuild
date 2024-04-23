@@ -31,6 +31,9 @@ let deleteAny entry =
     | FS.Directory directory -> Directory.Delete(directory, true)
     | _ -> ()
 
+let size file =
+    FileInfo(file).Length |> int
+
 let enumerateDirs rootDir =
     Directory.EnumerateDirectories(rootDir)
 
