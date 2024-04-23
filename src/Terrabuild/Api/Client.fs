@@ -65,6 +65,7 @@ module Build =
         Targets: string set
         Force: bool
         Retry: bool
+        CI: bool
     }
 
     [<RequireQualifiedAccess>]
@@ -86,12 +87,13 @@ module Build =
         Success: bool
     }
 
-    let startBuild headers branchOrTag commit targets force retry: StartBuildOutput =
+    let startBuild headers branchOrTag commit targets force retry ci: StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = commit
           StartBuildInput.Targets = targets 
           StartBuildInput.Force = force
-          StartBuildInput.Retry = retry }
+          StartBuildInput.Retry = retry
+          StartBuildInput.CI = ci }
           |> post headers "/build"
 
 
@@ -120,7 +122,7 @@ module Artifact =
 
 
 type IClient =
-    abstract BuildStart: branchOrTag:string -> commit:string -> targets:string set -> force:bool -> retry: bool -> string
+    abstract BuildStart: branchOrTag:string -> commit:string -> targets:string set -> force:bool -> retry:bool -> ci:bool -> string
     abstract BuildComplete: buildId:string -> success:bool -> Unit
     abstract BuildAddArtifact: buildId:string -> project:string -> target:string -> files:string list -> size:int -> success:bool -> Unit
     abstract ArtifactGet: path:string -> Uri
@@ -140,8 +142,8 @@ type Client(token: string, space: string) =
         HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
 
     interface IClient with
-        member _.BuildStart branchOrTag commit targets force retry =
-            let resp = Build.startBuild headers branchOrTag commit targets force retry
+        member _.BuildStart branchOrTag commit targets force retry ci =
+            let resp = Build.startBuild headers branchOrTag commit targets force retry ci
             resp.BuildId
 
         member _.BuildComplete buildId success =
@@ -157,7 +159,7 @@ type Client(token: string, space: string) =
 
 type Null() = 
     interface IClient with
-        member _.BuildStart branchOrTag commit targets force retry = ""
+        member _.BuildStart branchOrTag commit targets force retry ci = ""
         member _.BuildComplete buildId success = ()
         member _.BuildAddArtifact buildId project target path size success = ()
         member _.ArtifactGet path = Uri("")
