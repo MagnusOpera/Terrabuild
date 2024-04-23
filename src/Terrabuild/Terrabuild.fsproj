@@ -9,6 +9,7 @@
     <Compile Include="Contracts/Api.fs" />
     <Compile Include="Contracts/Storage.fs" />
     <Compile Include="Contracts/SourceControl.fs" />
+    <Compile Include="Contracts/Errors.fs" />
     <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/Compression.fs" />
     <Compile Include="Helpers/Json.fs" />

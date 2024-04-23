@@ -2,24 +2,22 @@
 open CLI
 open System
 open Serilog
-open System.Net.Http
 
 let rec dumpKnownException (ex: Exception) =
     seq {
         match ex with
-        | :? Configuration.ConfigException as ex ->
+        | :? Contracts.ConfigException as ex ->
             yield ex.Message
             yield! ex.InnerException |> dumpKnownException
         | null -> ()
         | _ ->
-            yield ex.ToString()
             yield! ex.InnerException |> dumpKnownException
     }
 
 let rec dumpUnknownException (ex: Exception) =
     seq {
         match ex with
-        | :? Configuration.ConfigException as ex ->
+        | :? Contracts.ConfigException as ex ->
             yield! ex |> dumpKnownException
         | null -> ()
         | _ -> yield ex.ToString()
@@ -41,10 +39,7 @@ type TerrabuildExiter() =
 
 let launchDir = Environment.CurrentDirectory
 
-let processCommandLine () =
-    let errorHandler = TerrabuildExiter()
-    let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
-    let result = parser.ParseCommandLine()
+let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseResults<TerrabuildArgs>) =
     let debug = result.Contains(TerrabuildArgs.Debug)
     let whatIf = result.Contains(TerrabuildArgs.WhatIf)
 
@@ -58,74 +53,59 @@ let processCommandLine () =
                 .CreateLogger()
 
     let runTarget wsDir target environment labels variables (options: Configuration.Options) =
-        try
-            let wsDir = wsDir |> FS.fullPath
-            Environment.CurrentDirectory <- wsDir
+        let wsDir = wsDir |> FS.fullPath
+        Environment.CurrentDirectory <- wsDir
+
+        if options.Debug then
+            let jsonOptions = Json.Serialize options
+            jsonOptions |> IO.writeTextFile (logFile "options.json")
+
+        let sourceControl = SourceControls.Factory.create()
+        let config = Configuration.read wsDir environment labels variables sourceControl options
+
+        let token = Cache.readAuthToken()
+        let api = Api.Factory.create token config.Space
+        let storage = Storages.Factory.create api
+
+        if options.Debug then
+            let jsonConfig = Json.Serialize config
+            jsonConfig |> IO.writeTextFile (logFile "config.json")
+
+        let graph = Graph.buildGraph config target
+
+        if options.Debug then
+            let jsonGraph = Json.Serialize graph
+            jsonGraph |> IO.writeTextFile (logFile "graph.json")
+            let mermaid = Graph.graph graph |> String.join "\n"
+            mermaid |> IO.writeTextFile (logFile "graph.mermaid")
+
+        let cache = Cache.Cache(storage) :> Cache.ICache
+        let buildGraph = Graph.optimize config graph cache options
+        if options.Debug then
+            let jsonBuildGraph = Json.Serialize buildGraph
+            jsonBuildGraph |> IO.writeTextFile (logFile "buildgraph.json")
+            let mermaid = Graph.graph buildGraph |> String.join "\n"
+            mermaid |> IO.writeTextFile (logFile "buildgraph.mermaid")
+
+        if options.WhatIf then 0
+        else
+            let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+            let build = Build.run config buildGraph cache api buildNotification options
+            buildNotification.WaitCompletion()
 
             if options.Debug then
-                let jsonOptions = Json.Serialize options
-                jsonOptions |> IO.writeTextFile (logFile "options.json")
+                let jsonBuild = Json.Serialize build
+                jsonBuild |> IO.writeTextFile (logFile "build.json")
 
-            let sourceControl = SourceControls.Factory.create()
-            let config = Configuration.read wsDir environment labels variables sourceControl options
-
-            let token = Cache.readAuthToken()
-            let api = Api.Factory.create token config.Space
-            let storage = Storages.Factory.create api
-
-            if options.Debug then
-                let jsonConfig = Json.Serialize config
-                jsonConfig |> IO.writeTextFile (logFile "config.json")
-
-            let graph = Graph.buildGraph config target
-
-            if options.Debug then
-                let jsonGraph = Json.Serialize graph
-                jsonGraph |> IO.writeTextFile (logFile "graph.json")
-                let mermaid = Graph.graph graph |> String.join "\n"
-                mermaid |> IO.writeTextFile (logFile "graph.mermaid")
-
-            let cache = Cache.Cache(storage) :> Cache.ICache
-            let buildGraph = Graph.optimize config graph cache options
-            if options.Debug then
-                let jsonBuildGraph = Json.Serialize buildGraph
-                jsonBuildGraph |> IO.writeTextFile (logFile "buildgraph.json")
-                let mermaid = Graph.graph buildGraph |> String.join "\n"
-                mermaid |> IO.writeTextFile (logFile "buildgraph.mermaid")
-
-            if options.WhatIf then 0
-            else
-                let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-                let build = Build.run config buildGraph cache api buildNotification options
-                buildNotification.WaitCompletion()
-
-                if options.Debug then
-                    let jsonBuild = Json.Serialize build
-                    jsonBuild |> IO.writeTextFile (logFile "build.json")
-
-                if build.Status = Build.Status.Success then 0
-                else 5
-        with
-            | :? Configuration.ConfigException as ex ->
-                Log.Fatal("Failed with {Exception}", ex)
-                let reason = 
-                    if options.Debug then ex.ToString()
-                    else dumpUnknownException ex |> String.join "\n   "
-                $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
-                5
+            if build.Status = Build.Status.Success then 0
+            else 5
 
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
-        try
-            let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")
-            let force = scaffoldArgs.Contains(ScaffoldArgs.Force)
-            Scalffold.scaffold wsDir force
-            0
-        with
-        | ex ->
-            let reason = ex.ToString()
-            $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
-            5
+        let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")
+        let force = scaffoldArgs.Contains(ScaffoldArgs.Force)
+        Scalffold.scaffold wsDir force
+        0
 
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
         let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
@@ -178,25 +158,35 @@ let processCommandLine () =
     | TerrabuildArgs.Serve arg :: _ -> targetShortcut "serve" arg
     | TerrabuildArgs.Run arg :: _ -> target arg
     | TerrabuildArgs.Clear arg :: _ -> clear arg; 0
-    | TerrabuildArgs.Login arg :: _ ->  login arg
+    | TerrabuildArgs.Login arg :: _ ->  login arg; 0
     | TerrabuildArgs.Logout :: _ ->  logout(); 0
     | _ -> parser.PrintUsage() |> Terminal.writeLine; 0
 
 [<EntryPoint>]
 let main _ =
+    let mutable debug = false
     try
         DotNetEnv.Env.TraversePath().Load() |> ignore
         Terminal.hideCursor()
         Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
-        let ret = processCommandLine()
+        let errorHandler = TerrabuildExiter()
+        let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
+        let result = parser.ParseCommandLine()
+        debug <- result.Contains(TerrabuildArgs.Debug)
+        let ret = processCommandLine parser result
 
         Environment.CurrentDirectory <- launchDir
         Terminal.showCursor()
         ret
     with
-        ex ->
-            $"{Ansi.Emojis.bomb} Failed with error\n{ex}{Ansi.Styles.cursorShow}" |> Terminal.writeLine
-
-            Environment.CurrentDirectory <- launchDir
-            Terminal.showCursor()
+        | :? Contracts.ConfigException as ex ->
+            Log.Fatal("Failed with {Exception}", ex)
+            let reason = 
+                if debug then ex.ToString()
+                else dumpUnknownException ex |> String.join "\n   "
+            $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
+            5
+        | ex ->
+            let reason = ex.ToString()
+            $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
             5

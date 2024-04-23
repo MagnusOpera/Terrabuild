@@ -7,6 +7,7 @@ open Terrabuild.Extensibility
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Terrabuild.Configuration.Project.AST
+open Contracts
 
 [<RequireQualifiedAccess>]
 type Options = {
@@ -17,13 +18,6 @@ type Options = {
     Retry: bool
     StartedAt: DateTime
 }
-
-type ConfigException(msg, ?innerException: Exception) =
-    inherit Exception(msg, innerException |> Option.defaultValue null)
-
-    static member Raise(msg, ?innerException) =
-        ConfigException(msg, ?innerException=innerException) |> raise
-
 
 type BatchContext = {
     Script: Terrabuild.Scripting.Script
