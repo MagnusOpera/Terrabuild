@@ -14,7 +14,6 @@ type Options = {
     Debug: bool
     MaxConcurrency: int
     Force: bool
-    Local: bool
     Retry: bool
     StartedAt: DateTime
 }
@@ -64,7 +63,7 @@ type Project = {
 [<RequireQualifiedAccess>]
 type Workspace = {
     Space: string option
-    SourceControl: SourceControls.SourceControl
+    SourceControl: Contracts.SourceControl
     Dependencies: string set
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
@@ -72,7 +71,7 @@ type Workspace = {
 }
 
 
-let read workspaceDir environment labels variables (sourceControl: SourceControls.SourceControl) (options: Options) =
+let read workspaceDir environment labels variables (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
@@ -101,8 +100,6 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
 
     if options.Force then
         $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
-    if options.Local then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} local mode requested" |> Terminal.writeLine
 
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {sourceControl.Name}" |> Terminal.writeLine
 

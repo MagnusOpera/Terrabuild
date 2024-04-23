@@ -66,9 +66,12 @@ let processCommandLine () =
                 let jsonOptions = Json.Serialize options
                 jsonOptions |> IO.writeTextFile (logFile "options.json")
 
-            let sourceControl = SourceControls.Factory.create options.Local
+            let sourceControl = SourceControls.Factory.create()
             let config = Configuration.read wsDir environment labels variables sourceControl options
-            let storage = Storages.Factory.create config.Space
+
+            let token = Cache.readAuthToken()
+            let api = Api.Factory.create token config.Space
+            let storage = Storages.Factory.create api
 
             if options.Debug then
                 let jsonConfig = Json.Serialize config
@@ -93,7 +96,7 @@ let processCommandLine () =
             if options.WhatIf then 0
             else
                 let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-                let build = Build.run config buildGraph cache buildNotification options
+                let build = Build.run config buildGraph cache api buildNotification options
                 buildNotification.WaitCompletion()
 
                 if options.Debug then
@@ -133,7 +136,6 @@ let processCommandLine () =
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
-                        Configuration.Options.Local = buildArgs.Contains(RunArgs.Local)
                         Configuration.Options.MaxConcurrency = ``parallel``
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
@@ -150,7 +152,6 @@ let processCommandLine () =
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
-                        Configuration.Options.Local = targetArgs.Contains(TargetArgs.Local)
                         Configuration.Options.MaxConcurrency = ``parallel``
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }

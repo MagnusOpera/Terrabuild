@@ -1,7 +1,7 @@
 namespace Storages
 
 type Local() =
-    inherit Storage()
+    inherit Contracts.Storage()
 
     override _.Name = "Local"
 

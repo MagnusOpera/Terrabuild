@@ -1,28 +1,17 @@
 namespace Storages
 open Azure.Storage.Blobs
 open Serilog
-open FSharp.Data
-open System
 
 
 type AzureArtifactLocationOutput = {
     Uri: string
 }
 
-type AzureBlobStorage(accessToken: string) =
-    inherit Storage()
+type AzureBlobStorage(api: Contracts.IApiClient) =
+    inherit Contracts.Storage()
 
     let getBlobClient path =
-        let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
-        let url = Uri(Uri(baseUrl), $"/artifact?path={path}").ToString()
-        let headers = [
-            HttpRequestHeaders.Accept HttpContentTypes.Json
-            HttpRequestHeaders.ContentType HttpContentTypes.Json
-            HttpRequestHeaders.Authorization $"Bearer {accessToken}" ]
-        let response =
-            Http.RequestString(url = url, headers = headers, httpMethod = HttpMethod.Get)
-            |> FSharpJson.Deserialize<AzureArtifactLocationOutput>
-        let uri = Uri(response.Uri)
+        let uri = api.ArtifactGet path
         let container = BlobContainerClient(uri)
         let blobClient = container.GetBlobClient(path)
         blobClient

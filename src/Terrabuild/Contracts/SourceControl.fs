@@ -1,4 +1,4 @@
-namespace Storages
+namespace Contracts
 
 [<AbstractClass>]
 type Storage() =

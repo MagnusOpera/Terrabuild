@@ -39,6 +39,7 @@ jobs:
       #   run: make github-tests
 
       - name: Build
+        if: always()
         run: |
           make self-publish
 
