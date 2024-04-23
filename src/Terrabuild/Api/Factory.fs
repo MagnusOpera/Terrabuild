@@ -27,7 +27,7 @@ let create token space =
     | Some token , Some space ->
         checkAuthError
             $"please check permissions with your administrator to access space {space}"
-            (fun() -> Client(space, token) :> Contracts.IApiClient |> Some)
+            (fun() -> Client(token, space) :> Contracts.IApiClient |> Some)
     | _ ->
         None
     
