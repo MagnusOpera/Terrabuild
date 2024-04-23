@@ -14,7 +14,6 @@ type Options = {
     Debug: bool
     MaxConcurrency: int
     Force: bool
-    Local: bool
     Retry: bool
     StartedAt: DateTime
 }
@@ -101,8 +100,6 @@ let read workspaceDir environment labels variables (sourceControl: SourceControl
 
     if options.Force then
         $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
-    if options.Local then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} local mode requested" |> Terminal.writeLine
 
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {sourceControl.Name}" |> Terminal.writeLine
 

@@ -63,7 +63,8 @@ module Build =
         BranchOrTag: string
         Commit: string
         Targets: string set
-        TriggeredBy: string
+        Force: bool
+        Retry: bool
     }
 
     [<RequireQualifiedAccess>]
@@ -85,11 +86,12 @@ module Build =
         Success: bool
     }
 
-    let startBuild headers branchOrTag commit targets triggeredBy: StartBuildOutput =
+    let startBuild headers branchOrTag commit targets force retry: StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = commit
-          StartBuildInput.Targets = targets
-          StartBuildInput.TriggeredBy = triggeredBy }
+          StartBuildInput.Targets = targets 
+          StartBuildInput.Force = force
+          StartBuildInput.Retry = retry }
           |> post headers "/build"
 
 
@@ -118,7 +120,7 @@ module Artifact =
 
 
 type IClient =
-    abstract BuildStart: branchOrTag:string -> commit:string -> targets:string set -> triggeredBy:string -> string
+    abstract BuildStart: branchOrTag:string -> commit:string -> targets:string set -> force:bool -> retry: bool -> string
     abstract BuildComplete: buildId:string -> success:bool -> Unit
     abstract BuildAddArtifact: buildId:string -> project:string -> target:string -> files:string list -> size:int -> success:bool -> Unit
     abstract ArtifactGet: path:string -> Uri
@@ -138,8 +140,8 @@ type Client(token: string, space: string) =
         HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
 
     interface IClient with
-        member _.BuildStart branchOrTag commit targets triggeredBy =
-            let resp = Build.startBuild headers branchOrTag commit targets triggeredBy
+        member _.BuildStart branchOrTag commit targets force retry =
+            let resp = Build.startBuild headers branchOrTag commit targets force retry
             resp.BuildId
 
         member _.BuildComplete buildId success =
@@ -155,7 +157,7 @@ type Client(token: string, space: string) =
 
 type Null() = 
     interface IClient with
-        member _.BuildStart branchOrTag commit targets triggeredBy = ""
+        member _.BuildStart branchOrTag commit targets force retry = ""
         member _.BuildComplete buildId success = ()
         member _.BuildAddArtifact buildId project target path size success = ()
         member _.ArtifactGet path = Uri("")

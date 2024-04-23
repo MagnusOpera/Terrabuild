@@ -66,7 +66,7 @@ let processCommandLine () =
                 let jsonOptions = Json.Serialize options
                 jsonOptions |> IO.writeTextFile (logFile "options.json")
 
-            let sourceControl = SourceControls.Factory.create options.Local
+            let sourceControl = SourceControls.Factory.create()
             let config = Configuration.read wsDir environment labels variables sourceControl options
 
             let token = Cache.readAuthToken()
@@ -136,7 +136,6 @@ let processCommandLine () =
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
-                        Configuration.Options.Local = buildArgs.Contains(RunArgs.Local)
                         Configuration.Options.MaxConcurrency = ``parallel``
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
@@ -153,7 +152,6 @@ let processCommandLine () =
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
-                        Configuration.Options.Local = targetArgs.Contains(TargetArgs.Local)
                         Configuration.Options.MaxConcurrency = ``parallel``
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }

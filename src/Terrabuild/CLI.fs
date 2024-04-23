@@ -19,7 +19,6 @@ type RunArgs =
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
-    | [<Unique>] Local
     | [<Unique>] Force
     | [<Unique>] Retry
 with
@@ -31,7 +30,6 @@ with
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
-            | Local -> "Local build - use no CI information."
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
 
@@ -43,7 +41,6 @@ type TargetArgs =
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
-    | [<Unique>] Local
     | [<Unique>] Force
     | [<Unique>] Retry
 with
@@ -56,7 +53,6 @@ with
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
-            | Local -> "Local build - use no CI information."
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
 
