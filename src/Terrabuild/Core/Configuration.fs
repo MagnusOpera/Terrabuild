@@ -63,7 +63,7 @@ type Project = {
 [<RequireQualifiedAccess>]
 type Workspace = {
     Space: string option
-    SourceControl: SourceControls.SourceControl
+    SourceControl: Contracts.SourceControl
     Dependencies: string set
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
@@ -71,7 +71,7 @@ type Workspace = {
 }
 
 
-let read workspaceDir environment labels variables (sourceControl: SourceControls.SourceControl) (options: Options) =
+let read workspaceDir environment labels variables (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText

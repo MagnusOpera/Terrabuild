@@ -70,7 +70,7 @@ let processCommandLine () =
             let config = Configuration.read wsDir environment labels variables sourceControl options
 
             let token = Cache.readAuthToken()
-            let api = ApiClient.create token config.Space
+            let api = Api.Factory.create token config.Space
             let storage = Storages.Factory.create api
 
             if options.Debug then

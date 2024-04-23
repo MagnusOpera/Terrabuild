@@ -1,4 +1,4 @@
-namespace SourceControls
+namespace Contracts
 
 [<AbstractClass>]
 type SourceControl() =

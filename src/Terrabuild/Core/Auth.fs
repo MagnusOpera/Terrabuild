@@ -7,7 +7,7 @@ let login token =
     // try exchanging this token with a real token
     // if successful token is validated
     try
-        ApiClient.Auth.authenticate token
+        Api.Factory.authenticate token
 
         // token is validated, can go to disk
         Cache.addAuthToken token

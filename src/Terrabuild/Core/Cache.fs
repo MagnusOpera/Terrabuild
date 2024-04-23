@@ -110,7 +110,7 @@ let readAuthToken () =
 
     config.Token
 
-type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.Storage) =
+type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.Storage) =
     let mutable logNum = 0
 
     let logsDir = FS.combinePath entryDir "logs"
@@ -174,7 +174,7 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Storages.S
             files, size
 
 
-type Cache(storage: Storages.Storage) =
+type Cache(storage: Contracts.Storage) =
     let cachedExists = System.Collections.Concurrent.ConcurrentDictionary<string, bool>()
     let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
 
@@ -225,7 +225,7 @@ type Cache(storage: Storages.Storage) =
                     cachedSummaries.TryAdd(summaryFile, summary) |> ignore
                     summary
 
-                let download (storage: Storages.Storage) =
+                let download (storage: Contracts.Storage) =
                     let downloadDir targetDir name =
                         match storage.TryDownload $"{id}/{name}" with
                         | Some tarFile ->

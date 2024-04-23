@@ -1,7 +1,7 @@
 namespace SourceControls
 
 type Local() =
-    inherit SourceControl()
+    inherit Contracts.SourceControl()
 
     override _.HeadCommit = "local"
 

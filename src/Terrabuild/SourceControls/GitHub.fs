@@ -1,7 +1,7 @@
 namespace SourceControls
 
 type GitHub() =
-    inherit SourceControl()
+    inherit Contracts.SourceControl()
 
     static member Detect() =
         System.Environment.GetEnvironmentVariable("GITHUB_SHA") |> isNull |> not

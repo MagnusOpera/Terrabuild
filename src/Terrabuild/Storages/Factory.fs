@@ -1,7 +1,7 @@
 module Storages.Factory
 
-let create (api: ApiClient.IClient option): Storage =
-    let (storage: Storage) =
+let create (api: Contracts.IApiClient option): Contracts.Storage =
+    let (storage: Contracts.Storage) =
         match api with
         | None -> Local()
         | Some api -> AzureBlobStorage(api)

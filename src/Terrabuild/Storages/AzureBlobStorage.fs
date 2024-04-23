@@ -7,8 +7,8 @@ type AzureArtifactLocationOutput = {
     Uri: string
 }
 
-type AzureBlobStorage(api: ApiClient.IClient) =
-    inherit Storage()
+type AzureBlobStorage(api: Contracts.IApiClient) =
+    inherit Contracts.Storage()
 
     let getBlobClient path =
         let uri = api.ArtifactGet path
