@@ -9,7 +9,7 @@ type Local() =
 
     override _.BranchOrTag =
         // NOTE: assuming current directory is a git repository
-        System.Environment.CurrentDirectory |> Git.getBranch
+        System.Environment.CurrentDirectory |> Git.getBranchOrTag
 
     override _.CI = false
 

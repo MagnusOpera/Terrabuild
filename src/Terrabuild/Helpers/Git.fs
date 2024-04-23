@@ -5,7 +5,10 @@ let getHeadCommit (dir: string) =
     | Exec.Success (output, _) -> output |> String.firstLine
     | _ -> failwith "Failed to get head commit"
 
-let getBranch (dir: string) =
+let getBranchOrTag (dir: string) =
     match Exec.execCaptureOutput dir "git" "rev-parse --abbrev-ref HEAD" with
     | Exec.Success (output, _) -> output |> String.firstLine
-    | _ -> failwith "Failed to get branch"
+    | _ -> 
+        match Exec.execCaptureOutput dir "git" "git describe --exact-match --tags" with
+        | Exec.Success (output, _) -> output |> String.firstLine
+        | _ -> failwith "Failed to get branch or tag"
