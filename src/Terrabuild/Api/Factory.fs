@@ -18,16 +18,11 @@ let checkAuthError msg f  =
             TerrabuildException.Raise($"{errorCode}: {msg}.", ex)
 
 
-let authenticate token =
-    checkAuthError "please check permissions with your administrator" (fun () -> Auth.authenticate token)
-
-
-let create token space =
-    match token, space with
-    | Some token , Some space ->
+let create space token =
+    match space, token with
+    | Some space , Some token ->
         checkAuthError
             $"please check permissions with your administrator to access space {space}"
-            (fun() -> Client(token, space) :> Contracts.IApiClient |> Some)
+            (fun() -> Client(space, token) :> Contracts.IApiClient |> Some)
     | _ ->
         None
-    

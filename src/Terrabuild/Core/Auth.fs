@@ -1,9 +1,9 @@
 module Auth
 
 
-let login token =
-    Api.Factory.authenticate token
-    Cache.addAuthToken token
+let login space token =
+    let api = Api.Factory.create (Some space) (Some token)
+    Cache.addAuthToken space token
 
-let logout () =
-    Cache.removeAuthToken()
+let logout space =
+    Cache.removeAuthToken space

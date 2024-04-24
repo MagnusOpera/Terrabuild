@@ -64,8 +64,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let sourceControl = SourceControls.Factory.create()
         let config = Configuration.read wsDir environment labels variables sourceControl options
 
-        let token = Cache.readAuthToken()
-        let api = Api.Factory.create token config.Space
+        let token = config.Space |> Option.bind (fun space -> Cache.readAuthToken space)
+        let api = Api.Factory.create config.Space token
         let storage = Storages.Factory.create api
 
         if options.Debug then
@@ -143,11 +143,13 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
 
     let login (loginArgs: ParseResults<LoginArgs>) =
+        let space = loginArgs.GetResult(LoginArgs.Space)
         let token = loginArgs.GetResult(LoginArgs.Token)
-        Auth.login token
+        Auth.login space token
 
-    let logout () =
-        Auth.logout ()
+    let logout (logoutArgs: ParseResults<LogoutArgs>)=
+        let space = logoutArgs.GetResult(LogoutArgs.Space)
+        Auth.logout space
 
     match result.GetAllResults() with
     | TerrabuildArgs.Scaffold arg :: _ -> scaffold arg
@@ -160,7 +162,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     | TerrabuildArgs.Run arg :: _ -> target arg
     | TerrabuildArgs.Clear arg :: _ -> clear arg; 0
     | TerrabuildArgs.Login arg :: _ ->  login arg; 0
-    | TerrabuildArgs.Logout :: _ ->  logout(); 0
+    | TerrabuildArgs.Logout arg :: _ ->  logout arg; 0
     | _ -> parser.PrintUsage() |> Terminal.writeLine; 0
 
 [<EntryPoint>]
