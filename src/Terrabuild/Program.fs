@@ -166,28 +166,29 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 [<EntryPoint>]
 let main _ =
     let mutable debug = false
-    try
-        DotNetEnv.Env.TraversePath().Load() |> ignore
-        Terminal.hideCursor()
-        Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
-        let errorHandler = TerrabuildExiter()
-        let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
-        let result = parser.ParseCommandLine()
-        debug <- result.Contains(TerrabuildArgs.Debug)
-        let ret = processCommandLine parser result
+    let retCode =
+        try
+            DotNetEnv.Env.TraversePath().Load() |> ignore
+            Terminal.hideCursor()
+            Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
+            let errorHandler = TerrabuildExiter()
+            let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
+            let result = parser.ParseCommandLine()
+            debug <- result.Contains(TerrabuildArgs.Debug)
+            processCommandLine parser result
+        with
+            | :? TerrabuildException as ex ->
+                Log.Fatal("Failed with {Exception}", ex)
+                let reason =
+                    if debug then ex.ToString()
+                    else dumpUnknownException ex |> String.join "\n   "
+                $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
+                5
+            | ex ->
+                let reason = ex.ToString()
+                $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
+                5
 
-        Environment.CurrentDirectory <- launchDir
-        Terminal.showCursor()
-        ret
-    with
-        | :? TerrabuildException as ex ->
-            Log.Fatal("Failed with {Exception}", ex)
-            let reason = 
-                if debug then ex.ToString()
-                else dumpUnknownException ex |> String.join "\n   "
-            $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
-            5
-        | ex ->
-            let reason = ex.ToString()
-            $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
-            5
+    Environment.CurrentDirectory <- launchDir
+    Terminal.showCursor()
+    retCode
