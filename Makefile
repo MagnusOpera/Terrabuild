@@ -74,16 +74,16 @@ docs:
 	dotnet build src/Terrabuild.Extensions -c $(config)
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(config)/net8.0/Terrabuild.Extensions.xml ../websites/terrabuild.io/content/docs/extensions
 
-self-dist: clean dist
+self-dist: clean publish
 	.out/dotnet/terrabuild dist --workspace src --environment $(config) --retry --debug
 
-self-test: clean dist
+self-test: clean publish
 	.out/dotnet/terrabuild test --workspace src --environment $(config) --retry --debug
 
-self-publish: clean dist
+self-publish: clean publish
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug
 
-self-check: clean dist
+self-check: clean publish
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug --whatif
 
 

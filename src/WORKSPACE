@@ -19,7 +19,7 @@ target publish {
     depends_on = [dist]
 }
 
-environment default {
+environment debug {
     variables = {
         configuration: "Debug"
     }
