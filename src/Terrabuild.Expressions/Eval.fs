@@ -1,5 +1,6 @@
 ﻿module Terrabuild.Expressions.Eval
 open Terrabuild.Expressions
+open Errors
 
 type EvaluationContext = {
     WorkspaceDir: string
@@ -18,7 +19,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
         | Expr.Object obj -> Value.Object obj
         | Expr.Variable var ->
             match context.Variables |> Map.tryFind var with
-            | None -> failwith $"Variable '{var}' is not defined"
+            | None -> TerrabuildException.Raise $"Variable '{var}' is not defined"
             | Some str -> Value.String str
         | Expr.Map map -> map |> Map.map (fun _ expr -> eval expr) |> Value.Map
         | Expr.Function (f, exprs) ->
@@ -45,12 +46,8 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 let projectName = FS.workspaceRelative context.WorkspaceDir context.ProjectDir str
                 match context.Versions |> Map.tryFind projectName with
                 | Some version -> Value.String version
-                | _ -> failwith $"Unknown project reference {str}"
+                | _ -> TerrabuildException.Raise $"Unknown project reference {str}"
 
-            | _ -> failwith $"Invalid arguments for function {f}"
+            | _ -> TerrabuildException.Raise $"Invalid arguments for function {f}"
 
-    try
-        eval expr
-    with
-    | exn ->
-        failwith $"{exn.Message} while evaluating:\n{expr}\nand variables:\n{context.Variables}"
+    eval expr

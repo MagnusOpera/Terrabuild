@@ -1,5 +1,6 @@
 module Terrabuild.Configuration.FrontEnd
 open FSharp.Text.Lexing
+open Errors
 
 
 let inline private dumpLexer lexer (lexbuff: LexBuffer<char>) =
@@ -17,7 +18,7 @@ let private parse parser lexer txt =
         let err = sprintf "Unexpected token '%s' at (%d,%d)"
                           (LexBuffer<_>.LexemeString lexbuf |> string) 
                           (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
-        failwith err
+        TerrabuildException.Raise err
 
 
 let parseProject = parse Project.Parser.Project Project.Lexer.token

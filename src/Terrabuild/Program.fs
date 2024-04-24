@@ -2,11 +2,12 @@
 open CLI
 open System
 open Serilog
+open Errors
 
 let rec dumpKnownException (ex: Exception) =
     seq {
         match ex with
-        | :? Contracts.ConfigException as ex ->
+        | :? TerrabuildException as ex ->
             yield ex.Message
             yield! ex.InnerException |> dumpKnownException
         | null -> ()
@@ -17,7 +18,7 @@ let rec dumpKnownException (ex: Exception) =
 let rec dumpUnknownException (ex: Exception) =
     seq {
         match ex with
-        | :? Contracts.ConfigException as ex ->
+        | :? TerrabuildException as ex ->
             yield! ex |> dumpKnownException
         | null -> ()
         | _ -> yield ex.ToString()
@@ -179,7 +180,7 @@ let main _ =
         Terminal.showCursor()
         ret
     with
-        | :? Contracts.ConfigException as ex ->
+        | :? TerrabuildException as ex ->
             Log.Fatal("Failed with {Exception}", ex)
             let reason = 
                 if debug then ex.ToString()

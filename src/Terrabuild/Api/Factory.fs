@@ -1,6 +1,6 @@
 module Api.Factory
 open System.Net
-
+open Errors
 
 let checkAuthError msg f  =
     try
@@ -15,7 +15,7 @@ let checkAuthError msg f  =
                     | _ -> ex.Message
                 | _ -> ex.Message
 
-            Contracts.ConfigException.Raise($"{errorCode}: {msg}.", ex)
+            TerrabuildException.Raise($"{errorCode}: {msg}.", ex)
 
 
 let authenticate token =

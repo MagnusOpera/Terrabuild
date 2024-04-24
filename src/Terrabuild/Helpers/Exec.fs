@@ -3,6 +3,7 @@ open System.Diagnostics
 open System
 open System.IO
 open System.Collections.Generic
+open Errors
 
 type CaptureResult =
     | Success of string*int
@@ -44,7 +45,7 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
 
         proc.ExitCode
     with
-    | exn -> failwith $"Process '{command} {args} in directory '{workingDir}' failed with error: {exn}"
+    | exn -> TerrabuildException.Raise $"Process '{command} {args} in directory '{workingDir}' failed with error: {exn}"
 
 type BuildQueue(maxItems: int) =
     let completion = new System.Threading.ManualResetEvent(false)

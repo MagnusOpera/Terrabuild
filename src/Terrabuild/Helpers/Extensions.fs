@@ -4,6 +4,7 @@ open System.IO
 open Terrabuild.Scripting
 open Terrabuild.Expressions
 open Terrabuild.Configuration.AST
+open Errors
 
 type InvocationResult<'t> =
     | Success of 't
@@ -29,7 +30,7 @@ let lazyLoadScript (name: string) (script: string option) =
         | _ ->
             match Terrabuild.Extensions.Factory.systemScripts |> Map.tryFind name with
             | Some sysTpe -> Script(sysTpe)
-            | _ -> failwith $"Script is not defined for extension '{name}'"
+            | _ -> TerrabuildException.Raise $"Script is not defined for extension '{name}'"
 
     lazy(initScript())
 

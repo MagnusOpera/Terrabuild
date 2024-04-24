@@ -7,7 +7,7 @@ open Terrabuild.Extensibility
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Terrabuild.Configuration.Project.AST
-open Contracts
+open Errors
 
 [<RequireQualifiedAccess>]
 type Options = {
@@ -73,7 +73,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
         try
             Terrabuild.Configuration.FrontEnd.parseWorkspace workspaceContent
         with exn ->
-            ConfigException.Raise("Failed to read WORKSPACE configuration file", exn)
+            TerrabuildException.Raise("Failed to read WORKSPACE configuration file", exn)
 
     // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
     if options.WhatIf |> not then FS.combinePath workspaceDir ".terrabuild" |> IO.createDirectory
@@ -86,7 +86,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
         | _ ->
             match environment with
             | "default" -> Map.empty
-            | _ -> ConfigException.Raise($"Environment '{environment}' not found")
+            | _ -> TerrabuildException.Raise($"Environment '{environment}' not found")
     let buildVariables =
         variables
         |> Map.map (fun _ value -> value)
@@ -121,7 +121,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                 try
                     Terrabuild.Configuration.FrontEnd.parseProject projectContent
                 with exn ->
-                    ConfigException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
+                    TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
 
             let projectDef =
                 // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
@@ -154,9 +154,9 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
 
                         match result with
                         | Extensions.Success result -> result
-                        | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {init} was not found"
+                        | Extensions.ScriptNotFound -> TerrabuildException.Raise $"Script {init} was not found"
                         | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-                        | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of __defaults__ of script {init}" exn
+                        | Extensions.ErrorTarget exn -> TerrabuildException.Raise $"Invocation failure of __defaults__ of script {init}" exn
                     | _ -> ProjectInfo.Default
 
                 let projectInfo = {
@@ -197,13 +197,13 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                     scanDependencies projects projectDef.Dependencies
                 with
                     ex ->
-                        ConfigException.Raise($"while processing '{project}'", ex)
+                        TerrabuildException.Raise($"while processing project '{project}'", ex)
 
 
             // check for circular or missing dependencies
             for childDependency in projectDef.Dependencies do
                 if projects |> Map.tryFind childDependency |> Option.isNone then
-                    ConfigException.Raise($"Circular dependencies between {project} and {childDependency}")
+                    TerrabuildException.Raise($"Circular dependencies between {project} and {childDependency}")
 
 
             // get dependencies on files
@@ -221,7 +221,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                 |> Seq.map (fun dependency -> 
                     match projects |> Map.tryFind dependency with
                     | Some project -> dependency, project.Hash
-                    | _ -> ConfigException.Raise($"Circular dependencies between '{project}' and '{dependency}'"))
+                    | _ -> TerrabuildException.Raise($"Circular dependencies between '{project}' and '{dependency}'"))
                 |> Map.ofSeq
 
             let dependenciesHash =
@@ -257,7 +257,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                             let extension = 
                                 match projectDef.Extensions |> Map.tryFind step.Extension with
                                 | Some extension -> extension
-                                | _ -> ConfigException.Raise $"Extension {step.Extension} is not defined"
+                                | _ -> TerrabuildException.Raise $"Extension {step.Extension} is not defined"
 
                             let stepActions =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
@@ -293,9 +293,9 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                                         |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionSequence> step.Command actionContext
                                     match result with
                                     | Extensions.Success result -> result
-                                    | Extensions.ScriptNotFound -> ConfigException.Raise $"Script {step.Extension} was not found"
-                                    | Extensions.TargetNotFound -> ConfigException.Raise $"Script {step.Extension} has no function {step.Command}"
-                                    | Extensions.ErrorTarget exn -> ConfigException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
+                                    | Extensions.ScriptNotFound -> TerrabuildException.Raise $"Script {step.Extension} was not found"
+                                    | Extensions.TargetNotFound -> TerrabuildException.Raise $"Script {step.Extension} has no function {step.Command}"
+                                    | Extensions.ErrorTarget exn -> TerrabuildException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
 
                                 let batchContext =
                                     if actionGroup.Batchable then

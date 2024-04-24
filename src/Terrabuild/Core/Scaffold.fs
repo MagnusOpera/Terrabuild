@@ -3,6 +3,7 @@ open System
 open System.IO
 open Collections
 open Microsoft.Extensions.FileSystemGlobbing
+open Errors
 
 
 [<RequireQualifiedAccess>]
@@ -219,8 +220,8 @@ let scaffold workspaceDir force =
         let projectExists = workspaceDir |> findProject |> Seq.tryHead
 
         match workspaceExists, projectExists with
-        | Some file, _ -> failwith $"WORKSPACE file found '{file}'"
-        | _, Some file -> failwith $"PROJECT file found '{file}'"
+        | Some file, _ -> TerrabuildException.Raise $"WORKSPACE file found '{file}'"
+        | _, Some file -> TerrabuildException.Raise $"PROJECT file found '{file}'"
         | _ -> ()
 
     let projects = findProjectInDir workspaceDir |> List.ofSeq

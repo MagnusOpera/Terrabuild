@@ -5,6 +5,7 @@ open System.Collections.Concurrent
 open Collections
 open Terrabuild.Extensibility
 open Serilog
+open Errors
 
 type Paths = string set
 
@@ -108,7 +109,7 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
                              IsLeaf = isLeaf
                              TargetHash = target.Hash }
                 if allNodes.TryAdd(nodeId, node) |> not then
-                    failwith "Unexpected graph building race"
+                    TerrabuildException.Raise "Unexpected graph building race"
                 Set.singleton nodeId
             | _ ->
                 children
@@ -326,7 +327,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                             map
                             |> Map.add "context" (Terrabuild.Expressions.Value.Object optContext)
                             |> Terrabuild.Expressions.Value.Map
-                        | _ -> failwith "internal error"
+                        | _ -> TerrabuildException.Raise "internal error"
 
                     let optCommand = $"__{context.Command}__"
                     let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
