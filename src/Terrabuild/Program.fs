@@ -3,6 +3,7 @@ open CLI
 open System
 open Serilog
 open Errors
+open Terrabuild.Expressions
 
 let rec dumpKnownException (ex: Exception) =
     seq {
@@ -112,7 +113,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
-        let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, v) |> Map
+        let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, (Expr.String v)) |> Map
         let ``parallel`` = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
@@ -128,7 +129,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
         let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
-        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, v) |> Map
+        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, (Expr.String v)) |> Map
         let ``parallel`` = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug

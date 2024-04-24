@@ -76,7 +76,7 @@ EnvironmentComponents:
     | /* empty */ { Environment.Empty }
     | EnvironmentComponents EnvironmentVariables { $1.Patch $2 }
 EnvironmentVariables:
-    | VARIABLES EQUAL LBRACE StringVariables RBRACE { EnvironmentComponents.Variables $4 }
+    | VARIABLES EQUAL LBRACE Variables RBRACE { EnvironmentComponents.Variables $4 }
 
 Extension:
     | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { WorkspaceComponents.Extension ($2, $4) }

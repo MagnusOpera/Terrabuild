@@ -22,7 +22,7 @@ let parseWorkspace() =
               Rebuild = None }
 
         let envRelease =
-            { Variables = Map [ "configuration", "Release" ] }
+            { Variables = Map [ "configuration", Expr.String "Release" ] }
         let envDummy =
             { Variables = Map.empty }
 

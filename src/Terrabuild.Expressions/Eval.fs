@@ -6,7 +6,7 @@ type EvaluationContext = {
     WorkspaceDir: string
     ProjectDir: string
     Versions: Map<string, string>
-    Variables: Map<string, string>
+    Variables: Map<string, Expr>
 }
 
 let rec eval (context: EvaluationContext) (expr: Expr) =
@@ -20,7 +20,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
         | Expr.Variable var ->
             match context.Variables |> Map.tryFind var with
             | None -> TerrabuildException.Raise $"Variable '{var}' is not defined"
-            | Some str -> Value.String str
+            | Some value -> eval value
         | Expr.Map map -> map |> Map.map (fun _ expr -> eval expr) |> Value.Map
         | Expr.Function (f, exprs) ->
             let values = exprs |> List.map eval

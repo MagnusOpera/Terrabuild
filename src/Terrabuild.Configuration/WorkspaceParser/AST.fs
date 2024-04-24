@@ -1,5 +1,6 @@
 ﻿namespace Terrabuild.Configuration.Workspace.AST
 open Terrabuild.Configuration.AST
+open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]
 type TargetComponents =
@@ -23,10 +24,10 @@ with
 
 [<RequireQualifiedAccess>]
 type EnvironmentComponents =
-    | Variables of Map<string, string>
+    | Variables of Map<string, Expr>
 
 type Environment = {
-    Variables: Map<string, string>
+    Variables: Map<string, Expr>
 }
 with
     static member Empty =

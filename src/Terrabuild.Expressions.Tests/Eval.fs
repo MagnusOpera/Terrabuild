@@ -38,7 +38,7 @@ let valueMap() =
 [<Test>]
 let valueVariable() =
     let expected = Value.String "titi"
-    let context = { evaluationContext with Variables = Map ["toto", "titi"] }
+    let context = { evaluationContext with Variables = Map ["toto", Expr.String "titi"] }
     let result = eval context (Expr.Variable "toto")
     result |> should equal expected
 

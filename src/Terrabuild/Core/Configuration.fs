@@ -269,8 +269,8 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
 
                                 let actionVariables =
                                     buildVariables
-                                    |> Map.add "terrabuild_project" project
-                                    |> Map.add "terrabuild_target" targetName
+                                    |> Map.add "terrabuild_project" (Expr.String project)
+                                    |> Map.add "terrabuild_target" (Expr.String targetName)
 
                                 let evaluationContext = {
                                     Eval.EvaluationContext.WorkspaceDir = workspaceDir
