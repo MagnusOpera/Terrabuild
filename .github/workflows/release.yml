@@ -27,8 +27,6 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.204
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.NUGET_KEY}}
 
       - name: Build & Publish
         run: make dist-all config=Release version=${{github.ref_name}}
@@ -41,4 +39,4 @@ jobs:
           files: ./.out/*.zip
 
       - name: NuGet Release
-        run: dotnet nuget push ./.nugets/Terrabuild.*.nupkg --skip-duplicate --source https://api.nuget.org/v3/index.json --no-symbols true
+        run: dotnet nuget push ./.nugets/Terrabuild.*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json --no-symbols true
