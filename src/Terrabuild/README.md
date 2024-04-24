@@ -1,6 +1,6 @@
 # ✨ Terrabuild
 
-Terrabuild is a tool to help building efficiently your monorepo.
+Terrabuild helps you build your monorepos efficiently.
 
 See [Documentation](https://terrabuild.io) for more information.
 
