@@ -83,10 +83,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
     let envVariables =
         match environments |> Map.tryFind environment with
         | Some variables -> variables.Variables
-        | _ ->
-            match environment with
-            | "default" -> Map.empty
-            | _ -> TerrabuildException.Raise($"Environment '{environment}' not found")
+        | _ -> TerrabuildException.Raise($"Environment '{environment}' not found")
     let buildVariables =
         variables
         |> Map.map (fun _ value -> value)
