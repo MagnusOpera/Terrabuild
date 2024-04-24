@@ -58,7 +58,6 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
-    <None Include="LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -68,7 +67,6 @@
     <Title>Terrabuild</Title>
     <Description>Terrabuild</Description>
     <Copyright>Copyright 2023-2024 Magnus Opera</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/MagnusOpera/Terrabuild</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MagnusOpera/Terrabuild.git</RepositoryUrl>
     <PackageTags>terrabuild;build;monorepo</PackageTags>
