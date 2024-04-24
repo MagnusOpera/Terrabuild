@@ -33,7 +33,7 @@ clean:
 
 
 clear-cache:
-	dotnet run --project src/Terrabuild -- clear --buildcache
+	dotnet run --project src/Terrabuild -- clear --cache --home
 
 docker-prune:
 	docker system prune -af

@@ -35,7 +35,7 @@ with
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
-    | [<Mandatory; ExactlyOnce; MainCommand; First>] Target of target:string list
+    | [<ExactlyOnce; MainCommand; First>] Target of target:string list
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
@@ -58,17 +58,19 @@ with
 
 [<RequireQualifiedAccess>]
 type ClearArgs =
-    | [<ExactlyOnce>] BuildCache
+    | [<Unique>] Cache
+    | [<Unique>] Home
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
-            | BuildCache -> "Clear build cache."
+            | Cache -> "Clear build cache."
+            | Home -> "Clear home cache."
 
 [<RequireQualifiedAccess>]
 type LoginArgs =
-    | [<Mandatory; ExactlyOnce>] Space of space:string
-    | [<Mandatory; ExactlyOnce>] Token of token:string
+    | [<ExactlyOnce>] Space of space:string
+    | [<ExactlyOnce>] Token of token:string
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -78,7 +80,7 @@ with
 
 [<RequireQualifiedAccess>]
 type LogoutArgs =
-    | [<Mandatory; ExactlyOnce>] Space of space:string
+    | [<ExactlyOnce>] Space of space:string
 with
     interface IArgParserTemplate with
         member this.Usage =

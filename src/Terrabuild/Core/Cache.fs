@@ -83,6 +83,9 @@ let private markEntryAsCompleted reason entryDir =
 let clearBuildCache () =
     IO.deleteAny buildCacheDirectory
 
+let clearHomeCache () =
+    IO.deleteAny homeDirectory
+
 
 let removeAuthToken (space: string) =
     let configFile = FS.combinePath terrabuildHome "config.json"

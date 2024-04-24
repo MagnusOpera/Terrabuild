@@ -140,7 +140,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
-        if clearArgs.Contains(ClearArgs.BuildCache) then Cache.clearBuildCache()
+        if clearArgs.Contains(ClearArgs.Cache) then Cache.clearBuildCache()
+        if clearArgs.Contains(ClearArgs.Home) then Cache.clearHomeCache()
 
     let login (loginArgs: ParseResults<LoginArgs>) =
         let space = loginArgs.GetResult(LoginArgs.Space)
