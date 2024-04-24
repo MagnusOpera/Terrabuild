@@ -58,7 +58,7 @@
 
   <ItemGroup>
     <None Include="NUGET.md" Pack="true" PackagePath="\" />
-    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -72,7 +72,7 @@
     <PackageProjectUrl>https://github.com/MagnusOpera/Terrabuild</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MagnusOpera/Terrabuild.git</RepositoryUrl>
     <PackageTags>terrabuild;build;monorepo</PackageTags>
-    <PackageReadmeFile>NUGET.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
 </Project>
