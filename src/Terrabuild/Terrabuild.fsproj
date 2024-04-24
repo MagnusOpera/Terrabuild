@@ -59,6 +59,7 @@
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
     <None Include="LICENSE" Pack="true" PackagePath="\" />
+    <None Include="Terrabuild.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -73,6 +74,7 @@
     <RepositoryUrl>https://github.com/MagnusOpera/Terrabuild.git</RepositoryUrl>
     <PackageTags>terrabuild;build;monorepo</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>Terrabuild.png</PackageIcon>
   </PropertyGroup>
 
 </Project>
