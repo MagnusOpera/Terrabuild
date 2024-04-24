@@ -39,4 +39,4 @@ jobs:
           files: ./.out/*.zip
 
       - name: NuGet Release
-        run: dotnet nuget push ./.nugets/Terrabuild.*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json --no-symbols true
+        run: dotnet nuget push ./.out/Terrabuild.${{github.ref_name}}.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json --no-symbols true

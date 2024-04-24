@@ -30,7 +30,6 @@ parser:
 clean:
 	-rm terrabuild-debug.*
 	-rm -rf $(PWD)/.out
-	-rm -rf $(PWD)/.nugets
 
 
 clear-cache:
@@ -66,7 +65,7 @@ publish-all: clean
 	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
 
 pack:
-	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
+	dotnet pack -c $(config) /p:Version=$(version) -o .out
 
 dist-all: clean publish-all pack
 
