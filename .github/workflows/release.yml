@@ -41,4 +41,4 @@ jobs:
           files: ./.out/*.zip
 
       - name: NuGet Release
-        run: dotnet nuget push ./nugets/Terrabuild.*.nupkg --skip-duplicate --no-symbols true
+        run: dotnet nuget push ./nugets/Terrabuild.*.nupkg --skip-duplicate --source https://api.nuget.org/v3/index.json --no-symbols true
