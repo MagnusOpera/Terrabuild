@@ -36,7 +36,9 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          files: ./.out/*.zip
+          files: |
+            ./.out/*.zip
+            ./.out/*.nupkg
 
       - name: NuGet Release
         run: dotnet nuget push ./.out/Terrabuild.${{github.ref_name}}.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json --no-symbols true
