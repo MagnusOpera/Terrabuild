@@ -12,10 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-      packages: write    
-
     steps:
       - name: Info
         run: echo 'Building ${{ github.ref }}'
@@ -26,14 +22,19 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0.203
+          dotnet-version: 8.0.204
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.NUGET_KEY}}
 
       - name: Build & Publish
-        run: make dist-all version=${{github.ref_name}}
+        run: make dist-all config=Release version=${{github.ref_name}}
 
-      - name: Release
+      - name: GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           generate_release_notes: true
           files: ./.out/*.zip
+
+      - name: NuGet Release
+        run: dotnet nuget push ./nugets/Terrabuild.*.nupkg --skip-duplicate --no-symbols true

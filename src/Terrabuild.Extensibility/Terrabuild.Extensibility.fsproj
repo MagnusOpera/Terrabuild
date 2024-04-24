@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Configurations>Debug;Release;BFS</Configurations>
-    <Platforms>AnyCPU</Platforms>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

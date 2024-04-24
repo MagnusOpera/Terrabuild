@@ -3,6 +3,15 @@ version ?= 0.0.0
 
 .PHONY: src tools
 
+#
+#  _______   ___________    ____
+# |       \ |   ____\   \  /   /
+# |  .--.  ||  |__   \   \/   /
+# |  |  |  ||   __|   \      /
+# |  '--'  ||  |____   \    /
+# |_______/ |_______|   \__/
+#
+
 build:
 	dotnet build -c $(config) terrabuild.sln
 
@@ -15,16 +24,35 @@ tools:
 test:
 	dotnet test terrabuild.sln
 
+parser:
+	dotnet build -c $(config) /p:DefineConstants="GENERATE_PARSER"
 
 clean:
 	-rm terrabuild-debug.*
 	-rm -rf $(PWD)/.out
+	-rm -rf $(PWD)/.nugets
 
-dist:
+
+clear-cache:
+	dotnet run --project src/Terrabuild -- clear --buildcache
+
+docker-prune:
+	docker system prune -af
+
+#
+# .______       _______  __       _______     ___           _______. _______
+# |   _  \     |   ____||  |     |   ____|   /   \         /       ||   ____|
+# |  |_)  |    |  |__   |  |     |  |__     /  ^  \       |   (----`|  |__
+# |      /     |   __|  |  |     |   __|   /  /_\  \       \   \    |   __|
+# |  |\  \----.|  |____ |  `----.|  |____ /  _____  \  .----)   |   |  |____
+# | _| `._____||_______||_______||_______/__/     \__\ |_______/    |_______|
+#
+
+publish:
 	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
 	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
 
-dist-all: clean
+publish-all: clean
 	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
 	cd .out/windows; zip -r ../terrabuild-$(version)-windows-x64.zip ./terrabuild.exe
 
@@ -37,15 +65,14 @@ dist-all: clean
 	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
 	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
 
+pack:
+	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
+
+dist-all: clean publish-all pack
+
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(config)
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(config)/net8.0/Terrabuild.Extensions.xml ../websites/terrabuild.io/content/docs/extensions
-
-parser:
-	dotnet build -c $(config) /p:DefineConstants="GENERATE_PARSER"
-
-all:
-	dotnet pack -c $(config) /p:Version=$(version) -o .nugets
 
 self-dist: clean dist
 	.out/dotnet/terrabuild dist --workspace src --environment $(config) --retry --debug
@@ -60,8 +87,14 @@ self-check: clean dist
 	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug --whatif
 
 
-
-tests: run-build run-build-nc target usage
+#
+# .___________. _______     _______.___________.    _______.
+# |           ||   ____|   /       |           |   /       |
+# `---|  |----`|  |__     |   (----`---|  |----`  |   (----`
+#     |  |     |   __|     \   \       |  |        \   \
+#     |  |     |  |____.----)   |      |  |    .----)   |
+#     |__|     |_______|_______/       |__|    |_______/
+#
 
 run-build-multirefs:
 	dotnet run --project src/Terrabuild -- build --workspace tests/multirefs
@@ -105,7 +138,6 @@ run-deploy-dev:
 run-build-app:
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label dotnet --debug
 
-
 github-tests:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --retry --parallel 4
 
@@ -113,10 +145,3 @@ usage:
 	dotnet run --project src/Terrabuild -- --help
 	dotnet run --project src/Terrabuild -- build --help
 	dotnet run --project src/Terrabuild -- run --help
-
-clear-cache:
-	dotnet run --project src/Terrabuild -- clear --buildcache
-
-docker-prune:
-	docker system prune -af
-

@@ -423,3 +423,4 @@ terraform.tfstate
 /tests/scaffold/.gitignore
 .local-store
 .env
+.nugets

@@ -2,7 +2,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <IsPackable>false</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>terrabuild</ToolCommandName>
     <AssemblyName>terrabuild</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
@@ -70,7 +71,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/MagnusOpera/Terrabuild</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MagnusOpera/Terrabuild.git</RepositoryUrl>
-    <PackageTags>terrabuild;build</PackageTags>
+    <PackageTags>terrabuild;build;monorepo</PackageTags>
     <PackageReadmeFile>NUGET.md</PackageReadmeFile>
   </PropertyGroup>
 
