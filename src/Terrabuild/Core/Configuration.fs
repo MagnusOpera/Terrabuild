@@ -246,17 +246,17 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                             |> Option.defaultValue false
                         )
 
-                    let variables, actions =
+                    let usedVariables, actions =
                         target.Steps
-                        |> List.fold (fun (variables, actions) step ->
-                            let stepVars: Map<string, string> = Map.empty
+                        |> List.fold (fun (usedVariables, actions) step ->
+                            // let stepVars: Map<string, string> = Map.empty
 
                             let extension = 
                                 match projectDef.Extensions |> Map.tryFind step.Extension with
                                 | Some extension -> extension
                                 | _ -> TerrabuildException.Raise $"Extension {step.Extension} is not defined"
 
-                            let stepActions =
+                            let stepActions, stepVars =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                                                       Terrabuild.Extensibility.ActionContext.Directory = projectDir
                                                       Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
@@ -276,7 +276,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                                     Eval.EvaluationContext.Variables = actionVariables
                                 }
 
-                                let actionContext =
+                                let usedVars, actionContext =
                                     extension.Defaults
                                     |> Map.addMap step.Parameters
                                     |> Map.add "context" (Expr.Object actionContext)
@@ -314,19 +314,20 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                                     ContaineredActionBatch.Actions = actionGroup.Actions
                                 }
 
-                                containedActionBatch
+                                containedActionBatch, usedVars
 
-                            let variables =
-                                variables
-                                |> Map.addMap stepVars
-
+                            let usedVariables = usedVariables + stepVars
                             let actions = actions @ [ stepActions ]
+                            usedVariables, actions
+                        ) (Set.empty, [])
 
-                            variables, actions
-                        ) (Map.empty, [])
+                    let usedVariables =
+                        usedVariables
+                        |> Seq.map (fun k -> k, buildVariables[k].ToString())
+                        |> Map.ofSeq
 
                     let variableHash =
-                        variables
+                        usedVariables
                         |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
                         |> Hash.sha256strings
 
@@ -359,7 +360,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                         | _ -> projectDef.Outputs
 
                     { ContaineredTarget.Hash = hash
-                      ContaineredTarget.Variables = variables
+                      ContaineredTarget.Variables = usedVariables
                       ContaineredTarget.Actions = actions
                       ContaineredTarget.DependsOn = dependsOn
                       ContaineredTarget.Outputs = outputs }

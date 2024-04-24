@@ -14,57 +14,68 @@ let private evaluationContext = {
 [<Test>]
 let valueNothing() =
     let expected = Value.Nothing
-    let result = eval evaluationContext (Expr.Nothing)
+    let varUsed, result = eval evaluationContext (Expr.Nothing)
+    varUsed |> should be Empty
     result |> should equal expected
 
 [<Test>]
 let valueString() =
     let expected = Value.String "toto"
-    let result = eval evaluationContext (Expr.String "toto")
+    let varUsed, result = eval evaluationContext (Expr.String "toto")
+    varUsed |> should be Empty
     result |> should equal expected
 
 [<Test>]
 let valueBool() =
     let expected = Value.Bool true
-    let result = eval evaluationContext (Expr.Boolean true)
+    let varUsed, result = eval evaluationContext (Expr.Boolean true)
+    varUsed |> should be Empty
     result |> should equal expected
 
 [<Test>]
 let valueMap() =
     let expected = Value.Map (Map ["hello", Value.String "world"])
-    let result = eval evaluationContext (Expr.Map (Map ["hello", Expr.String "world"]))
+    let varUsed, result = eval evaluationContext (Expr.Map (Map ["hello", Expr.String "world"]))
+    varUsed |> should be Empty
     result |> should equal expected
 
 [<Test>]
 let valueVariable() =
+    let expectedUsedVars = Set [ "toto" ]
     let expected = Value.String "titi"
     let context = { evaluationContext with Variables = Map ["toto", Expr.String "titi"] }
-    let result = eval context (Expr.Variable "toto")
+    let varUsed, result = eval context (Expr.Variable "toto")
+    varUsed |> should equal expectedUsedVars
     result |> should equal expected
 
 [<Test>]
 let concatString() =
     let expected = Value.String "hello world"
-    let result = eval evaluationContext (Expr.Function (Function.Plus, [Expr.String "hello"; Expr.String " world"]))
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Plus, [Expr.String "hello"; Expr.String " world"]))
+    varUsed |> should be Empty
     result |> should equal expected
 
 [<Test>]
 let trimString() =
     let expected = Value.String "hello"
-    let result = eval evaluationContext (Expr.Function (Function.Trim, [Expr.String " hello  "]))
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Trim, [Expr.String " hello  "]))
+    varUsed |> should be Empty
     result |> should equal expected
 
 [<Test>]
 let upperString() =
     let expected = Value.String "HELLO"
-    let result = eval evaluationContext (Expr.Function (Function.Trim,
-                                                        [Expr.Function (Function.Upper, [ Expr.String " hello  " ])] ))
+    let varUsed, result =
+        eval evaluationContext (Expr.Function (Function.Trim,
+                                               [Expr.Function (Function.Upper, [ Expr.String " hello  " ])] ))
+    varUsed |> should be Empty
     result |> should equal expected
 
 [<Test>]
 let lowerString() =
     let expected = Value.String "hello"
-    let result = eval evaluationContext (Expr.Function (Function.Lower, [ Expr.String "HELLO" ]))
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Lower, [ Expr.String "HELLO" ]))
+    varUsed |> should be Empty
     result |> should equal expected
 
 [<Test>]
@@ -77,5 +88,7 @@ let version() =
 
     printfn $"{context.ProjectDir}"
 
-    let result = eval context (Expr.Function (Function.Version, [ Expr.String "../net8.0/toto"]))
+    let varUsed, result =
+        eval context (Expr.Function (Function.Version, [ Expr.String "../net8.0/toto"]))
+    varUsed |> should be Empty
     result |> should equal expected

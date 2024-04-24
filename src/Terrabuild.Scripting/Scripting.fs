@@ -101,8 +101,8 @@ type Invocable(method: MethodInfo) =
         method.Invoke(null, args)
 
     member _.Invoke<'t> (value: Value) =
-        let args = buildArgs value
-        invoke args :?> 't
+        let mapping = buildArgs value
+        invoke mapping :?> 't
 
 type Script(mainType: Type) =
     member _.GetMethod(name: string) =
