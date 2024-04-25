@@ -197,8 +197,8 @@ let main _ =
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
             | ex ->
-                let reason = ex.ToString()
-                $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
+                Log.Fatal("Failed with {Exception}", ex)
+                $"{Ansi.Emojis.explosion} {ex}" |> Terminal.writeLine
                 5
 
     Environment.CurrentDirectory <- launchDir
