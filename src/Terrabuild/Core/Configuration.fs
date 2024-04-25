@@ -323,12 +323,12 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
 
                     let usedVariables =
                         usedVariables
-                        |> Seq.map (fun k -> k, buildVariables[k].ToString())
-                        |> Map.ofSeq
+                        |> Seq.sort
+                        |> Seq.map (fun k -> k, $"{buildVariables[k]}")
 
                     let variableHash =
                         usedVariables
-                        |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
+                        |> Seq.map (fun (key, value) -> $"{key} = {value}")
                         |> Hash.sha256strings
 
                     let stepHash =
@@ -360,7 +360,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                         | _ -> projectDef.Outputs
 
                     { ContaineredTarget.Hash = hash
-                      ContaineredTarget.Variables = usedVariables
+                      ContaineredTarget.Variables = usedVariables |> Map.ofSeq
                       ContaineredTarget.Actions = actions
                       ContaineredTarget.DependsOn = dependsOn
                       ContaineredTarget.Outputs = outputs }
