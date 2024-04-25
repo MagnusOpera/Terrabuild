@@ -324,7 +324,10 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
                     let usedVariables =
                         usedVariables
                         |> Seq.sort
-                        |> Seq.map (fun k -> k, $"{buildVariables[k]}")
+                        |> Seq.choose (fun k ->
+                            match buildVariables |> Map.tryFind k with
+                            | Some v -> Some (k, $"{v}")
+                            | _ -> None)
 
                     let variableHash =
                         usedVariables
