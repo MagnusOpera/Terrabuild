@@ -145,15 +145,18 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) then Cache.clearBuildCache()
         if clearArgs.Contains(ClearArgs.Home) then Cache.clearHomeCache()
+        0
 
     let login (loginArgs: ParseResults<LoginArgs>) =
         let space = loginArgs.GetResult(LoginArgs.Space)
         let token = loginArgs.GetResult(LoginArgs.Token)
         Auth.login space token
+        0
 
     let logout (logoutArgs: ParseResults<LogoutArgs>)=
         let space = logoutArgs.GetResult(LogoutArgs.Space)
         Auth.logout space
+        0
 
     Log.Debug("Parsing command line")
     match result with
@@ -165,11 +168,11 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     | p when p.Contains(TerrabuildArgs.Deploy) -> p.GetResult(TerrabuildArgs.Publish) |> targetShortcut "deploy"
     | p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> targetShortcut "serve"
     | p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> target
-    | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear; 0
-    | p when p.Contains(TerrabuildArgs.Login) -> p.GetResult(TerrabuildArgs.Login) |> login; 0
-    | p when p.Contains(TerrabuildArgs.Logout) -> p.GetResult(TerrabuildArgs.Logout) |> logout; 0
-    | allResults ->
-        Log.Debug("Failed to parse {result}", allResults)
+    | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
+    | p when p.Contains(TerrabuildArgs.Login) -> p.GetResult(TerrabuildArgs.Login) |> login
+    | p when p.Contains(TerrabuildArgs.Logout) -> p.GetResult(TerrabuildArgs.Logout) |> logout
+    | _ ->
+        Log.Debug("Failed to parse {result}", result)
         parser.PrintUsage() |> Terminal.writeLine; 0
 
 [<EntryPoint>]
