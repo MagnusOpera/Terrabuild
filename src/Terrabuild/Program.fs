@@ -53,10 +53,12 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .MinimumLevel.Debug()
                 .WriteTo.File(logFile "log")
                 .CreateLogger()
+        Log.Debug("Log created")
 
     let runTarget wsDir target environment labels variables (options: Configuration.Options) =
         let wsDir = wsDir |> FS.fullPath
         Environment.CurrentDirectory <- wsDir
+        Log.Debug("Changing current directory to {directory}", wsDir)
 
         if options.Debug then
             let jsonOptions = Json.Serialize options
@@ -153,19 +155,22 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let space = logoutArgs.GetResult(LogoutArgs.Space)
         Auth.logout space
 
-    match result.GetAllResults() with
-    | TerrabuildArgs.Scaffold arg :: _ -> scaffold arg
-    | TerrabuildArgs.Build arg :: _ -> targetShortcut "build" arg
-    | TerrabuildArgs.Test arg :: _ -> targetShortcut "test" arg
-    | TerrabuildArgs.Dist arg :: _ -> targetShortcut "dist" arg
-    | TerrabuildArgs.Publish arg :: _ -> targetShortcut "publish" arg
-    | TerrabuildArgs.Deploy arg :: _ -> targetShortcut "deploy" arg
-    | TerrabuildArgs.Serve arg :: _ -> targetShortcut "serve" arg
-    | TerrabuildArgs.Run arg :: _ -> target arg
-    | TerrabuildArgs.Clear arg :: _ -> clear arg; 0
-    | TerrabuildArgs.Login arg :: _ ->  login arg; 0
-    | TerrabuildArgs.Logout arg :: _ ->  logout arg; 0
-    | _ -> parser.PrintUsage() |> Terminal.writeLine; 0
+    Log.Debug("Parsing command line")
+    match result with
+    | p when p.Contains(TerrabuildArgs.Scaffold) -> p.GetResult(TerrabuildArgs.Scaffold) |> scaffold
+    | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
+    | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
+    | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"
+    | p when p.Contains(TerrabuildArgs.Publish) -> p.GetResult(TerrabuildArgs.Publish) |> targetShortcut "publish"
+    | p when p.Contains(TerrabuildArgs.Deploy) -> p.GetResult(TerrabuildArgs.Publish) |> targetShortcut "deploy"
+    | p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> targetShortcut "serve"
+    | p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> target
+    | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear; 0
+    | p when p.Contains(TerrabuildArgs.Login) -> p.GetResult(TerrabuildArgs.Login) |> login; 0
+    | p when p.Contains(TerrabuildArgs.Logout) -> p.GetResult(TerrabuildArgs.Logout) |> logout; 0
+    | allResults ->
+        Log.Debug("Failed to parse {result}", allResults)
+        parser.PrintUsage() |> Terminal.writeLine; 0
 
 [<EntryPoint>]
 let main _ =
