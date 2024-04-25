@@ -381,9 +381,9 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     graph <- { graph with
                                     Nodes = graph.Nodes |> Map.add node.Id node }
             else
-                Log.Debug("Failed to optimize cluster {cluster}")
+                Log.Debug("Failed to optimize cluster {cluster}", cluster)
         else
-            Log.Debug("Cluster {cluster} has only 1 node")
+            Log.Debug("Cluster {cluster} has only 1 node", cluster)
 
     let endedAt = DateTime.UtcNow
 
