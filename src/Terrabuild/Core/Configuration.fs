@@ -228,7 +228,7 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
 
             // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
             let projectHash =
-                [ project; filesHash; dependenciesHash ]
+                [ filesHash; dependenciesHash ]
                 |> Hash.sha256strings
 
             let projectSteps =
