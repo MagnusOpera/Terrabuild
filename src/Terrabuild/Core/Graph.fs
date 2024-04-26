@@ -202,7 +202,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
 
     let isCached (node: Node) =
         let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
-        let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
+        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
         if options.Force || node.Cache = Cacheability.Never then true
         else not <| cache.Exists useRemoteCache cacheEntryId
 

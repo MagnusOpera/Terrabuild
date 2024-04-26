@@ -106,7 +106,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     // collect dependencies status
     let getDependencyStatus depId =
         let node = graph.Nodes[depId]
-        let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
+        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
         let nodeInfo = 
             { NodeInfo.Project = node.Project
               NodeInfo.Target = node.Target
@@ -135,7 +135,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                 | FS.File projectFile -> FS.parentDirectory projectFile
                 | _ -> "."
 
-            let cacheEntryId = $"{node.Project}/{node.Target}/{node.Hash}"
+            let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
 
             // check first if it's possible to restore previously built state
             let summary =
