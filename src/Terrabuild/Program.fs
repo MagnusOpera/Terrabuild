@@ -41,6 +41,14 @@ type TerrabuildExiter() =
 
 let launchDir = Environment.CurrentDirectory
 
+let rec findWorkspace dir =
+    if FS.combinePath dir "WORKSPACE" |> IO.exists then
+        Some dir
+    else
+        match FS.parentDirectory dir with
+        | null -> None
+        | parentDir -> findWorkspace parentDir
+
 let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseResults<TerrabuildArgs>) =
     let debug = result.Contains(TerrabuildArgs.Debug)
     let whatIf = result.Contains(TerrabuildArgs.WhatIf)
@@ -112,7 +120,13 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         0
 
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
-        let wsDir = buildArgs.GetResult(RunArgs.Workspace, defaultValue = ".")
+        let wsDir =
+            match buildArgs.TryGetResult(RunArgs.Workspace) with
+            | Some ws -> ws
+            | _ ->
+                match Environment.CurrentDirectory |> findWorkspace with
+                | Some ws -> ws
+                | _ -> TerrabuildException.Raise "Can't find workspace root directory. Check you are in a workspace."
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, (Expr.String v)) |> Map
@@ -125,10 +139,15 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.StartedAt = DateTime.UtcNow }
         runTarget wsDir (Set.singleton target) environment labels variables options
 
-
     let target (targetArgs: ParseResults<TargetArgs>) =
         let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLower
-        let wsDir = targetArgs.GetResult(TargetArgs.Workspace, defaultValue = ".")
+        let wsDir =
+            match targetArgs.TryGetResult(TargetArgs.Workspace) with
+            | Some ws -> ws
+            | _ ->
+                match Environment.CurrentDirectory |> findWorkspace with
+                | Some ws -> ws
+                | _ -> TerrabuildException.Raise "Can't find workspace root directory. Check you are in a workspace."
         let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, (Expr.String v)) |> Map
