@@ -23,7 +23,7 @@ target deploy {
   depends_on = [ push ]
 }
 
-environment debug {
+environment default {
   variables = {
     configuration: "Debug"
     secret_message: "tagada"

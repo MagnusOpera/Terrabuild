@@ -1,7 +1,14 @@
-config ?= Debug
+env ?= default
 version ?= 0.0.0
 
 .PHONY: src tools
+
+ifeq ($(env), default)
+	config=Debug
+else
+	config=$env
+endif
+
 
 #
 #  _______   ___________    ____
@@ -74,16 +81,16 @@ docs:
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(config)/net8.0/Terrabuild.Extensions.xml ../websites/terrabuild.io/content/docs/extensions
 
 self-dist: clean publish
-	.out/dotnet/terrabuild dist --workspace src --environment $(config) --retry --debug
+	.out/dotnet/terrabuild dist --workspace src --environment $(env) --retry --debug
 
 self-test: clean publish
-	.out/dotnet/terrabuild test --workspace src --environment $(config) --retry --debug
+	.out/dotnet/terrabuild test --workspace src --environment $(env) --retry --debug
 
 self-publish: clean publish
-	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug
+	.out/dotnet/terrabuild publish --workspace src --environment $(env) --retry --debug
 
 self-check: clean publish
-	.out/dotnet/terrabuild publish --workspace src --environment $(config) --retry --debug --whatif
+	.out/dotnet/terrabuild publish --workspace src --environment $(env) --retry --debug --whatif
 
 
 #
@@ -114,31 +121,31 @@ run-publish-scaffold:
 	dotnet run --project src/Terrabuild -- publish --workspace tests/scaffold --debug --retry
 
 run-build: clean
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --debug
+	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment $(env) --debug
 
 run-rebuild: clean
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label app --debug --force
+	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment $(env) --label app --debug --force
 
 run-dist:
-	dotnet run --project src/Terrabuild -- dist --workspace tests/simple --environment debug --debug
+	dotnet run --project src/Terrabuild -- dist --workspace tests/simple --environment $(env) --debug
 
 run-docker:
-	dotnet run --project src/Terrabuild -- run docker --workspace tests/simple --environment debug --label app --debug --retry
+	dotnet run --project src/Terrabuild -- run docker --workspace tests/simple --environment $(env) --label app --debug --retry
 
 run-push:
-	dotnet run --project src/Terrabuild -- run push --workspace tests/simple --environment debug --label app --debug --retry
+	dotnet run --project src/Terrabuild -- run push --workspace tests/simple --environment $(env) --label app --debug --retry
 
 run-deploy:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --retry
+	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment $(env) --debug --retry
 
 run-deploy-dev:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --variable workspace=dev
+	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment $(env) --variable workspace=dev
 
 run-build-app:
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment debug --label dotnet --debug
+	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment $(env) --label dotnet --debug
 
 github-tests:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment debug --debug --retry --parallel 4
+	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --environment $(env) --debug --retry --parallel 4
 
 usage:
 	dotnet run --project src/Terrabuild -- --help
