@@ -14,4 +14,4 @@ See [📚 Documentation](https://terrabuild.io) for more information.
 </a>
 
 # Contributing
-Visit [Contribution Guide](CONTRIBUTING.md) for information on building Terrabuild from source or contributing improvements.
+Visit [Contributing](CONTRIBUTING.md) for information on building Terrabuild from source or contributing improvements.
