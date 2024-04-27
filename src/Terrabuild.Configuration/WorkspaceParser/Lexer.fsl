@@ -8,7 +8,9 @@ let lexeme = LexBuffer<_>.LexemeString
 }
 
 let doubleQuote = '\"'
-let identifier = ['@' '^']? ['a'-'z'] ('_'? ['a'-'z' '0'-'9']+)*
+let extensionIdentifier = '@'? ['a'-'z'] ('_'? ['a'-'z' '0'-'9']+)*
+let targetIdentifier = '^'? ['a'-'z'] ('_'? ['a'-'z' '0'-'9']+)*
+let identifier = ['a'-'z'] ('_'? ['a'-'z' '0'-'9']+)*
 let key = identifier ' '* ':'
 let variable = '$' identifier
 let quotedString = '\"' [^'\"']+ '\"'
@@ -53,6 +55,8 @@ rule token = parse
     | "//" { singleLineComment lexbuf }
 
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
+    | extensionIdentifier { EXTENSION_IDENTIFIER (lexeme lexbuf |> string) }
+    | targetIdentifier { TARGET_IDENTIFIER (lexeme lexbuf |> string) }
 
     | quotedString { 
         let s = lexeme lexbuf |> string

@@ -18,6 +18,8 @@ let debugPrint s = ignore s
 %token NOTHING TRUE FALSE
 %token <string> STRING
 %token <string> IDENTIFIER
+%token <string> EXTENSION_IDENTIFIER
+%token <string> TARGET_IDENTIFIER
 %token <string> VARIABLE
 %token <string> KEY
 %token <int> NUMBER
@@ -50,7 +52,7 @@ ProjectComponents:
 
 
 Extension:
-    | EXTENSION IDENTIFIER LBRACE ExtensionComponents RBRACE { ProjectComponents.Extension ($2, $4) }
+    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { ProjectComponents.Extension ($2, $4) }
 ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents ExtensionContainer { $1.Patch $2 }
@@ -66,8 +68,8 @@ ExtensionDefaults:
 
 Configuration:
     | CONFIGURATION LBRACE ConfigurationComponents RBRACE { ProjectComponents.Configuration $3 }
-    | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { ConfigurationComponents.Init $2 |> $4.Patch |> ProjectComponents.Configuration }
-    | CONFIGURATION IDENTIFIER { ConfigurationComponents.Init $2 |> Configuration.Empty.Patch |> ProjectComponents.Configuration }
+    | CONFIGURATION ExtensionIdentifier LBRACE ConfigurationComponents RBRACE { ConfigurationComponents.Init $2 |> $4.Patch |> ProjectComponents.Configuration }
+    | CONFIGURATION ExtensionIdentifier { ConfigurationComponents.Init $2 |> Configuration.Empty.Patch |> ProjectComponents.Configuration }
 ConfigurationComponents:
     | /* empty */ { Configuration.Empty }
     | ConfigurationComponents ConfigurationDependencies { $1.Patch $2 }
@@ -93,14 +95,14 @@ TargetComponents:
     | TargetComponents TargetOutputs { $1.Patch $2 }
     | TargetComponents TargetStep { $1.Patch $2 }
 TargetDependsOn:
-    | DEPENDS_ON EQUAL ListOfIdentifiers { TargetComponents.DependsOn $3 }
+    | DEPENDS_ON EQUAL ListOfTargetIdentifiers { TargetComponents.DependsOn $3 }
 TargetRebuild:
     | REBUILD EQUAL Bool { TargetComponents.Rebuild $3 }
 TargetOutputs:
     | OUTPUTS EQUAL ListOfString { TargetComponents.Outputs $3 }
 TargetStep:
-    | IDENTIFIER IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
-    | IDENTIFIER IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
+    | ExtensionIdentifier IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
+    | ExtensionIdentifier IDENTIFIER LBRACE Variables RBRACE { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $4 } }
 
 Bool:
     | TRUE { true }
@@ -114,17 +116,25 @@ Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
 
-ListOfIdentifiers:
-    | LSQBRACKET Identifiers RSQBRACKET { $2 }
-Identifiers:
+ListOfTargetIdentifiers:
+    | LSQBRACKET TargetIdentifiers RSQBRACKET { $2 }
+TargetIdentifiers:
     | /* empty */ { [] }
-    | Identifiers IDENTIFIER { $1 @ [$2] }
+    | TargetIdentifiers TargetIdentifier { $1 @ [$2] }
 
 Variables:
     | /* empty */ { Map.empty }        
     | Variables Variable { $1.Add $2 }
 Variable:
     | KEY Expr { ($1, $2) }
+
+TargetIdentifier:
+    | TARGET_IDENTIFIER { $1 }
+    | IDENTIFIER { $1 }
+
+ExtensionIdentifier:
+    | EXTENSION_IDENTIFIER { $1 }
+    | IDENTIFIER { $1 }
 
 Expr:
     | NOTHING { Expr.Nothing }

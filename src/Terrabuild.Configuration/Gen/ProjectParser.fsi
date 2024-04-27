@@ -31,6 +31,8 @@ type token =
   | NUMBER of (int)
   | KEY of (string)
   | VARIABLE of (string)
+  | TARGET_IDENTIFIER of (string)
+  | EXTENSION_IDENTIFIER of (string)
   | IDENTIFIER of (string)
   | STRING of (string)
   | NOTHING
@@ -67,6 +69,8 @@ type tokenId =
     | TOKEN_NUMBER
     | TOKEN_KEY
     | TOKEN_VARIABLE
+    | TOKEN_TARGET_IDENTIFIER
+    | TOKEN_EXTENSION_IDENTIFIER
     | TOKEN_IDENTIFIER
     | TOKEN_STRING
     | TOKEN_NOTHING
@@ -99,10 +103,12 @@ type nonTerminalId =
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
-    | NONTERM_ListOfIdentifiers
-    | NONTERM_Identifiers
+    | NONTERM_ListOfTargetIdentifiers
+    | NONTERM_TargetIdentifiers
     | NONTERM_Variables
     | NONTERM_Variable
+    | NONTERM_TargetIdentifier
+    | NONTERM_ExtensionIdentifier
     | NONTERM_Expr
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int
