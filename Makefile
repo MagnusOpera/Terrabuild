@@ -1,13 +1,15 @@
 env ?= default
+
 version ?= 0.0.0
 
-.PHONY: src tools
-
 ifeq ($(env), default)
-	config=Debug
+	config = Debug
 else
-	config=$env
+	config = $env
 endif
+
+
+.PHONY: src tools
 
 
 #
