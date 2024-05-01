@@ -40,7 +40,7 @@ module private Auth =
     let loginSpace headers space token: LoginSpaceOutput =
         { LoginSpaceInput.Space = space
           LoginSpaceInput.Token = token }
-        |> Http.post headers "/auth"
+        |> Http.post headers "/auth/loginspace"
 
 
 module private Build =
