@@ -18,11 +18,11 @@ type Docker() =
 
         let platform =
             match platform with
-            | Some platform -> $"--platform {platform}"
+            | Some platform -> $" --platform {platform}"
             | _ -> ""
 
         let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
-        let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash} {args}{platform} ."
+        let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash}{args}{platform} ."
 
         if context.CI then
             let pushArgs = $"push {image}:{nodehash}"
