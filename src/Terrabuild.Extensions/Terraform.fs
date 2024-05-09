@@ -23,7 +23,7 @@ type Terraform() =
     /// </summary>
     static member init () =
         scope Cacheability.Always
-        |> andThen "terraform" "init -reconfigure"
+        |> andThen "terraform" "init"
 
 
     /// <summary weight="2" title="Generate plan file.">
@@ -38,7 +38,7 @@ type Terraform() =
         let vars = variables |> Seq.fold (fun acc (KeyValue(key, value)) -> acc + $" -var=\"{key}={value}\"") ""
 
         scope Cacheability.Always
-        |> andThen "terraform" "init -reconfigure"
+        |> andThen "terraform" "init"
         |> andIf (workspace |> Option.isSome) (fun batch -> batch |> andThen "terraform" $"workspace select {workspace.Value}")
         |> andThen "terraform" $"plan -out=terrabuild.planfile{vars}"
   
@@ -52,6 +52,6 @@ type Terraform() =
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     static member apply (workspace: string option) =
         scope Cacheability.Always
-        |> andThen "terraform" "init -reconfigure" 
+        |> andThen "terraform" "init"
         |> andIf (workspace |> Option.isSome) (fun batch -> batch |> andThen "terraform" $"workspace select {workspace.Value}")
         |> andThen "terraform" "apply terrabuild.planfile"
