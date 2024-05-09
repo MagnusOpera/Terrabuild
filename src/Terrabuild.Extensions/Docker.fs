@@ -11,12 +11,17 @@ type Docker() =
     /// <param name="dockerfile" example="&quot;Dockerfile&quot;">Use alternative Dockerfile. Default is Dockerfile.</param>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
     /// <param name="arguments" example="{ configuration: &quot;Release&quot; }">Named arguments to build image (see Dockerfile [ARG](https://docs.docker.com/reference/dockerfile/#arg)).</param> 
-    static member build (context: ActionContext) (dockerfile: string option) (image: string) (arguments: Map<string, string>) =
+    static member build (context: ActionContext) (dockerfile: string option) (platform: string option) (image: string) (arguments: Map<string, string>) =
         let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
         let nodehash = context.NodeHash
 
+        let platform =
+            match platform with
+            | Some platform -> $"--platform {platform}"
+            | _ -> ""
+
         let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
-        let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash} {args} ."
+        let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash} {args}{platform} ."
 
         if context.CI then
             let pushArgs = $"push {image}:{nodehash}"
