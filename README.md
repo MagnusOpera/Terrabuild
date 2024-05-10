@@ -12,7 +12,7 @@
 
 See [📚 Documentation](https://terrabuild.io) for more information.
 
-<a href="https://terrabuild.io/docs/get-started/?utm_campaign=magnusopera-terrabuild-github-repo&utm_source=github.com&utm_medium=get-started-button" title="Get Started">
+<a href="https://terrabuild.io/docs/?utm_campaign=magnusopera-terrabuild-github-repo&utm_source=github.com&utm_medium=get-started-button" title="Get Started">
     <img src="https://magnusopera.io/images/get-started.svg" align="right" width="120">
 </a>
 
