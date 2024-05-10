@@ -29,7 +29,7 @@ module DotnetHelpers =
             |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(directory, ext))
         projects |> Seq.exactlyOne
 
-    let parseDotnetDependencies (projectFile: string) =
+    let findDependencies (projectFile: string) =
         let xdoc = XDocument.Load (projectFile)
         let refs =
             xdoc.Descendants() 
@@ -39,7 +39,7 @@ module DotnetHelpers =
             |> Seq.map Path.GetDirectoryName
             |> Seq.distinct
             |> List.ofSeq
-        refs 
+        Set refs 
 
     [<Literal>]
     let defaultConfiguration = "Debug"
@@ -120,12 +120,12 @@ type Dotnet() =
     /// <param name="dependencies" example="[ &lt;ProjectReference /&gt; from project ]">Default values.</param>
     static member __defaults__ (context: ExtensionContext) =
         let projectFile = DotnetHelpers.findProjectFile context.Directory
-        let dependencies = projectFile |> DotnetHelpers.parseDotnetDependencies 
+        let dependencies = projectFile |> DotnetHelpers.findDependencies 
         let projectInfo =
             { ProjectInfo.Default
               with Ignores = Set [ "**/*.binlog" ]
                    Outputs = Set [ "bin/"; "obj/"; "**/*.binlog"; "obj/*.json"; "obj/*.props"; "obj/*.targets" ]
-                   Dependencies = set dependencies }
+                   Dependencies = dependencies }
         projectInfo
 
 
