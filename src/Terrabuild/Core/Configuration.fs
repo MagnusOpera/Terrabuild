@@ -65,7 +65,7 @@ type Workspace = {
 }
 
 
-let read workspaceDir environment labels variables (sourceControl: Contracts.SourceControl) (options: Options) =
+let read workspaceDir environment labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
@@ -78,6 +78,20 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
     // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
     if options.WhatIf |> not then FS.combinePath workspaceDir ".terrabuild" |> IO.createDirectory
 
+    let convertToVarType (key: string) (expr: Expr) (value: string) =
+        match expr with
+        | Expr.String _ ->
+            Expr.String value
+        | Expr.Number _ ->
+            match value |> Int32.TryParse with
+            | true, value -> Expr.Number value
+            | _ -> TerrabuildException.Raise $"Value '{value}' can't be converted to number variable {key}"
+        | Expr.Boolean _ ->
+            match value |> Boolean.TryParse with
+            | true, value -> Expr.Boolean value
+            | _ -> TerrabuildException.Raise $"Value '{value}' can't be converted to boolean variable {key}"
+        | _ -> TerrabuildException.Raise $"Value 'value' can't be converted to variable {key}"
+
     // variables
     let environments = workspaceConfig.Environments
     let envVariables =
@@ -85,14 +99,17 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
         | Some variables -> variables.Variables
         | _ -> TerrabuildException.Raise($"Environment '{environment}' not found")
     let buildVariables =
-        variables
-        |> Map.map (fun _ value -> value)
-        |> Map.addMap envVariables
-        |> Map.map (fun key value ->
-            // override variable with environment variable if any
+        envVariables
+        // override variable with environment variable if any
+        |> Map.map (fun key expr ->
             match $"TB_VAR_{key}" |> Environment.GetEnvironmentVariable with
-            | null -> value
-            | envValue -> Expr.String envValue)
+            | null -> expr
+            | value -> convertToVarType key expr value)
+        // override variable with provided ones on command line if any
+        |> Map.map (fun key expr ->
+            match variables |> Map.tryFind key with
+            | Some value -> convertToVarType key expr value
+            | _ -> expr)
 
     if options.Force then
         $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
