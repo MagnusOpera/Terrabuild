@@ -88,6 +88,11 @@ let read workspaceDir environment labels variables (sourceControl: Contracts.Sou
         variables
         |> Map.map (fun _ value -> value)
         |> Map.addMap envVariables
+        |> Map.map (fun key value ->
+            // override variable with environment variable if any
+            match $"TB_VAR_{key}" |> Environment.GetEnvironmentVariable with
+            | null -> value
+            | envValue -> Expr.String envValue)
 
     if options.Force then
         $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
