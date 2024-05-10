@@ -12,8 +12,7 @@ type Docker() =
     /// <param name="platform" required="false" example="&quot;linux/amd64&quot;">Target platform. Default is host.</param>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
     /// <param name="arguments" example="{ configuration: &quot;Release&quot; }">Named arguments to build image (see Dockerfile [ARG](https://docs.docker.com/reference/dockerfile/#arg)).</param> 
-    /// <param name="rawargs" required="false" example="&quot;--net=host&quot;">Raw arguments for Docker.</param> 
-    static member build (context: ActionContext) (dockerfile: string option) (platform: string option) (image: string) (arguments: Map<string, string>) (rawargs: string option) =
+    static member build (context: ActionContext) (dockerfile: string option) (platform: string option) (image: string) (arguments: Map<string, string>) =
         let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
         let nodehash = context.NodeHash
 
@@ -22,13 +21,8 @@ type Docker() =
             | Some platform -> $" --platform {platform}"
             | _ -> ""
 
-        let rawargs =
-            match rawargs with
-            | Some rawargs -> $" {rawargs}"
-            | _ -> ""
-
         let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
-        let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash}{args}{platform}{rawargs} ."
+        let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash}{args}{platform} ."
 
         if context.CI then
             let pushArgs = $"push {image}:{nodehash}"
