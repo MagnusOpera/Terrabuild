@@ -12,19 +12,8 @@ let rec dumpKnownException (ex: Exception) =
             yield ex.Message
             yield! ex.InnerException |> dumpKnownException
         | null -> ()
-        | _ ->
-            yield! ex.InnerException |> dumpKnownException
+        | _ -> ()
     }
-
-let rec dumpUnknownException (ex: Exception) =
-    seq {
-        match ex with
-        | :? TerrabuildException as ex ->
-            yield! ex |> dumpKnownException
-        | null -> ()
-        | _ -> yield ex.ToString()
-    }
-
 
 
 type TerrabuildExiter() =
@@ -212,7 +201,7 @@ let main _ =
                 Log.Fatal("Failed with {Exception}", ex)
                 let reason =
                     if debug then ex.ToString()
-                    else dumpUnknownException ex |> String.join "\n   "
+                    else dumpKnownException ex |> String.join "\n   "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
             | ex ->
