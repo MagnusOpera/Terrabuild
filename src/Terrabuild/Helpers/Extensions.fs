@@ -30,7 +30,7 @@ let lazyLoadScript (name: string) (script: string option) =
         | _ ->
             match Terrabuild.Extensions.Factory.systemScripts |> Map.tryFind name with
             | Some sysTpe -> Script(sysTpe)
-            | _ -> TerrabuildException.Raise $"Script is not defined for extension '{name}'"
+            | _ -> TerrabuildException.Raise($"Script is not defined for extension '{name}'")
 
     lazy(initScript())
 

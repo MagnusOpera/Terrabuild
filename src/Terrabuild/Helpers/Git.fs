@@ -4,7 +4,7 @@ open Errors
 let getHeadCommit (dir: string) =
     match Exec.execCaptureOutput dir "git" "rev-parse HEAD" with
     | Exec.Success (output, _) -> output |> String.firstLine
-    | _ -> TerrabuildException.Raise "Failed to get head commit"
+    | _ -> TerrabuildException.Raise("Failed to get head commit")
 
 let getBranchOrTag (dir: string) =
     // https://stackoverflow.com/questions/18659425/get-git-current-branch-tag-name
@@ -13,4 +13,4 @@ let getBranchOrTag (dir: string) =
     | _ -> 
         match Exec.execCaptureOutput dir "git" "describe --tags --exact-match" with
         | Exec.Success (output, _) -> output |> String.firstLine
-        | _ -> TerrabuildException.Raise "Failed to get branch or tag"
+        | _ -> TerrabuildException.Raise("Failed to get branch or tag")

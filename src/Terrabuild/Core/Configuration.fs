@@ -85,12 +85,12 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
         | Expr.Number _ ->
             match value |> Int32.TryParse with
             | true, value -> Expr.Number value
-            | _ -> TerrabuildException.Raise $"Value '{value}' can't be converted to number variable {key}"
+            | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to number variable {key}")
         | Expr.Boolean _ ->
             match value |> Boolean.TryParse with
             | true, value -> Expr.Boolean value
-            | _ -> TerrabuildException.Raise $"Value '{value}' can't be converted to boolean variable {key}"
-        | _ -> TerrabuildException.Raise $"Value 'value' can't be converted to variable {key}"
+            | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
+        | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
 
     // variables
     let environments = workspaceConfig.Environments
@@ -173,9 +173,9 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
 
                         match result with
                         | Extensions.Success result -> result
-                        | Extensions.ScriptNotFound -> TerrabuildException.Raise $"Script {init} was not found"
+                        | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {init} was not found")
                         | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-                        | Extensions.ErrorTarget exn -> TerrabuildException.Raise $"Invocation failure of __defaults__ of script {init}" exn
+                        | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of __defaults__ of script {init}", exn)
                     | _ -> ProjectInfo.Default
 
                 let projectInfo = {
@@ -276,7 +276,7 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
                             let extension = 
                                 match projectDef.Extensions |> Map.tryFind step.Extension with
                                 | Some extension -> extension
-                                | _ -> TerrabuildException.Raise $"Extension {step.Extension} is not defined"
+                                | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
                             let stepActions, stepVars =
                                 let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
@@ -312,9 +312,9 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
                                         |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionSequence> step.Command actionContext
                                     match result with
                                     | Extensions.Success result -> result
-                                    | Extensions.ScriptNotFound -> TerrabuildException.Raise $"Script {step.Extension} was not found"
-                                    | Extensions.TargetNotFound -> TerrabuildException.Raise $"Script {step.Extension} has no function {step.Command}"
-                                    | Extensions.ErrorTarget exn -> TerrabuildException.Raise $"Invocation failure of {step.Command} of script {step.Extension}" exn
+                                    | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {step.Extension} was not found")
+                                    | Extensions.TargetNotFound -> TerrabuildException.Raise($"Script {step.Extension} has no function {step.Command}")
+                                    | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of {step.Command} of script {step.Extension}", exn)
 
                                 let batchContext =
                                     if actionGroup.Batchable then

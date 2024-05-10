@@ -45,7 +45,7 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
 
         proc.ExitCode
     with
-    | exn -> TerrabuildException.Raise $"Process '{command} {args} in directory '{workingDir}' failed with error: {exn}"
+    | exn -> TerrabuildException.Raise($"Process '{command} {args} in directory '{workingDir}' failed, exn")
 
 type BuildQueue(maxItems: int) =
     let completion = new System.Threading.ManualResetEvent(false)

@@ -36,22 +36,22 @@ type Invocable(method: MethodInfo) =
             elif prmType.IsGenericType && prmType = typeof<Map<string, string>> then
                 let emptyMap : Map<string, string> = Map.empty
                 emptyMap
-            else TerrabuildException.Raise $"Can't assign default value to parameter '{name}'"
+            else TerrabuildException.Raise($"Can't assign default value to parameter '{name}'")
 
         | Value.Bool value ->
             if value.GetType().IsAssignableTo(prmType) then value
             elif prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToSome prmType value
-            else TerrabuildException.Raise $"Can't assign default value to parameter '{name}'"
+            else TerrabuildException.Raise($"Can't assign default value to parameter '{name}'")
 
         | Value.String value ->
             if value.GetType().IsAssignableTo(prmType) then value
             elif prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToSome prmType value
-            else TerrabuildException.Raise $"Can't assign default value to parameter '{name}'"
+            else TerrabuildException.Raise($"Can't assign default value to parameter '{name}'")
 
         | Value.Number value ->
             if value.GetType().IsAssignableTo(prmType) then value
             elif prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToSome prmType value
-            else TerrabuildException.Raise $"Can't assign default value to parameter '{name}'"
+            else TerrabuildException.Raise($"Can't assign default value to parameter '{name}'")
 
         | Value.Object obj -> obj
 
@@ -64,7 +64,7 @@ type Invocable(method: MethodInfo) =
                 let fieldValues = Array.create (fields.Length) (false, null)
                 for (KeyValue (key, value)) in map do
                     match fieldIndices |> Map.tryFind key with
-                    | None -> TerrabuildException.Raise $"Property {key} does not exists"
+                    | None -> TerrabuildException.Raise($"Property {key} does not exists")
                     | Some idx -> 
                         let field = fields[idx]
                         let value = mapParameter value field.Name field.PropertyType
@@ -81,7 +81,7 @@ type Invocable(method: MethodInfo) =
             | TypeHelpers.TypeKind.FsMap ->
                 let values = map |> Map.map (fun name value -> mapParameter value name typeof<string> :?> string)
                 values
-            | _ -> TerrabuildException.Raise $"Can't assign default value to parameter '{name}'"
+            | _ -> TerrabuildException.Raise($"Can't assign default value to parameter '{name}'")
 
     let mapParameters (map: Map<string, Value>) (prms: ParameterInfo array) =
         prms
@@ -95,7 +95,7 @@ type Invocable(method: MethodInfo) =
         | Value.Map map -> 
             let prms = method.GetParameters()
             mapParameters map prms
-        | _ -> TerrabuildException.Raise $"Expecting a map for build arguments"
+        | _ -> TerrabuildException.Raise($"Expecting a map for build arguments")
 
     let invoke args =
         method.Invoke(null, args)
@@ -128,14 +128,14 @@ let loadScript (references: string list) (scriptFile) =
 
         let errors, _ = checker.Compile(compilerArgs) |> Async.RunSynchronously
         let firstError = errors |> Array.tryFind (fun x -> x.Severity = FSharpDiagnosticSeverity.Error)
-        if firstError <> None then TerrabuildException.Raise $"Error while compiling script {scriptFile}: {firstError.Value}"
+        if firstError <> None then TerrabuildException.Raise($"Error while compiling script {scriptFile}: {firstError.Value}")
 
         let assembly = Assembly.LoadFile outputDllName
         let expectedMainTypeName = Path.GetFileNameWithoutExtension(scriptFile)
         let mainType = 
             match assembly.GetTypes() |> Seq.tryFind (fun t -> String.Compare(t.Name, expectedMainTypeName, true) = 0) with
             | Some mainType -> mainType
-            | _ -> TerrabuildException.Raise $"Failed to identify function scope (either module or root class '{expectedMainTypeName}')"
+            | _ -> TerrabuildException.Raise($"Failed to identify function scope (either module or root class '{expectedMainTypeName}')")
 
         let script = Script(mainType)
         cache <- cache |> Map.add scriptFile script

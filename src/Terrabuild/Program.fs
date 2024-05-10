@@ -115,7 +115,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             | _ ->
                 match Environment.CurrentDirectory |> findWorkspace with
                 | Some ws -> ws
-                | _ -> TerrabuildException.Raise "Can't find workspace root directory. Check you are in a workspace."
+                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
@@ -136,7 +136,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             | _ ->
                 match Environment.CurrentDirectory |> findWorkspace with
                 | Some ws -> ws
-                | _ -> TerrabuildException.Raise "Can't find workspace root directory. Check you are in a workspace."
+                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
@@ -198,7 +198,7 @@ let main _ =
             processCommandLine parser result
         with
             | :? TerrabuildException as ex ->
-                Log.Fatal("Failed with {Exception}", ex)
+                Log.Fatal("Failed with {Exception}", ex.ToString())
                 let reason =
                     if debug then ex.ToString()
                     else dumpKnownException ex |> String.join "\n   "
