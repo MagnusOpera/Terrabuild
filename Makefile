@@ -125,6 +125,9 @@ run-publish-scaffold:
 run-build: clean
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment $(env) --debug
 
+run-build-env: clean
+	TB_VAR_secret_message="pouet pouet" dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment $(env) --debug
+
 run-rebuild: clean
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --environment $(env) --label app --debug --force
 
