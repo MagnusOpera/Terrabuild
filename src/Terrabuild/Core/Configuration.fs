@@ -102,12 +102,12 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
         envVariables
         // override variable with environment variable if any
         |> Map.map (fun key expr ->
-            match $"TB_VAR_{key}" |> Environment.GetEnvironmentVariable with
+            match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
             | null -> expr
             | value -> convertToVarType key expr value)
         // override variable with provided ones on command line if any
         |> Map.map (fun key expr ->
-            match variables |> Map.tryFind key with
+            match variables |> Map.tryFind (key |> String.toLower) with
             | Some value -> convertToVarType key expr value
             | _ -> expr)
 

@@ -118,7 +118,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | _ -> TerrabuildException.Raise "Can't find workspace root directory. Check you are in a workspace."
         let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
-        let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, v) |> Map
+        let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
@@ -139,7 +139,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | _ -> TerrabuildException.Raise "Can't find workspace root directory. Check you are in a workspace."
         let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
-        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k |> String.toLower, v) |> Map
+        let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
