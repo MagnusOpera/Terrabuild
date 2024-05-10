@@ -8,7 +8,7 @@
 [![NuGet version](https://badge.fury.io/nu/terrabuild.svg)](https://www.nuget.org/packages/Terrabuild)
 ![build](https://github.com/magnusopera/terrabuild/actions/workflows/build.yml/badge.svg?branch=main)
 
-**Magnus Opera's Terrabuild** is the easiest way to maintain and build efficiently a monorepo. Terrabuild leverages a build cache - speeding up the build process in your CI but also on developer environment.
+**Terrabuild** is the easiest way to maintain and build efficiently a monorepo. Terrabuild leverages a build cache - speeding up the build process in your CI but also on developer environment.
 
 See [📚 Documentation](https://terrabuild.io) for more information.
 
