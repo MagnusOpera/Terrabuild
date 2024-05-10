@@ -9,7 +9,7 @@ module NpmHelpers =
     open System.Text.Json.Serialization
     open System.Text.Json
     open System.Collections.Generic
-    open System.IO
+    open Errors
 
     [<CLIMutable>]
     type Package = {
@@ -23,7 +23,11 @@ module NpmHelpers =
     let findProjectFile (directory: string) =
         let projects =
             System.IO.Directory.EnumerateFiles(directory, "package.json")
-        projects |> Seq.exactlyOne
+            |> List.ofSeq
+        match projects with
+        | [ project ] -> project
+        | [] -> TerrabuildException.Raise("No project found")
+        | _ -> TerrabuildException.Raise("Multiple projects found")
 
     let findDependencies (projectFile: string) =
         let json = IO.readTextFile projectFile

@@ -8,6 +8,7 @@ open System.IO
 #nowarn "0077" // op_Explicit
 
 module DotnetHelpers =
+    open Errors
 
     let private NsNone = XNamespace.None
 
@@ -27,7 +28,11 @@ module DotnetHelpers =
             ext2projType.Keys
             |> Seq.map (fun k -> $"*{k}")
             |> Seq.collect (fun ext -> System.IO.Directory.EnumerateFiles(directory, ext))
-        projects |> Seq.exactlyOne
+            |> List.ofSeq
+        match projects with
+        | [ project ] -> project
+        | [] -> TerrabuildException.Raise("No project found")
+        | _ -> TerrabuildException.Raise("Multiple projects found")
 
     let findDependencies (projectFile: string) =
         let xdoc = XDocument.Load (projectFile)

@@ -50,6 +50,7 @@ let invokeScriptMethod<'r> (method: string) (args: Value) (script: Script option
                 try
                     Success (invocable.Invoke<'r> args)
                 with
+                | :? Reflection.TargetInvocationException as exn -> ErrorTarget exn.InnerException
                 | exn -> ErrorTarget exn
             | None ->
                 match method with
