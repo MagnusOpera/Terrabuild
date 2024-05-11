@@ -108,6 +108,17 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         Scalffold.scaffold wsDir force
         0
 
+    let graph (graphArgs: ParseResults<GraphArgs>) =
+        let outputFile = graphArgs.TryGetResult(GraphArgs.Output)
+        let wsDir = graphArgs.GetResult(GraphArgs.Workspace, defaultValue = ".")
+        let environment = graphArgs.TryGetResult(GraphArgs.Environment) |> Option.defaultValue "default" |> String.toLower
+        let labels = graphArgs.TryGetResult(GraphArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
+        let variables = graphArgs.GetResults(GraphArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
+        match outputFile with
+        | Some file -> ()
+        | _ -> ()
+        0
+
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
         let wsDir =
             match buildArgs.TryGetResult(RunArgs.Workspace) with
@@ -169,6 +180,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     Log.Debug("Parsing command line")
     match result with
     | p when p.Contains(TerrabuildArgs.Scaffold) -> p.GetResult(TerrabuildArgs.Scaffold) |> scaffold
+    | p when p.Contains(TerrabuildArgs.Graph) -> p.GetResult(TerrabuildArgs.Graph) |> graph
     | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
     | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
     | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"

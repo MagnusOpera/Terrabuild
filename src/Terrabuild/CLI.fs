@@ -13,6 +13,23 @@ with
             | Force -> "Default behavior is to not overwrite existing WORKSPACE or PROJECT file. This can be forced."
 
 [<RequireQualifiedAccess>]
+type GraphArgs =
+    | [<Unique; AltCommandLine("-o")>] Output of file:string
+    | [<Unique; AltCommandLine("-w")>] Workspace of path:string
+    | [<Unique; AltCommandLine("-e")>] Environment of name:string
+    | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
+    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
+with
+    interface IArgParserTemplate with
+        member this.Usage =
+            match this with
+            | Output _ -> "Generate mermaid graph to file."
+            | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Environment _ -> "Environment to use."
+            | Variable _ -> "Set variable."
+            | Label _-> "Select projects based on labels."
+
+[<RequireQualifiedAccess>]
 type RunArgs =
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
@@ -90,6 +107,7 @@ with
 [<RequireQualifiedAccess>]
 type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Scaffold of ParseResults<ScaffoldArgs>
+    | [<CliPrefix(CliPrefix.None)>] Graph of ParseResults<GraphArgs>
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Test of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<RunArgs>
@@ -107,6 +125,7 @@ with
         member this.Usage =
             match this with
             | Scaffold _ -> "Scaffold workspace."
+            | Graph _ -> "Graph explorer."
             | Build _ -> "Run target 'build'."
             | Test _ -> "Run target 'test'."
             | Dist _ -> "Run target 'dist'."
