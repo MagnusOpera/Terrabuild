@@ -4,7 +4,6 @@ open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.AspNetCore.Hosting.Server
 open Microsoft.AspNetCore.Hosting.Server.Features
-open System.Threading
 
 let serve wsDir =
 
@@ -32,7 +31,9 @@ let serve wsDir =
     app.Lifetime.ApplicationStarted.Register(fun () ->
         let server = app.Services.GetRequiredService<IServer>()
         let addressFeature = server.Features.Get<IServerAddressesFeature>()
-        let address = addressFeature.Addresses |> Seq.head
-        printfn $"Port = {address}") |> ignore
+        let address = Uri(addressFeature.Addresses |> Seq.head)
+
+        let graphUrl = $"https://graph.terrabuild.io?port={address.Port}"
+        System.Diagnostics.Process.Start("open", graphUrl) |> ignore) |> ignore
 
     app.Run("http://*:0")
