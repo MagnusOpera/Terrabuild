@@ -35,4 +35,4 @@ let serve wsDir =
         let address = addressFeature.Addresses |> Seq.head
         printfn $"Port = {address}") |> ignore
 
-    app.Run()
+    app.Run("http://*:0")
