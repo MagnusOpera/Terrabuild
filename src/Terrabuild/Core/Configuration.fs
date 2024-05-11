@@ -58,14 +58,13 @@ type Project = {
 type Workspace = {
     Space: string option
     SourceControl: Contracts.SourceControl
-    Dependencies: string set
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
     Environment: string
 }
 
 
-let read workspaceDir environment labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
+let read workspaceDir environment (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
@@ -428,17 +427,7 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
 
     let projects = scanDependencies Map.empty dependencies
 
-    // select dependencies with labels if any
-    let dependencies =
-        match labels with
-        | Some labels ->
-            projects
-             |> Seq.choose (fun (KeyValue(dependency, config)) -> if Set.intersect config.Labels labels <> Set.empty then Some dependency else None)
-        | _ -> projects.Keys
-        |> Set
-
     { Workspace.Space = workspaceConfig.Space
-      Workspace.Dependencies = dependencies
       Workspace.Projects = projects
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Environment = environment

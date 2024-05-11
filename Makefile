@@ -94,6 +94,9 @@ self-publish: clean publish
 self-check: clean publish
 	.out/dotnet/terrabuild publish --workspace src --environment $(env) --retry --debug --whatif
 
+graph:
+	dotnet run --project src/Terrabuild -- graph --workspace tests/simple
+
 
 #
 # .___________. _______     _______.___________.    _______.

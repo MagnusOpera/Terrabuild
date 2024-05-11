@@ -14,20 +14,12 @@ with
 
 [<RequireQualifiedAccess>]
 type GraphArgs =
-    | [<Unique; AltCommandLine("-o")>] Output of file:string
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
-    | [<Unique; AltCommandLine("-e")>] Environment of name:string
-    | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
-    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
-            | Output _ -> "Generate mermaid graph to file."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
-            | Environment _ -> "Environment to use."
-            | Variable _ -> "Set variable."
-            | Label _-> "Select projects based on labels."
 
 [<RequireQualifiedAccess>]
 type RunArgs =

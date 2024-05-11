@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -26,7 +26,6 @@
     <Compile Include="Core/Configuration.fs" />
     <Compile Include="Core/Graph.fs" />
     <Compile Include="Core/Build.fs" />
-    <Compile Include="Core/Explorer.fs" />
     <Compile Include="Core/Notification.fs" />
     <Compile Include="SourceControls/Local.fs" />
     <Compile Include="SourceControls/GitHub.fs" />
@@ -34,6 +33,7 @@
     <Compile Include="Storages/Local.fs" />
     <Compile Include="Storages/AzureBlobStorage.fs" />
     <Compile Include="Storages/Factory.fs" />
+    <Compile Include="Core/Explorer.fs" />
     <Compile Include="CLI.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

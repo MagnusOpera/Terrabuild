@@ -62,23 +62,23 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             jsonOptions |> IO.writeTextFile (logFile "options.json")
 
         let sourceControl = SourceControls.Factory.create()
-        let config = Configuration.read wsDir environment labels variables sourceControl options
-
-        let token = config.Space |> Option.bind (fun space -> Cache.readAuthToken space)
-        let api = Api.Factory.create config.Space token
-        let storage = Storages.Factory.create api
+        let config = Configuration.read wsDir environment variables sourceControl options
 
         if options.Debug then
             let jsonConfig = Json.Serialize config
             jsonConfig |> IO.writeTextFile (logFile "config.json")
 
-        let graph = Graph.buildGraph config target
+        let graph = Graph.buildGraph config labels target
 
         if options.Debug then
             let jsonGraph = Json.Serialize graph
             jsonGraph |> IO.writeTextFile (logFile "graph.json")
             let mermaid = Graph.graph graph |> String.join "\n"
             mermaid |> IO.writeTextFile (logFile "graph.mermaid")
+
+        let token = config.Space |> Option.bind (fun space -> Cache.readAuthToken space)
+        let api = Api.Factory.create config.Space token
+        let storage = Storages.Factory.create api
 
         let cache = Cache.Cache(storage) :> Cache.ICache
         let buildGraph = Graph.optimize config graph cache options
@@ -109,14 +109,16 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         0
 
     let graph (graphArgs: ParseResults<GraphArgs>) =
-        let outputFile = graphArgs.TryGetResult(GraphArgs.Output)
-        let wsDir = graphArgs.GetResult(GraphArgs.Workspace, defaultValue = ".")
-        let environment = graphArgs.TryGetResult(GraphArgs.Environment) |> Option.defaultValue "default" |> String.toLower
-        let labels = graphArgs.TryGetResult(GraphArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
-        let variables = graphArgs.GetResults(GraphArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
-        match outputFile with
-        | Some file -> ()
-        | _ -> ()
+        let wsDir =
+            match graphArgs.TryGetResult(GraphArgs.Workspace) with
+            | Some ws -> ws
+            | _ ->
+                match Environment.CurrentDirectory |> findWorkspace with
+                | Some ws -> ws
+                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+        let wsDir = wsDir |> FS.fullPath
+        Environment.CurrentDirectory <- wsDir
+        Explorer.serve wsDir
         0
 
     let targetShortcut target (buildArgs: ParseResults<RunArgs>) =

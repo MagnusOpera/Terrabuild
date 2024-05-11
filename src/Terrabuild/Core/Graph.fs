@@ -32,8 +32,17 @@ type Workspace = {
     RootNodes: string set
 }
 
-let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
+let buildGraph (configuration: Configuration.Workspace) labels (targets: string set) =
     $"{Ansi.Emojis.popcorn} Constructing graph" |> Terminal.writeLine
+
+    // select dependencies with labels if any
+    let dependencies =
+        match labels with
+        | Some labels ->
+            configuration.Projects
+             |> Seq.choose (fun (KeyValue(dependency, config)) -> if Set.intersect config.Labels labels <> Set.empty then Some dependency else None)
+        | _ -> configuration.Projects.Keys
+        |> Set
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
@@ -118,7 +127,7 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
         else Set.singleton nodeId
 
     let rootNodes =
-        configuration.Dependencies |> Seq.collect (fun dependency ->
+        dependencies |> Seq.collect (fun dependency ->
             targets |> Seq.collect (fun target -> buildTarget target dependency))
         |> Set
 
