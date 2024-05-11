@@ -7,7 +7,7 @@ open Microsoft.AspNetCore.Hosting.Server.Features
 
 let serve wsDir =
 
-    let handler environment target =
+    let graphHandler = Func<string, string, string>(fun environment target ->
         let options = { Configuration.Options.WhatIf = false
                         Configuration.Options.Debug = false
                         Configuration.Options.Force = false
@@ -22,12 +22,11 @@ let serve wsDir =
         let config = Configuration.read wsDir environment variables sourceControl options
         let graph = Graph.buildGraph config labels targets
         let mermaid = Graph.graph graph |> String.join "\n"
-        mermaid
-    let handler = Func<string, string, string>(fun env target -> handler env target)
+        mermaid)
 
     let builder = WebApplication.CreateBuilder()
     let app = builder.Build()
-    app.MapGet("/graph/{env}/{target}", handler) |> ignore
+    app.MapGet("/graph/{env}/{target}", graphHandler) |> ignore
     app.Lifetime.ApplicationStarted.Register(fun () ->
         let server = app.Services.GetRequiredService<IServer>()
         let addressFeature = server.Features.Get<IServerAddressesFeature>()
