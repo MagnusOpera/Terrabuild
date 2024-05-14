@@ -3,7 +3,6 @@ open CLI
 open System
 open Serilog
 open Errors
-open Terrabuild.Expressions
 
 let rec dumpKnownException (ex: Exception) =
     seq {
