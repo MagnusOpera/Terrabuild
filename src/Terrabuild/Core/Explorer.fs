@@ -32,7 +32,10 @@ let serve wsDir =
         let addressFeature = server.Features.Get<IServerAddressesFeature>()
         let address = Uri(addressFeature.Addresses |> Seq.head)
 
-        let graphUrl = $"https://graph.terrabuild.io?port={address.Port}"
+        let graphUrl =
+            DotNetEnv.Env.GetString("TERRABUILD_GRAPH_URL", "https://graph.terrabuild.io")
+            |> Uri
+        let graphUrl = Uri(graphUrl, $"?port={address.Port}").ToString()
         System.Diagnostics.Process.Start("open", graphUrl) |> ignore) |> ignore
 
     app.Run("http://*:0")
