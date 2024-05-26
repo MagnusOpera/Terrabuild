@@ -84,7 +84,7 @@ module private Build =
           StartBuildInput.Force = force
           StartBuildInput.Retry = retry
           StartBuildInput.CI = ci }
-          |> Http.post headers "/build"
+          |> Http.post headers "/builds"
 
 
     let addArtifact headers buildId project target projectHash hash files size success: Unit =
@@ -95,12 +95,12 @@ module private Build =
           AddArtifactInput.Files = files
           AddArtifactInput.Size = size
           AddArtifactInput.Success = success }
-        |> Http.post<AddArtifactInput, Unit> headers $"/build/{buildId}/add-artifact"
+        |> Http.post<AddArtifactInput, Unit> headers $"/builds/{buildId}/add-artifact"
 
 
     let completeBuild headers buildId success: Unit =
         { CompleteBuildInput.Success = success }
-        |> Http.post headers $"/build/{buildId}/complete"
+        |> Http.post headers $"/builds/{buildId}/complete"
 
 
 module private Artifact =
@@ -110,7 +110,7 @@ module private Artifact =
     }
 
     let getArtifact headers path: AzureArtifactLocationOutput =
-        Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifact?path={path}" ()
+        Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts?path={path}" ()
 
 
 type Client(space: string, token: string) =
