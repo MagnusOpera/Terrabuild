@@ -82,6 +82,9 @@ docs:
 	dotnet build src/Terrabuild.Extensions -c $(config)
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(config)/net8.0/Terrabuild.Extensions.xml ../websites/terrabuild.io/content/docs/extensions
 
+self-build: clean publish
+	.out/dotnet/terrabuild build --workspace src --environment $(env) --retry --debug
+
 self-dist: clean publish
 	.out/dotnet/terrabuild dist --workspace src --environment $(env) --retry --debug
 

@@ -66,6 +66,10 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         let token = config.Space |> Option.bind (fun space -> Cache.readAuthToken space)
         let api = Api.Factory.create config.Space token
+        if api |> Option.isSome then
+            Log.Debug("Connected to API")
+            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} Connected to Insights" |> Terminal.writeLine
+
         let storage = Storages.Factory.create api
 
         if options.Debug then
