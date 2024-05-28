@@ -19,8 +19,9 @@ type RunArgs =
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
-    | [<Unique>] Force
-    | [<Unique>] Retry
+    | [<Unique; AltCommandLine("-f")>] Force
+    | [<Unique; AltCommandLine("-r")>] Retry
+    | [<Unique; AltCommandLine("-lo")>] LocalOnly
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -32,6 +33,7 @@ with
             | Label _-> "Select projects based on labels."
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
+            | LocalOnly -> "Use local cache only."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
@@ -41,8 +43,9 @@ type TargetArgs =
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
-    | [<Unique>] Force
-    | [<Unique>] Retry
+    | [<Unique; AltCommandLine("-f")>] Force
+    | [<Unique; AltCommandLine("-r")>] Retry
+    | [<Unique; AltCommandLine("-lo")>] LocalOnly
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -55,6 +58,7 @@ with
             | Label _-> "Select projects based on labels."
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
+            | LocalOnly -> "Use local cache only."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =
