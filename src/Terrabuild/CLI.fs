@@ -64,12 +64,14 @@ with
 type ClearArgs =
     | [<Unique>] Cache
     | [<Unique>] Home
+    | [<Unique>] All
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
             | Cache -> "Clear build cache."
             | Home -> "Clear home cache."
+            | All -> "Clear all caches."
 
 [<RequireQualifiedAccess>]
 type LoginArgs =
