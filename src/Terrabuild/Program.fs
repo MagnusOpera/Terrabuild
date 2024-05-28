@@ -57,6 +57,9 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         Environment.CurrentDirectory <- wsDir
         Log.Debug("Changing current directory to {directory}", wsDir)
 
+        // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
+        if options.WhatIf |> not then ".terrabuild" |> IO.createDirectory
+
         if options.Debug then
             let jsonOptions = Json.Serialize options
             jsonOptions |> IO.writeTextFile (logFile "options.json")

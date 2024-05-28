@@ -75,9 +75,6 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
         with exn ->
             TerrabuildException.Raise("Failed to read WORKSPACE configuration file", exn)
 
-    // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
-    if options.WhatIf |> not then FS.combinePath workspaceDir ".terrabuild" |> IO.createDirectory
-
     let convertToVarType (key: string) (expr: Expr) (value: string) =
         match expr with
         | Expr.String _ ->
