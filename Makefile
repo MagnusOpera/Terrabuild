@@ -57,20 +57,20 @@ docker-prune:
 #
 
 publish:
-	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
+	dotnet publish -c $(config) -p:Version=$(version) -o $(PWD)/.out/dotnet src/Terrabuild
 	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
 
 publish-all: clean
-	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/windows src/Terrabuild
+	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/windows src/Terrabuild
 	cd .out/windows; zip -r ../terrabuild-$(version)-windows-x64.zip ./terrabuild.exe
 
-	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/darwin src/Terrabuild
+	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/darwin src/Terrabuild
 	cd .out/darwin; zip -r ../terrabuild-$(version)-darwin-x64.zip ./terrabuild
 
-	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -o $(PWD)/.out/linux src/Terrabuild
+	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/linux src/Terrabuild
 	cd .out/linux; zip -r ../terrabuild-$(version)-linux-x64.zip ./terrabuild
 
-	dotnet publish -c $(config) -o $(PWD)/.out/dotnet src/Terrabuild
+	dotnet publish -c $(config) -p:Version=$(version) -o $(PWD)/.out/dotnet src/Terrabuild
 	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
 
 pack:
@@ -162,3 +162,7 @@ usage:
 	dotnet run --project src/Terrabuild -- --help
 	dotnet run --project src/Terrabuild -- build --help
 	dotnet run --project src/Terrabuild -- run --help
+
+version:
+	dotnet run --project src/Terrabuild -- version
+

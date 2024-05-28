@@ -100,6 +100,7 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
     | [<CliPrefix(CliPrefix.None)>] Login of ParseResults<LoginArgs>
     | [<CliPrefix(CliPrefix.None)>] Logout of ParseResults<LogoutArgs>
+    | [<CliPrefix(CliPrefix.None)>] Version
     | [<Unique; Inherit>] WhatIf
     | [<Hidden; Unique; Inherit>] Debug
 with
@@ -115,7 +116,8 @@ with
             | Serve _ -> "Run target 'serve'."
             | Run _ -> "Run specified targets."
             | Clear _ -> "Clear specified caches."
-            | Login _ -> "Connect to space"
-            | Logout _ -> "Disconnect to space"
+            | Login _ -> "Connect to backend."
+            | Logout _ -> "Disconnect from backend."
+            | Version -> "Show current Terrabuild version."
             | WhatIf -> "Prepare the action but do not apply."
             | Debug -> "Enable logging and debug dumps."

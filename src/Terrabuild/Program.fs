@@ -165,11 +165,16 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         Auth.login space token
         0
 
-    let logout (logoutArgs: ParseResults<LogoutArgs>)=
+    let logout (logoutArgs: ParseResults<LogoutArgs>) =
         let space = logoutArgs.GetResult(LogoutArgs.Space)
         Auth.logout space
         0
 
+    let version () =
+        let version = Reflection.Assembly.GetEntryAssembly().GetName().Version
+        printfn $"Terrabuild v{version}"
+        0
+ 
     Log.Debug("Parsing command line")
     match result with
     | p when p.Contains(TerrabuildArgs.Scaffold) -> p.GetResult(TerrabuildArgs.Scaffold) |> scaffold
@@ -183,6 +188,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
     | p when p.Contains(TerrabuildArgs.Login) -> p.GetResult(TerrabuildArgs.Login) |> login
     | p when p.Contains(TerrabuildArgs.Logout) -> p.GetResult(TerrabuildArgs.Logout) |> logout
+    | p when p.Contains(TerrabuildArgs.Version) -> version()
     | _ ->
         Log.Debug("Failed to parse {result}", result)
         parser.PrintUsage() |> Terminal.writeLine; 0
