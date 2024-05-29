@@ -61,12 +61,12 @@ type Workspace = {
     Dependencies: string set
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
-    Environment: string
+    Configuration: string
 }
 
 
-let read workspaceDir environment labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
-    $"{Ansi.Emojis.box} Reading configuration using environment {environment}" |> Terminal.writeLine
+let read workspaceDir configuration environment labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
+    $"{Ansi.Emojis.box} Reading configuration using configuration {configuration}" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
@@ -90,17 +90,25 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
         | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
 
     // variables
-    let environments = workspaceConfig.Environments
+    let configVariables =
+        match workspaceConfig.Configurations |> Map.tryFind configuration with
+        | Some variables -> variables.Variables
+        | _ ->
+            match configuration with
+            | "default" -> Map.empty
+            | _ -> TerrabuildException.Raise($"Configuration '{configuration}' not found")
     let envVariables =
-        match environments |> Map.tryFind environment with
+        match workspaceConfig.Environments |> Map.tryFind environment with
         | Some variables -> variables.Variables
         | _ ->
             match environment with
             | "default" -> Map.empty
             | _ -> TerrabuildException.Raise($"Environment '{environment}' not found")
+
     let buildVariables =
-        envVariables
-        // override variable with environment variable if any
+        configVariables
+        |> Map.addMap envVariables
+        // override variable with configuration variable if any
         |> Map.map (fun key expr ->
             match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
             | null -> expr
@@ -441,5 +449,5 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
       Workspace.Dependencies = dependencies
       Workspace.Projects = projects
       Workspace.Targets = workspaceConfig.Targets
-      Workspace.Environment = environment
+      Workspace.Configuration = configuration
       Workspace.SourceControl = sourceControl }

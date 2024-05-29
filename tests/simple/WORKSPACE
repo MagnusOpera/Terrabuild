@@ -3,6 +3,21 @@ workspace {
     space = "magnusopera/default"
 }
 
+configuration default {
+  variables = {
+    configuration: "Debug"
+    secret_message: "tagada"
+    workspace: "default"
+  }
+}
+
+configuration release {
+  variables = {
+    configuration: "Release"
+    workspace: "default"
+  }
+}
+
 target build {
   depends_on = [ ^build ]
 }
@@ -21,21 +36,6 @@ target push {
 
 target deploy {
   depends_on = [ push ]
-}
-
-environment default {
-  variables = {
-    configuration: "Debug"
-    secret_message: "tagada"
-    workspace: "default"
-  }
-}
-
-environment release {
-  variables = {
-    configuration: "Release"
-    workspace: "default"
-  }
 }
 
 extension @dotnet {

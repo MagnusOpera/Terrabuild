@@ -25,6 +25,18 @@ configuration release {
 
 configuration dummy
 
+environment {
+    variables = {
+        secret: 0
+    }
+}
+
+environment prod {
+    variables = {
+        secret: 123456
+    }
+}
+
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
   defaults = {

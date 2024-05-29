@@ -11,6 +11,7 @@ type token =
   | DEFAULTS
   | WORKSPACE
   | TARGET
+  | CONFIGURATION
   | ENVIRONMENT
   | EXTENSION
   | EOF
@@ -48,6 +49,7 @@ type tokenId =
     | TOKEN_DEFAULTS
     | TOKEN_WORKSPACE
     | TOKEN_TARGET
+    | TOKEN_CONFIGURATION
     | TOKEN_ENVIRONMENT
     | TOKEN_EXTENSION
     | TOKEN_EOF
@@ -87,6 +89,9 @@ type nonTerminalId =
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn
     | NONTERM_TargetRebuild
+    | NONTERM_Configuration
+    | NONTERM_ConfigurationComponents
+    | NONTERM_ConfigurationVariables
     | NONTERM_Environment
     | NONTERM_EnvironmentComponents
     | NONTERM_EnvironmentVariables

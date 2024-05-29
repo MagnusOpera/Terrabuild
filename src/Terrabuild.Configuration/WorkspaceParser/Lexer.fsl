@@ -30,6 +30,7 @@ rule token = parse
 
     | "workspace" { WORKSPACE }
     | "target" { TARGET }
+    | "configuration" { CONFIGURATION }
     | "environment" { ENVIRONMENT }
     | "extension" { EXTENSION }
     

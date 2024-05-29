@@ -136,7 +136,7 @@ let genWorkspace (extensions: ExtensionType set) =
 
         for (KeyValue(env, variables)) in envConfigs do
             ""
-            $"environment {env} {{"
+            $"configuration {env} {{"
             if variables.Count > 0 then
                 "  variables = {"
                 for (KeyValue(name, value)) in variables do

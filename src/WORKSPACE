@@ -3,6 +3,18 @@ workspace {
     space = "magnusopera/terrabuild"
 }
 
+configuration {
+    variables = {
+        configuration: "Debug"
+    }
+}
+
+configuration release {
+    variables = {
+        configuration: "Release"
+    }
+}
+
 target build {
     depends_on = [^build]
 }
@@ -17,18 +29,6 @@ target dist {
 
 target publish {
     depends_on = [dist]
-}
-
-environment default {
-    variables = {
-        configuration: "Debug"
-    }
-}
-
-environment release {
-    variables = {
-        configuration: "Release"
-    }
 }
 
 extension @dotnet {

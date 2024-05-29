@@ -15,6 +15,7 @@ with
 [<RequireQualifiedAccess>]
 type RunArgs =
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
+    | [<Unique; AltCommandLine("-c")>] Configuration of name:string
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
@@ -27,6 +28,7 @@ with
         member this.Usage =
             match this with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Configuration _ -> "Configuration to use."
             | Environment _ -> "Environment to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Variable _ -> "Set variable."
@@ -39,6 +41,7 @@ with
 type TargetArgs =
     | [<ExactlyOnce; MainCommand; First>] Target of target:string list
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
+    | [<Unique; AltCommandLine("-c")>] Configuration of name:string
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
@@ -52,6 +55,7 @@ with
             match this with
             | Target _ -> "Specify build target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Configuration _ -> "Configuration to use."
             | Environment _ -> "Environment to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Variable _ -> "Set variable."
