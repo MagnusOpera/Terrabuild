@@ -162,6 +162,8 @@ usage:
 	dotnet run --project src/Terrabuild -- --help
 	dotnet run --project src/Terrabuild -- build --help
 	dotnet run --project src/Terrabuild -- run --help
+	dotnet run --project src/Terrabuild -- clear --help
+	dotnet run --project src/Terrabuild -- login --help
 
 version:
 	dotnet run --project src/Terrabuild -- version
