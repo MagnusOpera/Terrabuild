@@ -9,7 +9,7 @@ type token =
   | INIT
   | SCRIPT
   | DEFAULTS
-  | CONFIGURATION
+  | WORKSPACE
   | TARGET
   | ENVIRONMENT
   | EXTENSION
@@ -46,7 +46,7 @@ type tokenId =
     | TOKEN_INIT
     | TOKEN_SCRIPT
     | TOKEN_DEFAULTS
-    | TOKEN_CONFIGURATION
+    | TOKEN_WORKSPACE
     | TOKEN_TARGET
     | TOKEN_ENVIRONMENT
     | TOKEN_EXTENSION
@@ -77,12 +77,12 @@ type tokenId =
     | TOKEN_end_of_input
     | TOKEN_error
 type nonTerminalId = 
-    | NONTERM__startWorkspace
+    | NONTERM__startWorkspaceFile
+    | NONTERM_WorkspaceFile
+    | NONTERM_WorkspaceFileComponents
     | NONTERM_Workspace
     | NONTERM_WorkspaceComponents
-    | NONTERM_Configuration
-    | NONTERM_ConfigurationComponents
-    | NONTERM_ConfigurationSpace
+    | NONTERM_WorkspaceSpace
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn
@@ -119,4 +119,4 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val Workspace : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (Terrabuild.Configuration.Workspace.AST.Workspace) 
+val WorkspaceFile : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (Terrabuild.Configuration.Workspace.AST.WorkspaceFile) 

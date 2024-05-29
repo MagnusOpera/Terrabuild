@@ -1,5 +1,5 @@
 
-configuration {
+project {
   dependencies = [ "../A" ]
 }
 

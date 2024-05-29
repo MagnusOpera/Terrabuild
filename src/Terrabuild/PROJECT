@@ -1,5 +1,5 @@
 
-configuration @dotnet {
+project @dotnet {
     labels = [ "app"
                "dotnet"]
 }

@@ -1,5 +1,5 @@
 
-configuration @terraform {
+project @terraform {
     dependencies = [ "/projects/dotnet-app"
                      "../../projects/npm-app" ]
     labels = [ "infra" ]

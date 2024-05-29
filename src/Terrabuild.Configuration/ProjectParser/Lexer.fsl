@@ -28,7 +28,7 @@ rule token = parse
     | "lower" { LOWER }
     | "version" { VERSION }
 
-    | "configuration" { CONFIGURATION }
+    | "project" { PROJECT }
     | "target" { TARGET }
     | "dependencies" { DEPENDENCIES }
     | "outputs" { OUTPUTS }

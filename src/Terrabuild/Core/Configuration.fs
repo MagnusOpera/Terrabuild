@@ -157,7 +157,7 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
                         |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
 
                     let projectInfo =
-                        match projectConfig.Configuration.Init with
+                        match projectConfig.Project.Init with
                         | Some init ->
                             let parseContext = 
                                 let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
@@ -178,11 +178,11 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
 
                     let projectInfo = {
                         projectInfo
-                        with Ignores = projectConfig.Configuration.Ignores |> Option.defaultValue projectInfo.Ignores
-                             Outputs = projectConfig.Configuration.Outputs |> Option.defaultValue projectInfo.Outputs
-                             Dependencies = projectConfig.Configuration.Dependencies |> Option.defaultValue projectInfo.Dependencies }
+                        with Ignores = projectConfig.Project.Ignores |> Option.defaultValue projectInfo.Ignores
+                             Outputs = projectConfig.Project.Outputs |> Option.defaultValue projectInfo.Outputs
+                             Dependencies = projectConfig.Project.Dependencies |> Option.defaultValue projectInfo.Dependencies }
 
-                    let labels = projectConfig.Configuration.Labels
+                    let labels = projectConfig.Project.Labels
 
                     let projectOutputs = projectInfo.Outputs
                     let projectIgnores = projectInfo.Ignores

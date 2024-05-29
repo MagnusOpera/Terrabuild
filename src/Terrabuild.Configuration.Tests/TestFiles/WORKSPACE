@@ -1,6 +1,6 @@
 # comment at top of file
 
-configuration {
+workspace {
     space = "magnusopera/default"
 }
 

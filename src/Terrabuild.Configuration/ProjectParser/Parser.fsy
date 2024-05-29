@@ -12,7 +12,7 @@ let debugPrint s = ignore s
 
 %}
  
-%start Project
+%start ProjectFile
  
 // terminal tokens
 %token NOTHING TRUE FALSE
@@ -32,27 +32,27 @@ let debugPrint s = ignore s
 %token PLUS
 %token TRIM UPPER LOWER VERSION
 %token EOF
-%token EXTENSION CONFIGURATION TARGET 
+%token PROJECT EXTENSION TARGET 
 %token DEPENDENCIES OUTPUTS IGNORES LABELS CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS
 
 // associativity and precedences
 %left PLUS
 
-%type <Terrabuild.Configuration.Project.AST.Project> Project
+%type <Terrabuild.Configuration.Project.AST.ProjectFile> ProjectFile
 %% 
 
-Project:
-    | ProjectComponents EOF { $1 }
+ProjectFile:
+    | ProjectFileComponents EOF { $1 }
 
-ProjectComponents:
-    | /* empty */ { Project.Empty }
-    | ProjectComponents Extension { $1.Patch $2 }
-    | ProjectComponents Configuration { $1.Patch $2 }
-    | ProjectComponents Target { $1.Patch $2 }
+ProjectFileComponents:
+    | /* empty */ { ProjectFile.Empty }
+    | ProjectFileComponents Project { $1.Patch $2 }
+    | ProjectFileComponents Extension { $1.Patch $2 }
+    | ProjectFileComponents Target { $1.Patch $2 }
 
 
 Extension:
-    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { ProjectComponents.Extension ($2, $4) }
+    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { ProjectFileComponents.Extension ($2, $4) }
 ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents ExtensionContainer { $1.Patch $2 }
@@ -66,28 +66,28 @@ ExtensionDefaults:
     | DEFAULTS EQUAL LBRACE Variables RBRACE { ExtensionComponents.Defaults $4 }
 
 
-Configuration:
-    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { ProjectComponents.Configuration $3 }
-    | CONFIGURATION ExtensionIdentifier LBRACE ConfigurationComponents RBRACE { ConfigurationComponents.Init $2 |> $4.Patch |> ProjectComponents.Configuration }
-    | CONFIGURATION ExtensionIdentifier { ConfigurationComponents.Init $2 |> Configuration.Empty.Patch |> ProjectComponents.Configuration }
-ConfigurationComponents:
-    | /* empty */ { Configuration.Empty }
-    | ConfigurationComponents ConfigurationDependencies { $1.Patch $2 }
-    | ConfigurationComponents ConfigurationOutputs { $1.Patch $2 }
-    | ConfigurationComponents ConfigurationIgnores { $1.Patch $2 }
-    | ConfigurationComponents ConfigurationLabels { $1.Patch $2 }
-ConfigurationDependencies:
-    | DEPENDENCIES EQUAL ListOfString { ConfigurationComponents.Dependencies $3 }
-ConfigurationOutputs:
-    | OUTPUTS EQUAL ListOfString { ConfigurationComponents.Outputs $3 }
-ConfigurationIgnores:
-    | IGNORES EQUAL ListOfString { ConfigurationComponents.Ignores $3 }
-ConfigurationLabels:
-    | LABELS EQUAL ListOfString { ConfigurationComponents.Labels $3 }
+Project:
+    | PROJECT LBRACE ProjectComponents RBRACE { ProjectFileComponents.Project $3 }
+    | PROJECT ExtensionIdentifier LBRACE ProjectComponents RBRACE { ProjectComponents.Init $2 |> $4.Patch |> ProjectFileComponents.Project }
+    | PROJECT ExtensionIdentifier { ProjectComponents.Init $2 |> Project.Empty.Patch |> ProjectFileComponents.Project }
+ProjectComponents:
+    | /* empty */ { Project.Empty }
+    | ProjectComponents ProjectDependencies { $1.Patch $2 }
+    | ProjectComponents ProjectOutputs { $1.Patch $2 }
+    | ProjectComponents ProjectIgnores { $1.Patch $2 }
+    | ProjectComponents ProjectLabels { $1.Patch $2 }
+ProjectDependencies:
+    | DEPENDENCIES EQUAL ListOfString { ProjectComponents.Dependencies $3 }
+ProjectOutputs:
+    | OUTPUTS EQUAL ListOfString { ProjectComponents.Outputs $3 }
+ProjectIgnores:
+    | IGNORES EQUAL ListOfString { ProjectComponents.Ignores $3 }
+ProjectLabels:
+    | LABELS EQUAL ListOfString { ProjectComponents.Labels $3 }
 
 
 Target:
-    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { ProjectComponents.Target ($2, $4) }
+    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { ProjectFileComponents.Target ($2, $4) }
 TargetComponents:
     | /* empty */ { Target.Empty }
     | TargetComponents TargetDependsOn { $1.Patch $2 }

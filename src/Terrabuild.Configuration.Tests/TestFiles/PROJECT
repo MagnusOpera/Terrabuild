@@ -19,7 +19,7 @@ extension dummy {
 
 # comment in the middle of the file
 
-configuration @dotnet {
+project @dotnet {
   dependencies = [ "../../libraries/shell-lib" ]
   outputs = [ "dist" ]
   labels = [ "app"

@@ -28,7 +28,7 @@ rule token = parse
     | "lower" { LOWER }
     | "version" { VERSION }
 
-    | "configuration" { CONFIGURATION }
+    | "workspace" { WORKSPACE }
     | "target" { TARGET }
     | "environment" { ENVIRONMENT }
     | "extension" { EXTENSION }

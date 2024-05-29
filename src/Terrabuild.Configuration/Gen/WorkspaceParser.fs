@@ -28,7 +28,7 @@ type token =
   | INIT
   | SCRIPT
   | DEFAULTS
-  | CONFIGURATION
+  | WORKSPACE
   | TARGET
   | ENVIRONMENT
   | EXTENSION
@@ -66,7 +66,7 @@ type tokenId =
     | TOKEN_INIT
     | TOKEN_SCRIPT
     | TOKEN_DEFAULTS
-    | TOKEN_CONFIGURATION
+    | TOKEN_WORKSPACE
     | TOKEN_TARGET
     | TOKEN_ENVIRONMENT
     | TOKEN_EXTENSION
@@ -98,12 +98,12 @@ type tokenId =
     | TOKEN_error
 // This type is used to give symbolic names to token indexes, useful for error messages
 type nonTerminalId = 
-    | NONTERM__startWorkspace
+    | NONTERM__startWorkspaceFile
+    | NONTERM_WorkspaceFile
+    | NONTERM_WorkspaceFileComponents
     | NONTERM_Workspace
     | NONTERM_WorkspaceComponents
-    | NONTERM_Configuration
-    | NONTERM_ConfigurationComponents
-    | NONTERM_ConfigurationSpace
+    | NONTERM_WorkspaceSpace
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn
@@ -141,7 +141,7 @@ let tagOfToken (t:token) =
   | INIT  -> 5 
   | SCRIPT  -> 6 
   | DEFAULTS  -> 7 
-  | CONFIGURATION  -> 8 
+  | WORKSPACE  -> 8 
   | TARGET  -> 9 
   | ENVIRONMENT  -> 10 
   | EXTENSION  -> 11 
@@ -181,7 +181,7 @@ let tokenTagToTokenId (tokenIdx:int) =
   | 5 -> TOKEN_INIT 
   | 6 -> TOKEN_SCRIPT 
   | 7 -> TOKEN_DEFAULTS 
-  | 8 -> TOKEN_CONFIGURATION 
+  | 8 -> TOKEN_WORKSPACE 
   | 9 -> TOKEN_TARGET 
   | 10 -> TOKEN_ENVIRONMENT 
   | 11 -> TOKEN_EXTENSION 
@@ -216,17 +216,17 @@ let tokenTagToTokenId (tokenIdx:int) =
 /// This function maps production indexes returned in syntax errors to strings representing the non terminal that would be produced by that production
 let prodIdxToNonTerminal (prodIdx:int) = 
   match prodIdx with
-    | 0 -> NONTERM__startWorkspace 
-    | 1 -> NONTERM_Workspace 
-    | 2 -> NONTERM_WorkspaceComponents 
-    | 3 -> NONTERM_WorkspaceComponents 
-    | 4 -> NONTERM_WorkspaceComponents 
-    | 5 -> NONTERM_WorkspaceComponents 
-    | 6 -> NONTERM_WorkspaceComponents 
-    | 7 -> NONTERM_Configuration 
-    | 8 -> NONTERM_ConfigurationComponents 
-    | 9 -> NONTERM_ConfigurationComponents 
-    | 10 -> NONTERM_ConfigurationSpace 
+    | 0 -> NONTERM__startWorkspaceFile 
+    | 1 -> NONTERM_WorkspaceFile 
+    | 2 -> NONTERM_WorkspaceFileComponents 
+    | 3 -> NONTERM_WorkspaceFileComponents 
+    | 4 -> NONTERM_WorkspaceFileComponents 
+    | 5 -> NONTERM_WorkspaceFileComponents 
+    | 6 -> NONTERM_WorkspaceFileComponents 
+    | 7 -> NONTERM_Workspace 
+    | 8 -> NONTERM_WorkspaceComponents 
+    | 9 -> NONTERM_WorkspaceComponents 
+    | 10 -> NONTERM_WorkspaceSpace 
     | 11 -> NONTERM_Target 
     | 12 -> NONTERM_Target 
     | 13 -> NONTERM_TargetComponents 
@@ -294,7 +294,7 @@ let token_to_string (t:token) =
   | INIT  -> "INIT" 
   | SCRIPT  -> "SCRIPT" 
   | DEFAULTS  -> "DEFAULTS" 
-  | CONFIGURATION  -> "CONFIGURATION" 
+  | WORKSPACE  -> "WORKSPACE" 
   | TARGET  -> "TARGET" 
   | ENVIRONMENT  -> "ENVIRONMENT" 
   | EXTENSION  -> "EXTENSION" 
@@ -334,7 +334,7 @@ let _fsyacc_dataOfToken (t:token) =
   | INIT  -> (null : System.Object) 
   | SCRIPT  -> (null : System.Object) 
   | DEFAULTS  -> (null : System.Object) 
-  | CONFIGURATION  -> (null : System.Object) 
+  | WORKSPACE  -> (null : System.Object) 
   | TARGET  -> (null : System.Object) 
   | ENVIRONMENT  -> (null : System.Object) 
   | EXTENSION  -> (null : System.Object) 
@@ -375,38 +375,38 @@ let _fsyacc_immediateActions = [|65535us; 49152us; 65535us; 16385us; 16387us; 16
 let _fsyacc_reductions ()  =    [| 
 # 376 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> Terrabuild.Configuration.Workspace.AST.Workspace in
+            let _1 = parseState.GetInput(1) :?> Terrabuild.Configuration.Workspace.AST.WorkspaceFile in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
                       raise (FSharp.Text.Parsing.Accept(Microsoft.FSharp.Core.Operators.box _1))
                    )
-                 : 'gentype__startWorkspace));
+                 : 'gentype__startWorkspaceFile));
 # 385 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
+            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceFileComponents in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 45 "WorkspaceParser/Parser.fsy"
-                                                     _1 
+                                                         _1 
                    )
 # 45 "WorkspaceParser/Parser.fsy"
-                 : Terrabuild.Configuration.Workspace.AST.Workspace));
+                 : Terrabuild.Configuration.Workspace.AST.WorkspaceFile));
 # 396 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 48 "WorkspaceParser/Parser.fsy"
-                                         Workspace.Empty 
+                                         WorkspaceFile.Empty 
                    )
 # 48 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_WorkspaceComponents));
+                 : 'gentype_WorkspaceFileComponents));
 # 406 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_Configuration in
+            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceFileComponents in
+            let _2 = parseState.GetInput(2) :?> 'gentype_Workspace in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
@@ -414,76 +414,76 @@ let _fsyacc_reductions ()  =    [|
                                                                _1.Patch _2 
                    )
 # 49 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_WorkspaceComponents));
+                 : 'gentype_WorkspaceFileComponents));
 # 418 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
+            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceFileComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Target in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 50 "WorkspaceParser/Parser.fsy"
-                                                        _1.Patch _2 
+                                                            _1.Patch _2 
                    )
 # 50 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_WorkspaceComponents));
+                 : 'gentype_WorkspaceFileComponents));
 # 430 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
+            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceFileComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Environment in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 51 "WorkspaceParser/Parser.fsy"
-                                                             _1.Patch _2 
+                                                                 _1.Patch _2 
                    )
 # 51 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_WorkspaceComponents));
+                 : 'gentype_WorkspaceFileComponents));
 # 442 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
+            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceFileComponents in
             let _2 = parseState.GetInput(2) :?> 'gentype_Extension in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 52 "WorkspaceParser/Parser.fsy"
-                                                           _1.Patch _2 
+                                                               _1.Patch _2 
                    )
 # 52 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_WorkspaceComponents));
+                 : 'gentype_WorkspaceFileComponents));
 # 454 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _3 = parseState.GetInput(3) :?> 'gentype_ConfigurationComponents in
+            let _3 = parseState.GetInput(3) :?> 'gentype_WorkspaceComponents in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 55 "WorkspaceParser/Parser.fsy"
-                                                                                 WorkspaceComponents.Configuration _3 
+                                                                         WorkspaceFileComponents.Workspace _3 
                    )
 # 55 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_Configuration));
+                 : 'gentype_Workspace));
 # 465 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 57 "WorkspaceParser/Parser.fsy"
-                                         Configuration.Empty 
+                                         Workspace.Empty 
                    )
 # 57 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_ConfigurationComponents));
+                 : 'gentype_WorkspaceComponents));
 # 475 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_ConfigurationComponents in
-            let _2 = parseState.GetInput(2) :?> 'gentype_ConfigurationSpace in
+            let _1 = parseState.GetInput(1) :?> 'gentype_WorkspaceComponents in
+            let _2 = parseState.GetInput(2) :?> 'gentype_WorkspaceSpace in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 58 "WorkspaceParser/Parser.fsy"
-                                                                        _1.Patch _2 
+                                                                _1.Patch _2 
                    )
 # 58 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_ConfigurationComponents));
+                 : 'gentype_WorkspaceComponents));
 # 487 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> 'gentype_String in
@@ -491,10 +491,10 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 60 "WorkspaceParser/Parser.fsy"
-                                                ConfigurationComponents.Space _3 
+                                                WorkspaceComponents.Space _3 
                    )
 # 60 "WorkspaceParser/Parser.fsy"
-                 : 'gentype_ConfigurationSpace));
+                 : 'gentype_WorkspaceSpace));
 # 498 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> string in
@@ -502,7 +502,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 63 "WorkspaceParser/Parser.fsy"
-                                               WorkspaceComponents.Target (_2, Target.Empty) 
+                                               WorkspaceFileComponents.Target (_2, Target.Empty) 
                    )
 # 63 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Target));
@@ -514,7 +514,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 64 "WorkspaceParser/Parser.fsy"
-                                                                              WorkspaceComponents.Target (_2, _4) 
+                                                                              WorkspaceFileComponents.Target (_2, _4) 
                    )
 # 64 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Target));
@@ -581,7 +581,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 75 "WorkspaceParser/Parser.fsy"
-                                                    WorkspaceComponents.Environment (_2, Environment.Empty) 
+                                                    WorkspaceFileComponents.Environment (_2, Environment.Empty) 
                    )
 # 75 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Environment));
@@ -593,7 +593,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 76 "WorkspaceParser/Parser.fsy"
-                                                                                        WorkspaceComponents.Environment (_2, _4) 
+                                                                                        WorkspaceFileComponents.Environment (_2, _4) 
                    )
 # 76 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Environment));
@@ -638,7 +638,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 84 "WorkspaceParser/Parser.fsy"
-                                                                                             WorkspaceComponents.Extension (_2, _4) 
+                                                                                             WorkspaceFileComponents.Extension (_2, _4) 
                    )
 # 84 "WorkspaceParser/Parser.fsy"
                  : 'gentype_Extension));
@@ -1083,5 +1083,5 @@ let tables : FSharp.Text.Parsing.Tables<_> =
     numTerminals = 39;
     productionToNonTerminalTable = _fsyacc_productionToNonTerminalTable  }
 let engine lexer lexbuf startState = tables.Interpret(lexer, lexbuf, startState)
-let Workspace lexer lexbuf : Terrabuild.Configuration.Workspace.AST.Workspace =
+let WorkspaceFile lexer lexbuf : Terrabuild.Configuration.Workspace.AST.WorkspaceFile =
     engine lexer lexbuf 0 :?> _

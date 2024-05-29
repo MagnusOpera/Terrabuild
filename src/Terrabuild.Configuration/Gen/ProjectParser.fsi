@@ -11,8 +11,8 @@ type token =
   | DEPENDS_ON
   | REBUILD
   | DEFAULTS
+  | PROJECT
   | EXTENSION
-  | CONFIGURATION
   | TARGET
   | EOF
   | TRIM
@@ -49,8 +49,8 @@ type tokenId =
     | TOKEN_DEPENDS_ON
     | TOKEN_REBUILD
     | TOKEN_DEFAULTS
+    | TOKEN_PROJECT
     | TOKEN_EXTENSION
-    | TOKEN_CONFIGURATION
     | TOKEN_TARGET
     | TOKEN_EOF
     | TOKEN_TRIM
@@ -79,20 +79,20 @@ type tokenId =
     | TOKEN_end_of_input
     | TOKEN_error
 type nonTerminalId = 
-    | NONTERM__startProject
-    | NONTERM_Project
-    | NONTERM_ProjectComponents
+    | NONTERM__startProjectFile
+    | NONTERM_ProjectFile
+    | NONTERM_ProjectFileComponents
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_ExtensionContainer
     | NONTERM_ExtensionScript
     | NONTERM_ExtensionDefaults
-    | NONTERM_Configuration
-    | NONTERM_ConfigurationComponents
-    | NONTERM_ConfigurationDependencies
-    | NONTERM_ConfigurationOutputs
-    | NONTERM_ConfigurationIgnores
-    | NONTERM_ConfigurationLabels
+    | NONTERM_Project
+    | NONTERM_ProjectComponents
+    | NONTERM_ProjectDependencies
+    | NONTERM_ProjectOutputs
+    | NONTERM_ProjectIgnores
+    | NONTERM_ProjectLabels
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn
@@ -121,4 +121,4 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val Project : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (Terrabuild.Configuration.Project.AST.Project) 
+val ProjectFile : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (Terrabuild.Configuration.Project.AST.ProjectFile) 

@@ -13,7 +13,7 @@ open Terrabuild.Expressions
 [<Test>]
 let parseProject() =
     let expectedProject =
-        let configuration =
+        let project =
             { Dependencies = Set [ "../../libraries/shell-lib" ] |> Some
               Outputs = Set [ "dist" ] |> Some
               Ignores = None
@@ -61,7 +61,7 @@ let parseProject() =
         { Extensions = Map [ "@dotnet", extDotnet
                              "@docker", extDocker
                              "dummy", extDummy ]
-          Configuration = configuration
+          Project = project
           Targets = Map [ "build", targetBuild
                           "dist", targetDist
                           "docker", targetDocker ] }
@@ -75,7 +75,7 @@ let parseProject() =
 [<Test>]
 let parseProject2() =
     let expectedProject =
-        let configuration =
+        let project =
             { Dependencies = None
               Outputs = None
               Ignores = None
@@ -89,7 +89,7 @@ let parseProject2() =
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
         { Extensions = Map.empty
-          Configuration = configuration
+          Project = project
           Targets = Map [ "build", buildTarget ]  }
 
     let content = File.ReadAllText("TestFiles/PROJECT2")

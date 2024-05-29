@@ -1,4 +1,4 @@
-configuration @dotnet
+project @dotnet
 
 target build {
   rebuild = true

@@ -21,6 +21,6 @@ let private parse parser lexer txt =
         TerrabuildException.Raise(err)
 
 
-let parseProject = parse Project.Parser.Project Project.Lexer.token
+let parseProject = parse Project.Parser.ProjectFile Project.Lexer.token
 
-let parseWorkspace = parse Workspace.Parser.Workspace Workspace.Lexer.token
+let parseWorkspace = parse Workspace.Parser.WorkspaceFile Workspace.Lexer.token

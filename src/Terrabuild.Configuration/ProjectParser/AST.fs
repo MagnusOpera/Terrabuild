@@ -3,14 +3,14 @@ open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]
-type ConfigurationComponents =
+type ProjectComponents =
     | Dependencies of string list
     | Outputs of string list
     | Ignores of string list
     | Labels of string list
     | Init of string
 
-type Configuration = {
+type Project = {
     Dependencies: Set<string> option
     Outputs: Set<string> option
     Ignores: Set<string> option
@@ -27,11 +27,11 @@ with
 
     member this.Patch comp =
         match comp with
-        | ConfigurationComponents.Dependencies dependencies -> { this with Dependencies = dependencies |> Set.ofList |> Some }
-        | ConfigurationComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList |> Some }
-        | ConfigurationComponents.Ignores ignores -> { this with Ignores = ignores |> Set.ofList |> Some }
-        | ConfigurationComponents.Labels labels -> { this with Labels = labels |> Set.ofList |> Set.map (fun x -> x.ToLowerInvariant()) }
-        | ConfigurationComponents.Init init -> { this with Init = Some init }
+        | ProjectComponents.Dependencies dependencies -> { this with Dependencies = dependencies |> Set.ofList |> Some }
+        | ProjectComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList |> Some }
+        | ProjectComponents.Ignores ignores -> { this with Ignores = ignores |> Set.ofList |> Some }
+        | ProjectComponents.Labels labels -> { this with Labels = labels |> Set.ofList |> Set.map (fun x -> x.ToLowerInvariant()) }
+        | ProjectComponents.Init init -> { this with Init = Some init }
 
 
 
@@ -69,24 +69,24 @@ with
         | TargetComponents.Step step -> { this with Steps = this.Steps @ [step] }
 
 [<RequireQualifiedAccess>]
-type ProjectComponents =
+type ProjectFileComponents =
+    | Project of Project
     | Extension of string * Extension
-    | Configuration of Configuration
     | Target of string * Target
 
-type Project = {
+type ProjectFile = {
+    Project: Project
     Extensions: Map<string, Extension>
-    Configuration: Configuration
     Targets: Map<string, Target>
 }
 with
     static member Empty =
         { Extensions = Map.empty
-          Configuration = Configuration.Empty
+          Project = Project.Empty
           Targets = Map.empty }
 
     member this.Patch comp =
         match comp with
-        | ProjectComponents.Extension (name, extension) -> { this with Extensions = this.Extensions |> Map.add name extension }
-        | ProjectComponents.Configuration configuration -> { this with Configuration = configuration }
-        | ProjectComponents.Target (name, target) -> { this with Targets = this.Targets |> Map.add name target }
+        | ProjectFileComponents.Project project -> { this with Project = project }
+        | ProjectFileComponents.Extension (name, extension) -> { this with Extensions = this.Extensions |> Map.add name extension }
+        | ProjectFileComponents.Target (name, target) -> { this with Targets = this.Targets |> Map.add name target }
