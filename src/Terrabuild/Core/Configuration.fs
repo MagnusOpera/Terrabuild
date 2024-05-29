@@ -94,7 +94,10 @@ let read workspaceDir environment labels (variables: Map<string, string>) (sourc
     let envVariables =
         match environments |> Map.tryFind environment with
         | Some variables -> variables.Variables
-        | _ -> TerrabuildException.Raise($"Environment '{environment}' not found")
+        | _ ->
+            match environment with
+            | "default" -> Map.empty
+            | _ -> TerrabuildException.Raise($"Environment '{environment}' not found")
     let buildVariables =
         envVariables
         // override variable with environment variable if any
