@@ -287,13 +287,14 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
                                         buildVariables
                                         |> Map.add "terrabuild_project" (Expr.String project)
                                         |> Map.add "terrabuild_target" (Expr.String targetName)
+                                        |> Map.add "terrabuild_configuration" (Expr.String configuration)
+                                        |> Map.add "terrabuild_environment" (Expr.String environment)
 
                                     let evaluationContext = {
                                         Eval.EvaluationContext.WorkspaceDir = workspaceDir
                                         Eval.EvaluationContext.ProjectDir = projectDir
                                         Eval.EvaluationContext.Versions = versions
                                         Eval.EvaluationContext.Variables = actionVariables
-                                        Eval.EvaluationContext.Environment = environment
                                     }
 
                                     let usedVars, actionContext =

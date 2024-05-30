@@ -5,7 +5,6 @@ open Errors
 type EvaluationContext = {
     WorkspaceDir: string
     ProjectDir: string
-    Environment: string
     Versions: Map<string, string>
     Variables: Map<string, Expr>
 }
@@ -55,8 +54,6 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     match context.Versions |> Map.tryFind projectName with
                     | Some version -> Value.String version
                     | _ -> TerrabuildException.Raise($"Unknown project reference {str}")
-                | Function.Env, [] ->
-                    Value.String context.Environment
 
                 | _ -> TerrabuildException.Raise($"Invalid arguments for function {f}")
             varUsed, res

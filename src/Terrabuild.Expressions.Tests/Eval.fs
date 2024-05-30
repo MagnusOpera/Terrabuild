@@ -9,7 +9,6 @@ let private evaluationContext = {
     Eval.EvaluationContext.ProjectDir = TestContext.CurrentContext.TestDirectory
     Eval.EvaluationContext.Variables = Map.empty
     Eval.EvaluationContext.Versions = Map.empty
-    Eval.EvaluationContext.Environment = "prod"
 }
 
 [<Test>]
@@ -91,13 +90,5 @@ let version() =
 
     let varUsed, result =
         eval context (Expr.Function (Function.Version, [ Expr.String "../net8.0/toto"]))
-    varUsed |> should be Empty
-    result |> should equal expected
-
-[<Test>]
-let env() =
-    let expected = Value.String "prod"
-    let varUsed, result =
-        eval evaluationContext (Expr.Function (Function.Env, []))
     varUsed |> should be Empty
     result |> should equal expected
