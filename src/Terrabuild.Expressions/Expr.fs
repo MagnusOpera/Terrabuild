@@ -7,6 +7,7 @@ type Function =
     | Upper
     | Lower
     | Version
+    | Env
 
 [<RequireQualifiedAccessAttribute>]
 type Expr =

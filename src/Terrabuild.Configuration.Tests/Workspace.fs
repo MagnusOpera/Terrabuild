@@ -41,7 +41,6 @@ let parseWorkspace() =
                           "dummy", targetDummy ]
           Configurations = Map [ "release", envRelease
                                  "dummy", envDummy ]
-          Environments = Map.empty
           Extensions = Map [ "dotnet", extDotnet
                              "docker", extDocker ] }
 
@@ -70,8 +69,6 @@ let parseWorkspace2() =
         let envDummy =
             { Variables = Map.empty }
         let envSecret =
-            { Variables = Map [ "secret", Expr.Number 0 ]}
-        let envSecretProd =
             { Variables = Map [ "secret", Expr.Number 123456 ]}
 
         let extDotnet =
@@ -87,10 +84,9 @@ let parseWorkspace2() =
           Targets = Map [ "build", targetBuild
                           "dist", targetDist
                           "dummy", targetDummy ]
-          Configurations = Map [ "release", envRelease
+          Configurations = Map [ "default", envSecret
+                                 "release", envRelease
                                  "dummy", envDummy ]
-          Environments = Map [ "default", envSecret
-                               "prod", envSecretProd ]
           Extensions = Map [ "dotnet", extDotnet
                              "docker", extDocker ] }
 

@@ -39,10 +39,10 @@ with
 
 
 [<RequireQualifiedAccess>]
-type ContextComponents =
+type ConfigurationComponents =
     | Variables of Map<string, Expr>
 
-type Context = {
+type Configuration = {
     Variables: Map<string, Expr>
 }
 with
@@ -51,22 +51,20 @@ with
 
     member this.Patch comp =
         match comp with
-        | ContextComponents.Variables variables -> { this with Variables = variables }
+        | ConfigurationComponents.Variables variables -> { this with Variables = variables }
 
 
 [<RequireQualifiedAccess>]
 type WorkspaceFileComponents =
     | Workspace of Workspace
     | Target of string * Target
-    | Configuration of string * Context
-    | Environment of string * Context
+    | Configuration of string * Configuration
     | Extension of string * Extension
 
 type WorkspaceFile = {
     Space: string option
     Targets: Map<string, Target>
-    Configurations: Map<string, Context>
-    Environments: Map<string, Context>
+    Configurations: Map<string, Configuration>
     Extensions: Map<string, Extension>
 }
 with
@@ -74,7 +72,6 @@ with
         { Space = None
           Targets = Map.empty
           Configurations = Map.empty
-          Environments = Map.empty
           Extensions = Map.empty }
 
     member this.Patch comp =
@@ -82,5 +79,4 @@ with
         | WorkspaceFileComponents.Workspace workspace -> { this with Space = workspace.Space }
         | WorkspaceFileComponents.Target (name, target) -> { this with Targets = this.Targets |> Map.add name target }
         | WorkspaceFileComponents.Configuration (name, configuration) -> { this with Configurations = this.Configurations |> Map.add name configuration }
-        | WorkspaceFileComponents.Environment (name, environment) -> { this with Environments = this.Environments |> Map.add name environment }
         | WorkspaceFileComponents.Extension (name, extension) -> { this with Extensions = this.Extensions |> Map.add name extension }

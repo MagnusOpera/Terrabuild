@@ -62,6 +62,7 @@ type Workspace = {
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
     Configuration: string
+    Environment: string
 }
 
 
@@ -97,17 +98,9 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
             match configuration with
             | "default" -> Map.empty
             | _ -> TerrabuildException.Raise($"Configuration '{configuration}' not found")
-    let envVariables =
-        match workspaceConfig.Environments |> Map.tryFind environment with
-        | Some variables -> variables.Variables
-        | _ ->
-            match environment with
-            | "default" -> Map.empty
-            | _ -> TerrabuildException.Raise($"Environment '{environment}' not found")
 
     let buildVariables =
         configVariables
-        |> Map.addMap envVariables
         // override variable with configuration variable if any
         |> Map.map (fun key expr ->
             match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
@@ -300,6 +293,7 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
                                         Eval.EvaluationContext.ProjectDir = projectDir
                                         Eval.EvaluationContext.Versions = versions
                                         Eval.EvaluationContext.Variables = actionVariables
+                                        Eval.EvaluationContext.Environment = environment
                                     }
 
                                     let usedVars, actionContext =
@@ -450,4 +444,5 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
       Workspace.Projects = projects
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Configuration = configuration
+      Workspace.Environment = environment
       Workspace.SourceControl = sourceControl }

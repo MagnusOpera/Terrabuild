@@ -25,13 +25,7 @@ configuration release {
 
 configuration dummy
 
-environment {
-    variables = {
-        secret: 0
-    }
-}
-
-environment prod {
+configuration {
     variables = {
         secret: 123456
     }

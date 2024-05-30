@@ -31,9 +31,8 @@ rule token = parse
     | "workspace" { WORKSPACE }
     | "target" { TARGET }
     | "configuration" { CONFIGURATION }
-    | "environment" { ENVIRONMENT }
     | "extension" { EXTENSION }
-    
+
     | "space" { SPACE }
     | "depends_on" { DEPENDS_ON }
     | "rebuild" { REBUILD }

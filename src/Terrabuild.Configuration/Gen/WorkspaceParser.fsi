@@ -92,9 +92,6 @@ type nonTerminalId =
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents
     | NONTERM_ConfigurationVariables
-    | NONTERM_Environment
-    | NONTERM_EnvironmentComponents
-    | NONTERM_EnvironmentVariables
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_ExtensionContainer

@@ -32,7 +32,7 @@ let debugPrint s = ignore s
 %token PLUS
 %token TRIM UPPER LOWER VERSION
 %token EOF
-%token WORKSPACE TARGET CONFIGURATION ENVIRONMENT EXTENSION
+%token WORKSPACE TARGET CONFIGURATION EXTENSION
 %token SPACE DEPENDS_ON REBUILD VARIABLES CONTAINER INIT SCRIPT DEFAULTS
 
 // associativity and precedences
@@ -49,7 +49,6 @@ WorkspaceFileComponents:
     | WorkspaceFileComponents Workspace { $1.Patch $2 }
     | WorkspaceFileComponents Target { $1.Patch $2 }
     | WorkspaceFileComponents Configuration { $1.Patch $2 }
-    | WorkspaceFileComponents Environment { $1.Patch $2 }
     | WorkspaceFileComponents Extension { $1.Patch $2 }
 
 Workspace:
@@ -73,24 +72,14 @@ TargetRebuild:
     | REBUILD EQUAL Bool { TargetComponents.Rebuild $3 }
 
 Configuration:
-    | CONFIGURATION IDENTIFIER { WorkspaceFileComponents.Configuration ($2, Context.Empty) }
+    | CONFIGURATION IDENTIFIER { WorkspaceFileComponents.Configuration ($2, Configuration.Empty) }
     | CONFIGURATION LBRACE ConfigurationComponents RBRACE { WorkspaceFileComponents.Configuration ("default", $3) }
     | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { WorkspaceFileComponents.Configuration ($2, $4) }
 ConfigurationComponents:
-    | /* empty */ { Context.Empty }
+    | /* empty */ { Configuration.Empty }
     | ConfigurationComponents ConfigurationVariables { $1.Patch $2 }
 ConfigurationVariables:
-    | VARIABLES EQUAL LBRACE Variables RBRACE { ContextComponents.Variables $4 }
-
-Environment:
-    | ENVIRONMENT IDENTIFIER { WorkspaceFileComponents.Environment ($2, Context.Empty) }
-    | ENVIRONMENT LBRACE EnvironmentComponents RBRACE { WorkspaceFileComponents.Environment ("default", $3) }
-    | ENVIRONMENT IDENTIFIER LBRACE EnvironmentComponents RBRACE { WorkspaceFileComponents.Environment ($2, $4) }
-EnvironmentComponents:
-    | /* empty */ { Context.Empty }
-    | EnvironmentComponents EnvironmentVariables { $1.Patch $2 }
-EnvironmentVariables:
-    | VARIABLES EQUAL LBRACE Variables RBRACE { ContextComponents.Variables $4 }
+    | VARIABLES EQUAL LBRACE Variables RBRACE { ConfigurationComponents.Variables $4 }
 
 Extension:
     | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { WorkspaceFileComponents.Extension ($2, $4) }
