@@ -6,7 +6,7 @@ version ?= 0.0.0
 ifeq ($(config), default)
 	buildconfig = Debug
 else
-	buildconfig = $env
+	buildconfig = $(config)
 endif
 
 
