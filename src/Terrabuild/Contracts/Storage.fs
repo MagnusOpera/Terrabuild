@@ -6,3 +6,4 @@ type SourceControl() =
     abstract BranchOrTag: string
     abstract CI: bool
     abstract Name: string
+    abstract Log: success:bool -> title:string -> (string*string)

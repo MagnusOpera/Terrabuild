@@ -136,6 +136,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
+                        Configuration.Options.Logs = buildArgs.Contains(RunArgs.Logs)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
         runTarget wsDir (Set.singleton target) configuration environment labels variables localOnly options
 
@@ -159,6 +160,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
+                        Configuration.Options.Logs = targetArgs.Contains(TargetArgs.Logs)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
         runTarget wsDir (Set targets) configuration environment labels variables localOnly options
 

@@ -36,6 +36,8 @@ module Emojis =
     let clockwise = "↻"
     let bang = "!"
     let recycle = "♻︎"
+    let log = "𝍌"
+    let rightarrow = "▶"
 
 
 module Styles =

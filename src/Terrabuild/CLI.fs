@@ -18,11 +18,12 @@ type RunArgs =
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
-    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
+    | [<Unique; AltCommandLine("-la")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
+    | [<Unique; AltCommandLine("-l")>] Logs
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -36,6 +37,7 @@ with
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | LocalOnly -> "Use local cache only."
+            | Logs -> "Log outputs."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
@@ -44,11 +46,12 @@ type TargetArgs =
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
-    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
+    | [<Unique; AltCommandLine("-la")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
+    | [<Unique; AltCommandLine("-l")>] Logs
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -63,6 +66,7 @@ with
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | LocalOnly -> "Use local cache only."
+            | Logs -> "Log outputs."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =

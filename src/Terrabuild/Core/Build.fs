@@ -9,7 +9,8 @@ open Terrabuild.Extensibility
 type NodeInfo = {
     Project: string
     Target: string
-    Hash: string
+    ProjectHash: string
+    NodeHash: string
 }
 
 [<RequireQualifiedAccess>]
@@ -110,7 +111,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         let nodeInfo = 
             { NodeInfo.Project = node.Project
               NodeInfo.Target = node.Target
-              NodeInfo.Hash = node.Hash }
+              NodeInfo.NodeHash = node.Hash
+              NodeInfo.ProjectHash = node.ProjectHash }
 
         // NOTE: always hit local cache here
         match cache.TryGetSummary false cacheEntryId with
@@ -313,6 +315,36 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.Status = status
                       Summary.Targets = graph.Targets
                       Summary.RootNodes = dependencies }
+
+    if options.Logs then
+        graph.RootNodes |> Seq.iter (fun depId ->
+
+            let dumpLogs (summary: Cache.TargetSummary) =
+                summary.Steps |> Seq.iteri (fun index step ->
+                    if 0 < index then
+                        $"{Ansi.Styles.yellow}────────────────────────────────────────────────────────────────────────────────{Ansi.Styles.reset}" |> Terminal.writeLine
+                    step.Log |> IO.readTextFile |> Terminal.write
+                )
+
+            let node = graph.Nodes[depId]
+            let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
+            match cache.TryGetSummary false cacheEntryId with
+            | Some summary -> 
+                match summary.Status with
+                | Cache.TaskStatus.Success ->
+                    let (logStart, logEnd) = configuration.SourceControl.Log true $"{summary.Project}/{summary.Target}"
+                    logStart |> Terminal.writeLine
+                    dumpLogs summary
+                    logEnd |> Terminal.writeLine
+                | Cache.TaskStatus.Failure ->
+                    let (logStart, logEnd) = configuration.SourceControl.Log false $"{summary.Project}/{summary.Target}"
+                    logStart |> Terminal.writeLine
+                    dumpLogs summary
+                    logEnd |> Terminal.writeLine
+            | _ -> ()
+        )
+
     notification.BuildCompleted buildInfo
     api |> Option.iter (fun api -> api.BuildComplete buildId (status = Status.Success))
+
     buildInfo

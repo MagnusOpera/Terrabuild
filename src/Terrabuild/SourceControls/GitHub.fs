@@ -19,3 +19,5 @@ type GitHub() =
     override _.CI = true
 
     override _.Name = "GitHub"
+
+    override _.Log success title = ($"::group::{title}", "::endgroup::")

@@ -14,3 +14,10 @@ type Local() =
     override _.CI = false
 
     override _.Name = "Local"
+
+    override _.Log success title =
+        let color = 
+            if success then Ansi.Styles.green
+            else Ansi.Styles.red
+
+        $"{color}{title}{Ansi.Styles.reset}", ""
