@@ -44,6 +44,7 @@ type RunArgs =
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
+    | [<Unique>] Logs
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -57,6 +58,7 @@ with
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | LocalOnly -> "Use local cache only."
+            | Logs -> "Output logs for impacted projects."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
@@ -70,6 +72,7 @@ type TargetArgs =
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
+    | [<Unique>] Logs
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -84,6 +87,7 @@ with
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | LocalOnly -> "Use local cache only."
+            | Logs -> "Output logs for impacted projects."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =

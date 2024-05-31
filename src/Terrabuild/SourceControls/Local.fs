@@ -17,7 +17,7 @@ type Local() =
 
     override _.Log success title =
         let color = 
-            if success then Ansi.Styles.green
-            else Ansi.Styles.red
+            if success then $"{Ansi.Styles.green}{Ansi.Emojis.checkmark}"
+            else $"{Ansi.Styles.red}{Ansi.Emojis.crossmark}"
 
-        $"{color}{title}{Ansi.Styles.reset}", ""
+        $"{color} {title}{Ansi.Styles.reset}", ""

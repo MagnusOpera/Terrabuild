@@ -34,6 +34,7 @@ type Summary = {
     BuildDuration: TimeSpan
     Status: Status
     Targets: string set
+    ImpactedNodes: string set
     RootNodes: NodeStatus set
 }
 
@@ -268,10 +269,12 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     // this is the core of the build
     // schedule first nodes with no incoming edges
     // on completion schedule released nodes
+    let restoredNodes = Concurrent.ConcurrentDictionary<string, bool>()
     let buildQueue = Exec.BuildQueue(options.MaxConcurrency)
     let rec queueAction (nodeId: string) =
         let node = graph.Nodes[nodeId]
         let summary, restored = buildNode node
+        restoredNodes.TryAdd(nodeId, restored) |> ignore
         notification.NodeCompleted node restored summary
 
         // schedule children nodes if ready
@@ -306,6 +309,11 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         if isSuccess then Status.Success
         else Status.Failure
 
+    let impactedNodes =
+        restoredNodes
+        |> Seq.choose (fun (KeyValue(nodeId, restored)) -> if restored then None else Some nodeId)
+        |> Set
+
     let buildInfo = { Summary.Commit = headCommit
                       Summary.BranchOrTag = branchOrTag
                       Summary.StartedAt = options.StartedAt
@@ -314,6 +322,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.TotalDuration = totalDuration
                       Summary.Status = status
                       Summary.Targets = graph.Targets
+                      Summary.ImpactedNodes = impactedNodes
                       Summary.RootNodes = dependencies }
 
     notification.BuildCompleted buildInfo

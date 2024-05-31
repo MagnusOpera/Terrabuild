@@ -94,23 +94,22 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let mermaid = Graph.graph buildGraph |> String.join "\n"
             mermaid |> IO.writeTextFile (logFile "buildgraph.mermaid")
 
-        let buildStatus =
-            if options.WhatIf then 0
-            else
-                let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-                let build = Build.run config buildGraph cache api buildNotification options
-                buildNotification.WaitCompletion()
+        if options.WhatIf then
+            if logs then Logs.dumpLogs graph cache sourceControl None
+            0
+        else
+            let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+            let build = Build.run config buildGraph cache api buildNotification options
+            buildNotification.WaitCompletion()
 
-                if options.Debug then
-                    let jsonBuild = Json.Serialize build
-                    jsonBuild |> IO.writeTextFile (logFile "build.json")
+            if options.Debug then
+                let jsonBuild = Json.Serialize build
+                jsonBuild |> IO.writeTextFile (logFile "build.json")
 
-                if build.Status = Build.Status.Success then 0
-                else 5
+            Logs.dumpLogs graph cache sourceControl (Some build.ImpactedNodes)
 
-        if logs then Logs.dumpLogs graph cache sourceControl
-
-        buildStatus
+            if build.Status = Build.Status.Success then 0
+            else 5
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
         let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")
@@ -132,13 +131,14 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let localOnly = buildArgs.Contains(RunArgs.LocalOnly)
+        let logs = buildArgs.Contains(RunArgs.Logs)
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
-        runTarget wsDir (Set.singleton target) configuration environment labels variables localOnly false options
+        runTarget wsDir (Set.singleton target) configuration environment labels variables localOnly logs options
 
     let target (targetArgs: ParseResults<TargetArgs>) =
         let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLower
@@ -155,13 +155,14 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let localOnly = targetArgs.Contains(TargetArgs.LocalOnly)
+        let logs = targetArgs.Contains(TargetArgs.Logs)
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
-        runTarget wsDir (Set targets) configuration environment labels variables localOnly false options
+        runTarget wsDir (Set targets) configuration environment labels variables localOnly logs options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
         let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
