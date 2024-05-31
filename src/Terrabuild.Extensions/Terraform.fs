@@ -27,6 +27,20 @@ type Terraform() =
 
 
     /// <summary weight="2" title="Generate plan file.">
+    /// This command validate the project:
+    /// * initialize Terraform
+    /// * select workspace
+    /// * run validate
+    /// </summary>
+    /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
+    /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
+    static member validate (workspace: string option) =
+        scope Cacheability.Always
+        |> andThen "terraform" "init"
+        |> andIf (workspace |> Option.isSome) (fun batch -> batch |> andThen "terraform" $"workspace select {workspace.Value}")
+        |> andThen "terraform" $"validate"
+
+    /// <summary weight="2" title="Generate plan file.">
     /// This command generates the planfile:
     /// * initialize Terraform
     /// * select workspace
