@@ -13,17 +13,37 @@ with
             | Force -> "Default behavior is to not overwrite existing WORKSPACE or PROJECT file. This can be forced."
 
 [<RequireQualifiedAccess>]
+type LogsArgs =
+    | [<ExactlyOnce; MainCommand; First>] Target of target:string list
+    | [<Unique; AltCommandLine("-w")>] Workspace of path:string
+    | [<Unique; AltCommandLine("-c")>] Configuration of name:string
+    | [<Unique; AltCommandLine("-e")>] Environment of name:string
+    | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
+    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
+    | [<Unique; AltCommandLine("-lo")>] LocalOnly
+with
+    interface IArgParserTemplate with
+        member this.Usage =
+            match this with
+            | Target _ -> "Specify build target."
+            | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Configuration _ -> "Configuration to use."
+            | Environment _ -> "Environment to use."
+            | Variable _ -> "Set variable."
+            | Label _-> "Select projects based on labels."
+            | LocalOnly -> "Use local cache only."
+
+[<RequireQualifiedAccess>]
 type RunArgs =
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
-    | [<Unique; AltCommandLine("-la")>] Label of labels:string list
+    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
-    | [<Unique; AltCommandLine("-l")>] Logs
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -37,7 +57,6 @@ with
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | LocalOnly -> "Use local cache only."
-            | Logs -> "Log outputs."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
@@ -46,12 +65,11 @@ type TargetArgs =
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
-    | [<Unique; AltCommandLine("-la")>] Label of labels:string list
+    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
-    | [<Unique; AltCommandLine("-l")>] Logs
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -66,7 +84,6 @@ with
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | LocalOnly -> "Use local cache only."
-            | Logs -> "Log outputs."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =
@@ -104,6 +121,7 @@ with
 [<RequireQualifiedAccess>]
 type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Scaffold of ParseResults<ScaffoldArgs>
+    | [<CliPrefix(CliPrefix.None)>] Logs of ParseResults<LogsArgs>
     | [<CliPrefix(CliPrefix.None)>] Build of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Test of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Dist of ParseResults<RunArgs>
@@ -122,6 +140,7 @@ with
         member this.Usage =
             match this with
             | Scaffold _ -> "Scaffold workspace."
+            | Logs _ -> "dump logs."
             | Build _ -> "Run target 'build'."
             | Test _ -> "Run target 'test'."
             | Dist _ -> "Run target 'dist'."

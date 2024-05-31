@@ -13,7 +13,6 @@ open Errors
 type Options = {
     WhatIf: bool
     Debug: bool
-    Logs: bool
     MaxConcurrency: int
     Force: bool
     Retry: bool

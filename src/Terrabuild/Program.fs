@@ -3,7 +3,6 @@ open CLI
 open System
 open Serilog
 open Errors
-open Terrabuild.Expressions
 
 let rec dumpKnownException (ex: Exception) =
     seq {
@@ -52,7 +51,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .CreateLogger()
         Log.Debug("Log created")
 
-    let runTarget wsDir target configuration environment labels variables localOnly (options: Configuration.Options) =
+    let runTarget wsDir target configuration environment labels variables localOnly logs (options: Configuration.Options) =
         let wsDir = wsDir |> FS.fullPath
         Environment.CurrentDirectory <- wsDir
         Log.Debug("Changing current directory to {directory}", wsDir)
@@ -75,20 +74,18 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             Log.Debug("Connected to API")
             $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} Connected to Insights" |> Terminal.writeLine
 
-        let storage = Storages.Factory.create api
-
         if options.Debug then
             let jsonConfig = Json.Serialize config
             jsonConfig |> IO.writeTextFile (logFile "config.json")
 
         let graph = Graph.buildGraph config target
-
         if options.Debug then
             let jsonGraph = Json.Serialize graph
             jsonGraph |> IO.writeTextFile (logFile "graph.json")
             let mermaid = Graph.graph graph |> String.join "\n"
             mermaid |> IO.writeTextFile (logFile "graph.mermaid")
 
+        let storage = Storages.Factory.create api
         let cache = Cache.Cache(storage) :> Cache.ICache
         let buildGraph = Graph.optimize config graph cache options
         if options.Debug then
@@ -97,19 +94,23 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let mermaid = Graph.graph buildGraph |> String.join "\n"
             mermaid |> IO.writeTextFile (logFile "buildgraph.mermaid")
 
-        if options.WhatIf then 0
-        else
-            let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            let build = Build.run config buildGraph cache api buildNotification options
-            buildNotification.WaitCompletion()
+        let buildStatus =
+            if options.WhatIf then 0
+            else
+                let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+                let build = Build.run config buildGraph cache api buildNotification options
+                buildNotification.WaitCompletion()
 
-            if options.Debug then
-                let jsonBuild = Json.Serialize build
-                jsonBuild |> IO.writeTextFile (logFile "build.json")
+                if options.Debug then
+                    let jsonBuild = Json.Serialize build
+                    jsonBuild |> IO.writeTextFile (logFile "build.json")
 
-            if build.Status = Build.Status.Success then 0
-            else 5
+                if build.Status = Build.Status.Success then 0
+                else 5
 
+        if logs then Logs.dumpLogs graph cache sourceControl
+
+        buildStatus
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
         let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")
@@ -136,9 +137,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
-                        Configuration.Options.Logs = buildArgs.Contains(RunArgs.Logs)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
-        runTarget wsDir (Set.singleton target) configuration environment labels variables localOnly options
+        runTarget wsDir (Set.singleton target) configuration environment labels variables localOnly false options
 
     let target (targetArgs: ParseResults<TargetArgs>) =
         let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLower
@@ -160,10 +160,30 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
-                        Configuration.Options.Logs = targetArgs.Contains(TargetArgs.Logs)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
-        runTarget wsDir (Set targets) configuration environment labels variables localOnly options
+        runTarget wsDir (Set targets) configuration environment labels variables localOnly false options
 
+    let logs (logsArgs: ParseResults<LogsArgs>) =
+        let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
+        let wsDir =
+            match logsArgs.TryGetResult(LogsArgs.Workspace) with
+            | Some ws -> ws
+            | _ ->
+                match Environment.CurrentDirectory |> findWorkspace with
+                | Some ws -> ws
+                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+        let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
+        let environment = logsArgs.TryGetResult(LogsArgs.Environment) |> Option.defaultValue "default" |> String.toLower
+        let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
+        let variables = logsArgs.GetResults(LogsArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
+        let localOnly = logsArgs.Contains(LogsArgs.LocalOnly)
+        let options = { Configuration.Options.WhatIf = true
+                        Configuration.Options.Debug = debug
+                        Configuration.Options.Force = false
+                        Configuration.Options.MaxConcurrency = 1
+                        Configuration.Options.Retry = false
+                        Configuration.Options.StartedAt = DateTime.UtcNow }
+        runTarget wsDir (Set targets) configuration environment labels variables localOnly true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearBuildCache()
@@ -189,6 +209,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     Log.Debug("Parsing command line")
     match result with
     | p when p.Contains(TerrabuildArgs.Scaffold) -> p.GetResult(TerrabuildArgs.Scaffold) |> scaffold
+    | p when p.Contains(TerrabuildArgs.Logs) -> p.GetResult(TerrabuildArgs.Logs) |> logs
     | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
     | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
     | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"
