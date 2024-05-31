@@ -95,7 +95,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             mermaid |> IO.writeTextFile (logFile "buildgraph.mermaid")
 
         if options.WhatIf then
-            if logs then Logs.dumpLogs graph cache sourceControl None
+            if logs then
+                Logs.dumpLogs graph cache sourceControl None
             0
         else
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
@@ -106,7 +107,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 let jsonBuild = Json.Serialize build
                 jsonBuild |> IO.writeTextFile (logFile "build.json")
 
-            Logs.dumpLogs graph cache sourceControl (Some build.ImpactedNodes)
+            if logs then
+                Logs.dumpLogs graph cache sourceControl (Some build.ImpactedNodes)
 
             if build.Status = Build.Status.Success then 0
             else 5
