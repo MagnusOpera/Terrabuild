@@ -36,8 +36,6 @@ type BuildNotification() =
     let renderer = Progress.ProgressRenderer()
     let updateTimer = 200
 
-    let mutable failedLogs : Cache.TargetSummary list = []
-
     let handler (inbox: MailboxProcessor<PrinterProtocol>) =
 
         let scheduleUpdate () =
@@ -54,27 +52,6 @@ type BuildNotification() =
 
             | PrinterProtocol.BuildCompleted summary ->
                 renderer.Refresh()
-                for failedSummary in failedLogs do
-                    let lastLog = failedSummary.Steps |> List.last
-
-                    let containered =
-                        match lastLog.Container with
-                        | None -> ""
-                        | Some container -> $"{{{container}}} "
-                    $"{Ansi.Emojis.prohibited} {Ansi.Styles.red}{failedSummary.Target} {failedSummary.Project}: {containered}{lastLog.Command} {lastLog.Arguments}{Ansi.Styles.reset}"
-                    |> Terminal.writeLine
-
-                    let log = IO.readTextFile lastLog.Log
-                    log |> Terminal.writeLine
-
-                let result =
-                    match summary.Status with
-                    | Build.Status.Success -> Ansi.Emojis.happy
-                    | _ -> Ansi.Emojis.sad
-
-                $"{result} Completed in {summary.TotalDuration}"
-                |> Terminal.writeLine
-
                 buildComplete.Set() |> ignore
 
             | PrinterProtocol.NodeStatusChanged (node, status) ->
@@ -91,12 +68,7 @@ type BuildNotification() =
             | PrinterProtocol.NodeCompleted (node, restored, summary) ->
                 let status =
                     match summary with
-                    | Some summary ->
-                        match summary.Status with
-                        | Cache.TaskStatus.Success -> true
-                        | _ ->
-                            failedLogs <- failedLogs @ [ summary ]
-                            false
+                    | Some summary -> summary.Status = Cache.TaskStatus.Success
                     | _ -> false
 
                 let label = $"{node.Label} {node.Project}"

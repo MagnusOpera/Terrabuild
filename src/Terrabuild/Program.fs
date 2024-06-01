@@ -96,21 +96,27 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         if options.WhatIf then
             if logs then
-                Logs.dumpLogs graph cache sourceControl None
+                Logs.dumpLogs graph cache sourceControl None options.Debug
             0
         else
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            let build = Build.run config buildGraph cache api buildNotification options
+            let summary = Build.run config buildGraph cache api buildNotification options
             buildNotification.WaitCompletion()
 
             if options.Debug then
-                let jsonBuild = Json.Serialize build
+                let jsonBuild = Json.Serialize summary
                 jsonBuild |> IO.writeTextFile (logFile "build.json")
 
-            if logs then
-                Logs.dumpLogs graph cache sourceControl (Some build.ImpactedNodes)
+            if logs || summary.Status <> Build.Status.Success then
+                Logs.dumpLogs graph cache sourceControl (Some summary.ImpactedNodes) options.Debug
 
-            if build.Status = Build.Status.Success then 0
+            let result =
+                match summary.Status with
+                | Build.Status.Success -> Ansi.Emojis.happy
+                | _ -> Ansi.Emojis.sad
+
+            $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
+            if summary.Status = Build.Status.Success then 0
             else 5
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
