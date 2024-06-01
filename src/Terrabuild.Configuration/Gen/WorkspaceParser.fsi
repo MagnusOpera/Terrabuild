@@ -12,7 +12,6 @@ type token =
   | WORKSPACE
   | TARGET
   | CONFIGURATION
-  | ENVIRONMENT
   | EXTENSION
   | EOF
   | TRIM
@@ -50,7 +49,6 @@ type tokenId =
     | TOKEN_WORKSPACE
     | TOKEN_TARGET
     | TOKEN_CONFIGURATION
-    | TOKEN_ENVIRONMENT
     | TOKEN_EXTENSION
     | TOKEN_EOF
     | TOKEN_TRIM
@@ -95,6 +93,7 @@ type nonTerminalId =
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_ExtensionContainer
+    | NONTERM_ExtensionVariables
     | NONTERM_ExtensionScript
     | NONTERM_ExtensionDefaults
     | NONTERM_Bool

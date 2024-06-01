@@ -337,6 +337,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                             Configuration.ContaineredActionBatch.BatchContext = None
                             Configuration.ContaineredActionBatch.Cache = action.Cache
                             Configuration.ContaineredActionBatch.Container = action.Container
+                            Configuration.ContaineredActionBatch.ContainerVariables = action.ContainerVariables
                             Configuration.ContaineredActionBatch.Actions = actionBatch }
                     | _ -> None
                 )

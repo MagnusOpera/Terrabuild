@@ -204,7 +204,11 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                             | None -> projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container
                             | Some container ->
                                 let whoami = getContainerUser container
-                                let args = $"run --rm --net=host --entrypoint {commandLine.Command} --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} {container} {commandLine.Arguments}"
+                                let envs =
+                                    batch.ContainerVariables
+                                    |> Seq.map (fun var -> $"-e {var}")
+                                    |> String.join " "
+                                let args = $"run --rm --net=host --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {commandLine.Command} {envs} {container} {commandLine.Arguments}"
                                 workspaceDir, cmd, args, batch.Container))
 
 

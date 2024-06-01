@@ -11,6 +11,8 @@ extension @docker {
     configuration: $configuration
     image : "ghcr.io/magnusopera/dotnet-app"
   }
+
+  variables = [ "ARM_TENANT_ID" ]
 }
 
 extension dummy {

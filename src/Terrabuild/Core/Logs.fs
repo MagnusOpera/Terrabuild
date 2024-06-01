@@ -3,7 +3,7 @@ open Graph
 open Cache
 open Contracts
 
-let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option)=
+let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) debug =
     let scope =
         match impactedNodes with
         | Some impactedNodes -> impactedNodes
@@ -13,6 +13,12 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
 
         let dumpLogs (summary: Cache.TargetSummary) =
             summary.Steps |> Seq.iteri (fun index step ->
+                if debug then
+                    match step.Container with
+                    | Some container ->
+                        $"{Ansi.Styles.red}{container}: {step.Command} {step.Arguments}{Ansi.Styles.reset}" |> Terminal.writeLine
+                    | _ -> ()
+
                 if 0 < index then
                     $"{Ansi.Styles.yellow}+++{Ansi.Styles.reset}" |> Terminal.writeLine
                 step.Log |> IO.readTextFile |> Terminal.write

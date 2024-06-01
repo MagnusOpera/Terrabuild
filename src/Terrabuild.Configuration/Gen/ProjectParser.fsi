@@ -5,6 +5,7 @@ type token =
   | OUTPUTS
   | IGNORES
   | LABELS
+  | VARIABLES
   | CONTAINER
   | INIT
   | SCRIPT
@@ -43,6 +44,7 @@ type tokenId =
     | TOKEN_OUTPUTS
     | TOKEN_IGNORES
     | TOKEN_LABELS
+    | TOKEN_VARIABLES
     | TOKEN_CONTAINER
     | TOKEN_INIT
     | TOKEN_SCRIPT
@@ -85,6 +87,7 @@ type nonTerminalId =
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_ExtensionContainer
+    | NONTERM_ExtensionVariables
     | NONTERM_ExtensionScript
     | NONTERM_ExtensionDefaults
     | NONTERM_Project

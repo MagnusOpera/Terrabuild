@@ -86,10 +86,13 @@ Extension:
 ExtensionComponents:
     | /* empty */ { Extension.Empty }
     | ExtensionComponents ExtensionContainer { $1.Patch $2 }
+    | ExtensionComponents ExtensionVariables { $1.Patch $2 }
     | ExtensionComponents ExtensionScript { $1.Patch $2 }
     | ExtensionComponents ExtensionDefaults { $1.Patch $2 }
 ExtensionContainer:
     | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
+ExtensionVariables:
+    | VARIABLES EQUAL ListOfString { ExtensionComponents.Variables $3 }
 ExtensionScript:
     | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
 ExtensionDefaults:

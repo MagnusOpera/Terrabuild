@@ -28,10 +28,12 @@ let parseWorkspace() =
 
         let extDotnet =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
+              Variables = Set.empty
               Script = None
               Defaults = Map [ "configuration", Expr.Variable "configuration" ] }
         let extDocker =
             { Container = None
+              Variables = Set.empty
               Script = None
               Defaults = Map.empty }
 
@@ -73,10 +75,12 @@ let parseWorkspace2() =
 
         let extDotnet =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
+              Variables = Set.empty
               Script = None
               Defaults = Map [ "configuration", Expr.Variable "configuration" ] }
         let extDocker =
             { Container = None
+              Variables = Set.empty
               Script = None
               Defaults = Map.empty }
 

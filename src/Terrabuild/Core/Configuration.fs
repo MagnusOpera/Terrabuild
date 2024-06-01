@@ -31,6 +31,7 @@ type ContaineredActionBatch = {
     Actions: Action list
 
     Container: string option
+    ContainerVariables: string Set
     BatchContext: BatchContext option
 }
 
@@ -331,6 +332,7 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
                                     let containedActionBatch = {
                                         ContaineredActionBatch.BatchContext = batchContext
                                         ContaineredActionBatch.Container = extension.Container
+                                        ContaineredActionBatch.ContainerVariables = extension.Variables
                                         ContaineredActionBatch.Cache = cache
                                         ContaineredActionBatch.Actions = actionGroup.Actions
                                     }
