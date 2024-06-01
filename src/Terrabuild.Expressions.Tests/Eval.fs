@@ -72,7 +72,7 @@ let subNumber() =
 [<Test>]
 let coalesce() =
     let expected = Value.Number 42
-    let varUsed, result = eval evaluationContext (Expr.Function (Function.Coalesce, [Expr.Nothing; Expr.Number 42; Expr.String "toto"]))
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Coalesce, [Expr.Nothing; Expr.Number 42]))
     varUsed |> should be Empty
     result |> should equal expected
 

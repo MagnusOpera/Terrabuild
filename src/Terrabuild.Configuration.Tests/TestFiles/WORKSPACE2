@@ -26,7 +26,8 @@ configuration release {
     }
     list: [ 1
             2+3
-            "tutu" ]
+            "tutu"
+            nothing ?? 42 ]
   }
 }
 

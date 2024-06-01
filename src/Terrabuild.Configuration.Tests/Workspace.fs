@@ -72,7 +72,8 @@ let parseWorkspace2() =
                                                        "titi", Expr.String "tagada" ])
                                 "list", Expr.List [ Expr.Number 1
                                                     Expr.Function (Function.Plus, [ Expr.Number 2; Expr.Number 3 ])
-                                                    Expr.String "tutu" ] ] }
+                                                    Expr.String "tutu"
+                                                    Expr.Function (Function.Coalesce, [ Expr.Nothing; Expr.Number 42 ]) ] ] }
         let envDummy =
             { Variables = Map.empty }
         let envSecret =
