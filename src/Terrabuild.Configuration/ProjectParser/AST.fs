@@ -7,6 +7,7 @@ type ProjectComponents =
     | Dependencies of string list
     | Outputs of string list
     | Ignores of string list
+    | Files of string list
     | Labels of string list
     | Init of string
 
@@ -14,6 +15,7 @@ type Project = {
     Dependencies: Set<string> option
     Outputs: Set<string> option
     Ignores: Set<string> option
+    Files: Set<string> option
     Labels: Set<string>
     Init: string option
 }
@@ -22,6 +24,7 @@ with
         { Dependencies = None
           Outputs = None
           Ignores = None
+          Files = None
           Labels = Set.empty
           Init = None }
 
@@ -30,6 +33,7 @@ with
         | ProjectComponents.Dependencies dependencies -> { this with Dependencies = dependencies |> Set.ofList |> Some }
         | ProjectComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList |> Some }
         | ProjectComponents.Ignores ignores -> { this with Ignores = ignores |> Set.ofList |> Some }
+        | ProjectComponents.Files files -> { this with Files = files |> Set.ofList |> Some }
         | ProjectComponents.Labels labels -> { this with Labels = labels |> Set.ofList |> Set.map (fun x -> x.ToLowerInvariant()) }
         | ProjectComponents.Init init -> { this with Init = Some init }
 

@@ -33,7 +33,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER VERSION COALESCE
 %token EOF
 %token PROJECT EXTENSION TARGET 
-%token DEPENDENCIES OUTPUTS IGNORES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS
+%token DEPENDENCIES OUTPUTS IGNORES FILES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS
 
 // associativity and precedences
 %left PLUS
@@ -78,6 +78,7 @@ ProjectComponents:
     | ProjectComponents ProjectDependencies { $1.Patch $2 }
     | ProjectComponents ProjectOutputs { $1.Patch $2 }
     | ProjectComponents ProjectIgnores { $1.Patch $2 }
+    | ProjectComponents ProjectFiles { $1.Patch $2 }
     | ProjectComponents ProjectLabels { $1.Patch $2 }
 ProjectDependencies:
     | DEPENDENCIES EQUAL ListOfString { ProjectComponents.Dependencies $3 }
@@ -85,6 +86,8 @@ ProjectOutputs:
     | OUTPUTS EQUAL ListOfString { ProjectComponents.Outputs $3 }
 ProjectIgnores:
     | IGNORES EQUAL ListOfString { ProjectComponents.Ignores $3 }
+ProjectFiles:
+    | FILES EQUAL ListOfString { ProjectComponents.Files $3 }
 ProjectLabels:
     | LABELS EQUAL ListOfString { ProjectComponents.Labels $3 }
 

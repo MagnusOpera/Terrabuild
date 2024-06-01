@@ -34,6 +34,7 @@ rule token = parse
     | "dependencies" { DEPENDENCIES }
     | "outputs" { OUTPUTS }
     | "ignores" { IGNORES }
+    | "files" { FILES }
     | "labels" { LABELS }
     | "script" { SCRIPT }
     | "extension" { EXTENSION }

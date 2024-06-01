@@ -1,6 +1,6 @@
 
 workspace {
-    space = "magnusopera/default"
+    // space = "magnusopera/default"
 }
 
 configuration default {

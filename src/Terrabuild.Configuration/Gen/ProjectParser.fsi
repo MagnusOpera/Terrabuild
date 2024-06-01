@@ -4,6 +4,7 @@ type token =
   | DEPENDENCIES
   | OUTPUTS
   | IGNORES
+  | FILES
   | LABELS
   | VARIABLES
   | CONTAINER
@@ -46,6 +47,7 @@ type tokenId =
     | TOKEN_DEPENDENCIES
     | TOKEN_OUTPUTS
     | TOKEN_IGNORES
+    | TOKEN_FILES
     | TOKEN_LABELS
     | TOKEN_VARIABLES
     | TOKEN_CONTAINER
@@ -101,6 +103,7 @@ type nonTerminalId =
     | NONTERM_ProjectDependencies
     | NONTERM_ProjectOutputs
     | NONTERM_ProjectIgnores
+    | NONTERM_ProjectFiles
     | NONTERM_ProjectLabels
     | NONTERM_Target
     | NONTERM_TargetComponents

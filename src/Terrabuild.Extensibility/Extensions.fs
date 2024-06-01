@@ -13,12 +13,14 @@ type ProjectInfo = {
     Outputs: Set<string>
     Ignores: Set<string>
     Dependencies: Set<string>
+    Files: Set<string>
 }
 with
     static member Default = {
         Outputs = Set.empty
         Ignores = Set.empty
         Dependencies = Set.empty
+        Files = Set [ "**/*" ]
     }
 
 [<RequireQualifiedAccess>]

@@ -20,7 +20,8 @@ type Gradle() =
     /// </summary>
     /// <param name="outputs" example="[ &quot;build/classes/&quot; ]">Default values.</param>
     static member __defaults__ () =
-        let projectInfo = { ProjectInfo.Default with Outputs = Set [ "build/classes/" ] }
+        let projectInfo = { ProjectInfo.Default
+                            with Outputs = Set [ "build/classes/" ] }
         projectInfo
 
     /// <summary>

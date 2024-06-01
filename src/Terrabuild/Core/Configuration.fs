@@ -185,7 +185,8 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
                         projectInfo
                         with Ignores = projectConfig.Project.Ignores |> Option.defaultValue projectInfo.Ignores
                              Outputs = projectConfig.Project.Outputs |> Option.defaultValue projectInfo.Outputs
-                             Dependencies = projectConfig.Project.Dependencies |> Option.defaultValue projectInfo.Dependencies }
+                             Dependencies = projectConfig.Project.Dependencies |> Option.defaultValue projectInfo.Dependencies
+                             Files = projectConfig.Project.Files |> Option.defaultValue projectInfo.Files }
 
                     let labels = projectConfig.Project.Labels
 
@@ -207,6 +208,7 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
                        Includes = includes
                        Ignores = projectIgnores
                        Outputs = projectOutputs
+                       Files = projectInfo.Files
                        Targets = projectTargets
                        Labels = labels
                        Extensions = extensions
@@ -225,7 +227,7 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
 
                 // get dependencies on files
                 let files =
-                    projectDir |> IO.enumerateFilesBut (projectDef.Outputs + projectDef.Ignores)
+                    projectDir |> IO.enumerateFilesBut (projectDef.Files) (projectDef.Outputs + projectDef.Ignores)
                     |> Set
                     |> Set.union projectDef.Includes
                 let filesHash =

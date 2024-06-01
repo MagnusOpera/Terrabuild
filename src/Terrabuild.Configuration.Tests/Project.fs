@@ -17,6 +17,7 @@ let parseProject() =
             { Dependencies = Set [ "../../libraries/shell-lib" ] |> Some
               Outputs = Set [ "dist" ] |> Some
               Ignores = None
+              Files = None
               Labels = Set [ "app"; "dotnet" ]
               Init = Some "@dotnet" }
 
@@ -82,6 +83,7 @@ let parseProject2() =
             { Dependencies = None
               Outputs = None
               Ignores = None
+              Files = None
               Labels = Set.empty
               Init = Some "@dotnet" }
 

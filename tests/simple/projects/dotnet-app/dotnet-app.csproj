@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../shared-folder/Terminal.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../libraries/dotnet-lib/dotnet-lib.csproj" />
   </ItemGroup>
 

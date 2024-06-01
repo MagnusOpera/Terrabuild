@@ -9,6 +9,9 @@ extension @docker {
 project @dotnet {
     labels = [ "app"
                "dotnet" ]
+
+    files = [ "**/*"
+              "../shared-folder/**/*" ]
 }
 
 target build {
