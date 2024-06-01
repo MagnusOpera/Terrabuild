@@ -20,7 +20,6 @@ type LogsArgs =
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
-    | [<Unique; AltCommandLine("-lo")>] LocalOnly
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -31,7 +30,6 @@ with
             | Environment _ -> "Environment to use."
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
-            | LocalOnly -> "Use local cache only."
 
 [<RequireQualifiedAccess>]
 type RunArgs =

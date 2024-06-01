@@ -179,14 +179,13 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let environment = logsArgs.TryGetResult(LogsArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
-        let localOnly = logsArgs.Contains(LogsArgs.LocalOnly)
         let options = { Configuration.Options.WhatIf = true
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = false
                         Configuration.Options.MaxConcurrency = 1
                         Configuration.Options.Retry = false
                         Configuration.Options.StartedAt = DateTime.UtcNow }
-        runTarget wsDir (Set targets) configuration environment labels variables localOnly true options
+        runTarget wsDir (Set targets) configuration environment labels variables true true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearBuildCache()

@@ -4,6 +4,11 @@ open Cache
 open Contracts
 
 let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option)=
+    let scope =
+        match impactedNodes with
+        | Some impactedNodes -> impactedNodes
+        | _ -> graph.RootNodes
+
     graph.Nodes |> Map.iter (fun nodeId node ->
 
         let dumpLogs (summary: Cache.TargetSummary) =
@@ -13,12 +18,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                 step.Log |> IO.readTextFile |> Terminal.write
             )
 
-        let dump =
-            match impactedNodes with
-            | Some impactedNodes -> impactedNodes |> Set.contains nodeId
-            | _ -> true
-
-        if dump then
+        if scope |> Set.contains nodeId then
             let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
             match cache.TryGetSummary false cacheEntryId with
             | Some summary -> 
