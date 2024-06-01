@@ -27,7 +27,7 @@ type Terraform() =
 
 
     /// <summary weight="2" title="Generate plan file.">
-    /// This command validate the project:
+    /// This command validates the project:
     /// * initialize Terraform
     /// * select workspace
     /// * run validate
