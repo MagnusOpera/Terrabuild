@@ -67,7 +67,12 @@ let parseWorkspace2() =
               Rebuild = None }
 
         let envRelease =
-            { Variables = Map [ "configuration", Expr.String "Release" ] }
+            { Variables = Map [ "configuration", Expr.String "Release"
+                                "map", Expr.Map (Map [ "toto", Expr.Number 42
+                                                       "titi", Expr.String "tagada" ])
+                                "list", Expr.List [ Expr.Number 1
+                                                    Expr.Function (Function.Plus, [ Expr.Number 2; Expr.Number 3 ])
+                                                    Expr.String "tutu" ] ] }
         let envDummy =
             { Variables = Map.empty }
         let envSecret =
@@ -77,7 +82,8 @@ let parseWorkspace2() =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
               Variables = Set.empty
               Script = None
-              Defaults = Map [ "configuration", Expr.Variable "configuration" ] }
+              Defaults = Map [ "configuration1", Expr.Function (Function.Item, [Expr.Variable "map"; Expr.String "toto"])
+                               "configuration2", Expr.Function (Function.Item, [Expr.Variable "map"; Expr.String "titi"]) ] }
         let extDocker =
             { Container = None
               Variables = Set.empty

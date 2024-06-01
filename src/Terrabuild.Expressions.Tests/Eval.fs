@@ -92,3 +92,33 @@ let version() =
         eval context (Expr.Function (Function.Version, [ Expr.String "../net8.0/toto"]))
     varUsed |> should be Empty
     result |> should equal expected
+
+[<Test>]
+let listItem() =
+    let expected = Value.Number 42
+    let expectedUsedVars = Set ["tagada"]
+
+    let context = { evaluationContext
+                    with Variables = Map [ 
+                        "tagada", Expr.List [ Expr.String "toto"; Expr.Number 42 ]
+                    ] }
+
+    let varUsed, result =
+        eval context (Expr.Function (Function.Item, [ Expr.Variable "tagada"; Expr.Number 1]))
+    varUsed |> should equal expectedUsedVars
+    result |> should equal expected
+
+[<Test>]
+let mapItem() =
+    let expected = Value.Number 42
+    let expectedUsedVars = Set ["tagada"]
+
+    let context = { evaluationContext
+                    with Variables = Map [ 
+                        "tagada", Expr.Map (Map [ "toto", Expr.Number 42 ])
+                    ] }
+
+    let varUsed, result =
+        eval context (Expr.Function (Function.Item, [ Expr.Variable "tagada"; Expr.String "toto" ]))
+    varUsed |> should equal expectedUsedVars
+    result |> should equal expected

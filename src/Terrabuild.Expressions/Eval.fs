@@ -26,6 +26,11 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 let mvu, mv = eval varUsed v
                 varUsed+mvu, map |> Map.add k mv) (varUsed, Map.empty)
             varUsed, Value.Map values
+        | Expr.List list ->
+            let varUsed, values = list |> List.fold (fun (varUsed, list) v ->
+                let mvu, mv = eval varUsed v
+                varUsed+mvu, list @ [mv]) (varUsed, [])
+            varUsed, Value.List values
         | Expr.Function (f, exprs) ->
             let varUsed, values = exprs |> List.fold (fun (varUsed, exprs) expr ->
                 let vu, e = eval varUsed expr
@@ -54,6 +59,16 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     match context.Versions |> Map.tryFind projectName with
                     | Some version -> Value.String version
                     | _ -> TerrabuildException.Raise($"Unknown project reference {str}")
+
+                | Function.Item, [Value.Map map; Value.String key] ->
+                    match map |> Map.tryFind key with
+                    | Some value -> value
+                    | _ -> TerrabuildException.Raise($"Unknown key {key}")
+
+                | Function.Item, [Value.List list; Value.Number index] ->
+                    match list |> List.tryItem index with
+                    | Some value -> value
+                    | _ -> TerrabuildException.Raise($"Out of range index {index}")
 
                 | _ -> TerrabuildException.Raise($"Invalid arguments for function {f}")
             varUsed, res

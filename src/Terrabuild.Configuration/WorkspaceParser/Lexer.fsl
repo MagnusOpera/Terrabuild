@@ -43,6 +43,7 @@ rule token = parse
 
     | "{" { LBRACE }
     | "}" { RBRACE }
+    | ".[" { DOT_LSQBRACKET }
     | "[" { LSQBRACKET }
     | "]" { RSQBRACKET }
     | "(" { LPAREN }

@@ -23,6 +23,7 @@ type token =
   | EQUAL
   | LPAREN
   | RPAREN
+  | DOT_LSQBRACKET
   | LSQBRACKET
   | RSQBRACKET
   | LBRACE
@@ -60,6 +61,7 @@ type tokenId =
     | TOKEN_EQUAL
     | TOKEN_LPAREN
     | TOKEN_RPAREN
+    | TOKEN_DOT_LSQBRACKET
     | TOKEN_LSQBRACKET
     | TOKEN_RSQBRACKET
     | TOKEN_LBRACE
@@ -102,13 +104,14 @@ type nonTerminalId =
     | NONTERM_Strings
     | NONTERM_ListOfTargetIdentifiers
     | NONTERM_TargetIdentifiers
-    | NONTERM_StringVariables
-    | NONTERM_StringVariable
-    | NONTERM_Variables
-    | NONTERM_Variable
     | NONTERM_TargetIdentifier
     | NONTERM_ExtensionIdentifier
     | NONTERM_Expr
+    | NONTERM_ExprIndex
+    | NONTERM_ExprList
+    | NONTERM_ExprListContent
+    | NONTERM_ExprMap
+    | NONTERM_ExprMapContent
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int
 

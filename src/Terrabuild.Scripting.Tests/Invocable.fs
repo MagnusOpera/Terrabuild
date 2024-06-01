@@ -23,6 +23,13 @@ type Scripting() =
         let name = name |> Option.defaultValue "None"
         $"Hello {name} !"
 
+    static member HelloMap (names: Map<string, string>) =
+        let values = names |> Map.map (fun k v -> $"{k} {v}")
+        values.Values |> String.join " "
+
+    static member HelloList (names: string list) =
+        names |> String.join " "
+
 let getMethod name =
     let method = typeof<Scripting>.GetMethod(name)
     method
@@ -62,3 +69,23 @@ let invokeOptionSome() =
     let args = Value.Map (Map ["name", Value.String "Pierre"])
     let result = invocable.Invoke<string> args
     result |> should equal "Hello Pierre !"
+
+[<Test>]
+let invokeMap() =
+    let method = getMethod "HelloMap"
+    let invocable = Invocable(method)
+
+    let names = Value.Map (Map ["Hello", Value.String "Pierre"])
+    let args = Value.Map (Map ["names", names])    
+    let result = invocable.Invoke<string> args
+    result |> should equal "Hello Pierre"
+
+[<Test>]
+let invokeList() =
+    let method = getMethod "HelloList"
+    let invocable = Invocable(method)
+
+    let names = Value.List [Value.String "Hello"; Value.String "Pierre"]
+    let args = Value.Map (Map ["names", names])
+    let result = invocable.Invoke<string> args
+    result |> should equal "Hello Pierre"
