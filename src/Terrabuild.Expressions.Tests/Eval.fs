@@ -70,6 +70,13 @@ let subNumber() =
     result |> should equal expected
 
 [<Test>]
+let coalesce() =
+    let expected = Value.Number 42
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Coalesce, [Expr.Nothing; Expr.Number 42; Expr.String "toto"]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
 let trimString() =
     let expected = Value.String "hello"
     let varUsed, result = eval evaluationContext (Expr.Function (Function.Trim, [Expr.String " hello  "]))

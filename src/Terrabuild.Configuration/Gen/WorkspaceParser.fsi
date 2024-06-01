@@ -18,6 +18,7 @@ type token =
   | UPPER
   | LOWER
   | VERSION
+  | COALESCE
   | MINUS
   | PLUS
   | COMMA
@@ -57,6 +58,7 @@ type tokenId =
     | TOKEN_UPPER
     | TOKEN_LOWER
     | TOKEN_VERSION
+    | TOKEN_COALESCE
     | TOKEN_MINUS
     | TOKEN_PLUS
     | TOKEN_COMMA

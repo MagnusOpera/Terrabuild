@@ -9,6 +9,7 @@ type Function =
     | Lower
     | Version
     | Item
+    | Coalesce
 
 [<RequireQualifiedAccessAttribute>]
 type Expr =

@@ -64,6 +64,11 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | Some value -> value
                     | _ -> TerrabuildException.Raise($"Out of range index {index}")
 
+                | Function.Coalesce, list ->
+                    match list |> List.tryFind (fun i -> i <> Value.Nothing) with
+                    | Some value -> value
+                    | _ -> TerrabuildException.Raise($"Failed to find value")
+
                 | _ -> TerrabuildException.Raise($"Invalid arguments for function {f}")
             varUsed, res
 

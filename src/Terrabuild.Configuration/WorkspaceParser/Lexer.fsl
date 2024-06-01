@@ -27,6 +27,7 @@ rule token = parse
     | "upper" { UPPER }
     | "lower" { LOWER }
     | "version" { VERSION }
+    | "coalesce" { COALESCE }
 
     | "workspace" { WORKSPACE }
     | "target" { TARGET }
