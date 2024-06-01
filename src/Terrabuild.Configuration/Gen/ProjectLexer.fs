@@ -384,7 +384,7 @@ let trans : uint16[] array =
     (* State 185 *)
      [| 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 70us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 69us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 68us; 65535us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 71us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; 65535us; |];
     |] 
-let actions : uint16[] = [|65535us; 0us; 2us; 1us; 2us; 0us; 65535us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 20us; 42us; 22us; 42us; 42us; 42us; 42us; 28us; 42us; 29us; 30us; 42us; 32us; 33us; 34us; 35us; 36us; 37us; 38us; 39us; 40us; 42us; 41us; 42us; 40us; 31us; 28us; 65535us; 28us; 28us; 28us; 27us; 27us; 65535us; 27us; 65535us; 25us; 65535us; 24us; 24us; 65535us; 24us; 23us; 23us; 65535us; 23us; 22us; 65535us; 26us; 65535us; 22us; 21us; 22us; 22us; 22us; 22us; 22us; 18us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 15us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 14us; 22us; 22us; 22us; 22us; 13us; 22us; 22us; 22us; 22us; 22us; 11us; 22us; 22us; 22us; 22us; 22us; 10us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 19us; 22us; 22us; 22us; 22us; 22us; 65535us; 22us; 17us; 22us; 22us; 22us; 22us; 9us; 22us; 22us; 22us; 22us; 22us; 7us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 16us; 22us; 22us; 22us; 22us; 6us; 22us; 22us; 22us; 22us; 22us; 12us; 22us; 22us; 5us; 22us; 22us; 22us; 4us; 22us; 22us; 22us; 2us; 22us; 22us; 22us; 22us; 22us; 8us; 22us; 22us; 3us; 1us; 22us; 22us; 22us; 22us; 22us; 0us; |]
+let actions : uint16[] = [|65535us; 0us; 2us; 1us; 2us; 0us; 65535us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 20us; 43us; 22us; 43us; 43us; 43us; 43us; 28us; 38us; 29us; 30us; 43us; 32us; 33us; 34us; 35us; 36us; 37us; 39us; 40us; 41us; 43us; 42us; 43us; 41us; 31us; 28us; 65535us; 28us; 28us; 28us; 27us; 27us; 65535us; 27us; 65535us; 25us; 65535us; 24us; 24us; 65535us; 24us; 23us; 23us; 65535us; 23us; 22us; 65535us; 26us; 65535us; 22us; 21us; 22us; 22us; 22us; 22us; 22us; 18us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 15us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 14us; 22us; 22us; 22us; 22us; 13us; 22us; 22us; 22us; 22us; 22us; 11us; 22us; 22us; 22us; 22us; 22us; 10us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 19us; 22us; 22us; 22us; 22us; 22us; 65535us; 22us; 17us; 22us; 22us; 22us; 22us; 9us; 22us; 22us; 22us; 22us; 22us; 7us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 22us; 16us; 22us; 22us; 22us; 22us; 6us; 22us; 22us; 22us; 22us; 22us; 12us; 22us; 22us; 5us; 22us; 22us; 22us; 4us; 22us; 22us; 22us; 2us; 22us; 22us; 22us; 22us; 22us; 8us; 22us; 22us; 3us; 1us; 22us; 22us; 22us; 22us; 22us; 0us; |]
 let _fslex_tables = FSharp.Text.Lexing.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 // Rule token
@@ -591,47 +591,52 @@ and token  lexbuf =
           )
   | 38 -> ( 
 # 78 "ProjectParser/Lexer.fsl"
-                           PLUS 
+                           MINUS 
 # 595 "Gen/ProjectLexer.fs"
           )
   | 39 -> ( 
-# 80 "ProjectParser/Lexer.fsl"
-                                  token lexbuf 
+# 79 "ProjectParser/Lexer.fsl"
+                           PLUS 
 # 600 "Gen/ProjectLexer.fs"
           )
   | 40 -> ( 
 # 81 "ProjectParser/Lexer.fsl"
-                               lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
+                                  token lexbuf 
 # 605 "Gen/ProjectLexer.fs"
           )
   | 41 -> ( 
 # 82 "ProjectParser/Lexer.fsl"
-                           EOF 
+                               lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
 # 610 "Gen/ProjectLexer.fs"
           )
   | 42 -> ( 
 # 83 "ProjectParser/Lexer.fsl"
-                         failwithf "unrecognized input: '%s'" <| lexeme lexbuf 
+                           EOF 
 # 615 "Gen/ProjectLexer.fs"
+          )
+  | 43 -> ( 
+# 84 "ProjectParser/Lexer.fsl"
+                         failwithf "unrecognized input: '%s'" <| lexeme lexbuf 
+# 620 "Gen/ProjectLexer.fs"
           )
   | _ -> failwith "token"
 // Rule singleLineComment
 and singleLineComment  lexbuf =
   match _fslex_tables.Interpret(0,lexbuf) with
   | 0 -> ( 
-# 86 "ProjectParser/Lexer.fsl"
-                               lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
-# 624 "Gen/ProjectLexer.fs"
-          )
-  | 1 -> ( 
 # 87 "ProjectParser/Lexer.fsl"
-                           EOF 
+                               lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
 # 629 "Gen/ProjectLexer.fs"
           )
-  | 2 -> ( 
+  | 1 -> ( 
 # 88 "ProjectParser/Lexer.fsl"
-                         singleLineComment lexbuf 
+                           EOF 
 # 634 "Gen/ProjectLexer.fs"
+          )
+  | 2 -> ( 
+# 89 "ProjectParser/Lexer.fsl"
+                         singleLineComment lexbuf 
+# 639 "Gen/ProjectLexer.fs"
           )
   | _ -> failwith "singleLineComment"
 

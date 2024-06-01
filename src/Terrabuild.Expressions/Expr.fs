@@ -3,6 +3,7 @@ namespace Terrabuild.Expressions
 [<RequireQualifiedAccessAttribute>]
 type Function =
     | Plus
+    | Minus
     | Trim
     | Upper
     | Lower

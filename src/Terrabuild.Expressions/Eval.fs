@@ -38,15 +38,9 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
             let res = 
                 match f, values with
                 | Function.Plus, [Value.String left; Value.String right] -> Value.String (left + right)
-                | Function.Plus, [Value.String left; Value.Nothing] -> Value.String (left)
-                | Function.Plus, [Value.Nothing; Value.String right] -> Value.String (right)
-
                 | Function.Plus, [Value.Number left; Value.Number right] -> Value.Number (left + right)
-                | Function.Plus, [Value.Number left; Value.Nothing] -> Value.Number (left)
-                | Function.Plus, [Value.Nothing; Value.Number right] -> Value.Number (right)
-
+                | Function.Minus, [Value.Number left; Value.Number right] -> Value.Number (left - right)
                 | Function.Trim, [Value.String str] -> Value.String (str.Trim())
-                | Function.Trim, [Value.Nothing] -> Value.Nothing
 
                 | Function.Upper, [Value.String str] -> Value.String (str.ToUpperInvariant())
                 | Function.Upper, [Value.Nothing] -> Value.Nothing

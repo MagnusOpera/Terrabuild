@@ -56,6 +56,20 @@ let concatString() =
     result |> should equal expected
 
 [<Test>]
+let addNumber() =
+    let expected = Value.Number 7
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Plus, [Expr.Number 5; Expr.Number 2]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let subNumber() =
+    let expected = Value.Number 3
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Minus, [Expr.Number 5; Expr.Number 2]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
 let trimString() =
     let expected = Value.String "hello"
     let varUsed, result = eval evaluationContext (Expr.Function (Function.Trim, [Expr.String " hello  "]))

@@ -75,6 +75,7 @@ rule token = parse
     | ")" { RPAREN }
     | "=" { EQUAL }
     | "," { COMMA }
+    | "-" { MINUS }
     | "+" { PLUS }
 
     | whitespace { token lexbuf }

@@ -50,6 +50,7 @@ rule token = parse
     | ")" { RPAREN }
     | "=" { EQUAL }
     | "," { COMMA }
+    | "-" { MINUS }
     | "+" { PLUS }
 
     | "#" { singleLineComment lexbuf }
