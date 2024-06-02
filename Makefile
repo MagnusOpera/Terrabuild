@@ -79,9 +79,11 @@ pack:
 
 dist-all: clean publish-all pack
 
+
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(buildconfig)
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net8.0/Terrabuild.Extensions.xml ../websites/terrabuild.io/content/docs/extensions
+
 
 self-build: clean publish
 	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug
@@ -97,6 +99,23 @@ self-publish: clean publish
 
 self-check: clean publish
 	.out/dotnet/terrabuild publish --workspace src --configuration $(env) --retry --debug --whatif
+
+
+tb-build: clean
+	terrabuild build --workspace src --configuration $(env) --retry --debug
+
+tb-dist: clean
+	terrabuild dist --workspace src --configuration $(env) --retry --debug
+
+tb-test: clean
+	terrabuild test --workspace src --configuration $(env) --retry --debug
+
+tb-publish: clean
+	terrabuild publish --workspace src --configuration $(env) --retry --debug
+
+tb-check: clean
+	terrabuild publish --workspace src --configuration $(env) --retry --debug --whatif
+
 
 
 #
