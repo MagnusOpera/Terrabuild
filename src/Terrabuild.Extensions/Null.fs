@@ -18,3 +18,9 @@ type Null() =
     /// </summary>
     static member __dispatch__ (context: ActionContext) =
         if context.Debug then printfn $"__dispatch__ {context} invoked"
+
+    /// <summary>
+    /// Fake action.
+    /// </summary>
+    static member fake (context: ActionContext) =
+        if context.Debug then printfn $"fake {context} invoked"
