@@ -333,12 +333,9 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
                     match result with
                     | Extensions.InvocationResult.Success actionBatch ->
-                        Some { 
-                            Configuration.ContaineredActionBatch.BatchContext = None
-                            Configuration.ContaineredActionBatch.Cache = action.Cache
-                            Configuration.ContaineredActionBatch.Container = action.Container
-                            Configuration.ContaineredActionBatch.ContainerVariables = action.ContainerVariables
-                            Configuration.ContaineredActionBatch.Actions = actionBatch }
+                        Some { action
+                               with BatchContext = None
+                                    Actions = actionBatch }
                     | _ -> None
                 )
 

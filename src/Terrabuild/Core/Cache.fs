@@ -9,6 +9,7 @@ type TaskStatus =
 
 [<RequireQualifiedAccess>]
 type StepSummary = {
+    MetaCommand: string
     Command: string
     Arguments: string
     Container: string option

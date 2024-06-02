@@ -201,7 +201,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                     whoami
 
                             match batch.Container with
-                            | None -> projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container
+                            | None -> batch.MetaCommand, projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container
                             | Some container ->
                                 let whoami = getContainerUser container
                                 let envs =
@@ -209,7 +209,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                     |> Seq.map (fun var -> $"-e {var}")
                                     |> String.join " "
                                 let args = $"run --rm --net=host --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {commandLine.Command} {envs} {container} {commandLine.Arguments}"
-                                workspaceDir, cmd, args, batch.Container))
+                                batch.MetaCommand, workspaceDir, cmd, args, batch.Container))
 
 
                 let beforeFiles =
@@ -222,7 +222,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
 
                 while cmdLineIndex < allCommands.Length && lastExitCode = 0 do
                     let startedAt = DateTime.UtcNow
-                    let workDir, cmd, args, container = allCommands[cmdLineIndex]
+                    let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
                     let logFile = cacheEntry.NextLogFile()                    
                     cmdLineIndex <- cmdLineIndex + 1
 
@@ -230,7 +230,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                     let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
                     let endedAt = DateTime.UtcNow
                     let duration = endedAt - startedAt
-                    let stepLog = { Cache.StepSummary.Command = cmd
+                    let stepLog = { Cache.StepSummary.MetaCommand = metaCommand
+                                    Cache.StepSummary.Command = cmd
                                     Cache.StepSummary.Arguments = args
                                     Cache.StepSummary.Container = container
                                     Cache.StepSummary.StartedAt = startedAt

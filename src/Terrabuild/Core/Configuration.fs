@@ -28,6 +28,7 @@ type BatchContext = {
 [<RequireQualifiedAccess>]
 type ContaineredActionBatch = {
     Cache: Cacheability
+    MetaCommand: string
     Actions: Action list
 
     Container: string option
@@ -332,6 +333,7 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
                                         else actionGroup.Cache
 
                                     let containedActionBatch = {
+                                        ContaineredActionBatch.MetaCommand = $"{step.Extension} {step.Command}"
                                         ContaineredActionBatch.BatchContext = batchContext
                                         ContaineredActionBatch.Container = extension.Container
                                         ContaineredActionBatch.ContainerVariables = extension.Variables
