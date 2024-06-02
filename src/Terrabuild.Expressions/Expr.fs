@@ -10,6 +10,8 @@ type Function =
     | Version
     | Item
     | Coalesce
+    | Ternary
+    | Equal
 
 [<RequireQualifiedAccessAttribute>]
 type Expr =

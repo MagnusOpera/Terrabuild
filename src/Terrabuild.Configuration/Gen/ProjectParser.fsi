@@ -22,6 +22,8 @@ type token =
   | LOWER
   | VERSION
   | COALESCE
+  | TERNARY_IF
+  | TERNARY_ELSE
   | MINUS
   | PLUS
   | COMMA
@@ -65,6 +67,8 @@ type tokenId =
     | TOKEN_LOWER
     | TOKEN_VERSION
     | TOKEN_COALESCE
+    | TOKEN_TERNARY_IF
+    | TOKEN_TERNARY_ELSE
     | TOKEN_MINUS
     | TOKEN_PLUS
     | TOKEN_COMMA

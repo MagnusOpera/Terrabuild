@@ -27,6 +27,8 @@ rule token = parse
     | "upper" { UPPER }
     | "lower" { LOWER }
     | "version" { VERSION }
+    | "?" { TERNARY_IF }
+    | ":" { TERNARY_ELSE }
     | "??" { COALESCE }
 
     | "project" { PROJECT }

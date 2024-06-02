@@ -68,6 +68,13 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     match list |> List.tryFind (fun i -> i <> Value.Nothing) with
                     | Some value -> value
                     | _ -> TerrabuildException.Raise($"Failed to find value")
+                
+                | Function.Ternary, [Value.Bool condition; trueValue; falseValue] ->
+                    if condition then trueValue
+                    else falseValue
+
+                | Function.Equal, [left; right] ->
+                    Value.Bool (left = right)
 
                 | _ -> TerrabuildException.Raise($"Invalid arguments for function {f}")
             varUsed, res

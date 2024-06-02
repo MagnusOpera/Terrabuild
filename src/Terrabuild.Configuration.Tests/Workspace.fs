@@ -77,7 +77,10 @@ let parseWorkspace2() =
         let envDummy =
             { Variables = Map.empty }
         let envSecret =
-            { Variables = Map [ "secret", Expr.Number 123456 ]}
+            { Variables = Map [ "secret", Expr.Function (Function.Ternary, [ Expr.Function (Function.Equal, [ Expr.Function (Function.Item, [Expr.Variable "map"; Expr.String "toto"])
+                                                                                                              Expr.String "prod"])
+                                                                             Expr.Number 1234
+                                                                             Expr.Number 5678 ]) ] }
 
         let extDotnet =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
