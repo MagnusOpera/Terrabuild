@@ -82,7 +82,7 @@ dist-all: clean publish-all pack
 
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(buildconfig)
-	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net8.0/Terrabuild.Extensions.xml ../websites/terrabuild.io/content/docs/extensions
+	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net8.0/Terrabuild.Extensions.xml ../website/content/docs/extensions
 
 
 self-build: clean publish
