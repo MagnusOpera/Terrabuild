@@ -25,5 +25,8 @@ jobs:
           version: ${{github.ref_name}}
           file: '*'
 
-      - name: NuGet Release
-        run: dotnet nuget push ./Terrabuild.${{github.ref_name}}.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json
+      - name: Dump
+        run: ls -alR .
+
+      # - name: NuGet Release
+      #   run: dotnet nuget push ./Terrabuild.${{github.ref_name}}.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json
