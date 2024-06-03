@@ -19,10 +19,10 @@ jobs:
           dotnet-version: 8.0.204
 
       - name: Download Github Release artifacts
-        uses: dsaltares/fetch-gh-release-asset@1.1.2
+        uses: robinraju/release-downloader@v1.10
         with:
-          version: ${{github.ref_name}}
-          file: '*'
+          tag: ${{github.ref_name}}
+          fileName: '*'
 
       - name: Dump
         run: ls -alR .
