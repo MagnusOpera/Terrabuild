@@ -5,13 +5,13 @@ on:
     tags:
       - '**'
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      packages: write
 
     steps:
       - name: Info

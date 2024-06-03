@@ -1,8 +1,13 @@
 name: release
 
 on:
+  workflow_dispatch:
   release:
     types: [released]
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   release-nuget:
