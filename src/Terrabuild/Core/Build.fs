@@ -67,7 +67,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
-        api |> Option.map (fun api -> api.BuildStart configuration.SourceControl.BranchOrTag configuration.SourceControl.HeadCommit configuration.Configuration configuration.Environment graph.Targets options.Force options.Retry configuration.SourceControl.CI)
+        api |> Option.map (fun api -> api.BuildStart configuration.SourceControl.BranchOrTag configuration.SourceControl.HeadCommit configuration.Configuration graph.Targets options.Force options.Retry configuration.SourceControl.CI)
         |> Option.defaultValue ""
 
     let workspaceDir = Environment.CurrentDirectory

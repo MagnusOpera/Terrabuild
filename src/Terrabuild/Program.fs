@@ -51,7 +51,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .CreateLogger()
         Log.Debug("Log created")
 
-    let runTarget wsDir target configuration environment labels variables localOnly logs (options: Configuration.Options) =
+    let runTarget wsDir target configuration labels variables localOnly logs (options: Configuration.Options) =
         let wsDir = wsDir |> FS.fullPath
         Environment.CurrentDirectory <- wsDir
         Log.Debug("Changing current directory to {directory}", wsDir)
@@ -64,7 +64,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             jsonOptions |> IO.writeTextFile (logFile "options.json")
 
         let sourceControl = SourceControls.Factory.create()
-        let config = Configuration.read wsDir configuration environment labels variables sourceControl options
+        let config = Configuration.read wsDir configuration labels variables sourceControl options
 
         let token =
             if localOnly then None
@@ -134,7 +134,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | Some ws -> ws
                 | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let configuration = buildArgs.TryGetResult(RunArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
-        let environment = buildArgs.TryGetResult(RunArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
@@ -146,7 +145,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
-        runTarget wsDir (Set.singleton target) configuration environment labels variables localOnly logs options
+        runTarget wsDir (Set.singleton target) configuration labels variables localOnly logs options
 
     let target (targetArgs: ParseResults<TargetArgs>) =
         let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLower
@@ -158,7 +157,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | Some ws -> ws
                 | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let configuration = targetArgs.TryGetResult(TargetArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
-        let environment = targetArgs.TryGetResult(TargetArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
@@ -170,7 +168,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow }
-        runTarget wsDir (Set targets) configuration environment labels variables localOnly logs options
+        runTarget wsDir (Set targets) configuration labels variables localOnly logs options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
         let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
@@ -182,7 +180,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | Some ws -> ws
                 | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
-        let environment = logsArgs.TryGetResult(LogsArgs.Environment) |> Option.defaultValue "default" |> String.toLower
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let options = { Configuration.Options.WhatIf = true
@@ -191,7 +188,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.MaxConcurrency = 1
                         Configuration.Options.Retry = false
                         Configuration.Options.StartedAt = DateTime.UtcNow }
-        runTarget wsDir (Set targets) configuration environment labels variables true true options
+        runTarget wsDir (Set targets) configuration labels variables true true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearBuildCache()

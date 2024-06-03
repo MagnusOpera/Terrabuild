@@ -64,11 +64,10 @@ type Workspace = {
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
     Configuration: string
-    Environment: string
 }
 
 
-let read workspaceDir configuration environment labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
+let read workspaceDir configuration labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading configuration using configuration {configuration}" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
@@ -292,7 +291,6 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
                                         |> Map.add "terrabuild_project" (Expr.String project)
                                         |> Map.add "terrabuild_target" (Expr.String targetName)
                                         |> Map.add "terrabuild_configuration" (Expr.String configuration)
-                                        |> Map.add "terrabuild_environment" (Expr.String environment)
 
                                     let evaluationContext = {
                                         Eval.EvaluationContext.WorkspaceDir = workspaceDir
@@ -451,5 +449,4 @@ let read workspaceDir configuration environment labels (variables: Map<string, s
       Workspace.Projects = projects
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Configuration = configuration
-      Workspace.Environment = environment
       Workspace.SourceControl = sourceControl }
