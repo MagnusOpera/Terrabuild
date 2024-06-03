@@ -1,44 +1,28 @@
 name: release
 
 on:
-  push:
-    tags:
-      - '**'
+  workflow_dispatch:
+  release:
+    types: [released]
 
-env:
-  TERRABUILD_AZURE_BLOB_STORAGE: ${{ secrets.TERRABUILD_AZURE_BLOB_STORAGE }}
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  build:
+  release-nuget:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      packages: write
-
     steps:
-      - name: Info
-        run: echo 'Building ${{ github.ref }}'
-
-      - name: Cloning repository
-        uses: actions/checkout@v4
-
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.204
 
-      - name: Build & Publish
-        run: make dist-all config=Release version=${{github.ref_name}}
-
-      - name: GitHub Release
-        uses: softprops/action-gh-release@v1
+      - name: Download Github Release artifacts
+        uses: robinraju/release-downloader@v1.10
         with:
-          draft: true
-          generate_release_notes: true
-          files: |
-            ./.out/*.zip
-            ./.out/*.nupkg
+          tag: ${{github.ref_name}}
+          fileName: '*'
 
       - name: NuGet Release
-        run: dotnet nuget push ./.out/Terrabuild.${{github.ref_name}}.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./Terrabuild.${{github.ref_name}}.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json
