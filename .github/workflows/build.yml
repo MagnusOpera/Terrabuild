@@ -1,9 +1,9 @@
 name: build
 
-on:
-  push:
-    branches:
-      - '**'
+# on:
+#   push:
+#     branches:
+#       - '**'
 
 env:
   TERRABUILD_AZURE_BLOB_STORAGE: ${{ secrets.TERRABUILD_AZURE_BLOB_STORAGE }}
