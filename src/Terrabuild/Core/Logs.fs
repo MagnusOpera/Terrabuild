@@ -25,21 +25,22 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
 
         if scope |> Set.contains nodeId then
             let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
+            let title = $"{node.Target} {node.Project}"
             match cache.TryGetSummary false cacheEntryId with
             | Some summary -> 
                 match summary.Status with
                 | TaskStatus.Success ->
-                    let (logStart, logEnd) = sourceControl.Log true $"{node.Project}/{node.Target}"
+                    let (logStart, logEnd) = sourceControl.Log true title
                     logStart |> Terminal.writeLine
                     dumpLogs summary
                     logEnd |> Terminal.writeLine
                 | TaskStatus.Failure ->
-                    let (logStart, logEnd) = sourceControl.Log false $"{node.Project}/{node.Target}"
+                    let (logStart, logEnd) = sourceControl.Log false title
                     logStart |> Terminal.writeLine
                     dumpLogs summary
                     logEnd |> Terminal.writeLine
             | _ ->
-                let (logStart, logEnd) = sourceControl.Log true $"{node.Project}/{node.Target}"
+                let (logStart, logEnd) = sourceControl.Log true title
                 logStart |> Terminal.writeLine
                 $"{Ansi.Styles.yellow}No logs available{Ansi.Styles.reset}" |> Terminal.writeLine
                 logEnd |> Terminal.writeLine
