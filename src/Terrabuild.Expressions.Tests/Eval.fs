@@ -130,6 +130,21 @@ let listItem() =
     result |> should equal expected
 
 [<Test>]
+let listTryItem() =
+    let expected = Value.Nothing
+    let expectedUsedVars = Set ["tagada"]
+
+    let context = { evaluationContext
+                    with Variables = Map [ 
+                        "tagada", Expr.List [ Expr.String "toto"; Expr.Number 42 ]
+                    ] }
+
+    let varUsed, result =
+        eval context (Expr.Function (Function.TryItem, [ Expr.Variable "tagada"; Expr.Number 3]))
+    varUsed |> should equal expectedUsedVars
+    result |> should equal expected
+
+[<Test>]
 let mapItem() =
     let expected = Value.Number 42
     let expectedUsedVars = Set ["tagada"]
@@ -142,4 +157,33 @@ let mapItem() =
     let varUsed, result =
         eval context (Expr.Function (Function.Item, [ Expr.Variable "tagada"; Expr.String "toto" ]))
     varUsed |> should equal expectedUsedVars
+    result |> should equal expected
+
+[<Test>]
+let mapTryItem() =
+    let expected = Value.Nothing
+    let expectedUsedVars = Set ["tagada"]
+
+    let context = { evaluationContext
+                    with Variables = Map [ 
+                        "tagada", Expr.Map (Map [ "toto", Expr.Number 42 ])
+                    ] }
+
+    let varUsed, result =
+        eval context (Expr.Function (Function.TryItem, [ Expr.Variable "tagada"; Expr.String "titi" ]))
+    varUsed |> should equal expectedUsedVars
+    result |> should equal expected
+
+[<Test>]
+let equalValue() =
+    let expected = Value.Bool true
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Equal, [Expr.String "toto"; Expr.String "toto"]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let notEqualValue() =
+    let expected = Value.Bool false
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Equal, [Expr.String "toto"; Expr.Number 42]))
+    varUsed |> should be Empty
     result |> should equal expected

@@ -64,6 +64,16 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | Some value -> value
                     | _ -> TerrabuildException.Raise($"Out of range index {index}")
 
+                | Function.TryItem, [Value.Map map; Value.String key] ->
+                    match map |> Map.tryFind key with
+                    | Some value -> value
+                    | _ -> Value.Nothing
+
+                | Function.TryItem, [Value.List list; Value.Number index] ->
+                    match list |> List.tryItem index with
+                    | Some value -> value
+                    | _ -> Value.Nothing
+
                 | Function.Coalesce, list ->
                     match list |> List.tryFind (fun i -> i <> Value.Nothing) with
                     | Some value -> value
@@ -76,7 +86,22 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Equal, [left; right] ->
                     Value.Bool (left = right)
 
-                | _ -> TerrabuildException.Raise($"Invalid arguments for function {f}")
+                | Function.NotEqual, [left; right] ->
+                    Value.Bool (left <> right)
+
+                | f, prms -> 
+                    let getParamType (value: Value ) =
+                        match value with
+                        | Value.Bool _ -> "bool"
+                        | Value.List _ -> "list"
+                        | Value.Map _ -> "map"
+                        | Value.Nothing -> "nothing"
+                        | Value.Number _ -> "number"
+                        | Value.Object _ -> "object"
+                        | Value.String _ -> "string"
+
+                    let prms = prms |> List.map (getParamType) |> String.join "*"
+                    TerrabuildException.Raise($"Invalid arguments for function {f} with parameters ({prms})")
             varUsed, res
 
     eval Set.empty expr

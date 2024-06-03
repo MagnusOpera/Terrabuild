@@ -9,9 +9,11 @@ type Function =
     | Lower
     | Version
     | Item
+    | TryItem
     | Coalesce
     | Ternary
     | Equal
+    | NotEqual
 
 [<RequireQualifiedAccessAttribute>]
 type Expr =

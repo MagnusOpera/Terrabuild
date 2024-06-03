@@ -27,9 +27,26 @@ rule token = parse
     | "upper" { UPPER }
     | "lower" { LOWER }
     | "version" { VERSION }
-    | "?" { TERNARY_IF }
-    | ":" { TERNARY_ELSE }
-    | "??" { COALESCE }
+    | "?" { QUESTION }
+    | ":" { COLON }
+    | "??" { DOUBLE_QUESTION }
+    | ".[" { DOT_LSQBRACKET }
+    | ".?[" { DOT_QUESTION_LSQBRACKET }
+
+    | "{" { LBRACE }
+    | "}" { RBRACE }
+    | "[" { LSQBRACKET }
+    | "]" { RSQBRACKET }
+    | "(" { LPAREN }
+    | ")" { RPAREN }
+    | "=" { EQUAL }
+    | "!=" { NOT_EQUAL }
+    | "," { COMMA }
+    | "-" { MINUS }
+    | "+" { PLUS }
+
+    | "#" { singleLineComment lexbuf }
+    | "//" { singleLineComment lexbuf }
 
     | "workspace" { WORKSPACE }
     | "target" { TARGET }
@@ -43,21 +60,6 @@ rule token = parse
     | "container" { CONTAINER }
     | "script" { SCRIPT }
     | "defaults" { DEFAULTS }
-
-    | "{" { LBRACE }
-    | "}" { RBRACE }
-    | ".[" { DOT_LSQBRACKET }
-    | "[" { LSQBRACKET }
-    | "]" { RSQBRACKET }
-    | "(" { LPAREN }
-    | ")" { RPAREN }
-    | "=" { EQUAL }
-    | "," { COMMA }
-    | "-" { MINUS }
-    | "+" { PLUS }
-
-    | "#" { singleLineComment lexbuf }
-    | "//" { singleLineComment lexbuf }
 
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
     | extensionIdentifier { EXTENSION_IDENTIFIER (lexeme lexbuf |> string) }
