@@ -20,9 +20,9 @@ module private Http =
         if typeof<'resp> <> typeof<Unit> then response |> FSharpJson.Deserialize<'resp>
         else Unchecked.defaultof<'resp>
 
-    let inline options<'req, 'resp> = request<'req, 'resp> HttpMethod.Options
-    let inline get<'req, 'resp> = request<'req, 'resp> HttpMethod.Get
-    let inline post<'req, 'resp> = request<'req, 'resp> HttpMethod.Post
+    let options<'req, 'resp> = request<'req, 'resp> HttpMethod.Options
+    let get<'req, 'resp> = request<'req, 'resp> HttpMethod.Get
+    let post<'req, 'resp> = request<'req, 'resp> HttpMethod.Post
 
 
 module private Auth =
