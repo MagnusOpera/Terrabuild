@@ -115,7 +115,10 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
                 children
 
         if processedNodes.TryAdd(nodeId, true) then processNode()
-        else Set.singleton nodeId
+        else
+            match allNodes.TryGetValue(nodeId) with
+            | true, node -> node.Dependencies
+            | _ -> Set.empty
 
     let rootNodes =
         configuration.Dependencies |> Seq.collect (fun dependency ->
