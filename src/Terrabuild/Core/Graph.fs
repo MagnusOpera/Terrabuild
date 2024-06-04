@@ -117,7 +117,7 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
         if processedNodes.TryAdd(nodeId, true) then processNode()
         else
             match allNodes.TryGetValue(nodeId) with
-            | true, node -> node.Dependencies
+            | true, _ -> Set.singleton nodeId
             | _ -> Set.empty
 
     let rootNodes =
