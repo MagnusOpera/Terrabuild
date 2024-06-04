@@ -52,7 +52,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     let projectName = FS.workspaceRelative context.WorkspaceDir context.ProjectDir str
                     match context.Versions |> Map.tryFind projectName with
                     | Some version -> Value.String version
-                    | _ -> TerrabuildException.Raise($"Unknown project reference {str}")
+                    | _ -> TerrabuildException.Raise($"Unknown project reference '{str}'")
 
                 | Function.Item, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with

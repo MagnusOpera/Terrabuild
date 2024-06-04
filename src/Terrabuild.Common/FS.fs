@@ -1,6 +1,11 @@
 module FS
 open System.IO
 
+let fileExists path =
+    File.Exists path
+
+let directoryExists path =
+    Directory.Exists path
 
 let fullPath path =
     Path.GetFullPath(path)

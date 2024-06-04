@@ -139,6 +139,9 @@ let read workspaceDir configuration note labels (variables: Map<string, string>)
             // process only unknown dependency
             if processedNodes.TryAdd(project, true) then
                 let projectFile = FS.combinePath projectDir "PROJECT"
+                if FS.fileExists projectFile |> not then
+                    TerrabuildException.Raise($"Unknown project reference '{project}'")
+
                 let projectContent = File.ReadAllText projectFile
                 let projectConfig =
                     try
@@ -179,7 +182,7 @@ let read workspaceDir configuration note labels (variables: Map<string, string>)
                             | Extensions.Success result -> result
                             | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {init} was not found")
                             | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-                            | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of __defaults__ of script {init}", exn)
+                            | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
                         | _ -> ProjectInfo.Default
 
                     let projectInfo = {
@@ -316,7 +319,7 @@ let read workspaceDir configuration note labels (variables: Map<string, string>)
                                         | Extensions.Success result -> result
                                         | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {step.Extension} was not found")
                                         | Extensions.TargetNotFound -> TerrabuildException.Raise($"Script {step.Extension} has no function {step.Command}")
-                                        | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of {step.Command} of script {step.Extension}", exn)
+                                        | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '{step.Command}' for extension '{step.Extension}'", exn)
 
                                     let batchContext =
                                         if actionGroup.Batchable then
