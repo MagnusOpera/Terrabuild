@@ -49,6 +49,7 @@ module private Build =
         BranchOrTag: string
         Commit: string
         Configuration: string
+        Note: string option
         Targets: string seq
         Force: bool
         Retry: bool
@@ -76,10 +77,11 @@ module private Build =
         Success: bool
     }
 
-    let startBuild headers branchOrTag commit configuration targets force retry ci: StartBuildOutput =
+    let startBuild headers branchOrTag commit configuration note targets force retry ci: StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = commit
           StartBuildInput.Configuration = configuration
+          StartBuildInput.Note = note
           StartBuildInput.Targets = targets 
           StartBuildInput.Force = force
           StartBuildInput.Retry = retry
@@ -128,8 +130,8 @@ type Client(space: string, token: string) =
         HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
 
     interface Contracts.IApiClient with
-        member _.BuildStart branchOrTag commit configuration targets force retry ci =
-            let resp = Build.startBuild headers branchOrTag commit configuration targets force retry ci
+        member _.BuildStart branchOrTag commit configuration note targets force retry ci =
+            let resp = Build.startBuild headers branchOrTag commit configuration note targets force retry ci
             resp.BuildId
 
         member _.BuildComplete buildId success =

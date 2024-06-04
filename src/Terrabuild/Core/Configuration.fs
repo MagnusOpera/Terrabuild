@@ -64,10 +64,11 @@ type Workspace = {
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
     Projects: Map<string, Project>
     Configuration: string
+    Note: string option
 }
 
 
-let read workspaceDir configuration labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
+let read workspaceDir configuration note labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading configuration using configuration {configuration}" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
@@ -449,4 +450,5 @@ let read workspaceDir configuration labels (variables: Map<string, string>) (sou
       Workspace.Projects = projects
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Configuration = configuration
+      Workspace.Note = note
       Workspace.SourceControl = sourceControl }
