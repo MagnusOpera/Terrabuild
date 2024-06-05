@@ -27,6 +27,8 @@ type TargetSummary = {
     Steps: StepSummary list
     Outputs: string option
     Status: TaskStatus
+    StartedAt: DateTime
+    EndedAt: DateTime
 }
 
 

@@ -96,7 +96,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         if options.WhatIf then
             if logs then
-                Logs.dumpLogs graph cache sourceControl None options.Debug
+                Logs.dumpLogs buildGraph cache sourceControl None options.Debug
             0
         else
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
@@ -108,7 +108,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 jsonBuild |> IO.writeTextFile (logFile "build.json")
 
             if logs || summary.Status <> Build.Status.Success then
-                Logs.dumpLogs graph cache sourceControl (Some summary.ImpactedNodes) options.Debug
+                Logs.dumpLogs buildGraph cache sourceControl (Some summary.ImpactedNodes) options.Debug
 
             let result =
                 match summary.Status with
@@ -145,7 +145,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
-                        Configuration.Options.StartedAt = DateTime.UtcNow }
+                        Configuration.Options.StartedAt = DateTime.UtcNow
+                        Configuration.Options.IsLog = false }
         runTarget wsDir (Set.singleton target) configuration note labels variables localOnly logs options
 
     let target (targetArgs: ParseResults<TargetArgs>) =
@@ -169,7 +170,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
-                        Configuration.Options.StartedAt = DateTime.UtcNow }
+                        Configuration.Options.StartedAt = DateTime.UtcNow
+                        Configuration.Options.IsLog = false }
         runTarget wsDir (Set targets) configuration note labels variables localOnly logs options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
@@ -189,7 +191,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = false
                         Configuration.Options.MaxConcurrency = 1
                         Configuration.Options.Retry = false
-                        Configuration.Options.StartedAt = DateTime.UtcNow }
+                        Configuration.Options.StartedAt = DateTime.UtcNow
+                        Configuration.Options.IsLog = true }
         runTarget wsDir (Set targets) configuration None labels variables true true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =

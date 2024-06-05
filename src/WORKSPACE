@@ -9,7 +9,13 @@ configuration {
     }
 }
 
-configuration release {
+configuration dev {
+    variables = {
+        configuration: "Release"
+    }
+}
+
+configuration prod {
     variables = {
         configuration: "Release"
     }

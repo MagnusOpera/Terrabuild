@@ -21,6 +21,7 @@ type Node = {
     Outputs: string set
     Cache: Cacheability
     IsLeaf: bool
+    Batched: bool
 
     TargetHash: string
     CommandLines: Configuration.ContaineredActionBatch list
@@ -107,7 +108,8 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
                              ProjectHash = projectConfig.Hash
                              Cache = cache
                              IsLeaf = isLeaf
-                             TargetHash = target.Hash }
+                             TargetHash = target.Hash
+                             Batched = false }
                 if allNodes.TryAdd(nodeId, node) |> not then
                     TerrabuildException.Raise("Unexpected graph building race")
                 Set.singleton nodeId
@@ -213,8 +215,9 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
     let clusters = Concurrent.ConcurrentDictionary<string, string*string>()
     let computeCluster (node: Node) =
         let nodeTag, reason =
-            // if not is already built then no batch build
-            if node |> isCached |> not then
+            // NOTE: if we are running log command we ensure idempotency
+            //       otherwise we are seeking to optimize graph and if task is already built, do not batch build
+            if (options.IsLog || node |> isCached) |> not then
                 $"{node.TargetHash}-{node.Id}", "not batchable/no build required"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
             else
@@ -365,6 +368,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     Outputs = Set.empty
                     Cache = oneNode.Cache
                     IsLeaf = oneNode.IsLeaf
+                    Batched = false
 
                     TargetHash = cluster
                     CommandLines = optimizedActions
@@ -378,6 +382,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     let node = { node with
                                     Dependencies = Set.singleton cluster
                                     Label = $"post-{node.Target} {node.Project}"
+                                    Batched = true
                                     CommandLines = List.Empty }
                     graph <- { graph with
                                     Nodes = graph.Nodes |> Map.add node.Id node }

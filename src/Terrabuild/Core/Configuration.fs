@@ -17,6 +17,7 @@ type Options = {
     Force: bool
     Retry: bool
     StartedAt: DateTime
+    IsLog: bool
 }
 
 type BatchContext = {

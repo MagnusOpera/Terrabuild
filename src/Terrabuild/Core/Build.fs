@@ -222,16 +222,21 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                 let stepLogs = List<Cache.StepSummary>()
                 let mutable lastExitCode = 0
                 let mutable cmdLineIndex = 0
+                let cmdFirstStartedAt = DateTime.UtcNow
+                let mutable cmdLastEndedAt = cmdFirstStartedAt
 
                 while cmdLineIndex < allCommands.Length && lastExitCode = 0 do
-                    let startedAt = DateTime.UtcNow
+                    let startedAt =
+                        if cmdLineIndex > 0 then DateTime.UtcNow
+                        else cmdFirstStartedAt
                     let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
                     let logFile = cacheEntry.NextLogFile()                    
                     cmdLineIndex <- cmdLineIndex + 1
 
                     Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.Hash, cmd, args)
                     let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
-                    let endedAt = DateTime.UtcNow
+                    cmdLastEndedAt <- DateTime.UtcNow
+                    let endedAt = cmdLastEndedAt
                     let duration = endedAt - startedAt
                     let stepLog = { Cache.StepSummary.MetaCommand = metaCommand
                                     Cache.StepSummary.Command = cmd
@@ -267,7 +272,9 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                 Cache.TargetSummary.Target = node.Target
                                 Cache.TargetSummary.Steps = stepLogs |> List.ofSeq
                                 Cache.TargetSummary.Outputs = outputs
-                                Cache.TargetSummary.Status = status }
+                                Cache.TargetSummary.Status = status
+                                Cache.TargetSummary.StartedAt = cmdFirstStartedAt
+                                Cache.TargetSummary.EndedAt = cmdLastEndedAt }
                 let files, size = cacheEntry.Complete summary
                 api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.Hash files size (status = Cache.TaskStatus.Success))
                 Some summary, false
