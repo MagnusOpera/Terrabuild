@@ -189,10 +189,10 @@ let read workspaceDir configuration note labels (variables: Map<string, string>)
 
                     let projectInfo = {
                         projectInfo
-                        with Ignores = projectConfig.Project.Ignores |> Option.defaultValue projectInfo.Ignores
-                             Outputs = projectConfig.Project.Outputs |> Option.defaultValue projectInfo.Outputs
-                             Dependencies = projectConfig.Project.Dependencies |> Option.defaultValue projectInfo.Dependencies
-                             Files = projectConfig.Project.Files |> Option.defaultValue projectInfo.Files }
+                        with Ignores = projectInfo.Ignores + (projectConfig.Project.Ignores |> Option.defaultValue Set.empty)
+                             Outputs = projectInfo.Outputs + (projectConfig.Project.Outputs |> Option.defaultValue Set.empty)
+                             Dependencies = projectInfo.Dependencies + (projectConfig.Project.Dependencies |> Option.defaultValue Set.empty)
+                             Files = projectInfo.Files + (projectConfig.Project.Files |> Option.defaultValue Set.empty) }
 
                     let labels = projectConfig.Project.Labels
 
