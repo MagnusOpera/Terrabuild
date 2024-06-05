@@ -40,6 +40,7 @@ type RunArgs =
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
     | [<Unique; AltCommandLine("-n")>] Note of note:string
+    | [<Unique; AltCommandLine("-t")>] Tag of tag:string
     | [<Unique>] Logs
 with
     interface IArgParserTemplate with
@@ -55,6 +56,7 @@ with
             | LocalOnly -> "Use local cache only."
             | Logs -> "Output logs for impacted projects."
             | Note _ -> "Note for the build."
+            | Tag _ -> "Tag for build."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
@@ -68,6 +70,7 @@ type TargetArgs =
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
     | [<Unique; AltCommandLine("-n")>] Note of note:string
+    | [<Unique; AltCommandLine("-t")>] Tag of tag:string
     | [<Unique>] Logs
 with
     interface IArgParserTemplate with
@@ -84,6 +87,7 @@ with
             | LocalOnly -> "Use local cache only."
             | Note _ -> "Note for the build."
             | Logs -> "Output logs for impacted projects."
+            | Tag _ -> "Tag for build."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =

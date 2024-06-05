@@ -6,16 +6,15 @@ on:
       - '**'
 
 env:
-  TERRABUILD_API_URL: https://api.dev.magnusopera.io
-
-permissions:
-  contents: read
-  packages: write    
+  TERRABUILD_AZURE_BLOB_STORAGE: ${{ secrets.TERRABUILD_AZURE_BLOB_STORAGE }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: "dev"
+
+    permissions:
+      contents: read
+      packages: write    
 
     steps:
       - name: Info
@@ -36,19 +35,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Terrabuild
-        uses: jaxxstorm/action-install-gh-release@v1.10.0
-        with:
-          token: ${{ secrets.MAGNUSOPERA_CONTENT_TOKEN }}
-          repo: magnusopera/terrabuild
-          platform: linux
-
-      - name: Login to Space
-        run: terrabuild login --space magnusopera/terrabuild --token ${{ secrets.TERRABUILD_TOKEN }}
+      # - name: Run Tests
+      #   run: make github-tests
 
       - name: Build
         if: always()
-        run: terrabuild build -w src --logs -c "dev" --debug
+        run: |
+          make self-publish
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
@@ -57,3 +50,10 @@ jobs:
           name: Terrabuild Debug
           path: |
             terrabuild-debug.*
+
+      # - name: Upload Terrabuild Cache
+      #   uses: actions/upload-artifact@v4
+      #   if: success() || failure()
+      #   with:
+      #     name: Terrabuild Cache
+      #     path: ~/.terrabuild/buildcache/*

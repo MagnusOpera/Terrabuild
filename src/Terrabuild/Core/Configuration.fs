@@ -18,6 +18,7 @@ type Options = {
     Retry: bool
     StartedAt: DateTime
     IsLog: bool
+    Tag: string option
 }
 
 type BatchContext = {
@@ -296,6 +297,12 @@ let read workspaceDir configuration note labels (variables: Map<string, string>)
                                         |> Map.add "terrabuild_project" (Expr.String project)
                                         |> Map.add "terrabuild_target" (Expr.String targetName)
                                         |> Map.add "terrabuild_configuration" (Expr.String configuration)
+                                        |> (fun map ->
+                                            let tagValue =
+                                                match options.Tag with
+                                                | Some tag -> Expr.String tag
+                                                | _ -> Expr.Nothing
+                                            map |> Map.add "terrabuild_tag" tagValue)
 
                                     let evaluationContext = {
                                         Eval.EvaluationContext.WorkspaceDir = workspaceDir
@@ -310,6 +317,9 @@ let read workspaceDir configuration note labels (variables: Map<string, string>)
                                         |> Map.add "context" (Expr.Object actionContext)
                                         |> Expr.Map
                                         |> Eval.eval evaluationContext
+
+                                    // tag shall not trigger a build so we do not want dependency on this
+                                    let usedVars = usedVars |> Set.remove "terrabuild_tag"
 
                                     let script = Extensions.getScript step.Extension projectDef.Scripts
                                     let actionGroup =
