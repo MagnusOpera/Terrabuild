@@ -11,7 +11,7 @@ extension @docker {
 }
 
 target build {
-    @dotnet build
+    @dotnet build { version: $terrabuild_tag }
 }
 
 target dist {
