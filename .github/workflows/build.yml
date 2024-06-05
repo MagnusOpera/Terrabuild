@@ -6,15 +6,16 @@ on:
       - '**'
 
 env:
-  TERRABUILD_AZURE_BLOB_STORAGE: ${{ secrets.TERRABUILD_AZURE_BLOB_STORAGE }}
+  TERRABUILD_API_URL: https://api.dev.magnusopera.io
+
+permissions:
+  contents: read
+  packages: write    
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write    
+    environment: "dev"
 
     steps:
       - name: Info
