@@ -71,7 +71,7 @@ type Workspace = {
 
 
 let read workspaceDir configuration note labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
-    $"{Ansi.Emojis.box} Reading configuration using configuration {configuration}" |> Terminal.writeLine
+    $"{Ansi.Emojis.box} Reading {configuration} configuration" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
