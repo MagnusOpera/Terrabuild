@@ -195,15 +195,15 @@ type Cache(storage: Contracts.Storage) =
 
     let tryDownload targetDir id name =
         match storage.TryDownload $"{id}/{name}" with
-        | Some tarFile ->
+        | Some file ->
             let uncompressFile = IO.getTempFilename()
             try
-                tarFile |> Compression.uncompress uncompressFile
+                file |> Compression.uncompress uncompressFile
                 uncompressFile |> Compression.untar targetDir
                 true
             finally
                 IO.deleteAny uncompressFile
-                IO.deleteAny tarFile
+                IO.deleteAny file
         | _ ->
             false
 
@@ -236,7 +236,7 @@ type Cache(storage: Contracts.Storage) =
                     Some summary
                 | _ ->
                     if useRemote then
-                        if tryDownload summaryFile id "logs" then
+                        if tryDownload logsDir id "logs" then
                             let summary = loadSummary logsDir outputsDir summaryFile
                             cachedSummaries.TryAdd(id, Some summary) |> ignore
                             Some summary
@@ -259,11 +259,11 @@ type Cache(storage: Contracts.Storage) =
                 Some summary
             | _ ->
                 if useRemote then
-                    if tryDownload summaryFile id "logs" then
+                    if tryDownload logsDir id "logs" then
                         let summary = loadSummary logsDir outputsDir summaryFile
                         match summary.Outputs with
                         | Some _ ->
-                            if tryDownload summaryFile id "outputs" then
+                            if tryDownload outputsDir id "outputs" then
                                 entryDir |> markEntryAsCompleted "remote"
                                 Some summary
                             else
