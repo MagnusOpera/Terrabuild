@@ -51,7 +51,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .CreateLogger()
         Log.Debug("Log created")
 
-    let runTarget wsDir target configuration note labels variables localOnly logs (options: Configuration.Options) =
+    let runTarget wsDir target configuration note tag labels variables localOnly logs (options: Configuration.Options) =
         let wsDir = wsDir |> FS.fullPath
         Environment.CurrentDirectory <- wsDir
         Log.Debug("Changing current directory to {directory}", wsDir)
@@ -64,7 +64,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             jsonOptions |> IO.writeTextFile (logFile "options.json")
 
         let sourceControl = SourceControls.Factory.create()
-        let config = Configuration.read wsDir configuration note labels variables sourceControl options
+        let config = Configuration.read wsDir configuration note tag labels variables sourceControl options
 
         let token =
             if localOnly then None
@@ -78,21 +78,29 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let jsonConfig = Json.Serialize config
             jsonConfig |> IO.writeTextFile (logFile "config.json")
 
-        let graph = Graph.buildGraph config target
+        let storage = Storages.Factory.create api
+        let cache = Cache.Cache(storage) :> Cache.ICache
+
+        let graph = Graph.buildGraph config target cache options
         if options.Debug then
             let jsonGraph = Json.Serialize graph
             jsonGraph |> IO.writeTextFile (logFile "graph.json")
             let mermaid = Graph.graph graph |> String.join "\n"
             mermaid |> IO.writeTextFile (logFile "graph.mermaid")
 
-        let storage = Storages.Factory.create api
-        let cache = Cache.Cache(storage) :> Cache.ICache
-        let buildGraph = Graph.optimize config graph cache options
+        let trimGraph = Graph.trim config graph cache options
+        if options.Debug then
+            let jsonTrimGraph = Json.Serialize trimGraph
+            jsonTrimGraph |> IO.writeTextFile (logFile "trim-graph.json")
+            let mermaid = Graph.graph trimGraph |> String.join "\n"
+            mermaid |> IO.writeTextFile (logFile "trim-graph.mermaid")
+
+        let buildGraph = Graph.optimize config trimGraph cache options
         if options.Debug then
             let jsonBuildGraph = Json.Serialize buildGraph
-            jsonBuildGraph |> IO.writeTextFile (logFile "buildgraph.json")
+            jsonBuildGraph |> IO.writeTextFile (logFile "build-graph.json")
             let mermaid = Graph.graph buildGraph |> String.join "\n"
-            mermaid |> IO.writeTextFile (logFile "buildgraph.mermaid")
+            mermaid |> IO.writeTextFile (logFile "build-graph.mermaid")
 
         if options.WhatIf then
             if logs then
@@ -147,9 +155,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow
-                        Configuration.Options.IsLog = false
-                        Configuration.Options.Tag = tag }
-        runTarget wsDir (Set.singleton target) configuration note labels variables localOnly logs options
+                        Configuration.Options.IsLog = false }
+        runTarget wsDir (Set.singleton target) configuration note tag labels variables localOnly logs options
 
     let target (targetArgs: ParseResults<TargetArgs>) =
         let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLower
@@ -174,9 +181,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow
-                        Configuration.Options.IsLog = false
-                        Configuration.Options.Tag = tag }
-        runTarget wsDir (Set targets) configuration note labels variables localOnly logs options
+                        Configuration.Options.IsLog = false }
+        runTarget wsDir (Set targets) configuration note tag labels variables localOnly logs options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
         let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
@@ -196,9 +202,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.MaxConcurrency = 1
                         Configuration.Options.Retry = false
                         Configuration.Options.StartedAt = DateTime.UtcNow
-                        Configuration.Options.IsLog = true
-                        Configuration.Options.Tag = None }
-        runTarget wsDir (Set targets) configuration None labels variables true true options
+                        Configuration.Options.IsLog = true}
+        runTarget wsDir (Set targets) configuration None None labels variables true true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearBuildCache()

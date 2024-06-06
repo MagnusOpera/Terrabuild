@@ -88,6 +88,9 @@ docs:
 self-build: clean publish
 	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug
 
+self-build-local: clean publish
+	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug --localonly
+
 self-dist: clean publish
 	.out/dotnet/terrabuild dist --workspace src --configuration $(env) --retry --debug
 

@@ -21,6 +21,7 @@ type Node = {
     Outputs: string set
     Cache: Cacheability
     IsLeaf: bool
+    Required: bool
     Batched: bool
 
     TargetHash: string
@@ -33,7 +34,7 @@ type Workspace = {
     RootNodes: string set
 }
 
-let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
+let buildGraph (configuration: Configuration.Workspace) (targets: string set) (cache: Cache.ICache)  (options: Configuration.Options) =
     $"{Ansi.Emojis.popcorn} Constructing graph" |> Terminal.writeLine
 
     let processedNodes = ConcurrentDictionary<string, bool>()
@@ -108,8 +109,10 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
                              ProjectHash = projectConfig.Hash
                              Cache = cache
                              IsLeaf = isLeaf
+                             Required = true
                              TargetHash = target.Hash
                              Batched = false }
+
                 if allNodes.TryAdd(nodeId, node) |> not then
                     TerrabuildException.Raise("Unexpected graph building race")
                 Set.singleton nodeId
@@ -123,15 +126,59 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) =
             | _ -> Set.empty
 
     let rootNodes =
-        configuration.Dependencies |> Seq.collect (fun dependency ->
+        configuration.ComputedProjectSelection |> Seq.collect (fun dependency ->
             targets |> Seq.collect (fun target -> buildTarget target dependency))
         |> Set
 
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {allNodes.Count} tasks to run" |> Terminal.writeLine
+    let nodesToRun = allNodes.Count
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
 
     { Targets = targets
       Nodes = allNodes |> Map.ofDict
       RootNodes = rootNodes }
+
+
+
+let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
+    let startedAt = DateTime.UtcNow
+
+    let cacheMode =
+        if configuration.SourceControl.CI then Cacheability.Always
+        else Cacheability.Remote
+
+    let shallRebuild (node: Node) =
+        let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
+        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
+        if options.Force || node.Cache = Cacheability.Never then
+            true
+        else
+            let summary = cache.TryGetSummaryOnly useRemoteCache cacheEntryId
+            match summary with
+            | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
+            | _ -> true
+
+    let processedNodes = ConcurrentDictionary<string, bool>()
+    let allNodes = ConcurrentDictionary<string, Node>()
+
+    let rec skipNode parentRequired nodeId =
+        let node = graph.Nodes[nodeId]
+        let processNode () =
+            let required = parentRequired || shallRebuild node
+            let node = { node with Required = required }
+            allNodes.TryAdd(nodeId, node) |> ignore
+
+            node.Dependencies |> Seq.iter (skipNode required) 
+
+        if processedNodes.TryAdd(node.Id, true) then processNode()
+
+    graph.RootNodes |> Seq.iter (skipNode false)
+
+    let endedAt = DateTime.UtcNow
+
+    let trimDuration = endedAt - startedAt
+    Log.Debug("Trim: {duration}", trimDuration)
+
+    { graph with Nodes = allNodes |> Map.ofDict }
 
 
 
@@ -205,11 +252,16 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
         if configuration.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
-    let isCached (node: Node) =
+    let shallRebuild (node: Node) =
         let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-        if options.Force || node.Cache = Cacheability.Never then true
-        else not <| cache.Exists useRemoteCache cacheEntryId
+        if options.Force || node.Cache = Cacheability.Never then
+            true
+        else
+            let summary = cache.TryGetSummaryOnly useRemoteCache cacheEntryId
+            match summary with
+            | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
+            | _ -> true
 
     // map a node to a cluster
     let clusters = Concurrent.ConcurrentDictionary<string, string*string>()
@@ -217,7 +269,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
         let nodeTag, reason =
             // NOTE: if we are running log command we ensure idempotency
             //       otherwise we are seeking to optimize graph and if task is already built, do not batch build
-            if (options.IsLog || node |> isCached) |> not then
+            if (options.IsLog || node |> shallRebuild) |> not then
                 $"{node.TargetHash}-{node.Id}", "not batchable/no build required"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
             else
@@ -236,7 +288,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                         node.Dependencies
                         |> Set.choose (fun dependency ->
                             let dependencyNode = graph.Nodes[dependency]
-                            if dependencyNode |> isCached then Some (clusters[dependency] |> fst, dependencyNode.TargetHash)
+                            if dependencyNode |> shallRebuild then Some (clusters[dependency] |> fst, dependencyNode.TargetHash)
                             else None)
                         |> List.ofSeq
 
@@ -369,6 +421,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     Cache = oneNode.Cache
                     IsLeaf = oneNode.IsLeaf
                     Batched = false
+                    Required = true
 
                     TargetHash = cluster
                     CommandLines = optimizedActions

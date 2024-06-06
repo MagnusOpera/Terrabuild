@@ -18,7 +18,6 @@ type Options = {
     Retry: bool
     StartedAt: DateTime
     IsLog: bool
-    Tag: string option
 }
 
 type BatchContext = {
@@ -60,17 +59,33 @@ type Project = {
 
 [<RequireQualifiedAccess>]
 type Workspace = {
+    // Space to use
     Space: string option
+
+    // Source control in use
     SourceControl: Contracts.SourceControl
-    Dependencies: string set
+
+    // Computed projects selection (derived from user inputs)
+    ComputedProjectSelection: string set
+
+    // All targets at workspace level
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
+
+    // All discovered projects in workspace
     Projects: Map<string, Project>
+
+    // Configuration provided by user
     Configuration: string
+
+    // Note provided by user
     Note: string option
+
+    // Tag provided by user
+    Tag: string option
 }
 
 
-let read workspaceDir configuration note labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
+let read workspaceDir configuration note tag labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading {configuration} configuration" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
@@ -299,7 +314,7 @@ let read workspaceDir configuration note labels (variables: Map<string, string>)
                                         |> Map.add "terrabuild_configuration" (Expr.String configuration)
                                         |> (fun map ->
                                             let tagValue =
-                                                match options.Tag with
+                                                match tag with
                                                 | Some tag -> Expr.String tag
                                                 | _ -> Expr.Nothing
                                             map |> Map.add "terrabuild_tag" tagValue)
@@ -460,9 +475,10 @@ let read workspaceDir configuration note labels (variables: Map<string, string>)
         |> Set
 
     { Workspace.Space = workspaceConfig.Space
-      Workspace.Dependencies = dependencies
+      Workspace.ComputedProjectSelection = dependencies
       Workspace.Projects = projects
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Configuration = configuration
       Workspace.Note = note
+      Workspace.Tag = tag
       Workspace.SourceControl = sourceControl }

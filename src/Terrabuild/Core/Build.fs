@@ -64,10 +64,13 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
     $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
 
+    let nodesToRun = graph.Nodes |> Seq.filter (fun (KeyValue(_, node)) -> node.Required) |> Seq.length
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks to run" |> Terminal.writeLine
+
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
-        api |> Option.map (fun api -> api.BuildStart configuration.SourceControl.BranchOrTag configuration.SourceControl.HeadCommit configuration.Configuration configuration.Note options.Tag graph.Targets options.Force options.Retry configuration.SourceControl.CI)
+        api |> Option.map (fun api -> api.BuildStart configuration.SourceControl.BranchOrTag configuration.SourceControl.HeadCommit configuration.Configuration configuration.Note configuration.Tag graph.Targets options.Force options.Retry configuration.SourceControl.CI)
         |> Option.defaultValue ""
 
     let workspaceDir = Environment.CurrentDirectory
@@ -116,7 +119,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
               NodeInfo.ProjectHash = node.ProjectHash }
 
         // NOTE: always hit local cache here
-        match cache.TryGetSummary false cacheEntryId with
+        match cache.TryGetSummaryOnly false cacheEntryId with
         | Some summary -> 
             match summary.Status with
             | Cache.TaskStatus.Success -> NodeStatus.Success nodeInfo
@@ -288,17 +291,22 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let buildQueue = Exec.BuildQueue(options.MaxConcurrency)
     let rec queueAction (nodeId: string) =
         let node = graph.Nodes[nodeId]
-        let summary, restored = buildNode node
-        restoredNodes.TryAdd(nodeId, restored) |> ignore
-        notification.NodeCompleted node restored summary
+        if node.Required then
+            let summary, restored = buildNode node
+            restoredNodes.TryAdd(nodeId, restored) |> ignore
+            notification.NodeCompleted node restored summary
 
-        // schedule children nodes if ready
-        let triggers = reverseIncomings[nodeId]
-        for trigger in triggers do
-            let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
-            if newValue = 0 then
-                readyNodes[trigger].Value <- -1 // mark node as scheduled
-                buildQueue.Enqueue (fun () -> queueAction trigger)
+            // schedule children nodes if ready
+            let triggers = reverseIncomings[nodeId]
+            for trigger in triggers do
+                let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
+                if newValue = 0 then
+                    readyNodes[trigger].Value <- -1 // mark node as scheduled
+                    buildQueue.Enqueue (fun () -> queueAction trigger)
+
+        else
+            restoredNodes.TryAdd(nodeId, true) |> ignore
+
 
     readyNodes
     |> Map.filter (fun _ value -> value.Value = 0)

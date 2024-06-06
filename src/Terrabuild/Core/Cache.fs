@@ -56,7 +56,7 @@ type IEntry =
     abstract Complete: summary:TargetSummary -> (string list * int)
 
 type ICache =
-    abstract Exists: useRemote:bool -> id:string -> bool
+    abstract TryGetSummaryOnly: useRemote:bool -> id:string -> TargetSummary option
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
     abstract CreateEntry: useRemote:bool -> id:string -> IEntry
     abstract CreateHomeDir: nodeHash:string -> string
@@ -189,101 +189,96 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.
 
 
 type Cache(storage: Contracts.Storage) =
-    let cachedExists = System.Collections.Concurrent.ConcurrentDictionary<string, bool>()
-    let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary>()
+    // if there is a entry we already tried to download the summary (result is the value)
+    // if not we have never tried to download the summary
+    let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary option>()
+
+    let tryDownload targetDir id name =
+        match storage.TryDownload $"{id}/{name}" with
+        | Some tarFile ->
+            let uncompressFile = IO.getTempFilename()
+            try
+                tarFile |> Compression.uncompress uncompressFile
+                uncompressFile |> Compression.untar targetDir
+                true
+            finally
+                IO.deleteAny uncompressFile
+                IO.deleteAny tarFile
+        | _ ->
+            false
+
+    let loadSummary logsDir outputsDir summaryFile =
+        let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
+        let summary = { summary
+                        with Steps = summary.Steps
+                                        |> List.map (fun stepLog -> { stepLog
+                                                                      with Log = FS.combinePath logsDir stepLog.Log })
+                             Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
+        summary
 
     interface ICache with
-        member _.Exists useRemote id : bool =
-            match cachedExists.TryGetValue(id) with
-            | true, _ ->
-                true
-            | _ ->
-                match cachedSummaries.TryGetValue(id) with
-                | true, _ ->
-                    cachedExists.TryAdd(id, true) |> ignore
-                    true
-                | _ ->
-                    let entryDir = FS.combinePath buildCacheDirectory id
-                    let completeFile = FS.combinePath entryDir completeFilename
-
-                    match completeFile with
-                    | FS.File _ ->
-                        cachedExists.TryAdd(id, true) |> ignore
-                        true
-                    | _ ->
-                        // NOTE: probably overcaching here but since Exists is not used after TryGetSummary it's ok
-                        let res =
-                            if useRemote then storage.Exists $"{id}/logs"
-                            else false
-                        cachedExists.TryAdd(id, res) |> ignore
-                        res
-
-        member _.TryGetSummary useRemote id : TargetSummary option =
-
+        member _.TryGetSummaryOnly useRemote id : TargetSummary option =
             match cachedSummaries.TryGetValue(id) with
-            | true, summary -> Some summary
-            | _ ->
+            | true, targetSummary ->
+                targetSummary
+            | false, _ ->
                 let entryDir = FS.combinePath buildCacheDirectory id
                 let logsDir = FS.combinePath entryDir "logs"
                 let outputsDir = FS.combinePath entryDir "outputs"
                 let summaryFile = FS.combinePath logsDir summaryFilename
                 let completeFile = FS.combinePath entryDir completeFilename
 
-                let load () =
-                    let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
-                    let summary = { summary
-                                    with Steps = summary.Steps
-                                                 |> List.map (fun stepLog -> { stepLog
-                                                                               with Log = FS.combinePath logsDir stepLog.Log })
-                                         Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
-                    cachedSummaries.TryAdd(summaryFile, summary) |> ignore
-                    summary
-
-                let download (storage: Contracts.Storage) =
-                    let downloadDir targetDir name =
-                        match storage.TryDownload $"{id}/{name}" with
-                        | Some tarFile ->
-                            let uncompressFile = IO.getTempFilename()
-                            try
-                                tarFile |> Compression.uncompress uncompressFile
-                                uncompressFile |> Compression.untar targetDir
-                                Some targetDir
-                            finally
-                                IO.deleteAny uncompressFile
-                                IO.deleteAny tarFile
-                        | _ ->
+                // do we have the summary in local cache?
+                match completeFile with
+                | FS.File _ ->
+                    let summary = loadSummary logsDir outputsDir summaryFile
+                    cachedSummaries.TryAdd(id, Some summary) |> ignore
+                    Some summary
+                | _ ->
+                    if useRemote then
+                        if tryDownload summaryFile id "logs" then
+                            let summary = loadSummary logsDir outputsDir summaryFile
+                            cachedSummaries.TryAdd(id, Some summary) |> ignore
+                            Some summary
+                        else
+                            cachedSummaries.TryAdd(id, None) |> ignore
                             None
-                    
-                    match downloadDir logsDir "logs" with
-                    | Some _ ->
-                        let summary = load()
+                    else
+                        None
 
+        member _.TryGetSummary useRemote id : TargetSummary option =
+            let entryDir = FS.combinePath buildCacheDirectory id
+            let logsDir = FS.combinePath entryDir "logs"
+            let outputsDir = FS.combinePath entryDir "outputs"
+            let summaryFile = FS.combinePath logsDir summaryFilename
+            let completeFile = FS.combinePath entryDir completeFilename
+
+            match completeFile with
+            | FS.File _ ->
+                let summary = loadSummary logsDir outputsDir summaryFile
+                Some summary
+            | _ ->
+                if useRemote then
+                    if tryDownload summaryFile id "logs" then
+                        let summary = loadSummary logsDir outputsDir summaryFile
                         match summary.Outputs with
-                        | Some outputsDir ->
-                            match downloadDir outputsDir "outputs" with
-                            | Some _ ->
+                        | Some _ ->
+                            if tryDownload summaryFile id "outputs" then
                                 entryDir |> markEntryAsCompleted "remote"
-                                summary |> Some
-                            | _ ->
+                                Some summary
+                            else
                                 None
                         | _ ->
                             entryDir |> markEntryAsCompleted "remote"
-                            summary |> Some
-                    | _ ->
+                            Some summary
+                    else
                         None
-
-                match completeFile with
-                | FS.File _ ->
-                    load() |> Some
-                | _ ->
-                    // cleanup everything - it's not valid anyway
-                    IO.deleteAny entryDir
-
-                    if useRemote then storage |> download
-                    else None
-
+                else
+                    None
 
         member _.CreateEntry useRemote id : IEntry =
+            // invalidate cache as we are creating a new entry
+            cachedSummaries.TryRemove(id) |> ignore
             let entryDir = FS.combinePath buildCacheDirectory id
             NewEntry(entryDir, useRemote, id, storage)
 
