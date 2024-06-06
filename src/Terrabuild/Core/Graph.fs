@@ -109,7 +109,7 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) (c
                              ProjectHash = projectConfig.Hash
                              Cache = cache
                              IsLeaf = isLeaf
-                             Required = true
+                             Required = false
                              TargetHash = target.Hash
                              Batched = false }
 
@@ -157,28 +157,41 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
             | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
             | _ -> true
 
-    let processedNodes = ConcurrentDictionary<string, bool>()
-    let allNodes = ConcurrentDictionary<string, Node>()
+    let mutable allNodes = Map.empty
 
     let rec skipNode parentRequired nodeId =
         let node = graph.Nodes[nodeId]
         let processNode () =
             let required = parentRequired || shallRebuild node
-            let node = { node with Required = required }
-            allNodes.TryAdd(nodeId, node) |> ignore
+            let node = { node with Required = node.Required || required }
+            allNodes <- allNodes |>Map.add nodeId node
 
             node.Dependencies |> Seq.iter (skipNode required) 
 
-        if processedNodes.TryAdd(node.Id, true) then processNode()
+        processNode()
 
-    graph.RootNodes |> Seq.iter (skipNode false)
+    // compute first incoming edges
+    let reverseIncomings =
+        graph.Nodes
+        |> Map.map (fun _ _ -> List<string>())
+    for KeyValue(nodeId, node) in graph.Nodes do
+        for dependency in node.Dependencies do
+            reverseIncomings[dependency].Add(nodeId)
+
+    let rootNodes =
+        reverseIncomings
+        |> Map.filter (fun _ v -> v.Count = 0)
+        |> Map.keys
+        |> List.ofSeq
+
+    rootNodes |> List.iter (skipNode false)
 
     let endedAt = DateTime.UtcNow
 
     let trimDuration = endedAt - startedAt
     Log.Debug("Trim: {duration}", trimDuration)
 
-    { graph with Nodes = allNodes |> Map.ofDict }
+    { graph with Nodes = allNodes }
 
 
 
