@@ -165,7 +165,7 @@ type Dotnet() =
         File.WriteAllLines(slnfile, slnContent)
 
         let actions = [
-            action "dotnet" $"restore {slnfile} --no-dependencies" 
+            action "dotnet" $"restore {slnfile}" 
             action "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{logger}{version}"
         ]
         actions
@@ -201,7 +201,7 @@ type Dotnet() =
             | _ -> ""
 
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
+        |> andThen "dotnet" $"restore {projectfile}" 
         |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore --configuration {configuration}{logger}{maxcpucount}{version}"
         |> batchable
 
@@ -230,6 +230,7 @@ type Dotnet() =
 
         // NOTE for TargetsForTfmSpecificContentInPackage: https://github.com/dotnet/fsharp/issues/12320
         scope Cacheability.Always
+        |> andThen "dotnet" $"restore {projectfile}" 
         |> andThen "dotnet" $"pack {projectfile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage="
 
     /// <summary>
@@ -257,7 +258,7 @@ type Dotnet() =
             | Some true -> " --self-contained"
             | _ -> ""
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectfile} --no-dependencies" 
+        |> andThen "dotnet" $"restore {projectfile}" 
         |> andThen "dotnet" $"publish {projectfile} --no-dependencies --no-restore --configuration {configuration}{runtime}{trim}{single}"
 
     /// <summary>
@@ -282,4 +283,5 @@ type Dotnet() =
 
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
         scope Cacheability.Always
+        |> andThen "dotnet" $"restore {projectfile}" 
         |> andThen "dotnet" $"test --no-build --configuration {configuration} {filter} {projectfile}"
