@@ -291,21 +291,24 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let buildQueue = Exec.BuildQueue(options.MaxConcurrency)
     let rec queueAction (nodeId: string) =
         let node = graph.Nodes[nodeId]
-        if node.Required then
-            let summary, restored = buildNode node
-            restoredNodes.TryAdd(nodeId, restored) |> ignore
-            notification.NodeCompleted node restored summary
 
-            // schedule children nodes if ready
-            let triggers = reverseIncomings[nodeId]
-            for trigger in triggers do
-                let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
-                if newValue = 0 then
-                    readyNodes[trigger].Value <- -1 // mark node as scheduled
-                    buildQueue.Enqueue (fun () -> queueAction trigger)
+        let restored =
+            if node.Required then
+                let summary, restored = buildNode node
+                notification.NodeCompleted node restored summary
+                restored
+            else
+                false
 
-        else
-            restoredNodes.TryAdd(nodeId, true) |> ignore
+        restoredNodes.TryAdd(nodeId, restored) |> ignore
+
+        // schedule children nodes if ready
+        let triggers = reverseIncomings[nodeId]
+        for trigger in triggers do
+            let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
+            if newValue = 0 then
+                readyNodes[trigger].Value <- -1 // mark node as scheduled
+                buildQueue.Enqueue (fun () -> queueAction trigger)
 
 
     readyNodes
