@@ -217,6 +217,7 @@ type Cache(storage: Contracts.Storage) =
         summary
 
     interface ICache with
+        // NOTE: do not use when building - only use for graph building
         member _.TryGetSummaryOnly useRemote id : TargetSummary option =
             match cachedSummaries.TryGetValue(id) with
             | true, targetSummary ->
