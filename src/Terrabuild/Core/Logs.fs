@@ -14,7 +14,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
     |> Seq.choose (fun (KeyValue(nodeId, node)) -> if scope |> Set.contains nodeId then Some node else None)
     |> Seq.map (fun node ->
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-        let summary = cache.TryGetSummary false cacheEntryId
+        let summary = cache.TryGetSummaryOnly false cacheEntryId
         node, summary)
     |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
     |> Seq.iter (fun (node, summary) ->
