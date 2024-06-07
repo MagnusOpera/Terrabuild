@@ -64,7 +64,7 @@ type ICache =
 
 let private summaryFilename = "summary.json"
 
-let private completeFilename = ".complete"
+let private completeFilename = "status"
 
 let terrabuildHome =
     FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
