@@ -118,7 +118,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
               NodeInfo.NodeHash = node.Hash
               NodeInfo.ProjectHash = node.ProjectHash }
 
-        match cache.TryGetSummary false cacheEntryId with
+        match cache.TryGetSummaryOnly false cacheEntryId with
         | Some summary -> 
             match summary.Status with
             | Cache.TaskStatus.Success -> NodeStatus.Success nodeInfo
