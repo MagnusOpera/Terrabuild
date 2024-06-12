@@ -80,6 +80,11 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
+    // first check all targets exist in WORKSPACE
+    match targets |> Seq.tryFind (fun targetName -> configuration.Targets |> Map.containsKey targetName |> not) with
+    | Some undefinedTarget -> TerrabuildException.Raise($"Target {undefinedTarget} is not defined in WORKSPACE")
+    | _ -> ()
+
     let rec buildTarget targetName project =
         let nodeId = $"{project}:{targetName}"
 
