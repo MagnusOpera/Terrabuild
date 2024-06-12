@@ -96,6 +96,7 @@ type private Signal(name, eventQueue: IEventQueue) as this =
 
 type IComputedGetter<'T> =
     inherit ISignal
+    abstract Name: string
     abstract Value: 'T with get
 
 type IComputedSetter<'T> =
@@ -108,6 +109,8 @@ type private Computed<'T>(name, eventQueue) =
     let mutable value = None
 
     interface IComputedGetter<'T> with
+        member _.Name = name
+
         member this.Value =
             lock this (fun () ->
                 match value with

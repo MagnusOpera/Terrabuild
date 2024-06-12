@@ -8,6 +8,7 @@ open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Terrabuild.Configuration.Project.AST
 open Errors
+open Terrabuild.PubSub
 
 [<RequireQualifiedAccess>]
 type Options = {
@@ -85,6 +86,21 @@ type Workspace = {
 }
 
 
+type LazyScript = Lazy<Terrabuild.Scripting.Script>
+
+[<RequireQualifiedAccess>]
+type LoadedProject = {
+    Dependencies: string set
+    Includes: string set
+    Ignores: string set
+    Outputs: string set
+    Targets: Map<string, Target>
+    Labels: string set
+    Extensions: Map<string, Extension>
+    Scripts: Map<string, LazyScript>
+}
+
+
 let read workspaceDir configuration note tag labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading {configuration} configuration" |> Terminal.writeLine
 
@@ -138,8 +154,6 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
     let branchOrTag = sourceControl.BranchOrTag
 
-    let processedNodes = ConcurrentDictionary<string, bool>()
-
     let extensions = 
         Extensions.systemExtensions
         |> Map.addMap workspaceConfig.Extensions
@@ -149,321 +163,317 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         |> Map.map (fun _ _ -> None)
         |> Map.map Extensions.lazyLoadScript
 
-    let rec scanDependency projects project =
-        try
-            let projectDir = project
 
-            // process only unknown dependency
-            if processedNodes.TryAdd(project, true) then
-                let projectFile = FS.combinePath projectDir "PROJECT"
-                if FS.fileExists projectFile |> not then
-                    TerrabuildException.Raise($"Unknown project reference '{project}'")
+    let projectFiles = 
+        let rec findDependencies dir =
+            seq {
+                let projectFile =  FS.combinePath dir "PROJECT" 
+                match projectFile with
+                | FS.File file ->
+                    file |> FS.parentDirectory |> FS.relativePath workspaceDir
+                | _ ->
+                    for subdir in dir |> IO.enumerateDirs do
+                        yield! findDependencies subdir
+            }
 
-                let projectContent = File.ReadAllText projectFile
-                let projectConfig =
-                    try
-                        Terrabuild.Configuration.FrontEnd.parseProject projectContent
-                    with exn ->
-                        TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
-
-                let projectDef =
-                    // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
-                    // Order is important as we just want to override in the project and reduce as much as possible scripts compilation
-                    // In other terms: we only compile what's changed
-                    let extensions =
-                        extensions
-                        |> Map.addMap projectConfig.Extensions
-
-                    let projectScripts =
-                        projectConfig.Extensions
-                        |> Map.map (fun _ ext -> ext.Script |> Option.map (FS.workspaceRelative workspaceDir projectDir))
-
-                    let scripts =
-                        scripts
-                        |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
-
-                    let projectInfo =
-                        match projectConfig.Project.Init with
-                        | Some init ->
-                            let parseContext = 
-                                let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
-                                                Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
-                                                Terrabuild.Extensibility.ExtensionContext.CI = sourceControl.CI }
-                                Value.Map (Map [ "context", Value.Object context ])
-                            
-                            let result =
-                                Extensions.getScript init scripts
-                                |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
-
-                            match result with
-                            | Extensions.Success result -> result
-                            | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {init} was not found")
-                            | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-                            | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
-                        | _ -> ProjectInfo.Default
-
-                    let projectInfo = {
-                        projectInfo
-                        with Ignores = projectInfo.Ignores + (projectConfig.Project.Ignores |> Option.defaultValue Set.empty)
-                             Outputs = projectInfo.Outputs + (projectConfig.Project.Outputs |> Option.defaultValue Set.empty)
-                             Dependencies = projectInfo.Dependencies + (projectConfig.Project.Dependencies |> Option.defaultValue Set.empty)
-                             Includes = projectInfo.Includes + (projectConfig.Project.Includes |> Option.defaultValue Set.empty) }
-
-                    let labels = projectConfig.Project.Labels
-
-                    let projectOutputs = projectInfo.Outputs
-                    let projectIgnores = projectInfo.Ignores
-                    // convert relative dependencies to absolute dependencies respective to workspaceDirectory
-                    let projectDependencies =
-                        projectInfo.Dependencies
-                        |> Set.map (fun dep -> FS.workspaceRelative workspaceDir projectDir dep)
-
-                    let projectTargets = projectConfig.Targets
-
-                    let includes =
-                        projectScripts
-                        |> Seq.choose (fun (KeyValue(_, script)) -> script)
-                        |> Set.ofSeq
-                        |> Set.union projectInfo.Includes
-
-                    {| Dependencies = projectDependencies
-                       Includes = includes
-                       Ignores = projectIgnores
-                       Outputs = projectOutputs
-                       Targets = projectTargets
-                       Labels = labels
-                       Extensions = extensions
-                       Scripts = scripts |}
-
-                // we go depth-first in order to compute node hash right after
-                // NOTE: this could lead to a memory usage problem
-                let projects: Map<string, Project> =
-                    scanDependencies projects projectDef.Dependencies
-
-                // check for circular or missing dependencies
-                for childDependency in projectDef.Dependencies do
-                    if projects |> Map.tryFind childDependency |> Option.isNone then
-                        TerrabuildException.Raise($"Circular dependencies between {project} and {childDependency}")
+        findDependencies workspaceDir
 
 
-                // get dependencies on files
-                let files =
-                    projectDir |> IO.enumerateFilesBut (projectDef.Includes) (projectDef.Outputs + projectDef.Ignores)
-                    |> Set
-                let filesHash =
-                    files
-                    |> Seq.sort
-                    |> Hash.sha256files
-    
-                let versions =
-                    projectDef.Dependencies
-                    |> Seq.map (fun dependency -> 
-                        match projects |> Map.tryFind dependency with
-                        | Some project -> dependency, project.Hash
-                        | _ -> TerrabuildException.Raise($"Circular dependencies between '{project}' and '{dependency}'"))
-                    |> Map.ofSeq
+    let loadProjectDef projectId =
+        let projectDir = FS.combinePath workspaceDir projectId
+        let projectFile = FS.combinePath projectDir "PROJECT"
 
-                let dependenciesHash =
-                    versions.Values
-                    |> Seq.sort
-                    |> Hash.sha256strings
+        let projectContent = File.ReadAllText projectFile
+        let projectConfig =
+            try Terrabuild.Configuration.FrontEnd.parseProject projectContent
+            with exn -> TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
 
-                // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
-                let projectHash =
-                    [ filesHash; dependenciesHash ]
-                    |> Hash.sha256strings
+        // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
+        // Order is important as we just want to override in the project and reduce as much as possible scripts compilation
+        // In other terms: we only compile what's changed
+        let extensions =
+            extensions
+            |> Map.addMap projectConfig.Extensions
 
-                let projectSteps =
-                    projectDef.Targets
-                    |> Map.map (fun targetName target ->
-                        // use value from project target
-                        // otherwise use workspace target
-                        // defaults to allow caching
-                        let rebuild =
-                            target.Rebuild
-                            |> Option.defaultWith (fun () ->
-                                workspaceConfig.Targets
-                                |> Map.tryFind targetName
-                                |> Option.map (fun target -> target.Rebuild)
-                                |> Option.defaultValue false
-                            )
+        let projectScripts =
+            projectConfig.Extensions
+            |> Map.map (fun _ ext -> ext.Script |> Option.map (FS.workspaceRelative workspaceDir projectDir))
 
-                        let usedVariables, actions =
-                            target.Steps
-                            |> List.fold (fun (usedVariables, actions) step ->
-                                // let stepVars: Map<string, string> = Map.empty
+        let scripts =
+            scripts
+            |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
 
-                                let extension = 
-                                    match projectDef.Extensions |> Map.tryFind step.Extension with
-                                    | Some extension -> extension
-                                    | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
+        let projectInfo =
+            match projectConfig.Project.Init with
+            | Some init ->
+                let parseContext = 
+                    let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
+                                    Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
+                                    Terrabuild.Extensibility.ExtensionContext.CI = sourceControl.CI }
+                    Value.Map (Map [ "context", Value.Object context ])
+                
+                let result =
+                    Extensions.getScript init scripts
+                    |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
 
-                                let stepActions, stepVars =
-                                    let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
-                                                          Terrabuild.Extensibility.ActionContext.Directory = projectDir
-                                                          Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
-                                                          Terrabuild.Extensibility.ActionContext.NodeHash = projectHash
-                                                          Terrabuild.Extensibility.ActionContext.Command = step.Command
-                                                          Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
+                match result with
+                | Extensions.Success result -> result
+                | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {init} was not found")
+                | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
+                | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
+            | _ -> ProjectInfo.Default
 
-                                    let actionVariables =
-                                        buildVariables
-                                        |> Map.add "terrabuild_project" (Expr.String project)
-                                        |> Map.add "terrabuild_target" (Expr.String targetName)
-                                        |> Map.add "terrabuild_configuration" (Expr.String configuration)
-                                        |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
-                                        |> (fun map ->
-                                            let tagValue =
-                                                match tag with
-                                                | Some tag -> Expr.String tag
-                                                | _ -> Expr.Nothing
-                                            map |> Map.add "terrabuild_tag" tagValue)
+        let projectInfo = {
+            projectInfo
+            with Ignores = projectInfo.Ignores + (projectConfig.Project.Ignores |> Option.defaultValue Set.empty)
+                 Outputs = projectInfo.Outputs + (projectConfig.Project.Outputs |> Option.defaultValue Set.empty)
+                 Dependencies = projectInfo.Dependencies + (projectConfig.Project.Dependencies |> Option.defaultValue Set.empty)
+                 Includes = projectInfo.Includes + (projectConfig.Project.Includes |> Option.defaultValue Set.empty) }
 
-                                    let evaluationContext = {
-                                        Eval.EvaluationContext.WorkspaceDir = workspaceDir
-                                        Eval.EvaluationContext.ProjectDir = projectDir
-                                        Eval.EvaluationContext.Versions = versions
-                                        Eval.EvaluationContext.Variables = actionVariables
-                                    }
+        let labels = projectConfig.Project.Labels
 
-                                    let usedVars, actionContext =
-                                        extension.Defaults
-                                        |> Map.addMap step.Parameters
-                                        |> Map.add "context" (Expr.Object actionContext)
-                                        |> Expr.Map
-                                        |> Eval.eval evaluationContext
+        let projectOutputs = projectInfo.Outputs
+        let projectIgnores = projectInfo.Ignores
+        // convert relative dependencies to absolute dependencies respective to workspaceDirectory
+        let projectDependencies =
+            projectInfo.Dependencies
+            |> Set.map (fun dep -> FS.workspaceRelative workspaceDir projectDir dep)
 
-                                    // tag shall not trigger a build so we do not want dependency on this
-                                    let usedVars = usedVars |> Set.remove "terrabuild_tag"
+        let projectTargets = projectConfig.Targets
 
-                                    let script = Extensions.getScript step.Extension projectDef.Scripts
-                                    let actionGroup =
-                                        let result =
-                                            script
-                                            |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionSequence> step.Command actionContext
-                                        match result with
-                                        | Extensions.Success result -> result
-                                        | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {step.Extension} was not found")
-                                        | Extensions.TargetNotFound -> TerrabuildException.Raise($"Script {step.Extension} has no function {step.Command}")
-                                        | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '{step.Command}' for extension '{step.Extension}'", exn)
+        let includes =
+            projectScripts
+            |> Seq.choose (fun (KeyValue(_, script)) -> script)
+            |> Set.ofSeq
+            |> Set.union projectInfo.Includes
 
-                                    let batchContext =
-                                        if actionGroup.Batchable then
-                                            Some { Script = script.Value
-                                                   Command = step.Command
-                                                   Context = actionContext }
-                                        else
-                                            None
+        { LoadedProject.Dependencies = projectDependencies
+          LoadedProject.Includes = includes
+          LoadedProject.Ignores = projectIgnores
+          LoadedProject.Outputs = projectOutputs
+          LoadedProject.Targets = projectTargets
+          LoadedProject.Labels = labels
+          LoadedProject.Extensions = extensions
+          LoadedProject.Scripts = scripts }
 
-                                    // rebuild semantic is implemented by tweaking cacheability
-                                    let cache = 
-                                        if rebuild then Cacheability.Never
-                                        else actionGroup.Cache
+    let finalizeProject projectId (projectDef: LoadedProject) (projectDependencies: IComputedGetter<Project> seq) =
+        let projectDir = projectId
 
-                                    let containedActionBatch = {
-                                        ContaineredActionBatch.MetaCommand = $"{step.Extension} {step.Command}"
-                                        ContaineredActionBatch.BatchContext = batchContext
-                                        ContaineredActionBatch.Container = extension.Container
-                                        ContaineredActionBatch.ContainerVariables = extension.Variables
-                                        ContaineredActionBatch.Cache = cache
-                                        ContaineredActionBatch.Actions = actionGroup.Actions
-                                    }
+        // get dependencies on files
+        let files =
+            projectDir |> IO.enumerateFilesBut (projectDef.Includes) (projectDef.Outputs + projectDef.Ignores)
+            |> Set
+        let filesHash =
+            files
+            |> Seq.sort
+            |> Hash.sha256files
 
-                                    containedActionBatch, usedVars
+        let versions =
+            projectDependencies
+            |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value.Hash)
+            |> Map.ofSeq
 
-                                let usedVariables = usedVariables + stepVars
-                                let actions = actions @ [ stepActions ]
-                                usedVariables, actions
-                            ) (Set.empty, [])
+        let dependenciesHash =
+            versions.Values
+            |> Seq.sort
+            |> Hash.sha256strings
 
-                        let usedVariables =
-                            usedVariables
-                            |> Seq.sort
-                            |> Seq.choose (fun k ->
-                                match buildVariables |> Map.tryFind k with
-                                | Some v -> Some (k, $"{v}")
-                                | _ -> None)
+        // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
+        let projectHash =
+            [ filesHash; dependenciesHash ]
+            |> Hash.sha256strings
 
-                        let variableHash =
-                            usedVariables
-                            |> Seq.map (fun (key, value) -> $"{key} = {value}")
-                            |> Hash.sha256strings
-
-                        let stepHash =
-                            actions
-                            |> Seq.collect (fun batch ->
-                                batch.Actions |> Seq.map(fun step ->
-                                    $"{batch.Container} {step.Command} {step.Arguments}"))
-                            |> Hash.sha256strings
-
-                        let hash =
-                            [ stepHash; variableHash ]
-                            |> Hash.sha256strings
-
-                        // use value from project target
-                        // otherwise use workspace target
-                        // defaults to no dependencies
-                        let dependsOn =
-                            target.DependsOn
-                            |> Option.defaultWith (fun () ->
-                                workspaceConfig.Targets
-                                |> Map.tryFind targetName
-                                |> Option.map (fun target -> target.DependsOn)
-                                |> Option.defaultValue Set.empty
-                            )
-
-                        let outputs =
-                            match target.Outputs with
-                            | Some outputs -> outputs
-                            | _ -> projectDef.Outputs
-
-                        { ContaineredTarget.Hash = hash
-                          ContaineredTarget.Variables = usedVariables |> Map.ofSeq
-                          ContaineredTarget.Actions = actions
-                          ContaineredTarget.DependsOn = dependsOn
-                          ContaineredTarget.Outputs = outputs }
+        let projectSteps =
+            projectDef.Targets
+            |> Map.map (fun targetName target ->
+                // use value from project target
+                // otherwise use workspace target
+                // defaults to allow caching
+                let rebuild =
+                    target.Rebuild
+                    |> Option.defaultWith (fun () ->
+                        workspaceConfig.Targets
+                        |> Map.tryFind targetName
+                        |> Option.map (fun target -> target.Rebuild)
+                        |> Option.defaultValue false
                     )
 
-                let files =
-                    files
-                    |> Set.map (FS.relativePath projectDir)
+                let usedVariables, actions =
+                    target.Steps
+                    |> List.fold (fun (usedVariables, actions) step ->
+                        // let stepVars: Map<string, string> = Map.empty
 
-                let projectConfig =
-                    { Project.Id = project
-                      Project.Hash = projectHash
-                      Project.Dependencies = projectDef.Dependencies
-                      Project.Files = files
-                      Project.Targets = projectSteps
-                      Project.Labels = projectDef.Labels }
+                        let extension = 
+                            match projectDef.Extensions |> Map.tryFind step.Extension with
+                            | Some extension -> extension
+                            | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                projects |> Map.add project projectConfig
-            else
-                projects
-        with
-            ex ->
-                TerrabuildException.Raise($"while processing project '{project}'", ex)
+                        let stepActions, stepVars =
+                            let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
+                                                  Terrabuild.Extensibility.ActionContext.Directory = projectDir
+                                                  Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
+                                                  Terrabuild.Extensibility.ActionContext.NodeHash = projectHash
+                                                  Terrabuild.Extensibility.ActionContext.Command = step.Command
+                                                  Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
 
-    and scanDependencies projects dependencies =
-        dependencies |> Seq.fold scanDependency projects
+                            let actionVariables =
+                                buildVariables
+                                |> Map.add "terrabuild_project" (Expr.String projectId)
+                                |> Map.add "terrabuild_target" (Expr.String targetName)
+                                |> Map.add "terrabuild_configuration" (Expr.String configuration)
+                                |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
+                                |> (fun map ->
+                                    let tagValue =
+                                        match tag with
+                                        | Some tag -> Expr.String tag
+                                        | _ -> Expr.Nothing
+                                    map |> Map.add "terrabuild_tag" tagValue)
 
-    // scan for projects
-    let rec findDependencies dir =
-        seq {
-            let projectFile =  FS.combinePath dir "PROJECT" 
-            match projectFile with
-            | FS.File file ->
-                file |> FS.parentDirectory |> FS.relativePath workspaceDir
-            | _ ->
-                for subdir in dir |> IO.enumerateDirs do
-                    yield! findDependencies subdir
-        }
+                            let evaluationContext = {
+                                Eval.EvaluationContext.WorkspaceDir = workspaceDir
+                                Eval.EvaluationContext.ProjectDir = projectDir
+                                Eval.EvaluationContext.Versions = versions
+                                Eval.EvaluationContext.Variables = actionVariables
+                            }
 
-    let dependencies =
-        "."
-        |> findDependencies
-        |> Set
+                            let usedVars, actionContext =
+                                extension.Defaults
+                                |> Map.addMap step.Parameters
+                                |> Map.add "context" (Expr.Object actionContext)
+                                |> Expr.Map
+                                |> Eval.eval evaluationContext
 
-    let projects = scanDependencies Map.empty dependencies
+                            // tag shall not trigger a build so we do not want dependency on this
+                            let usedVars = usedVars |> Set.remove "terrabuild_tag"
+
+                            let script = Extensions.getScript step.Extension projectDef.Scripts
+                            let actionGroup =
+                                let result =
+                                    script
+                                    |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionSequence> step.Command actionContext
+                                match result with
+                                | Extensions.Success result -> result
+                                | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {step.Extension} was not found")
+                                | Extensions.TargetNotFound -> TerrabuildException.Raise($"Script {step.Extension} has no function {step.Command}")
+                                | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '{step.Command}' for extension '{step.Extension}'", exn)
+
+                            let batchContext =
+                                if actionGroup.Batchable then
+                                    Some { Script = script.Value
+                                           Command = step.Command
+                                           Context = actionContext }
+                                else
+                                    None
+
+                            // rebuild semantic is implemented by tweaking cacheability
+                            let cache = 
+                                if rebuild then Cacheability.Never
+                                else actionGroup.Cache
+
+                            let containedActionBatch = {
+                                ContaineredActionBatch.MetaCommand = $"{step.Extension} {step.Command}"
+                                ContaineredActionBatch.BatchContext = batchContext
+                                ContaineredActionBatch.Container = extension.Container
+                                ContaineredActionBatch.ContainerVariables = extension.Variables
+                                ContaineredActionBatch.Cache = cache
+                                ContaineredActionBatch.Actions = actionGroup.Actions
+                            }
+
+                            containedActionBatch, usedVars
+
+                        let usedVariables = usedVariables + stepVars
+                        let actions = actions @ [ stepActions ]
+                        usedVariables, actions
+                    ) (Set.empty, [])
+
+                let usedVariables =
+                    usedVariables
+                    |> Seq.sort
+                    |> Seq.choose (fun k ->
+                        match buildVariables |> Map.tryFind k with
+                        | Some v -> Some (k, $"{v}")
+                        | _ -> None)
+
+                let variableHash =
+                    usedVariables
+                    |> Seq.map (fun (key, value) -> $"{key} = {value}")
+                    |> Hash.sha256strings
+
+                let stepHash =
+                    actions
+                    |> Seq.collect (fun batch ->
+                        batch.Actions |> Seq.map(fun step ->
+                            $"{batch.Container} {step.Command} {step.Arguments}"))
+                    |> Hash.sha256strings
+
+                let hash =
+                    [ stepHash; variableHash ]
+                    |> Hash.sha256strings
+
+                // use value from project target
+                // otherwise use workspace target
+                // defaults to no dependencies
+                let dependsOn =
+                    target.DependsOn
+                    |> Option.defaultWith (fun () ->
+                        workspaceConfig.Targets
+                        |> Map.tryFind targetName
+                        |> Option.map (fun target -> target.DependsOn)
+                        |> Option.defaultValue Set.empty
+                    )
+
+                let outputs =
+                    match target.Outputs with
+                    | Some outputs -> outputs
+                    | _ -> projectDef.Outputs
+
+                { ContaineredTarget.Hash = hash
+                  ContaineredTarget.Variables = usedVariables |> Map.ofSeq
+                  ContaineredTarget.Actions = actions
+                  ContaineredTarget.DependsOn = dependsOn
+                  ContaineredTarget.Outputs = outputs }
+            )
+
+        let files =
+            files
+            |> Set.map (FS.relativePath projectDir)
+
+        { Project.Id = projectId
+          Project.Hash = projectHash
+          Project.Dependencies = projectDef.Dependencies
+          Project.Files = files
+          Project.Targets = projectSteps
+          Project.Labels = projectDef.Labels }
+
+    let projects = ConcurrentDictionary<string, Project>()
+    let hub = Hub.Create(options.MaxConcurrency)
+    for projectId in projectFiles do
+        // parallel load of projects
+        hub.Subscribe Array.empty (fun () ->
+            // load project
+            let loadedProject = loadProjectDef projectId
+
+            // await dependencies to be loaded
+            let awaitedProjects =
+                loadedProject.Dependencies
+                |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Project> awaitedProjectId)
+                |> Array.ofSeq
+
+            let awaitedSignals = awaitedProjects |> Array.map (fun entry -> entry :> ISignal)
+            hub.Subscribe awaitedSignals (fun () ->
+                // build task & code & notify
+                let project = finalizeProject projectId loadedProject awaitedProjects
+                projects.TryAdd(projectId, project) |> ignore
+
+                let loadedProjectSignal = hub.CreateComputed<Project> projectId
+                loadedProjectSignal.Value <- project)
+        )
+
+    let status = hub.WaitCompletion()
+    match status with
+    | Status.Ok -> ()
+    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Project {projectId} is unknown")
+    | Status.SubscriptionError exn -> TerrabuildException.Raise("Failed to load configuration", exn)
 
     // select dependencies with labels if any
     let dependencies =
@@ -476,7 +486,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
     { Workspace.Space = workspaceConfig.Space
       Workspace.ComputedProjectSelection = dependencies
-      Workspace.Projects = projects
+      Workspace.Projects = projects |> Map.ofDict
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Configuration = configuration
       Workspace.Note = note
