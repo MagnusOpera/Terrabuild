@@ -1,4 +1,4 @@
-project dotnet_app @dotnet
+project @dotnet
 
 target build {
   rebuild = true

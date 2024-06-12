@@ -250,7 +250,6 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                 let files =
                     projectDir |> IO.enumerateFilesBut (projectDef.Includes) (projectDef.Outputs + projectDef.Ignores)
                     |> Set
-                    |> Set.union projectDef.Includes
                 let filesHash =
                     files
                     |> Seq.sort

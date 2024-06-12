@@ -1,15 +1,15 @@
 
-project deploy_apps @terraform {
-    dependencies = [ dotnet_app
-                     npm_app ]
+project @terraform {
+    dependencies = [ "/projects/dotnet-app"
+                     "../../projects/npm-app" ]
     labels = [ "infra" ]
 }
 
 target build {
     rebuild = true
     @terraform plan { 
-        variables: { dotnet_app_version: version(dotnet_app)
-                     npm_app_version: version(npm_app) }
+        variables: { dotnet_app_version: version("/projects/dotnet-app")
+                     npm_app_version: version("../../projects/npm-app") }
     }
 }
 

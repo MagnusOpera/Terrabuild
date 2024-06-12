@@ -1,4 +1,5 @@
+project { }
 
-target shell_lib build {
+target build {
     @shell echo { arguments: "building library1" }
 }

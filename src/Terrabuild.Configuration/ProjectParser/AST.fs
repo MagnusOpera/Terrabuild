@@ -11,7 +11,6 @@ type ProjectComponents =
     | Labels of string list
 
 type Project = {
-    Id: string
     Init: string option
     Dependencies: Set<string> option
     Outputs: Set<string> option
@@ -20,7 +19,7 @@ type Project = {
     Labels: Set<string>
 }
 with
-    static member Build id init components =
+    static member Build init components =
         let dependencies =
             match components |> List.choose (function | ProjectComponents.Dependencies value -> Some value | _ -> None) with
             | [] -> None
@@ -51,8 +50,7 @@ with
             | [value] -> value |> Set.ofList
             | _ -> failwith "multiple labels declared"
 
-        { Id = id
-          Init = init
+        { Init = init
           Dependencies = dependencies
           Outputs = outputs
           Ignores = ignores

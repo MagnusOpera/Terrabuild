@@ -79,10 +79,10 @@ ExtensionDefaults:
 
 
 Project:
-    | PROJECT IDENTIFIER { Project.Build $2 None [] |> ProjectFileComponents.Project }
-    | PROJECT IDENTIFIER LBRACE ProjectComponents RBRACE { Project.Build $2 None $4 |> ProjectFileComponents.Project }
-    | PROJECT IDENTIFIER ExtensionIdentifier LBRACE ProjectComponents RBRACE { Project.Build $2 (Some $3) $5 |> ProjectFileComponents.Project }
-    | PROJECT IDENTIFIER ExtensionIdentifier { Project.Build $2 (Some $3) [] |> ProjectFileComponents.Project }
+    | PROJECT { Project.Build None [] |> ProjectFileComponents.Project }
+    | PROJECT LBRACE ProjectComponents RBRACE { Project.Build None $3 |> ProjectFileComponents.Project }
+    | PROJECT ExtensionIdentifier { Project.Build (Some $2) [] |> ProjectFileComponents.Project }
+    | PROJECT ExtensionIdentifier LBRACE ProjectComponents RBRACE { Project.Build (Some $2) $4 |> ProjectFileComponents.Project }
 ProjectComponents:
     | /* empty */ { [] }
     | ProjectComponents ProjectDependencies { $1 @ [$2] }
@@ -91,7 +91,7 @@ ProjectComponents:
     | ProjectComponents ProjectIncludes { $1 @ [$2] }
     | ProjectComponents ProjectLabels { $1 @ [$2] }
 ProjectDependencies:
-    | DEPENDENCIES EQUAL ListOfIdentifiers { ProjectComponents.Dependencies $3 }
+    | DEPENDENCIES EQUAL ListOfString { ProjectComponents.Dependencies $3 }
 ProjectOutputs:
     | OUTPUTS EQUAL ListOfString { ProjectComponents.Outputs $3 }
 ProjectIgnores:
@@ -174,7 +174,7 @@ Expr:
     | TRIM LPAREN Expr RPAREN { Expr.Function (Function.Trim, [$3]) }
     | UPPER LPAREN Expr RPAREN { Expr.Function (Function.Upper, [$3]) }
     | LOWER LPAREN Expr RPAREN { Expr.Function (Function.Lower, [$3]) }
-    | VERSION LPAREN IDENTIFIER RPAREN { Expr.Function (Function.Version, [Expr.String $3]) }
+    | VERSION LPAREN Expr RPAREN { Expr.Function (Function.Version, [$3]) }
     | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }
     | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
 
