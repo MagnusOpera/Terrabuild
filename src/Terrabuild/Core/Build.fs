@@ -6,7 +6,6 @@ open Serilog
 open Terrabuild.Extensibility
 open Terrabuild.PubSub
 open Graph
-open Errors
 
 [<RequireQualifiedAccess>]
 type NodeInfo = {
@@ -53,13 +52,6 @@ type IBuildNotification =
     abstract NodeBuilding: node:Graph.Node -> unit
     abstract NodeUploading: node:Graph.Node -> unit
     abstract NodeCompleted: node:Graph.Node -> restored: bool -> summary:Cache.TargetSummary option -> unit
-
-
-let private isNodeUnsatisfied = function
-    | NodeStatus.Failure nodeInfo -> Some nodeInfo
-    | NodeStatus.Unfulfilled nodeInfo -> Some nodeInfo
-    | NodeStatus.Success _ -> None
-
 
 
 let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (options: Configuration.Options) =

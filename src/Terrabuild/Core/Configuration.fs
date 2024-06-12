@@ -164,7 +164,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         |> Map.map Extensions.lazyLoadScript
 
 
-
+    // this is the first stage: load project and mostly get dependencies references
     let loadProjectDef projectId =
         let projectDir = FS.combinePath workspaceDir projectId
         let projectFile = FS.combinePath projectDir "PROJECT"
@@ -242,6 +242,8 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
           LoadedProject.Extensions = extensions
           LoadedProject.Scripts = scripts }
 
+
+    // this is the final stage: create targets and create the project
     let finalizeProject projectId (projectDef: LoadedProject) (projectDependencies: IComputedGetter<Project> seq) =
         let projectDir = projectId
 
@@ -420,9 +422,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                   ContaineredTarget.Outputs = outputs }
             )
 
-        let files =
-            files
-            |> Set.map (FS.relativePath projectDir)
+        let files = files |> Set.map (FS.relativePath projectDir)
 
         { Project.Id = projectId
           Project.Hash = projectHash
@@ -481,7 +481,8 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         match labels with
         | Some labels ->
             projects
-             |> Seq.choose (fun (KeyValue(dependency, config)) -> if Set.intersect config.Labels labels <> Set.empty then Some dependency else None)
+            |> Seq.choose (fun (KeyValue(dependency, config)) ->
+                if Set.intersect config.Labels labels <> Set.empty then Some dependency else None)
         | _ -> projects.Keys
         |> Set
 
