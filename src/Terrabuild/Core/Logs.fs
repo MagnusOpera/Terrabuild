@@ -49,7 +49,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                 | TaskStatus.Failure -> sourceControl.Log false title, dumpLogs
             | _ ->
                 let dumpNoLog() = $"{Ansi.Styles.yellow}No logs available{Ansi.Styles.reset}" |> Terminal.writeLine
-                sourceControl.Log true title, dumpNoLog
+                sourceControl.Log false title, dumpNoLog
 
         logStart |> Terminal.writeLine
         dumpLogs ()

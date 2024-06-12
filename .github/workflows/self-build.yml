@@ -55,7 +55,6 @@ jobs:
         run: terrabuild login --space magnusopera/terrabuild --token ${{ secrets.TERRABUILD_TOKEN }}
 
       - name: Build
-        if: always()
         run: |
           terrabuild build \
             -w src \
@@ -64,10 +63,13 @@ jobs:
             ${{ github.event.inputs.retry == 'true' && '--retry' || '' }} \
             --logs --debug \
 
-      - name: Upload Terrabuild Debug
+      - name: Upload Terrabuild Logs
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: Terrabuild Debug
+          name: terrabuild-dev-self-build-${{ github.sha }}
           path: |
             terrabuild-debug.*
+            ~/.terrabuild/buildcache/**/status
+            ~/.terrabuild/buildcache/**/summary.json
+            ~/.terrabuild/buildcache/**/*.log

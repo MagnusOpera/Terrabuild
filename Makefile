@@ -86,22 +86,22 @@ docs:
 
 
 self-build: clean publish
-	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug
+	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug --logs
 
 self-build-local: clean publish
-	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug --localonly
+	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug --logs --localonly
 
 self-dist: clean publish
-	.out/dotnet/terrabuild dist --workspace src --configuration $(env) --retry --debug
+	.out/dotnet/terrabuild dist --workspace src --configuration $(env) --retry --debug --logs
 
 self-test: clean publish
-	.out/dotnet/terrabuild test --workspace src --configuration $(env) --retry --debug
+	.out/dotnet/terrabuild test --workspace src --configuration $(env) --retry --debug --logs
 
 self-publish: clean publish
-	.out/dotnet/terrabuild publish --workspace src --configuration $(env) --retry --debug
+	.out/dotnet/terrabuild publish --workspace src --configuration $(env) --retry --debug --logs
 
 self-check: clean publish
-	.out/dotnet/terrabuild publish --workspace src --configuration $(env) --retry --debug --whatif
+	.out/dotnet/terrabuild publish --workspace src --configuration $(env) --retry --debug --whatif --logs
 
 
 tb-build: clean

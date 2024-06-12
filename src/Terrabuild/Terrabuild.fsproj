@@ -44,6 +44,7 @@
    <ProjectReference Include="../Terrabuild.Scripting/Terrabuild.Scripting.fsproj" />
    <ProjectReference Include="../Terrabuild.Configuration/Terrabuild.Configuration.fsproj" />
    <ProjectReference Include="../Terrabuild.Extensions/Terrabuild.Extensions.fsproj" />
+   <ProjectReference Include="../Terrabuild.PubSub/Terrabuild.PubSub.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

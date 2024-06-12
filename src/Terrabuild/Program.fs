@@ -84,9 +84,9 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let graph = Graph.create config target
         if options.Debug then
             let jsonGraph = Json.Serialize graph
-            jsonGraph |> IO.writeTextFile (logFile "graph.json")
+            jsonGraph |> IO.writeTextFile (logFile "config-graph.json")
             let mermaid = Graph.graph graph |> String.join "\n"
-            mermaid |> IO.writeTextFile (logFile "graph.mermaid")
+            mermaid |> IO.writeTextFile (logFile "config-graph.mermaid")
 
         let trimGraph = Graph.trim config graph cache options
         if options.Debug then

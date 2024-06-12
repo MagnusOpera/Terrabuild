@@ -6,6 +6,7 @@ open Collections
 open Terrabuild.Extensibility
 open Serilog
 open Errors
+open Terrabuild.PubSub
 
 type Paths = string set
 
@@ -202,41 +203,53 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
             | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
             | _ -> true
 
-    let mutable allNodes = Map.empty
+    let reversedDependencies =
+        let reversedEdges =
+            graph.Nodes
+            |> Seq.collect (fun (KeyValue(nodeId, node)) -> node.Dependencies |> Seq.map (fun dependency -> dependency, nodeId))
+            |> Seq.groupBy fst
+            |> Seq.map (fun (k, v) -> k, v |> Seq.map snd |> List.ofSeq)
+            |> Map.ofSeq
 
-    let rec skipNode parentRequired nodeId =
-        let node = graph.Nodes[nodeId]
-        let processNode () =
-            let required = parentRequired || shallRebuild node
-            let node = { node with Required = node.Required || required }
-            allNodes <- allNodes |>Map.add nodeId node
-
-            node.Dependencies |> Seq.iter (skipNode required) 
-
-        processNode()
-
-    // compute first incoming edges
-    let reverseIncomings =
         graph.Nodes
-        |> Map.map (fun _ _ -> List<string>())
-    for KeyValue(nodeId, node) in graph.Nodes do
-        for dependency in node.Dependencies do
-            reverseIncomings[dependency].Add(nodeId)
+        |> Map.map (fun _ _ -> [])
+        |> Map.addMap reversedEdges
 
-    let rootNodes =
-        reverseIncomings
-        |> Map.filter (fun _ v -> v.Count = 0)
-        |> Map.keys
-        |> List.ofSeq
+    let allNodes = ConcurrentDictionary<string, Node>()
 
-    rootNodes |> List.iter (skipNode false)
+    let hub = Hub.Create(options.MaxConcurrency)
+    for (KeyValue(depNodeId, nodeIds)) in reversedDependencies do
+        let nodeComputed = hub.CreateComputed<bool> depNodeId
+
+        // await dependencies
+        let awaitedDependencies =
+            nodeIds
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<bool> awaitedProjectId)
+            |> Array.ofSeq
+
+        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+        hub.Subscribe awaitedSignals (fun () ->
+            let node = graph.Nodes[depNodeId]
+            let parentRequired =
+                awaitedDependencies |> Seq.fold (fun acc dep -> acc || dep.Value) false
+                || shallRebuild node
+
+            let node = { node with Required = parentRequired }
+            allNodes.TryAdd(depNodeId, node) |> ignore
+            nodeComputed.Value <- parentRequired)
+
+    let status = hub.WaitCompletion()
+    match status with
+    | Status.Ok -> ()
+    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Node {projectId} is unknown")
+    | Status.SubscriptionError exn -> TerrabuildException.Raise("Optimization error", exn)
 
     let endedAt = DateTime.UtcNow
 
     let trimDuration = endedAt - startedAt
     Log.Debug("Trim: {duration}", trimDuration)
 
-    { graph with Nodes = allNodes }
+    { graph with Nodes = allNodes |> Map.ofDict }
 
 
 
@@ -244,29 +257,6 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
 
 let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
-
-    // compute first incoming edges
-    let reverseIncomings =
-        graph.Nodes
-        |> Map.map (fun _ _ -> List<string>())
-    for KeyValue(nodeId, node) in graph.Nodes do
-        for dependency in node.Dependencies do
-            reverseIncomings[dependency].Add(nodeId)
-
-    let allNodes =
-        graph.Nodes
-        |> Map.map (fun _ _ -> ref 0)
-
-    let refCounts =
-        reverseIncomings
-        |> Seq.collect (fun kvp -> kvp.Value)
-        |> Seq.countBy (id)
-        |> Map
-        |> Map.map (fun _ value -> ref value)
-
-    let readyNodes =
-        allNodes
-        |> Map.addMap refCounts
 
     let cacheMode =
         if configuration.SourceControl.CI then Cacheability.Always
@@ -330,25 +320,27 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
     // then the infection flows to parents if they are compatible
     // if they are not compatible - the virus mutates and continue its propagation up to the root nodes
     // nodeTags dictionary holds a mapping of nodes to virus variant - they are our clusters
-    let buildQueue = Exec.BuildQueue(1)
-    let rec queueAction (nodeId: string) =
-        let node = graph.Nodes[nodeId]
-        computeCluster node
 
-        // schedule children nodes if ready
-        let triggers = reverseIncomings[nodeId]
-        for trigger in triggers do
-            let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
-            if newValue = 0 then
-                readyNodes[trigger].Value <- -1 // mark node as scheduled
-                buildQueue.Enqueue (fun () -> queueAction trigger)
+    let hub = Hub.Create(options.MaxConcurrency)
+    for (KeyValue(nodeId, node)) in graph.Nodes do
+        let nodeComputed = hub.CreateComputed<Node> nodeId
 
-    readyNodes
-    |> Map.filter (fun _ value -> value.Value = 0)
-    |> Map.iter (fun key _ -> buildQueue.Enqueue (fun () -> queueAction key))
+        // await dependencies
+        let awaitedDependencies =
+            node.Dependencies
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
+            |> Array.ofSeq
 
-    // wait only if we have something to do
-    buildQueue.WaitCompletion()
+        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+        hub.Subscribe awaitedSignals (fun () ->
+            computeCluster node
+            nodeComputed.Value <- node)
+
+    let status = hub.WaitCompletion()
+    match status with
+    | Status.Ok -> ()
+    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Node {projectId} is unknown")
+    | Status.SubscriptionError exn -> TerrabuildException.Raise("Optimization error", exn)
 
     // find a project for each cluster
     let clusterNodes =
