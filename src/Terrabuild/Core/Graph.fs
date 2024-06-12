@@ -6,6 +6,7 @@ open Collections
 open Terrabuild.Extensibility
 open Serilog
 open Errors
+open Terrabuild.PubSub
 
 type Paths = string set
 
@@ -245,29 +246,6 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
 let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
-    // compute first incoming edges
-    let reverseIncomings =
-        graph.Nodes
-        |> Map.map (fun _ _ -> List<string>())
-    for KeyValue(nodeId, node) in graph.Nodes do
-        for dependency in node.Dependencies do
-            reverseIncomings[dependency].Add(nodeId)
-
-    let allNodes =
-        graph.Nodes
-        |> Map.map (fun _ _ -> ref 0)
-
-    let refCounts =
-        reverseIncomings
-        |> Seq.collect (fun kvp -> kvp.Value)
-        |> Seq.countBy (id)
-        |> Map
-        |> Map.map (fun _ value -> ref value)
-
-    let readyNodes =
-        allNodes
-        |> Map.addMap refCounts
-
     let cacheMode =
         if configuration.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
@@ -330,25 +308,27 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
     // then the infection flows to parents if they are compatible
     // if they are not compatible - the virus mutates and continue its propagation up to the root nodes
     // nodeTags dictionary holds a mapping of nodes to virus variant - they are our clusters
-    let buildQueue = Exec.BuildQueue(1)
-    let rec queueAction (nodeId: string) =
-        let node = graph.Nodes[nodeId]
-        computeCluster node
 
-        // schedule children nodes if ready
-        let triggers = reverseIncomings[nodeId]
-        for trigger in triggers do
-            let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
-            if newValue = 0 then
-                readyNodes[trigger].Value <- -1 // mark node as scheduled
-                buildQueue.Enqueue (fun () -> queueAction trigger)
+    let hub = Hub.Create(options.MaxConcurrency)
+    for (KeyValue(nodeId, node)) in graph.Nodes do
+        let nodeComputed = hub.CreateComputed<Node> nodeId
 
-    readyNodes
-    |> Map.filter (fun _ value -> value.Value = 0)
-    |> Map.iter (fun key _ -> buildQueue.Enqueue (fun () -> queueAction key))
+        // await dependencies
+        let awaitedDependencies =
+            node.Dependencies
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
+            |> Array.ofSeq
 
-    // wait only if we have something to do
-    buildQueue.WaitCompletion()
+        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+        hub.Subscribe awaitedSignals (fun () ->
+            computeCluster node
+            nodeComputed.Value <- node)
+
+    let status = hub.WaitCompletion()
+    match status with
+    | Status.Ok -> ()
+    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Node {projectId} is unknown")
+    | Status.SubscriptionError exn -> TerrabuildException.Raise("Optimization error", exn)
 
     // find a project for each cluster
     let clusterNodes =
