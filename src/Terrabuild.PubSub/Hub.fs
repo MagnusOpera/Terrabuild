@@ -147,6 +147,7 @@ type private Subscription(name, eventQueue, signals: ISignal array) as this =
         | _ -> ()
  
 
+[<RequireQualifiedAccess>]
 type Status =
     | Ok
     | SubcriptionNotRaised of string
