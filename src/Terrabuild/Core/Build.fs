@@ -51,7 +51,7 @@ type IBuildNotification =
     abstract NodeDownloading: node:Graph.Node -> unit
     abstract NodeBuilding: node:Graph.Node -> unit
     abstract NodeUploading: node:Graph.Node -> unit
-    abstract NodeCompleted: node:Graph.Node -> restored: bool -> summary:Cache.TargetSummary option -> unit
+    abstract NodeCompleted: node:Graph.Node -> restored: bool -> summary:Cache.TargetSummary -> unit
 
 
 let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (options: Configuration.Options) =
@@ -129,7 +129,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                 let files = IO.enumerateFiles outputs
                 IO.copyFiles projectDirectory outputs files |> ignore
             | _ -> ()
-            Some summary, true
+            summary, true
 
         | _ ->
             Log.Debug("{Hash}: Building '{Project}/{Target}'", node.Hash, node.Project, node.Target)
@@ -245,29 +245,31 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                             Cache.TargetSummary.EndedAt = cmdLastEndedAt }
             let files, size = cacheEntry.Complete summary
             api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.Hash files size (status = Cache.TaskStatus.Success))
-            Some summary, false
+            summary, false
 
     let restoredNodes = Concurrent.ConcurrentDictionary<string, bool>()
     let hub = Hub.Create(options.MaxConcurrency)
     for (KeyValue(nodeId, node)) in graph.Nodes do
-        let nodeComputed = hub.CreateComputed<Node> nodeId
+        if node.Required then
+            let nodeComputed = hub.CreateComputed<Node> nodeId
 
-        // await dependencies
-        let awaitedDependencies =
-            node.Dependencies
-            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
-            |> Array.ofSeq
+            // await dependencies
+            let awaitedDependencies =
+                node.Dependencies
+                |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
+                |> Array.ofSeq
 
-        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-        hub.Subscribe awaitedSignals (fun () ->
-            if node.Required then
+            let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+            hub.Subscribe awaitedSignals (fun () ->
                 let summary, restored = buildNode node
                 notification.NodeCompleted node restored summary
                 restoredNodes.TryAdd(nodeId, restored) |> ignore
-            else
-                restoredNodes.TryAdd(nodeId, true) |> ignore
 
-            nodeComputed.Value <- node)
+                if summary.Status = Cache.TaskStatus.Success then
+                    nodeComputed.Value <- node
+            )
+        else
+            restoredNodes.TryAdd(nodeId, true) |> ignore
 
     let status = hub.WaitCompletion()
 

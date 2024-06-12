@@ -27,7 +27,7 @@ type PrinterProtocol =
     | BuildStarted of graph:Graph.Workspace
     | BuildCompleted of summary:Build.Summary
     | NodeStatusChanged of node:Graph.Node * status:NodeStatus
-    | NodeCompleted of node:Graph.Node * restored:bool * summary:Cache.TargetSummary option
+    | NodeCompleted of node:Graph.Node * restored:bool * summary:Cache.TargetSummary
     | Render
 
 type BuildNotification() =
@@ -66,11 +66,7 @@ type BuildNotification() =
                 return! messageLoop ()
 
             | PrinterProtocol.NodeCompleted (node, restored, summary) ->
-                let status =
-                    match summary with
-                    | Some summary -> summary.Status = Cache.TaskStatus.Success
-                    | _ -> false
-
+                let status = summary.Status = Cache.TaskStatus.Success
                 let label = $"{node.Label} {node.Project}"
                 renderer.Complete node.Hash label status restored
                 scheduleUpdate ()
@@ -115,6 +111,6 @@ type BuildNotification() =
             PrinterProtocol.NodeStatusChanged (node, NodeStatus.Uploading)
             |> printerAgent.Post
 
-        member _.NodeCompleted (node: Graph.Node) (restored: bool) (status: Cache.TargetSummary option) = 
+        member _.NodeCompleted (node: Graph.Node) (restored: bool) (status: Cache.TargetSummary) = 
             PrinterProtocol.NodeCompleted (node, restored, status)
             |> printerAgent.Post
