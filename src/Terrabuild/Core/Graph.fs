@@ -204,11 +204,16 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
             | _ -> true
 
     let reversedDependencies =
+        let reversedEdges =
+            graph.Nodes
+            |> Seq.collect (fun (KeyValue(nodeId, node)) -> node.Dependencies |> Seq.map (fun dependency -> dependency, nodeId))
+            |> Seq.groupBy fst
+            |> Seq.map (fun (k, v) -> k, v |> Seq.map snd |> List.ofSeq)
+            |> Map.ofSeq
+
         graph.Nodes
-        |> Seq.collect (fun (KeyValue(nodeId, node)) -> node.Dependencies |> Seq.map (fun dependency -> dependency, nodeId))
-        |> Seq.groupBy fst
-        |> Seq.map (fun (k, v) -> k, v |> Seq.map snd |> List.ofSeq)
-        |> Map.ofSeq
+        |> Map.map (fun _ _ -> [])
+        |> Map.addMap reversedEdges
 
     let allNodes = ConcurrentDictionary<string, Node>()
 
@@ -225,11 +230,9 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
         let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
         hub.Subscribe awaitedSignals (fun () ->
             let node = graph.Nodes[depNodeId]
-            let parentRequired = awaitedDependencies |> Seq.fold (fun acc dep -> acc || dep.Value) false
             let parentRequired =
-                // if at least one parent required then do not hit the cache
-                if parentRequired |> not then shallRebuild node
-                else parentRequired
+                awaitedDependencies |> Seq.fold (fun acc dep -> acc || dep.Value) false
+                || shallRebuild node
 
             let node = { node with Required = parentRequired }
             allNodes.TryAdd(depNodeId, node) |> ignore
