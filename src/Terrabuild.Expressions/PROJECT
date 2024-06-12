@@ -2,5 +2,6 @@
 project @dotnet { }
 
 target build {
+    depends_on = [ ^build ]
     @dotnet build
 }

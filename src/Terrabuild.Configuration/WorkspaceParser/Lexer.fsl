@@ -60,6 +60,7 @@ rule token = parse
     | "container" { CONTAINER }
     | "script" { SCRIPT }
     | "defaults" { DEFAULTS }
+    | "name" { NAME }
 
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
     | extensionIdentifier { EXTENSION_IDENTIFIER (lexeme lexbuf |> string) }

@@ -5,7 +5,7 @@ extension npm {
 }
 
 
-project npm {
+project npm_app npm {
     labels = [ "app" ]
 }
 

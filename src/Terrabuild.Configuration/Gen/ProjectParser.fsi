@@ -4,7 +4,7 @@ type token =
   | DEPENDENCIES
   | OUTPUTS
   | IGNORES
-  | FILES
+  | INCLUDES
   | LABELS
   | VARIABLES
   | CONTAINER
@@ -13,6 +13,7 @@ type token =
   | DEPENDS_ON
   | REBUILD
   | DEFAULTS
+  | NAME
   | PROJECT
   | EXTENSION
   | TARGET
@@ -51,7 +52,7 @@ type tokenId =
     | TOKEN_DEPENDENCIES
     | TOKEN_OUTPUTS
     | TOKEN_IGNORES
-    | TOKEN_FILES
+    | TOKEN_INCLUDES
     | TOKEN_LABELS
     | TOKEN_VARIABLES
     | TOKEN_CONTAINER
@@ -60,6 +61,7 @@ type tokenId =
     | TOKEN_DEPENDS_ON
     | TOKEN_REBUILD
     | TOKEN_DEFAULTS
+    | TOKEN_NAME
     | TOKEN_PROJECT
     | TOKEN_EXTENSION
     | TOKEN_TARGET
@@ -111,7 +113,7 @@ type nonTerminalId =
     | NONTERM_ProjectDependencies
     | NONTERM_ProjectOutputs
     | NONTERM_ProjectIgnores
-    | NONTERM_ProjectFiles
+    | NONTERM_ProjectIncludes
     | NONTERM_ProjectLabels
     | NONTERM_Target
     | NONTERM_TargetComponents
@@ -123,6 +125,8 @@ type nonTerminalId =
     | NONTERM_String
     | NONTERM_ListOfString
     | NONTERM_Strings
+    | NONTERM_ListOfIdentifiers
+    | NONTERM_Identifiers
     | NONTERM_ListOfTargetIdentifiers
     | NONTERM_TargetIdentifiers
     | NONTERM_TargetIdentifier

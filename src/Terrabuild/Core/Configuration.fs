@@ -207,7 +207,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                         with Ignores = projectInfo.Ignores + (projectConfig.Project.Ignores |> Option.defaultValue Set.empty)
                              Outputs = projectInfo.Outputs + (projectConfig.Project.Outputs |> Option.defaultValue Set.empty)
                              Dependencies = projectInfo.Dependencies + (projectConfig.Project.Dependencies |> Option.defaultValue Set.empty)
-                             Files = projectInfo.Files + (projectConfig.Project.Files |> Option.defaultValue Set.empty) }
+                             Includes = projectInfo.Includes + (projectConfig.Project.Includes |> Option.defaultValue Set.empty) }
 
                     let labels = projectConfig.Project.Labels
 
@@ -224,12 +224,12 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                         projectScripts
                         |> Seq.choose (fun (KeyValue(_, script)) -> script)
                         |> Set.ofSeq
+                        |> Set.union projectInfo.Includes
 
                     {| Dependencies = projectDependencies
                        Includes = includes
                        Ignores = projectIgnores
                        Outputs = projectOutputs
-                       Files = projectInfo.Files
                        Targets = projectTargets
                        Labels = labels
                        Extensions = extensions
@@ -248,7 +248,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
                 // get dependencies on files
                 let files =
-                    projectDir |> IO.enumerateFilesBut (projectDef.Files) (projectDef.Outputs + projectDef.Ignores)
+                    projectDir |> IO.enumerateFilesBut (projectDef.Includes) (projectDef.Outputs + projectDef.Ignores)
                     |> Set
                     |> Set.union projectDef.Includes
                 let filesHash =
@@ -285,7 +285,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                             |> Option.defaultWith (fun () ->
                                 workspaceConfig.Targets
                                 |> Map.tryFind targetName
-                                |> Option.bind (fun target -> target.Rebuild)
+                                |> Option.map (fun target -> target.Rebuild)
                                 |> Option.defaultValue false
                             )
 
@@ -409,7 +409,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                             |> Option.defaultWith (fun () ->
                                 workspaceConfig.Targets
                                 |> Map.tryFind targetName
-                                |> Option.bind (fun target -> target.DependsOn)
+                                |> Option.map (fun target -> target.DependsOn)
                                 |> Option.defaultValue Set.empty
                             )
 

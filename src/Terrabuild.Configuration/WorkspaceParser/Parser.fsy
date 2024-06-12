@@ -33,7 +33,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER VERSION DOUBLE_QUESTION QUESTION COLON
 %token EOF
 %token WORKSPACE TARGET CONFIGURATION EXTENSION
-%token SPACE DEPENDS_ON REBUILD VARIABLES CONTAINER INIT SCRIPT DEFAULTS
+%token PROJECT SPACE DEPENDS_ON REBUILD VARIABLES CONTAINER INIT SCRIPT DEFAULTS NAME
 
 // associativity and precedences
 %right LSQBRACKET
@@ -50,53 +50,53 @@ let debugPrint s = ignore s
 %% 
 
 WorkspaceFile:
-    | WorkspaceFileComponents EOF { $1 }
+    | WorkspaceFileComponents EOF { WorkspaceFile.Build $1 }
 
 WorkspaceFileComponents:
-    | /* empty */ { WorkspaceFile.Empty }
-    | WorkspaceFileComponents Workspace { $1.Patch $2 }
-    | WorkspaceFileComponents Target { $1.Patch $2 }
-    | WorkspaceFileComponents Configuration { $1.Patch $2 }
-    | WorkspaceFileComponents Extension { $1.Patch $2 }
+    | /* empty */ { [] }
+    | WorkspaceFileComponents Workspace { $1 @ [$2] }
+    | WorkspaceFileComponents Target { $1 @ [$2] }
+    | WorkspaceFileComponents Configuration { $1 @ [$2] }
+    | WorkspaceFileComponents Extension { $1 @ [$2] }
 
 Workspace:
-    | WORKSPACE LBRACE WorkspaceComponents RBRACE { WorkspaceFileComponents.Workspace $3 }
+    | WORKSPACE LBRACE WorkspaceComponents RBRACE { Workspace.Build $3 |> WorkspaceFileComponents.Workspace }
 WorkspaceComponents:
-    | /* empty */ { Workspace.Empty }
-    | WorkspaceComponents WorkspaceSpace { $1.Patch $2 }
+    | /* empty */ { [] }
+    | WorkspaceComponents WorkspaceSpace { $1 @ [$2] }
 WorkspaceSpace:
     | SPACE EQUAL String { WorkspaceComponents.Space $3 }
 
 Target:
-    | TARGET IDENTIFIER { WorkspaceFileComponents.Target ($2, Target.Empty) }
-    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { WorkspaceFileComponents.Target ($2, $4) }
+    | TARGET IDENTIFIER { Target.Build $2 [] |> WorkspaceFileComponents.Target }
+    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { Target.Build $2 $4 |>  WorkspaceFileComponents.Target }
 TargetComponents:
-    | /* empty */ { Target.Empty }
-    | TargetComponents TargetDependsOn { $1.Patch $2 }
-    | TargetComponents TargetRebuild { $1.Patch $2 }
+    | /* empty */ { [] }
+    | TargetComponents TargetDependsOn { $1 @ [$2] }
+    | TargetComponents TargetRebuild { $1 @ [$2] }
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfTargetIdentifiers { TargetComponents.DependsOn $3 }
 TargetRebuild:
     | REBUILD EQUAL Bool { TargetComponents.Rebuild $3 }
 
 Configuration:
-    | CONFIGURATION IDENTIFIER { WorkspaceFileComponents.Configuration ($2, Configuration.Empty) }
-    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { WorkspaceFileComponents.Configuration ("default", $3) }
-    | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { WorkspaceFileComponents.Configuration ($2, $4) }
+    | CONFIGURATION IDENTIFIER { Configuration.Build $2 [] |> WorkspaceFileComponents.Configuration }
+    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { Configuration.Build "default" $3 |> WorkspaceFileComponents.Configuration }
+    | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { Configuration.Build $2 $4 |> WorkspaceFileComponents.Configuration }
 ConfigurationComponents:
-    | /* empty */ { Configuration.Empty }
-    | ConfigurationComponents ConfigurationVariables { $1.Patch $2 }
+    | /* empty */ { [] }
+    | ConfigurationComponents ConfigurationVariables { $1 @ [$2] }
 ConfigurationVariables:
     | VARIABLES EQUAL ExprMap { ConfigurationComponents.Variables $3 }
 
 Extension:
-    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { WorkspaceFileComponents.Extension ($2, $4) }
+    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { Extension.Build $2 $4 |> WorkspaceFileComponents.Extension }
 ExtensionComponents:
-    | /* empty */ { Extension.Empty }
-    | ExtensionComponents ExtensionContainer { $1.Patch $2 }
-    | ExtensionComponents ExtensionVariables { $1.Patch $2 }
-    | ExtensionComponents ExtensionScript { $1.Patch $2 }
-    | ExtensionComponents ExtensionDefaults { $1.Patch $2 }
+    | /* empty */ { [] }
+    | ExtensionComponents ExtensionContainer { $1 @ [$2] }
+    | ExtensionComponents ExtensionVariables { $1 @ [$2] }
+    | ExtensionComponents ExtensionScript { $1 @ [$2] }
+    | ExtensionComponents ExtensionDefaults { $1 @ [$2] }
 ExtensionContainer:
     | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
 ExtensionVariables:
@@ -153,13 +153,12 @@ Expr:
     | TRIM LPAREN Expr RPAREN { Expr.Function (Function.Trim, [$3]) }
     | UPPER LPAREN Expr RPAREN { Expr.Function (Function.Upper, [$3]) }
     | LOWER LPAREN Expr RPAREN { Expr.Function (Function.Lower, [$3]) }
-    | VERSION LPAREN Expr RPAREN { Expr.Function (Function.Version, [$3]) }
+    | VERSION LPAREN IDENTIFIER RPAREN { Expr.Function (Function.Version, [Expr.String $3]) }
     | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }
     | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
 
 ExprIndex:
     | Expr { $1 }
-    | IDENTIFIER { Expr.String $1 }
 
 ExprList:
     | LSQBRACKET ExprListContent RSQBRACKET { $2 }

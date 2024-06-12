@@ -53,7 +53,7 @@ rule token = parse
     | "dependencies" { DEPENDENCIES }
     | "outputs" { OUTPUTS }
     | "ignores" { IGNORES }
-    | "files" { FILES }
+    | "includes" { INCLUDES }
     | "labels" { LABELS }
     | "script" { SCRIPT }
     | "extension" { EXTENSION }
@@ -62,6 +62,7 @@ rule token = parse
     | "depends_on" { DEPENDS_ON }
     | "rebuild" { REBUILD }
     | "defaults" { DEFAULTS }
+    | "name" { NAME }
 
     | identifier { IDENTIFIER (lexeme lexbuf |> string) }
     | extensionIdentifier { EXTENSION_IDENTIFIER (lexeme lexbuf |> string) }

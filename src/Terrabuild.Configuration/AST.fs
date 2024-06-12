@@ -15,15 +15,33 @@ type Extension = {
     Defaults: Map<string, Expr>
 }
 with
-    static member Empty =
-        { Container = None
-          Variables = Set.empty
-          Script = None
-          Defaults = Map.empty }
+    static member Build name components =
+        let container =
+            match components |> List.choose (function | ExtensionComponents.Container value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> Some value
+            | _ -> failwith "multiple container declared"
 
-    member this.Patch comp =
-        match comp with
-        | ExtensionComponents.Container container -> { this with Container = Some container }
-        | ExtensionComponents.Variables variables -> { this with Variables = Set variables }
-        | ExtensionComponents.Script script -> { this with Script = Some script }
-        | ExtensionComponents.Defaults defaults -> { this with Defaults = defaults }
+        let variables =
+            match components |> List.choose (function | ExtensionComponents.Variables value -> Some value | _ -> None) with
+            | [] -> Set.empty
+            | [value] -> value |> Set.ofList
+            | _ -> failwith "multiple variables declared"
+
+        let script =
+            match components |> List.choose (function | ExtensionComponents.Script value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> Some value
+            | _ -> failwith "multiple script declared"
+
+        let defaults =
+            match components |> List.choose (function | ExtensionComponents.Defaults value -> Some value | _ -> None) with
+            | [] -> Map.empty
+            | [value] -> value
+            | _ -> failwith "multiple defaults declared"
+
+        name, { Container = container
+                Variables = variables
+                Script = script
+                Defaults = defaults }
+  

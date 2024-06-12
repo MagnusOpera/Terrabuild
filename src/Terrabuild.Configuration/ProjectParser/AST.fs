@@ -1,4 +1,4 @@
-﻿module Terrabuild.Configuration.Project.AST
+module Terrabuild.Configuration.Project.AST
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 
@@ -7,35 +7,59 @@ type ProjectComponents =
     | Dependencies of string list
     | Outputs of string list
     | Ignores of string list
-    | Files of string list
+    | Includes of string list
     | Labels of string list
-    | Init of string
 
 type Project = {
+    Id: string
+    Init: string option
     Dependencies: Set<string> option
     Outputs: Set<string> option
     Ignores: Set<string> option
-    Files: Set<string> option
+    Includes: Set<string> option
     Labels: Set<string>
-    Init: string option
 }
 with
-    static member Empty =
-        { Dependencies = None
-          Outputs = None
-          Ignores = None
-          Files = None
-          Labels = Set.empty
-          Init = None }
+    static member Build id init components =
+        let dependencies =
+            match components |> List.choose (function | ProjectComponents.Dependencies value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value |> Set.ofList |> Some
+            | _ -> failwith "multiple dependencies declared"
 
-    member this.Patch comp =
-        match comp with
-        | ProjectComponents.Dependencies dependencies -> { this with Dependencies = dependencies |> Set.ofList |> Some }
-        | ProjectComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList |> Some }
-        | ProjectComponents.Ignores ignores -> { this with Ignores = ignores |> Set.ofList |> Some }
-        | ProjectComponents.Files files -> { this with Files = files |> Set.ofList |> Some }
-        | ProjectComponents.Labels labels -> { this with Labels = labels |> Set.ofList |> Set.map (fun x -> x.ToLowerInvariant()) }
-        | ProjectComponents.Init init -> { this with Init = Some init }
+        let outputs =
+            match components |> List.choose (function | ProjectComponents.Outputs value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value |> Set.ofList |> Some
+            | _ -> failwith "multiple outputs declared"
+
+        let ignores =
+            match components |> List.choose (function | ProjectComponents.Ignores value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value |> Set.ofList |> Some
+            | _ -> failwith "multiple ignores declared"
+
+        let includes =
+            match components |> List.choose (function | ProjectComponents.Includes value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value |> Set.ofList |> Some
+            | _ -> failwith "multiple files declared"
+
+        let labels =
+            match components |> List.choose (function | ProjectComponents.Labels value -> Some value | _ -> None) with
+            | [] -> Set.empty
+            | [value] -> value |> Set.ofList
+            | _ -> failwith "multiple labels declared"
+
+        { Id = id
+          Init = init
+          Dependencies = dependencies
+          Outputs = outputs
+          Ignores = ignores
+          Includes = includes
+          Labels = labels }
+  
+
 
 
 
@@ -53,24 +77,40 @@ type TargetComponents =
     | Step of Step
 
 type Target = {
-    DependsOn: Set<string> option
     Rebuild: bool option
     Outputs: Set<string> option
+    DependsOn: Set<string> option
     Steps: Step list
 }
 with
-    static member Empty =
-        { DependsOn = None
-          Rebuild = None
-          Outputs = None
-          Steps = [] }
+    static member Build id components =
+        let dependsOn =
+            match components |> List.choose (function | TargetComponents.DependsOn value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value |> Set.ofList |> Some
+            | _ -> failwith "multiple depends_on declared"
 
-    member this.Patch comp =
-        match comp with
-        | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn |> Set.ofList |> Some }
-        | TargetComponents.Rebuild rebuild -> { this with Rebuild = Some rebuild }
-        | TargetComponents.Outputs outputs -> { this with Outputs = outputs |> Set.ofList |> Some }
-        | TargetComponents.Step step -> { this with Steps = this.Steps @ [step] }
+        let rebuild =
+            match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> Some value
+            | _ -> failwith "multiple rebuild declared"
+
+        let outputs =
+            match components |> List.choose (function | TargetComponents.Outputs value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value |> Set.ofList |> Some
+            | _ -> failwith "multiple outputs declared"
+
+        let steps =
+            components
+            |> List.choose (function | TargetComponents.Step step -> Some step | _ -> None)
+
+        id, { DependsOn = dependsOn
+              Rebuild = rebuild
+              Outputs = outputs
+              Steps = steps }
+
 
 [<RequireQualifiedAccess>]
 type ProjectFileComponents =
@@ -84,13 +124,23 @@ type ProjectFile = {
     Targets: Map<string, Target>
 }
 with
-    static member Empty =
-        { Extensions = Map.empty
-          Project = Project.Empty
-          Targets = Map.empty }
+    static member Build components =
+        let project =
+            match components |> List.choose (function | ProjectFileComponents.Project value -> Some value | _ -> None) with
+            | [] -> failwith "project is not declared"
+            | [value] -> value
+            | _ -> failwith "multiple project declared"
 
-    member this.Patch comp =
-        match comp with
-        | ProjectFileComponents.Project project -> { this with Project = project }
-        | ProjectFileComponents.Extension (name, extension) -> { this with Extensions = this.Extensions |> Map.add name extension }
-        | ProjectFileComponents.Target (name, target) -> { this with Targets = this.Targets |> Map.add name target }
+        let extensions =
+            components
+            |> List.choose (function | ProjectFileComponents.Extension (name, ext) -> Some (name, ext) | _ -> None)
+            |> Map.ofList
+
+        let targets =
+            components
+            |> List.choose (function | ProjectFileComponents.Target (name, target) -> Some (name, target) | _ -> None)
+            |> Map.ofList
+
+        { Project = project
+          Extensions = extensions
+          Targets = targets }

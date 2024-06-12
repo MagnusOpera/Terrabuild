@@ -1,5 +1,5 @@
 
-project @dotnet { }
+project dotnet_lib @dotnet { }
 
 target build {
   @dotnet build { configuration: $configuration }
