@@ -22,7 +22,6 @@ type GitHub() =
 
     override _.Log success title =
         let errMsg =
-            match success with
-            | true -> "::error::{title} failed\n"
-            | _ -> ""
+            if success |> not then "::error::{title} failed\n"
+            else ""
         $"{errMsg}::group::{title}", "::endgroup::"
