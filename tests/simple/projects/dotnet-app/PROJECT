@@ -10,8 +10,8 @@ project @dotnet {
     labels = [ "app"
                "dotnet" ]
 
-    files = [ "**/*"
-              "../shared-folder/**/*" ]
+    includes = [ "**/*"
+                 "../shared-folder/**/*" ]
 }
 
 target build {

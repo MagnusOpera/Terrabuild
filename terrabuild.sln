@@ -31,6 +31,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{B4F7239A
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DocGen", "tools\DocGen\DocGen.fsproj", "{0EAEB0CA-8B6D-48C1-8A0E-DDE3F675D107}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.PubSub", "src\Terrabuild.PubSub\Terrabuild.PubSub.fsproj", "{C88C69E9-F1FF-4F02-AF43-646FDD7F4FE5}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.PubSub.Tests", "src\Terrabuild.PubSub.Tests\Terrabuild.PubSub.Tests.fsproj", "{493E17DD-4F8D-422F-8011-B812E3FFCB57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,7 +92,17 @@ Global
 		{0EAEB0CA-8B6D-48C1-8A0E-DDE3F675D107}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EAEB0CA-8B6D-48C1-8A0E-DDE3F675D107}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EAEB0CA-8B6D-48C1-8A0E-DDE3F675D107}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C88C69E9-F1FF-4F02-AF43-646FDD7F4FE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C88C69E9-F1FF-4F02-AF43-646FDD7F4FE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C88C69E9-F1FF-4F02-AF43-646FDD7F4FE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C88C69E9-F1FF-4F02-AF43-646FDD7F4FE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{493E17DD-4F8D-422F-8011-B812E3FFCB57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{493E17DD-4F8D-422F-8011-B812E3FFCB57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{493E17DD-4F8D-422F-8011-B812E3FFCB57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{493E17DD-4F8D-422F-8011-B812E3FFCB57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{C88C69E9-F1FF-4F02-AF43-646FDD7F4FE5} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
+		{493E17DD-4F8D-422F-8011-B812E3FFCB57} = {95B29BFC-EDC1-4700-A95B-D4D545D4505B}
 	EndGlobalSection
 EndGlobal

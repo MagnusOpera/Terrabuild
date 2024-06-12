@@ -12,7 +12,10 @@ type InvocationResult<'t> =
     | TargetNotFound
     | ErrorTarget of Exception
 
-let systemExtensions = Terrabuild.Extensions.Factory.systemScripts |> Map.map (fun _ _ -> Extension.Empty)
+let systemExtensions =
+    Terrabuild.Extensions.Factory.systemScripts
+    |> Seq.map (fun kvp -> Extension.Build kvp.Key [])
+    |> Map.ofSeq
 
 // NOTE: when app in package as a single file, Terrabuild.Assembly can't be found... So instead of providing 
 //       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided instead

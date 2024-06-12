@@ -50,7 +50,7 @@ let buildGraph (configuration: Configuration.Workspace) (targets: string set) (c
             let buildDependsOn =
                 configuration.Targets
                 |> Map.tryFind targetName
-                |> Option.bind (fun ct -> ct.DependsOn)
+                |> Option.map (fun ct -> ct.DependsOn)
                 |> Option.defaultValue Set.empty
             let projDependsOn =
                 projectConfig.Targets

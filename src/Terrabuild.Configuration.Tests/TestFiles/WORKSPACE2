@@ -36,7 +36,7 @@ configuration dummy
 
 configuration {
     variables = {
-        secret:  $map.[toto] = "prod" ? 1234 : 5678
+        secret:  $map.["toto"] = "prod" ? 1234 : 5678
     }
 }
 
@@ -44,7 +44,7 @@ extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
   defaults = {
     configuration1: $map.["toto"]
-    configuration2: $map.[titi]
+    configuration2: $map.["titi"]
   }
 }
 

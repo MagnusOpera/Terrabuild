@@ -17,10 +17,9 @@ let parseProject() =
             { Dependencies = Set [ "../../libraries/shell-lib" ] |> Some
               Outputs = Set [ "dist" ] |> Some
               Ignores = None
-              Files = None
+              Includes = None
               Labels = Set [ "app"; "dotnet" ]
               Init = Some "@dotnet" }
-
 
         let extDotnet =
             { Container = None
@@ -51,7 +50,7 @@ let parseProject() =
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty }
                         { Extension = "@dotnet"; Command = "publish"; Parameters = Map.empty } ] }
         let targetDocker =
-            { DependsOn = None 
+            { DependsOn = None
               Rebuild = Some false
               Outputs = None
               Steps = [ { Extension = "@shell"; Command = "echo"
@@ -83,14 +82,14 @@ let parseProject2() =
             { Dependencies = None
               Outputs = None
               Ignores = None
-              Files = None
+              Includes = None
               Labels = Set.empty
               Init = Some "@dotnet" }
 
         let buildTarget = 
             { DependsOn = None
               Rebuild = Some true
-              Outputs = Some (Set [ "*.dll" ])
+              Outputs = Set [ "*.dll" ] |> Some
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
         { Extensions = Map.empty

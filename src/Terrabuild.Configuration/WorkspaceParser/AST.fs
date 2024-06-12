@@ -1,4 +1,4 @@
-﻿namespace Terrabuild.Configuration.Workspace.AST
+namespace Terrabuild.Configuration.Workspace.AST
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 
@@ -10,12 +10,14 @@ type Workspace = {
     Space: string option
 }
 with
-    static member Empty =
-        { Space = None }
+    static member Build components =
+        let space =
+            match components |> List.choose (function | WorkspaceComponents.Space value -> Some value) with
+            | [] -> None
+            | [value] -> Some value
+            | _ -> failwith "multiple space declared"
 
-    member this.Patch comp =
-        match comp with
-        | WorkspaceComponents.Space space -> { this with Space = space |> Some }
+        { Space = space }
 
 
 [<RequireQualifiedAccess>]
@@ -24,18 +26,25 @@ type TargetComponents =
     | Rebuild of bool
 
 type Target = {
-    DependsOn: Set<string> option
-    Rebuild: bool option
+    DependsOn: Set<string>
+    Rebuild: bool
 }
 with
-    static member Empty =
-        { DependsOn = None
-          Rebuild = None }
+    static member Build id components =
+        let dependsOn =
+            match components |> List.choose (function | TargetComponents.DependsOn value -> Some value | _ -> None) with
+            | [] -> Set.empty
+            | [value] -> value |> Set.ofList
+            | _ -> failwith "multiple depends_on declared"
 
-    member this.Patch comp =
-        match comp with
-        | TargetComponents.DependsOn dependsOn -> { this with DependsOn = dependsOn |> Set.ofList |> Some }
-        | TargetComponents.Rebuild rebuild -> { this with Rebuild = rebuild |> Some }
+        let rebuild =
+            match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
+            | [] -> false
+            | [value] -> value
+            | _ -> failwith "multiple rebuild declared"
+
+        id, { DependsOn = dependsOn
+              Rebuild = rebuild }
 
 
 [<RequireQualifiedAccess>]
@@ -46,13 +55,14 @@ type Configuration = {
     Variables: Map<string, Expr>
 }
 with
-    static member Empty =
-        { Variables = Map.empty }
+    static member Build id components =
+        let variables =
+            match components |> List.choose (function | ConfigurationComponents.Variables value -> Some value) with
+            | [] -> Map.empty
+            | [value] -> value
+            | _ -> failwith "multiple variables declared"
 
-    member this.Patch comp =
-        match comp with
-        | ConfigurationComponents.Variables variables -> { this with Variables = variables }
-
+        id, { Variables = variables }
 
 [<RequireQualifiedAccess>]
 type WorkspaceFileComponents =
@@ -68,15 +78,29 @@ type WorkspaceFile = {
     Extensions: Map<string, Extension>
 }
 with
-    static member Empty =
-        { Space = None
-          Targets = Map.empty
-          Configurations = Map.empty
-          Extensions = Map.empty }
+    static member Build components =
+        let space =
+            match components |> List.choose (function | WorkspaceFileComponents.Workspace value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value.Space
+            | _ -> failwith "multiple workspace declared"
 
-    member this.Patch comp =
-        match comp with
-        | WorkspaceFileComponents.Workspace workspace -> { this with Space = workspace.Space }
-        | WorkspaceFileComponents.Target (name, target) -> { this with Targets = this.Targets |> Map.add name target }
-        | WorkspaceFileComponents.Configuration (name, configuration) -> { this with Configurations = this.Configurations |> Map.add name configuration }
-        | WorkspaceFileComponents.Extension (name, extension) -> { this with Extensions = this.Extensions |> Map.add name extension }
+        let targets =
+            components
+            |> List.choose (function | WorkspaceFileComponents.Target (name, target) -> Some (name, target) | _ -> None)
+            |> Map.ofList
+
+        let configurations =
+            components
+            |> List.choose (function | WorkspaceFileComponents.Configuration (name, ext) -> Some (name, ext) | _ -> None)
+            |> Map.ofList
+
+        let extensions =
+            components
+            |> List.choose (function | WorkspaceFileComponents.Extension (name, ext) -> Some (name, ext) | _ -> None)
+            |> Map.ofList
+
+        { Space = space
+          Targets = targets
+          Configurations = configurations
+          Extensions = extensions }

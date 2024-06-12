@@ -33,7 +33,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER VERSION DOUBLE_QUESTION QUESTION COLON
 %token EOF
 %token PROJECT EXTENSION TARGET 
-%token DEPENDENCIES OUTPUTS IGNORES FILES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS
+%token DEPENDENCIES OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS NAME
 
 // associativity and precedences
 
@@ -51,23 +51,23 @@ let debugPrint s = ignore s
 %% 
 
 ProjectFile:
-    | ProjectFileComponents EOF { $1 }
+    | ProjectFileComponents EOF { ProjectFile.Build $1 }
 
 ProjectFileComponents:
-    | /* empty */ { ProjectFile.Empty }
-    | ProjectFileComponents Project { $1.Patch $2 }
-    | ProjectFileComponents Extension { $1.Patch $2 }
-    | ProjectFileComponents Target { $1.Patch $2 }
+    | /* empty */ { [] }
+    | ProjectFileComponents Project { $1 @ [$2] }
+    | ProjectFileComponents Extension { $1 @ [$2] }
+    | ProjectFileComponents Target { $1 @ [$2] }
 
 
 Extension:
-    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { ProjectFileComponents.Extension ($2, $4) }
+    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { Extension.Build $2 $4 |> ProjectFileComponents.Extension }
 ExtensionComponents:
-    | /* empty */ { Extension.Empty }
-    | ExtensionComponents ExtensionContainer { $1.Patch $2 }
-    | ExtensionComponents ExtensionVariables { $1.Patch $2 }
-    | ExtensionComponents ExtensionScript { $1.Patch $2 }
-    | ExtensionComponents ExtensionDefaults { $1.Patch $2 }
+    | /* empty */ { [] }
+    | ExtensionComponents ExtensionContainer { $1 @ [$2] }
+    | ExtensionComponents ExtensionVariables { $1 @ [$2] }
+    | ExtensionComponents ExtensionScript { $1 @ [$2] }
+    | ExtensionComponents ExtensionDefaults { $1 @ [$2] }
 ExtensionContainer:
     | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
 ExtensionVariables:
@@ -79,36 +79,36 @@ ExtensionDefaults:
 
 
 Project:
-    | PROJECT LBRACE ProjectComponents RBRACE { ProjectFileComponents.Project $3 }
-    | PROJECT ExtensionIdentifier LBRACE ProjectComponents RBRACE { ProjectComponents.Init $2 |> $4.Patch |> ProjectFileComponents.Project }
-    | PROJECT ExtensionIdentifier { ProjectComponents.Init $2 |> Project.Empty.Patch |> ProjectFileComponents.Project }
+    | PROJECT { Project.Build None [] |> ProjectFileComponents.Project }
+    | PROJECT LBRACE ProjectComponents RBRACE { Project.Build None $3 |> ProjectFileComponents.Project }
+    | PROJECT ExtensionIdentifier { Project.Build (Some $2) [] |> ProjectFileComponents.Project }
+    | PROJECT ExtensionIdentifier LBRACE ProjectComponents RBRACE { Project.Build (Some $2) $4 |> ProjectFileComponents.Project }
 ProjectComponents:
-    | /* empty */ { Project.Empty }
-    | ProjectComponents ProjectDependencies { $1.Patch $2 }
-    | ProjectComponents ProjectOutputs { $1.Patch $2 }
-    | ProjectComponents ProjectIgnores { $1.Patch $2 }
-    | ProjectComponents ProjectFiles { $1.Patch $2 }
-    | ProjectComponents ProjectLabels { $1.Patch $2 }
+    | /* empty */ { [] }
+    | ProjectComponents ProjectDependencies { $1 @ [$2] }
+    | ProjectComponents ProjectOutputs { $1 @ [$2] }
+    | ProjectComponents ProjectIgnores { $1 @ [$2] }
+    | ProjectComponents ProjectIncludes { $1 @ [$2] }
+    | ProjectComponents ProjectLabels { $1 @ [$2] }
 ProjectDependencies:
     | DEPENDENCIES EQUAL ListOfString { ProjectComponents.Dependencies $3 }
 ProjectOutputs:
     | OUTPUTS EQUAL ListOfString { ProjectComponents.Outputs $3 }
 ProjectIgnores:
     | IGNORES EQUAL ListOfString { ProjectComponents.Ignores $3 }
-ProjectFiles:
-    | FILES EQUAL ListOfString { ProjectComponents.Files $3 }
+ProjectIncludes:
+    | INCLUDES EQUAL ListOfString { ProjectComponents.Includes $3 }
 ProjectLabels:
     | LABELS EQUAL ListOfString { ProjectComponents.Labels $3 }
 
-
 Target:
-    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { ProjectFileComponents.Target ($2, $4) }
+    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { Target.Build $2 $4 |> ProjectFileComponents.Target }
 TargetComponents:
-    | /* empty */ { Target.Empty }
-    | TargetComponents TargetDependsOn { $1.Patch $2 }
-    | TargetComponents TargetRebuild { $1.Patch $2 }
-    | TargetComponents TargetOutputs { $1.Patch $2 }
-    | TargetComponents TargetStep { $1.Patch $2 }
+    | /* empty */ { [] }
+    | TargetComponents TargetDependsOn { $1 @ [$2] }
+    | TargetComponents TargetRebuild { $1 @ [$2] }
+    | TargetComponents TargetOutputs { $1 @ [$2] }
+    | TargetComponents TargetStep { $1 @ [$2] }
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfTargetIdentifiers { TargetComponents.DependsOn $3 }
 TargetRebuild:
@@ -118,6 +118,7 @@ TargetOutputs:
 TargetStep:
     | ExtensionIdentifier IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | ExtensionIdentifier IDENTIFIER ExprMap { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $3 } }
+
 
 Bool:
     | TRUE { true }
@@ -130,6 +131,13 @@ ListOfString:
 Strings:
     | /* empty */ { [] }
     | Strings String { $1 @ [$2] }
+
+ListOfIdentifiers:
+    | LSQBRACKET Identifiers RSQBRACKET { $2 }
+Identifiers:
+    | /* empty */ { [] }
+    | Identifiers IDENTIFIER { $1 @ [$2] }
+
 
 ListOfTargetIdentifiers:
     | LSQBRACKET TargetIdentifiers RSQBRACKET { $2 }
