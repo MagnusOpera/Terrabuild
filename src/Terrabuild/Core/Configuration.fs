@@ -86,10 +86,10 @@ type Workspace = {
 }
 
 
-type LazyScript = Lazy<Terrabuild.Scripting.Script>
+type private LazyScript = Lazy<Terrabuild.Scripting.Script>
 
 [<RequireQualifiedAccess>]
-type LoadedProject = {
+type private LoadedProject = {
     Dependencies: string set
     Includes: string set
     Ignores: string set
@@ -163,20 +163,6 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         |> Map.map (fun _ _ -> None)
         |> Map.map Extensions.lazyLoadScript
 
-
-    let projectFiles = 
-        let rec findDependencies dir =
-            seq {
-                let projectFile =  FS.combinePath dir "PROJECT" 
-                match projectFile with
-                | FS.File file ->
-                    file |> FS.parentDirectory |> FS.relativePath workspaceDir
-                | _ ->
-                    for subdir in dir |> IO.enumerateDirs do
-                        yield! findDependencies subdir
-            }
-
-        findDependencies workspaceDir
 
 
     let loadProjectDef projectId =
@@ -444,6 +430,21 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
           Project.Files = files
           Project.Targets = projectSteps
           Project.Labels = projectDef.Labels }
+
+
+    let projectFiles = 
+        let rec findDependencies dir =
+            seq {
+                let projectFile =  FS.combinePath dir "PROJECT" 
+                match projectFile with
+                | FS.File file ->
+                    file |> FS.parentDirectory |> FS.relativePath workspaceDir
+                | _ ->
+                    for subdir in dir |> IO.enumerateDirs do
+                        yield! findDependencies subdir
+            }
+
+        findDependencies workspaceDir
 
     let projects = ConcurrentDictionary<string, Project>()
     let hub = Hub.Create(options.MaxConcurrency)
