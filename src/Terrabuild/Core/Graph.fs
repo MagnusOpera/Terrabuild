@@ -34,7 +34,47 @@ type Workspace = {
     RootNodes: string set
 }
 
-let buildGraph (configuration: Configuration.Workspace) (targets: string set) (cache: Cache.ICache)  (options: Configuration.Options) =
+
+
+let graph (graph: Workspace) =
+    let projects =
+        graph.Nodes.Values
+        |> Seq.groupBy (fun x -> x.Project)
+        |> Map.ofSeq
+        |> Map.map (fun _ v -> v |> List.ofSeq)
+
+    let colors =
+        projects
+        |> Map.map (fun k v ->
+            let hash = Hash.sha256 k
+            $"#{hash.Substring(0, 3)}")
+
+    let mermaid = seq {
+        "flowchart LR"
+        $"classDef bold stroke:black,stroke-width:3px"
+
+        // declare colors
+        for (KeyValue(project, color)) in colors do
+            $"classDef {project} fill:{color}"
+
+        // nodes and arrows
+        for (KeyValue(nodeId, node)) in graph.Nodes do
+            let srcNode = graph.Nodes |> Map.find nodeId
+            $"{srcNode.Hash}([{srcNode.Label}])"
+            for dependency in node.Dependencies do
+                let dstNode = graph.Nodes |> Map.find dependency
+                $"{srcNode.Hash}([{srcNode.Label}]) --> {dstNode.Hash}([{dstNode.Label}])"
+
+            $"class {srcNode.Hash} {srcNode.Project}"
+            if graph.RootNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} bold"
+    }
+
+    mermaid
+
+
+
+
+let create (configuration: Configuration.Workspace) (targets: string set) =
     $"{Ansi.Emojis.popcorn} Constructing graph" |> Terminal.writeLine
 
     let processedNodes = ConcurrentDictionary<string, bool>()
@@ -192,44 +232,6 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
     Log.Debug("Trim: {duration}", trimDuration)
 
     { graph with Nodes = allNodes }
-
-
-
-let graph (graph: Workspace) =
-    let projects =
-        graph.Nodes.Values
-        |> Seq.groupBy (fun x -> x.Project)
-        |> Map.ofSeq
-        |> Map.map (fun _ v -> v |> List.ofSeq)
-
-    let colors =
-        projects
-        |> Map.map (fun k v ->
-            let hash = Hash.sha256 k
-            $"#{hash.Substring(0, 3)}")
-
-    let mermaid = seq {
-        "flowchart LR"
-        $"classDef bold stroke:black,stroke-width:3px"
-
-        // declare colors
-        for (KeyValue(project, color)) in colors do
-            $"classDef {project} fill:{color}"
-
-        // nodes and arrows
-        for (KeyValue(nodeId, node)) in graph.Nodes do
-            let srcNode = graph.Nodes |> Map.find nodeId
-            $"{srcNode.Hash}([{srcNode.Label}])"
-            for dependency in node.Dependencies do
-                let dstNode = graph.Nodes |> Map.find dependency
-                $"{srcNode.Hash}([{srcNode.Label}]) --> {dstNode.Hash}([{dstNode.Label}])"
-
-            $"class {srcNode.Hash} {srcNode.Project}"
-            if graph.RootNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} bold"
-    }
-
-    mermaid
-
 
 
 

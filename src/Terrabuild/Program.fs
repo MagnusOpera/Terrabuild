@@ -81,7 +81,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let storage = Storages.Factory.create api
         let cache = Cache.Cache(storage) :> Cache.ICache
 
-        let graph = Graph.buildGraph config target cache options
+        let graph = Graph.create config target
         if options.Debug then
             let jsonGraph = Json.Serialize graph
             jsonGraph |> IO.writeTextFile (logFile "graph.json")
