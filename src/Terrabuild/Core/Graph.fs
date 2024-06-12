@@ -1,6 +1,5 @@
 module Graph
 open System
-open System.Collections.Generic
 open System.Collections.Concurrent
 open Collections
 open Terrabuild.Extensibility
