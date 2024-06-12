@@ -7,3 +7,4 @@ let login space token =
 
 let logout space =
     Cache.removeAuthToken space
+www
