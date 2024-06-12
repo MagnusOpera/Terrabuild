@@ -20,4 +20,9 @@ type GitHub() =
 
     override _.Name = "GitHub"
 
-    override _.Log success title = ($"::group::{title}", "::endgroup::")
+    override _.Log success title =
+        let errMsg =
+            match success with
+            | true -> "::error::{title} failed\n"
+            | _ -> ""
+        $"{errMsg}::group::{title}", "::endgroup::"
