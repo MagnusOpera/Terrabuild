@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - '**'
+  workflow_dispatch:
+    inputs:
+      retry:
+        type: boolean
+        description: retry rebuild
+      force:
+        type: boolean
+        description: force build
 
 env:
   TERRABUILD_API_URL: https://api.dev.magnusopera.io
@@ -48,7 +56,13 @@ jobs:
 
       - name: Build
         if: always()
-        run: terrabuild build -w src --logs -c "dev" --debug
+        run: |
+          terrabuild build \
+            -w src \
+            -c "dev" \
+            ${{ github.event.inputs.force == 'true' && '--force' || '' }} \
+            ${{ github.event.inputs.retry == 'true' && '--retry' || '' }} \
+            --logs --debug \
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
