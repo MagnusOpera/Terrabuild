@@ -4,6 +4,9 @@ open System.Collections.Generic
 open Collections
 open Serilog
 open Terrabuild.Extensibility
+open Terrabuild.PubSub
+open Graph
+open Errors
 
 [<RequireQualifiedAccess>]
 type NodeInfo = {
@@ -81,29 +84,6 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         if configuration.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
-    // compute first incoming edges
-    let reverseIncomings =
-        graph.Nodes
-        |> Map.map (fun _ _ -> List<string>())
-    for KeyValue(nodeId, node) in graph.Nodes do
-        for dependency in node.Dependencies do
-            reverseIncomings[dependency].Add(nodeId)
-
-    let allNodes =
-        graph.Nodes
-        |> Map.map (fun _ _ -> ref 0)
-
-    let refCounts =
-        reverseIncomings
-        |> Seq.collect (fun kvp -> kvp.Value)
-        |> Seq.countBy (id)
-        |> Map
-        |> Map.map (fun _ value -> ref value)
-
-    let readyNodes =
-        allNodes
-        |> Map.addMap refCounts
-
     let isBuildSuccess = function
         | NodeStatus.Success _ -> true
         | _ -> false
@@ -124,6 +104,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
             | Cache.TaskStatus.Success -> NodeStatus.Success nodeInfo
             | Cache.TaskStatus.Failure -> NodeStatus.Failure nodeInfo
         | _ -> NodeStatus.Unfulfilled nodeInfo
+
 
     let buildNode (node: Graph.Node) =
         // determine if step node can be reused or not
@@ -282,36 +263,29 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         else
             None, false
 
-    // this is the core of the build
-    // schedule first nodes with no incoming edges
-    // on completion schedule released nodes
     let restoredNodes = Concurrent.ConcurrentDictionary<string, bool>()
-    let buildQueue = Exec.BuildQueue(options.MaxConcurrency)
-    let rec queueAction (nodeId: string) =
-        let node = graph.Nodes[nodeId]
+    let hub = Hub.Create(options.MaxConcurrency)
+    for (KeyValue(nodeId, node)) in graph.Nodes do
+        let nodeComputed = hub.CreateComputed<Node> nodeId
 
-        if node.Required then
-            let summary, restored = buildNode node
-            notification.NodeCompleted node restored summary
-            restoredNodes.TryAdd(nodeId, restored) |> ignore
-        else
-            restoredNodes.TryAdd(nodeId, true) |> ignore
+        // await dependencies
+        let awaitedDependencies =
+            node.Dependencies
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
+            |> Array.ofSeq
 
-        // schedule children nodes if ready
-        let triggers = reverseIncomings[nodeId]
-        for trigger in triggers do
-            let newValue = System.Threading.Interlocked.Decrement(readyNodes[trigger])
-            if newValue = 0 then
-                readyNodes[trigger].Value <- -1 // mark node as scheduled
-                buildQueue.Enqueue (fun () -> queueAction trigger)
+        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+        hub.Subscribe awaitedSignals (fun () ->
+            if node.Required then
+                let summary, restored = buildNode node
+                notification.NodeCompleted node restored summary
+                restoredNodes.TryAdd(nodeId, restored) |> ignore
+            else
+                restoredNodes.TryAdd(nodeId, true) |> ignore
 
+            nodeComputed.Value <- node)
 
-    readyNodes
-    |> Map.filter (fun _ value -> value.Value = 0)
-    |> Map.iter (fun key _ -> buildQueue.Enqueue (fun () -> queueAction key))
-
-    // wait only if we have something to do
-    buildQueue.WaitCompletion()
+    let status = hub.WaitCompletion()
 
     let headCommit = configuration.SourceControl.HeadCommit
     let branchOrTag = configuration.SourceControl.BranchOrTag
