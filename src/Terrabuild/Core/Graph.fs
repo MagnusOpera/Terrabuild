@@ -203,41 +203,50 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
             | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
             | _ -> true
 
-    let mutable allNodes = Map.empty
-
-    let rec skipNode parentRequired nodeId =
-        let node = graph.Nodes[nodeId]
-        let processNode () =
-            let required = parentRequired || shallRebuild node
-            let node = { node with Required = node.Required || required }
-            allNodes <- allNodes |>Map.add nodeId node
-
-            node.Dependencies |> Seq.iter (skipNode required) 
-
-        processNode()
-
-    // compute first incoming edges
-    let reverseIncomings =
+    let reversedDependencies =
         graph.Nodes
-        |> Map.map (fun _ _ -> List<string>())
-    for KeyValue(nodeId, node) in graph.Nodes do
-        for dependency in node.Dependencies do
-            reverseIncomings[dependency].Add(nodeId)
+        |> Seq.collect (fun (KeyValue(nodeId, node)) -> node.Dependencies |> Seq.map (fun dependency -> dependency, nodeId))
+        |> Seq.groupBy fst
+        |> Seq.map (fun (k, v) -> k, v |> Seq.map snd |> List.ofSeq)
+        |> Map.ofSeq
 
-    let rootNodes =
-        reverseIncomings
-        |> Map.filter (fun _ v -> v.Count = 0)
-        |> Map.keys
-        |> List.ofSeq
+    let allNodes = ConcurrentDictionary<string, Node>()
 
-    rootNodes |> List.iter (skipNode false)
+    let hub = Hub.Create(options.MaxConcurrency)
+    for (KeyValue(depNodeId, nodeIds)) in reversedDependencies do
+        let nodeComputed = hub.CreateComputed<bool> depNodeId
+
+        // await dependencies
+        let awaitedDependencies =
+            nodeIds
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<bool> awaitedProjectId)
+            |> Array.ofSeq
+
+        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+        hub.Subscribe awaitedSignals (fun () ->
+            let node = graph.Nodes[depNodeId]
+            let parentRequired = awaitedDependencies |> Seq.fold (fun acc dep -> acc || dep.Value) false
+            let parentRequired =
+                // if at least one parent required then do not hit the cache
+                if parentRequired |> not then shallRebuild node
+                else parentRequired
+
+            let node = { node with Required = parentRequired }
+            allNodes.TryAdd(depNodeId, node) |> ignore
+            nodeComputed.Value <- parentRequired)
+
+    let status = hub.WaitCompletion()
+    match status with
+    | Status.Ok -> ()
+    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Node {projectId} is unknown")
+    | Status.SubscriptionError exn -> TerrabuildException.Raise("Optimization error", exn)
 
     let endedAt = DateTime.UtcNow
 
     let trimDuration = endedAt - startedAt
     Log.Debug("Trim: {duration}", trimDuration)
 
-    { graph with Nodes = allNodes }
+    { graph with Nodes = allNodes |> Map.ofDict }
 
 
 
