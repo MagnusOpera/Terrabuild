@@ -159,6 +159,7 @@ Expr:
 
 ExprIndex:
     | Expr { $1 }
+    | IDENTIFIER { Expr.String $1 }
 
 ExprList:
     | LSQBRACKET ExprListContent RSQBRACKET { $2 }
