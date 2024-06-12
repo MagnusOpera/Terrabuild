@@ -244,12 +244,13 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
 
     // this is the final stage: create targets and create the project
-    let finalizeProject projectId (projectDef: LoadedProject) (projectDependencies: IComputedGetter<Project> seq) =
+    let finalizeProject projectId (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
         let projectDir = projectId
 
         // get dependencies on files
         let files =
-            projectDir |> IO.enumerateFilesBut (projectDef.Includes) (projectDef.Outputs + projectDef.Ignores)
+            projectDir
+            |> IO.enumerateFilesBut (projectDef.Includes) (projectDef.Outputs + projectDef.Ignores)
             |> Set
         let filesHash =
             files
@@ -258,8 +259,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
         let versions =
             projectDependencies
-            |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value.Hash)
-            |> Map.ofSeq
+            |> Map.map (fun _ depProj -> depProj.Hash)
 
         let dependenciesHash =
             versions.Values
@@ -463,7 +463,12 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
             let awaitedSignals = awaitedProjects |> Array.map (fun entry -> entry :> ISignal)
             hub.Subscribe awaitedSignals (fun () ->
                 // build task & code & notify
-                let project = finalizeProject projectId loadedProject awaitedProjects
+                let projectDependencies = 
+                    awaitedProjects
+                    |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value)
+                    |> Map.ofSeq
+    
+                let project = finalizeProject projectId loadedProject projectDependencies
                 projects.TryAdd(projectId, project) |> ignore
 
                 let loadedProjectSignal = hub.CreateComputed<Project> projectId
