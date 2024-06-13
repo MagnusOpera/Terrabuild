@@ -229,11 +229,11 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
         hub.Subscribe awaitedSignals (fun () ->
             let node = graph.Nodes[depNodeId]
             let parentRequired = awaitedDependencies |> Seq.fold (fun parentRequired dep -> parentRequired || dep.Value) false
-            let requiredChild = parentRequired || shallRebuild node
+            let childRequired = parentRequired || shallRebuild node
 
-            let node = { node with Required = requiredChild }
+            let node = { node with Required = childRequired }
             allNodes.TryAdd(depNodeId, node) |> ignore
-            nodeComputed.Value <- requiredChild)
+            nodeComputed.Value <- childRequired)
 
     let status = hub.WaitCompletion()
     match status with
