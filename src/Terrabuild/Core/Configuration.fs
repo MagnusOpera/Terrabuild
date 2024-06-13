@@ -395,9 +395,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
                 let stepHash =
                     actions
-                    |> Seq.collect (fun batch ->
-                        batch.Actions |> Seq.map(fun step ->
-                            $"{batch.Container} {step.Command} {step.Arguments}"))
+                    |> Seq.map (fun action -> action.MetaCommand)
                     |> Hash.sha256strings
 
                 let hash =

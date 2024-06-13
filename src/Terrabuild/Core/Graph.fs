@@ -126,9 +126,7 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
             | Some target ->
                 let hashContent = [
                     yield! target.Variables |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-                    yield! target.Actions |> Seq.collect (fun batch -> 
-                        batch.Actions |> Seq.map (fun cmd ->
-                            $"{batch.Container} {cmd.Command} {cmd.Arguments}"))
+                    yield! target.Actions |> Seq.map (fun batch -> batch.MetaCommand)
                     yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].Hash)
                     yield projectConfig.Hash
                 ]
