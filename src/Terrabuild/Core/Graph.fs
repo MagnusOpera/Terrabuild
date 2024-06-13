@@ -175,9 +175,6 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
             targets |> Seq.collect (fun target -> buildTarget target dependency))
         |> Set
 
-    let nodesToRun = allNodes.Count
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
-
     { Targets = targets
       Nodes = allNodes |> Map.ofDict
       RootNodes = rootNodes }
@@ -459,5 +456,8 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
 
     let optimizationDuration = endedAt - startedAt
     Log.Debug("Optimization: {duration}", optimizationDuration)
+
+    let nodesToRun = graph.Nodes.Count
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
 
     graph

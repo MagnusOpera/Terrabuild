@@ -129,7 +129,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                 let files = IO.enumerateFiles outputs
                 IO.copyFiles projectDirectory outputs files |> ignore
             | _ -> ()
-            summary, true
+            true, summary
 
         | _ ->
             Log.Debug("{Hash}: Building '{Project}/{Target}'", node.Hash, node.Project, node.Target)
@@ -245,31 +245,27 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                             Cache.TargetSummary.EndedAt = cmdLastEndedAt }
             let files, size = cacheEntry.Complete summary
             api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.Hash files size (status = Cache.TaskStatus.Success))
-            summary, false
+            false, summary
 
-    let restoredNodes = Concurrent.ConcurrentDictionary<string, bool>()
     let hub = Hub.Create(options.MaxConcurrency)
-    for (KeyValue(nodeId, node)) in graph.Nodes do
-        if node.Required then
-            let nodeComputed = hub.CreateComputed<Node> nodeId
+    let impactedNodes = graph.Nodes |> Map.filter (fun _ n -> n.Required)
+    for (KeyValue(nodeId, node)) in impactedNodes do
+        let nodeComputed = hub.CreateComputed<Node> nodeId
 
-            // await dependencies
-            let awaitedDependencies =
-                node.Dependencies
-                |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
-                |> Array.ofSeq
+        // await dependencies
+        let awaitedDependencies =
+            node.Dependencies
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
+            |> Array.ofSeq
 
-            let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-            hub.Subscribe awaitedSignals (fun () ->
-                let summary, restored = buildNode node
-                notification.NodeCompleted node restored summary
-                restoredNodes.TryAdd(nodeId, restored) |> ignore
+        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+        hub.Subscribe awaitedSignals (fun () ->
+            let restored, summary = buildNode node
+            notification.NodeCompleted node restored summary
 
-                if summary.Status = Cache.TaskStatus.Success then
-                    nodeComputed.Value <- node
-            )
-        else
-            restoredNodes.TryAdd(nodeId, true) |> ignore
+            if summary.Status = Cache.TaskStatus.Success then
+                nodeComputed.Value <- node
+        )
 
     let status = hub.WaitCompletion()
 
@@ -290,11 +286,6 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         if isSuccess then Status.Success
         else Status.Failure
 
-    let impactedNodes =
-        restoredNodes
-        |> Seq.choose (fun (KeyValue(nodeId, restored)) -> if restored then None else Some nodeId)
-        |> Set
-
     let buildInfo = { Summary.Commit = headCommit
                       Summary.BranchOrTag = branchOrTag
                       Summary.StartedAt = options.StartedAt
@@ -303,7 +294,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.TotalDuration = totalDuration
                       Summary.Status = status
                       Summary.Targets = graph.Targets
-                      Summary.ImpactedNodes = impactedNodes
+                      Summary.ImpactedNodes = impactedNodes |> Map.keys |> Set.ofSeq
                       Summary.RootNodes = dependencies }
 
     notification.BuildCompleted buildInfo
