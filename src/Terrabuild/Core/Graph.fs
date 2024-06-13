@@ -175,9 +175,6 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
             targets |> Seq.collect (fun target -> buildTarget target dependency))
         |> Set
 
-    let nodesToRun = allNodes.Count
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
-
     { Targets = targets
       Nodes = allNodes |> Map.ofDict
       RootNodes = rootNodes }
@@ -199,7 +196,9 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
         else
             let summary = cache.TryGetSummaryOnly useRemoteCache cacheEntryId
             match summary with
-            | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
+            | Some summary ->
+                let rebuild = options.Retry && summary.Status <> Cache.TaskStatus.Success
+                rebuild
             | _ -> true
 
     let reversedDependencies =
@@ -229,13 +228,12 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
         let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
         hub.Subscribe awaitedSignals (fun () ->
             let node = graph.Nodes[depNodeId]
-            let parentRequired =
-                awaitedDependencies |> Seq.fold (fun acc dep -> acc || dep.Value) false
-                || shallRebuild node
+            let parentRequired = awaitedDependencies |> Seq.fold (fun parentRequired dep -> parentRequired || dep.Value) false
+            let childRequired = parentRequired || shallRebuild node
 
-            let node = { node with Required = parentRequired }
+            let node = { node with Required = childRequired }
             allNodes.TryAdd(depNodeId, node) |> ignore
-            nodeComputed.Value <- parentRequired)
+            nodeComputed.Value <- childRequired)
 
     let status = hub.WaitCompletion()
     match status with
@@ -459,5 +457,8 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
 
     let optimizationDuration = endedAt - startedAt
     Log.Debug("Optimization: {duration}", optimizationDuration)
+
+    let nodesToRun = graph.Nodes.Count
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
 
     graph
