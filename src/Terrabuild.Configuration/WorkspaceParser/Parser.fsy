@@ -73,8 +73,11 @@ Target:
 TargetComponents:
     | /* empty */ { [] }
     | TargetComponents TargetDependsOn { $1 @ [$2] }
+    | TargetComponents TargetRebuild { $1 @ [$2] }
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfTargetIdentifiers { TargetComponents.DependsOn $3 }
+TargetRebuild:
+    | REBUILD EQUAL Expr { TargetComponents.Rebuild $3 }
 
 Configuration:
     | CONFIGURATION IDENTIFIER { Configuration.Build $2 [] |> WorkspaceFileComponents.Configuration }
