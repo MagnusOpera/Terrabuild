@@ -188,23 +188,18 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
         if configuration.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
-    let shallRebuild (node: Node) notBefore =
+    let shallRebuild (node: Node) =
         let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
         if options.Force || node.Cache = Cacheability.Never then
-            true, DateTime.MaxValue
+            true
         else
             let summary = cache.TryGetSummaryOnly useRemoteCache cacheEntryId
             match summary with
             | Some summary ->
-                let rebuild =
-                    // rationale here for rebuild:
-                    // - user ask for retry and task is failed
-                    // - task can't be older than children
-                   (options.Retry && summary.Status <> Cache.TaskStatus.Success)
-                   || summary.EndedAt < notBefore
-                rebuild, summary.EndedAt
-            | _ -> true, DateTime.MaxValue
+                let rebuild = options.Retry && summary.Status <> Cache.TaskStatus.Success
+                rebuild
+            | _ -> true
 
     let reversedDependencies =
         let reversedEdges =
@@ -222,28 +217,23 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
 
     let hub = Hub.Create(options.MaxConcurrency)
     for (KeyValue(depNodeId, nodeIds)) in reversedDependencies do
-        let nodeComputed = hub.CreateComputed<bool*DateTime> depNodeId
+        let nodeComputed = hub.CreateComputed<bool> depNodeId
 
         // await dependencies
         let awaitedDependencies =
             nodeIds
-            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<bool * DateTime> awaitedProjectId)
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<bool> awaitedProjectId)
             |> Array.ofSeq
 
         let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
         hub.Subscribe awaitedSignals (fun () ->
             let node = graph.Nodes[depNodeId]
-            let parentRequired, notBefore =
-                awaitedDependencies |> Seq.fold (fun (required, notBefore) dep ->
-                    let taskRequired, taskNotBefore = dep.Value
-                    required || taskRequired, max notBefore taskNotBefore) (false, DateTime.MinValue)
-            let parentRequired, notBefore =
-                if parentRequired |> not then shallRebuild node notBefore
-                else parentRequired, notBefore
+            let parentRequired = awaitedDependencies |> Seq.fold (fun parentRequired dep -> parentRequired || dep.Value) false
+            let requiredChild = parentRequired || shallRebuild node
 
-            let node = { node with Required = parentRequired }
+            let node = { node with Required = requiredChild }
             allNodes.TryAdd(depNodeId, node) |> ignore
-            nodeComputed.Value <- (parentRequired, notBefore))
+            nodeComputed.Value <- requiredChild)
 
     let status = hub.WaitCompletion()
     match status with
