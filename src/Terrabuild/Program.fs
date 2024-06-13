@@ -96,7 +96,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let consistentGraph = Graph.enforceConsistency config graph cache options
         if options.Debug then logGraph consistentGraph "consistent"
 
-        let requiredGraph = Graph.markRequired config consistentGraph cache options
+        let requiredGraph = Graph.markRequired consistentGraph options
         if options.Debug then logGraph requiredGraph "required"
 
         let buildGraph = Graph.optimize config requiredGraph cache options
@@ -116,7 +116,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 jsonBuild |> IO.writeTextFile (logFile "build.json")
 
             if logs || summary.Status <> Build.Status.Success then
-                Logs.dumpLogs buildGraph cache sourceControl None options.Debug
+                Logs.dumpLogs buildGraph cache sourceControl (Some summary.ImpactedNodes) options.Debug
 
             let result =
                 match summary.Status with

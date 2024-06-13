@@ -258,26 +258,8 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
 
 
 
-let markRequired (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
+let markRequired (graph: Workspace) (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
-
-    // first compute if a node's outputs are required
-    let cacheMode =
-        if configuration.SourceControl.CI then Cacheability.Always
-        else Cacheability.Remote
-
-    let outputConsumed (node: Node) =
-        let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-        if options.Force || node.Cache = Cacheability.Never then
-            true
-        else
-            let summary = cache.TryGetSummaryOnly useRemoteCache cacheEntryId
-            match summary with
-            | Some summary ->
-                let rebuild = options.Retry && summary.Status <> Cache.TaskStatus.Success
-                rebuild
-            | _ -> true
 
     let reversedDependencies =
         let reversedEdges =
@@ -305,10 +287,9 @@ let markRequired (configuration: Configuration.Workspace) (graph: Workspace) (ca
         let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
         hubOutputs.Subscribe awaitedSignals (fun () ->
             let node = graph.Nodes[depNodeId]
-            let parentRequired =
+            let childRequired =
                 awaitedDependencies |> Seq.fold (fun parentRequired dep -> parentRequired || dep.Value) (node.BuildSummary |> Option.isNone)
-            let childRequired = parentRequired || outputConsumed node
-            let node = { node with Required = childRequired }
+            let node = { node with Required = node.Required || childRequired }
             allNodes.TryAdd(depNodeId, node) |> ignore
             nodeComputed.Value <- childRequired)
 
