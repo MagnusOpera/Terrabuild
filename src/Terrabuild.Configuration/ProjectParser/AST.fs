@@ -75,7 +75,7 @@ type TargetComponents =
     | Step of Step
 
 type Target = {
-    Rebuild: Expr
+    Rebuild: Expr option
     Outputs: Set<string> option
     DependsOn: Set<string> option
     Steps: Step list
@@ -90,8 +90,8 @@ with
 
         let rebuild =
             match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
-            | [] -> Expr.Boolean false
-            | [value] -> value
+            | [] -> None
+            | [value] -> Some value
             | _ -> failwith "multiple rebuild declared"
 
         let outputs =

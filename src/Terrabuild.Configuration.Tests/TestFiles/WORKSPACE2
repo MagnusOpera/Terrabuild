@@ -12,6 +12,7 @@ target build { # comment at end of line
 
 target dist {
   depends_on = [ build ]
+  rebuild = true
 }
 
 target dummy

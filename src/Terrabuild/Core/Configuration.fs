@@ -298,7 +298,15 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                 // use value from project target
                 // otherwise use workspace target
                 // defaults to allow caching
-                let usedVariables, rebuild = Eval.eval evaluationContext target.Rebuild
+                let usedVariables, rebuild =
+                    let rebuild =
+                        target.Rebuild
+                        |> Option.defaultWith (fun () ->
+                            workspaceConfig.Targets
+                            |> Map.tryFind targetName
+                            |> Option.map (fun target -> target.Rebuild)
+                            |> Option.defaultValue (Expr.Boolean false))
+                    Eval.eval evaluationContext rebuild
                 let rebuild =
                     match rebuild with
                     | Value.Bool rebuild -> rebuild

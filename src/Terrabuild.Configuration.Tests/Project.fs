@@ -40,18 +40,18 @@ let parseProject() =
 
         let targetBuild = 
             { DependsOn = Set [ "dist" ] |> Some
-              Rebuild = Expr.Boolean false
+              Rebuild = None
               Outputs = None
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
         let targetDist =
             { DependsOn = None
-              Rebuild = Expr.Boolean false
+              Rebuild = None
               Outputs = None
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty }
                         { Extension = "@dotnet"; Command = "publish"; Parameters = Map.empty } ] }
         let targetDocker =
             { DependsOn = None
-              Rebuild = Expr.Boolean false
+              Rebuild = Some (Expr.Boolean false)
               Outputs = None
               Steps = [ { Extension = "@shell"; Command = "echo"
                           Parameters = Map [ "arguments", Expr.Function (Function.Trim,
@@ -88,7 +88,7 @@ let parseProject2() =
 
         let buildTarget = 
             { DependsOn = None
-              Rebuild = Expr.Boolean true
+              Rebuild = Some (Expr.Boolean true)
               Outputs = Set [ "*.dll" ] |> Some
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
