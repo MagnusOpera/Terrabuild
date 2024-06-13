@@ -70,12 +70,12 @@ type Step = {
 [<RequireQualifiedAccess>]
 type TargetComponents =
     | DependsOn of string list
-    | Rebuild of bool
+    | Rebuild of Expr
     | Outputs of string list
     | Step of Step
 
 type Target = {
-    Rebuild: bool option
+    Rebuild: Expr option
     Outputs: Set<string> option
     DependsOn: Set<string> option
     Steps: Step list

@@ -77,7 +77,7 @@ TargetComponents:
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfTargetIdentifiers { TargetComponents.DependsOn $3 }
 TargetRebuild:
-    | REBUILD EQUAL Bool { TargetComponents.Rebuild $3 }
+    | REBUILD EQUAL Expr { TargetComponents.Rebuild $3 }
 
 Configuration:
     | CONFIGURATION IDENTIFIER { Configuration.Build $2 [] |> WorkspaceFileComponents.Configuration }

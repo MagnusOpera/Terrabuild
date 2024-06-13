@@ -23,11 +23,11 @@ with
 [<RequireQualifiedAccess>]
 type TargetComponents =
     | DependsOn of string list
-    | Rebuild of bool
+    | Rebuild of Expr
 
 type Target = {
     DependsOn: Set<string>
-    Rebuild: bool
+    Rebuild: Expr
 }
 with
     static member Build id components =
@@ -39,7 +39,7 @@ with
 
         let rebuild =
             match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
-            | [] -> false
+            | [] -> Expr.Boolean false
             | [value] -> value
             | _ -> failwith "multiple rebuild declared"
 
