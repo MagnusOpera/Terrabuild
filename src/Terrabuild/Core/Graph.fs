@@ -22,6 +22,7 @@ type Node = {
     Cache: Cacheability
     IsLeaf: bool
     Required: bool
+    BuildSummary: Cache.TargetSummary option
     Batched: bool
 
     TargetHash: string
@@ -155,6 +156,7 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
                              Cache = cache
                              IsLeaf = isLeaf
                              Required = false
+                             BuildSummary = None
                              TargetHash = target.Hash
                              Batched = false }
 
@@ -181,14 +183,90 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
 
 
 
-let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
+
+
+let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
     let cacheMode =
         if configuration.SourceControl.CI then Cacheability.Always
         else Cacheability.Remote
 
-    let shallRebuild (node: Node) =
+    let allNodes = ConcurrentDictionary<string, Node>()
+    let hub = Hub.Create(options.MaxConcurrency)
+    for (KeyValue(nodeId, node)) in graph.Nodes do
+        let nodeComputed = hub.CreateComputed<bool*DateTime> nodeId
+
+        // await dependencies
+        let awaitedDependencies =
+            node.Dependencies
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<bool*DateTime> awaitedProjectId)
+            |> Array.ofSeq
+
+        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+        hub.Subscribe awaitedSignals (fun () ->
+
+            // children can ask for a build
+            let childrenRebuild, childrenLastBuild =
+                awaitedDependencies |> Seq.fold (fun (childrenRebuild, childrenLastBuild) childComputed ->
+                    let childRebuild, childLastBuild = childComputed.Value
+                    let nodeRebuild = childrenRebuild || childRebuild
+                    let nodeLastBuild = max childrenLastBuild childLastBuild
+                    nodeRebuild, nodeLastBuild) (false, DateTime.MinValue)
+
+            let summary, nodeRebuild, nodeLastBuild =
+                if childrenRebuild then
+                    None, true, DateTime.MaxValue
+
+                else
+                    let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
+                    let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
+
+                    // check first if it's possible to restore previously built state
+                    let summary =
+                        if options.Force || node.Cache = Cacheability.Never then None
+                        else
+                            // get task execution summary & take care of retrying failed tasks
+                            match cache.TryGetSummary useRemoteCache cacheEntryId with
+                            | Some summary when summary.Status = Cache.TaskStatus.Failure && options.Retry -> None
+                            | Some summary -> Some summary
+                            | _ -> None
+
+                    match summary with
+                    | Some summary ->
+                        if summary.StartedAt < childrenLastBuild then None, true, DateTime.MaxValue
+                        else (Some summary), false, summary.EndedAt
+                    | _ ->
+                        None, true, DateTime.MaxValue
+
+            let node = { node with BuildSummary = summary
+                                   Required = summary |> Option.isNone }
+            allNodes.TryAdd(nodeId, node) |> ignore
+
+            nodeComputed.Value <- (nodeRebuild, nodeLastBuild)
+        )
+
+    let status = hub.WaitCompletion()
+
+    let endedAt = DateTime.UtcNow
+
+    let trimDuration = endedAt - startedAt
+    Log.Debug("Consistency: {duration}", trimDuration)
+    { graph with Nodes = allNodes |> Map.ofDict }
+
+
+
+
+
+let markRequired (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
+    let startedAt = DateTime.UtcNow
+
+    // first compute if a node's outputs are required
+    let cacheMode =
+        if configuration.SourceControl.CI then Cacheability.Always
+        else Cacheability.Remote
+
+    let outputConsumed (node: Node) =
         let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
         if options.Force || node.Cache = Cacheability.Never then
@@ -214,28 +292,27 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
         |> Map.addMap reversedEdges
 
     let allNodes = ConcurrentDictionary<string, Node>()
-
-    let hub = Hub.Create(options.MaxConcurrency)
+    let hubOutputs = Hub.Create(options.MaxConcurrency)
     for (KeyValue(depNodeId, nodeIds)) in reversedDependencies do
-        let nodeComputed = hub.CreateComputed<bool> depNodeId
+        let nodeComputed = hubOutputs.CreateComputed<bool> depNodeId
 
         // await dependencies
         let awaitedDependencies =
             nodeIds
-            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<bool> awaitedProjectId)
+            |> Seq.map (fun awaitedProjectId -> hubOutputs.GetComputed<bool> awaitedProjectId)
             |> Array.ofSeq
 
         let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-        hub.Subscribe awaitedSignals (fun () ->
+        hubOutputs.Subscribe awaitedSignals (fun () ->
             let node = graph.Nodes[depNodeId]
-            let parentRequired = awaitedDependencies |> Seq.fold (fun parentRequired dep -> parentRequired || dep.Value) false
-            let childRequired = parentRequired || shallRebuild node
-
+            let parentRequired =
+                awaitedDependencies |> Seq.fold (fun parentRequired dep -> parentRequired || dep.Value) (node.BuildSummary |> Option.isNone)
+            let childRequired = parentRequired || outputConsumed node
             let node = { node with Required = childRequired }
             allNodes.TryAdd(depNodeId, node) |> ignore
             nodeComputed.Value <- childRequired)
 
-    let status = hub.WaitCompletion()
+    let status = hubOutputs.WaitCompletion()
     match status with
     | Status.Ok -> ()
     | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Node {projectId} is unknown")
@@ -243,12 +320,10 @@ let trim (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cac
 
     let endedAt = DateTime.UtcNow
 
-    let trimDuration = endedAt - startedAt
-    Log.Debug("Trim: {duration}", trimDuration)
+    let requiredDuration = endedAt - startedAt
 
+    Log.Debug("Required: {duration}", requiredDuration)
     { graph with Nodes = allNodes |> Map.ofDict }
-
-
 
 
 
@@ -431,6 +506,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     IsLeaf = oneNode.IsLeaf
                     Batched = false
                     Required = true
+                    BuildSummary = None
 
                     TargetHash = cluster
                     CommandLines = optimizedActions

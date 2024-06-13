@@ -59,7 +59,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
     $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
 
-    let nodesToRun = graph.Nodes |> Seq.filter (fun (KeyValue(_, node)) -> node.Required) |> Seq.length
+    let nodesToRun = graph.Nodes |> Map.filter (fun nodeId node -> node.Required) |> Map.count
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks to run" |> Terminal.writeLine
 
     let startedAt = DateTime.UtcNow
@@ -71,10 +71,6 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let workspaceDir = Environment.CurrentDirectory
 
     let containerInfos = Concurrent.ConcurrentDictionary<string, string>()
-
-    let cacheMode =
-        if configuration.SourceControl.CI then Cacheability.Always
-        else Cacheability.Remote
 
     let isBuildSuccess = function
         | NodeStatus.Success _ -> true
@@ -99,8 +95,6 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
 
 
     let buildNode (node: Graph.Node) =
-        // determine if step node can be reused or not
-        let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
 
         notification.NodeDownloading node
@@ -112,14 +106,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
             | _ -> "."
 
         // check first if it's possible to restore previously built state
-        let summary =
-            if options.Force || node.Cache = Cacheability.Never then None
-            else
-                // get task execution summary & take care of retrying failed tasks
-                match cache.TryGetSummary useRemoteCache cacheEntryId with
-                | Some summary when summary.Status = Cache.TaskStatus.Failure && options.Retry -> None
-                | Some summary -> Some summary
-                | _ -> None
+        let summary = node.BuildSummary
 
         match summary with
         | Some summary ->

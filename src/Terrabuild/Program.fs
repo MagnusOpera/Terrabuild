@@ -52,6 +52,15 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         Log.Debug("Log created")
 
     let runTarget wsDir target configuration note tag labels variables localOnly logs (options: Configuration.Options) =
+        let logGraph graph name =
+            graph
+            |> Json.Serialize
+            |> IO.writeTextFile (logFile $"{name}-graph.json")
+            graph
+            |> Graph.graph
+            |> String.join "\n"
+            |> IO.writeTextFile (logFile $"{name}-graph.mermaid")
+
         let wsDir = wsDir |> FS.fullPath
         Environment.CurrentDirectory <- wsDir
         Log.Debug("Changing current directory to {directory}", wsDir)
@@ -82,25 +91,16 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let cache = Cache.Cache(storage) :> Cache.ICache
 
         let graph = Graph.create config target
-        if options.Debug then
-            let jsonGraph = Json.Serialize graph
-            jsonGraph |> IO.writeTextFile (logFile "config-graph.json")
-            let mermaid = Graph.graph graph |> String.join "\n"
-            mermaid |> IO.writeTextFile (logFile "config-graph.mermaid")
+        if options.Debug then logGraph graph "config"
 
-        let trimGraph = Graph.trim config graph cache options
-        if options.Debug then
-            let jsonTrimGraph = Json.Serialize trimGraph
-            jsonTrimGraph |> IO.writeTextFile (logFile "trim-graph.json")
-            let mermaid = Graph.graph trimGraph |> String.join "\n"
-            mermaid |> IO.writeTextFile (logFile "trim-graph.mermaid")
+        let consistentGraph = Graph.enforceConsistency config graph cache options
+        if options.Debug then logGraph consistentGraph "consistent"
 
-        let buildGraph = Graph.optimize config trimGraph cache options
-        if options.Debug then
-            let jsonBuildGraph = Json.Serialize buildGraph
-            jsonBuildGraph |> IO.writeTextFile (logFile "build-graph.json")
-            let mermaid = Graph.graph buildGraph |> String.join "\n"
-            mermaid |> IO.writeTextFile (logFile "build-graph.mermaid")
+        let requiredGraph = Graph.markRequired config consistentGraph cache options
+        if options.Debug then logGraph requiredGraph "required"
+
+        let buildGraph = Graph.optimize config requiredGraph cache options
+        if options.Debug then logGraph buildGraph "build"
 
         if options.WhatIf then
             if logs then
