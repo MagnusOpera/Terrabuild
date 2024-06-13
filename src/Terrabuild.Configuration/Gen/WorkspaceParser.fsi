@@ -104,7 +104,6 @@ type nonTerminalId =
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn
-    | NONTERM_TargetRebuild
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents
     | NONTERM_ConfigurationVariables

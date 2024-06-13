@@ -12,14 +12,11 @@ open Terrabuild.Expressions
 let parseWorkspace() =
     let expectedWorkspace =
         let targetBuild = 
-            { DependsOn = Set [ "^build" ]
-              Rebuild = false }
+            { DependsOn = Set [ "^build" ] }
         let targetDist =
-            { DependsOn = Set [ "build" ]
-              Rebuild = true }
+            { DependsOn = Set [ "build" ] }
         let targetDummy =
-            { DependsOn = Set.empty
-              Rebuild = false }
+            { DependsOn = Set.empty }
 
         let envRelease =
             { Variables = Map [ "configuration", Expr.String "Release" ] }
@@ -57,14 +54,11 @@ let parseWorkspace() =
 let parseWorkspace2() =
     let expectedWorkspace =
         let targetBuild = 
-            { DependsOn = Set [ "^build" ]
-              Rebuild = false }
+            { DependsOn = Set [ "^build" ] }
         let targetDist =
-            { DependsOn = Set [ "build" ]
-              Rebuild = true }
+            { DependsOn = Set [ "build" ] }
         let targetDummy =
-            { DependsOn = Set.empty
-              Rebuild = false }
+            { DependsOn = Set.empty }
 
         let envRelease =
             { Variables = Map [ "configuration", Expr.String "Release"

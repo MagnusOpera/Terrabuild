@@ -274,17 +274,35 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         let projectSteps =
             projectDef.Targets
             |> Map.map (fun targetName target ->
+
+                let actionVariables =
+                    buildVariables
+                    |> Map.add "terrabuild_project" (Expr.String projectId)
+                    |> Map.add "terrabuild_target" (Expr.String targetName)
+                    |> Map.add "terrabuild_configuration" (Expr.String configuration)
+                    |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
+                    |> (fun map ->
+                        let tagValue =
+                            match tag with
+                            | Some tag -> Expr.String tag
+                            | _ -> Expr.Nothing
+                        map |> Map.add "terrabuild_tag" tagValue)
+
+                let evaluationContext = {
+                    Eval.EvaluationContext.WorkspaceDir = workspaceDir
+                    Eval.EvaluationContext.ProjectDir = projectDir
+                    Eval.EvaluationContext.Versions = versions
+                    Eval.EvaluationContext.Variables = actionVariables
+                }
+
                 // use value from project target
                 // otherwise use workspace target
                 // defaults to allow caching
+                let usedVariables, rebuild = Eval.eval evaluationContext target.Rebuild
                 let rebuild =
-                    target.Rebuild
-                    |> Option.defaultWith (fun () ->
-                        workspaceConfig.Targets
-                        |> Map.tryFind targetName
-                        |> Option.map (fun target -> target.Rebuild)
-                        |> Option.defaultValue false
-                    )
+                    match rebuild with
+                    | Value.Bool rebuild -> rebuild
+                    | _ -> TerrabuildException.Raise("rebuild must evaluate to a bool")
 
                 let usedVariables, actions =
                     target.Steps
@@ -303,26 +321,6 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                                                   Terrabuild.Extensibility.ActionContext.NodeHash = projectHash
                                                   Terrabuild.Extensibility.ActionContext.Command = step.Command
                                                   Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
-
-                            let actionVariables =
-                                buildVariables
-                                |> Map.add "terrabuild_project" (Expr.String projectId)
-                                |> Map.add "terrabuild_target" (Expr.String targetName)
-                                |> Map.add "terrabuild_configuration" (Expr.String configuration)
-                                |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
-                                |> (fun map ->
-                                    let tagValue =
-                                        match tag with
-                                        | Some tag -> Expr.String tag
-                                        | _ -> Expr.Nothing
-                                    map |> Map.add "terrabuild_tag" tagValue)
-
-                            let evaluationContext = {
-                                Eval.EvaluationContext.WorkspaceDir = workspaceDir
-                                Eval.EvaluationContext.ProjectDir = projectDir
-                                Eval.EvaluationContext.Versions = versions
-                                Eval.EvaluationContext.Variables = actionVariables
-                            }
 
                             let usedVars, actionContext =
                                 extension.Defaults
@@ -372,7 +370,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                         let usedVariables = usedVariables + stepVars
                         let actions = actions @ [ stepActions ]
                         usedVariables, actions
-                    ) (Set.empty, [])
+                    ) (usedVariables, [])
 
                 let usedVariables =
                     usedVariables

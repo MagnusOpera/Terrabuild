@@ -70,12 +70,12 @@ type Step = {
 [<RequireQualifiedAccess>]
 type TargetComponents =
     | DependsOn of string list
-    | Rebuild of bool
+    | Rebuild of Expr
     | Outputs of string list
     | Step of Step
 
 type Target = {
-    Rebuild: bool option
+    Rebuild: Expr
     Outputs: Set<string> option
     DependsOn: Set<string> option
     Steps: Step list
@@ -90,8 +90,8 @@ with
 
         let rebuild =
             match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
-            | [] -> None
-            | [value] -> Some value
+            | [] -> Expr.Boolean false
+            | [value] -> value
             | _ -> failwith "multiple rebuild declared"
 
         let outputs =

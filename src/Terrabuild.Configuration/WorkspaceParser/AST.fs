@@ -23,28 +23,19 @@ with
 [<RequireQualifiedAccess>]
 type TargetComponents =
     | DependsOn of string list
-    | Rebuild of bool
 
 type Target = {
     DependsOn: Set<string>
-    Rebuild: bool
 }
 with
     static member Build id components =
         let dependsOn =
-            match components |> List.choose (function | TargetComponents.DependsOn value -> Some value | _ -> None) with
+            match components |> List.choose (function | TargetComponents.DependsOn value -> Some value) with
             | [] -> Set.empty
             | [value] -> value |> Set.ofList
             | _ -> failwith "multiple depends_on declared"
 
-        let rebuild =
-            match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
-            | [] -> false
-            | [value] -> value
-            | _ -> failwith "multiple rebuild declared"
-
-        id, { DependsOn = dependsOn
-              Rebuild = rebuild }
+        id, { DependsOn = dependsOn }
 
 
 [<RequireQualifiedAccess>]

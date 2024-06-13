@@ -112,7 +112,7 @@ TargetComponents:
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfTargetIdentifiers { TargetComponents.DependsOn $3 }
 TargetRebuild:
-    | REBUILD EQUAL Bool { TargetComponents.Rebuild $3 }
+    | REBUILD EQUAL Expr { TargetComponents.Rebuild $3 }
 TargetOutputs:
     | OUTPUTS EQUAL ListOfString { TargetComponents.Outputs $3 }
 TargetStep:
