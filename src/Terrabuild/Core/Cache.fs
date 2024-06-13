@@ -60,6 +60,7 @@ type ICache =
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
     abstract CreateEntry: useRemote:bool -> id:string -> IEntry
     abstract CreateHomeDir: nodeHash:string -> string
+    abstract Invalidate: id:string -> unit
 
 
 let private summaryFilename = "summary.json"
@@ -276,6 +277,11 @@ type Cache(storage: Contracts.Storage) =
                         None
                 else
                     None
+
+        member _.Invalidate id =
+            cachedSummaries.TryRemove(id) |> ignore
+            let entryDir = FS.combinePath buildCacheDirectory id
+            entryDir |> IO.deleteAny
 
         member _.CreateEntry useRemote id : IEntry =
             // invalidate cache as we are creating a new entry

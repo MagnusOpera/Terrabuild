@@ -234,7 +234,9 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
 
                     match summary with
                     | Some summary ->
-                        if summary.StartedAt < childrenLastBuild then None, true, DateTime.MaxValue
+                        if summary.StartedAt < childrenLastBuild then
+                            cache.Invalidate cacheEntryId
+                            None, true, DateTime.MaxValue
                         else (Some summary), false, summary.EndedAt
                     | _ ->
                         None, true, DateTime.MaxValue
