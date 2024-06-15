@@ -36,6 +36,7 @@ type RunArgs =
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
+    | [<Unique; AltCommandLine("-nc")>] NoContainer
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
@@ -49,6 +50,7 @@ with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Configuration _ -> "Configuration to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
+            | NoContainer -> "Ignore containers on extensions"
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
             | Force -> "Ignore cache when building target."
@@ -66,6 +68,7 @@ type TargetArgs =
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
+    | [<Unique; AltCommandLine("-nc")>] NoContainer
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
@@ -80,6 +83,7 @@ with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Configuration _ -> "Configuration to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
+            | NoContainer -> "Ignore containers on extensions"
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
             | Force -> "Ignore cache when building target."

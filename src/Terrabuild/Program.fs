@@ -146,6 +146,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
+        let noContainer = buildArgs.Contains(RunArgs.NoContainer)
         let localOnly = buildArgs.Contains(RunArgs.LocalOnly)
         let logs = buildArgs.Contains(RunArgs.Logs)
         let tag = buildArgs.TryGetResult(RunArgs.Tag)
@@ -153,6 +154,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
+                        Configuration.Options.NoContainer = noContainer
                         Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow
                         Configuration.Options.IsLog = false }
@@ -172,6 +174,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let labels = targetArgs.TryGetResult(TargetArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = targetArgs.GetResults(TargetArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = targetArgs.GetResult(TargetArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
+        let noContainer = targetArgs.Contains(TargetArgs.NoContainer)
         let localOnly = targetArgs.Contains(TargetArgs.LocalOnly)
         let logs = targetArgs.Contains(TargetArgs.Logs)
         let tag = targetArgs.TryGetResult(TargetArgs.Tag)
@@ -179,6 +182,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
+                        Configuration.Options.NoContainer = noContainer
                         Configuration.Options.Retry = targetArgs.Contains(TargetArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow
                         Configuration.Options.IsLog = false }
@@ -200,6 +204,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = false
                         Configuration.Options.MaxConcurrency = 1
+                        Configuration.Options.NoContainer = false
                         Configuration.Options.Retry = false
                         Configuration.Options.StartedAt = DateTime.UtcNow
                         Configuration.Options.IsLog = true}

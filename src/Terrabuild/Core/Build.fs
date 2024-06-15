@@ -159,16 +159,16 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                             if index = 0 then batch.MetaCommand
                             else "+++"
 
-                        match batch.Container with
-                        | None -> metaCommand, projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container
-                        | Some container ->
+                        match batch.Container, options.NoContainer with
+                        | Some container, false ->
                             let whoami = getContainerUser container
                             let envs =
                                 batch.ContainerVariables
                                 |> Seq.map (fun var -> $"-e {var}")
                                 |> String.join " "
                             let args = $"run --rm --net=host --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {commandLine.Command} {envs} {container} {commandLine.Arguments}"
-                            metaCommand, workspaceDir, cmd, args, batch.Container))
+                            metaCommand, workspaceDir, cmd, args, batch.Container
+                        | _ -> metaCommand, projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container))
 
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs

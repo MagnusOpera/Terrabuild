@@ -19,6 +19,7 @@ type Options = {
     Retry: bool
     StartedAt: DateTime
     IsLog: bool
+    NoContainer: bool
 }
 
 type BatchContext = {
