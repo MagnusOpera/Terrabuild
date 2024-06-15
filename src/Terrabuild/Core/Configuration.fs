@@ -125,7 +125,12 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
             | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
         | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
 
-    // variables
+    // variables = default configuration vars + configuration vars + env vars + args vars
+    let defaultVariables =
+        match workspaceConfig.Configurations |> Map.tryFind "default" with
+        | Some config -> config.Variables
+        | _ -> Map.empty
+
     let configVariables =
         match workspaceConfig.Configurations |> Map.tryFind configuration with
         | Some variables -> variables.Variables
@@ -135,7 +140,8 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
             | _ -> TerrabuildException.Raise($"Configuration '{configuration}' not found")
 
     let buildVariables =
-        configVariables
+        defaultVariables
+        |> Map.addMap configVariables
         // override variable with configuration variable if any
         |> Map.map (fun key expr ->
             match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
