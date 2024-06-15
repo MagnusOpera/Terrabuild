@@ -126,7 +126,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
             // NOTE:
             //  we use ProjectHash here because it's interesting from a cache perspective
             //  some binaries could have been cached in homedir, let's reuse them if available
-            // let homeDir = cache.CreateHomeDir node.ProjectHash
+            let homeDir = cache.CreateHomeDir node.ProjectHash
 
             let allCommands =
                 node.CommandLines
@@ -135,6 +135,26 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                         let cmd = "docker"
                         let wsDir = Environment.CurrentDirectory
 
+                        let getContainerUser (container: string) =
+                            match containerInfos.TryGetValue(container) with
+                            | true, whoami ->
+                                Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
+                                whoami
+                            | _ ->
+                                // discover USER
+                                let args = $"run --rm --name {node.Hash} --entrypoint whoami {container}"
+                                let whoami =
+                                    Log.Debug("Identifying USER for {container}", container)
+                                    match Exec.execCaptureOutput workspaceDir cmd args with
+                                    | Exec.Success (whoami, 0) -> whoami.Trim()
+                                    | _ ->
+                                        Log.Debug("USER identification failed for {container}: using root", container)
+                                        "root"
+
+                                Log.Debug("Using USER {whoami} for {container}", whoami, container)
+                                containerInfos.TryAdd(container, whoami) |> ignore
+                                whoami
+
                         let metaCommand =
                             if index = 0 then batch.MetaCommand
                             else "+++"
@@ -142,11 +162,12 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                         match batch.Container with
                         | None -> metaCommand, projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container
                         | Some container ->
+                            let whoami = getContainerUser container
                             let envs =
                                 batch.ContainerVariables
                                 |> Seq.map (fun var -> $"-e {var}")
                                 |> String.join " "
-                            let args = $"run --rm --net=host --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {commandLine.Command} {envs} {container} {commandLine.Arguments}"
+                            let args = $"run --rm --net=host --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {commandLine.Command} {envs} {container} {commandLine.Arguments}"
                             metaCommand, workspaceDir, cmd, args, batch.Container))
 
             let beforeFiles =
