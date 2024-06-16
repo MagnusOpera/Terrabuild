@@ -43,6 +43,7 @@ type RunArgs =
     | [<Unique; AltCommandLine("-n")>] Note of note:string
     | [<Unique; AltCommandLine("-t")>] Tag of tag:string
     | [<Unique>] Logs
+    | [<Unique; Inherit>] WhatIf
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -59,6 +60,7 @@ with
             | Logs -> "Output logs for impacted projects."
             | Note _ -> "Note for the build."
             | Tag _ -> "Tag for build."
+            | WhatIf -> "Prepare the action but do not apply."
 
 [<RequireQualifiedAccess>]
 type TargetArgs =
@@ -75,6 +77,7 @@ type TargetArgs =
     | [<Unique; AltCommandLine("-n")>] Note of note:string
     | [<Unique; AltCommandLine("-t")>] Tag of tag:string
     | [<Unique>] Logs
+    | [<Unique; Inherit>] WhatIf
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -92,6 +95,7 @@ with
             | Note _ -> "Note for the build."
             | Logs -> "Output logs for impacted projects."
             | Tag _ -> "Tag for build."
+            | WhatIf -> "Prepare the action but do not apply."
 
 [<RequireQualifiedAccess>]
 type ClearArgs =
@@ -141,7 +145,6 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Login of ParseResults<LoginArgs>
     | [<CliPrefix(CliPrefix.None)>] Logout of ParseResults<LogoutArgs>
     | [<CliPrefix(CliPrefix.None)>] Version
-    | [<Unique; Inherit>] WhatIf
     | [<Hidden; Unique; Inherit>] Debug
 with
     interface IArgParserTemplate with
@@ -160,5 +163,4 @@ with
             | Login _ -> "Connect to backend."
             | Logout _ -> "Disconnect from backend."
             | Version -> "Show current Terrabuild version."
-            | WhatIf -> "Prepare the action but do not apply."
             | Debug -> "Enable logging and debug dumps."

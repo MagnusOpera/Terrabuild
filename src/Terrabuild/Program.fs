@@ -39,7 +39,6 @@ let rec findWorkspace dir =
 
 let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseResults<TerrabuildArgs>) =
     let debug = result.Contains(TerrabuildArgs.Debug)
-    let whatIf = result.Contains(TerrabuildArgs.WhatIf)
 
     let logFile name = FS.combinePath launchDir $"terrabuild-debug.{name}"
 
@@ -150,6 +149,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let localOnly = buildArgs.Contains(RunArgs.LocalOnly)
         let logs = buildArgs.Contains(RunArgs.Logs)
         let tag = buildArgs.TryGetResult(RunArgs.Tag)
+        let whatIf = buildArgs.Contains(RunArgs.WhatIf)
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
@@ -178,6 +178,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let localOnly = targetArgs.Contains(TargetArgs.LocalOnly)
         let logs = targetArgs.Contains(TargetArgs.Logs)
         let tag = targetArgs.TryGetResult(TargetArgs.Tag)
+        let whatIf = targetArgs.Contains(TargetArgs.WhatIf)
         let options = { Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = targetArgs.Contains(TargetArgs.Force)
