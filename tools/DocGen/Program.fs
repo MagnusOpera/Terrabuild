@@ -210,7 +210,7 @@ let writeExtension extensionDir (extension: Extension) =
                 "```"
                 $"project @{extension.Name}"
                 "```"
-                "Same as:"
+                "Equivalent to:"
                 "```"
                 $"project @{extension.Name} {{"
                 for prm in init.Parameters do
