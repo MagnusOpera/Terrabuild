@@ -67,4 +67,4 @@ Magnus Opera employees have write access to Magnus Opera repositories and must p
 
 ## Getting Help
 
-We're sure there are rough edges and we appreciate you helping out. If you want to talk with other folks in the Terrabuild community (including members of the Magnus Opera team) come hang out in the `#contribute` channel on the [Terrabuild Community Slack](https://slack.terrabuild.io/).
+We're sure there are rough edges and we appreciate you helping out. If you want to talk with other folks in the Terrabuild community (including members of the Magnus Opera team) come hang out in the `#contribute` channel on the [Terrabuild Community Slack](https://terrabuild.io/community/).
