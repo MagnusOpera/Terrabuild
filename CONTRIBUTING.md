@@ -28,7 +28,6 @@ You'll want to install the following on your machine:
 - [.net SDK](https://dotnet.microsoft.com/download)
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Docker](https://www.docker.com/products/docker-desktop/) or [OrbStack](https://orbstack.dev/)
-- [.NET](https://dotnet.microsoft.com/download)
 
 ### Build
 
