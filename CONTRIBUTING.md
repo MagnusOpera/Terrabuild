@@ -31,7 +31,7 @@ You'll want to install the following on your machine:
 
 ### Build
 
-We use `make` as a way to provide an easy way to run commands. 
+We use `make` as shortcuts to run commands.
 
 We develop mainly on macOS and Ubuntu - with limited support for doing development on Windows. Feel free to pitch in if you can to improve situation.
 
@@ -50,7 +50,7 @@ For contributors we use the standard GitHub workflow: fork, create a branch and 
 
 ### Changelog messages
 
-Changelog notes are written in the active imperative form.  They should not end with a period. The simple rule is to pretend the message starts with "This change will ..."
+Changelog notes are written in the active imperative form. They should not end with a period. The simple rule is to pretend the message starts with "This change will ..."
 
 Good examples for changelog entries are:
 - move whatif at task level
