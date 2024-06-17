@@ -4,12 +4,14 @@ Thanks for contributing to Terrabuild and helping make it better. We appreciate 
 
 ## Communications
 
-You are welcome to join the [Terrabuild Community Slack](https://slack.terrabuild.io/) for questions and a community of like-minded folks.
+You are welcome to join the [Terrabuild Community Slack](https://terrabuild.io/community/) for questions and feature requests.
 We discuss features and file bugs on GitHub via [Issues](https://github.com/MagnusOpera/Terrabuild/issues) as well as [Discussions](https://github.com/MagnusOpera/Terrabuild/discussions).
 
 ### Issues
 
 Feel free to pick up any existing issue that looks interesting to you or fix a bug you stumble across while using Terrabuild. No matter the size, we welcome all improvements.
+
+Please keep in mind Terrabuild is a young product. We are doing our best to move forward while keeping product simple.
 
 ### Feature Work
 
@@ -28,18 +30,20 @@ You'll want to install the following on your machine:
 - [Docker](https://www.docker.com/products/docker-desktop/) or [OrbStack](https://orbstack.dev/)
 - [.NET](https://dotnet.microsoft.com/download)
 
-### Make build system
+### Build
 
-We use `make` as our build system, so you'll want to install that as well, if you don't have it already. 
+We use `make` as a way to provide an easy way to run commands. 
 
-We develop mainly on macOS - with limited support for doing development on Windows. Feel free to pitch in if you can to improve situation.
+We develop mainly on macOS and Ubuntu - with limited support for doing development on Windows. Feel free to pitch in if you can to improve situation.
 
-`Makefile` contains several targets. The one you care are:
+`Makefile` contains several targets. The ones you care are:
 1. `build`: build Terrabuild
 1. `test`: build and run tests
 1. `dist-all`: build and publish all artifacts
 1. `self-build`: build Terrabuild, which is used to self-build
 1. `tb-build`: build Terrabuild using locally installed Terrabuild
+
+You probably also want to install current Terrabuild distribution: `dotnet tool install --global terrabuild`
 
 ## Submitting a Pull Request
 
@@ -50,8 +54,8 @@ For contributors we use the standard GitHub workflow: fork, create a branch and 
 Changelog notes are written in the active imperative form.  They should not end with a period. The simple rule is to pretend the message starts with "This change will ..."
 
 Good examples for changelog entries are:
-- Exit immediately from state edit when no change was made
-- Fix root and program paths to always be absolute
+- move whatif at task level
+- invalidate local cache on cache inconsistency
 
 Here's some examples of what we're trying to avoid:
 - Fixes a bug
