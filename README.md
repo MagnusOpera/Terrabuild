@@ -16,5 +16,5 @@ See [📚 Documentation](https://terrabuild.io) for more information.
 Visit [Contributing](CONTRIBUTING.md) for information on building Terrabuild from source or contributing improvements.
 
 <a href="https://terrabuild.io/docs/?utm_campaign=magnusopera-terrabuild-github-repo&utm_source=github.com&utm_medium=get-started-button" title="Get Started">
-    <img src="https://magnusopera.io/images/get-started.svg" />
+    <img src="https://terrabuild.io/images/get-started.svg" />
 </a>
