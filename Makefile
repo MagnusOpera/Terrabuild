@@ -98,10 +98,10 @@ self-test: clean publish
 	.out/dotnet/terrabuild test --workspace src --configuration $(env) --retry --debug --logs
 
 self-publish: clean publish
-	.out/dotnet/terrabuild publish --workspace src --configuration $(env) --retry --debug --logs
+	.out/dotnet/terrabuild dist --workspace src --configuration $(env) --retry --debug --logs
 
 self-check: clean publish
-	.out/dotnet/terrabuild publish --workspace src --configuration $(env) --retry --debug --whatif --logs
+	.out/dotnet/terrabuild dist --workspace src --configuration $(env) --retry --debug --whatif --logs
 
 
 tb-build: clean
@@ -114,10 +114,10 @@ tb-test: clean
 	terrabuild test --workspace src --configuration $(env) --retry --debug
 
 tb-publish: clean
-	terrabuild publish --workspace src --configuration $(env) --retry --debug
+	terrabuild dist --workspace src --configuration $(env) --retry --debug
 
 tb-check: clean
-	terrabuild publish --workspace src --configuration $(env) --retry --debug --whatif
+	terrabuild dist --workspace src --configuration $(env) --retry --debug --whatif
 
 
 
@@ -146,7 +146,7 @@ run-build-scaffold:
 	dotnet run --project src/Terrabuild -- build --workspace tests/scaffold --debug --retry
 
 run-publish-scaffold:
-	dotnet run --project src/Terrabuild -- publish --workspace tests/scaffold --debug --retry
+	dotnet run --project src/Terrabuild -- dist --workspace tests/scaffold --debug --retry
 
 run-build: clean
 	dotnet run --project src/Terrabuild -- build --workspace tests/simple --configuration $(env) --debug
