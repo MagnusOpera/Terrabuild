@@ -239,8 +239,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
     | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
     | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"
-    | p when p.Contains(TerrabuildArgs.Publish) -> p.GetResult(TerrabuildArgs.Publish) |> targetShortcut "publish"
-    | p when p.Contains(TerrabuildArgs.Deploy) -> p.GetResult(TerrabuildArgs.Deploy) |> targetShortcut "deploy"
+    | p when p.Contains(TerrabuildArgs.Plan) -> p.GetResult(TerrabuildArgs.Plan) |> targetShortcut "plan"
+    | p when p.Contains(TerrabuildArgs.Apply) -> p.GetResult(TerrabuildArgs.Apply) |> targetShortcut "apply"
     | p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> targetShortcut "serve"
     | p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> target
     | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
