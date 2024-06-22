@@ -214,6 +214,7 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
 
             let summary, nodeRebuild, nodeLastBuild =
                 if childrenRebuild then
+                    Log.Debug("{nodeId} must be rebuild because children must rebuild", nodeId)
                     None, true, DateTime.MaxValue
 
                 else
@@ -222,20 +223,30 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
 
                     // check first if it's possible to restore previously built state
                     let summary =
-                        if options.Force || node.Cache = Cacheability.Never then None
+                        if options.Force || node.Cache = Cacheability.Never then
+                            Log.Debug("{nodeId} must rebuild because forced build or node never cached", nodeId)
+                            None
                         else
                             // get task execution summary & take care of retrying failed tasks
                             match cache.TryGetSummary useRemoteCache cacheEntryId with
-                            | Some summary when summary.Status = Cache.TaskStatus.Failure && options.Retry -> None
-                            | Some summary -> Some summary
-                            | _ -> None
+                            | Some summary when summary.Status = Cache.TaskStatus.Failure && options.Retry ->
+                                Log.Debug("{nodeId} must rebuild because node is failed and retry requested", nodeId)
+                                None
+                            | Some summary ->
+                                Log.Debug("{nodeId} has existing build summary", nodeId)
+                                Some summary
+                            | _ ->
+                                Log.Debug("{nodeId} has no build summary", nodeId)
+                                None
 
                     match summary with
                     | Some summary ->
                         if summary.StartedAt < childrenLastBuild then
+                            Log.Debug("{nodeId} must rebuild because it is younger than one of child", nodeId)
                             cache.Invalidate cacheEntryId
                             None, true, DateTime.MaxValue
-                        else (Some summary), false, summary.EndedAt
+                        else
+                            (Some summary), false, summary.EndedAt
                     | _ ->
                         None, true, DateTime.MaxValue
 
