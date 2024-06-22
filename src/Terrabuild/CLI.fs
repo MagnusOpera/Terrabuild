@@ -31,39 +31,6 @@ with
 
 [<RequireQualifiedAccess>]
 type RunArgs =
-    | [<Unique; AltCommandLine("-w")>] Workspace of path:string
-    | [<Unique; AltCommandLine("-c")>] Configuration of name:string
-    | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
-    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
-    | [<Unique; AltCommandLine("-p")>] Parallel of max:int
-    | [<Unique; AltCommandLine("-nc")>] NoContainer
-    | [<Unique; AltCommandLine("-f")>] Force
-    | [<Unique; AltCommandLine("-r")>] Retry
-    | [<Unique; AltCommandLine("-lo")>] LocalOnly
-    | [<Unique; AltCommandLine("-n")>] Note of note:string
-    | [<Unique; AltCommandLine("-t")>] Tag of tag:string
-    | [<Unique>] Logs
-    | [<Unique; Inherit>] WhatIf
-with
-    interface IArgParserTemplate with
-        member this.Usage =
-            match this with
-            | Workspace _ -> "Root of workspace. If not specified, current directory is used."
-            | Configuration _ -> "Configuration to use."
-            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
-            | NoContainer -> "Ignore containers on extensions"
-            | Variable _ -> "Set variable."
-            | Label _-> "Select projects based on labels."
-            | Force -> "Ignore cache when building target."
-            | Retry -> "Retry failed task."
-            | LocalOnly -> "Use local cache only."
-            | Logs -> "Output logs for impacted projects."
-            | Note _ -> "Note for the build."
-            | Tag _ -> "Tag for build."
-            | WhatIf -> "Prepare the action but do not apply."
-
-[<RequireQualifiedAccess>]
-type TargetArgs =
     | [<ExactlyOnce; MainCommand; First>] Target of target:string list
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
@@ -134,7 +101,7 @@ with
 type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Scaffold of ParseResults<ScaffoldArgs>
     | [<CliPrefix(CliPrefix.None)>] Logs of ParseResults<LogsArgs>
-    | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<TargetArgs>
+    | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<RunArgs>
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
     | [<CliPrefix(CliPrefix.None)>] Login of ParseResults<LoginArgs>
     | [<CliPrefix(CliPrefix.None)>] Logout of ParseResults<LogoutArgs>

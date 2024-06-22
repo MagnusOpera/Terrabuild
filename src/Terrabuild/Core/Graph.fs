@@ -75,7 +75,7 @@ let graph (graph: Workspace) =
 
 
 
-let create (configuration: Configuration.Workspace) (targets: string set) =
+let create (configuration: Configuration.Workspace) (targets: string set) (options: Configuration.Options) =
     $"{Ansi.Emojis.popcorn} Constructing graph" |> Terminal.writeLine
 
     let processedNodes = ConcurrentDictionary<string, bool>()
@@ -142,6 +142,13 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
                     target.Actions
                     |> Seq.fold (fun acc cmd -> acc &&& cmd.Cache) childrenCache
 
+                let isForced =
+                    let isSelectedProject = configuration.SelectedProjects |> Set.contains project
+                    let isSelectedTarget = configuration.Targets |> Map.containsKey targetName
+                    let forced = options.Force && isSelectedProject && isSelectedTarget
+                    if forced then Log.Debug("{nodeId} must rebuild because force build is requested", nodeId)
+                    forced
+
                 let node = { Id = nodeId
                              Hash = hash
                              Project = project
@@ -153,7 +160,7 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
                              ProjectHash = projectConfig.Hash
                              Cache = cache
                              IsLeaf = isLeaf
-                             Required = false
+                             Required = isForced
                              BuildSummary = None
                              TargetHash = target.Hash
                              Batched = false }
@@ -183,7 +190,7 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
 
 
 
-let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
+let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache) (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
     let cacheMode =
@@ -223,8 +230,8 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
 
                     // check first if it's possible to restore previously built state
                     let summary =
-                        if options.Force || node.Cache = Cacheability.Never then
-                            Log.Debug("{nodeId} must rebuild because forced build or node never cached", nodeId)
+                        if node.Cache = Cacheability.Never then
+                            Log.Debug("{nodeId} must rebuild because node never cached", nodeId)
                             None
                         else
                             // get task execution summary & take care of retrying failed tasks
@@ -329,7 +336,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
     let shallRebuild (node: Node) =
         let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-        if options.Force || node.Cache = Cacheability.Never then
+        if node.Cache = Cacheability.Never then
             true
         else
             let summary = cache.TryGetSummaryOnly useRemoteCache cacheEntryId
