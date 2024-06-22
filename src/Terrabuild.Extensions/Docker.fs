@@ -37,13 +37,17 @@ type Docker() =
     /// Push a docker image to registry.
     /// </summary>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
-    static member push (context: ActionContext) (image: string) =
-        let branchOrTag = context.BranchOrTag.Replace("/", "-")
+    static member push (context: ActionContext) (image: string) (tag: string option)=
+        let imageTag =
+            match tag with
+            | Some tag -> tag
+            | _ -> context.BranchOrTag.Replace("/", "-")
+
         if context.CI then
-            let retagArgs = $"buildx imagetools create -t {image}:{branchOrTag} {image}:{context.NodeHash}"
+            let retagArgs = $"buildx imagetools create -t {image}:{imageTag} {image}:{context.NodeHash}"
             scope Cacheability.Remote
             |> andThen "docker" retagArgs
         else
-            let tagArgs = $"tag {image}:{context.NodeHash} {image}:{branchOrTag}"
+            let tagArgs = $"tag {image}:{context.NodeHash} {image}:{imageTag}"
             scope Cacheability.Local
             |> andThen "docker" tagArgs
