@@ -220,7 +220,11 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
                     nodeRebuild, nodeLastBuild) (false, DateTime.MinValue)
 
             let summary, nodeRebuild, nodeLastBuild =
-                if childrenRebuild then
+                if node.Required then
+                    Log.Debug("{nodeId} must rebuild because force build is requested", nodeId)
+                    None, true, DateTime.MaxValue
+
+                elif childrenRebuild then
                     Log.Debug("{nodeId} must be rebuild because children must rebuild", nodeId)
                     None, true, DateTime.MaxValue
 
