@@ -253,7 +253,7 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
                     match summary with
                     | Some summary ->
                         if summary.StartedAt < childrenLastBuild then
-                            Log.Debug("{nodeId} must rebuild because it is younger than one of child", nodeId)
+                            Log.Debug("{nodeId} must rebuild because it is older than one of child", nodeId)
                             cache.Invalidate cacheEntryId
                             None, true, DateTime.MaxValue
                         else
