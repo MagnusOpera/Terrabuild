@@ -294,6 +294,12 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                             | Some tag -> Expr.String tag
                             | _ -> Expr.Nothing
                         map |> Map.add "terrabuild_tag" tagValue)
+                    |> (fun map ->
+                        let noteValue =
+                            match note with
+                            | Some note -> Expr.String note
+                            | _ -> Expr.Nothing
+                        map |> Map.add "terrabuild_note" noteValue)
 
                 let evaluationContext = {
                     Eval.EvaluationContext.WorkspaceDir = workspaceDir
