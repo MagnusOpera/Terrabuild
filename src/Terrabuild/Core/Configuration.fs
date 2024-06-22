@@ -305,7 +305,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                 // use value from project target
                 // otherwise use workspace target
                 // defaults to allow caching
-                let usedVariables, rebuild =
+                let _, rebuild =
                     let rebuild =
                         target.Rebuild
                         |> Option.defaultWith (fun () ->
@@ -385,7 +385,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                         let usedVariables = usedVariables + stepVars
                         let actions = actions @ [ stepActions ]
                         usedVariables, actions
-                    ) (usedVariables, [])
+                    ) (Set.empty, [])
 
                 let usedVariables =
                     usedVariables
