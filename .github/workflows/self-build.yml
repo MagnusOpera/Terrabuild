@@ -56,7 +56,7 @@ jobs:
 
       - name: Build
         run: |
-          terrabuild build \
+          terrabuild run build \
             -w src \
             -c "dev" \
             ${{ github.event.inputs.force == 'true' && '--force' || '' }} \

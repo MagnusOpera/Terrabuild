@@ -86,38 +86,38 @@ docs:
 
 
 self-build: clean publish
-	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug --logs
+	.out/dotnet/terrabuild run build --workspace src --configuration $(env) --retry --debug --logs
 
 self-build-local: clean publish
-	.out/dotnet/terrabuild build --workspace src --configuration $(env) --retry --debug --logs --localonly
+	.out/dotnet/terrabuild run build --workspace src --configuration $(env) --retry --debug --logs --localonly
 
 self-dist: clean publish
-	.out/dotnet/terrabuild dist --workspace src --configuration $(env) --retry --debug --logs
+	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
 
 self-test: clean publish
-	.out/dotnet/terrabuild test --workspace src --configuration $(env) --retry --debug --logs
+	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --logs
 
 self-publish: clean publish
-	.out/dotnet/terrabuild dist --workspace src --configuration $(env) --retry --debug --logs
+	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
 
 self-check: clean publish
-	.out/dotnet/terrabuild dist --workspace src --configuration $(env) --retry --debug --whatif --logs
+	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --whatif --logs
 
 
 tb-build: clean
-	terrabuild build --workspace src --configuration $(env) --retry --debug
+	terrabuild run build --workspace src --configuration $(env) --retry --debug
 
 tb-dist: clean
-	terrabuild dist --workspace src --configuration $(env) --retry --debug --tag $(version)
+	terrabuild run dist --workspace src --configuration $(env) --retry --debug --tag $(version)
 
 tb-test: clean
-	terrabuild test --workspace src --configuration $(env) --retry --debug
+	terrabuild run test --workspace src --configuration $(env) --retry --debug
 
 tb-publish: clean
-	terrabuild dist --workspace src --configuration $(env) --retry --debug
+	terrabuild run dist --workspace src --configuration $(env) --retry --debug
 
 tb-check: clean
-	terrabuild dist --workspace src --configuration $(env) --retry --debug --whatif
+	terrabuild run dist --workspace src --configuration $(env) --retry --debug --whatif
 
 
 
@@ -131,10 +131,10 @@ tb-check: clean
 #
 
 run-build-multirefs:
-	dotnet run --project src/Terrabuild -- build --workspace tests/multirefs
+	dotnet run --project src/Terrabuild -- run build --workspace tests/multirefs
 
 run-build-circular:
-	dotnet run --project src/Terrabuild -- build --workspace tests/circular
+	dotnet run --project src/Terrabuild -- run build --workspace tests/circular
 
 run-scaffold:
 	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold
@@ -143,25 +143,25 @@ run-rescaffold:
 	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --force
 
 run-build-scaffold:
-	dotnet run --project src/Terrabuild -- build --workspace tests/scaffold --debug --retry
+	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry
 
 run-publish-scaffold:
-	dotnet run --project src/Terrabuild -- dist --workspace tests/scaffold --debug --retry
+	dotnet run --project src/Terrabuild -- run dist --workspace tests/scaffold --debug --retry
 
 run-build: clean
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --configuration $(env) --debug
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --debug
 
 run-build-playground: clean
-	dotnet run --project src/Terrabuild -- deploy --workspace ../playgrounds/terrabuild
+	dotnet run --project src/Terrabuild -- run deploy --workspace ../playgrounds/terrabuild
 
 run-build-env: clean
-	TB_VAR_secret_message="pouet pouet" dotnet run --project src/Terrabuild -- build --workspace tests/simple --configuration $(env) --debug
+	TB_VAR_secret_message="pouet pouet" dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --debug
 
 run-rebuild: clean
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --configuration $(env) --label app --debug --force
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --label app --debug --force
 
 run-dist:
-	dotnet run --project src/Terrabuild -- dist --workspace tests/simple --configuration $(env) --debug
+	dotnet run --project src/Terrabuild -- run dist --workspace tests/simple --configuration $(env) --debug
 
 run-docker:
 	dotnet run --project src/Terrabuild -- run docker --workspace tests/simple --configuration $(env) --label app --debug --retry
@@ -176,14 +176,13 @@ run-deploy-dev:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --configuration $(env) --variable workspace=dev
 
 run-build-app:
-	dotnet run --project src/Terrabuild -- build --workspace tests/simple --configuration $(env) --label dotnet --debug
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --label dotnet --debug
 
 github-tests:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --configuration $(env) --debug --retry --parallel 4
 
 usage:
 	dotnet run --project src/Terrabuild -- --help
-	dotnet run --project src/Terrabuild -- build --help
 	dotnet run --project src/Terrabuild -- run --help
 	dotnet run --project src/Terrabuild -- clear --help
 	dotnet run --project src/Terrabuild -- login --help

@@ -132,34 +132,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         Scalffold.scaffold wsDir force
         0
 
-    let targetShortcut target (buildArgs: ParseResults<RunArgs>) =
-        let wsDir =
-            match buildArgs.TryGetResult(RunArgs.Workspace) with
-            | Some ws -> ws
-            | _ ->
-                match Environment.CurrentDirectory |> findWorkspace with
-                | Some ws -> ws
-                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
-        let configuration = buildArgs.TryGetResult(RunArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
-        let note = buildArgs.TryGetResult(RunArgs.Note)
-        let labels = buildArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
-        let variables = buildArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
-        let maxConcurrency = buildArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
-        let noContainer = buildArgs.Contains(RunArgs.NoContainer)
-        let localOnly = buildArgs.Contains(RunArgs.LocalOnly)
-        let logs = buildArgs.Contains(RunArgs.Logs)
-        let tag = buildArgs.TryGetResult(RunArgs.Tag)
-        let whatIf = buildArgs.Contains(RunArgs.WhatIf)
-        let options = { Configuration.Options.WhatIf = whatIf
-                        Configuration.Options.Debug = debug
-                        Configuration.Options.Force = buildArgs.Contains(RunArgs.Force)
-                        Configuration.Options.MaxConcurrency = maxConcurrency
-                        Configuration.Options.NoContainer = noContainer
-                        Configuration.Options.Retry = buildArgs.Contains(RunArgs.Retry)
-                        Configuration.Options.StartedAt = DateTime.UtcNow
-                        Configuration.Options.IsLog = false }
-        runTarget wsDir (Set.singleton target) configuration note tag labels variables localOnly logs options
-
     let target (targetArgs: ParseResults<TargetArgs>) =
         let targets = targetArgs.GetResult(TargetArgs.Target) |> Seq.map String.toLower
         let wsDir =
@@ -236,12 +208,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     match result with
     | p when p.Contains(TerrabuildArgs.Scaffold) -> p.GetResult(TerrabuildArgs.Scaffold) |> scaffold
     | p when p.Contains(TerrabuildArgs.Logs) -> p.GetResult(TerrabuildArgs.Logs) |> logs
-    | p when p.Contains(TerrabuildArgs.Build) -> p.GetResult(TerrabuildArgs.Build) |> targetShortcut "build"
-    | p when p.Contains(TerrabuildArgs.Test) -> p.GetResult(TerrabuildArgs.Test) |> targetShortcut "test"
-    | p when p.Contains(TerrabuildArgs.Dist) -> p.GetResult(TerrabuildArgs.Dist) |> targetShortcut "dist"
-    | p when p.Contains(TerrabuildArgs.Plan) -> p.GetResult(TerrabuildArgs.Plan) |> targetShortcut "plan"
-    | p when p.Contains(TerrabuildArgs.Apply) -> p.GetResult(TerrabuildArgs.Apply) |> targetShortcut "apply"
-    | p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> targetShortcut "serve"
     | p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> target
     | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
     | p when p.Contains(TerrabuildArgs.Login) -> p.GetResult(TerrabuildArgs.Login) |> login
