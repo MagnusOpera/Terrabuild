@@ -39,7 +39,7 @@ type Summary = {
     Nodes: string set
     RequiredNodes: string set
     BuildNodes: string set
-    SelectedNodesStatus: NodeStatus set
+    BuildNodesStatus: NodeStatus set
 }
 
 
@@ -79,8 +79,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         | _ -> false
 
     // collect dependencies status
-    let getDependencyStatus depId =
-        let node = graph.Nodes[depId]
+    let getDependencyStatus nodeId node =
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
         let nodeInfo = 
             { NodeInfo.Project = node.Project
@@ -261,24 +260,25 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let headCommit = configuration.SourceControl.HeadCommit
     let branchOrTag = configuration.SourceControl.BranchOrTag
 
-    // status of nodes to build
-    let selectedNodesStatus =
-        graph.SelectedNodes
-        |> Seq.map getDependencyStatus
-        |> Set
-
     // nodes that were considered for the whole requested build
     let buildNodes =
         graph.Nodes
         |> Map.filter (fun nodeId node ->
             node.Required || node.BuildSummary |> Option.isSome)
 
+    // status of nodes to build
+    let buildNodesStatus =
+        buildNodes
+        |> Map.map getDependencyStatus
+        |> Map.values
+        |> Set.ofSeq
+
     let endedAt = DateTime.UtcNow
     let buildDuration = endedAt - startedAt
     let totalDuration = endedAt - options.StartedAt
 
     let status =
-        let isSuccess = selectedNodesStatus |> Seq.forall isBuildSuccess
+        let isSuccess = buildNodesStatus |> Seq.forall isBuildSuccess
         if isSuccess then Status.Success
         else Status.Failure
 
@@ -293,7 +293,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.Nodes = graph.Nodes |> Map.keys |> Set.ofSeq
                       Summary.RequiredNodes = requiredNodes |> Map.keys |> Set.ofSeq
                       Summary.BuildNodes = buildNodes |> Map.keys |> Set.ofSeq
-                      Summary.SelectedNodesStatus = selectedNodesStatus  }
+                      Summary.BuildNodesStatus = buildNodesStatus  }
 
     notification.BuildCompleted buildInfo
     api |> Option.iter (fun api -> api.BuildComplete buildId (status = Status.Success))
