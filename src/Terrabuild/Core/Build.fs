@@ -36,8 +36,9 @@ type Summary = {
     BuildDuration: TimeSpan
     Status: Status
     Targets: string set
-    ImpactedNodes: string set
-    RootNodes: NodeStatus set
+    Nodes: string set
+    SelectedNodes: NodeStatus set
+    RequiredNodes: string set
 }
 
 
@@ -235,8 +236,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
             false, summary
 
     let hub = Hub.Create(options.MaxConcurrency)
-    let impactedNodes = graph.Nodes |> Map.filter (fun _ n -> n.Required)
-    for (KeyValue(nodeId, node)) in impactedNodes do
+    let requiredNodes = graph.Nodes |> Map.filter (fun _ n -> n.Required)
+    for (KeyValue(nodeId, node)) in requiredNodes do
         let nodeComputed = hub.CreateComputed<Node> nodeId
 
         // await dependencies
@@ -281,8 +282,9 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.TotalDuration = totalDuration
                       Summary.Status = status
                       Summary.Targets = graph.Targets
-                      Summary.ImpactedNodes = impactedNodes |> Map.keys |> Set.ofSeq
-                      Summary.RootNodes = dependencies }
+                      Summary.Nodes = graph.Nodes |> Map.keys |> Set.ofSeq
+                      Summary.SelectedNodes = dependencies 
+                      Summary.RequiredNodes = requiredNodes |> Map.keys |> Set.ofSeq }
 
     notification.BuildCompleted buildInfo
     api |> Option.iter (fun api -> api.BuildComplete buildId (status = Status.Success))
