@@ -350,9 +350,6 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                                 |> Expr.Map
                                 |> Eval.eval evaluationContext
 
-                            // tag shall not trigger a build so we do not want dependency on this
-                            let usedVars = usedVars |> Set.remove "terrabuild_tag"
-
                             let script = Extensions.getScript step.Extension projectDef.Scripts
                             let actionGroup =
                                 let result =
