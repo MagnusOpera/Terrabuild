@@ -115,7 +115,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 jsonBuild |> IO.writeTextFile (logFile "build.json")
 
             if logs || summary.Status <> Build.Status.Success then
-                Logs.dumpLogs buildGraph cache sourceControl (Some summary.RequiredNodes) options.Debug
+                Logs.dumpLogs buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
 
             let result =
                 match summary.Status with

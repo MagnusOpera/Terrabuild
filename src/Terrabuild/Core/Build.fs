@@ -38,6 +38,7 @@ type Summary = {
     Targets: string set
     Nodes: string set
     RequiredNodes: string set
+    BuildNodes: string set
     SelectedNodesStatus: NodeStatus set
 }
 
@@ -260,10 +261,17 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let headCommit = configuration.SourceControl.HeadCommit
     let branchOrTag = configuration.SourceControl.BranchOrTag
 
+    // status of nodes to build
     let selectedNodesStatus =
         graph.SelectedNodes
         |> Seq.map getDependencyStatus
         |> Set
+
+    // nodes that were considered for the whole requested build
+    let buildNodes =
+        graph.Nodes
+        |> Map.filter (fun nodeId node ->
+            node.Required || node.BuildSummary |> Option.isSome)
 
     let endedAt = DateTime.UtcNow
     let buildDuration = endedAt - startedAt
@@ -284,6 +292,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.Targets = graph.Targets
                       Summary.Nodes = graph.Nodes |> Map.keys |> Set.ofSeq
                       Summary.RequiredNodes = requiredNodes |> Map.keys |> Set.ofSeq
+                      Summary.BuildNodes = buildNodes |> Map.keys |> Set.ofSeq
                       Summary.SelectedNodesStatus = selectedNodesStatus  }
 
     notification.BuildCompleted buildInfo
