@@ -144,7 +144,7 @@ let create (configuration: Configuration.Workspace) (targets: string set) (optio
 
                 let isForced =
                     let isSelectedProject = configuration.SelectedProjects |> Set.contains project
-                    let isSelectedTarget = configuration.Targets |> Map.containsKey targetName
+                    let isSelectedTarget = targets |> Set.contains targetName
                     let forced = options.Force && isSelectedProject && isSelectedTarget
                     if forced then Log.Debug("{nodeId} must rebuild because force build is requested", nodeId)
                     forced
@@ -221,7 +221,7 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
 
             let summary, nodeRebuild, nodeLastBuild =
                 if node.Required then
-                    Log.Debug("{nodeId} must rebuild because force build is requested", nodeId)
+                    Log.Debug("{nodeId} must rebuild because node is required", nodeId)
                     None, true, DateTime.MaxValue
 
                 elif childrenRebuild then
