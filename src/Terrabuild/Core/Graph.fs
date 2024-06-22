@@ -32,7 +32,7 @@ type Node = {
 type Workspace = {
     Targets: string set
     Nodes: Map<string, Node>
-    RootNodes: string set
+    SelectedNodes: string set
 }
 
 
@@ -67,7 +67,7 @@ let graph (graph: Workspace) =
                 $"{srcNode.Hash}([{srcNode.Label}]) --> {dstNode.Hash}([{dstNode.Label}])"
 
             $"class {srcNode.Hash} {srcNode.Project}"
-            if graph.RootNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} bold"
+            if graph.SelectedNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} bold"
     }
 
     mermaid
@@ -170,14 +170,14 @@ let create (configuration: Configuration.Workspace) (targets: string set) =
             | true, _ -> Set.singleton nodeId
             | _ -> Set.empty
 
-    let rootNodes =
-        configuration.ComputedProjectSelection |> Seq.collect (fun dependency ->
+    let selectedNodes =
+        configuration.SelectedProjects |> Seq.collect (fun dependency ->
             targets |> Seq.collect (fun target -> buildTarget target dependency))
         |> Set
 
     { Targets = targets
       Nodes = allNodes |> Map.ofDict
-      RootNodes = rootNodes }
+      SelectedNodes = selectedNodes }
 
 
 

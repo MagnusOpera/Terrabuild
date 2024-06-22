@@ -37,8 +37,8 @@ type Summary = {
     Status: Status
     Targets: string set
     Nodes: string set
-    SelectedNodes: NodeStatus set
     RequiredNodes: string set
+    SelectedNodesStatus: NodeStatus set
 }
 
 
@@ -260,8 +260,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let headCommit = configuration.SourceControl.HeadCommit
     let branchOrTag = configuration.SourceControl.BranchOrTag
 
-    let dependencies =
-        graph.RootNodes
+    let selectedNodesStatus =
+        graph.SelectedNodes
         |> Seq.map getDependencyStatus
         |> Set
 
@@ -270,7 +270,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let totalDuration = endedAt - options.StartedAt
 
     let status =
-        let isSuccess = dependencies |> Seq.forall isBuildSuccess
+        let isSuccess = selectedNodesStatus |> Seq.forall isBuildSuccess
         if isSuccess then Status.Success
         else Status.Failure
 
@@ -283,8 +283,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.Status = status
                       Summary.Targets = graph.Targets
                       Summary.Nodes = graph.Nodes |> Map.keys |> Set.ofSeq
-                      Summary.SelectedNodes = dependencies 
-                      Summary.RequiredNodes = requiredNodes |> Map.keys |> Set.ofSeq }
+                      Summary.RequiredNodes = requiredNodes |> Map.keys |> Set.ofSeq
+                      Summary.SelectedNodesStatus = selectedNodesStatus  }
 
     notification.BuildCompleted buildInfo
     api |> Option.iter (fun api -> api.BuildComplete buildId (status = Status.Success))

@@ -68,7 +68,7 @@ type Workspace = {
     SourceControl: Contracts.SourceControl
 
     // Computed projects selection (derived from user inputs)
-    ComputedProjectSelection: string set
+    SelectedProjects: string set
 
     // All targets at workspace level
     Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
@@ -493,7 +493,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
     | Status.SubscriptionError exn -> TerrabuildException.Raise("Failed to load configuration", exn)
 
     // select dependencies with labels if any
-    let dependencies =
+    let selectedProjects =
         match labels with
         | Some labels ->
             projects
@@ -503,7 +503,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         |> Set
 
     { Workspace.Space = workspaceConfig.Space
-      Workspace.ComputedProjectSelection = dependencies
+      Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Configuration = configuration
