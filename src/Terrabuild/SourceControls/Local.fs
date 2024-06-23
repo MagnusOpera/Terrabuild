@@ -11,13 +11,8 @@ type Local() =
         // NOTE: assuming current directory is a git repository
         System.Environment.CurrentDirectory |> Git.getBranchOrTag
 
+    override _.LogType = Contracts.LogType.Terminal
+
     override _.CI = false
 
     override _.Name = "Local"
-
-    override _.Log success title =
-        let color = 
-            if success then $"{Ansi.Styles.green}{Ansi.Emojis.checkmark}"
-            else $"{Ansi.Styles.red}{Ansi.Emojis.crossmark}"
-
-        $"{color} {title}{Ansi.Styles.reset}", ""

@@ -1,27 +1,21 @@
 namespace SourceControls
-open Errors
 
 type GitHub() =
     inherit Contracts.SourceControl()
 
+    static let sha = System.Environment.GetEnvironmentVariable("GITHUB_SHA")
+    static let refName = System.Environment.GetEnvironmentVariable("GITHUB_REF_NAME")
+    static let stepSummary = System.Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY")
+
     static member Detect() =
-        System.Environment.GetEnvironmentVariable("GITHUB_SHA") |> isNull |> not
-        && System.Environment.GetEnvironmentVariable("GITHUB_REF_NAME") |> isNull |> not
+        [ sha; refName; stepSummary ] |> List.forall (not << isNull)
 
-    override _.HeadCommit =
-        let hash = System.Environment.GetEnvironmentVariable("GITHUB_SHA")
-        hash
+    override _.HeadCommit = sha
 
-    override _.BranchOrTag =
-        let branchOrRef = System.Environment.GetEnvironmentVariable("GITHUB_REF_NAME")
-        branchOrRef
+    override _.BranchOrTag = refName
+
+    override _.LogType = Contracts.LogType.Markdown stepSummary
 
     override _.CI = true
 
     override _.Name = "GitHub"
-
-    override _.Log success title =
-        let errMsg =
-            if success |> not then $"::error::{title} failed\n"
-            else ""
-        $"{errMsg}::group::{title}", "::endgroup::"

@@ -26,3 +26,6 @@ let cut m (s: string) =
 
 let startsWith (start: string) (s: string) =
     s.StartsWith(start)
+
+let trim (s: string) =
+    s.Trim()

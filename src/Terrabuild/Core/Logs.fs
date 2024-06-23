@@ -3,22 +3,71 @@ open Graph
 open Cache
 open Contracts
 
+
+
+
 let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) debug =
     let scope =
         match impactedNodes with
         | Some impactedNodes -> impactedNodes
         | _ -> graph.Nodes.Keys |> Set
 
-    // filter, collect summaries and dump
-    graph.Nodes
-    |> Seq.choose (fun (KeyValue(nodeId, node)) -> if scope |> Set.contains nodeId then Some node else None)
-    |> Seq.map (fun node ->
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-        let summary = cache.TryGetSummaryOnly false cacheEntryId
-        node, summary)
-    |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
-    |> Seq.iter (fun (node, summary) ->
+    let dumpMarkdown filename (node: Node) (summary: TargetSummary option) =
+        let append line = IO.appendLinesFile filename [line] 
+
         let title = node.Label
+
+        let getHeaderFooter success title =
+            let color =
+                if success then "✅"
+                else "❌"
+            $"# <a name=\"{node.Id}\"></a> {color} {title}", ""
+
+        let (logStart, logEnd), dumpLogs =
+            match summary with
+            | Some summary -> 
+                let dumpLogs () =
+
+                    let batchNode =
+                        match node.Batched, node.Dependencies |> Seq.tryHead with
+                        | true, Some batchId -> Some graph.Nodes[batchId]
+                        | _ -> None
+
+                    match batchNode with
+                    | Some batchNode -> $"**Batched with [{batchNode.Label}](#{batchNode.Id})**" |> append
+                    | _ ->
+                        summary.Steps |> Seq.iter (fun step ->
+                            $"**{step.MetaCommand}**" |> append
+                            if debug then
+                                let cmd = $"{step.Command} {step.Arguments}" |> String.trim
+                                $"*{cmd}*" |> append
+
+                            append "```"
+                            step.Log |> IO.readTextFile |> append
+                            append "```"
+                    )
+
+                match summary.Status with
+                | TaskStatus.Success -> getHeaderFooter true title, dumpLogs
+                | TaskStatus.Failure -> getHeaderFooter false title, dumpLogs
+            | _ ->
+                let dumpNoLog() = $"**No logs available**" |> append
+                getHeaderFooter false title, dumpNoLog
+
+        logStart |> append
+        dumpLogs ()
+        logEnd |> append
+
+
+    let dumpTerminal (node: Node) (summary: TargetSummary option) =
+        let title = node.Label
+
+        let getHeaderFooter success title =
+            let color =
+                if success then $"{Ansi.Styles.green}{Ansi.Emojis.checkmark}"
+                else $"{Ansi.Styles.red}{Ansi.Emojis.crossmark}"
+
+            $"{color} {title}{Ansi.Styles.reset}", ""
 
         let (logStart, logEnd), dumpLogs =
             match summary with
@@ -36,22 +85,34 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                         summary.Steps |> Seq.iter (fun step ->
                             $"{Ansi.Styles.yellow}{step.MetaCommand}{Ansi.Styles.reset}" |> Terminal.writeLine
                             if debug then
-                                match step.Container with
-                                | Some container ->
-                                    $"{Ansi.Styles.cyan}{container} [{step.Command} {step.Arguments}]{Ansi.Styles.reset}" |> Terminal.writeLine
-                                | _ -> ()
-
+                                $"{Ansi.Styles.cyan}{step.Command} {step.Arguments}{Ansi.Styles.reset}" |> Terminal.writeLine
                             step.Log |> IO.readTextFile |> Terminal.write
                     )
 
                 match summary.Status with
-                | TaskStatus.Success -> sourceControl.Log true title, dumpLogs
-                | TaskStatus.Failure -> sourceControl.Log false title, dumpLogs
+                | TaskStatus.Success -> getHeaderFooter true title, dumpLogs
+                | TaskStatus.Failure -> getHeaderFooter false title, dumpLogs
             | _ ->
                 let dumpNoLog() = $"{Ansi.Styles.yellow}No logs available{Ansi.Styles.reset}" |> Terminal.writeLine
-                sourceControl.Log false title, dumpNoLog
+                getHeaderFooter false title, dumpNoLog
 
         logStart |> Terminal.writeLine
         dumpLogs ()
         logEnd |> Terminal.writeLine
-    )
+
+
+    let logger =
+        match sourceControl.LogType with
+        | Terminal -> dumpTerminal
+        | Markdown filename -> dumpMarkdown filename
+
+    // filter, collect summaries and dump
+    graph.Nodes
+    |> Seq.choose (fun (KeyValue(nodeId, node)) -> if scope |> Set.contains nodeId then Some node else None)
+    |> Seq.map (fun node ->
+        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
+        let summary = cache.TryGetSummaryOnly false cacheEntryId
+        node, summary)
+    |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
+    |> Seq.iter (fun (node, summary) -> logger node summary)
+
