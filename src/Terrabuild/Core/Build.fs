@@ -157,8 +157,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                 whoami
 
                         let metaCommand =
-                            if batch.Actions.Length = 1 then batch.MetaCommand
-                            else $"{batch.MetaCommand} ({index+1}/{batch.Actions.Length})"
+                            if batch.Actions.Length > 1 then $"{batch.MetaCommand} ({index+1}/{batch.Actions.Length})"
+                            else batch.MetaCommand
 
                         match batch.Container, options.NoContainer with
                         | Some container, false ->

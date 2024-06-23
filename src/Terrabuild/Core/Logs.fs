@@ -34,15 +34,13 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                         | _ -> None
 
                     match batchNode with
-                    | Some batchNode -> $"**Batched with [{batchNode.Label}]({batchNode.Id})**" |> append
+                    | Some batchNode -> $"**Batched with [{batchNode.Label}](#{batchNode.Id})**" |> append
                     | _ ->
                         summary.Steps |> Seq.iter (fun step ->
                             $"**{step.MetaCommand}**" |> append
                             if debug then
-                                match step.Container with
-                                | Some container ->
-                                    $"*{container} [{step.Command} {step.Arguments}]*" |> append
-                                | _ -> ()
+                                let cmd = $"{step.Command} {step.Arguments}" |> String.trim
+                                $"*{cmd}*" |> append
 
                             append "```"
                             step.Log |> IO.readTextFile |> append
@@ -87,11 +85,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                         summary.Steps |> Seq.iter (fun step ->
                             $"{Ansi.Styles.yellow}{step.MetaCommand}{Ansi.Styles.reset}" |> Terminal.writeLine
                             if debug then
-                                match step.Container with
-                                | Some container ->
-                                    $"{Ansi.Styles.cyan}{container} [{step.Command} {step.Arguments}]{Ansi.Styles.reset}" |> Terminal.writeLine
-                                | _ -> ()
-
+                                $"{Ansi.Styles.cyan}{step.Command} {step.Arguments}{Ansi.Styles.reset}" |> Terminal.writeLine
                             step.Log |> IO.readTextFile |> Terminal.write
                     )
 
