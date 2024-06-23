@@ -15,9 +15,5 @@ type Local() =
 
     override _.Name = "Local"
 
-    override _.Log success title =
-        let color = 
-            if success then $"{Ansi.Styles.green}{Ansi.Emojis.checkmark}"
-            else $"{Ansi.Styles.red}{Ansi.Emojis.crossmark}"
-
-        $"{color} {title}{Ansi.Styles.reset}", ""
+    override _.LogType() =
+        Contracts.LogType.Terminal

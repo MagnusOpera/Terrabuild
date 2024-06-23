@@ -1,5 +1,4 @@
 namespace SourceControls
-open Errors
 
 type GitHub() =
     inherit Contracts.SourceControl()
@@ -20,8 +19,6 @@ type GitHub() =
 
     override _.Name = "GitHub"
 
-    override _.Log success title =
-        let errMsg =
-            if success |> not then $"::error::{title} failed\n"
-            else ""
-        $"{errMsg}::group::{title}", "::endgroup::"
+    override _.LogType() =
+        let filename = System.Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY")
+        Contracts.LogType.Markdown filename

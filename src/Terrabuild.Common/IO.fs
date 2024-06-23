@@ -13,6 +13,9 @@ let readTextFile filename =
 let writeTextFile filename content =
     File.WriteAllText(filename, content)
 
+let appendLinesFile filename content =
+    File.AppendAllLines(filename, content)
+
 let getTempFilename () =
     Path.GetTempFileName()
 
