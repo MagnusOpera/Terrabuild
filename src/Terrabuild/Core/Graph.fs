@@ -21,6 +21,7 @@ type Node = {
     Outputs: string set
     Cache: Cacheability
     IsLeaf: bool
+    Forced: bool
     Required: bool
     BuildSummary: Cache.TargetSummary option
     Batched: bool
@@ -160,7 +161,8 @@ let create (configuration: Configuration.Workspace) (targets: string set) (optio
                              ProjectHash = projectConfig.Hash
                              Cache = cache
                              IsLeaf = isLeaf
-                             Required = isForced
+                             Required = false
+                             Forced = isForced
                              BuildSummary = None
                              TargetHash = target.Hash
                              Batched = false }
@@ -220,8 +222,8 @@ let enforceConsistency (configuration: Configuration.Workspace) (graph: Workspac
                     nodeRebuild, nodeLastBuild) (false, DateTime.MinValue)
 
             let summary, nodeRebuild, nodeLastBuild =
-                if node.Required then
-                    Log.Debug("{nodeId} must rebuild because node is required", nodeId)
+                if node.Forced then
+                    Log.Debug("{nodeId} must rebuild because node is forced", nodeId)
                     None, true, DateTime.MaxValue
 
                 elif childrenRebuild then
@@ -311,7 +313,7 @@ let markRequired (graph: Workspace) (options: Configuration.Options) =
             let node = graph.Nodes[depNodeId]
             let childRequired =
                 awaitedDependencies |> Seq.fold (fun parentRequired dep -> parentRequired || dep.Value) (node.BuildSummary |> Option.isNone)
-            let node = { node with Required = node.Required || childRequired }
+            let node = { node with Required = node.Forced || node.Required || childRequired }
             allNodes.TryAdd(depNodeId, node) |> ignore
             nodeComputed.Value <- childRequired)
 
@@ -340,7 +342,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
     let shallRebuild (node: Node) =
         let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-        if node.Cache = Cacheability.Never then
+        if node.Forced || node.Cache = Cacheability.Never then
             true
         else
             let summary = cache.TryGetSummaryOnly useRemoteCache cacheEntryId
@@ -509,6 +511,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     IsLeaf = oneNode.IsLeaf
                     Batched = false
                     Required = true
+                    Forced = true
                     BuildSummary = None
 
                     TargetHash = cluster
