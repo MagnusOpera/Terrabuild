@@ -8,7 +8,7 @@ type LogType =
 type SourceControl() =
     abstract HeadCommit: string
     abstract BranchOrTag: string
+    abstract LogType: LogType
     abstract CI: bool
     abstract Name: string
-    abstract LogType: unit -> LogType
 

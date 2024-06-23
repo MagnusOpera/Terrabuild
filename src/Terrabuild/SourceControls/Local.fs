@@ -11,9 +11,8 @@ type Local() =
         // NOTE: assuming current directory is a git repository
         System.Environment.CurrentDirectory |> Git.getBranchOrTag
 
+    override _.LogType = Contracts.LogType.Terminal
+
     override _.CI = false
 
     override _.Name = "Local"
-
-    override _.LogType() =
-        Contracts.LogType.Terminal

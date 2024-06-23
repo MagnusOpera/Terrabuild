@@ -102,7 +102,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
 
 
     let logger =
-        match sourceControl.LogType() with
+        match sourceControl.LogType with
         | Terminal -> dumpTerminal
         | Markdown filename -> dumpMarkdown filename
 
