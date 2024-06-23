@@ -288,6 +288,8 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     |> Map.add "terrabuild_target" (Expr.String targetName)
                     |> Map.add "terrabuild_configuration" (Expr.String configuration)
                     |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
+                    |> Map.add "terrabuild_retry" (Expr.Boolean options.Retry)
+                    |> Map.add "terrabuild_force" (Expr.Boolean options.Force)
                     |> (fun map ->
                         let tagValue =
                             match tag with
