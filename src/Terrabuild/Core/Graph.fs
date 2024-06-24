@@ -495,18 +495,12 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
 
             // did we optimize everything ?
             if optimizedActions.Length = target.Actions.Length then
-                let projectList =
-                    nodes
-                    |> Seq.map (fun node -> node.Project)
-                    |> String.join " "
-                    |> String.cut 80
-
                 let clusterNode = {
                     Node.Id = cluster
                     Node.Hash = clusterHash
                     Node.Project = $"batch/{cluster}"
                     Node.Target = oneNode.Target
-                    Node.Label = $"batch-{oneNode.Target} {projectList}"
+                    Node.Label = $"batch-{oneNode.Target} {cluster}"
                     Node.Dependencies = clusterDependencies
                     ProjectHash = clusterHash
                     Outputs = Set.empty
@@ -528,7 +522,6 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                 for node in nodes do
                     let node = { node with
                                     Dependencies = Set.singleton cluster
-                                    Label = $"post-{node.Target} {node.Project}"
                                     Batched = true
                                     CommandLines = List.Empty }
                     graph <- { graph with
