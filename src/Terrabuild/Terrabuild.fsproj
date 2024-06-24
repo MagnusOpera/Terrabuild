@@ -11,8 +11,6 @@
     <Compile Include="Contracts/Storage.fs" />
     <Compile Include="Contracts/SourceControl.fs" />
     <Compile Include="Helpers/Threading.fs" />
-    <Compile Include="Helpers/Compression.fs" />
-    <Compile Include="Helpers/Json.fs" />
     <Compile Include="Helpers/Exec.fs" />
     <Compile Include="Helpers/Git.fs" />
     <Compile Include="Helpers/Terminal.fs" />

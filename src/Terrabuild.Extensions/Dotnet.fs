@@ -166,10 +166,9 @@ type Dotnet() =
 
         let actions = [
             action "dotnet" $"restore {slnfile}" 
-            action "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{logger}{version}"
+            action "dotnet" $"build {slnfile} --no-restore --no-dependencies --no-restore --configuration {configuration}{logger}{version}"
         ]
         actions
-
 
 
     /// <summary title="Build project.">
@@ -201,8 +200,8 @@ type Dotnet() =
             | _ -> ""
 
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectfile}" 
-        |> andThen "dotnet" $"build {projectfile} --no-dependencies --no-restore --configuration {configuration}{logger}{maxcpucount}{version}"
+        |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
+        |> andThen "dotnet" $"build {projectfile} --no-restore --no-dependencies --no-restore --configuration {configuration} {logger} {maxcpucount} {version}"
         |> batchable
 
 
@@ -258,8 +257,8 @@ type Dotnet() =
             | Some true -> " --self-contained"
             | _ -> ""
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectfile}" 
-        |> andThen "dotnet" $"publish {projectfile} --no-dependencies --no-restore --configuration {configuration}{runtime}{trim}{single}"
+        |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
+        |> andThen "dotnet" $"publish {projectfile} --no-dependencies --no-restore --configuration {configuration} {runtime} {trim} {single}"
 
     /// <summary>
     /// Restore packages.
@@ -268,7 +267,7 @@ type Dotnet() =
     static member restore (projectfile: string option) =
         let projectfile = projectfile |> Option.defaultValue ""
         scope Cacheability.Local
-        |> andThen "dotnet" $"restore {projectfile} --no-dependencies"
+        |> andThen "dotnet" $"restore {projectfile} --no-dependencies --disable-parallel"
 
 
     /// <summary>
@@ -283,5 +282,5 @@ type Dotnet() =
 
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectfile}" 
-        |> andThen "dotnet" $"test --no-build --configuration {configuration} {filter} {projectfile}"
+        |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
+        |> andThen "dotnet" $"test {projectfile} --no-build --no-restore --configuration {configuration} {filter}"
