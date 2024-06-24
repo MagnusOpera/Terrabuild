@@ -195,7 +195,7 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.
 
             summary |> write
             let files, size = upload()
-            entryDir |> setOrigin Origin.Local
+            entryDir |> setOrigin summary.Origin
             files, size
 
 

@@ -78,7 +78,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
             let statusEmoji = statusEmoji summary
             let duration =
                 match summary with
-                | Some summary -> $"{summary.EndedAt - summary.EndedAt}"
+                | Some summary -> $"{summary.EndedAt - summary.StartedAt}"
                 | _ -> ""
 
             $"| {statusEmoji} [{node.Label}](#user-content-{node.Id}) | {duration} |" |> append
