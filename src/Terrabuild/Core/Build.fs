@@ -231,7 +231,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                             Cache.TargetSummary.Status = status
                             Cache.TargetSummary.StartedAt = cmdFirstStartedAt
                             Cache.TargetSummary.EndedAt = cmdLastEndedAt
-                            Cache.TargetSummary.Origin = "local" }
+                            Cache.TargetSummary.Origin = Cache.Origin.Local }
             let files, size = cacheEntry.Complete summary
             api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.Hash files size (status = Cache.TaskStatus.Success))
             false, summary

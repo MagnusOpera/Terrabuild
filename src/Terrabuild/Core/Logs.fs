@@ -12,20 +12,31 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
         | Some impactedNodes -> impactedNodes
         | _ -> graph.Nodes.Keys |> Set
 
-    let dumpMarkdown filename (infos: (Node * TargetSummary option) seq) =
+    let dumpMarkdown filename (infos: (Node * TargetSummary option) list) =
+        let append line = IO.appendLinesFile filename [line] 
 
         let dumpMarkdown (node: Node) (summary: TargetSummary option) =
-            let append line = IO.appendLinesFile filename [line] 
 
             let title = node.Label
 
-            let getHeaderFooter success title =
+            let header =
                 let color =
-                    if success then "✅"
-                    else "❌"
-                $"## <a name=\"{node.Id}\"></a> {color} {title}", ""
+                    match summary with
+                    | Some summary ->
+                        match summary.Status with
+                        | TaskStatus.Success ->
+                            match summary.Origin with
+                            | Origin.Local -> "✅"
+                            | Origin.Remote -> "🍿"
+                        | TaskStatus.Failure ->
+                            match summary.Origin with
+                            | Origin.Local -> "❌"
+                            | Origin.Remote -> "🥨"
+                    | _ -> "❓"
 
-            let (logStart, logEnd), dumpLogs =
+                $"## <a name=\"{node.Id}\"></a> {color} {title}"
+
+            let dumpLogs =
                 match summary with
                 | Some summary -> 
                     let dumpLogs () =
@@ -52,17 +63,20 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                         )
 
                     match summary.Status with
-                    | TaskStatus.Success -> getHeaderFooter true title, dumpLogs
-                    | TaskStatus.Failure -> getHeaderFooter false title, dumpLogs
+                    | TaskStatus.Success -> dumpLogs
+                    | TaskStatus.Failure -> dumpLogs
                 | _ ->
                     let dumpNoLog() = $"**No logs available**" |> append
-                    getHeaderFooter false title, dumpNoLog
+                    dumpNoLog
 
-            logStart |> append
+            header |> append
             dumpLogs ()
-            logEnd |> append
 
-        infos |> Seq.iter (fun (node, summary) -> dumpMarkdown node summary)
+
+        "# Summary" |> append
+
+        "# Details" |> append
+        infos |> List.iter (fun (node, summary) -> dumpMarkdown node summary)
 
 
     let dumpTerminal (infos: (Node * TargetSummary option) seq) =
@@ -122,4 +136,5 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
         let summary = cache.TryGetSummaryOnly false cacheEntryId
         node, summary)
     |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
+    |> List.ofSeq
     |> logger
