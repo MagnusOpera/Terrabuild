@@ -21,6 +21,11 @@ type StepSummary = {
 }
 
 [<RequireQualifiedAccess>]
+type Origin =
+    | Local
+    | Remote
+
+[<RequireQualifiedAccess>]
 type TargetSummary = {
     Project: string
     Target: string
@@ -29,6 +34,7 @@ type TargetSummary = {
     Status: TaskStatus
     StartedAt: DateTime
     EndedAt: DateTime
+    Origin: Origin
 }
 
 
@@ -80,9 +86,13 @@ let private homeDirectory =
     IO.createDirectory cacheDir
     cacheDir
 
-let private markEntryAsCompleted reason entryDir =
-    let completeFile = FS.combinePath entryDir completeFilename
-    File.WriteAllText(completeFile, reason)
+let private setOrigin (origin: Origin) entryDir =
+    let originFile = FS.combinePath entryDir completeFilename
+    origin |> Json.Serialize |> IO.writeTextFile originFile
+
+let private getOrigin entryDir =
+    let originFile = FS.combinePath entryDir completeFilename
+    originFile |> IO.readTextFile |> Json.Deserialize<Origin>
 
 let clearBuildCache () =
     IO.deleteAny buildCacheDirectory
@@ -185,7 +195,7 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.
 
             summary |> write
             let files, size = upload()
-            entryDir |> markEntryAsCompleted "local"
+            entryDir |> setOrigin Origin.Local
             files, size
 
 
@@ -233,13 +243,16 @@ type Cache(storage: Contracts.Storage) =
                 // do we have the summary in local cache?
                 match completeFile with
                 | FS.File _ ->
+                    let origin = getOrigin entryDir
                     let summary = loadSummary logsDir outputsDir summaryFile
+                    let summary = { summary with Origin = origin }
                     cachedSummaries.TryAdd(id, Some summary) |> ignore
                     Some summary
                 | _ ->
                     if useRemote then
                         if tryDownload logsDir id "logs" then
                             let summary = loadSummary logsDir outputsDir summaryFile
+                            let summary = { summary with Origin = Origin.Remote }
                             cachedSummaries.TryAdd(id, Some summary) |> ignore
                             Some summary
                         else
@@ -257,21 +270,24 @@ type Cache(storage: Contracts.Storage) =
 
             match completeFile with
             | FS.File _ ->
+                let origin = getOrigin entryDir
                 let summary = loadSummary logsDir outputsDir summaryFile
+                let summary = { summary with Origin = origin }
                 Some summary
             | _ ->
                 if useRemote then
                     if tryDownload logsDir id "logs" then
                         let summary = loadSummary logsDir outputsDir summaryFile
+                        let summary = { summary with Origin = Origin.Remote }
                         match summary.Outputs with
                         | Some _ ->
                             if tryDownload outputsDir id "outputs" then
-                                entryDir |> markEntryAsCompleted "remote"
+                                entryDir |> setOrigin summary.Origin
                                 Some summary
                             else
                                 None
                         | _ ->
-                            entryDir |> markEntryAsCompleted "remote"
+                            entryDir |> setOrigin summary.Origin
                             Some summary
                     else
                         None
