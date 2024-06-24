@@ -18,4 +18,3 @@ type Local() =
     override _.CI = false
 
     override _.Name = "Local"
-wqdqdqw
