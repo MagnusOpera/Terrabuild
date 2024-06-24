@@ -29,6 +29,7 @@ type TargetSummary = {
     Status: TaskStatus
     StartedAt: DateTime
     EndedAt: DateTime
+    Origin: string
 }
 
 
