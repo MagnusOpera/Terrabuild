@@ -7,7 +7,7 @@ open System
 
 
 
-let dumpLogs (runId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) debug =
+let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) debug =
     let scope =
         match impactedNodes with
         | Some impactedNodes -> impactedNodes
@@ -35,7 +35,7 @@ let dumpLogs (runId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         let dumpMarkdown (node: Node) (summary: TargetSummary option) =
             let header =
                 let statusEmoji = statusEmoji summary
-                $"## <a name=\"{runId}-{node.Id}\"></a> {statusEmoji} {node.Label}"
+                $"## <a name=\"{node.UniqueId}\"></a> {statusEmoji} {node.Label}"
 
             let dumpLogs =
                 match summary with
@@ -48,7 +48,7 @@ let dumpLogs (runId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
                             | _ -> None
 
                         match batchNode with
-                        | Some batchNode -> $"**Batched with [{batchNode.Label}](#user-content-{runId}-{batchNode.Id})**" |> append
+                        | Some batchNode -> $"**Batched with [{batchNode.Label}](#user-content-{batchNode.UniqueId})**" |> append
                         | _ ->
                             summary.Steps |> List.iter (fun step ->
                                 $"### {step.MetaCommand}" |> append
@@ -83,7 +83,7 @@ let dumpLogs (runId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
                 | Some summary -> $"{summary.EndedAt - summary.StartedAt}"
                 | _ -> ""
 
-            $"| {statusEmoji} [{node.Label}](#user-content-{runId}-{node.Id}) | {duration} |" |> append
+            $"| {statusEmoji} [{node.Label}](#user-content-{node.UniqueId}) | {duration} |" |> append
         )
         let (cost, gain) =
             infos |> List.fold (fun (cost, gain) (_, summary) ->
