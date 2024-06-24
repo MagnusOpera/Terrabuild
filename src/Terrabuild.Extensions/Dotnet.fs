@@ -284,32 +284,3 @@ type Dotnet() =
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
         |> andThen "dotnet" $"test {projectfile} --no-build --no-restore --configuration {configuration} {filter}"
-        |> batchable
-
-
-    /// <summary title="Batch build multiple projects.">
-    /// The `test` command supports building multiple projects in the same batch.
-    /// </summary>
-    /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
-    /// <param name="log" example="true">Enable binlog for the build.</param>
-    static member __test__ (context: BatchContext) (configuration: string option) (filter: string option) =
-        let projects =
-            context.ProjectPaths
-            |> List.map DotnetHelpers.findProjectFile
-            |> List.map (fun path -> Path.GetRelativePath(context.TempDir, path))
-
-        let configuration =
-            configuration
-            |> Option.defaultValue DotnetHelpers.defaultConfiguration
-
-        let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
-
-        // generate temp solution file
-        let slnfile = Path.Combine(context.TempDir, $"{context.NodeHash}.sln")
-        let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
-        File.WriteAllLines(slnfile, slnContent)
-
-        let actions = [
-            action "dotnet" $"test {slnfile} --no-build --configuration {configuration} {filter}"
-        ]
-        actions

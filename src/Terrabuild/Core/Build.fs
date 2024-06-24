@@ -127,7 +127,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
             // NOTE:
             //  we use ProjectHash here because it's interesting from a cache perspective
             //  some binaries could have been cached in homedir, let's reuse them if available
-            let homeDir = cache.CreateHomeDir "container"
+            let homeDir = cache.CreateHomeDir node.Hash
 
             let allCommands =
                 node.CommandLines
