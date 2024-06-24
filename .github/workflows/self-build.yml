@@ -56,12 +56,20 @@ jobs:
 
       - name: Build
         run: |
-          terrabuild run build \
+          terrabuild run build test \
             -w src \
             -c "dev" \
             ${{ github.event.inputs.force == 'true' && '--force' || '' }} \
             ${{ github.event.inputs.retry == 'true' && '--retry' || '' }} \
             --logs --debug \
+
+      - name: Create Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Unit Tests Report
+          path: **/*.trx
+          reporter: dotnet-trx
 
       - name: Upload Terrabuild Logs
         uses: actions/upload-artifact@v4
