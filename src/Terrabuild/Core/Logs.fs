@@ -153,18 +153,28 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
 
         infos |> Seq.iter (fun (node, summary) -> dumpTerminal node summary)
 
+    let reportFailedNodes (infos: (Node * TargetSummary option) list) =
+        infos
+        |> List.iter (fun (node, summary) ->
+            match summary with
+            | Some summary when summary.Status = TaskStatus.Failure -> sourceControl.LogError $"{node.Label} failed"
+            | _ -> ())
+
     let logger =
         match sourceControl.LogType with
         | Terminal -> dumpTerminal
         | Markdown filename -> dumpMarkdown filename
 
     // filter, collect summaries and dump
-    graph.Nodes
-    |> Seq.choose (fun (KeyValue(nodeId, node)) -> if scope |> Set.contains nodeId then Some node else None)
-    |> Seq.map (fun node ->
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-        let summary = cache.TryGetSummaryOnly false cacheEntryId
-        node, summary)
-    |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
-    |> List.ofSeq
-    |> logger
+    let nodes =
+        graph.Nodes
+        |> Seq.choose (fun (KeyValue(nodeId, node)) -> if scope |> Set.contains nodeId then Some node else None)
+        |> Seq.map (fun node ->
+            let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
+            let summary = cache.TryGetSummaryOnly false cacheEntryId
+            node, summary)
+        |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
+        |> List.ofSeq
+
+    nodes |> logger
+    nodes |> reportFailedNodes

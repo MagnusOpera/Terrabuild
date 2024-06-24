@@ -16,6 +16,8 @@ type GitHub() =
 
     override _.LogType = Contracts.LogType.Markdown stepSummary
 
+    override _.LogError msg = $"::error::{msg}" |> Terminal.writeLine
+
     override _.CI = true
 
     override _.Name = "GitHub"

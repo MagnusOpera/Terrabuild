@@ -13,6 +13,9 @@ type Local() =
 
     override _.LogType = Contracts.LogType.Terminal
 
+    override _.LogError _ = ()
+
     override _.CI = false
 
     override _.Name = "Local"
+wqdqdqw

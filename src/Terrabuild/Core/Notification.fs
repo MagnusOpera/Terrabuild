@@ -1,5 +1,4 @@
 module Notification
-open System
 
 // https://antofthy.gitlab.io/info/ascii/HeartBeats_howto.txt
 let spinnerScheduled = "⠁⠂⠄⠂"
