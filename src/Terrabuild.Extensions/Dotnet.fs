@@ -166,7 +166,7 @@ type Dotnet() =
 
         let actions = [
             action "dotnet" $"restore {slnfile}" 
-            action "dotnet" $"build {slnfile} --no-restore --no-dependencies --no-restore --configuration {configuration}{logger}{version}"
+            action "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{logger}{version}"
         ]
         actions
 
@@ -201,7 +201,7 @@ type Dotnet() =
 
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
-        |> andThen "dotnet" $"build {projectfile} --no-restore --no-restore --configuration {configuration} {logger} {maxcpucount} {version}"
+        |> andThen "dotnet" $"build {projectfile} --no-restore --configuration {configuration} {logger} {maxcpucount} {version}"
         |> batchable
 
 
