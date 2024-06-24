@@ -85,17 +85,17 @@ let dumpLogs (runId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
 
             $"| {statusEmoji} [{node.Label}](#user-content-{runId}-{node.Id}) | {duration} |" |> append
         )
-        let totalDuration =
-            infos |> List.fold (fun acc (node, summary) ->
-                let duration =
-                    match summary with
-                    | Some summary ->
-                        if summary.Origin = Origin.Local then summary.EndedAt - summary.StartedAt
-                        else TimeSpan.Zero
-                    | _ -> TimeSpan.Zero
-                acc + duration
-            ) TimeSpan.Zero
-        $"| Total | {totalDuration} |" |> append
+        let (cost, gain) =
+            infos |> List.fold (fun (cost, gain) (_, summary) ->
+                match summary with
+                | Some summary ->
+                    let duration = summary.EndedAt - summary.StartedAt
+                    if summary.Origin = Origin.Local then cost + duration, gain
+                    else cost, gain + duration
+                | _ -> cost, gain
+            ) (TimeSpan.Zero, TimeSpan.Zero)
+        $"| Cost | {cost} |" |> append
+        $"| Gain | {gain} |" |> append
 
         "" |> append
 
