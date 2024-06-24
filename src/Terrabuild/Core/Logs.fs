@@ -46,7 +46,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                             | _ -> None
 
                         match batchNode with
-                        | Some batchNode -> $"**Batched with [{batchNode.Label}](#{batchNode.Id})**" |> append
+                        | Some batchNode -> $"**Batched with [{batchNode.Label}](#user-content-{batchNode.Id})**" |> append
                         | _ ->
                             summary.Steps |> List.iter (fun step ->
                                 $"### {step.MetaCommand}" |> append
@@ -78,7 +78,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
         "|---------|" |> append
         infos |> List.iter (fun (node, summary) ->
             let statusEmoji = statusEmoji summary
-            $"| {statusEmoji} [{node.Label}](#{node.Id}) |" |> append
+            $"| {statusEmoji} [{node.Label}](#user-content-{node.Id}) |" |> append
         )
         "" |> append
 
