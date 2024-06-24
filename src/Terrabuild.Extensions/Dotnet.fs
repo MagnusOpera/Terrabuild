@@ -165,7 +165,7 @@ type Dotnet() =
         File.WriteAllLines(slnfile, slnContent)
 
         let actions = [
-            action "dotnet" $"restore {slnfile} --disable-parallel" 
+            action "dotnet" $"restore {slnfile}" 
             action "dotnet" $"build {slnfile} --no-restore --no-dependencies --no-restore --configuration {configuration}{logger}{version}"
         ]
         actions
