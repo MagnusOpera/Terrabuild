@@ -14,7 +14,8 @@
     <Compile Include="FS.fs" />
     <Compile Include="IO.fs" />
     <Compile Include="Hash.fs" />
-    <Compile Include="FSharpJson.fs" />
+    <Compile Include="Compression.fs" />
+    <Compile Include="Json.fs" />
   </ItemGroup>
 
   <ItemGroup>

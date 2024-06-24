@@ -12,15 +12,14 @@ module private Http =
     let private request<'req, 'resp> method headers (path: string) (request: 'req): 'resp =
         let url = Uri(apiUrl, path).ToString()
         let body =
-            if typeof<'req> <> typeof<Unit> then request |> FSharpJson.Serialize |> TextRequest |> Some
+            if typeof<'req> <> typeof<Unit> then request |> Json.Serialize |> TextRequest |> Some
             else None
 
         let response = Http.RequestString(url = url, headers = headers, ?body = body, httpMethod = method)
 
-        if typeof<'resp> <> typeof<Unit> then response |> FSharpJson.Deserialize<'resp>
+        if typeof<'resp> <> typeof<Unit> then response |> Json.Deserialize<'resp>
         else Unchecked.defaultof<'resp>
 
-    let options<'req, 'resp> = request<'req, 'resp> HttpMethod.Options
     let get<'req, 'resp> = request<'req, 'resp> HttpMethod.Get
     let post<'req, 'resp> = request<'req, 'resp> HttpMethod.Post
 
