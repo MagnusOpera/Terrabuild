@@ -332,9 +332,6 @@ let markRequired (graph: Workspace) (options: Configuration.Options) =
 
     let requiredDuration = endedAt - startedAt
 
-    let nodesToRun = graph.Nodes.Count
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
-
     Log.Debug("Required: {duration}", requiredDuration)
     { graph with Nodes = allNodes |> Map.ofDict }
 
