@@ -15,26 +15,25 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
     let dumpMarkdown filename (infos: (Node * TargetSummary option) list) =
         let append line = IO.appendLinesFile filename [line] 
 
+        let statusEmoji (summary: TargetSummary option) =
+            match summary with
+            | Some summary ->
+                match summary.Status with
+                | TaskStatus.Success ->
+                    match summary.Origin with
+                    | Origin.Local -> "✅"
+                    | Origin.Remote -> "🍿"
+                | TaskStatus.Failure ->
+                    match summary.Origin with
+                    | Origin.Local -> "❌"
+                    | Origin.Remote -> "🥨"
+            | _ -> "❓"
+
+
         let dumpMarkdown (node: Node) (summary: TargetSummary option) =
-
-            let title = node.Label
-
             let header =
-                let color =
-                    match summary with
-                    | Some summary ->
-                        match summary.Status with
-                        | TaskStatus.Success ->
-                            match summary.Origin with
-                            | Origin.Local -> "✅"
-                            | Origin.Remote -> "🍿"
-                        | TaskStatus.Failure ->
-                            match summary.Origin with
-                            | Origin.Local -> "❌"
-                            | Origin.Remote -> "🥨"
-                    | _ -> "❓"
-
-                $"## <a name=\"{node.Id}\"></a> {color} {title}"
+                let statusEmoji = statusEmoji summary
+                $"## <a name=\"{node.Id}\"></a> {statusEmoji} {node.Label}"
 
             let dumpLogs =
                 match summary with
@@ -49,7 +48,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                         match batchNode with
                         | Some batchNode -> $"**Batched with [{batchNode.Label}](#{batchNode.Id})**" |> append
                         | _ ->
-                            summary.Steps |> Seq.iter (fun step ->
+                            summary.Steps |> List.iter (fun step ->
                                 $"### {step.MetaCommand}" |> append
                                 if debug then
                                     let cmd = $"{step.Command} {step.Arguments}" |> String.trim
@@ -74,7 +73,18 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
 
 
         "# Summary" |> append
+        "" |> append
+        "| Targets | " |> append
+        "|---------|" |> append
+        infos |> List.iter (fun (node, summary) ->
+            let statusEmoji = statusEmoji summary
+            $"| {statusEmoji} [{node.Label}](#{node.Id}) |" |> append
+        )
+        "" |> append
 
+        
+
+        "" |> append
         "# Details" |> append
         infos |> List.iter (fun (node, summary) -> dumpMarkdown node summary)
 
