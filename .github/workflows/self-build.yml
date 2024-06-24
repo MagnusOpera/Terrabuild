@@ -68,7 +68,7 @@ jobs:
         if: success() || failure()
         with:
           name: Unit Tests Report
-          path: **/*.trx
+          path: '**/*.trx'
           reporter: dotnet-trx
 
       - name: Upload Terrabuild Logs
