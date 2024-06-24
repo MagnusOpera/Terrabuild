@@ -201,7 +201,7 @@ type Dotnet() =
 
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
-        |> andThen "dotnet" $"build {projectfile} --no-restore --no-dependencies --no-restore --configuration {configuration} {logger} {maxcpucount} {version}"
+        |> andThen "dotnet" $"build {projectfile} --no-restore --no-restore --configuration {configuration} {logger} {maxcpucount} {version}"
         |> batchable
 
 
