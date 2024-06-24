@@ -72,6 +72,7 @@ jobs:
           name: Unit Tests Report
           path: '**/*.trx'
           reporter: dotnet-trx
+          fail-on-empty: false
 
       - name: Upload Terrabuild Logs
         uses: actions/upload-artifact@v4
