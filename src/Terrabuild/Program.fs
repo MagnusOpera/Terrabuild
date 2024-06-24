@@ -51,6 +51,9 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         Log.Debug("Log created")
 
     let runTarget wsDir target configuration note tag labels variables localOnly logs (options: Configuration.Options) =
+        // NOTE: disable container since builds scale poorly
+        let options = { options with NoContainer = true }
+
         let logGraph graph name =
             graph
             |> Json.Serialize
