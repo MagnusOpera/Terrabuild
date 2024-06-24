@@ -13,7 +13,8 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
         | _ -> graph.Nodes.Keys |> Set
 
     let dumpMarkdown filename (infos: (Node * TargetSummary option) list) =
-        let append line = IO.appendLinesFile filename [line] 
+        let appendLines lines = IO.appendLinesFile filename lines 
+        let append line = appendLines [line]
 
         let statusEmoji (summary: TargetSummary option) =
             match summary with
@@ -85,7 +86,10 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
         )
         "" |> append
 
-        
+        let mermaid = Graph.graph graph
+        "```mermaid" |> append
+        mermaid |> appendLines
+        "```" |> append
 
         "" |> append
         "# Details" |> append

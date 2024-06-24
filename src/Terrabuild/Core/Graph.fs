@@ -51,9 +51,11 @@ let graph (graph: Workspace) =
             let hash = Hash.sha256 k
             $"#{hash.Substring(0, 3)}")
 
-    let mermaid = seq {
+    let mermaid = [
         "flowchart LR"
-        $"classDef bold stroke:black,stroke-width:3px"
+        $"classDef forced stroke:red,stroke-width:3px"
+        $"classDef required stroke:orange,stroke-width:3px"
+        $"classDef selected stroke:black,stroke-width:3px"
 
         // declare colors
         for (KeyValue(project, color)) in colors do
@@ -65,11 +67,12 @@ let graph (graph: Workspace) =
             $"{srcNode.Hash}([{srcNode.Label}])"
             for dependency in node.Dependencies do
                 let dstNode = graph.Nodes |> Map.find dependency
-                $"{srcNode.Hash}([{srcNode.Label}]) --> {dstNode.Hash}([{dstNode.Label}])"
+                $"{srcNode.Hash} --> {dstNode.Hash}"
 
-            $"class {srcNode.Hash} {srcNode.Project}"
-            if graph.SelectedNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} bold"
-    }
+            if node.Forced then $"class {srcNode.Hash} forced"
+            elif node.Required then $"class {srcNode.Hash} required"
+            elif graph.SelectedNodes |> Set.contains nodeId then $"class {srcNode.Hash} selected"
+    ]
 
     mermaid
 
