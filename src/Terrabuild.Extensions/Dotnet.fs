@@ -281,7 +281,7 @@ type Dotnet() =
 
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
         scope Cacheability.Always
-        |> andThen "dotnet" $"test {projectfile} --no-dependencies --no-build --configuration {configuration} {filter}"
+        |> andThen "dotnet" $"test {projectfile} --no-build --configuration {configuration} {filter}"
         |> batchable
 
 
