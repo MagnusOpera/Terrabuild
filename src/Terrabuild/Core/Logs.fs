@@ -52,9 +52,7 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                                 $"### {step.MetaCommand}" |> append
                                 if debug then
                                     let cmd = $"{step.Command} {step.Arguments}" |> String.trim
-                                    "<detail><summary>command</summary>" |> append
                                     $"*{cmd}*" |> append
-                                    "</detail>" |> append
 
                                 append "```"
                                 step.Log |> IO.readTextFile |> append
@@ -74,11 +72,16 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
 
         "# Summary" |> append
         "" |> append
-        "| Targets | " |> append
-        "|---------|" |> append
+        "| Target | Duration |" |> append
+        "|--------|----------|" |> append
         infos |> List.iter (fun (node, summary) ->
             let statusEmoji = statusEmoji summary
-            $"| {statusEmoji} [{node.Label}](#user-content-{node.Id}) |" |> append
+            let duration =
+                match summary with
+                | Some summary -> $"{summary.EndedAt - summary.EndedAt}"
+                | _ -> ""
+
+            $"| {statusEmoji} [{node.Label}](#user-content-{node.Id}) | {duration} |" |> append
         )
         "" |> append
 
