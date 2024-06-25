@@ -46,12 +46,18 @@ let graph (graph: Workspace) =
         |> Map.ofSeq
         |> Map.map (fun _ v -> v |> List.ofSeq)
 
-    let clusters =
+    let clusterColors =
         graph.Nodes
         |> Seq.map (fun (KeyValue(nodeId, node)) ->
             let hash = Hash.sha256 node.Cluster
             node.Cluster, $"#{hash.Substring(0, 3)}")
         |> Map.ofSeq
+
+    let clusters =
+        graph.Nodes
+        |> Seq.groupBy (fun (KeyValue(nodeId, node)) -> node.Cluster)
+        |> Map.ofSeq
+        |> Map.map (fun _ v -> v |> Seq.map (fun kvp -> kvp.Value) |> List.ofSeq)
 
     let mermaid = [
         "flowchart LR"
@@ -60,21 +66,35 @@ let graph (graph: Workspace) =
         $"classDef selected stroke:black,stroke-width:3px"
 
         // declare colors
-        for (KeyValue(cluster, color)) in clusters do
+        for (KeyValue(cluster, color)) in clusterColors do
             $"classDef {cluster} fill:{color}"
 
-        // nodes and arrows
-        for (KeyValue(nodeId, node)) in graph.Nodes do
-            let srcNode = graph.Nodes |> Map.find nodeId
-            $"{srcNode.Hash}([{srcNode.Label}])"
-            for dependency in node.Dependencies do
-                let dstNode = graph.Nodes |> Map.find dependency
-                $"{srcNode.Hash} --> {dstNode.Hash}"
 
-            if node.Forced then $"class {srcNode.Hash} forced"
-            elif node.Required then $"class {srcNode.Hash} required"
-            elif graph.SelectedNodes |> Set.contains nodeId then $"class {srcNode.Hash} selected"
-            $"class {srcNode.Hash} {node.Cluster}"
+        for (KeyValue(cluster, nodes)) in clusters do
+            let clusterNode = nodes |> List.tryFind (fun node -> node.Cluster = cluster)
+            let isCluster = clusterNode |> Option.isSome
+
+            if isCluster then $"subgraph {cluster}[{clusterNode.Value.Label}]"
+
+            let offset, nodes =
+                if isCluster then "  ", nodes |> List.filter (fun node -> node.Id <> cluster)
+                else "", nodes
+
+            for node in nodes do
+                $"{offset}{node.Hash}([{node.Label}])"
+
+            if isCluster then "end"
+
+            for srcNode in nodes do
+                for dependency in srcNode.Dependencies do
+                    if dependency <> cluster then
+                        let dstNode = graph.Nodes |> Map.find dependency
+                        $"{srcNode.Hash} --> {dstNode.Hash}"
+
+                if srcNode.Forced then $"class {srcNode.Hash} forced"
+                elif srcNode.Required then $"class {srcNode.Hash} required"
+                elif graph.SelectedNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} selected"
+                $"class {srcNode.Hash} {srcNode.Cluster}"
     ]
 
     mermaid
@@ -388,8 +408,9 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
 
                     match childrenTags with
                     | [] -> node.Cluster, "batchable/no impacting dependencies"
-                    | [tag, cluster] when cluster = node.Cluster -> tag, "batchable/diffusion"
-                    | [newTag, newCluster] -> node.Cluster, "batchable/new cluster"
+                    | [tag, cluster] when cluster = node.Cluster ->
+                        if node.Cluster = node.Cluster then tag, "batchable/diffusion"
+                        else node.Cluster, "batchable/new cluster"
                     | childrenTags ->
                         let tags = childrenTags |> List.map (fun (tag, cluster) -> $"{tag}+{cluster}") |> String.join "/"
                         $"{node.Cluster}-{node.Id}", $"not batchable/multiple tags: {tags}"
