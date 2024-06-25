@@ -524,7 +524,8 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                 // patch each nodes to have a single dependency on the cluster
                 for node in nodes do
                     let node = { node with
-                                    Dependencies = Set.singleton cluster
+                                    Label = $"post-{node.Label}"
+                                    Dependencies = node.Dependencies |> Set.add clusterNode.Id
                                     Batched = true
                                     CommandLines = List.Empty }
                     graph <- { graph with
