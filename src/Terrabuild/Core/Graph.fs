@@ -387,12 +387,11 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                         |> List.ofSeq
 
                     match childrenTags with
-                    | [tag, hash] when hash = node.Cluster ->
-                        tag, "batchable/diffusion"
-                    | [] ->
-                        node.Cluster, "batchable/no impacting dependencies"
+                    | [] -> node.Cluster, "batchable/no impacting dependencies"
+                    | [tag, cluster] when cluster = node.Cluster -> tag, "batchable/diffusion"
+                    | [newTag, newCluster] -> node.Cluster, "batchable/new cluster"
                     | childrenTags ->
-                        let tags = childrenTags |> List.map fst |> String.join "/"
+                        let tags = childrenTags |> List.map (fun (tag, cluster) -> $"{tag}+{cluster}") |> String.join "/"
                         $"{node.Cluster}-{node.Id}", $"not batchable/multiple tags: {tags}"
         clusters.TryAdd(node.Id, (nodeTag, reason)) |> ignore
         Log.Debug("Node {node} ({label}) is assigned tag {tag} with reason {reason}", node.Id, node.Label, nodeTag, reason)
