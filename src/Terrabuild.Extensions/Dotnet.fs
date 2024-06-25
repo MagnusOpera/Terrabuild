@@ -128,7 +128,7 @@ type Dotnet() =
         let dependencies = projectFile |> DotnetHelpers.findDependencies 
         let projectInfo =
             { ProjectInfo.Default
-              with Ignores = Set [ "**/*.binlog" ]
+              with Ignores = Set [ "**/*.binlog"; "TestResults/" ]
                    Outputs = Set [ "bin/"; "obj/"; "**/*.binlog"; "obj/*.json"; "obj/*.props"; "obj/*.targets" ]
                    Dependencies = dependencies }
         projectInfo
@@ -165,8 +165,7 @@ type Dotnet() =
         File.WriteAllLines(slnfile, slnContent)
 
         let actions = [
-            action "dotnet" $"restore {slnfile}" 
-            action "dotnet" $"build {slnfile} --no-restore --configuration {configuration}{logger}{version}"
+            action "dotnet" $"build {slnfile} --configuration {configuration}{logger}{version}"
         ]
         actions
 
@@ -178,7 +177,8 @@ type Dotnet() =
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
     /// <param name="parallel" example="1">Max worker processes to build the project.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
-    static member build (projectfile: string option) (configuration: string option) (``parallel``: int option) (log: bool option) (version: string option) =
+    /// <param name="arguments" example="--no-incremental">Arguments for command.</param>
+    static member build (projectfile: string option) (configuration: string option) (``parallel``: int option) (log: bool option) (version: string option) (arguments: string option) =
         let projectfile = projectfile |> Option.defaultValue ""
         let configuration =
             configuration
@@ -199,9 +199,10 @@ type Dotnet() =
             | Some version -> $" -p:Version={version}"
             | _ -> ""
 
+        let arguments = arguments |> Option.defaultValue ""
+
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
-        |> andThen "dotnet" $"build {projectfile} --no-restore --configuration {configuration} {logger} {maxcpucount} {version}"
+        |> andThen "dotnet" $"build {projectfile} --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
         |> batchable
 
 
@@ -222,15 +223,16 @@ type Dotnet() =
     /// <param name="configuration" example="&quot;Release&quot;">Configuration for pack command.</param>
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
     /// <param name="version" example="&quot;1.0.0&quot;">Version for pack command.</param>
-    static member pack (configuration: string option) (projectfile: string option) (version: string option) =
+    /// <param name="arguments" example="--include-symbols">Arguments for command.</param>
+    static member pack (configuration: string option) (projectfile: string option) (version: string option) (arguments: string option)=
         let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let version = version |> Option.defaultValue "0.0.0"
+        let arguments = arguments |> Option.defaultValue ""
 
         // NOTE for TargetsForTfmSpecificContentInPackage: https://github.com/dotnet/fsharp/issues/12320
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectfile}" 
-        |> andThen "dotnet" $"pack {projectfile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage="
+        |> andThen "dotnet" $"pack {projectfile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
 
     /// <summary>
     /// Publish a project.
@@ -240,7 +242,8 @@ type Dotnet() =
     /// <param name="runtime" example="&quot;linux-x64&quot;">Runtime for publish.</param>
     /// <param name="trim" example="true">Instruct to trim published project.</param>
     /// <param name="single" example="true">Instruct to publish project as self-contained.</param>
-    static member publish (configuration: string option) (projectfile: string option) (runtime: string option) (trim: bool option) (single: bool option) =
+    /// <param name="arguments" example="--version-suffix beta">Arguments for command.</param>
+    static member publish (configuration: string option) (projectfile: string option) (runtime: string option) (trim: bool option) (single: bool option) (arguments: string option) =
         let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
@@ -256,18 +259,22 @@ type Dotnet() =
             match single with
             | Some true -> " --self-contained"
             | _ -> ""
+        let arguments = arguments |> Option.defaultValue ""
+
         scope Cacheability.Always
-        |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
-        |> andThen "dotnet" $"publish {projectfile} --no-dependencies --no-restore --configuration {configuration} {runtime} {trim} {single}"
+        |> andThen "dotnet" $"publish {projectfile} --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
 
     /// <summary>
     /// Restore packages.
     /// </summary>
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
-    static member restore (projectfile: string option) =
+    /// <param name="arguments" example="--no-dependencies">Arguments for command.</param>
+    static member restore (projectfile: string option) (arguments: string option) =
         let projectfile = projectfile |> Option.defaultValue ""
+        let arguments = arguments |> Option.defaultValue ""
+
         scope Cacheability.Local
-        |> andThen "dotnet" $"restore {projectfile} --no-dependencies --disable-parallel"
+        |> andThen "dotnet" $"restore {projectfile} {arguments}"
 
 
     /// <summary>
@@ -276,11 +283,13 @@ type Dotnet() =
     /// <param name="configuration" example="&quot;Release&quot;">Configuration for publish command.</param>
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
     /// <param name="filter" example="&quot;TestCategory!=integration&quot;">Run selected unit tests.</param>
-    static member test (configuration: string option) (projectfile: string option) (filter: string option) =
+    /// <param name="arguments" example="--blame-hang">Arguments for command.</param>
+    static member test (configuration: string option) (projectfile: string option) (filter: string option) (arguments: string option) =
         let projectfile = projectfile |> Option.defaultValue ""
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
-
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
+        let arguments = arguments |> Option.defaultValue ""
+
         scope Cacheability.Always
         |> andThen "dotnet" $"restore {projectfile} --disable-parallel" 
-        |> andThen "dotnet" $"test {projectfile} --no-build --no-restore --configuration {configuration} {filter}"
+        |> andThen "dotnet" $"test {projectfile} --no-build --no-restore --configuration {configuration} {filter} {arguments}"
