@@ -61,7 +61,7 @@ let graph (graph: Workspace) =
 
         // declare colors
         for (KeyValue(cluster, color)) in clusterColors do
-            $"classDef {cluster} fill:{color}"
+            $"classDef {cluster} stroke:{color},stroke-width:3px,fill:white"
 
         for (KeyValue(cluster, nodes)) in clusters do
             let clusterNode = nodes |> List.tryFind (fun node -> node.Id = cluster)
@@ -76,7 +76,9 @@ let graph (graph: Workspace) =
             for node in nodes do
                 $"{offset}{node.Hash}([{node.Label}])"
 
-            if isCluster then "end"
+            if isCluster then
+                "end"
+                $"class {cluster} {cluster}"
 
             for srcNode in nodes do
                 for dependency in srcNode.Dependencies do
@@ -87,7 +89,6 @@ let graph (graph: Workspace) =
                 if srcNode.Forced then $"class {srcNode.Hash} forced"
                 elif srcNode.Required then $"class {srcNode.Hash} required"
                 elif graph.SelectedNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} selected"
-                $"class {srcNode.Hash} {srcNode.Cluster}"
     ]
 
     mermaid
