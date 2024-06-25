@@ -38,18 +38,6 @@ type TargetSummary = {
 }
 
 
-
-type SpaceAuth = {
-    Space: string
-    Token: string
-}
-
-[<RequireQualifiedAccess>]
-type Configuration = {
-    SpaceAuths: SpaceAuth list
-}
-
-
 type ArtifactInfo = {
     Path: string
     Size: int
@@ -101,39 +89,6 @@ let clearHomeCache () =
     IO.deleteAny homeDirectory
 
 
-let removeAuthToken (space: string) =
-    let configFile = FS.combinePath terrabuildHome "config.json"
-    let config =
-        if File.Exists configFile then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
-        else { Configuration.SpaceAuths = List.empty }
-
-    let config = { config with SpaceAuths = config.SpaceAuths |> List.filter (fun sa -> sa.Space = space )}
-
-    config
-    |> Json.Serialize
-    |> IO.writeTextFile configFile
-
-let addAuthToken (space: string) (token: string) =
-    let configFile = FS.combinePath terrabuildHome "config.json"
-    let config =
-        if File.Exists configFile then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
-        else { SpaceAuths = [] }
-
-    let config = { config with SpaceAuths = { Space = space; Token = token } :: config.SpaceAuths }
-
-    config
-    |> Json.Serialize
-    |> IO.writeTextFile configFile
-
-let readAuthToken (space: string) =
-    let configFile = FS.combinePath terrabuildHome "config.json"
-    let config =
-        if File.Exists configFile then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
-        else { Configuration.SpaceAuths = List.empty }
-
-    match config.SpaceAuths |> List.tryFind (fun sa -> sa.Space = space) with
-    | Some spaceAuth -> Some spaceAuth.Token
-    | _ -> None
 
 type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.Storage) =
     let mutable logNum = 0

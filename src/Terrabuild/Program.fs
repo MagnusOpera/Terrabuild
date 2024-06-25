@@ -77,7 +77,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         let token =
             if localOnly then None
-            else config.Space |> Option.bind (fun space -> Cache.readAuthToken space)
+            else config.Space |> Option.bind (fun space -> Auth.readAuthToken space)
         let api = Api.Factory.create config.Space token
         if api |> Option.isSome then
             Log.Debug("Connected to API")
