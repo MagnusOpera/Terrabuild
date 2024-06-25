@@ -1,4 +1,5 @@
 name: self-build
+run-name: "self-build retry=${{ inputs.retry == true }} force={{ inputs.force == true }}"
 
 on:
   push:
