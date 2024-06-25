@@ -90,17 +90,24 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let storage = Storages.Factory.create api
         let cache = Cache.Cache(storage) :> Cache.ICache
 
-        let graph = Graph.create config target options
-        if options.Debug then logGraph graph "config"
+        let buildGraph =
+            let graph = Graph.create config target options
+            if options.Debug then logGraph graph "config"
 
-        let consistentGraph = Graph.enforceConsistency config graph cache options
-        if options.Debug then logGraph consistentGraph "consistent"
+            let consistentGraph = Graph.enforceConsistency config graph cache options
+            if options.Debug then logGraph consistentGraph "consistent"
 
-        let requiredGraph = Graph.markRequired consistentGraph options
-        if options.Debug then logGraph requiredGraph "required"
+            let requiredGraph = Graph.markRequired consistentGraph options
+            if options.Debug then logGraph requiredGraph "required"
 
-        let buildGraph = Graph.optimize config requiredGraph cache options
-        if options.Debug then logGraph buildGraph "build"
+            let buildGraph =
+                if options.NoBatch then requiredGraph
+                else Graph.optimize config requiredGraph cache options
+            if options.Debug then logGraph buildGraph "build"
+
+            let nodesToRun = graph.Nodes.Count
+            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
+            buildGraph
 
         if options.WhatIf then
             if logs then
@@ -148,6 +155,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let variables = runArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let noContainer = runArgs.Contains(RunArgs.NoContainer)
+        let noBatch = runArgs.Contains(RunArgs.NoBatch)
         let localOnly = runArgs.Contains(RunArgs.LocalOnly)
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
@@ -157,6 +165,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = runArgs.Contains(RunArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
                         Configuration.Options.NoContainer = noContainer
+                        Configuration.Options.NoBatch = noBatch
                         Configuration.Options.Retry = runArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow
                         Configuration.Options.IsLog = false }
@@ -179,6 +188,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.Force = false
                         Configuration.Options.MaxConcurrency = 1
                         Configuration.Options.NoContainer = false
+                        Configuration.Options.NoBatch = true
                         Configuration.Options.Retry = false
                         Configuration.Options.StartedAt = DateTime.UtcNow
                         Configuration.Options.IsLog = true}

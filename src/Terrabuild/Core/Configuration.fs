@@ -20,6 +20,7 @@ type Options = {
     StartedAt: DateTime
     IsLog: bool
     NoContainer: bool
+    NoBatch: bool
 }
 
 type BatchContext = {

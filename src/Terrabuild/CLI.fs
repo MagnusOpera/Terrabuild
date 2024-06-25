@@ -41,6 +41,7 @@ type RunArgs =
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] LocalOnly
+    | [<Unique; AltCommandLine("-nb")>] NoBatch
     | [<Unique; AltCommandLine("-n")>] Note of note:string
     | [<Unique; AltCommandLine("-t")>] Tag of tag:string
     | [<Unique>] Logs
@@ -59,6 +60,7 @@ with
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | LocalOnly -> "Use local cache only."
+            | NoBatch -> "Disable batch optimizations."
             | Note _ -> "Note for the build."
             | Logs -> "Output logs for impacted projects."
             | Tag _ -> "Tag for build."

@@ -555,8 +555,4 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
 
     let optimizationDuration = endedAt - startedAt
     Log.Debug("Optimization: {duration}", optimizationDuration)
-
-    let nodesToRun = graph.Nodes.Count
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
-
     graph
