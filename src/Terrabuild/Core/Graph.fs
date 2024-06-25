@@ -40,12 +40,6 @@ type Workspace = {
 
 
 let graph (graph: Workspace) =
-    let projects =
-        graph.Nodes.Values
-        |> Seq.groupBy (fun x -> x.Project)
-        |> Map.ofSeq
-        |> Map.map (fun _ v -> v |> List.ofSeq)
-
     let clusterColors =
         graph.Nodes
         |> Seq.map (fun (KeyValue(nodeId, node)) ->
@@ -55,7 +49,7 @@ let graph (graph: Workspace) =
 
     let clusters =
         graph.Nodes
-        |> Seq.groupBy (fun (KeyValue(nodeId, node)) -> node.Cluster)
+        |> Seq.groupBy (fun (KeyValue(_, node)) -> node.Cluster)
         |> Map.ofSeq
         |> Map.map (fun _ v -> v |> Seq.map (fun kvp -> kvp.Value) |> List.ofSeq)
 
@@ -69,9 +63,8 @@ let graph (graph: Workspace) =
         for (KeyValue(cluster, color)) in clusterColors do
             $"classDef {cluster} fill:{color}"
 
-
         for (KeyValue(cluster, nodes)) in clusters do
-            let clusterNode = nodes |> List.tryFind (fun node -> node.Cluster = cluster)
+            let clusterNode = nodes |> List.tryFind (fun node -> node.Id = cluster)
             let isCluster = clusterNode |> Option.isSome
 
             if isCluster then $"subgraph {cluster}[{clusterNode.Value.Label}]"
@@ -408,8 +401,8 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
 
                     match childrenTags with
                     | [] -> node.Cluster, "batchable/no impacting dependencies"
-                    | [tag, cluster] when cluster = node.Cluster ->
-                        if node.Cluster = node.Cluster then tag, "batchable/diffusion"
+                    | [tag, cluster] ->
+                        if cluster = node.Cluster then tag, "batchable/diffusion"
                         else node.Cluster, "batchable/new cluster"
                     | childrenTags ->
                         let tags = childrenTags |> List.map (fun (tag, cluster) -> $"{tag}+{cluster}") |> String.join "/"
