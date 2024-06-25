@@ -54,14 +54,14 @@ let graph (graph: Workspace) =
         |> Map.map (fun _ v -> v |> Seq.map (fun kvp -> kvp.Value) |> List.ofSeq)
 
     let mermaid = [
-        "flowchart LR"
+        "flowchart TB"
         $"classDef forced stroke:red,stroke-width:3px"
         $"classDef required stroke:orange,stroke-width:3px"
         $"classDef selected stroke:black,stroke-width:3px"
 
         // declare colors
         for (KeyValue(cluster, color)) in clusterColors do
-            $"classDef {cluster} stroke:{color},stroke-width:3px,fill:white"
+            $"classDef cluster-{cluster} stroke:{color},stroke-width:3px,fill:white,rx:10,ry:10"
 
         for (KeyValue(cluster, nodes)) in clusters do
             let clusterNode = nodes |> List.tryFind (fun node -> node.Id = cluster)
@@ -78,7 +78,7 @@ let graph (graph: Workspace) =
 
             if isCluster then
                 "end"
-                $"class {cluster} {cluster}"
+                $"class {cluster} cluster-{cluster}"
 
             for srcNode in nodes do
                 for dependency in srcNode.Dependencies do
