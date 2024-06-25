@@ -27,7 +27,7 @@ type Node = {
     BuildSummary: Cache.TargetSummary option
     Batched: bool
 
-    TargetHash: string
+    Cluster: string
     CommandLines: Configuration.ContaineredActionBatch list
 }
 
@@ -46,11 +46,12 @@ let graph (graph: Workspace) =
         |> Map.ofSeq
         |> Map.map (fun _ v -> v |> List.ofSeq)
 
-    let colors =
-        projects
-        |> Map.map (fun k v ->
-            let hash = Hash.sha256 k
-            $"#{hash.Substring(0, 3)}")
+    let clusters =
+        graph.Nodes
+        |> Seq.map (fun (KeyValue(nodeId, node)) ->
+            let hash = Hash.sha256 node.Cluster
+            node.Cluster, $"#{hash.Substring(0, 3)}")
+        |> Map.ofSeq
 
     let mermaid = [
         "flowchart LR"
@@ -59,8 +60,8 @@ let graph (graph: Workspace) =
         $"classDef selected stroke:black,stroke-width:3px"
 
         // declare colors
-        for (KeyValue(project, color)) in colors do
-            $"classDef {project} fill:{color}"
+        for (KeyValue(cluster, color)) in clusters do
+            $"classDef {cluster} fill:{color}"
 
         // nodes and arrows
         for (KeyValue(nodeId, node)) in graph.Nodes do
@@ -73,6 +74,7 @@ let graph (graph: Workspace) =
             if node.Forced then $"class {srcNode.Hash} forced"
             elif node.Required then $"class {srcNode.Hash} required"
             elif graph.SelectedNodes |> Set.contains nodeId then $"class {srcNode.Hash} selected"
+            $"class {srcNode.Hash} {node.Cluster}"
     ]
 
     mermaid
@@ -169,7 +171,7 @@ let create (configuration: Configuration.Workspace) (targets: string set) (optio
                              Required = false
                              Forced = isForced
                              BuildSummary = None
-                             TargetHash = target.Hash
+                             Cluster = target.Hash
                              Batched = false }
 
                 if allNodes.TryAdd(nodeId, node) |> not then
@@ -362,7 +364,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
             // NOTE: if we are running log command we ensure idempotency
             //       otherwise we are seeking to optimize graph and if task is already built, do not batch build
             if (options.IsLog || node |> shallRebuild) |> not then
-                $"{node.TargetHash}-{node.Id}", "not batchable/no build required"
+                $"{node.Cluster}-{node.Id}", "not batchable/no build required"
             // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
             else
                 // check all actions are batchable
@@ -371,7 +373,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     |> Set.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BatchContext <> None))
 
                 if batchable |> not then
-                    $"{node.TargetHash}-{node.Id}", "not batchable"
+                    $"{node.Cluster}-{node.Id}", "not batchable"
                 else
                     // collect tags from dependencies
                     // if they are the same then infect this node with children virus iif it's unique
@@ -380,18 +382,18 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                         node.Dependencies
                         |> Set.choose (fun dependency ->
                             let dependencyNode = graph.Nodes[dependency]
-                            if dependencyNode |> shallRebuild then Some (clusters[dependency] |> fst, dependencyNode.TargetHash)
+                            if dependencyNode |> shallRebuild then Some (clusters[dependency] |> fst, dependencyNode.Cluster)
                             else None)
                         |> List.ofSeq
 
                     match childrenTags with
-                    | [tag, hash] when hash = node.TargetHash ->
+                    | [tag, hash] when hash = node.Cluster ->
                         tag, "batchable/diffusion"
                     | [] ->
-                        node.TargetHash, "batchable/no impacting dependencies"
+                        node.Cluster, "batchable/no impacting dependencies"
                     | childrenTags ->
                         let tags = childrenTags |> List.map fst |> String.join "/"
-                        $"{node.TargetHash}-{node.Id}", $"not batchable/multiple tags: {tags}"
+                        $"{node.Cluster}-{node.Id}", $"not batchable/multiple tags: {tags}"
         clusters.TryAdd(node.Id, (nodeTag, reason)) |> ignore
         Log.Debug("Node {node} ({label}) is assigned tag {tag} with reason {reason}", node.Id, node.Label, nodeTag, reason)
 
@@ -514,7 +516,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     Forced = true
                     BuildSummary = None
 
-                    TargetHash = cluster
+                    Cluster = cluster
                     CommandLines = optimizedActions
                 }
 
@@ -526,7 +528,8 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                     let node = { node with
                                     Dependencies = node.Dependencies |> Set.add clusterNode.Id
                                     Batched = true
-                                    CommandLines = List.Empty }
+                                    CommandLines = List.Empty
+                                    Cluster = cluster }
                     graph <- { graph with
                                     Nodes = graph.Nodes |> Map.add node.Id node }
             else
