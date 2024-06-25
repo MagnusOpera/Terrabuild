@@ -41,6 +41,8 @@ clean:
 	-rm terrabuild-debug.*
 	-rm -rf $(PWD)/.out
 
+upgrade:
+	dotnet restore --force-evaluate
 
 clear-cache:
 	dotnet run --project src/Terrabuild -- clear --cache --home
