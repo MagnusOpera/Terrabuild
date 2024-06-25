@@ -413,10 +413,10 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
 
 
     // optimization is like building but instead of running actions
-    // conceptually, it's inspired from virus infection :-)
+    // conceptually, it's inspired from virus propagation :-)
     // this starts spontaneously with leaf nodes (patients 0) - same virus even they are not related (leaf nodes have no dependencies by definition)
-    // then the infection flows to parents if they are compatible
-    // if they are not compatible - the virus mutates and continue its propagation up to the root nodes
+    // then the infection flows to parents as they are compatible
+    // if they are not compatible - the virus resets (new patients 0) and continue its propagation up to the root nodes
     // nodeTags dictionary holds a mapping of nodes to virus variant - they are our clusters
 
     let hub = Hub.Create(options.MaxConcurrency)

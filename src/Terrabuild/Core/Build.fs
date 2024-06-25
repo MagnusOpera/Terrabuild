@@ -125,8 +125,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
             notification.NodeBuilding node
 
             // NOTE:
-            //  we use ProjectHash here because it's interesting from a cache perspective
-            //  some binaries could have been cached in homedir, let's reuse them if available
+            //  home dir is redirected for container because it's interesting from a cache perspective
+            //  moreover it's likely container architecture is not the same as host
             let homeDir = cache.CreateHomeDir "container"
 
             let allCommands =
