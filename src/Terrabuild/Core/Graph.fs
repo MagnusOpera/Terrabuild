@@ -40,18 +40,18 @@ type Workspace = {
 
 
 let graph (graph: Workspace) =
-    let projects =
-        graph.Nodes.Values
-        |> Seq.groupBy (fun x -> x.Project)
-        |> Map.ofSeq
-        |> Map.map (fun _ v -> v |> List.ofSeq)
-
-    let clusters =
+    let clusterColors =
         graph.Nodes
         |> Seq.map (fun (KeyValue(nodeId, node)) ->
             let hash = Hash.sha256 node.Cluster
             node.Cluster, $"#{hash.Substring(0, 3)}")
         |> Map.ofSeq
+
+    let clusters =
+        graph.Nodes
+        |> Seq.groupBy (fun (KeyValue(_, node)) -> node.Cluster)
+        |> Map.ofSeq
+        |> Map.map (fun _ v -> v |> Seq.map (fun kvp -> kvp.Value) |> List.ofSeq)
 
     let mermaid = [
         "flowchart LR"
@@ -60,21 +60,35 @@ let graph (graph: Workspace) =
         $"classDef selected stroke:black,stroke-width:3px"
 
         // declare colors
-        for (KeyValue(cluster, color)) in clusters do
-            $"classDef {cluster} fill:{color}"
+        for (KeyValue(cluster, color)) in clusterColors do
+            $"classDef {cluster} stroke:{color},stroke-width:3px,fill:white"
 
-        // nodes and arrows
-        for (KeyValue(nodeId, node)) in graph.Nodes do
-            let srcNode = graph.Nodes |> Map.find nodeId
-            $"{srcNode.Hash}([{srcNode.Label}])"
-            for dependency in node.Dependencies do
-                let dstNode = graph.Nodes |> Map.find dependency
-                $"{srcNode.Hash} --> {dstNode.Hash}"
+        for (KeyValue(cluster, nodes)) in clusters do
+            let clusterNode = nodes |> List.tryFind (fun node -> node.Id = cluster)
+            let isCluster = clusterNode |> Option.isSome
 
-            if node.Forced then $"class {srcNode.Hash} forced"
-            elif node.Required then $"class {srcNode.Hash} required"
-            elif graph.SelectedNodes |> Set.contains nodeId then $"class {srcNode.Hash} selected"
-            $"class {srcNode.Hash} {node.Cluster}"
+            if isCluster then $"subgraph {cluster}[{clusterNode.Value.Label}]"
+
+            let offset, nodes =
+                if isCluster then "  ", nodes |> List.filter (fun node -> node.Id <> cluster)
+                else "", nodes
+
+            for node in nodes do
+                $"{offset}{node.Hash}([{node.Label}])"
+
+            if isCluster then
+                "end"
+                $"class {cluster} {cluster}"
+
+            for srcNode in nodes do
+                for dependency in srcNode.Dependencies do
+                    if dependency <> cluster then
+                        let dstNode = graph.Nodes |> Map.find dependency
+                        $"{srcNode.Hash} --> {dstNode.Hash}"
+
+                if srcNode.Forced then $"class {srcNode.Hash} forced"
+                elif srcNode.Required then $"class {srcNode.Hash} required"
+                elif graph.SelectedNodes |> Set.contains srcNode.Id then $"class {srcNode.Hash} selected"
     ]
 
     mermaid
@@ -387,12 +401,12 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache:
                         |> List.ofSeq
 
                     match childrenTags with
-                    | [tag, hash] when hash = node.Cluster ->
-                        tag, "batchable/diffusion"
-                    | [] ->
-                        node.Cluster, "batchable/no impacting dependencies"
+                    | [] -> node.Cluster, "batchable/no impacting dependencies"
+                    | [tag, cluster] ->
+                        if cluster = node.Cluster then tag, "batchable/diffusion"
+                        else node.Cluster, "batchable/new cluster"
                     | childrenTags ->
-                        let tags = childrenTags |> List.map fst |> String.join "/"
+                        let tags = childrenTags |> List.map (fun (tag, cluster) -> $"{tag}+{cluster}") |> String.join "/"
                         $"{node.Cluster}-{node.Id}", $"not batchable/multiple tags: {tags}"
         clusters.TryAdd(node.Id, (nodeTag, reason)) |> ignore
         Log.Debug("Node {node} ({label}) is assigned tag {tag} with reason {reason}", node.Id, node.Label, nodeTag, reason)
