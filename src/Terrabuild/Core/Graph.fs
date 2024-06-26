@@ -54,7 +54,7 @@ let graph (graph: Workspace) =
         |> Map.map (fun _ v -> v |> Seq.map (fun kvp -> kvp.Value) |> List.ofSeq)
 
     let mermaid = [
-        "flowchart TB"
+        "flowchart LR"
         $"classDef forced stroke:red,stroke-width:3px"
         $"classDef required stroke:orange,stroke-width:3px"
         $"classDef selected stroke:black,stroke-width:3px"
