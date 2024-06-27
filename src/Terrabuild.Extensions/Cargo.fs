@@ -1,0 +1,80 @@
+namespace Terrabuild.Extensions
+
+open Terrabuild.Extensibility
+open System.IO
+
+module CargoHelpers =
+    let findProjectFile dir = FS.combinePath dir "Cargo.toml"
+
+    let findDependencies (projectFile: string) =
+        projectFile
+        |> File.ReadAllLines
+        |> Seq.choose (fun line ->
+            match line with
+            | String.Regex "path *= *\"(.*)\"" [path] -> Some path
+            | _ -> None)
+        |> Set.ofSeq
+
+
+/// <summary>
+/// Add support for cargo (rust) projects.
+/// </summary>
+
+type Cargo() =
+
+    /// <summary>
+    /// Provides default values for project.
+    /// </summary>
+    /// <param name="ignores" example="[ ]">Default values.</param>
+    /// <param name="outputs" example="[ &quot;target/debug/&quot; &quot;target/release/&quot; ]">Default values.</param>
+    /// <param name="dependencies" example="[ &lt;path /&gt; from project ]">Default values.</param>
+    static member __defaults__ (context: ExtensionContext) =
+        let projectFile = CargoHelpers.findProjectFile context.Directory
+        let dependencies = projectFile |> CargoHelpers.findDependencies 
+        let projectInfo =
+            { ProjectInfo.Default
+              with Ignores = Set [ ]
+                   Outputs = Set [ "target/debug/"; "target/release/" ]
+                   Dependencies = dependencies }
+        projectInfo
+
+
+    /// <summary title="Build project.">
+    /// Build project.
+    /// </summary>
+    /// <param name="profile" example="&quot;release&quot;">Profile to use to build project. Default is `dev`.</param>
+    /// <param name="arguments" example="--keep-going">Arguments for command.</param>
+    static member build (profile: string option) (arguments: string option) =
+        let profile =
+            profile
+            |> Option.defaultValue "dev"
+
+        let arguments = arguments |> Option.defaultValue ""
+
+        scope Cacheability.Always
+        |> andThen "cargo" $"build --profile {profile} {arguments}"
+
+
+    /// <summary>
+    /// Run a cargo `command`.
+    /// </summary>
+    /// <param name="__dispatch__" example="format">Example.</param>
+    /// <param name="arguments" example="&quot;check&quot;">Arguments for command.</param>
+    static member __dispatch__ (context: ActionContext) (arguments: string option) =
+        let arguments = arguments |> Option.defaultValue ""
+        scope Cacheability.Always
+        |> andThen (context.Command) arguments
+
+
+    /// <summary>
+    /// Test project.
+    /// </summary>
+    /// <param name="profile" example="&quot;release&quot;">Profile for test command.</param>
+    /// <param name="arguments" example="--blame-hang">Arguments for command.</param>
+    static member test (profile: string option) (arguments: string option) =
+        let profile = profile |> Option.defaultValue "dev"
+        let arguments = arguments |> Option.defaultValue ""
+
+        scope Cacheability.Always
+        |> andThen "cargo" $"test --profile {profile} {arguments}"
+        |> batchable
