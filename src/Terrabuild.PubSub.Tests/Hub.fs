@@ -175,7 +175,7 @@ let unsignaled_subscription2_is_error() =
     let status = hub.WaitCompletion()
 
     match status with
-    | Status.SubcriptionNotRaised name -> name |> should equal "computed2/computed3"
+    | Status.SubcriptionNotRaised name -> name |> should equal "computed2,computed3"
     | _ -> Assert.Fail()
     triggered1 |> should equal true
     triggered2 |> should equal false
