@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Core/Graph.fs" />
     <Compile Include="Program.fs"/>
   </ItemGroup>
 
@@ -20,6 +21,12 @@
 
   <ItemGroup>
     <ProjectReference Include="../Terrabuild/Terrabuild.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestFiles/**/*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

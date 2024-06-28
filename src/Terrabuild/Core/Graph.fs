@@ -365,66 +365,75 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
             | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
             | _ -> true
 
-    let processedNodes = ConcurrentDictionary<string, bool>()
-    let nodes = graph.Nodes
+    let computeClusters remainingNodes =
+        let clusters = Concurrent.ConcurrentDictionary<string, string set>()
 
-    let clusters = Concurrent.ConcurrentDictionary<string, string set>()
-    let computeCluster (node: Node) =
-        if (options.IsLog || node |> shallRebuild) |> not then
-            Log.Debug("Node {node} do not need rebuild", node.Id)
-            false
+        let hub = Hub.Create(options.MaxConcurrency)
+        for nodeId in remainingNodes do
+            let node  = graph.Nodes |> Map.find nodeId
+            let nodeComputed = hub.CreateComputed<Node> nodeId
 
-        else
-            let nodeDependencies = node.Dependencies |> Set.filter (processedNodes.ContainsKey)
+            let nodeDependencies = node.Dependencies |> Set.filter (fun dependency -> remainingNodes |> Set.contains dependency)
 
-            // check all actions are batchable
-            let batchable =
+            // await dependencies
+            let awaitedDependencies =
                 nodeDependencies
-                |> Set.forall (fun dependency ->
-                    graph.Nodes[dependency].CommandLines
-                    |> List.forall (fun cmd -> cmd.BatchContext <> None))
+                |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
+                |> Array.ofSeq
 
-            if batchable |> not then
-                Log.Debug("Node {node} is not batchable", node.Id)
-                false
-            elif nodeDependencies = Set.empty || clusters.ContainsKey(node.Cluster) then
-                let add _ = Set.singleton node.Id
-                let update _ nodes = nodes |> Set.add node.Id
-                clusters.AddOrUpdate(node.Cluster, add, update) |> ignore
-                Log.Debug("Node {node} is added to cluster {cluster}", node.Id, node.Cluster)
-                true
-            else
-                Log.Debug("Node {node} does not belong to any active clusters", node.Id)
-                false
+            let addToCluster (node: Node) =
+                if (options.IsLog || node |> shallRebuild) |> not then
+                    Log.Debug("Node {node} does not need rebuild", node.Id)
+                    false
 
+                else
+                    // check all actions are batchable
+                    let batchable =
+                        nodeDependencies
+                        |> Set.forall (fun dependency ->
+                            graph.Nodes[dependency].CommandLines
+                            |> List.forall (fun cmd -> cmd.BatchContext <> None))
 
-    let hub = Hub.Create(options.MaxConcurrency)
-    for (KeyValue(nodeId, node)) in graph.Nodes do
-        let nodeComputed = hub.CreateComputed<Node> nodeId
+                    if batchable |> not then
+                        Log.Debug("Node {node} is not batchable", node.Id)
+                        false
+                    elif nodeDependencies = Set.empty || clusters.ContainsKey(node.Cluster) then
+                        let add _ = Set.singleton node.Id
+                        let update _ nodes = nodes |> Set.add node.Id
+                        clusters.AddOrUpdate(node.Cluster, add, update) |> ignore
+                        Log.Debug("Node {node} has joined cluster {cluster}", node.Id, node.Cluster)
+                        true
+                    else
+                        Log.Debug("Node {node} can't join any clusters", node.Id)
+                        false
 
-        // await dependencies
-        let awaitedDependencies =
-            node.Dependencies
-            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
-            |> Array.ofSeq
+            let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+            hub.Subscribe awaitedSignals (fun () -> if addToCluster node then nodeComputed.Value <- node)
 
-        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-        hub.Subscribe awaitedSignals (fun () ->
-            if computeCluster node then nodeComputed.Value <- node)
+        let status = hub.WaitCompletion()
+        status, clusters |> Map.ofDict
 
-    let status = hub.WaitCompletion()
-    match status with
-    | Status.Ok -> ()
-    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Node {projectId} is unknown")
-    | Status.SubscriptionError exn -> TerrabuildException.Raise("Optimization error", exn)
+    let buildAllClusters() =
+        let rec buildNextClusters availableNodes (status, clusters) =
+            seq {
+                if clusters |> Map.count = 0 then
+                    match status with
+                    | Status.Ok -> if availableNodes |> Set.count <> 0 then TerrabuildException.Raise($"Failed to optimize whole graph")
+                    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Node {projectId} is unknown")
+                    | Status.SubscriptionError exn -> TerrabuildException.Raise("Optimization error", exn)
+                else
+                    yield! clusters
+                    let processedNodes = clusters.Values |> Set.collect id
+                    let availableNodes = availableNodes - processedNodes
+                    yield! availableNodes |> computeClusters |> buildNextClusters availableNodes
+            }
 
-    // find a project for each cluster
-    let clusterNodes =
-        clusters
-        |> Seq.map (fun kvp -> kvp.Value |> fst, kvp.Key)
-        |> Seq.groupBy fst
-        |> Map.ofSeq
-        |> Map.map (fun _ nodeIds -> nodeIds |> Seq.map snd |> Set.ofSeq)
+        seq {
+            let availableNodes = graph.Nodes.Keys |> Set.ofSeq
+            yield! availableNodes |> computeClusters |> buildNextClusters availableNodes
+        }
+
+    let clusterNodes = buildAllClusters()
 
     // invoke __optimize__ function on each cluster
     let mutable graph = graph
@@ -491,8 +500,10 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
 
             // did we optimize everything ?
             if optimizedActions.Length = target.Actions.Length then
+                let clusterId = Guid.NewGuid()
+                let cluster = $"{clusterId}"
                 let clusterNode = {
-                    Node.UniqueId = Guid.NewGuid()
+                    Node.UniqueId = clusterId
                     Node.Id = cluster
                     Node.Hash = clusterHash
                     Node.Project = $"batch/{cluster}"

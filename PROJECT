@@ -1,0 +1,3 @@
+project @dotnet {
+    dependencies = []
+}
