@@ -368,7 +368,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
     let computeClusters remainingNodes =
         let clusters = Concurrent.ConcurrentDictionary<string, string set>()
 
-        let hub = Hub.Create(1)
+        let hub = Hub.Create(options.MaxConcurrency)
         for nodeId in remainingNodes do
             let node  = graph.Nodes |> Map.find nodeId
             let nodeComputed = hub.CreateComputed<Node> nodeId
@@ -382,31 +382,31 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                 |> Array.ofSeq
 
             let addToCluster (node: Node) =
-                if node |> shallRebuild |> not then
-                    Log.Debug("Node {node} does not need rebuild", node.Id)
-                    false
-
-                else
-                    // check all actions are batchable
-                    let batchable =
-                        nodeDependencies
-                        |> Set.forall (fun dependency ->
-                            graph.Nodes[dependency].CommandLines
-                            |> List.forall (fun cmd -> cmd.BatchContext <> None))
-
-                    if batchable |> not then
-                        Log.Debug("Node {node} is not batchable", node.Id)
-                        false
-                    elif nodeDependencies = Set.empty || clusters.ContainsKey(node.Cluster) then
-                        let add _ = Set.singleton node.Id
-                        let update _ nodes = nodes |> Set.add node.Id
-                        // lock because AddOrUpdate is not thread safe
-                        lock clusters (fun () -> clusters.AddOrUpdate(node.Cluster, add, update) |> ignore)
-                        Log.Debug("Node {node} has joined cluster {cluster}", node.Id, node.Cluster)
-                        true
+                let add _ = Set.singleton node.Id
+                let update _ nodes = nodes |> Set.add node.Id
+                let clusterId =
+                    if node |> shallRebuild |> not then
+                        Log.Debug("Node {node} does not need rebuild", node.Id)
+                        node.Id
                     else
-                        Log.Debug("Node {node} can't join any clusters", node.Id)
-                        false
+                        let batchable =
+                            nodeDependencies
+                            |> Set.forall (fun dependency ->
+                                graph.Nodes[dependency].CommandLines
+                                |> List.forall (fun cmd -> cmd.BatchContext <> None))
+
+                        if batchable |> not then
+                            Log.Debug("Node {node} is not batchable", node.Id)
+                            node.Id
+                        elif nodeDependencies = Set.empty || clusters.ContainsKey(node.Cluster) then
+                            Log.Debug("Node {node} has joined cluster {cluster}", node.Id, node.Cluster)
+                            node.Cluster
+                        else
+                            Log.Debug("Node {node} can't join any clusters", node.Id)
+                            node.Id
+
+                lock clusters (fun () -> clusters.AddOrUpdate(clusterId, add, update) |> ignore)
+                clusterId <> node.Id
 
             let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
             hub.Subscribe awaitedSignals (fun () -> if addToCluster node then nodeComputed.Value <- node)

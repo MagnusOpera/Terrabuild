@@ -188,7 +188,7 @@ type Hub(maxConcurrency) =
                 | [| |] -> Guid.NewGuid().ToString()
                 | signals ->
                     let names = signals |> Array.map (fun signal -> (signal :?> Signal).Name)
-                    String.Join("/", names)
+                    String.Join(",", names)
             let subscription = Subscription(name, eventQueue, signals)
             subscriptions.TryAdd(name, subscription) |> ignore
             subscription.Subscribe(handler)
