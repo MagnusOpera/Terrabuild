@@ -4,9 +4,9 @@
     "net8.0": {
       "FSharp.Core": {
         "type": "Direct",
-        "requested": "[8.0.200, )",
-        "resolved": "8.0.200",
-        "contentHash": "U016Y0NhtIEQvbmxf6Sff9lx7PTSGEFctA/kLrJr9MvNfKwjrzlK/4C2V1StgsapegWeGYW6K8Zd/D6vc9C4Yw=="
+        "requested": "[8.0.300, )",
+        "resolved": "8.0.300",
+        "contentHash": "Jv44fV7TNglyMku89lQcA4Q6mFKLyHb2bs1Yb72nvSVc+cHplEnoZ4XQUaaTLJGUTx/iMqcrkYGtaLzkkIhpaA=="
       },
       "FsUnit": {
         "type": "Direct",
@@ -847,7 +847,7 @@
       "terrabuild.common": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[8.0.200, )",
+          "FSharp.Core": "[8.0.300, )",
           "FSharp.SystemTextJson": "[1.2.42, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0, )"
         }
@@ -855,7 +855,7 @@
       "terrabuild.configuration": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[8.0.200, )",
+          "FSharp.Core": "[8.0.300, )",
           "FsLexYacc": "[10.2.0, )",
           "Terrabuild.Expressions": "[1.0.0, )"
         }
@@ -863,7 +863,7 @@
       "terrabuild.expressions": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[8.0.200, )",
+          "FSharp.Core": "[8.0.300, )",
           "Terrabuild.Common": "[1.0.0, )"
         }
       }

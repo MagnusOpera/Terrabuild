@@ -1,0 +1,7 @@
+project @dotnet {
+    dependencies = []
+}
+
+target build {
+    @dotnet build
+}

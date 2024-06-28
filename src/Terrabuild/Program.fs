@@ -66,7 +66,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         Log.Debug("ProcessorCount = {procCount}", Environment.ProcessorCount)
 
         // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
-        if options.WhatIf |> not then ".terrabuild" |> IO.createDirectory
+        IO.createDirectory ".terrabuild"
 
         if options.Debug then
             let jsonOptions = Json.Serialize options
@@ -102,7 +102,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
             let buildGraph =
                 if options.NoBatch then requiredGraph
-                else Graph.optimize config requiredGraph cache options
+                else Graph.optimize config requiredGraph options
             if options.Debug then logGraph buildGraph "build"
 
             let nodesToRun = graph.Nodes.Count
