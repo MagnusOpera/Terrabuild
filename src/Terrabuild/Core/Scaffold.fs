@@ -14,6 +14,7 @@ type ExtensionType =
     | Make
     | Docker
     | Terraform
+    | Cargo
 
 [<RequireQualifiedAccess>]
 type Target =
@@ -59,6 +60,7 @@ let extMarkers = [
     ExtensionType.Make, "Makefile"
     ExtensionType.Docker, "Dockerfile"
     ExtensionType.Terraform, ".terraform.lock.hcl"
+    ExtensionType.Cargo, "Cargo.toml"
 ]
 
 
@@ -90,6 +92,10 @@ let extConfigs =
                                    Defaults = Map.empty
                                    Actions = Map [ Target.Build, [ "plan" ]
                                                    Target.Deploy, [ "apply" ] ] }
+
+        ExtensionType.Cargo, { Container = None // Some "rust:1.79.0"
+                               Defaults = Map [ "profile", "$configuration" ]
+                               Actions = Map [ Target.Build, [ "build" ]] }
     ]
 
 
