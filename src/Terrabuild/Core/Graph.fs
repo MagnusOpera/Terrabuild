@@ -59,10 +59,6 @@ let graph (graph: Workspace) =
         $"classDef required stroke:orange,stroke-width:3px"
         $"classDef selected stroke:black,stroke-width:3px"
 
-        // declare colors
-        for (KeyValue(cluster, color)) in clusterColors do
-            $"classDef cluster-{cluster} stroke:{color},stroke-width:3px,fill:white,rx:10,ry:10"
-
         for (KeyValue(cluster, nodes)) in clusters do
             let clusterNode = nodes |> List.tryFind (fun node -> node.Id = cluster)
             let isCluster = clusterNode |> Option.isSome
@@ -78,6 +74,7 @@ let graph (graph: Workspace) =
 
             if isCluster then
                 "end"
+                $"classDef cluster-{cluster} stroke:{clusterColors[cluster]},stroke-width:3px,fill:white,rx:10,ry:10"
                 $"class {cluster} cluster-{cluster}"
 
             for srcNode in nodes do
