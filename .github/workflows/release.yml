@@ -17,7 +17,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0.204
+          dotnet-version: 8.0.302
 
       - name: Download Github Release artifacts
         uses: robinraju/release-downloader@v1.10

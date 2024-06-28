@@ -38,7 +38,7 @@ target publish {
 }
 
 extension @dotnet {
-    container = "mcr.microsoft.com/dotnet/sdk:8.0.204"
+    container = "mcr.microsoft.com/dotnet/sdk:8.0.302"
     defaults = {
         configuration: $configuration
     }

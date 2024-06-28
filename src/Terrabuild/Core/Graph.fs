@@ -353,20 +353,14 @@ let markRequired (graph: Workspace) (options: Configuration.Options) =
 
 
 
-let optimize (configuration: Configuration.Workspace) (graph: Workspace) (cache: Cache.ICache)  (options: Configuration.Options) =
+let optimize (configuration: Configuration.Workspace) (graph: Workspace) (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
-    let cacheMode =
-        if configuration.SourceControl.CI then Cacheability.Always
-        else Cacheability.Remote
-
     let shallRebuild (node: Node) =
-        let useRemoteCache = Cacheability.Never <> (node.Cache &&& cacheMode)
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
         if node.Forced || node.Cache = Cacheability.Never then
             true
         else
-            let summary = cache.TryGetSummaryOnly useRemoteCache cacheEntryId
+            let summary = node.BuildSummary
             match summary with
             | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
             | _ -> true
