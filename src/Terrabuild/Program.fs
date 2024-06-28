@@ -102,7 +102,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
             let buildGraph =
                 if options.NoBatch then requiredGraph
-                else Graph.optimize config requiredGraph cache options
+                else Graph.optimize config requiredGraph options
             if options.Debug then logGraph buildGraph "build"
 
             let nodesToRun = graph.Nodes.Count
