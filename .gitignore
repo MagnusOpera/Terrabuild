@@ -418,9 +418,3 @@ terrabuild.md
 .out
 .nuget
 .mono
-
-/tests/scaffold/WORKSPACE
-/tests/scaffold/**/PROJECT
-/tests/scaffold/.gitignore
-.local-store
-.env
