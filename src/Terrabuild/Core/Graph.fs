@@ -365,53 +365,38 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
             | Some summary -> options.Retry && summary.Status <> Cache.TaskStatus.Success
             | _ -> true
 
-    // map a node to a cluster
-    let clusters = Concurrent.ConcurrentDictionary<string, string*string>()
+    let processedNodes = ConcurrentDictionary<string, bool>()
+    let nodes = graph.Nodes
+
+    let clusters = Concurrent.ConcurrentDictionary<string, string set>()
     let computeCluster (node: Node) =
-        let nodeTag, reason =
-            // NOTE: if we are running log command we ensure idempotency
-            //       otherwise we are seeking to optimize graph and if task is already built, do not batch build
-            if (options.IsLog || node |> shallRebuild) |> not then
-                $"{node.Cluster}-{node.Id}", "not batchable/no build required"
-            // node has no dependencies so try to link to existing tag (this will bootstrap the infection with same virus)
+        if (options.IsLog || node |> shallRebuild) |> not then
+            Log.Debug("Node {node} do not need rebuild", node.Id)
+            false
+
+        else
+            let nodeDependencies = node.Dependencies |> Set.filter (processedNodes.ContainsKey)
+
+            // check all actions are batchable
+            let batchable =
+                nodeDependencies
+                |> Set.forall (fun dependency ->
+                    graph.Nodes[dependency].CommandLines
+                    |> List.forall (fun cmd -> cmd.BatchContext <> None))
+
+            if batchable |> not then
+                Log.Debug("Node {node} is not batchable", node.Id)
+                false
+            elif nodeDependencies = Set.empty || clusters.ContainsKey(node.Cluster) then
+                let add _ = Set.singleton node.Id
+                let update _ nodes = nodes |> Set.add node.Id
+                clusters.AddOrUpdate(node.Cluster, add, update) |> ignore
+                Log.Debug("Node {node} is added to cluster {cluster}", node.Id, node.Cluster)
+                true
             else
-                // check all actions are batchable
-                let batchable =
-                    node.Dependencies
-                    |> Set.forall (fun dependency -> graph.Nodes[dependency].CommandLines |> List.forall (fun cmd -> cmd.BatchContext <> None))
+                Log.Debug("Node {node} does not belong to any active clusters", node.Id)
+                false
 
-                if batchable |> not then
-                    $"{node.Cluster}-{node.Id}", "not batchable"
-                else
-                    // collect tags from dependencies
-                    // if they are the same then infect this node with children virus iif it's unique
-                    // otherwise mutate the virus in new variant
-                    let childrenTags =
-                        node.Dependencies
-                        |> Set.choose (fun dependency ->
-                            let dependencyNode = graph.Nodes[dependency]
-                            if dependencyNode |> shallRebuild then Some (clusters[dependency] |> fst, dependencyNode.Cluster)
-                            else None)
-                        |> List.ofSeq
-
-                    match childrenTags with
-                    | [] -> node.Cluster, "batchable/no impacting dependencies"
-                    | [tag, cluster] ->
-                        if cluster = node.Cluster then tag, "batchable/diffusion"
-                        else node.Cluster, "batchable/new cluster"
-                    | childrenTags ->
-                        let tags = childrenTags |> List.map (fun (tag, cluster) -> $"{tag}+{cluster}") |> String.join "/"
-                        $"{node.Cluster}-{node.Id}", $"not batchable/multiple tags: {tags}"
-        clusters.TryAdd(node.Id, (nodeTag, reason)) |> ignore
-        Log.Debug("Node {node} ({label}) is assigned tag {tag} with reason {reason}", node.Id, node.Label, nodeTag, reason)
-
-
-    // optimization is like building but instead of running actions
-    // conceptually, it's inspired from virus propagation :-)
-    // this starts spontaneously with leaf nodes (patients 0) - same virus even they are not related (leaf nodes have no dependencies by definition)
-    // then the infection flows to parents as they are compatible
-    // if they are not compatible - the virus resets (new patients 0) and continue its propagation up to the root nodes
-    // nodeTags dictionary holds a mapping of nodes to virus variant - they are our clusters
 
     let hub = Hub.Create(options.MaxConcurrency)
     for (KeyValue(nodeId, node)) in graph.Nodes do
@@ -425,8 +410,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
 
         let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
         hub.Subscribe awaitedSignals (fun () ->
-            computeCluster node
-            nodeComputed.Value <- node)
+            if computeCluster node then nodeComputed.Value <- node)
 
     let status = hub.WaitCompletion()
     match status with
