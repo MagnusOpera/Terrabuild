@@ -11,4 +11,5 @@ let systemScripts =
         "@null", typeof<Null>
         "@shell", typeof<Shell>
         "@terraform", typeof<Terraform>
+        "@cargo", typeof<Cargo>
     ]
