@@ -27,7 +27,7 @@ type Cargo() =
     /// </summary>
     /// <param name="ignores" example="[ ]">Default values.</param>
     /// <param name="outputs" example="[ &quot;target/debug/&quot; &quot;target/release/&quot; ]">Default values.</param>
-    /// <param name="dependencies" example="[ &lt;path /&gt; from project ]">Default values.</param>
+    /// <param name="dependencies" example="[ &lt;&quot;path=&quot; from project&gt; ]">Default values.</param>
     static member __defaults__ (context: ExtensionContext) =
         let projectFile = CargoHelpers.findProjectFile context.Directory
         let dependencies = projectFile |> CargoHelpers.findDependencies 
@@ -43,7 +43,7 @@ type Cargo() =
     /// Build project.
     /// </summary>
     /// <param name="profile" example="&quot;release&quot;">Profile to use to build project. Default is `dev`.</param>
-    /// <param name="arguments" example="--keep-going">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;--keep-going&quot;">Arguments for command.</param>
     static member build (profile: string option) (arguments: string option) =
         let profile =
             profile
@@ -70,7 +70,7 @@ type Cargo() =
     /// Test project.
     /// </summary>
     /// <param name="profile" example="&quot;release&quot;">Profile for test command.</param>
-    /// <param name="arguments" example="--blame-hang">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;--blame-hang&quot;">Arguments for command.</param>
     static member test (profile: string option) (arguments: string option) =
         let profile = profile |> Option.defaultValue "dev"
         let arguments = arguments |> Option.defaultValue ""
