@@ -384,10 +384,10 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
             let addToCluster (node: Node) =
                 let add _ = Set.singleton node.Id
                 let update _ nodes = nodes |> Set.add node.Id
-                let clusterId =
+                let declare, clusterId =
                     if node |> shallRebuild |> not then
                         Log.Debug("Node {node} does not need rebuild", node.Id)
-                        node.Id
+                        true, node.Id
                     else
                         let batchable =
                             nodeDependencies
@@ -397,15 +397,16 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
 
                         if batchable |> not then
                             Log.Debug("Node {node} is not batchable", node.Id)
-                            node.Id
+                            true, node.Id
                         elif nodeDependencies = Set.empty || clusters.ContainsKey(node.Cluster) then
                             Log.Debug("Node {node} has joined cluster {cluster}", node.Id, node.Cluster)
-                            node.Cluster
+                            true, node.Cluster
                         else
                             Log.Debug("Node {node} can't join any clusters", node.Id)
-                            node.Id
+                            false, node.Id
 
-                lock clusters (fun () -> clusters.AddOrUpdate(clusterId, add, update) |> ignore)
+                if declare then
+                    lock clusters (fun () -> clusters.AddOrUpdate(clusterId, add, update) |> ignore)
                 clusterId <> node.Id
 
             let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)

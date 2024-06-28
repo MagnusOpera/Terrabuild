@@ -97,7 +97,7 @@ self-dist: clean publish
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
 
 self-test: clean publish
-	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --logs
+	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --whatif --localonly
 
 self-publish: clean publish
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
