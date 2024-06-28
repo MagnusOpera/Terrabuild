@@ -368,7 +368,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
     let computeClusters remainingNodes =
         let clusters = Concurrent.ConcurrentDictionary<string, string set>()
 
-        let hub = Hub.Create(options.MaxConcurrency)
+        let hub = Hub.Create(1)
         for nodeId in remainingNodes do
             let node  = graph.Nodes |> Map.find nodeId
             let nodeComputed = hub.CreateComputed<Node> nodeId
@@ -382,7 +382,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                 |> Array.ofSeq
 
             let addToCluster (node: Node) =
-                if (options.IsLog || node |> shallRebuild) |> not then
+                if node |> shallRebuild |> not then
                     Log.Debug("Node {node} does not need rebuild", node.Id)
                     false
 
@@ -400,7 +400,8 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                     elif nodeDependencies = Set.empty || clusters.ContainsKey(node.Cluster) then
                         let add _ = Set.singleton node.Id
                         let update _ nodes = nodes |> Set.add node.Id
-                        clusters.AddOrUpdate(node.Cluster, add, update) |> ignore
+                        // lock because AddOrUpdate is not thread safe
+                        lock clusters (fun () -> clusters.AddOrUpdate(node.Cluster, add, update) |> ignore)
                         Log.Debug("Node {node} has joined cluster {cluster}", node.Id, node.Cluster)
                         true
                     else
@@ -441,104 +442,115 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
         let oneNodeId = nodeIds |> Seq.head
         let oneNode = graph.Nodes |> Map.find oneNodeId
 
-        if nodeIds.Count > 1 then
-            let nodes =
-                nodeIds
-                |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
-                |> List.ofSeq
+        let nodes =
+            nodeIds
+            |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
+            |> List.ofSeq
 
-            // get hands on target
-            let project = configuration.Projects |> Map.find oneNode.Project
-            let target = project.Targets |> Map.find oneNode.Target
+        let clusterNode =
+            if nodeIds.Count > 1 then
+                // get hands on target
+                let project = configuration.Projects |> Map.find oneNode.Project
+                let target = project.Targets |> Map.find oneNode.Target
 
-            let projectPaths = nodes |> List.map (fun node -> node.Project)
+                let projectPaths = nodes |> List.map (fun node -> node.Project)
 
-            // cluster dependencies gather all nodeIds dependencies
-            // nodes forming the cluster are removed (no-self dependencies)
-            let clusterDependencies =
-                nodes
-                |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
-            let clusterDependencies = clusterDependencies - nodeIds
+                // cluster dependencies gather all nodeIds dependencies
+                // nodes forming the cluster are removed (no-self dependencies)
+                let clusterDependencies =
+                    nodes
+                    |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
+                let clusterDependencies = clusterDependencies - nodeIds
 
-            let clusterHash =
-                clusterDependencies
-                |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Hash)
-                |> Hash.sha256strings
+                let clusterHash =
+                    clusterDependencies
+                    |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Hash)
+                    |> Hash.sha256strings
 
-            let optimizeAction (action: Configuration.ContaineredActionBatch) =
-                action.BatchContext
-                |> Option.bind (fun context ->
-                    let optContext = {
-                        BatchContext.Debug = options.Debug
-                        BatchContext.CI = configuration.SourceControl.CI
-                        BatchContext.BranchOrTag = configuration.SourceControl.BranchOrTag
-                        BatchContext.ProjectPaths = projectPaths
-                        BatchContext.TempDir = ".terrabuild"
-                        BatchContext.NodeHash = clusterHash
-                    }
-                    let parameters = 
-                        match context.Context with
-                        | Terrabuild.Expressions.Value.Map map ->
-                            map
-                            |> Map.add "context" (Terrabuild.Expressions.Value.Object optContext)
-                            |> Terrabuild.Expressions.Value.Map
-                        | _ -> TerrabuildException.Raise("internal error")
+                let optimizeAction (action: Configuration.ContaineredActionBatch) =
+                    action.BatchContext
+                    |> Option.bind (fun context ->
+                        let optContext = {
+                            BatchContext.Debug = options.Debug
+                            BatchContext.CI = configuration.SourceControl.CI
+                            BatchContext.BranchOrTag = configuration.SourceControl.BranchOrTag
+                            BatchContext.ProjectPaths = projectPaths
+                            BatchContext.TempDir = ".terrabuild"
+                            BatchContext.NodeHash = clusterHash
+                        }
+                        let parameters = 
+                            match context.Context with
+                            | Terrabuild.Expressions.Value.Map map ->
+                                map
+                                |> Map.add "context" (Terrabuild.Expressions.Value.Object optContext)
+                                |> Terrabuild.Expressions.Value.Map
+                            | _ -> TerrabuildException.Raise("internal error")
 
-                    let optCommand = $"__{context.Command}__"
-                    let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
-                    match result with
-                    | Extensions.InvocationResult.Success actionBatch ->
-                        Some { action
-                               with BatchContext = None
+                        let optCommand = $"__{context.Command}__"
+                        let result = Extensions.invokeScriptMethod<Action list> optCommand parameters (Some context.Script)
+                        match result with
+                        | Extensions.InvocationResult.Success actionBatch ->
+                            Some { action with
+                                    BatchContext = None
                                     Actions = actionBatch }
-                    | _ -> None
-                )
+                        | _ -> None
+                    )
 
-            let optimizedActions =
-                target.Actions
-                |> List.choose optimizeAction
+                let optimizedActions =
+                    target.Actions
+                    |> List.choose optimizeAction
 
-            // did we optimize everything ?
-            if optimizedActions.Length = target.Actions.Length then
-                let clusterId = Guid.NewGuid()
-                let cluster = $"{clusterId}"
-                let clusterNode = {
-                    Node.UniqueId = clusterId
-                    Node.Id = cluster
-                    Node.Hash = clusterHash
-                    Node.Project = $"batch/{cluster}"
-                    Node.Target = oneNode.Target
-                    Node.Label = $"batch-{oneNode.Target} {cluster}"
-                    Node.Dependencies = clusterDependencies
-                    ProjectHash = clusterHash
-                    Outputs = Set.empty
-                    Cache = oneNode.Cache
-                    IsLeaf = oneNode.IsLeaf
-                    Batched = false
-                    Required = true
-                    Forced = true
-                    BuildSummary = None
+                // did we optimize everything ?
+                if optimizedActions.Length = target.Actions.Length then
+                    let clusterId = Guid.NewGuid()
+                    let cluster = $"{clusterId}"
+                    let clusterNode = {
+                        Node.UniqueId = clusterId
+                        Node.Id = cluster
+                        Node.Hash = clusterHash
+                        Node.Project = $"batch/{cluster}"
+                        Node.Target = oneNode.Target
+                        Node.Label = $"batch-{oneNode.Target} {cluster}"
+                        Node.Dependencies = clusterDependencies
+                        ProjectHash = clusterHash
+                        Outputs = Set.empty
+                        Cache = oneNode.Cache
+                        IsLeaf = oneNode.IsLeaf
+                        Batched = false
+                        Required = true
+                        Forced = true
+                        BuildSummary = None
 
-                    Cluster = cluster
-                    CommandLines = optimizedActions
-                }
-
-                // add cluster node to the graph
-                graph <- { graph with Nodes = graph.Nodes |> Map.add cluster clusterNode }
-                
-                // patch each nodes to have a single dependency on the cluster
-                for node in nodes do
-                    let node = { node with
-                                    Dependencies = node.Dependencies |> Set.add clusterNode.Id
-                                    Batched = true
-                                    CommandLines = List.Empty
-                                    Cluster = cluster }
-                    graph <- { graph with
-                                    Nodes = graph.Nodes |> Map.add node.Id node }
+                        Cluster = cluster
+                        CommandLines = optimizedActions
+                    }
+                    Some clusterNode
+                else
+                    Log.Debug("Failed to optimize cluster {cluster}", cluster)
+                    None
             else
-                Log.Debug("Failed to optimize cluster {cluster}", cluster)
-        else
-            Log.Debug("Cluster {cluster} has only 1 node", cluster)
+                Log.Debug("Cluster {cluster} has only 1 node", cluster)
+                None
+
+        // patch each nodes to have a single dependency on the cluster
+        match clusterNode with
+        | Some clusterNode -> graph <- { graph with Nodes = graph.Nodes |> Map.add clusterNode.Id clusterNode }
+        | _ -> ()
+            
+        for node in nodes do
+            let node =
+                match clusterNode with
+                | Some clusterNode ->
+                    { node with
+                        Dependencies = node.Dependencies |> Set.add clusterNode.Id
+                        Batched = true
+                        CommandLines = List.Empty
+                        Cluster = clusterNode.Id }
+                | _ ->
+                    { node with Cluster = $"{Guid.NewGuid()}" }
+
+            graph <- { graph with
+                            Nodes = graph.Nodes |> Map.add node.Id node }
 
     let endedAt = DateTime.UtcNow
 

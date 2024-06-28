@@ -180,6 +180,9 @@ run-deploy-dev:
 run-build-app:
 	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --label dotnet --debug
 
+run-graph-cluster-layers:
+	dotnet run --project src/Terrabuild -- run build --workspace tests/cluster-layers --whatif --force --debug
+
 github-tests:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --configuration $(env) --debug --retry --parallel 4
 

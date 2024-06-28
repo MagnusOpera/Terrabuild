@@ -276,7 +276,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
         // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
         let projectHash =
-            [ filesHash; dependenciesHash ]
+            [ projectId; filesHash; dependenciesHash ]
             |> Hash.sha256strings
 
         let projectSteps =
