@@ -1,3 +1,0 @@
-target build {
-    depends_on = [ ^build ]
-}

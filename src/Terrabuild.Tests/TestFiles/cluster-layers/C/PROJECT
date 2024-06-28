@@ -1,7 +1,0 @@
-project @npm {
-    dependencies = [ "/A" "/B" ]
-}
-
-target build {
-    @npm build
-}
