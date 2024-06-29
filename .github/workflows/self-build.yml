@@ -73,7 +73,7 @@ jobs:
           name: Unit Tests Report
           path: '**/*.trx'
           reporter: dotnet-trx
-          fail-on-empty: false
+          fail-on-error: false
           output-to: 'step-summary'
 
       - name: Upload Terrabuild Logs
