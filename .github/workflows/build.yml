@@ -53,7 +53,7 @@ jobs:
             terrabuild-debug.*
 
       - name: Create Test Report
-        uses: dorny/test-reporter@main
+        uses: pchalamet/test-reporter@link
         if: success() || failure()
         with:
           name: Unit Tests Report
