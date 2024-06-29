@@ -2,9 +2,6 @@ name: self-build
 run-name: "${{ github.name }} ${{ inputs.retry == true && 'retry' || '' }} ${{ inputs.force == true && 'force' || '' }}"
 
 on:
-  push:
-    branches:
-      - '**'
   workflow_dispatch:
     inputs:
       retry:
