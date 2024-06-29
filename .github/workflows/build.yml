@@ -40,11 +40,12 @@ jobs:
 
       - name: Build & Publish
         run: |
+          make test
           make publish
-          make self-publish
 
-      - name: Self Test
-        run: make self-test
+      - name: Self Publish
+        run: |
+          make self-publish
 
       - name: Create Test Report
         uses: dorny/test-reporter@main
