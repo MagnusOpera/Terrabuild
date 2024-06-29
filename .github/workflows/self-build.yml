@@ -67,13 +67,14 @@ jobs:
             --logs --debug \
 
       - name: Create Test Report
-        uses: dorny/test-reporter@v1
+        uses: phoenix-actions/test-reporting@v8
         if: success() || failure()
         with:
           name: Unit Tests Report
           path: '**/*.trx'
           reporter: dotnet-trx
           fail-on-empty: false
+          output-to: 'step-summary'
 
       - name: Upload Terrabuild Logs
         uses: actions/upload-artifact@v4
