@@ -43,7 +43,6 @@ jobs:
       - name: Self Publish
         run: |
           make self-publish
-          printf "\n___\n" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
