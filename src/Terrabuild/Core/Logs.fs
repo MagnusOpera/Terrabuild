@@ -78,14 +78,6 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
             dumpLogs ()
 
 
-        let mermaid = Graph.graph graph
-        let targets = graph.Targets |> String.join " "
-        $"# Build graph ({targets})" |> append
-        "```mermaid" |> append
-        mermaid |> appendLines
-        "```" |> append
-
-        "" |> append
         "# Summary" |> append
         "" |> append
         "| Target | Duration |" |> append
@@ -112,11 +104,17 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         $"| Cost | {cost} |" |> append
         $"| Gain | {gain} |" |> append
 
-        $"<details><summary>Expand for build details ({targets})</summary>" |> append
+        let mermaid = Graph.graph graph
+        let targets = graph.Targets |> String.join " "
+        $"# Build graph ({targets})" |> append
+        "```mermaid" |> append
+        mermaid |> appendLines
+        "```" |> append
+
         "" |> append
+        $"<details><summary>Expand for build details</summary>" |> append
         "# Details" |> append
         infos |> List.iter (fun (node, summary) -> dumpMarkdown node summary)
-        "" |> append
         "</details>" |> append
 
     let dumpTerminal (infos: (Node * TargetSummary option) seq) =
