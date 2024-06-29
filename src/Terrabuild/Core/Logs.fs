@@ -100,7 +100,8 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
         "" |> append
 
         let mermaid = Graph.graph graph
-        "# Build graph" |> append
+        let targets = graph.Targets |> String.join " "
+        $"# Build graph ({targets})" |> append
         "```mermaid" |> append
         mermaid |> appendLines
         "```" |> append
