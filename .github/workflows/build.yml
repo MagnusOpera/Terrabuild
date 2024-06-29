@@ -46,15 +46,15 @@ jobs:
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
-        if: success() || failure()
+        if: always()
         with:
           name: Terrabuild Debug
           path: |
             terrabuild-debug.*
 
       - name: Create Test Report
-        uses: dorny/test-reporter@main
-        if: success() || failure()
+        uses: pchalamet/test-reporter@link
+        if: always()
         with:
           name: Unit Tests Report
           path: '**/*.trx'
