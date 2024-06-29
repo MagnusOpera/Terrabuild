@@ -67,7 +67,7 @@ jobs:
             --logs --debug \
 
       - name: Create Test Report
-        uses: pchalamet/test-reporting
+        uses: pchalamet/test-reporting@main
         if: success() || failure()
         with:
           name: Unit Tests Report
