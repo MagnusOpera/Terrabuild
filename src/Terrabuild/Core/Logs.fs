@@ -112,10 +112,12 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         $"| Cost | {cost} |" |> append
         $"| Gain | {gain} |" |> append
 
+        $"<details><summary>Expand for build details ({targets})</summary>" |> append
         "" |> append
         "# Details" |> append
         infos |> List.iter (fun (node, summary) -> dumpMarkdown node summary)
-
+        "" |> append
+        "</details>" |> append
 
     let dumpTerminal (infos: (Node * TargetSummary option) seq) =
         let dumpTerminal (node: Node) (summary: TargetSummary option) =
