@@ -100,7 +100,7 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
             if successful then "success", "success"
             else "failure", "critical"
         let targetsBadge = graph.Targets |> String.join "_"
-        $"![{targets}](https://img.shields.io/badge/{targetsBadge}-{message}-{color})" |> append
+        $"![{targets}](https://img.shields.io/badge/{targetsBadge}-build_{message}-{color})" |> append
 
         $"<details><summary>Expand for build details</summary>" |> append
 
