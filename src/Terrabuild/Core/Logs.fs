@@ -39,7 +39,7 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
             let header =
                 let statusEmoji = statusEmoji summary
                 let uniqueId = stableRandomId node.Id
-                $"## <a name=\"{uniqueId}\"></a> {statusEmoji} {node.Label}"
+                $"## <a name=\"user-content-{uniqueId}\"></a> {statusEmoji} {node.Label}"
 
             let dumpLogs =
                 match summary with
