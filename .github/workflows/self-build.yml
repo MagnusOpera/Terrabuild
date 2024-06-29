@@ -63,17 +63,6 @@ jobs:
             ${{ github.event.inputs.retry == 'true' && '--retry' || '' }} \
             --logs --debug \
 
-      - name: Create Test Report
-        uses: dorny/test-reporter@main
-        if: success() || failure()
-        with:
-          name: Unit Tests Report
-          path: '**/*.trx'
-          reporter: dotnet-trx
-          fail-on-error: false
-          fail-on-empty: false
-          use-actions-summary: true
-
       - name: Upload Terrabuild Logs
         uses: actions/upload-artifact@v4
         if: success() || failure()
@@ -84,3 +73,13 @@ jobs:
             ~/.terrabuild/buildcache/**/status
             ~/.terrabuild/buildcache/**/summary.json
             ~/.terrabuild/buildcache/**/*.log
+
+      - name: Create Test Report
+        uses: dorny/test-reporter@main
+        if: success() || failure()
+        with:
+          name: Unit Tests Report
+          path: '**/*.trx'
+          reporter: dotnet-trx
+          fail-on-empty: false
+          use-actions-summary: true
