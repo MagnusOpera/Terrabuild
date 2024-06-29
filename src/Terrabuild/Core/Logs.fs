@@ -72,6 +72,14 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
             dumpLogs ()
 
 
+        let mermaid = Graph.graph graph
+        let targets = graph.Targets |> String.join " "
+        $"# Build graph ({targets})" |> append
+        "```mermaid" |> append
+        mermaid |> appendLines
+        "```" |> append
+
+        "" |> append
         "# Summary" |> append
         "" |> append
         "| Target | Duration |" |> append
@@ -96,15 +104,6 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
             ) (TimeSpan.Zero, TimeSpan.Zero)
         $"| Cost | {cost} |" |> append
         $"| Gain | {gain} |" |> append
-
-        "" |> append
-
-        let mermaid = Graph.graph graph
-        let targets = graph.Targets |> String.join " "
-        $"# Build graph ({targets})" |> append
-        "```mermaid" |> append
-        mermaid |> appendLines
-        "```" |> append
 
         "" |> append
         "# Details" |> append
