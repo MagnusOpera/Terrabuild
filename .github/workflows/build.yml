@@ -38,12 +38,13 @@ jobs:
       # - name: Run Tests
       #   run: make github-tests
 
-      - name: Build
-        if: always()
+      - name: Build & Publish
         run: |
           make publish
-          make self-test
           make self-publish
+
+      - name: Self Test
+        run: make self-test
 
       - name: Create Test Report
         uses: dorny/test-reporter@main
