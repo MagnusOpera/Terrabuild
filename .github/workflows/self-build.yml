@@ -74,6 +74,7 @@ jobs:
           path: '**/*.trx'
           reporter: dotnet-trx
           fail-on-error: false
+          fail-on-empty: false
           output-to: 'step-summary'
 
       - name: Upload Terrabuild Logs
