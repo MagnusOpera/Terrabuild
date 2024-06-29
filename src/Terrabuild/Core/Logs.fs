@@ -143,7 +143,9 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         "" |> append
 
         "</details>" |> append
-        "---" |> append
+        "" |> append
+        "___" |> append
+        "" |> append
 
     let dumpTerminal (infos: (Node * TargetSummary option) seq) =
         let dumpTerminal (node: Node) (summary: TargetSummary option) =
