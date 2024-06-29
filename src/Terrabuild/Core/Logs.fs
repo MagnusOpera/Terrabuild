@@ -9,7 +9,7 @@ open System
 
 let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) debug =
     let stableRandomId (id: string) =
-        $"{logId} {id}" |> Hash.md5
+        $"{logId} {id}" |> Hash.md5 |> String.toLower
 
     let scope =
         match impactedNodes with
