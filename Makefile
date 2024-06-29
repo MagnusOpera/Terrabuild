@@ -87,22 +87,22 @@ docs:
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net8.0/Terrabuild.Extensions.xml ../website/content/docs/extensions
 
 
-self-build: clean publish
+self-build:
 	.out/dotnet/terrabuild run build --workspace src --configuration $(env) --retry --debug --logs
 
-self-build-local: clean publish
+self-build-local:
 	.out/dotnet/terrabuild run build --workspace src --configuration $(env) --retry --debug --logs --localonly
 
-self-dist: clean publish
+self-dist:
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
 
-self-test: clean publish
+self-test:
 	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --whatif --localonly
 
-self-publish: clean publish
+self-publish:
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
 
-self-check: clean publish
+self-check:
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --whatif --logs
 
 
