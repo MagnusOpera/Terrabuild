@@ -8,9 +8,8 @@ open System
 
 
 let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) debug =
-    let logId = $"{logId}"
     let stableRandomId (id: string) =
-        [ logId; id ] |> Hash.sha256strings
+        $"{logId} {id}" |> Hash.md5
 
     let scope =
         match impactedNodes with

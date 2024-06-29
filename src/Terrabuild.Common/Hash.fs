@@ -33,8 +33,14 @@ let sha256 (s: string) =
 let sha256strings (lines: string seq) =
     lines |> String.join "\n" |> sha256
 
-let guidify (input : string) =
-    use provider = System.Security.Cryptography.MD5.Create()
-    let inputBytes = System.Text.Encoding.GetEncoding(0).GetBytes(input)
+let md5 (s: string) =
+    use provider = MD5.Create()
+    let inputBytes = System.Text.Encoding.GetEncoding(0).GetBytes(s)
+    let hash = inputBytes |> provider.ComputeHash |> Convert.ToHexString
+    hash
+
+let guidify (s: string) =
+    use provider = MD5.Create()
+    let inputBytes = System.Text.Encoding.GetEncoding(0).GetBytes(s)
     let hashBytes = provider.ComputeHash(inputBytes)
     Guid(hashBytes)
