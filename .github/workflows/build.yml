@@ -35,9 +35,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Run Tests
-      #   run: make github-tests
-
       - name: Build & Publish
         run: |
           make test
@@ -47,6 +44,14 @@ jobs:
         run: |
           make self-publish
           printf "\n___\n" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Terrabuild Debug
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: Terrabuild Debug
+          path: |
+            terrabuild-debug.*
 
       - name: Create Test Report
         uses: dorny/test-reporter@main
@@ -58,18 +63,3 @@ jobs:
           fail-on-error: false
           fail-on-empty: false
           use-actions-summary: true
-
-      - name: Upload Terrabuild Debug
-        uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          name: Terrabuild Debug
-          path: |
-            terrabuild-debug.*
-
-      # - name: Upload Terrabuild Cache
-      #   uses: actions/upload-artifact@v4
-      #   if: success() || failure()
-      #   with:
-      #     name: Terrabuild Cache
-      #     path: ~/.terrabuild/buildcache/*
