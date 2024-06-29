@@ -1,0 +1,7 @@
+project @npm {
+    dependencies = [ "/C" ]
+}
+
+target build {
+    @npm build
+}
