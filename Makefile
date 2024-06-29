@@ -87,23 +87,20 @@ docs:
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net8.0/Terrabuild.Extensions.xml ../website/content/docs/extensions
 
 
-self-build: clean publish
+self-build:
 	.out/dotnet/terrabuild run build --workspace src --configuration $(env) --retry --debug --logs
 
-self-build-local: clean publish
+self-build-local:
 	.out/dotnet/terrabuild run build --workspace src --configuration $(env) --retry --debug --logs --localonly
 
-self-dist: clean publish
+self-dist:
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
 
-self-test: clean publish
-	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --whatif --localonly
+self-test:
+	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --logs
 
-self-publish: clean publish
+self-publish:
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
-
-self-check: clean publish
-	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --whatif --logs
 
 
 tb-build: clean
@@ -151,7 +148,7 @@ run-publish-scaffold:
 	dotnet run --project src/Terrabuild -- run dist --workspace tests/scaffold --debug --retry
 
 run-build: clean
-	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --debug
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --debug --logs
 
 run-build-playground: clean
 	dotnet run --project src/Terrabuild -- run deploy --workspace ../playgrounds/terrabuild
@@ -160,7 +157,7 @@ run-build-env: clean
 	TB_VAR_secret_message="pouet pouet" dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --debug
 
 run-rebuild: clean
-	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --label app --debug --force
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --label app --debug --force --logs
 
 run-dist:
 	dotnet run --project src/Terrabuild -- run dist --workspace tests/simple --configuration $(env) --debug

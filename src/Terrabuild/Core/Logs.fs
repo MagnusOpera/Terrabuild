@@ -16,6 +16,24 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         | Some impactedNodes -> impactedNodes
         | _ -> graph.Nodes.Keys |> Set
 
+    // filter, collect summaries and dump
+    let nodes =
+        graph.Nodes
+        |> Seq.choose (fun (KeyValue(nodeId, node)) -> if scope |> Set.contains nodeId then Some node else None)
+        |> Seq.map (fun node ->
+            let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
+            let summary = cache.TryGetSummaryOnly false cacheEntryId
+            node, summary)
+        |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
+        |> List.ofSeq
+
+    let successful =
+        nodes
+        |> List.forall (fun (node, targetSummary) ->
+            match targetSummary with
+            | Some summary -> summary.Status = TaskStatus.Success
+            | _ -> false)
+
     let dumpMarkdown filename (infos: (Node * TargetSummary option) list) =
         let appendLines lines = IO.appendLinesFile filename lines 
         let append line = appendLines [line]
@@ -77,17 +95,17 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
             header |> append
             dumpLogs ()
 
-
-        let mermaid = Graph.graph graph
         let targets = graph.Targets |> String.join " "
-        $"# Build graph ({targets})" |> append
-        "```mermaid" |> append
-        mermaid |> appendLines
-        "```" |> append
+        let message, color =
+            if successful then "success", "success"
+            else "failure", "critical"
+        let targetsBadge = graph.Targets |> String.join "_"
+        $"![{targets}](https://img.shields.io/badge/{targetsBadge}-build_{message}-{color})" |> append
+
+        $"<details><summary>Expand for details</summary>" |> append
 
         "" |> append
         "# Summary" |> append
-        "" |> append
         "| Target | Duration |" |> append
         "|--------|----------|" |> append
         infos |> List.iter (fun (node, summary) ->
@@ -113,9 +131,18 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         $"| Gain | {gain} |" |> append
 
         "" |> append
+        let mermaid = Graph.graph graph
+        $"# Build Graph" |> append
+        "```mermaid" |> append
+        mermaid |> appendLines
+        "```" |> append
+
+        "" |> append
         "# Details" |> append
         infos |> List.iter (fun (node, summary) -> dumpMarkdown node summary)
+        "" |> append
 
+        "</details>" |> append
 
     let dumpTerminal (infos: (Node * TargetSummary option) seq) =
         let dumpTerminal (node: Node) (summary: TargetSummary option) =
@@ -172,17 +199,6 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         match sourceControl.LogType with
         | Terminal -> dumpTerminal
         | Markdown filename -> dumpMarkdown filename
-
-    // filter, collect summaries and dump
-    let nodes =
-        graph.Nodes
-        |> Seq.choose (fun (KeyValue(nodeId, node)) -> if scope |> Set.contains nodeId then Some node else None)
-        |> Seq.map (fun node ->
-            let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-            let summary = cache.TryGetSummaryOnly false cacheEntryId
-            node, summary)
-        |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
-        |> List.ofSeq
 
     nodes |> logger
     nodes |> reportFailedNodes

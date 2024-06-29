@@ -38,10 +38,26 @@ jobs:
       # - name: Run Tests
       #   run: make github-tests
 
-      - name: Build
-        if: always()
+      - name: Build & Publish
+        run: |
+          make test
+          make publish
+
+      - name: Self Publish
         run: |
           make self-publish
+          printf "\n___\n" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create Test Report
+        uses: dorny/test-reporter@main
+        if: success() || failure()
+        with:
+          name: Unit Tests Report
+          path: '**/*.trx'
+          reporter: dotnet-trx
+          fail-on-error: false
+          fail-on-empty: false
+          use-actions-summary: true
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4

@@ -2,9 +2,6 @@ name: self-build
 run-name: "${{ github.name }} ${{ inputs.retry == true && 'retry' || '' }} ${{ inputs.force == true && 'force' || '' }}"
 
 on:
-  push:
-    branches:
-      - '**'
   workflow_dispatch:
     inputs:
       retry:
@@ -67,13 +64,15 @@ jobs:
             --logs --debug \
 
       - name: Create Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@main
         if: success() || failure()
         with:
           name: Unit Tests Report
           path: '**/*.trx'
           reporter: dotnet-trx
+          fail-on-error: false
           fail-on-empty: false
+          use-actions-summary: true
 
       - name: Upload Terrabuild Logs
         uses: actions/upload-artifact@v4
