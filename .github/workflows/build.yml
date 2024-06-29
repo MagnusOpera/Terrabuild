@@ -46,6 +46,7 @@ jobs:
       - name: Self Publish
         run: |
           make self-publish
+          printf "\n___\n" >> $GITHUB_STEP_SUMMARY
 
       - name: Create Test Report
         uses: dorny/test-reporter@main
