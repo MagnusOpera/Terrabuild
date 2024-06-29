@@ -11,7 +11,6 @@ type Paths = string set
 
 
 type Node = {
-    UniqueId: Guid
     Id: string
     Hash: string
     Project: string
@@ -167,8 +166,7 @@ let create (configuration: Configuration.Workspace) (targets: string set) (optio
                     if forced then Log.Debug("{nodeId} must rebuild because force build is requested", nodeId)
                     forced
 
-                let node = { UniqueId = Guid.NewGuid()
-                             Id = nodeId
+                let node = { Id = nodeId
                              Hash = hash
                              Project = project
                              Target = targetName
@@ -504,9 +502,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                 // did we optimize everything ?
                 if optimizedActions.Length = target.Actions.Length then
                     let cluster = $"cluster-{oneNode.Id}" |> Hash.sha256
-                    let clusterId = cluster |> Hash.guidify
                     let clusterNode = {
-                        Node.UniqueId = clusterId
                         Node.Id = cluster
                         Node.Hash = clusterHash
                         Node.Project = $"batch/{cluster}"

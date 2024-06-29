@@ -39,6 +39,7 @@ let rec findWorkspace dir =
 
 let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseResults<TerrabuildArgs>) =
     let debug = result.Contains(TerrabuildArgs.Debug)
+    let runId = Guid.NewGuid()
 
     let logFile name = FS.combinePath launchDir $"terrabuild-debug.{name}"
 
@@ -111,7 +112,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         if options.WhatIf then
             if logs then
-                Logs.dumpLogs buildGraph cache sourceControl None options.Debug
+                Logs.dumpLogs runId buildGraph cache sourceControl None options.Debug
             0
         else
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
@@ -123,7 +124,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 jsonBuild |> IO.writeTextFile (logFile "build.json")
 
             if logs || summary.Status <> Build.Status.Success then
-                Logs.dumpLogs buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
+                Logs.dumpLogs runId buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
 
             let result =
                 match summary.Status with

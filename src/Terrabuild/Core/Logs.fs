@@ -7,7 +7,11 @@ open System
 
 
 
-let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) debug =
+let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) debug =
+    let logId = $"{logId}"
+    let stableRandomId (id: string) =
+        [ logId; id ] |> Hash.sha256strings
+
     let scope =
         match impactedNodes with
         | Some impactedNodes -> impactedNodes
@@ -35,7 +39,8 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
         let dumpMarkdown (node: Node) (summary: TargetSummary option) =
             let header =
                 let statusEmoji = statusEmoji summary
-                $"## <a name=\"{node.UniqueId}\"></a> {statusEmoji} {node.Label}"
+                let uniqueId = stableRandomId node.Id
+                $"## <a name=\"{uniqueId}\"></a> {statusEmoji} {node.Label}"
 
             let dumpLogs =
                 match summary with
@@ -48,7 +53,9 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                             | _ -> None
 
                         match batchNode with
-                        | Some batchNode -> $"**Batched with [{batchNode.Label}](#user-content-{batchNode.UniqueId})**" |> append
+                        | Some batchNode ->
+                            let uniqueId = stableRandomId batchNode.Id
+                            $"**Batched with [{batchNode.Label}](#user-content-{uniqueId})**" |> append
                         | _ ->
                             summary.Steps |> List.iter (fun step ->
                                 $"### {step.MetaCommand}" |> append
@@ -91,7 +98,8 @@ let dumpLogs (graph: Workspace) (cache: ICache) (sourceControl: SourceControl) (
                 | Some summary -> $"{summary.EndedAt - summary.StartedAt}"
                 | _ -> ""
 
-            $"| {statusEmoji} [{node.Label}](#user-content-{node.UniqueId}) | {duration} |" |> append
+            let uniqueId = stableRandomId node.Id
+            $"| {statusEmoji} [{node.Label}](#user-content-{uniqueId}) | {duration} |" |> append
         )
         let (cost, gain) =
             infos |> List.fold (fun (cost, gain) (_, summary) ->
