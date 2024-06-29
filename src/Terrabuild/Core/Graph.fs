@@ -386,11 +386,14 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                         Log.Debug("Node {node} does not need rebuild", node.Id)
                         true, node.Id
                     else
+                        let isBatchable (node: Node) =
+                            node.CommandLines
+                            |> List.forall (fun cmd -> cmd.BatchContext <> None)
+
                         let batchable =
                             nodeDependencies
-                            |> Set.forall (fun dependency ->
-                                graph.Nodes[dependency].CommandLines
-                                |> List.forall (fun cmd -> cmd.BatchContext <> None))
+                            |> Set.add node.Id
+                            |> Set.forall (fun dependency -> isBatchable graph.Nodes[dependency])
 
                         if batchable |> not then
                             Log.Debug("Node {node} is not batchable", node.Id)
