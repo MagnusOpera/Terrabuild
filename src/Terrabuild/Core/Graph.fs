@@ -503,8 +503,8 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
 
                 // did we optimize everything ?
                 if optimizedActions.Length = target.Actions.Length then
-                    let clusterId = Guid.NewGuid()
-                    let cluster = $"{clusterId}"
+                    let cluster = $"cluster-{oneNode.Id}" |> Hash.sha256
+                    let clusterId = cluster |> Hash.guidify
                     let clusterNode = {
                         Node.UniqueId = clusterId
                         Node.Id = cluster
@@ -533,11 +533,12 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                 Log.Debug("Cluster {cluster} has only 1 node", cluster)
                 None
 
-        // patch each nodes to have a single dependency on the cluster
         match clusterNode with
         | Some clusterNode -> graph <- { graph with Nodes = graph.Nodes |> Map.add clusterNode.Id clusterNode }
         | _ -> ()
             
+        // patch each nodes to have a dependency on the cluster
+        // but still keep dependencies because outputs must be recovered
         for node in nodes do
             let node =
                 match clusterNode with
@@ -548,7 +549,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                         CommandLines = List.Empty
                         Cluster = clusterNode.Id }
                 | _ ->
-                    { node with Cluster = $"{Guid.NewGuid()}" }
+                    { node with Cluster = $"cluster-{node.Id}" |> Hash.sha256 }
 
             graph <- { graph with
                             Nodes = graph.Nodes |> Map.add node.Id node }
