@@ -97,13 +97,10 @@ self-dist:
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
 
 self-test:
-	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --whatif --localonly
+	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --logs
 
 self-publish:
 	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
-
-self-check:
-	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --whatif --logs
 
 
 tb-build: clean
