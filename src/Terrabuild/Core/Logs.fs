@@ -100,12 +100,13 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
             if successful then "success", "success"
             else "failure", "critical"
         let targetsBadge = graph.Targets |> String.join "_"
-        $"![{targets}](https://img.shields.io/badge/{targetsBadge}-build_{message}-{color})" |> append
+        let summaryAnchor = stableRandomId "summary"
+        $"[![{targets}](https://img.shields.io/badge/{targetsBadge}-build_{message}-{color})](#user-content-{summaryAnchor})" |> append
 
         $"<details><summary>Expand for details</summary>" |> append
 
         "" |> append
-        "# Summary" |> append
+        $"# <a name=\"user-content-{summaryAnchor}\"></a> Summary" |> append
         "| Target | Duration |" |> append
         "|--------|----------|" |> append
         infos |> List.iter (fun (node, summary) ->
