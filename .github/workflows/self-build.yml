@@ -67,7 +67,7 @@ jobs:
             --logs --debug \
 
       - name: Create Test Report
-        uses: phoenix-actions/test-reporting@v15
+        uses: pchalamet/test-reporting
         if: success() || failure()
         with:
           name: Unit Tests Report
