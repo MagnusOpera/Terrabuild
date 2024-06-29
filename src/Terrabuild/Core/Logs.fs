@@ -102,7 +102,7 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         let targetsBadge = graph.Targets |> String.join "_"
         $"![{targets}](https://img.shields.io/badge/{targetsBadge}-build_{message}-{color})" |> append
 
-        $"<details><summary>Expand for build details</summary>" |> append
+        $"<details><summary>Expand for details</summary>" |> append
 
         "" |> append
         "# Summary" |> append
@@ -143,6 +143,7 @@ let dumpLogs (logId: Guid) (graph: Workspace) (cache: ICache) (sourceControl: So
         "" |> append
 
         "</details>" |> append
+        "___" |> append
 
     let dumpTerminal (infos: (Node * TargetSummary option) seq) =
         let dumpTerminal (node: Node) (summary: TargetSummary option) =
