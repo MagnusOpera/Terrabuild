@@ -45,6 +45,7 @@ jobs:
         uses: softprops/action-gh-release@v2.0.6
         with:
           draft: true
+          prerelease: ${{ env.BUILD_VERSION_SUFFIX != '' }}
           generate_release_notes: true
           files: |
             ./.out/*.zip
