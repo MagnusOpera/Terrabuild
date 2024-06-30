@@ -1,4 +1,4 @@
-name: self-build
+name: current-build
 run-name: "${{ github.name }} ${{ inputs.retry == true && 'retry' || '' }} ${{ inputs.force == true && 'force' || '' }}"
 
 on:
@@ -45,7 +45,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Terrabuild
-        uses: jaxxstorm/action-install-gh-release@v1.10.0
+        uses: jaxxstorm/action-install-gh-release@v1.12.0
         with:
           token: ${{ secrets.MAGNUSOPERA_CONTENT_TOKEN }}
           repo: magnusopera/terrabuild
@@ -75,7 +75,7 @@ jobs:
             ~/.terrabuild/buildcache/**/*.log
 
       - name: Create Test Report
-        uses: dorny/test-reporter@main
+        uses: pchalamet/test-reporter@link
         if: always()
         with:
           name: Unit Tests Report
