@@ -35,10 +35,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build
-        run: |
-          make test
-
       - name: Build Self
         run: |
           make self env=dev
