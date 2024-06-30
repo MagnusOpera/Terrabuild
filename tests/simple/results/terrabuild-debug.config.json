@@ -69,7 +69,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "id": "deployments/terraform-deploy",
-      "hash": "FB65D7F55DF0B7DA2523B1656B444F5C74CCC1633DA14F33B3FA155DA452B467",
+      "hash": "C9ADADCABC3D69F000594358EF1CFDD54D535DF8361FDAC716106D70E27D64B1",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
@@ -78,7 +78,6 @@
         ".terraform.lock.hcl",
         "PROJECT",
         "backend.tf",
-        "deploy.log",
         "test_res.tf",
         "variables.tf"
       ],

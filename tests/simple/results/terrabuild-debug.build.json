@@ -1,10 +1,10 @@
 {
   "commit": "1234",
   "branchOrTag": "main",
-  "startedAt": "2024-06-30T15:04:59.993817Z",
-  "endedAt": "2024-06-30T15:05:03.892104Z",
-  "totalDuration": "00:00:03.8982870",
-  "buildDuration": "00:00:02.6501560",
+  "startedAt": "2024-06-30T15:12:42.688514Z",
+  "endedAt": "2024-06-30T15:12:46.366735Z",
+  "totalDuration": "00:00:03.6782210",
+  "buildDuration": "00:00:02.3985830",
   "status": "success",
   "targets": [
     "build"
@@ -54,8 +54,8 @@
       {
         "project": "deployments/terraform-deploy",
         "target": "build",
-        "projectHash": "FB65D7F55DF0B7DA2523B1656B444F5C74CCC1633DA14F33B3FA155DA452B467",
-        "nodeHash": "8DAD4698729CEFF7EEBD509A8744C0972851ECD80F9B85B6A7D75E7D74585C16"
+        "projectHash": "C9ADADCABC3D69F000594358EF1CFDD54D535DF8361FDAC716106D70E27D64B1",
+        "nodeHash": "2A799FA55508E3D46FC19C46523CD166DCDF4FBC1A3F57B03364A564F0C1BE3A"
       }
     ],
     [
