@@ -1,8 +1,8 @@
 {
   "space": null,
   "sourceControl": {
-    "headCommit": "7b65ebb5fc4e2afbcefef53afc988af7c9415f0f",
-    "branchOrTag": "main",
+    "headCommit": "da27321ea384350325eb62a655961568333e8e0e",
+    "branchOrTag": "feature/integration-tests",
     "logType": "terminal",
     "ci": false,
     "name": "Local"
@@ -210,7 +210,7 @@
                         "ci": false,
                         "nodeHash": "666908E6236D9394711779EEAB166ED8BC6341DF1EEEF724C7DE083D0C9709DC",
                         "command": "build",
-                        "branchOrTag": "main"
+                        "branchOrTag": "feature/integration-tests"
                       }
                     ]
                   }
@@ -316,7 +316,7 @@
                         "ci": false,
                         "nodeHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
                         "command": "build",
-                        "branchOrTag": "main"
+                        "branchOrTag": "feature/integration-tests"
                       }
                     ]
                   }
@@ -412,7 +412,7 @@
               "actions": [
                 {
                   "command": "docker",
-                  "arguments": "tag ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C ghcr.io/magnusopera/dotnet-app:main"
+                  "arguments": "tag ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C ghcr.io/magnusopera/dotnet-app:feature-integration-tests"
                 }
               ],
               "container": null,

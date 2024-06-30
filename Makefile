@@ -202,7 +202,7 @@ self-test-circular:
 	cd tests/circular; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif
 
 self-test-cluster-layers:
-	cd tests/cluster-layers; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif -p 1
+	GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild.md cd tests/cluster-layers; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif -p 1
 	diff tests/cluster-layers/results/terrabuild-debug.config.json tests/cluster-layers/terrabuild-debug.config.json
 	diff tests/cluster-layers/results/terrabuild-debug.config-graph.json tests/cluster-layers/terrabuild-debug.config-graph.json
 	diff tests/cluster-layers/results/terrabuild-debug.consistent-graph.json tests/cluster-layers/terrabuild-debug.consistent-graph.json
@@ -210,7 +210,7 @@ self-test-cluster-layers:
 	diff tests/cluster-layers/results/terrabuild-debug.build-graph.json tests/cluster-layers/terrabuild-debug.build-graph.json
 
 self-test-multirefs:
-	cd tests/multirefs; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif -p 1
+	GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild.md cd tests/multirefs; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif -p 1
 	diff tests/multirefs/results/terrabuild-debug.config.json tests/multirefs/terrabuild-debug.config.json
 	diff tests/multirefs/results/terrabuild-debug.config-graph.json tests/multirefs/terrabuild-debug.config-graph.json
 	diff tests/multirefs/results/terrabuild-debug.consistent-graph.json tests/multirefs/terrabuild-debug.consistent-graph.json
@@ -221,9 +221,11 @@ self-test-scaffold:
 	cd tests/scaffold; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif
 
 self-test-simple:
-	cd tests/simple; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif -p 1
+	GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild.md cd tests/simple; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif -p 1
 	diff tests/simple/results/terrabuild-debug.config.json tests/simple/terrabuild-debug.config.json
 	diff tests/simple/results/terrabuild-debug.config-graph.json tests/simple/terrabuild-debug.config-graph.json
 	diff tests/simple/results/terrabuild-debug.consistent-graph.json tests/simple/terrabuild-debug.consistent-graph.json
 	diff tests/simple/results/terrabuild-debug.required-graph.json tests/simple/terrabuild-debug.required-graph.json
 	diff tests/simple/results/terrabuild-debug.build-graph.json tests/simple/terrabuild-debug.build-graph.json
+
+self-test-all: self-test-cluster-layers self-test-multirefs self-test-simple

@@ -1,7 +1,7 @@
 {
   "space": null,
   "sourceControl": {
-    "headCommit": "7b65ebb5fc4e2afbcefef53afc988af7c9415f0f",
+    "headCommit": "da27321ea384350325eb62a655961568333e8e0e",
     "branchOrTag": "feature/integration-tests",
     "logType": "terminal",
     "ci": false,

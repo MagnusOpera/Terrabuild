@@ -101,7 +101,7 @@
                     "ci": false,
                     "nodeHash": "666908E6236D9394711779EEAB166ED8BC6341DF1EEEF724C7DE083D0C9709DC",
                     "command": "build",
-                    "branchOrTag": "main"
+                    "branchOrTag": "feature/integration-tests"
                   }
                 ]
               }
@@ -197,7 +197,7 @@
                     "ci": false,
                     "nodeHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
                     "command": "build",
-                    "branchOrTag": "main"
+                    "branchOrTag": "feature/integration-tests"
                   }
                 ]
               }
