@@ -291,7 +291,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         scope Cacheability.Always
-        |> andThen "dotnet" $"test {projectfile} --configuration {configuration} {filter} {arguments}"
+        |> andThen "dotnet" $"test {projectfile} --no-build --configuration {configuration} {filter} {arguments}"
         |> batchable
 
     /// <summary title="Batch build multiple projects.">
@@ -317,6 +317,6 @@ type Dotnet() =
         File.WriteAllLines(slnfile, slnContent)
 
         let actions = [
-            action "dotnet" $"test {slnfile} --configuration {configuration} {filter}"
+            action "dotnet" $"test {slnfile} --no-build --configuration {configuration} {filter}"
         ]
         actions
