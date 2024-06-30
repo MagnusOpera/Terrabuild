@@ -41,9 +41,7 @@ jobs:
 
       - name: Self Integration Tests
         run: |
-          make self-test-cluster-layers
-          make self-test-multirefs
-          make self-test-simple
+          make self-test-all
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
