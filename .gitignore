@@ -412,7 +412,7 @@ init.sh
 terrabuild-debug.*
 terrabuild.planfile
 terraform.tfstate
-terrabuild.md
+terrabuild-debug.md
 .terraform
 .vscode/settings.json
 .out

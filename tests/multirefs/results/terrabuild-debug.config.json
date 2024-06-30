@@ -5,7 +5,7 @@
     "branchOrTag": "main",
     "logType": [
       "markdown",
-      "terrabuild.md"
+      "terrabuild-debug.md"
     ],
     "ci": true,
     "name": "GitHub"
