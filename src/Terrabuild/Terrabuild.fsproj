@@ -5,6 +5,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>terrabuild</ToolCommandName>
     <AssemblyName>terrabuild</AssemblyName>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Contracts/Api.fs" />
