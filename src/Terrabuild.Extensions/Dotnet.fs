@@ -232,7 +232,7 @@ type Dotnet() =
 
         // NOTE for TargetsForTfmSpecificContentInPackage: https://github.com/dotnet/fsharp/issues/12320
         scope Cacheability.Always
-        |> andThen "dotnet" $"pack {projectfile} --no-restore --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
+        |> andThen "dotnet" $"pack {projectfile} --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
 
     /// <summary>
     /// Publish a project.
