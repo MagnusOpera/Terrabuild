@@ -1,15 +1,16 @@
-name: current-build
+name: build-with-version
 run-name: "${{ github.name }} ${{ inputs.retry == true && 'retry' || '' }} ${{ inputs.force == true && 'force' || '' }}"
 
 on:
   workflow_dispatch:
     inputs:
-      retry:
-        type: boolean
-        description: retry rebuild
       force:
         type: boolean
         description: force build
+      version:
+        type: string
+        description: version
+        default: latest
 
 env:
   TERRABUILD_API_URL: https://api.dev.magnusopera.io
@@ -50,18 +51,21 @@ jobs:
           token: ${{ secrets.MAGNUSOPERA_CONTENT_TOKEN }}
           repo: magnusopera/terrabuild
           platform: linux
+          tag: ${{ inputs.version }}
 
       - name: Login to Space
         run: terrabuild login --space magnusopera/terrabuild --token ${{ secrets.TERRABUILD_TOKEN }}
 
       - name: Build
         run: |
+          echo 'Building ${{ github.ref }}'
+          terrabuild version
           terrabuild run build test \
+            --logs --debug \
             -w src \
             -c "dev" \
             ${{ github.event.inputs.force == 'true' && '--force' || '' }} \
-            ${{ github.event.inputs.retry == 'true' && '--retry' || '' }} \
-            --logs --debug \
+            ${{ github.run_attempt > 1 && '--retry' || '' }}
 
       - name: Upload Terrabuild Logs
         uses: actions/upload-artifact@v4
