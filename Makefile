@@ -229,7 +229,7 @@ self-test-scaffold:
 	cd tests/scaffold; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif
 
 self-test-simple:
-	cd tests/simple; GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild.md $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif -p 2
+	cd tests/simple; GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild.md $(current_dir)/.out/dotnet/terrabuild run build deploy --force --debug --whatif -p 2
 	diff tests/simple/results/terrabuild-debug.config.json tests/simple/terrabuild-debug.config.json
 	diff tests/simple/results/terrabuild-debug.config-graph.json tests/simple/terrabuild-debug.config-graph.json
 	diff tests/simple/results/terrabuild-debug.consistent-graph.json tests/simple/terrabuild-debug.consistent-graph.json
