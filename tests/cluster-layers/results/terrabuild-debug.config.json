@@ -1,11 +1,14 @@
 {
   "space": null,
   "sourceControl": {
-    "headCommit": "da27321ea384350325eb62a655961568333e8e0e",
-    "branchOrTag": "feature/integration-tests",
-    "logType": "terminal",
-    "ci": false,
-    "name": "Local"
+    "headCommit": "1234",
+    "branchOrTag": "main",
+    "logType": [
+      "markdown",
+      "terrabuild.md"
+    ],
+    "ci": true,
+    "name": "GitHub"
   },
   "selectedProjects": [
     "A",
@@ -75,10 +78,10 @@
                       {
                         "debug": true,
                         "directory": "A",
-                        "ci": false,
+                        "ci": true,
                         "nodeHash": "6765DB78C92AE5CDF6D209FE067DDBE92511B2A720448DCC73DCBAC29E224624",
                         "command": "build",
-                        "branchOrTag": "feature/integration-tests"
+                        "branchOrTag": "main"
                       }
                     ]
                   }
@@ -137,10 +140,10 @@
                       {
                         "debug": true,
                         "directory": "B",
-                        "ci": false,
+                        "ci": true,
                         "nodeHash": "509BAF9F664901BED1F979302A6D189C2A35A9B8450B617893B84316694AEBF1",
                         "command": "build",
-                        "branchOrTag": "feature/integration-tests"
+                        "branchOrTag": "main"
                       }
                     ]
                   }
@@ -246,10 +249,10 @@
                       {
                         "debug": true,
                         "directory": "D",
-                        "ci": false,
+                        "ci": true,
                         "nodeHash": "F3F274387FB0965E1A6167C8FC1795B178ED1E51FC4C80FBEC4FF0B01E0C1714",
                         "command": "build",
-                        "branchOrTag": "feature/integration-tests"
+                        "branchOrTag": "main"
                       }
                     ]
                   }
@@ -310,10 +313,10 @@
                       {
                         "debug": true,
                         "directory": "E",
-                        "ci": false,
+                        "ci": true,
                         "nodeHash": "E6FE0175538764C73EEBB213E01551D2F05E3CF251434AF6813573BF0BBE9C6A",
                         "command": "build",
-                        "branchOrTag": "feature/integration-tests"
+                        "branchOrTag": "main"
                       }
                     ]
                   }

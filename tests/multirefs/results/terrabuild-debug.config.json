@@ -1,11 +1,14 @@
 {
   "space": null,
   "sourceControl": {
-    "headCommit": "da27321ea384350325eb62a655961568333e8e0e",
-    "branchOrTag": "feature/integration-tests",
-    "logType": "terminal",
-    "ci": false,
-    "name": "Local"
+    "headCommit": "1234",
+    "branchOrTag": "main",
+    "logType": [
+      "markdown",
+      "terrabuild.md"
+    ],
+    "ci": true,
+    "name": "GitHub"
   },
   "selectedProjects": [
     "A",

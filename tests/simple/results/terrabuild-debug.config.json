@@ -1,11 +1,14 @@
 {
   "space": null,
   "sourceControl": {
-    "headCommit": "da27321ea384350325eb62a655961568333e8e0e",
-    "branchOrTag": "feature/integration-tests",
-    "logType": "terminal",
-    "ci": false,
-    "name": "Local"
+    "headCommit": "1234",
+    "branchOrTag": "main",
+    "logType": [
+      "markdown",
+      "terrabuild.md"
+    ],
+    "ci": true,
+    "name": "GitHub"
   },
   "selectedProjects": [
     "deployments/terraform-deploy",
@@ -207,10 +210,10 @@
                       {
                         "debug": true,
                         "directory": "libraries/dotnet-lib",
-                        "ci": false,
+                        "ci": true,
                         "nodeHash": "666908E6236D9394711779EEAB166ED8BC6341DF1EEEF724C7DE083D0C9709DC",
                         "command": "build",
-                        "branchOrTag": "feature/integration-tests"
+                        "branchOrTag": "main"
                       }
                     ]
                   }
@@ -313,10 +316,10 @@
                       {
                         "debug": true,
                         "directory": "projects/dotnet-app",
-                        "ci": false,
+                        "ci": true,
                         "nodeHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
                         "command": "build",
-                        "branchOrTag": "feature/integration-tests"
+                        "branchOrTag": "main"
                       }
                     ]
                   }
@@ -375,12 +378,16 @@
           ],
           "actions": [
             {
-              "cache": 1,
+              "cache": 2,
               "metaCommand": "@docker build",
               "actions": [
                 {
                   "command": "docker",
                   "arguments": "build --file Dockerfile --tag ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C --build-arg configuration=\u0022Debug\u0022 ."
+                },
+                {
+                  "command": "docker",
+                  "arguments": "push ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C"
                 }
               ],
               "container": null,
@@ -407,12 +414,12 @@
           ],
           "actions": [
             {
-              "cache": 1,
+              "cache": 2,
               "metaCommand": "@docker push",
               "actions": [
                 {
                   "command": "docker",
-                  "arguments": "tag ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C ghcr.io/magnusopera/dotnet-app:feature-integration-tests"
+                  "arguments": "buildx imagetools create -t ghcr.io/magnusopera/dotnet-app:main ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C"
                 }
               ],
               "container": null,

@@ -98,10 +98,10 @@
                   {
                     "debug": true,
                     "directory": "libraries/dotnet-lib",
-                    "ci": false,
+                    "ci": true,
                     "nodeHash": "666908E6236D9394711779EEAB166ED8BC6341DF1EEEF724C7DE083D0C9709DC",
                     "command": "build",
-                    "branchOrTag": "feature/integration-tests"
+                    "branchOrTag": "main"
                   }
                 ]
               }
@@ -194,10 +194,10 @@
                   {
                     "debug": true,
                     "directory": "projects/dotnet-app",
-                    "ci": false,
+                    "ci": true,
                     "nodeHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
                     "command": "build",
-                    "branchOrTag": "feature/integration-tests"
+                    "branchOrTag": "main"
                   }
                 ]
               }
