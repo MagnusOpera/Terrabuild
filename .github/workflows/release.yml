@@ -4,7 +4,7 @@ run-name: Release ${{github.ref_name}}
 on:
   workflow_dispatch:
   release:
-    types: [prereleased, released]
+    types: [published]
 
 permissions:
   contents: write
