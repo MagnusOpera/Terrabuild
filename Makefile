@@ -118,7 +118,7 @@ tb-build: clean
 	terrabuild run build --workspace src --configuration $(env) --retry --debug
 
 tb-dist: clean
-	terrabuild run dist --workspace src --configuration $(env) --retry --debug --tag $(version)
+	terrabuild run dist --workspace src --configuration $(env) --retry --debug --tag $(full_version)
 
 tb-test: clean
 	terrabuild run test --workspace src --configuration $(env) --retry --debug
