@@ -40,6 +40,7 @@ let rec findWorkspace dir =
 let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseResults<TerrabuildArgs>) =
     let debug = result.Contains(TerrabuildArgs.Debug)
     let runId = Guid.NewGuid()
+    let startedAt = DateTime.UtcNow
 
     let logFile name = FS.combinePath launchDir $"terrabuild-debug.{name}"
 
@@ -116,7 +117,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             0
         else
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            let summary = Build.run config buildGraph cache api buildNotification options
+            let summary = Build.run config buildGraph cache api buildNotification options startedAt
             buildNotification.WaitCompletion()
 
             if options.Debug then
@@ -168,7 +169,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.NoContainer = noContainer
                         Configuration.Options.NoBatch = noBatch
                         Configuration.Options.Retry = runArgs.Contains(RunArgs.Retry)
-                        Configuration.Options.StartedAt = DateTime.UtcNow
                         Configuration.Options.IsLog = false }
         runTarget wsDir (Set targets) configuration note tag labels variables localOnly logs options
 
@@ -191,7 +191,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.NoContainer = false
                         Configuration.Options.NoBatch = true
                         Configuration.Options.Retry = false
-                        Configuration.Options.StartedAt = DateTime.UtcNow
                         Configuration.Options.IsLog = true}
         runTarget wsDir (Set targets) configuration None None labels variables true true options
 
