@@ -35,14 +35,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & Publish
+      - name: Build
         run: |
           make test
-          make publish
 
-      - name: Self Publish
+      - name: Build Self
         run: |
-          make self-publish
+          make self env=dev
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
