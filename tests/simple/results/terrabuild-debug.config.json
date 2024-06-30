@@ -538,15 +538,13 @@
     },
     "projects/rust-app": {
       "id": "projects/rust-app",
-      "hash": "2564477BF664E782099745B69ECF9962B19C6F23DBA6432C03E801C02D7EA26C",
+      "hash": "0CEC6981250E3AC5C5CE7EBE9FF15A39800DDC5287F862EBDF540A5C1FF52AC0",
       "dependencies": [],
       "files": [
         "Cargo.lock",
         "Cargo.toml",
         "PROJECT",
-        "src/main.rs",
-        "target/.rustc_info.json",
-        "target/CACHEDIR.TAG"
+        "src/main.rs"
       ],
       "targets": {
         "build": {

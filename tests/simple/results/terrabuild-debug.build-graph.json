@@ -428,12 +428,12 @@
     },
     "projects/rust-app:build": {
       "id": "projects/rust-app:build",
-      "hash": "313194836FA7C76349A203A55096C6650D2F4AF1F4BB3FBA5E37473B8362843A",
+      "hash": "622E64551A4677B79487613D1484965B21D511F49CFC09A22539DB12C27E82F4",
       "project": "projects/rust-app",
       "target": "build",
       "label": "build projects/rust-app",
       "dependencies": [],
-      "projectHash": "2564477BF664E782099745B69ECF9962B19C6F23DBA6432C03E801C02D7EA26C",
+      "projectHash": "0CEC6981250E3AC5C5CE7EBE9FF15A39800DDC5287F862EBDF540A5C1FF52AC0",
       "outputs": [
         "target/debug/",
         "target/release/"
