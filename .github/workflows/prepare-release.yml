@@ -26,8 +26,20 @@ jobs:
         with:
           dotnet-version: 8.0.302
 
+      - name: Extract Version/Version Suffix
+        run: |
+          s=${{github.ref_name}}
+          pat="([^-]*)-?([^-]*)"
+          [[ $s =~ $pat ]]
+          BUILD_VERSION=${BASH_REMATCH[1]}
+          BUILD_VERSION_SUFFIX=${BASH_REMATCH[2]}
+          echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV"
+          echo "BUILD_VERSION_SUFFIX=BUILD_VERSION_SUFFIX" >> $GITHUB_ENV"
+          echo "BUILD_VERSION: $BUILD_VERSION"
+          echo "BUILD_VERSION_SUFFIX: $BUILD_VERSION_SUFFIX"
+
       - name: Build & Publish
-        run: make dist-all config=Release version=${{github.ref_name}}
+        run: make dist-all config=Release version=${{ env.BUILD_VERSION }} version_suffix=${{ env.BUILD_VERSION_SUFFIX }}
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
