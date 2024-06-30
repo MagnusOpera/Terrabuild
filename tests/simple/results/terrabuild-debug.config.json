@@ -5,7 +5,7 @@
     "branchOrTag": "main",
     "logType": [
       "markdown",
-      "terrabuild.md"
+      "terrabuild-debug.md"
     ],
     "ci": true,
     "name": "GitHub"
@@ -69,7 +69,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "id": "deployments/terraform-deploy",
-      "hash": "11F9A8A6CCAAFF82F399F2B25F81338E93DD6075BE22D79EE13C51505427E007",
+      "hash": "FB65D7F55DF0B7DA2523B1656B444F5C74CCC1633DA14F33B3FA155DA452B467",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
@@ -78,6 +78,7 @@
         ".terraform.lock.hcl",
         "PROJECT",
         "backend.tf",
+        "deploy.log",
         "test_res.tf",
         "variables.tf"
       ],

@@ -1,12 +1,11 @@
 {
   "targets": [
-    "build",
-    "deploy"
+    "build"
   ],
   "nodes": {
     "deployments/terraform-deploy:build": {
       "id": "deployments/terraform-deploy:build",
-      "hash": "34BE35387B82383F0B086DB5C7F7B5F7650F39EDA06E4059C7F436BDE1114B85",
+      "hash": "8DAD4698729CEFF7EEBD509A8744C0972851ECD80F9B85B6A7D75E7D74585C16",
       "project": "deployments/terraform-deploy",
       "target": "build",
       "label": "build deployments/terraform-deploy",
@@ -14,7 +13,7 @@
         "projects/dotnet-app:build",
         "projects/npm-app:build"
       ],
-      "projectHash": "11F9A8A6CCAAFF82F399F2B25F81338E93DD6075BE22D79EE13C51505427E007",
+      "projectHash": "FB65D7F55DF0B7DA2523B1656B444F5C74CCC1633DA14F33B3FA155DA452B467",
       "outputs": [
         "*.planfile"
       ],
@@ -41,50 +40,6 @@
             {
               "command": "terraform",
               "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C\u0022 -var=\u0022npm_app_version=C35EBCC267398EEEC270894F7616EEE6382F70EAEC3C16247A7EBE487A914E4B\u0022"
-            }
-          ],
-          "container": null,
-          "containerVariables": [],
-          "batchContext": null
-        }
-      ]
-    },
-    "deployments/terraform-deploy:deploy": {
-      "id": "deployments/terraform-deploy:deploy",
-      "hash": "EEE349DAFF065765CC8B45E15C0FC1E5E026B8B4932257C6F2DE422EE441BB1D",
-      "project": "deployments/terraform-deploy",
-      "target": "deploy",
-      "label": "deploy deployments/terraform-deploy",
-      "dependencies": [
-        "deployments/terraform-deploy:build"
-      ],
-      "projectHash": "11F9A8A6CCAAFF82F399F2B25F81338E93DD6075BE22D79EE13C51505427E007",
-      "outputs": [
-        "*.planfile"
-      ],
-      "cache": 3,
-      "isLeaf": false,
-      "forced": true,
-      "required": false,
-      "buildSummary": null,
-      "batched": false,
-      "cluster": "06393D190E8DBC6D9649B9AD0E1A872FCCF324C5ACDC0BA02C391875CE8CD00D",
-      "commandLines": [
-        {
-          "cache": 3,
-          "metaCommand": "@terraform apply",
-          "actions": [
-            {
-              "command": "terraform",
-              "arguments": "init"
-            },
-            {
-              "command": "terraform",
-              "arguments": "workspace select default"
-            },
-            {
-              "command": "terraform",
-              "arguments": "apply terrabuild.planfile"
             }
           ],
           "container": null,
@@ -251,133 +206,6 @@
         }
       ]
     },
-    "projects/dotnet-app:dist": {
-      "id": "projects/dotnet-app:dist",
-      "hash": "FE8D0B7E2CAA18CF6AEC7044354722BED0EE30E3526AB3B876B3A492C41DCA46",
-      "project": "projects/dotnet-app",
-      "target": "dist",
-      "label": "dist projects/dotnet-app",
-      "dependencies": [
-        "projects/dotnet-app:build"
-      ],
-      "projectHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
-      "outputs": [
-        "**/*.binlog",
-        "bin/",
-        "obj/",
-        "obj/*.json",
-        "obj/*.props",
-        "obj/*.targets"
-      ],
-      "cache": 3,
-      "isLeaf": false,
-      "forced": false,
-      "required": false,
-      "buildSummary": null,
-      "batched": false,
-      "cluster": "076CD4BA37B1947AE860169B31A172CECA44175E61ACDAA02DDA5295A8136D6A",
-      "commandLines": [
-        {
-          "cache": 3,
-          "metaCommand": "@dotnet publish",
-          "actions": [
-            {
-              "command": "dotnet",
-              "arguments": "publish  --no-dependencies --configuration Debug  --no-restore --no-build   "
-            }
-          ],
-          "container": null,
-          "containerVariables": [],
-          "batchContext": null
-        }
-      ]
-    },
-    "projects/dotnet-app:docker": {
-      "id": "projects/dotnet-app:docker",
-      "hash": "BDF8F6F06E1E28377DC3EF6597059BD966FCB6F45789E0FCF71417F081AB63E5",
-      "project": "projects/dotnet-app",
-      "target": "docker",
-      "label": "docker projects/dotnet-app",
-      "dependencies": [
-        "projects/dotnet-app:dist"
-      ],
-      "projectHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
-      "outputs": [
-        "**/*.binlog",
-        "bin/",
-        "obj/",
-        "obj/*.json",
-        "obj/*.props",
-        "obj/*.targets"
-      ],
-      "cache": 2,
-      "isLeaf": false,
-      "forced": false,
-      "required": false,
-      "buildSummary": null,
-      "batched": false,
-      "cluster": "CF0E0D7DD67A58796E6CAFCB42180D0916EA97906676B80801C9B19E6D29020B",
-      "commandLines": [
-        {
-          "cache": 2,
-          "metaCommand": "@docker build",
-          "actions": [
-            {
-              "command": "docker",
-              "arguments": "build --file Dockerfile --tag ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C --build-arg configuration=\u0022Debug\u0022 ."
-            },
-            {
-              "command": "docker",
-              "arguments": "push ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C"
-            }
-          ],
-          "container": null,
-          "containerVariables": [],
-          "batchContext": null
-        }
-      ]
-    },
-    "projects/dotnet-app:push": {
-      "id": "projects/dotnet-app:push",
-      "hash": "E0CF6F73BFB80D80479C07DCD0C50EE88FE08F0D1CFBBD65AF475963E5FAD88A",
-      "project": "projects/dotnet-app",
-      "target": "push",
-      "label": "push projects/dotnet-app",
-      "dependencies": [
-        "projects/dotnet-app:docker"
-      ],
-      "projectHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
-      "outputs": [
-        "**/*.binlog",
-        "bin/",
-        "obj/",
-        "obj/*.json",
-        "obj/*.props",
-        "obj/*.targets"
-      ],
-      "cache": 2,
-      "isLeaf": false,
-      "forced": false,
-      "required": false,
-      "buildSummary": null,
-      "batched": false,
-      "cluster": "D0A2911832DB7C267ECF603527A489E8A74276D579E1D37EEC32E4D805CD9DFF",
-      "commandLines": [
-        {
-          "cache": 2,
-          "metaCommand": "@docker push",
-          "actions": [
-            {
-              "command": "docker",
-              "arguments": "buildx imagetools create -t ghcr.io/magnusopera/dotnet-app:main ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C"
-            }
-          ],
-          "container": null,
-          "containerVariables": [],
-          "batchContext": null
-        }
-      ]
-    },
     "projects/make-app:build": {
       "id": "projects/make-app:build",
       "hash": "3B3D0C1A2C3ED3243CAC6A02B7B4A905D5B2AD5F49BB716DB9511E69A28BFA80",
@@ -503,11 +331,9 @@
   },
   "selectedNodes": [
     "deployments/terraform-deploy:build",
-    "deployments/terraform-deploy:deploy",
     "libraries/dotnet-lib:build",
     "libraries/shell-lib:build",
     "projects/dotnet-app:build",
-    "projects/dotnet-app:push",
     "projects/make-app:build",
     "projects/npm-app:build",
     "projects/rust-app:build"
