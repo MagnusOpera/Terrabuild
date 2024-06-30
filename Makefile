@@ -2,11 +2,18 @@ config ?= default
 env ?= default
 
 version ?= 0.0.0
+version_suffix ?=
 
 ifeq ($(config), default)
 	buildconfig = Debug
 else
 	buildconfig = $(config)
+endif
+
+ifeq ($(version_suffix), )
+	file_version_suffix = release
+else
+	file_version_suffix = $(version_suffix)
 endif
 
 current_dir = $(shell pwd)
@@ -61,24 +68,24 @@ docker-prune:
 #
 
 publish:
-	dotnet publish -c $(buildconfig) -p:Version=$(version) -o $(PWD)/.out/dotnet src/Terrabuild
-	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
+	dotnet publish -c $(buildconfig) -p:Version=$(version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/dotnet src/Terrabuild
+	cd .out/dotnet; zip -r ../dotnet-$(version)-$(file_version_suffix).zip ./*
 
 publish-all: clean
-	dotnet publish -c $(buildconfig) -r win-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/windows src/Terrabuild
-	cd .out/windows; zip -r ../terrabuild-$(version)-windows-x64.zip ./terrabuild.exe
+	dotnet publish -c $(buildconfig) -r win-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/windows src/Terrabuild
+	cd .out/windows; zip -r ../terrabuild-$(version)-$(file_version_suffix)-windows-x64.zip ./terrabuild.exe
 
-	dotnet publish -c $(buildconfig) -r osx-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/darwin src/Terrabuild
-	cd .out/darwin; zip -r ../terrabuild-$(version)-darwin-x64.zip ./terrabuild
+	dotnet publish -c $(buildconfig) -r osx-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/darwin src/Terrabuild
+	cd .out/darwin; zip -r ../terrabuild-$(version)-$(file_version_suffix)-darwin-x64.zip ./terrabuild
 
-	dotnet publish -c $(buildconfig) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/linux src/Terrabuild
-	cd .out/linux; zip -r ../terrabuild-$(version)-linux-x64.zip ./terrabuild
+	dotnet publish -c $(buildconfig) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/linux src/Terrabuild
+	cd .out/linux; zip -r ../terrabuild-$(version)-$(file_version_suffix)-linux-x64.zip ./terrabuild
 
-	dotnet publish -c $(buildconfig) -p:Version=$(version) -o $(PWD)/.out/dotnet src/Terrabuild
-	cd .out/dotnet; zip -r ../dotnet-$(version).zip ./*
+	dotnet publish -c $(buildconfig) -p:Version=$(version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/dotnet src/Terrabuild
+	cd .out/dotnet; zip -r ../dotnet-$(version)-$(file_version_suffix).zip ./*
 
 pack:
-	dotnet pack -c $(buildconfig) /p:Version=$(version) -o .out
+	dotnet pack -c $(buildconfig) -p:Version=$(version) -p:VersionSuffix=$(version_suffix) -o .out
 
 dist-all: clean publish-all pack
 
