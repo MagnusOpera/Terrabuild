@@ -1,0 +1,169 @@
+{
+  "space": null,
+  "sourceControl": {
+    "headCommit": "1234",
+    "branchOrTag": "main",
+    "logType": [
+      "markdown",
+      "terrabuild.md"
+    ],
+    "ci": true,
+    "name": "GitHub"
+  },
+  "selectedProjects": [
+    "A",
+    "B",
+    "C"
+  ],
+  "targets": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "rebuild": [
+        "boolean",
+        false
+      ]
+    },
+    "docker": {
+      "dependsOn": [
+        "^publish",
+        "publish"
+      ],
+      "rebuild": [
+        "boolean",
+        false
+      ]
+    },
+    "publish": {
+      "dependsOn": [
+        "build"
+      ],
+      "rebuild": [
+        "boolean",
+        false
+      ]
+    },
+    "push": {
+      "dependsOn": [
+        "docker"
+      ],
+      "rebuild": [
+        "boolean",
+        false
+      ]
+    }
+  },
+  "projects": {
+    "A": {
+      "id": "A",
+      "hash": "50F53DAE0A28CB085245C3DAA8E068FA1026C7B0A13395C1A60BEE8B56DDA77E",
+      "dependencies": [
+        "B",
+        "C"
+      ],
+      "files": [
+        "PROJECT"
+      ],
+      "targets": {
+        "build": {
+          "hash": "B9AE1A51CFF46F86872F9AF55D2B9D7596DE1F0330CC9AAF307EAB73027D680A",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@shell echo",
+              "actions": [
+                {
+                  "command": "echo",
+                  "arguments": "building A"
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": null
+            }
+          ]
+        }
+      },
+      "labels": []
+    },
+    "B": {
+      "id": "B",
+      "hash": "0058E0305878067C8E3793E674633FEE00820654CFD00805FD0664FA9033718F",
+      "dependencies": [
+        "C"
+      ],
+      "files": [
+        "PROJECT"
+      ],
+      "targets": {
+        "build": {
+          "hash": "B9AE1A51CFF46F86872F9AF55D2B9D7596DE1F0330CC9AAF307EAB73027D680A",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@shell echo",
+              "actions": [
+                {
+                  "command": "echo",
+                  "arguments": "building B"
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": null
+            }
+          ]
+        }
+      },
+      "labels": []
+    },
+    "C": {
+      "id": "C",
+      "hash": "0EFEA7392B648CE721962FA473E3D5E1B52006332B3DC8ED8B81FB24D2101481",
+      "dependencies": [],
+      "files": [
+        "PROJECT"
+      ],
+      "targets": {
+        "build": {
+          "hash": "B9AE1A51CFF46F86872F9AF55D2B9D7596DE1F0330CC9AAF307EAB73027D680A",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@shell echo",
+              "actions": [
+                {
+                  "command": "echo",
+                  "arguments": "building C"
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": null
+            }
+          ]
+        }
+      },
+      "labels": []
+    }
+  },
+  "configuration": "default",
+  "note": null,
+  "tag": null
+}

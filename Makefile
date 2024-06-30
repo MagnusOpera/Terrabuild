@@ -9,6 +9,7 @@ else
 	buildconfig = $(config)
 endif
 
+current_dir = $(shell pwd)
 
 .PHONY: src tools
 
@@ -194,3 +195,41 @@ usage:
 version:
 	dotnet run --project src/Terrabuild -- version
 
+
+
+
+self-test-circular:
+	cd tests/circular; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif
+
+
+define diff_results
+	diff $(1)/results/terrabuild-debug.config.json $(1)/terrabuild-debug.config.json
+	diff $(1)/results/terrabuild-debug.config-graph.json $(1)/terrabuild-debug.config-graph.json
+	diff $(1)/results/terrabuild-debug.consistent-graph.json $(1)/terrabuild-debug.consistent-graph.json
+	diff $(1)/results/terrabuild-debug.required-graph.json $(1)/terrabuild-debug.required-graph.json
+	diff $(1)/results/terrabuild-debug.build-graph.json $(1)/terrabuild-debug.build-graph.json
+	diff $(1)/results/terrabuild-debug.config-graph.mermaid $(1)/terrabuild-debug.config-graph.mermaid
+	diff $(1)/results/terrabuild-debug.consistent-graph.mermaid $(1)/terrabuild-debug.consistent-graph.mermaid
+	diff $(1)/results/terrabuild-debug.required-graph.mermaid $(1)/terrabuild-debug.required-graph.mermaid
+	diff $(1)/results/terrabuild-debug.build-graph.mermaid $(1)/terrabuild-debug.build-graph.mermaid
+endef
+
+
+define run_integration_test
+	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild.md $(current_dir)/.out/dotnet/terrabuild $(2)
+	$(call diff_results, $(1))
+endef
+
+self-test-cluster-layers:
+	$(call run_integration_test, tests/cluster-layers, run build --force --debug --whatif -p 2)
+
+self-test-multirefs:
+	$(call run_integration_test, tests/multirefs, run build --force --debug --whatif -p 2)
+
+self-test-scaffold:
+	cd tests/scaffold; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif
+
+self-test-simple:
+	$(call run_integration_test, tests/simple, run build deploy --force --debug --whatif -p 2)
+
+self-test-all: self-test-cluster-layers self-test-multirefs self-test-simple

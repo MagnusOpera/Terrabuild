@@ -39,6 +39,10 @@ jobs:
         run: |
           make self env=dev
 
+      - name: Self Integration Tests
+        run: |
+          make self-test-all
+
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
         if: always()

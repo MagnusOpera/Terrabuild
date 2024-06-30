@@ -1,0 +1,113 @@
+{
+  "targets": [
+    "build"
+  ],
+  "nodes": {
+    "A:build": {
+      "id": "A:build",
+      "hash": "B235A49D02A24D2A39666561721CB9C36AEE5FB83AF94FA1F0EB6C5CB9A194B3",
+      "project": "A",
+      "target": "build",
+      "label": "build A",
+      "dependencies": [
+        "B:build",
+        "C:build"
+      ],
+      "projectHash": "50F53DAE0A28CB085245C3DAA8E068FA1026C7B0A13395C1A60BEE8B56DDA77E",
+      "outputs": [],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "CD2042D8089B53EF5E02DD6900C27FAF5048364C3D95883B9849DB83FEC65361",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "@shell echo",
+          "actions": [
+            {
+              "command": "echo",
+              "arguments": "building A"
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    },
+    "B:build": {
+      "id": "B:build",
+      "hash": "54E3E662F74726559379BF833EF9D253398336E227A034D9489AA3F3F84BB6EF",
+      "project": "B",
+      "target": "build",
+      "label": "build B",
+      "dependencies": [
+        "C:build"
+      ],
+      "projectHash": "0058E0305878067C8E3793E674633FEE00820654CFD00805FD0664FA9033718F",
+      "outputs": [],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "6D2BBE04928FACE7C87D0803170E89DD41DA1FBF9296D4B7ED1B794B9D387948",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "@shell echo",
+          "actions": [
+            {
+              "command": "echo",
+              "arguments": "building B"
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    },
+    "C:build": {
+      "id": "C:build",
+      "hash": "A56C088A9E1E007252BB642F712C1C04B2FECF83F0FCBF70766BAEF9C1AEF5EF",
+      "project": "C",
+      "target": "build",
+      "label": "build C",
+      "dependencies": [],
+      "projectHash": "0EFEA7392B648CE721962FA473E3D5E1B52006332B3DC8ED8B81FB24D2101481",
+      "outputs": [],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "D6CF6903FD80DA3FC84FF51EB158AD151338E52EFEFED39BE96A81C5067AED25",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "@shell echo",
+          "actions": [
+            {
+              "command": "echo",
+              "arguments": "building C"
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    }
+  },
+  "selectedNodes": [
+    "A:build",
+    "B:build",
+    "C:build"
+  ]
+}
