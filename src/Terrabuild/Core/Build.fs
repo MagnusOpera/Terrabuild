@@ -56,7 +56,7 @@ type IBuildNotification =
     abstract NodeCompleted: node:Graph.Node -> restored: bool -> summary:Cache.TargetSummary -> unit
 
 
-let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (options: Configuration.Options) startedAt =
+let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (options: Configuration.Options) =
     let targets = graph.Targets |> String.join ","
     let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
     $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
@@ -64,7 +64,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
     let nodesToRun = graph.Nodes |> Map.filter (fun nodeId node -> node.Required) |> Map.count
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks to run" |> Terminal.writeLine
 
-    let buildStartedAt = DateTime.UtcNow
+    let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
         api |> Option.map (fun api -> api.BuildStart configuration.SourceControl.BranchOrTag configuration.SourceControl.HeadCommit configuration.Configuration configuration.Note configuration.Tag graph.Targets options.Force options.Retry configuration.SourceControl.CI)
@@ -274,9 +274,9 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         |> Map.values
         |> Set.ofSeq
 
-    let buildEndedAt = DateTime.UtcNow
-    let buildDuration = buildEndedAt - buildStartedAt
-    let totalDuration = buildEndedAt - startedAt
+    let endedAt = DateTime.UtcNow
+    let buildDuration = endedAt - startedAt
+    let totalDuration = endedAt - options.StartedAt
 
     let status =
         let isSuccess = buildNodesStatus |> Seq.forall isBuildSuccess
@@ -285,8 +285,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
 
     let buildInfo = { Summary.Commit = headCommit
                       Summary.BranchOrTag = branchOrTag
-                      Summary.StartedAt = startedAt
-                      Summary.EndedAt = buildEndedAt
+                      Summary.StartedAt = options.StartedAt
+                      Summary.EndedAt = endedAt
                       Summary.BuildDuration = buildDuration
                       Summary.TotalDuration = totalDuration
                       Summary.Status = status

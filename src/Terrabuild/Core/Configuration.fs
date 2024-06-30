@@ -17,6 +17,7 @@ type Options = {
     MaxConcurrency: int
     Force: bool
     Retry: bool
+    StartedAt: DateTime
     IsLog: bool
     NoContainer: bool
     NoBatch: bool
