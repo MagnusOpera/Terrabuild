@@ -216,20 +216,22 @@ endef
 
 
 define run_integration_test
-	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild.md $(current_dir)/.out/dotnet/terrabuild $(2)
+	@printf "\n*** Running integration test %s ***\n" $(1)
+	-cd $(1); rm terrabuild-debug.*
+	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild-debug.md $(current_dir)/.out/dotnet/terrabuild $(2)
 	$(call diff_results, $(1))
 endef
 
 self-test-cluster-layers:
-	$(call run_integration_test, tests/cluster-layers, run build --force --debug --whatif -p 2)
+	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
 
 self-test-multirefs:
-	$(call run_integration_test, tests/multirefs, run build --force --debug --whatif -p 2)
+	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --logs)
 
 self-test-scaffold:
 	cd tests/scaffold; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif
 
 self-test-simple:
-	$(call run_integration_test, tests/simple, run build deploy --force --debug --whatif -p 2)
+	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs)
 
 self-test-all: self-test-cluster-layers self-test-multirefs self-test-simple

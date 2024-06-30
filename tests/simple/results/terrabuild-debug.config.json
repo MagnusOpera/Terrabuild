@@ -5,7 +5,7 @@
     "branchOrTag": "main",
     "logType": [
       "markdown",
-      "terrabuild.md"
+      "terrabuild-debug.md"
     ],
     "ci": true,
     "name": "GitHub"
@@ -69,7 +69,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "id": "deployments/terraform-deploy",
-      "hash": "11F9A8A6CCAAFF82F399F2B25F81338E93DD6075BE22D79EE13C51505427E007",
+      "hash": "C9ADADCABC3D69F000594358EF1CFDD54D535DF8361FDAC716106D70E27D64B1",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"

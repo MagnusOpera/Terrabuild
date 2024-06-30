@@ -2,6 +2,7 @@
 project @terraform {
     dependencies = [ "/projects/dotnet-app"
                      "../../projects/npm-app" ]
+    ignores = [ "deploy.log" ]
     labels = [ "infra" ]
 }
 
