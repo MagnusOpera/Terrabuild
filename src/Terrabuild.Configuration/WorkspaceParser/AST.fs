@@ -1,6 +1,7 @@
 namespace Terrabuild.Configuration.Workspace.AST
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
+open Errors
 
 [<RequireQualifiedAccess>]
 type WorkspaceComponents =
@@ -15,7 +16,7 @@ with
             match components |> List.choose (function | WorkspaceComponents.Space value -> Some value) with
             | [] -> None
             | [value] -> Some value
-            | _ -> failwith "multiple space declared"
+            | _ -> TerrabuildException.Raise("multiple space declared")
 
         { Space = space }
 
@@ -35,13 +36,13 @@ with
             match components |> List.choose (function | TargetComponents.DependsOn value -> Some value | _ -> None) with
             | [] -> Set.empty
             | [value] -> value |> Set.ofList
-            | _ -> failwith "multiple depends_on declared"
+            | _ -> TerrabuildException.Raise("multiple depends_on declared")
 
         let rebuild =
             match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
             | [] -> Expr.Boolean false
             | [value] -> value
-            | _ -> failwith "multiple rebuild declared"
+            | _ -> TerrabuildException.Raise("multiple rebuild declared")
 
         id, { DependsOn = dependsOn
               Rebuild = rebuild }
@@ -60,7 +61,7 @@ with
             match components |> List.choose (function | ConfigurationComponents.Variables value -> Some value) with
             | [] -> Map.empty
             | [value] -> value
-            | _ -> failwith "multiple variables declared"
+            | _ -> TerrabuildException.Raise("multiple variables declared")
 
         id, { Variables = variables }
 
@@ -83,7 +84,7 @@ with
             match components |> List.choose (function | WorkspaceFileComponents.Workspace value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value.Space
-            | _ -> failwith "multiple workspace declared"
+            | _ -> TerrabuildException.Raise("multiple workspace declared")
 
         let targets =
             components
