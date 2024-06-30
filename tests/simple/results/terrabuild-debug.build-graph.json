@@ -1,0 +1,302 @@
+{
+  "targets": [
+    "build"
+  ],
+  "nodes": {
+    "A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B": {
+      "id": "A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B",
+      "hash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "project": "batch/A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B",
+      "target": "build",
+      "label": "batch-build A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B",
+      "dependencies": [],
+      "projectHash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "outputs": [],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "@dotnet build",
+          "actions": [
+            {
+              "command": "dotnet",
+              "arguments": "build .terrabuild/E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855.sln --configuration Debug  "
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    },
+    "deployments/terraform-deploy:build": {
+      "id": "deployments/terraform-deploy:build",
+      "hash": "34BE35387B82383F0B086DB5C7F7B5F7650F39EDA06E4059C7F436BDE1114B85",
+      "project": "deployments/terraform-deploy",
+      "target": "build",
+      "label": "build deployments/terraform-deploy",
+      "dependencies": [
+        "projects/dotnet-app:build",
+        "projects/npm-app:build"
+      ],
+      "projectHash": "11F9A8A6CCAAFF82F399F2B25F81338E93DD6075BE22D79EE13C51505427E007",
+      "outputs": [
+        "*.planfile"
+      ],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "DD2AA0D852FFD220DB537D779025F1ECD45B8477C8E43B39558A697968EC4433",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "@terraform plan",
+          "actions": [
+            {
+              "command": "terraform",
+              "arguments": "init"
+            },
+            {
+              "command": "terraform",
+              "arguments": "workspace select default"
+            },
+            {
+              "command": "terraform",
+              "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C\u0022 -var=\u0022npm_app_version=C35EBCC267398EEEC270894F7616EEE6382F70EAEC3C16247A7EBE487A914E4B\u0022"
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    },
+    "libraries/dotnet-lib:build": {
+      "id": "libraries/dotnet-lib:build",
+      "hash": "08D8B1A762D1AB2C9706CD8F058C429644843CE9B54B9DA63B673BF2AF19C79A",
+      "project": "libraries/dotnet-lib",
+      "target": "build",
+      "label": "build libraries/dotnet-lib",
+      "dependencies": [
+        "A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B"
+      ],
+      "projectHash": "666908E6236D9394711779EEAB166ED8BC6341DF1EEEF724C7DE083D0C9709DC",
+      "outputs": [
+        "**/*.binlog",
+        "bin/",
+        "obj/",
+        "obj/*.json",
+        "obj/*.props",
+        "obj/*.targets"
+      ],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": true,
+      "cluster": "A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B",
+      "commandLines": []
+    },
+    "libraries/shell-lib:build": {
+      "id": "libraries/shell-lib:build",
+      "hash": "F916FA659305A3A94393AADBD661A4C0CD1236251DDF91C0129969578ADB46E6",
+      "project": "libraries/shell-lib",
+      "target": "build",
+      "label": "build libraries/shell-lib",
+      "dependencies": [],
+      "projectHash": "60F9371D05141EC9C0E9CC759730C62EC37C01D9EEB1330EFE2737AA01F557A6",
+      "outputs": [],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "F620A2D6F3F36C9B9F1F6CDEA9CD84C4D448A3821E337DB217A59A7D2957F175",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "@shell echo",
+          "actions": [
+            {
+              "command": "echo",
+              "arguments": "building library1"
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    },
+    "projects/dotnet-app:build": {
+      "id": "projects/dotnet-app:build",
+      "hash": "CC3EDD06A6697CF8E5E14085BA6C1662E33583A91C25D50B6D1B5C6DDF1AEE2E",
+      "project": "projects/dotnet-app",
+      "target": "build",
+      "label": "build projects/dotnet-app",
+      "dependencies": [
+        "A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B",
+        "libraries/dotnet-lib:build"
+      ],
+      "projectHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
+      "outputs": [
+        "**/*.binlog",
+        "bin/",
+        "obj/",
+        "obj/*.json",
+        "obj/*.props",
+        "obj/*.targets"
+      ],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": true,
+      "cluster": "A922080C67BE70BAD86C25717A34EDF7451FBD9E907D29B9C86D4B8B2A01863B",
+      "commandLines": []
+    },
+    "projects/make-app:build": {
+      "id": "projects/make-app:build",
+      "hash": "3B3D0C1A2C3ED3243CAC6A02B7B4A905D5B2AD5F49BB716DB9511E69A28BFA80",
+      "project": "projects/make-app",
+      "target": "build",
+      "label": "build projects/make-app",
+      "dependencies": [
+        "libraries/shell-lib:build"
+      ],
+      "projectHash": "47A18E4D676C50894D393158B4C1CE5C7736BD65C6C15CC542E764E876CB2E68",
+      "outputs": [
+        "dist"
+      ],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "37A20316F9F61AA2D141419ADBC1415E508CB628C0BA77771B740A62DF6749E0",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "@shell echo",
+          "actions": [
+            {
+              "command": "echo",
+              "arguments": "building project1"
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        },
+        {
+          "cache": 3,
+          "metaCommand": "@make build",
+          "actions": [
+            {
+              "command": "make",
+              "arguments": "build secret=\u0022tagada\u0022"
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    },
+    "projects/npm-app:build": {
+      "id": "projects/npm-app:build",
+      "hash": "7CEED9ED7135438472B859AFBAD635AC459E210291EB82FEB01F5297B47CF0C1",
+      "project": "projects/npm-app",
+      "target": "build",
+      "label": "build projects/npm-app",
+      "dependencies": [],
+      "projectHash": "C35EBCC267398EEEC270894F7616EEE6382F70EAEC3C16247A7EBE487A914E4B",
+      "outputs": [
+        "dist/"
+      ],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "3327B90E645559C6A5B57D627DB95630676B699DFA34C754D2E6B0AC233AC9B9",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "npm build",
+          "actions": [
+            {
+              "command": "npm",
+              "arguments": "ci"
+            },
+            {
+              "command": "npm",
+              "arguments": "run build -- "
+            }
+          ],
+          "container": "node:20",
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    },
+    "projects/rust-app:build": {
+      "id": "projects/rust-app:build",
+      "hash": "313194836FA7C76349A203A55096C6650D2F4AF1F4BB3FBA5E37473B8362843A",
+      "project": "projects/rust-app",
+      "target": "build",
+      "label": "build projects/rust-app",
+      "dependencies": [],
+      "projectHash": "2564477BF664E782099745B69ECF9962B19C6F23DBA6432C03E801C02D7EA26C",
+      "outputs": [
+        "target/debug/",
+        "target/release/"
+      ],
+      "cache": 3,
+      "isLeaf": true,
+      "forced": true,
+      "required": true,
+      "buildSummary": null,
+      "batched": false,
+      "cluster": "A47A212B059B934E88BA2444327E9733FB58117AE975562BC5721C6C65D02B05",
+      "commandLines": [
+        {
+          "cache": 3,
+          "metaCommand": "@cargo build",
+          "actions": [
+            {
+              "command": "cargo",
+              "arguments": "build --profile dev "
+            }
+          ],
+          "container": null,
+          "containerVariables": [],
+          "batchContext": null
+        }
+      ]
+    }
+  },
+  "selectedNodes": [
+    "deployments/terraform-deploy:build",
+    "libraries/dotnet-lib:build",
+    "libraries/shell-lib:build",
+    "projects/dotnet-app:build",
+    "projects/make-app:build",
+    "projects/npm-app:build",
+    "projects/rust-app:build"
+  ]
+}

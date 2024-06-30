@@ -1,0 +1,421 @@
+{
+  "space": null,
+  "sourceControl": {
+    "headCommit": "7b65ebb5fc4e2afbcefef53afc988af7c9415f0f",
+    "branchOrTag": "feature/integration-tests",
+    "logType": "terminal",
+    "ci": false,
+    "name": "Local"
+  },
+  "selectedProjects": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+  ],
+  "targets": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "rebuild": [
+        "boolean",
+        false
+      ]
+    }
+  },
+  "projects": {
+    "A": {
+      "id": "A",
+      "hash": "6765DB78C92AE5CDF6D209FE067DDBE92511B2A720448DCC73DCBAC29E224624",
+      "dependencies": [],
+      "files": [
+        "A.csproj",
+        "PROJECT",
+        "packages.lock.json"
+      ],
+      "targets": {
+        "build": {
+          "hash": "8E44CBB6DB72FF3E4BE587B2D07A78F0EDC7F0F2688AAC4B5B9A2C3E94D72A38",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "**/*.binlog",
+            "bin/",
+            "obj/",
+            "obj/*.json",
+            "obj/*.props",
+            "obj/*.targets"
+          ],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@dotnet build",
+              "actions": [
+                {
+                  "command": "dotnet",
+                  "arguments": "build  --configuration Debug    "
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": {
+                "script": {},
+                "command": "build",
+                "context": [
+                  "map",
+                  {
+                    "context": [
+                      "object",
+                      {
+                        "debug": true,
+                        "directory": "A",
+                        "ci": false,
+                        "nodeHash": "6765DB78C92AE5CDF6D209FE067DDBE92511B2A720448DCC73DCBAC29E224624",
+                        "command": "build",
+                        "branchOrTag": "feature/integration-tests"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "labels": []
+    },
+    "B": {
+      "id": "B",
+      "hash": "509BAF9F664901BED1F979302A6D189C2A35A9B8450B617893B84316694AEBF1",
+      "dependencies": [],
+      "files": [
+        "B.csproj",
+        "PROJECT",
+        "packages.lock.json"
+      ],
+      "targets": {
+        "build": {
+          "hash": "8E44CBB6DB72FF3E4BE587B2D07A78F0EDC7F0F2688AAC4B5B9A2C3E94D72A38",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "**/*.binlog",
+            "bin/",
+            "obj/",
+            "obj/*.json",
+            "obj/*.props",
+            "obj/*.targets"
+          ],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@dotnet build",
+              "actions": [
+                {
+                  "command": "dotnet",
+                  "arguments": "build  --configuration Debug    "
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": {
+                "script": {},
+                "command": "build",
+                "context": [
+                  "map",
+                  {
+                    "context": [
+                      "object",
+                      {
+                        "debug": true,
+                        "directory": "B",
+                        "ci": false,
+                        "nodeHash": "509BAF9F664901BED1F979302A6D189C2A35A9B8450B617893B84316694AEBF1",
+                        "command": "build",
+                        "branchOrTag": "feature/integration-tests"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "labels": []
+    },
+    "C": {
+      "id": "C",
+      "hash": "8243CB709ACA1CF703BF9D34898D1A3E7EE2A204F8A969856D1B369C80B0BFFE",
+      "dependencies": [
+        "A",
+        "B"
+      ],
+      "files": [
+        "PROJECT",
+        "package-lock.json",
+        "package.json"
+      ],
+      "targets": {
+        "build": {
+          "hash": "99DD49C225ABACFB2E7A0437E146E795DB3A0C4ABD4750C8361C18E326A6C0B4",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "dist/"
+          ],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@npm build",
+              "actions": [
+                {
+                  "command": "npm",
+                  "arguments": "ci"
+                },
+                {
+                  "command": "npm",
+                  "arguments": "run build -- "
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": null
+            }
+          ]
+        }
+      },
+      "labels": []
+    },
+    "D": {
+      "id": "D",
+      "hash": "F3F274387FB0965E1A6167C8FC1795B178ED1E51FC4C80FBEC4FF0B01E0C1714",
+      "dependencies": [
+        "C"
+      ],
+      "files": [
+        "D.csproj",
+        "PROJECT",
+        "packages.lock.json"
+      ],
+      "targets": {
+        "build": {
+          "hash": "8E44CBB6DB72FF3E4BE587B2D07A78F0EDC7F0F2688AAC4B5B9A2C3E94D72A38",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "**/*.binlog",
+            "bin/",
+            "obj/",
+            "obj/*.json",
+            "obj/*.props",
+            "obj/*.targets"
+          ],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@dotnet build",
+              "actions": [
+                {
+                  "command": "dotnet",
+                  "arguments": "build  --configuration Debug    "
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": {
+                "script": {},
+                "command": "build",
+                "context": [
+                  "map",
+                  {
+                    "context": [
+                      "object",
+                      {
+                        "debug": true,
+                        "directory": "D",
+                        "ci": false,
+                        "nodeHash": "F3F274387FB0965E1A6167C8FC1795B178ED1E51FC4C80FBEC4FF0B01E0C1714",
+                        "command": "build",
+                        "branchOrTag": "feature/integration-tests"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "labels": []
+    },
+    "E": {
+      "id": "E",
+      "hash": "E6FE0175538764C73EEBB213E01551D2F05E3CF251434AF6813573BF0BBE9C6A",
+      "dependencies": [
+        "C"
+      ],
+      "files": [
+        "E.csproj",
+        "PROJECT",
+        "packages.lock.json"
+      ],
+      "targets": {
+        "build": {
+          "hash": "8E44CBB6DB72FF3E4BE587B2D07A78F0EDC7F0F2688AAC4B5B9A2C3E94D72A38",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "**/*.binlog",
+            "bin/",
+            "obj/",
+            "obj/*.json",
+            "obj/*.props",
+            "obj/*.targets"
+          ],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@dotnet build",
+              "actions": [
+                {
+                  "command": "dotnet",
+                  "arguments": "build  --configuration Debug    "
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": {
+                "script": {},
+                "command": "build",
+                "context": [
+                  "map",
+                  {
+                    "context": [
+                      "object",
+                      {
+                        "debug": true,
+                        "directory": "E",
+                        "ci": false,
+                        "nodeHash": "E6FE0175538764C73EEBB213E01551D2F05E3CF251434AF6813573BF0BBE9C6A",
+                        "command": "build",
+                        "branchOrTag": "feature/integration-tests"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "labels": []
+    },
+    "F": {
+      "id": "F",
+      "hash": "CADB098228D693FDD16B79A788C2530146BDE1780B0868B157300F373DB7D205",
+      "dependencies": [
+        "D",
+        "E"
+      ],
+      "files": [
+        "PROJECT",
+        "package-lock.json",
+        "package.json"
+      ],
+      "targets": {
+        "build": {
+          "hash": "99DD49C225ABACFB2E7A0437E146E795DB3A0C4ABD4750C8361C18E326A6C0B4",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "dist/"
+          ],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@npm build",
+              "actions": [
+                {
+                  "command": "npm",
+                  "arguments": "ci"
+                },
+                {
+                  "command": "npm",
+                  "arguments": "run build -- "
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": null
+            }
+          ]
+        }
+      },
+      "labels": []
+    },
+    "G": {
+      "id": "G",
+      "hash": "98AF58F8627AB8C567A3F08B2C1CEFF8CF4FB9F3482676807E2D673164209178",
+      "dependencies": [
+        "C"
+      ],
+      "files": [
+        "PROJECT",
+        "package-lock.json",
+        "package.json"
+      ],
+      "targets": {
+        "build": {
+          "hash": "99DD49C225ABACFB2E7A0437E146E795DB3A0C4ABD4750C8361C18E326A6C0B4",
+          "variables": {},
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "dist/"
+          ],
+          "actions": [
+            {
+              "cache": 3,
+              "metaCommand": "@npm build",
+              "actions": [
+                {
+                  "command": "npm",
+                  "arguments": "ci"
+                },
+                {
+                  "command": "npm",
+                  "arguments": "run build -- "
+                }
+              ],
+              "container": null,
+              "containerVariables": [],
+              "batchContext": null
+            }
+          ]
+        }
+      },
+      "labels": []
+    }
+  },
+  "configuration": "default",
+  "note": null,
+  "tag": null
+}

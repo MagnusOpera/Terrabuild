@@ -1,0 +1,10 @@
+{
+  "whatIf": true,
+  "debug": true,
+  "maxConcurrency": 4,
+  "force": true,
+  "retry": false,
+  "isLog": false,
+  "noContainer": false,
+  "noBatch": false
+}
