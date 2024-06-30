@@ -18,7 +18,7 @@ let private parse parser lexer txt =
         let err = sprintf "Unexpected token '%s' at (%d,%d)"
                           (LexBuffer<_>.LexemeString lexbuf |> string) 
                           (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
-        TerrabuildException.Raise(err)
+        TerrabuildException.Raise(err, exn)
 
 
 let parseProject = parse Project.Parser.ProjectFile Project.Lexer.token

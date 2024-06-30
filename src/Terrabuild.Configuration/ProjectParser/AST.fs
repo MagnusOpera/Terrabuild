@@ -1,6 +1,7 @@
 module Terrabuild.Configuration.Project.AST
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
+open Errors
 
 [<RequireQualifiedAccess>]
 type ProjectComponents =
@@ -24,31 +25,31 @@ with
             match components |> List.choose (function | ProjectComponents.Dependencies value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> failwith "multiple dependencies declared"
+            | _ -> TerrabuildException.Raise("multiple dependencies declared")
 
         let outputs =
             match components |> List.choose (function | ProjectComponents.Outputs value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> failwith "multiple outputs declared"
+            | _ -> TerrabuildException.Raise("multiple outputs declared")
 
         let ignores =
             match components |> List.choose (function | ProjectComponents.Ignores value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> failwith "multiple ignores declared"
+            | _ -> TerrabuildException.Raise("multiple ignores declared")
 
         let includes =
             match components |> List.choose (function | ProjectComponents.Includes value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> failwith "multiple files declared"
+            | _ -> TerrabuildException.Raise("multiple files declared")
 
         let labels =
             match components |> List.choose (function | ProjectComponents.Labels value -> Some value | _ -> None) with
             | [] -> Set.empty
             | [value] -> value |> Set.ofList
-            | _ -> failwith "multiple labels declared"
+            | _ -> TerrabuildException.Raise("multiple labels declared")
 
         { Init = init
           Dependencies = dependencies
@@ -86,19 +87,19 @@ with
             match components |> List.choose (function | TargetComponents.DependsOn value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> failwith "multiple depends_on declared"
+            | _ -> TerrabuildException.Raise("multiple depends_on declared")
 
         let rebuild =
             match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> Some value
-            | _ -> failwith "multiple rebuild declared"
+            | _ -> TerrabuildException.Raise("multiple rebuild declared")
 
         let outputs =
             match components |> List.choose (function | TargetComponents.Outputs value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> failwith "multiple outputs declared"
+            | _ -> TerrabuildException.Raise("multiple outputs declared")
 
         let steps =
             components
@@ -125,9 +126,9 @@ with
     static member Build components =
         let project =
             match components |> List.choose (function | ProjectFileComponents.Project value -> Some value | _ -> None) with
-            | [] -> failwith "project is not declared"
+            | [] -> Project.Build None []
             | [value] -> value
-            | _ -> failwith "multiple project declared"
+            | _ -> TerrabuildException.Raise("multiple project declared")
 
         let extensions =
             components
