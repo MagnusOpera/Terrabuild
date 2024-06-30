@@ -3,6 +3,7 @@ open CLI
 open System
 open Serilog
 open Errors
+open System.Reflection
 
 let rec dumpKnownException (ex: Exception) =
     seq {
@@ -212,7 +213,10 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         0
 
     let version () =
-        let version = Reflection.Assembly.GetEntryAssembly().GetName().Version
+        let version =
+            Assembly.GetExecutingAssembly()
+                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                    .InformationalVersion
         printfn $"Terrabuild v{version}"
         0
  
