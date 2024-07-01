@@ -5,7 +5,7 @@ Thanks for contributing to Terrabuild and helping make it better. We appreciate 
 ## Communications
 
 You are welcome to join the [Terrabuild Community Slack](https://terrabuild.io/community/) for questions and feature requests.
-We discuss features and file bugs on GitHub via [Issues](https://github.com/MagnusOpera/Terrabuild/issues) as well as [Discussions](https://github.com/MagnusOpera/Terrabuild/discussions).
+We discuss features and file bugs on GitHub via [Issues](https://github.com/MagnusOpera/Terrabuild/issues).
 
 ### Issues
 
@@ -36,13 +36,17 @@ We use `make` as shortcuts to run commands.
 We develop mainly on macOS and Ubuntu - with limited support for doing development on Windows. Feel free to pitch in if you can to improve situation.
 
 `Makefile` contains several targets. The ones you care are:
-1. `build`: build Terrabuild
-1. `test`: build and run tests
-1. `dist-all`: build and publish all artifacts
-1. `self-build`: build Terrabuild, which is used to self-build
-1. `tb-build`: build Terrabuild using locally installed Terrabuild
+1. `build`: build Terrabuild. This is the default target.
+1. `parser`: rebuild parser and start build.
+1. `test`: build and run tests.
+1. `self`: build and self buid/test/publish again.
+1. `self-test-all`: use published version to run integration tests.
+1. `dist`: publish as standalone tool.
+1. `terrabuild`: build/test/publish Terrabuild using locally installed Terrabuild.
 
 You probably also want to install current Terrabuild distribution: `dotnet tool install --global terrabuild`
+
+Use `dotnet tool install --global --prerelease terrabuild` if you want pre-release version instead.
 
 ## Submitting a Pull Request
 

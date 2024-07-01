@@ -18,8 +18,6 @@ endif
 
 current_dir = $(shell pwd)
 
-.PHONY: src tools
-
 
 #
 #  _______   ___________    ____
@@ -32,12 +30,6 @@ current_dir = $(shell pwd)
 
 build:
 	dotnet build -c $(buildconfig) terrabuild.sln
-
-src:
-	dotnet build -c $(buildconfig) src/src.sln
-
-tools:
-	dotnet build -c $(buildconfig) tools/tools.sln
 
 test:
 	dotnet test terrabuild.sln
@@ -52,11 +44,11 @@ clean:
 upgrade:
 	dotnet restore --force-evaluate
 
-clear-cache:
-	dotnet run --project src/Terrabuild -- clear --cache --home
-
-docker-prune:
-	docker system prune -af
+usage:
+	dotnet run --project src/Terrabuild -- --help
+	dotnet run --project src/Terrabuild -- run --help
+	dotnet run --project src/Terrabuild -- clear --help
+	dotnet run --project src/Terrabuild -- login --help
 
 #
 # .______       _______  __       _______     ___           _______. _______
@@ -90,7 +82,6 @@ pack:
 
 dist-all: clean publish-all pack
 
-
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(buildconfig)
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net8.0/Terrabuild.Extensions.xml ../website/content/docs/extensions
@@ -98,37 +89,8 @@ docs:
 self: clean publish
 	.out/dotnet/terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --localonly
 
-self-build:
-	.out/dotnet/terrabuild run build --workspace src --configuration $(env) --retry --debug --logs
-
-self-build-local:
-	.out/dotnet/terrabuild run build --workspace src --configuration $(env) --retry --debug --logs --localonly
-
-self-dist:
-	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
-
-self-test:
-	.out/dotnet/terrabuild run test --workspace src --configuration $(env) --retry --debug --logs
-
-self-publish:
-	.out/dotnet/terrabuild run dist --workspace src --configuration $(env) --retry --debug --logs
-
-
-tb-build: clean
-	terrabuild run build --workspace src --configuration $(env) --retry --debug
-
-tb-dist: clean
-	terrabuild run dist --workspace src --configuration $(env) --retry --debug --tag $(full_version)
-
-tb-test: clean
-	terrabuild run test --workspace src --configuration $(env) --retry --debug
-
-tb-publish: clean
-	terrabuild run dist --workspace src --configuration $(env) --retry --debug
-
-tb-check: clean
-	terrabuild run dist --workspace src --configuration $(env) --retry --debug --whatif
-
+terrabuild:
+	terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --localonly
 
 
 #
@@ -139,9 +101,6 @@ tb-check: clean
 #     |  |     |  |____.----)   |      |  |    .----)   |
 #     |__|     |_______|_______/       |__|    |_______/
 #
-
-run-build-multirefs:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/multirefs
 
 run-build-circular:
 	dotnet run --project src/Terrabuild -- run build --workspace tests/circular
@@ -154,60 +113,6 @@ run-rescaffold:
 
 run-build-scaffold:
 	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry
-
-run-publish-scaffold:
-	dotnet run --project src/Terrabuild -- run dist --workspace tests/scaffold --debug --retry
-
-run-build: clean
-	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --debug --logs
-
-run-build-playground: clean
-	dotnet run --project src/Terrabuild -- run deploy --workspace ../playgrounds/terrabuild
-
-run-build-env: clean
-	TB_VAR_secret_message="pouet pouet" dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --debug
-
-run-rebuild: clean
-	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --label app --debug --force --logs
-
-run-dist:
-	dotnet run --project src/Terrabuild -- run dist --workspace tests/simple --configuration $(env) --debug
-
-run-docker:
-	dotnet run --project src/Terrabuild -- run docker --workspace tests/simple --configuration $(env) --label app --debug --retry
-
-run-push:
-	dotnet run --project src/Terrabuild -- run push --workspace tests/simple --configuration $(env) --label app --debug --retry
-
-run-deploy:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --configuration $(env) --debug --retry
-
-run-deploy-dev:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --configuration $(env) --variable workspace=dev
-
-run-build-app:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --configuration $(env) --label dotnet --debug
-
-run-graph-cluster-layers:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/cluster-layers --whatif --force --debug
-
-github-tests:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --configuration $(env) --debug --retry --parallel 4
-
-usage:
-	dotnet run --project src/Terrabuild -- --help
-	dotnet run --project src/Terrabuild -- run --help
-	dotnet run --project src/Terrabuild -- clear --help
-	dotnet run --project src/Terrabuild -- login --help
-
-version:
-	dotnet run --project src/Terrabuild -- version
-
-
-
-
-self-test-circular:
-	cd tests/circular; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif
 
 
 define diff_results
@@ -235,9 +140,6 @@ self-test-cluster-layers:
 
 self-test-multirefs:
 	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --logs)
-
-self-test-scaffold:
-	cd tests/scaffold; $(current_dir)/.out/dotnet/terrabuild run build --force --debug --whatif
 
 self-test-simple:
 	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs)
