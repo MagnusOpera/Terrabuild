@@ -57,11 +57,10 @@ type IBuildNotification =
 
 
 let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (options: Configuration.Options) =
-    let targets = graph.Targets |> String.join ","
-    let targetLabel = if graph.Targets.Count > 1 then "targets" else "target"
-    $"{Ansi.Emojis.rocket} Running {targetLabel} {targets}" |> Terminal.writeLine
+    let targets = graph.Targets |> String.join " "
+    $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
-    let nodesToRun = graph.Nodes |> Map.filter (fun nodeId node -> node.Required) |> Map.count
+    let nodesToRun = graph.Nodes |> Map.filter (fun _ node -> node.Required) |> Map.count
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks to run" |> Terminal.writeLine
 
     let startedAt = DateTime.UtcNow
