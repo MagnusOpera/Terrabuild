@@ -52,7 +52,7 @@ jobs:
             terrabuild-debug.*
 
       - name: Create Test Report
-        uses: pchalamet/test-reporter@lean
+        uses: magnusopera/test-reporter@main
         if: always()
         with:
           name: Unit Tests Report

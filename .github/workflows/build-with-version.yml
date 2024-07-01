@@ -79,7 +79,7 @@ jobs:
             ~/.terrabuild/buildcache/**/*.log
 
       - name: Create Test Report
-        uses: pchalamet/test-reporter@link
+        uses: magnusopera/test-reporter@main
         if: always()
         with:
           name: Unit Tests Report
