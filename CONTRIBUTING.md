@@ -39,7 +39,8 @@ We develop mainly on macOS and Ubuntu - with limited support for doing developme
 1. `build`: build Terrabuild. This is the default target.
 1. `parser`: rebuild parser and start build.
 1. `test`: build and run tests.
-1. `self`: build and self buid/test/publish again.
+1. `publish`: build and publish.
+1. `self`: publish and self buid/test/publish again.
 1. `self-test-all`: use published version to run integration tests.
 1. `dist`: publish as standalone tool.
 1. `terrabuild`: build/test/publish Terrabuild using locally installed Terrabuild.

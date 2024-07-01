@@ -60,7 +60,6 @@ usage:
 #
 
 publish:
-	printf "%s %s\n" $(full_version) $(version_suffix)
 	dotnet publish -c $(buildconfig) -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/dotnet src/Terrabuild
 	cd .out/dotnet; zip -r ../dotnet-$(full_version).zip ./*
 
@@ -144,4 +143,4 @@ self-test-multirefs:
 self-test-simple:
 	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs)
 
-self-test-all: self-test-cluster-layers self-test-multirefs self-test-simple
+self-test-all: publish self-test-cluster-layers self-test-multirefs self-test-simple
