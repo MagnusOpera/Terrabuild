@@ -68,31 +68,38 @@ type Npm() =
                    Dependencies = dependencies }
         projectInfo
 
+
     /// <summary>
     /// Install packages using lock file.
     /// </summary>
-    static member install () =
-        scope Cacheability.Always
-        |> andThen "npm" "ci"
+    static member install (context: ActionContext) =
+        let ops = [ shellOp "npm" "ci" ]
+        execRequest Cacheability.Always [] (All ops)
+
 
     /// <summary>
     /// Run `build` script.
     /// </summary>
     /// <param name="arguments" example="&quot;--port=1337&quot;">Arguments to pass to target.</param> 
-    static member build (arguments: string option) =
+    static member build (context: ActionContext) (arguments: string option) =
         let args = arguments |> Option.defaultValue ""
 
-        scope Cacheability.Always
-        |> andThen "npm" "ci" 
-        |> andThen "npm" $"run build -- {args}"
+        let ops = All [
+            shellOp "npm" "ci"
+            shellOp "npm" $"run build -- {args}"   
+        ]
+        execRequest Cacheability.Always [] ops
+
 
     /// <summary>
     /// Run `test` script.
     /// </summary>
     /// <param name="arguments" example="&quot;--port=1337&quot;">Arguments to pass to target.</param> 
-    static member test (arguments: string option) =
+    static member test (context: ActionContext) (arguments: string option) =
         let args = arguments |> Option.defaultValue ""
 
-        scope Cacheability.Always
-        |> andThen "npm" "ci" 
-        |> andThen "npm" $"run test -- {args}"
+        let ops = All [
+            shellOp "npm" "ci"
+            shellOp "npm" $"run test -- {args}"   
+        ]
+        execRequest Cacheability.Always [] ops

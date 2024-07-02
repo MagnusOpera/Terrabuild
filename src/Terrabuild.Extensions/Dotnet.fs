@@ -67,7 +67,7 @@ module DotnetHelpers =
         guid.ToString("D").ToUpperInvariant()
 
 
-    let GenerateSolutionContent (projects : string list) (configuration: string) =
+    let GenerateSolutionContent (projects : string seq) (configuration: string) =
         let string2guid s =
             s
             |> GenerateGuidFromString 
@@ -117,6 +117,23 @@ module DotnetHelpers =
 
 type Dotnet() =
 
+    static let buildRequest (context: ActionContext) configuration buildOps =
+        let preOps, ops =
+            if context.Projects.Count > 1 then
+                let projects =
+                    context.Projects
+                    |> Map.values
+                    |> Seq.map DotnetHelpers.findProjectFile
+                    |> Seq.map (fun path -> Path.GetRelativePath(context.TempDir, path))
+                let slnfile = Path.Combine(context.TempDir, $"{context.NodeHash}.sln")
+                let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
+                IO.writeLines slnfile slnContent
+                buildOps slnfile, All []
+            else
+                [], All (buildOps "")
+
+        execRequest Cacheability.Always preOps ops
+
     /// <summary>
     /// Provides default values for project.
     /// </summary>
@@ -134,52 +151,14 @@ type Dotnet() =
         projectInfo
 
 
-    /// <summary title="Batch build multiple projects.">
-    /// The `build` command supports building multiple projects in the same batch.
-    /// </summary>
-    /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
-    /// <param name="log" example="true">Enable binlog for the build.</param>
-    static member __build__ (context: BatchContext) (configuration: string option) (log: bool option) (version: string option) =
-        let projects =
-            context.ProjectPaths
-            |> List.map DotnetHelpers.findProjectFile
-            |> List.map (fun path -> Path.GetRelativePath(context.TempDir, path))
-
-        let configuration =
-            configuration
-            |> Option.defaultValue DotnetHelpers.defaultConfiguration
-
-        let logger =
-            match log with
-            | Some true -> " -bl"
-            | _ -> ""
-
-        let version =
-            match version with
-            | Some version -> $" -p:Version={version}"
-            | _ -> ""
-
-        // generate temp solution file
-        let slnfile = Path.Combine(context.TempDir, $"{context.NodeHash}.sln")
-        let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
-        File.WriteAllLines(slnfile, slnContent)
-
-        let actions = [
-            action "dotnet" $"build {slnfile} --configuration {configuration} {logger} {version}"
-        ]
-        actions
-
-
     /// <summary title="Build project.">
     /// Build project and ensure packages are available first.
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
-    /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
     /// <param name="parallel" example="1">Max worker processes to build the project.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
     /// <param name="arguments" example="--no-incremental">Arguments for command.</param>
-    static member build (projectfile: string option) (configuration: string option) (``parallel``: int option) (log: bool option) (version: string option) (arguments: string option) =
-        let projectfile = projectfile |> Option.defaultValue ""
+    static member build (context: ActionContext) (configuration: string option) (``parallel``: int option) (log: bool option) (version: string option) (arguments: string option) =
         let configuration =
             configuration
             |> Option.defaultValue DotnetHelpers.defaultConfiguration
@@ -201,10 +180,11 @@ type Dotnet() =
 
         let arguments = arguments |> Option.defaultValue ""
 
-        scope Cacheability.Always
-        |> andThen "dotnet" $"build {projectfile} --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
-        |> batchable
+        let buildOps projectFile = [
+            shellOp "dotnet" $"build {projectFile} --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
+        ]
 
+        buildRequest context configuration buildOps
 
     /// <summary>
     /// Run a dotnet `command`.
@@ -213,38 +193,37 @@ type Dotnet() =
     /// <param name="arguments" example="&quot;--verify-no-changes&quot;">Arguments for command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
-        scope Cacheability.Always
-        |> andThen (context.Command) arguments
+
+        let ops = All [ shellOp context.Command arguments ]
+        execRequest Cacheability.Always [] ops
 
 
     /// <summary>
     /// Pack a project.
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration for pack command.</param>
-    /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for build.</param>
     /// <param name="version" example="&quot;1.0.0&quot;">Version for pack command.</param>
     /// <param name="arguments" example="--include-symbols">Arguments for command.</param>
-    static member pack (configuration: string option) (projectfile: string option) (version: string option) (arguments: string option)=
-        let projectfile = projectfile |> Option.defaultValue ""
+    static member pack (context: ActionContext) (configuration: string option) (version: string option) (arguments: string option)=
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let version = version |> Option.defaultValue "0.0.0"
         let arguments = arguments |> Option.defaultValue ""
 
-        // NOTE for TargetsForTfmSpecificContentInPackage: https://github.com/dotnet/fsharp/issues/12320
-        scope Cacheability.Always
-        |> andThen "dotnet" $"pack {projectfile} --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
+        let buildOps projectFile = [
+            shellOp "dotnet" $"pack {projectFile} --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
+        ]
+
+        buildRequest context configuration buildOps
 
     /// <summary>
     /// Publish a project.
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration for publish command.</param>
-    /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
     /// <param name="runtime" example="&quot;linux-x64&quot;">Runtime for publish.</param>
     /// <param name="trim" example="true">Instruct to trim published project.</param>
     /// <param name="single" example="true">Instruct to publish project as self-contained.</param>
     /// <param name="arguments" example="--version-suffix beta">Arguments for command.</param>
-    static member publish (configuration: string option) (projectfile: string option) (runtime: string option) (trim: bool option) (single: bool option) (arguments: string option) =
-        let projectfile = projectfile |> Option.defaultValue ""
+    static member publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) (arguments: string option) =
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
         let runtime =
@@ -261,62 +240,37 @@ type Dotnet() =
             | _ -> ""
         let arguments = arguments |> Option.defaultValue ""
 
-        scope Cacheability.Always
-        |> andThen "dotnet" $"publish {projectfile} --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
+        let buildOps projectFile = [
+            shellOp "dotnet" $"publish {projectFile} --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
+        ]
+
+        buildRequest context configuration buildOps
 
     /// <summary>
     /// Restore packages.
     /// </summary>
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
     /// <param name="arguments" example="--no-dependencies">Arguments for command.</param>
-    static member restore (projectfile: string option) (arguments: string option) =
-        let projectfile = projectfile |> Option.defaultValue ""
+    static member restore (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
-        scope Cacheability.Local
-        |> andThen "dotnet" $"restore {projectfile} {arguments}"
+        let ops = All [ shellOp "dotnet" $"restore {arguments}" ]
+        execRequest Cacheability.Local [] ops
 
 
     /// <summary>
     /// Test project.
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration for publish command.</param>
-    /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
     /// <param name="filter" example="&quot;TestCategory!=integration&quot;">Run selected unit tests.</param>
     /// <param name="arguments" example="--blame-hang">Arguments for command.</param>
-    static member test (configuration: string option) (projectfile: string option) (filter: string option) (arguments: string option) =
-        let projectfile = projectfile |> Option.defaultValue ""
+    static member test (context: ActionContext) (configuration: string option) (filter: string option) (arguments: string option) =
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
         let arguments = arguments |> Option.defaultValue ""
 
-        scope Cacheability.Always
-        |> andThen "dotnet" $"test {projectfile} --no-build --configuration {configuration} {filter} {arguments}"
-        |> batchable
-
-    /// <summary title="Batch build multiple projects.">
-    /// The `build` command supports building multiple projects in the same batch.
-    /// </summary>
-    /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
-    /// <param name="filter" example="&quot;TestCategory!=integration&quot;">Enable binlog for the build.</param>
-    static member __test__ (context: BatchContext) (configuration: string option) (filter: string option) =
-        let projects =
-            context.ProjectPaths
-            |> List.map DotnetHelpers.findProjectFile
-            |> List.map (fun path -> Path.GetRelativePath(context.TempDir, path))
-
-        let configuration =
-            configuration
-            |> Option.defaultValue DotnetHelpers.defaultConfiguration
-
-        let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
-
-        // generate temp solution file
-        let slnfile = Path.Combine(context.TempDir, $"{context.NodeHash}.sln")
-        let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
-        File.WriteAllLines(slnfile, slnContent)
-
-        let actions = [
-            action "dotnet" $"test {slnfile} --no-build --configuration {configuration} {filter}"
+        let buildOps projectFile = [
+            shellOp "dotnet" $"test {projectFile} --no-build --configuration {configuration} {filter} {arguments}"
         ]
-        actions
+
+        buildRequest context configuration buildOps

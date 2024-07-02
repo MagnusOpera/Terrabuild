@@ -24,14 +24,20 @@ type Docker() =
         let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
         let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash}{args}{platform} ."
 
-        if context.CI then
-            let pushArgs = $"push {image}:{nodehash}"
-            scope Cacheability.Remote
-            |> andThen "docker" buildArgs
-            |> andThen "docker" pushArgs
-        else
-            scope Cacheability.Local
-            |> andThen "docker" buildArgs
+        let ops = All [
+            if context.CI then
+                shellOp "docker" buildArgs
+                shellOp "docker" $"push {image}:{nodehash}"
+            else
+                shellOp "docker" buildArgs
+        ]
+
+        let cacheability =
+            if context.CI then Cacheability.Remote
+            else Cacheability.Local
+
+        execRequest cacheability [] ops
+
 
     /// <summary>
     /// Push a docker image to registry.
@@ -44,11 +50,15 @@ type Docker() =
             | Some tag -> tag
             | _ -> context.BranchOrTag.Replace("/", "-")
 
-        if context.CI then
-            let retagArgs = $"buildx imagetools create -t {image}:{imageTag} {image}:{context.NodeHash}"
-            scope Cacheability.Remote
-            |> andThen "docker" retagArgs
-        else
-            let tagArgs = $"tag {image}:{context.NodeHash} {image}:{imageTag}"
-            scope Cacheability.Local
-            |> andThen "docker" tagArgs
+        let ops = All [
+            if context.CI then
+                shellOp "docker" $"buildx imagetools create -t {image}:{imageTag} {image}:{context.NodeHash}"
+            else
+                shellOp "docker" $"tag {image}:{context.NodeHash} {image}:{imageTag}"
+        ]
+
+        let cacheability =
+            if context.CI then Cacheability.Remote
+            else Cacheability.Local
+
+        execRequest cacheability [] ops
