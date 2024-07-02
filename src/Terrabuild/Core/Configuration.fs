@@ -33,10 +33,10 @@ type TargetOperation = {
 
 [<RequireQualifiedAccess>]
 type Target = {
-    Hash: string
     Rebuild: bool
     DependsOn: string set
     Outputs: string set
+    Hash: string
     Operations: TargetOperation list
 }
 
@@ -330,19 +330,9 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
                         let stepActions, stepVars =
-                            let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
-                                                  Terrabuild.Extensibility.ActionContext.Directory = projectDir
-                                                  Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
-                                                  Terrabuild.Extensibility.ActionContext.NodeHash = projectHash
-                                                  Terrabuild.Extensibility.ActionContext.Command = step.Command
-                                                  Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag
-                                                  Terrabuild.Extensibility.ActionContext.TempDir = ""
-                                                  Terrabuild.Extensibility.ActionContext.Projects = Map.empty }
-
                             let usedVars, context =
                                 extension.Defaults
                                 |> Map.addMap step.Parameters
-                                |> Map.add "context" (Expr.Object actionContext)
                                 |> Expr.Map
                                 |> Eval.eval evaluationContext
 

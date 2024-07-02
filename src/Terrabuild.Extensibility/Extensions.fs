@@ -26,9 +26,7 @@ with
 [<RequireQualifiedAccess>]
 type ActionContext = {
     Debug: bool
-    Directory: string
     CI: bool
-    NodeHash: string
     Command: string
     BranchOrTag: string
 

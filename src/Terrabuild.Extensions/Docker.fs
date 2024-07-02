@@ -14,7 +14,6 @@ type Docker() =
     /// <param name="arguments" example="{ configuration: &quot;Release&quot; }">Named arguments to build image (see Dockerfile [ARG](https://docs.docker.com/reference/dockerfile/#arg)).</param> 
     static member build (context: ActionContext) (dockerfile: string option) (platform: string option) (image: string) (arguments: Map<string, string>) =
         let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
-        let nodehash = context.NodeHash
 
         let platform =
             match platform with
@@ -22,15 +21,17 @@ type Docker() =
             | _ -> ""
 
         let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
-        let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash}{args}{platform} ."
 
-        let ops = All [
-            if context.CI then
-                shellOp "docker" buildArgs
-                shellOp "docker" $"push {image}:{nodehash}"
-            else
-                shellOp "docker" buildArgs
-        ]
+        let ops = 
+            context.Projects 
+            |> Map.map (fun nodehash _ -> [
+                let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash}{args}{platform} ."
+                if context.CI then
+                    shellOp "docker" buildArgs
+                    shellOp "docker" $"push {image}:{nodehash}"
+                else
+                    shellOp "docker" buildArgs])
+            |> Each
 
         let cacheability =
             if context.CI then Cacheability.Remote
@@ -50,12 +51,14 @@ type Docker() =
             | Some tag -> tag
             | _ -> context.BranchOrTag.Replace("/", "-")
 
-        let ops = All [
-            if context.CI then
-                shellOp "docker" $"buildx imagetools create -t {image}:{imageTag} {image}:{context.NodeHash}"
-            else
-                shellOp "docker" $"tag {image}:{context.NodeHash} {image}:{imageTag}"
-        ]
+        let ops =
+            context.Projects
+            |> Map.map (fun nodehash _ -> [
+                if context.CI then
+                    shellOp "docker" $"buildx imagetools create -t {image}:{imageTag} {image}:{nodehash}"
+                else
+                    shellOp "docker" $"tag {image}:{nodehash} {image}:{imageTag}"])
+            |> Each
 
         let cacheability =
             if context.CI then Cacheability.Remote

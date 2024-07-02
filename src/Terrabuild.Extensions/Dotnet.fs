@@ -119,18 +119,18 @@ type Dotnet() =
 
     static let buildRequest (context: ActionContext) configuration buildOps =
         let preOps, ops =
-            if context.Projects.Count > 1 then
+            match context.Projects.Count with
+            | 1 -> [], All (buildOps "")
+            | _ ->
                 let projects =
                     context.Projects
                     |> Map.values
                     |> Seq.map DotnetHelpers.findProjectFile
                     |> Seq.map (fun path -> Path.GetRelativePath(context.TempDir, path))
-                let slnfile = Path.Combine(context.TempDir, $"{context.NodeHash}.sln")
+                let slnfile = Path.Combine(context.TempDir, $"{System.Guid.NewGuid()}.sln")
                 let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
                 IO.writeLines slnfile slnContent
                 buildOps slnfile, All []
-            else
-                [], All (buildOps "")
 
         execRequest Cacheability.Always preOps ops
 
