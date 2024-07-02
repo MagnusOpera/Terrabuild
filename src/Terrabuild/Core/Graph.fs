@@ -19,15 +19,13 @@ type Node = {
     Dependencies: string set
     ProjectHash: string
     Outputs: string set
-    Cache: Cacheability
     IsLeaf: bool
     Forced: bool
     Required: bool
-    BuildSummary: Cache.TargetSummary option
-    Batched: bool
-
     Cluster: string
-    CommandLines: Configuration.ContaineredActionBatch list
+    Cache: Cacheability
+    ShellOperations: ShellOperation list
+    BuildSummary: Cache.TargetSummary option
 }
 
 type Workspace = {
@@ -142,22 +140,12 @@ let create (configuration: Configuration.Workspace) (targets: string set) (optio
             match projectConfig.Targets |> Map.tryFind targetName with
             | Some target ->
                 let hashContent = [
-                    yield! target.Variables |> Seq.map (fun kvp -> $"{kvp.Key} = {kvp.Value}")
-                    yield! target.Actions |> Seq.map (fun batch -> batch.MetaCommand)
-                    yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].Hash)
                     yield projectConfig.Hash
+                    yield target.Hash
+                    yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].Hash)
                 ]
 
                 let hash = hashContent |> Hash.sha256strings
-
-                // compute cacheability of this node
-                let childrenCache =
-                    children
-                    |> Seq.fold (fun acc nodeId -> acc &&& allNodes[nodeId].Cache) Cacheability.Always
-
-                let cache =
-                    target.Actions
-                    |> Seq.fold (fun acc cmd -> acc &&& cmd.Cache) childrenCache
 
                 let isForced =
                     let isSelectedProject = configuration.SelectedProjects |> Set.contains project
@@ -171,17 +159,16 @@ let create (configuration: Configuration.Workspace) (targets: string set) (optio
                              Project = project
                              Target = targetName
                              Label = $"{targetName} {project}"
-                             CommandLines = target.Actions
                              Outputs = target.Outputs
                              Dependencies = children
                              ProjectHash = projectConfig.Hash
-                             Cache = cache
                              IsLeaf = isLeaf
                              Required = false
                              Forced = isForced
-                             BuildSummary = None
                              Cluster = target.Hash
-                             Batched = false }
+                             Cache = Cacheability.Never
+                             ShellOperations = []
+                             BuildSummary = None }
 
                 if allNodes.TryAdd(nodeId, node) |> not then
                     TerrabuildException.Raise("Unexpected graph building race")
