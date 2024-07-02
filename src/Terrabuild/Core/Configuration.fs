@@ -23,32 +23,23 @@ type Options = {
     NoBatch: bool
 }
 
-type BatchContext = {
+[<RequireQualifiedAccess>]
+type TargetOperation = {
     Script: Terrabuild.Scripting.Script
+    MetaCommand: string
     Command: string
     Context: Value
 }
 
 [<RequireQualifiedAccess>]
-type ContaineredActionBatch = {
-    Cache: Cacheability
-    MetaCommand: string
-    Actions: Action list
-
-    Container: string option
-    ContainerVariables: string Set
-    BatchContext: BatchContext option
-}
-
-
-[<RequireQualifiedAccess>]
-type ContaineredTarget = {
+type Target = {
     Hash: string
-    Variables: Map<string, string>
+    Rebuild: bool
     DependsOn: string set
     Outputs: string set
-    Actions: ContaineredActionBatch list
+    Operations: TargetOperation list
 }
+
 
 [<RequireQualifiedAccess>]
 type Project = {
@@ -56,7 +47,7 @@ type Project = {
     Hash: string
     Dependencies: string set
     Files: string set
-    Targets: Map<string, ContaineredTarget>
+    Targets: Map<string, Target>
     Labels: string set
 }
 
@@ -96,7 +87,7 @@ type private LoadedProject = {
     Includes: string set
     Ignores: string set
     Outputs: string set
-    Targets: Map<string, Target>
+    Targets: Map<string, Terrabuild.Configuration.Project.AST.Target>
     Labels: string set
     Extensions: Map<string, Extension>
     Scripts: Map<string, LazyScript>
@@ -205,7 +196,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                                     Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
                                     Terrabuild.Extensibility.ExtensionContext.CI = sourceControl.CI }
                     Value.Map (Map [ "context", Value.Object context ])
-                
+
                 let result =
                     Extensions.getScript init scripts
                     |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
@@ -328,7 +319,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     | Value.Bool rebuild -> rebuild
                     | _ -> TerrabuildException.Raise("rebuild must evaluate to a bool")
 
-                let usedVariables, actions =
+                let usedVariables, targetOperations =
                     target.Steps
                     |> List.fold (fun (usedVariables, actions) step ->
                         // let stepVars: Map<string, string> = Map.empty
@@ -344,49 +335,30 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                                                   Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
                                                   Terrabuild.Extensibility.ActionContext.NodeHash = projectHash
                                                   Terrabuild.Extensibility.ActionContext.Command = step.Command
-                                                  Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
+                                                  Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag
+                                                  Terrabuild.Extensibility.ActionContext.TempDir = ""
+                                                  Terrabuild.Extensibility.ActionContext.Projects = Map.empty }
 
-                            let usedVars, actionContext =
+                            let usedVars, context =
                                 extension.Defaults
                                 |> Map.addMap step.Parameters
                                 |> Map.add "context" (Expr.Object actionContext)
                                 |> Expr.Map
                                 |> Eval.eval evaluationContext
 
-                            let script = Extensions.getScript step.Extension projectDef.Scripts
-                            let actionGroup =
-                                let result =
-                                    script
-                                    |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionSequence> step.Command actionContext
-                                match result with
-                                | Extensions.Success result -> result
-                                | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {step.Extension} was not found")
-                                | Extensions.TargetNotFound -> TerrabuildException.Raise($"Script {step.Extension} has no function {step.Command}")
-                                | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '{step.Command}' for extension '{step.Extension}'", exn)
+                            let script =
+                                match Extensions.getScript step.Extension projectDef.Scripts with
+                                | Some script -> script
+                                | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                            let batchContext =
-                                if actionGroup.Batchable then
-                                    Some { Script = script.Value
-                                           Command = step.Command
-                                           Context = actionContext }
-                                else
-                                    None
-
-                            // rebuild semantic is implemented by tweaking cacheability
-                            let cache = 
-                                if rebuild then Cacheability.Never
-                                else actionGroup.Cache
-
-                            let containedActionBatch = {
-                                ContaineredActionBatch.MetaCommand = $"{step.Extension} {step.Command}"
-                                ContaineredActionBatch.BatchContext = batchContext
-                                ContaineredActionBatch.Container = extension.Container
-                                ContaineredActionBatch.ContainerVariables = extension.Variables
-                                ContaineredActionBatch.Cache = cache
-                                ContaineredActionBatch.Actions = actionGroup.Actions
+                            let targetContext = {
+                                TargetOperation.Script = script
+                                TargetOperation.MetaCommand = $"{step.Extension} {step.Command}"
+                                TargetOperation.Command = step.Command
+                                TargetOperation.Context = context
                             }
 
-                            containedActionBatch, usedVars
+                            targetContext, usedVars
 
                         let usedVariables = usedVariables + stepVars
                         let actions = actions @ [ stepActions ]
@@ -407,8 +379,8 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     |> Hash.sha256strings
 
                 let stepHash =
-                    actions
-                    |> Seq.map (fun action -> action.MetaCommand)
+                    targetOperations
+                    |> Seq.map (fun operation -> operation.MetaCommand)
                     |> Hash.sha256strings
 
                 let hash =
@@ -432,11 +404,15 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     | Some outputs -> outputs
                     | _ -> projectDef.Outputs
 
-                { ContaineredTarget.Hash = hash
-                  ContaineredTarget.Variables = usedVariables |> Map.ofSeq
-                  ContaineredTarget.Actions = actions
-                  ContaineredTarget.DependsOn = dependsOn
-                  ContaineredTarget.Outputs = outputs }
+                let target = {
+                    Target.Hash = hash
+                    Target.Rebuild = rebuild
+                    Target.DependsOn = dependsOn
+                    Target.Outputs = outputs
+                    Target.Operations = targetOperations
+                }
+
+                target
             )
 
         let files = files |> Set.map (FS.relativePath projectDir)
