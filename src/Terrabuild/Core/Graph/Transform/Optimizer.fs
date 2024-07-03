@@ -36,15 +36,19 @@ let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: C
 
                 let declare, clusterId =
                     if node.IsForced |> not then
+                        // node is not built => let it standalone in own cluster
                         Log.Debug("Node {node} does not need rebuild", node.Id)
                         true, node.Id
                     elif nodeDependencies = Set.empty then
+                        // node has no dependencies hence can freely create or join a cluster
                         Log.Debug("Node {node} has no dependencies and joined {cluster}", node.Id, node.OperationHash)
                         true, node.OperationHash
                     elif childrenClusters = Set.singleton node.OperationHash then
+                        // children's cluster is same as this node so join the cluster
                         Log.Debug("Node {node} is compatible with {cluster}", node.Id, node.OperationHash)
                         true, node.OperationHash
                     else
+                        // different clusters for children - maybe another time
                         Log.Debug("Node {node} can't join any clusters", node.Id)
                         false, node.Id
 
