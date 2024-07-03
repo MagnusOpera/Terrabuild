@@ -52,7 +52,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .CreateLogger()
         Log.Debug("Log created")
 
-    let runTarget wsDir target configuration note tag labels variables localOnly logs (options: Configuration.Options) =
+    let runTarget wsDir configuration note tag labels variables logs (options: Configuration.Options) =
         let logGraph graph name =
             graph
             |> Json.Serialize
@@ -78,7 +78,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let config = Configuration.read wsDir configuration note tag labels variables sourceControl options
 
         let token =
-            if localOnly then None
+            if options.LocalOnly then None
             else config.Space |> Option.bind (fun space -> Auth.readAuthToken space)
         let api = Api.Factory.create config.Space token
         if api |> Option.isSome then
@@ -93,7 +93,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let cache = Cache.Cache(storage) :> Cache.ICache
 
         let buildGraph =
-            let graph = Graph.create config target options
+            let graph = Graph.create config options.Targets options
             if options.Debug then logGraph graph "config"
 
             let consistentGraph = Graph.enforceConsistency config graph cache options
@@ -170,8 +170,10 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.NoBatch = noBatch
                         Configuration.Options.Retry = runArgs.Contains(RunArgs.Retry)
                         Configuration.Options.StartedAt = DateTime.UtcNow
-                        Configuration.Options.IsLog = false }
-        runTarget wsDir (Set targets) configuration note tag labels variables localOnly logs options
+                        Configuration.Options.IsLog = false
+                        Configuration.Options.Targets = Set targets
+                        Configuration.Options.LocalOnly = localOnly }
+        runTarget wsDir configuration note tag labels variables logs options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
         let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
@@ -193,8 +195,10 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.NoBatch = true
                         Configuration.Options.Retry = false
                         Configuration.Options.StartedAt = DateTime.UtcNow
-                        Configuration.Options.IsLog = true}
-        runTarget wsDir (Set targets) configuration None None labels variables true true options
+                        Configuration.Options.IsLog = true
+                        Configuration.Options.Targets = Set targets
+                        Configuration.Options.LocalOnly = true }
+        runTarget wsDir configuration None None labels variables true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearBuildCache()

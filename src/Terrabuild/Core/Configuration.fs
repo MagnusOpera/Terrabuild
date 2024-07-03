@@ -17,10 +17,12 @@ type Options = {
     MaxConcurrency: int
     Force: bool
     Retry: bool
+    LocalOnly: bool
     StartedAt: DateTime
     IsLog: bool
     NoContainer: bool
     NoBatch: bool
+    Targets: string set
 }
 
 [<RequireQualifiedAccess>]
@@ -55,9 +57,6 @@ type Project = {
 type Workspace = {
     // Space to use
     Space: string option
-
-    // Source control in use
-    SourceControl: Contracts.SourceControl
 
     // Computed projects selection (derived from user inputs)
     SelectedProjects: string set
@@ -480,5 +479,4 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
       Workspace.Targets = workspaceConfig.Targets
       Workspace.Configuration = configuration
       Workspace.Note = note
-      Workspace.Tag = tag
-      Workspace.SourceControl = sourceControl }
+      Workspace.Tag = tag }
