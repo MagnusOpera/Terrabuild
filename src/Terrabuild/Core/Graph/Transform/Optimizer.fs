@@ -7,7 +7,7 @@ open Terrabuild.PubSub
 open Serilog
 open Errors
 
-let optimize (sourceControl: Contracts.SourceControl) (configuration: Configuration.Workspace) (graph: Graph) (options: Configuration.Options) =
+let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: Configuration.Options) =
     let startedAt = DateTime.UtcNow
 
     let computeClusters remainingNodes =
@@ -83,7 +83,7 @@ let optimize (sourceControl: Contracts.SourceControl) (configuration: Configurat
 
     // invoke __optimize__ function on each cluster
     let allNodes = Concurrent.ConcurrentDictionary<string, GraphDef.Node>()
-    for (KeyValue(cluster, nodeIds)) in clusterNodes do
+    for (KeyValue(_, nodeIds)) in clusterNodes do
         let oneNodeId = nodeIds |> Seq.head
         let oneNode = graph.Nodes |> Map.find oneNodeId
 
@@ -91,10 +91,6 @@ let optimize (sourceControl: Contracts.SourceControl) (configuration: Configurat
             nodeIds
             |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
             |> List.ofSeq
-
-        // get hands on target
-        let project = configuration.Projects |> Map.find oneNode.Project
-        let target = project.Targets |> Map.find oneNode.Target
 
         let projectPaths = nodes |> List.map (fun node -> node.Id, node.Project) |> Map.ofList
 
