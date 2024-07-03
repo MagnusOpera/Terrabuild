@@ -150,7 +150,7 @@ let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: C
                     Set.singleton clusterNode.Id
 
             // patch each nodes to have a dependency on the cluster
-            // but still keep dependencies because outputs must be recovered
+            // but still keep dependencies because we want to ensure build order
             for node in nodes do
                 let ops =
                     match executionRequest.Operations with
