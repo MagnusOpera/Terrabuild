@@ -11,6 +11,7 @@ type Node = {
     Target: string
     TargetOperation: Configuration.TargetOperation option
     ConfigurationTarget: Configuration.Target
+    ShellOperations: Terrabuild.Extensibility.ShellOperations
 
     Dependencies: string set
     Outputs: string set

@@ -82,6 +82,7 @@ let build (configuration: Configuration.Workspace) (options: Configuration.Optio
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
                              Node.TargetOperation = None
+                             Node.ShellOperations = []
 
                              Node.Dependencies = children
                              Node.Outputs = target.Outputs

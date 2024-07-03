@@ -144,17 +144,24 @@ let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: C
                             Dependencies = clusterDependencies
                             Outputs = Set.empty
                             ProjectHash = clusterHash
-                            OperationHash = cluster }
+                            OperationHash = cluster
+                            ShellOperations = executionRequest.PreOperations }
                     allNodes.TryAdd(clusterNode.Id, clusterNode) |> ignore
                     Set.singleton clusterNode.Id
 
             // patch each nodes to have a dependency on the cluster
             // but still keep dependencies because outputs must be recovered
             for node in nodes do
+                let ops =
+                    match executionRequest.Operations with
+                    | Terrabuild.Extensibility.All ops -> ops
+                    | Terrabuild.Extensibility.Each map -> map[node.Id]
+
                 let node =
                     { node with
                         OperationHash = cluster
-                        Dependencies = node.Dependencies + clusterDependencies }
+                        Dependencies = node.Dependencies + clusterDependencies
+                        ShellOperations = ops }
 
                 allNodes.TryAdd(node.Id, node) |> ignore
         | _ ->
