@@ -84,7 +84,7 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
 
     let clusterNodes = buildAllClusters()
 
-    // invoke __optimize__ function on each cluster
+    // transform each node using command from extension
     let allNodes = Concurrent.ConcurrentDictionary<string, GraphDef.Node>()
     for (KeyValue(_, nodeIds)) in clusterNodes do
         let oneNodeId = nodeIds |> Seq.head
