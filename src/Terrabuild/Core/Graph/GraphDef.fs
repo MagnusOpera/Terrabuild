@@ -65,14 +65,14 @@ let render (graph: Graph) =
         |> Map.map (fun _ v -> v |> Seq.map (fun kvp -> kvp.Value) |> List.ofSeq)
 
     let mermaid = [
-        "flowchart TD"
+        "flowchart LR"
         $"classDef forced stroke:red,stroke-width:3px"
         $"classDef required stroke:orange,stroke-width:3px"
         $"classDef selected stroke:black,stroke-width:3px"
 
         for (KeyValue(cluster, nodes)) in clusters do
             let clusterNode = nodes |> List.tryFind (fun node -> node.Id = cluster)
-            let isCluster = false // clusterNode |> Option.isSome
+            let isCluster = clusterNode |> Option.isSome
 
             if isCluster then $"subgraph {cluster}[\" \"]"
 

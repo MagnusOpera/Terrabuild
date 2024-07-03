@@ -29,6 +29,11 @@ let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: C
             let addToCluster (node: Node) =
                 let add _ = Set.singleton node.Id
                 let update _ nodes = nodes |> Set.add node.Id
+                let childrenClusters =
+                    awaitedDependencies
+                    |> Seq.map (fun node -> node.Value.OperationHash)
+                    |> Set.ofSeq
+
                 let declare, clusterId =
                     if node.IsForced |> not then
                         Log.Debug("Node {node} does not need rebuild", node.Id)
@@ -36,18 +41,12 @@ let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: C
                     elif nodeDependencies = Set.empty then
                         Log.Debug("Node {node} has no dependencies and joined {cluster}", node.Id, node.OperationHash)
                         true, node.OperationHash
+                    elif childrenClusters = Set.singleton node.OperationHash then
+                        Log.Debug("Node {node} is compatible with {cluster}", node.Id, node.OperationHash)
+                        true, node.OperationHash
                     else
-                        let childrenClusters =
-                            awaitedDependencies
-                            |> Seq.map (fun node -> node.Value.OperationHash)
-                            |> Set.ofSeq
-
-                        if childrenClusters = Set.singleton node.OperationHash then
-                            Log.Debug("Node {node} is compatible with {cluster}", node.Id, node.OperationHash)
-                            true, node.OperationHash
-                        else
-                            Log.Debug("Node {node} can't join any clusters", node.Id)
-                            false, node.Id
+                        Log.Debug("Node {node} can't join any clusters", node.Id)
+                        false, node.Id
 
                 if declare then
                     lock clusters (fun () -> clusters.AddOrUpdate(clusterId, add, update) |> ignore)
