@@ -139,6 +139,10 @@ run-test-terrabuild:
 
 run-test-cluster-layers:
 	dotnet run --project src/Terrabuild -- run build -w tests/cluster-layers --debug --force
+
+run-test-simple:
+	dotnet run --project src/Terrabuild -- run build -w tests/simple --debug --force
+
 # $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
 
 self-test-cluster-layers:
