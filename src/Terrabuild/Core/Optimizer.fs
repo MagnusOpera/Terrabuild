@@ -1,5 +1,5 @@
 module Optimizer
-open Graph
+open GraphDef
 open System
 open Terrabuild.Extensibility
 open System.Collections
@@ -125,7 +125,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                 | [] -> dependencies
                 | _ ->
                     let clusterNode = {
-                        Id = cluster
+                        GraphDef.Node.Id = cluster
                         Hash = cluster
                         Project = $"batch/{cluster}"
                         Target = oneNode.Target
