@@ -93,19 +93,19 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let cache = Cache.Cache(storage) :> Cache.ICache
 
         let buildGraph =
-            let graph = GraphAnalysisBuilder.build config options
+            let graph = GraphAnalysisBuilder.build options config
             if options.Debug then logGraph graph "config"
 
-            let consistentGraph = GraphAnalysisConsistency.enforce graph cache options
+            let consistentGraph = GraphAnalysisConsistency.enforce options cache graph
             if options.Debug then logGraph consistentGraph "consistent"
 
-            let requiredGraph = GraphAnalysisRequirements.markRequired consistentGraph options
+            let requiredGraph = GraphAnalysisRequirements.markRequired options consistentGraph 
             if options.Debug then logGraph requiredGraph "required"
 
             let transformGraph = GraphTransformBuilder.build requiredGraph
             if options.Debug then logGraph transformGraph "transform"
 
-            let optimizeGraph = GraphTransformOptimizer.optimize sourceControl transformGraph options
+            let optimizeGraph = GraphTransformOptimizer.optimize options sourceControl transformGraph
             if options.Debug then logGraph optimizeGraph "optimize"
             optimizeGraph
 

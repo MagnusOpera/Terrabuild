@@ -7,7 +7,7 @@ open Terrabuild.PubSub
 open Serilog
 open Errors
 
-let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: Configuration.Options) =
+let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceControl) (graph: Graph) =
     let startedAt = DateTime.UtcNow
 
     let computeClusters remainingNodes =

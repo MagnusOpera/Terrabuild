@@ -10,7 +10,7 @@ open Serilog
 // here we are trying to determine if outputs of a node will really be consumed (IsRequired)
 // idea is if a parent node does not build (hence not required) then it's not worth downloading outputs of children
 // graph is explored from top to bottom to propagate required state to children
-let markRequired (graph: GraphDef.Graph) (options: Configuration.Options) =
+let markRequired (options: Configuration.Options) (graph: GraphDef.Graph) =
     let startedAt = DateTime.UtcNow
 
     let reversedDependencies =

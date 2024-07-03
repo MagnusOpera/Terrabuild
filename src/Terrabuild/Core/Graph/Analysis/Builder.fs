@@ -9,7 +9,7 @@ open GraphDef
 
 
 // build the high-level graph from configuration
-let build (configuration: Configuration.Workspace) (options: Configuration.Options) =
+let build (options: Configuration.Options) (configuration: Configuration.Workspace) =
     let startedAt = DateTime.UtcNow
     $"{Ansi.Emojis.popcorn} Building graph" |> Terminal.writeLine
 

@@ -13,7 +13,7 @@ open Errors
 // - node must rebuild if forced
 //
 // ==> previous build summary is only attached if node validates rules
-let enforce (graph: GraphDef.Graph) (cache: Cache.ICache) (options: Configuration.Options) =
+let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: GraphDef.Graph) =
     let startedAt = DateTime.UtcNow
     let allowRemoteCache = options.LocalOnly |> not
 
