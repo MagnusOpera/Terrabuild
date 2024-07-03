@@ -119,7 +119,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                 | Extensions.InvocationResult.Success execRequest -> execRequest
                 | _ -> TerrabuildException.Raise("Failed to create shell operations")
 
-            let cluster = $"cluster-{oneNode.Id}-{targetOperation.MetaCommand}" |> Hash.sha256
+            let cluster = $"cluster-{oneNode.Id}-{targetOperation.Extension}" |> Hash.sha256
             let dependencies =
                 match execRequest.PreOperations with
                 | [] -> dependencies
@@ -154,7 +154,7 @@ let optimize (configuration: Configuration.Workspace) (graph: Workspace) (option
                         let tempNodes =
                             nodes
                             |> List.map (fun node ->
-                                let nodeId = $"node-{node.Id}-{targetOperation.MetaCommand}" |> Hash.sha256
+                                let nodeId = $"node-{node.Id}-{targetOperation.Extension}" |> Hash.sha256
                                 let node = {
                                     Id = nodeId
                                     Hash = nodeId

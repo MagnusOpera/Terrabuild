@@ -81,16 +81,18 @@ let build (configuration: Configuration.Workspace) (options: Configuration.Optio
                              Node.Project = project
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
+                             Node.TargetOperation = None
 
                              Node.Dependencies = children
                              Node.Outputs = target.Outputs
-                             
+
                              Node.ProjectHash = projectConfig.Hash
                              Node.TargetHash = hash
-                             
+                             Node.OperationHash = hash
+
                              Node.IsLeaf = isLeaf
                              Node.IsForced = isForced
-                             Node.IsRequired = false
+                             Node.IsRequired = isForced
                              
                              Node.IsLast = true }
 

@@ -27,18 +27,19 @@ type Options = {
 
 [<RequireQualifiedAccess>]
 type TargetOperation = {
-    Script: Terrabuild.Scripting.Script
-    MetaCommand: string
+    Hash: string
+    Extension: string
     Command: string
+    Script: Terrabuild.Scripting.Script
     Context: Value
 }
 
 [<RequireQualifiedAccess>]
 type Target = {
+    Hash: string
     Rebuild: bool
     DependsOn: string set
     Outputs: string set
-    Hash: string
     Operations: TargetOperation list
 }
 
@@ -318,63 +319,49 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     | Value.Bool rebuild -> rebuild
                     | _ -> TerrabuildException.Raise("rebuild must evaluate to a bool")
 
-                let usedVariables, targetOperations =
+                let targetOperations =
                     target.Steps
-                    |> List.fold (fun (usedVariables, actions) step ->
-                        // let stepVars: Map<string, string> = Map.empty
-
+                    |> List.fold (fun actions step ->
                         let extension = 
                             match projectDef.Extensions |> Map.tryFind step.Extension with
                             | Some extension -> extension
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                        let stepActions, stepVars =
-                            let usedVars, context =
-                                extension.Defaults
-                                |> Map.addMap step.Parameters
-                                |> Expr.Map
-                                |> Eval.eval evaluationContext
+                        let usedVars, context =
+                            extension.Defaults
+                            |> Map.addMap step.Parameters
+                            |> Expr.Map
+                            |> Eval.eval evaluationContext
 
-                            let script =
-                                match Extensions.getScript step.Extension projectDef.Scripts with
-                                | Some script -> script
-                                | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
+                        let script =
+                            match Extensions.getScript step.Extension projectDef.Scripts with
+                            | Some script -> script
+                            | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                            let targetContext = {
-                                TargetOperation.Script = script
-                                TargetOperation.MetaCommand = $"{step.Extension} {step.Command}"
-                                TargetOperation.Command = step.Command
-                                TargetOperation.Context = context
-                            }
+                        let usedVariables =
+                            usedVars
+                            |> Seq.sort
+                            |> Seq.choose (fun key ->
+                                match buildVariables |> Map.tryFind key with
+                                | Some value -> Some $"{key} = {value}"
+                                | _ -> None)
+                            |> List.ofSeq
 
-                            targetContext, usedVars
+                        let hash =
+                            [ step.Extension; step.Command ] @ usedVariables
+                            |> Hash.sha256strings
 
-                        let usedVariables = usedVariables + stepVars
-                        let actions = actions @ [ stepActions ]
-                        usedVariables, actions
-                    ) (Set.empty, [])
+                        let targetContext = {
+                            TargetOperation.Hash = hash
+                            TargetOperation.Extension = step.Extension
+                            TargetOperation.Command = step.Command
+                            TargetOperation.Script = script
+                            TargetOperation.Context = context
+                        }
 
-                let usedVariables =
-                    usedVariables
-                    |> Seq.sort
-                    |> Seq.choose (fun k ->
-                        match buildVariables |> Map.tryFind k with
-                        | Some v -> Some (k, $"{v}")
-                        | _ -> None)
-
-                let variableHash =
-                    usedVariables
-                    |> Seq.map (fun (key, value) -> $"{key} = {value}")
-                    |> Hash.sha256strings
-
-                let stepHash =
-                    targetOperations
-                    |> Seq.map (fun operation -> operation.MetaCommand)
-                    |> Hash.sha256strings
-
-                let hash =
-                    [ stepHash; variableHash ]
-                    |> Hash.sha256strings
+                        let actions = actions @ [ targetContext ]
+                        actions
+                    ) []
 
                 // use value from project target
                 // otherwise use workspace target
@@ -392,6 +379,11 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     match target.Outputs with
                     | Some outputs -> outputs
                     | _ -> projectDef.Outputs
+
+                let hash =
+                    targetOperations
+                    |> List.map (fun ope -> ope.Hash)
+                    |> Hash.sha256strings
 
                 let target = {
                     Target.Hash = hash

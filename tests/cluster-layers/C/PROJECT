@@ -3,5 +3,6 @@ project @npm {
 }
 
 target build {
+    @shell echo { arguments: "building project" }
     @npm build
 }

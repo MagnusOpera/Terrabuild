@@ -33,11 +33,9 @@ let enforce (graph: GraphDef.Graph) (cache: Cache.ICache) (options: Configuratio
 
             // children can ask for a build
             let childrenRebuild, childrenLastBuild =
-                awaitedDependencies |> Seq.fold (fun (childrenRebuild, childrenLastBuild) childComputed ->
+                awaitedDependencies |> Seq.fold (fun (forced, lastBuild) childComputed ->
                     let childRebuild, childLastBuild = childComputed.Value
-                    let nodeRebuild = childrenRebuild || childRebuild
-                    let nodeLastBuild = max childrenLastBuild childLastBuild
-                    nodeRebuild, nodeLastBuild) (false, DateTime.MinValue)
+                    forced || childRebuild, max lastBuild childLastBuild) (false, DateTime.MinValue)
 
             let summary, nodeLastBuild =
                 if node.IsForced then
@@ -68,10 +66,10 @@ let enforce (graph: GraphDef.Graph) (cache: Cache.ICache) (options: Configuratio
                         Log.Debug("{nodeId} has no build summary", nodeId)
                         None, DateTime.MaxValue
 
-            let consistentNode = { node with GraphDef.Node.IsRequired = summary |> Option.isNone }
+            let consistentNode = { node with GraphDef.Node.IsForced = summary |> Option.isNone }
             allNodes.TryAdd(nodeId, consistentNode) |> ignore
 
-            nodeComputed.Value <- (summary.IsNone, nodeLastBuild)
+            nodeComputed.Value <- (node.IsForced, nodeLastBuild)
         )
 
     let status = hub.WaitCompletion()

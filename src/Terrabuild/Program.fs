@@ -58,7 +58,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             |> Json.Serialize
             |> IO.writeTextFile (logFile $"{name}-graph.json")
             graph
-            |> Graph.graph
+            |> GraphDef.render
             |> String.join "\n"
             |> IO.writeTextFile (logFile $"{name}-graph.mermaid")
 
@@ -93,48 +93,54 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let cache = Cache.Cache(storage) :> Cache.ICache
 
         let buildGraph =
-            let graph = Graph.create config options.Targets options
+            let graph = GraphAnalysisBuilder.build config options
             if options.Debug then logGraph graph "config"
 
-            let consistentGraph = Graph.enforceConsistency config graph cache options
+            let consistentGraph = GraphAnalysisConsistency.enforce graph cache options
             if options.Debug then logGraph consistentGraph "consistent"
 
-            let requiredGraph = Graph.markRequired consistentGraph options
+            let requiredGraph = GraphAnalysisRequirements.markRequired consistentGraph options
             if options.Debug then logGraph requiredGraph "required"
 
-            let buildGraph =
-                if options.NoBatch then requiredGraph
-                else Graph.optimize config requiredGraph options
-            if options.Debug then logGraph buildGraph "build"
+            let transformGraph = GraphTransformBuilder.build requiredGraph
+            if options.Debug then logGraph transformGraph "transform"
+            transformGraph
 
-            let nodesToRun = graph.Nodes.Count
-            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
-            buildGraph
+            // let buildGraph =
+            //     if options.NoBatch then requiredGraph
+            //     else Graph.optimize config requiredGraph options
+            // if options.Debug then logGraph buildGraph "build"
 
-        if options.WhatIf then
-            if logs then
-                Logs.dumpLogs runId buildGraph cache sourceControl None options.Debug
-            0
-        else
-            let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            let summary = Build.run config buildGraph cache api buildNotification options
-            buildNotification.WaitCompletion()
+            // let nodesToRun = graph.Nodes.Count
+            // $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
+            // buildGraph
 
-            if options.Debug then
-                let jsonBuild = Json.Serialize summary
-                jsonBuild |> IO.writeTextFile (logFile "build.json")
+        0
 
-            if logs || summary.Status <> Build.Status.Success then
-                Logs.dumpLogs runId buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
+        // if options.WhatIf then
+        //     if logs then
+        //         Logs.dumpLogs runId buildGraph cache sourceControl None options.Debug
+        //     0
+        // else
+        //     let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+        //     let summary = Build.run config buildGraph cache api buildNotification options
+        //     buildNotification.WaitCompletion()
 
-            let result =
-                match summary.Status with
-                | Build.Status.Success -> Ansi.Emojis.happy
-                | _ -> Ansi.Emojis.sad
+        //     if options.Debug then
+        //         let jsonBuild = Json.Serialize summary
+        //         jsonBuild |> IO.writeTextFile (logFile "build.json")
 
-            $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
-            if summary.Status = Build.Status.Success then 0
-            else 5
+        //     if logs || summary.Status <> Build.Status.Success then
+        //         Logs.dumpLogs runId buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
+
+        //     let result =
+        //         match summary.Status with
+        //         | Build.Status.Success -> Ansi.Emojis.happy
+        //         | _ -> Ansi.Emojis.sad
+
+        //     $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
+        //     if summary.Status = Build.Status.Success then 0
+        //     else 5
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
         let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")
