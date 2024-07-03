@@ -134,6 +134,9 @@ define run_integration_test
 	$(call diff_results, $(1))
 endef
 
+run-test-terrabuild:
+	dotnet run --project src/Terrabuild -- run build test publish -w src --debug --force --localonly
+
 run-test-cluster-layers:
 	dotnet run --project src/Terrabuild -- run build -w tests/cluster-layers --debug --force
 # $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)

@@ -88,7 +88,7 @@ let build (configuration: Configuration.Workspace) (options: Configuration.Optio
 
                              Node.ProjectHash = projectConfig.Hash
                              Node.TargetHash = hash
-                             Node.OperationHash = hash
+                             Node.OperationHash = target.Hash
 
                              Node.IsLeaf = isLeaf
                              Node.IsForced = isForced

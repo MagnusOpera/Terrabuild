@@ -51,7 +51,7 @@ let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: C
 
                 if declare then
                     lock clusters (fun () -> clusters.AddOrUpdate(clusterId, add, update) |> ignore)
-                clusterId <> node.Id
+                declare
 
             let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
             hub.Subscribe awaitedSignals (fun () -> if addToCluster node then nodeComputed.Value <- node)
@@ -125,37 +125,26 @@ let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: C
                 | Extensions.InvocationResult.Success executionRequest -> executionRequest
                 | _ -> TerrabuildException.Raise("Failed to get shell operation (extension error)")
 
+            let clusterHash =
+                clusterDependencies
+                |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Id)
+                |> Hash.sha256strings
+            let cluster = $"cluster-{oneNode.Id}" |> Hash.sha256
+
             // create the batch node if required
             let clusterDependencies = 
                 match executionRequest.PreOperations with
                 | [] -> clusterDependencies
                 | _ ->
-                    let clusterHash =
-                        clusterDependencies
-                        |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Id)
-                        |> Hash.sha256strings
-                    let cluster = $"cluster-{oneNode.Id}" |> Hash.sha256
                     let clusterNode: GraphDef.Node = {
-                        Node.Id = cluster
-                        Node.Label = $"batch-{oneNode.Target} {cluster}"
-
-                        Node.Project = $"batch/{cluster}"
-                        Node.Target = oneNode.Target
-                        Node.TargetOperation = oneNode.TargetOperation
-                        Node.ConfigurationTarget = oneNode.ConfigurationTarget
-
-                        Node.Dependencies = clusterDependencies
-                        Node.Outputs = Set.empty
-
-                        Node.ProjectHash = clusterHash
-                        Node.TargetHash = oneNode.TargetHash
-                        Node.OperationHash = oneNode.OperationHash
-
-                        Node.IsLeaf = oneNode.IsLeaf
-                        Node.IsForced = oneNode.IsForced
-                        Node.IsRequired = oneNode.IsRequired
-                        Node.IsLast = oneNode.IsLast
-                    }
+                        oneNode with
+                            Id = cluster
+                            Label = $"batch-{oneNode.Target} {cluster}"
+                            Project = $"batch/{cluster}"
+                            Dependencies = clusterDependencies
+                            Outputs = Set.empty
+                            ProjectHash = clusterHash
+                            OperationHash = cluster }
                     allNodes.TryAdd(clusterNode.Id, clusterNode) |> ignore
                     Set.singleton clusterNode.Id
 
@@ -164,6 +153,7 @@ let optimize (sourceControl: Contracts.SourceControl) (graph: Graph) (options: C
             for node in nodes do
                 let node =
                     { node with
+                        OperationHash = cluster
                         Dependencies = node.Dependencies + clusterDependencies }
 
                 allNodes.TryAdd(node.Id, node) |> ignore

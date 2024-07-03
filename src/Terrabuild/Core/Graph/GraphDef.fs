@@ -53,34 +53,34 @@ let render (graph: Graph) =
     let clusterColors =
         graph.Nodes
         |> Seq.map (fun (KeyValue(nodeId, node)) ->
-            let hash = Hash.sha256 node.TargetHash
-            node.TargetHash, $"#{hash.Substring(0, 3)}")
+            let hash = Hash.sha256 node.OperationHash
+            node.OperationHash, $"#{hash.Substring(0, 3)}")
         |> Map.ofSeq
 
     let clusters =
         graph.Nodes
-        |> Seq.groupBy (fun (KeyValue(_, node)) -> node.TargetHash)
+        |> Seq.groupBy (fun (KeyValue(_, node)) -> node.OperationHash)
         |> Map.ofSeq
         |> Map.map (fun _ v -> v |> Seq.map (fun kvp -> kvp.Value) |> List.ofSeq)
 
     let mermaid = [
-        "flowchart LR"
+        "flowchart TD"
         $"classDef forced stroke:red,stroke-width:3px"
         $"classDef required stroke:orange,stroke-width:3px"
         $"classDef selected stroke:black,stroke-width:3px"
 
         for (KeyValue(cluster, nodes)) in clusters do
             let clusterNode = nodes |> List.tryFind (fun node -> node.Id = cluster)
-            let isCluster = clusterNode |> Option.isSome
+            let isCluster = false // clusterNode |> Option.isSome
 
-            if isCluster then $"subgraph {cluster}[batch {clusterNode.Value.Target}]"
+            if isCluster then $"subgraph {cluster}[\" \"]"
 
             let offset, nodes =
                 if isCluster then "  ", nodes |> List.filter (fun node -> node.Id <> cluster)
                 else "", nodes
 
             for node in nodes do
-                $"{offset}{node.Id}([{node.Label}])"
+                $"{offset}{node.Id}([\"{node.Label}\"])"
 
             if isCluster then
                 "end"
@@ -89,7 +89,7 @@ let render (graph: Graph) =
 
             for srcNode in nodes do
                 for dependency in srcNode.Dependencies do
-                    if dependency <> cluster then
+                    if (isCluster && dependency = cluster) |> not then
                         let dstNode = graph.Nodes |> Map.find dependency
                         $"{srcNode.Id} --> {dstNode.Id}"
 

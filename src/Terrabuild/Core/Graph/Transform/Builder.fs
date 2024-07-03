@@ -7,24 +7,31 @@ let build (graph: GraphDef.Graph) =
     let allNodes = ConcurrentDictionary<string, GraphDef.Node>()
     for (KeyValue(_, node)) in graph.Nodes do
 
-        let nbOps = node.ConfigurationTarget.Operations.Length
-        let nodeDependencies, _ =
+        if node.IsForced then
+            let nbOps = node.ConfigurationTarget.Operations.Length
             node.ConfigurationTarget.Operations
-            |> List.fold (fun (dependencies, index) operation -> 
+            |> List.fold (fun (dependencies, index) operation ->
+                let isLast = nbOps = index
+
+                // generate a node for each operation
                 let actionNode =
                     { node with
-                        Node.Id = $"{node.Id}-{index}"
-                        Node.Label = $"{node.Id} {index}/{nbOps}"
-                        Node.TargetOperation = Some operation
-                        Node.OperationHash = operation.Hash
-                        Node.Dependencies = dependencies
-                        Node.IsLast = false }
+                        Label = $"{node.Id} {operation.Extension} {operation.Command}"
+                        TargetOperation = Some operation
+                        OperationHash = operation.Hash
+                        Dependencies = dependencies
+                        IsLast = isLast }
+
+                let actionNode =
+                    if isLast then actionNode
+                    else { actionNode with Id = $"{node.Id}-{index}" }
                 allNodes.TryAdd(actionNode.Id, actionNode) |> ignore
+
                 (actionNode.Id |> Set.singleton, index+1)
             ) (node.Dependencies, 1)
-
-        let node = { node with Node.Dependencies = nodeDependencies }
-        allNodes.TryAdd(node.Id, node) |> ignore
+            |> ignore
+        else
+            allNodes.TryAdd(node.Id, node) |> ignore
 
     { graph with 
         Graph.Nodes = allNodes |> Map.ofDict }
