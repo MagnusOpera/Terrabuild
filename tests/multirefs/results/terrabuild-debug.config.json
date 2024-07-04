@@ -1,15 +1,5 @@
 {
   "space": null,
-  "sourceControl": {
-    "headCommit": "1234",
-    "branchOrTag": "main",
-    "logType": [
-      "markdown",
-      "terrabuild-debug.md"
-    ],
-    "ci": true,
-    "name": "GitHub"
-  },
   "selectedProjects": [
     "A",
     "B",
@@ -67,25 +57,29 @@
       ],
       "targets": {
         "build": {
-          "hash": "B9AE1A51CFF46F86872F9AF55D2B9D7596DE1F0330CC9AAF307EAB73027D680A",
-          "variables": {},
+          "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@shell echo",
-              "actions": [
-                {
-                  "command": "echo",
-                  "arguments": "building A"
-                }
-              ],
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@shell",
+              "command": "echo",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "string",
+                    "building A"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -103,25 +97,29 @@
       ],
       "targets": {
         "build": {
-          "hash": "B9AE1A51CFF46F86872F9AF55D2B9D7596DE1F0330CC9AAF307EAB73027D680A",
-          "variables": {},
+          "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@shell echo",
-              "actions": [
-                {
-                  "command": "echo",
-                  "arguments": "building B"
-                }
-              ],
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@shell",
+              "command": "echo",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "string",
+                    "building B"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -137,25 +135,29 @@
       ],
       "targets": {
         "build": {
-          "hash": "B9AE1A51CFF46F86872F9AF55D2B9D7596DE1F0330CC9AAF307EAB73027D680A",
-          "variables": {},
+          "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@shell echo",
-              "actions": [
-                {
-                  "command": "echo",
-                  "arguments": "building C"
-                }
-              ],
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@shell",
+              "command": "echo",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "string",
+                    "building C"
+                  ]
+                }
+              ]
             }
           ]
         }

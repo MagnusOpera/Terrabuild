@@ -116,13 +116,17 @@ run-build-scaffold:
 
 define diff_results
 	diff $(1)/results/terrabuild-debug.config.json $(1)/terrabuild-debug.config.json
+
 	diff $(1)/results/terrabuild-debug.config-graph.json $(1)/terrabuild-debug.config-graph.json
 	diff $(1)/results/terrabuild-debug.consistent-graph.json $(1)/terrabuild-debug.consistent-graph.json
-	diff $(1)/results/terrabuild-debug.required-graph.json $(1)/terrabuild-debug.required-graph.json
+	diff $(1)/results/terrabuild-debug.transform-graph.json $(1)/terrabuild-debug.transform-graph.json
+	diff $(1)/results/terrabuild-debug.optimize-graph.json $(1)/terrabuild-debug.optimize-graph.json
 	diff $(1)/results/terrabuild-debug.build-graph.json $(1)/terrabuild-debug.build-graph.json
+
 	diff $(1)/results/terrabuild-debug.config-graph.mermaid $(1)/terrabuild-debug.config-graph.mermaid
 	diff $(1)/results/terrabuild-debug.consistent-graph.mermaid $(1)/terrabuild-debug.consistent-graph.mermaid
-	diff $(1)/results/terrabuild-debug.required-graph.mermaid $(1)/terrabuild-debug.required-graph.mermaid
+	diff $(1)/results/terrabuild-debug.transform-graph.mermaid $(1)/terrabuild-debug.transform-graph.mermaid
+	diff $(1)/results/terrabuild-debug.optimize-graph.mermaid $(1)/terrabuild-debug.optimize-graph.mermaid
 	diff $(1)/results/terrabuild-debug.build-graph.mermaid $(1)/terrabuild-debug.build-graph.mermaid
 endef
 

@@ -111,6 +111,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
             optimizeGraph
 
+        if options.Debug then logGraph buildGraph "build"
+
         if options.WhatIf then
             // if logs then
             //     Logs.dumpLogs runId buildGraph cache sourceControl None options.Debug
@@ -122,7 +124,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
             if options.Debug then
                 let jsonBuild = Json.Serialize summary
-                jsonBuild |> IO.writeTextFile (logFile "build.json")
+                jsonBuild |> IO.writeTextFile (logFile "build-result.json")
 
             // if logs || summary.Status <> Build.Status.Success then
             //     Logs.dumpLogs runId buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
