@@ -77,7 +77,7 @@
     },
     "deployments/terraform-deploy:build": {
       "id": "deployments/terraform-deploy:build",
-      "label": "deployments/terraform-deploy:build @terraform plan",
+      "label": "build deployments/terraform-deploy",
       "project": "deployments/terraform-deploy",
       "target": "build",
       "targetOperation": {
@@ -190,7 +190,7 @@
     },
     "libraries/dotnet-lib:build": {
       "id": "libraries/dotnet-lib:build",
-      "label": "libraries/dotnet-lib:build @dotnet build",
+      "label": "build libraries/dotnet-lib",
       "project": "libraries/dotnet-lib",
       "target": "build",
       "targetOperation": {
@@ -267,7 +267,7 @@
     },
     "libraries/shell-lib:build": {
       "id": "libraries/shell-lib:build",
-      "label": "libraries/shell-lib:build @shell echo",
+      "label": "build libraries/shell-lib",
       "project": "libraries/shell-lib",
       "target": "build",
       "targetOperation": {
@@ -335,7 +335,7 @@
     },
     "projects/dotnet-app:build": {
       "id": "projects/dotnet-app:build",
-      "label": "projects/dotnet-app:build @dotnet build",
+      "label": "build projects/dotnet-app",
       "project": "projects/dotnet-app",
       "target": "build",
       "targetOperation": {
@@ -413,7 +413,7 @@
     },
     "projects/make-app:build": {
       "id": "projects/make-app:build",
-      "label": "projects/make-app:build @make build",
+      "label": "build projects/make-app",
       "project": "projects/make-app",
       "target": "build",
       "targetOperation": {
@@ -514,7 +514,7 @@
     },
     "projects/make-app:build-1": {
       "id": "projects/make-app:build-1",
-      "label": "projects/make-app:build @shell echo",
+      "label": "build projects/make-app",
       "project": "projects/make-app",
       "target": "build",
       "targetOperation": {
@@ -610,7 +610,7 @@
     },
     "projects/npm-app:build": {
       "id": "projects/npm-app:build",
-      "label": "projects/npm-app:build @npm build",
+      "label": "build projects/npm-app",
       "project": "projects/npm-app",
       "target": "build",
       "targetOperation": {
@@ -678,7 +678,7 @@
     },
     "projects/rust-app:build": {
       "id": "projects/rust-app:build",
-      "label": "projects/rust-app:build @cargo build",
+      "label": "build projects/rust-app",
       "project": "projects/rust-app",
       "target": "build",
       "targetOperation": {

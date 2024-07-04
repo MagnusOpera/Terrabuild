@@ -114,20 +114,22 @@ run-build-scaffold:
 	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry
 
 
+#	cp $(1)/$(2) $(1)/results/$(2)
+define diff_file
+	diff $(1)/results/$(2) $(1)/$(2)
+endef
+
 define diff_results
-	diff $(1)/results/terrabuild-debug.config.json $(1)/terrabuild-debug.config.json
-
-	diff $(1)/results/terrabuild-debug.config-graph.json $(1)/terrabuild-debug.config-graph.json
-	diff $(1)/results/terrabuild-debug.consistent-graph.json $(1)/terrabuild-debug.consistent-graph.json
-	diff $(1)/results/terrabuild-debug.transform-graph.json $(1)/terrabuild-debug.transform-graph.json
-	diff $(1)/results/terrabuild-debug.optimize-graph.json $(1)/terrabuild-debug.optimize-graph.json
-	diff $(1)/results/terrabuild-debug.build-graph.json $(1)/terrabuild-debug.build-graph.json
-
-	diff $(1)/results/terrabuild-debug.config-graph.mermaid $(1)/terrabuild-debug.config-graph.mermaid
-	diff $(1)/results/terrabuild-debug.consistent-graph.mermaid $(1)/terrabuild-debug.consistent-graph.mermaid
-	diff $(1)/results/terrabuild-debug.transform-graph.mermaid $(1)/terrabuild-debug.transform-graph.mermaid
-	diff $(1)/results/terrabuild-debug.optimize-graph.mermaid $(1)/terrabuild-debug.optimize-graph.mermaid
-	diff $(1)/results/terrabuild-debug.build-graph.mermaid $(1)/terrabuild-debug.build-graph.mermaid
+	$(call diff_file,$(1),terrabuild-debug.config.json)
+	$(call diff_file,$(1),terrabuild-debug.config-graph.json)
+	$(call diff_file,$(1),terrabuild-debug.consistent-graph.json)
+	$(call diff_file,$(1),terrabuild-debug.transform-graph.json)
+	$(call diff_file,$(1),terrabuild-debug.optimize-graph.json)
+	$(call diff_file,$(1),terrabuild-debug.config-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.consistent-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.transform-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.optimize-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.build-graph.mermaid)
 endef
 
 
@@ -135,7 +137,7 @@ define run_integration_test
 	@printf "\n*** Running integration test %s ***\n" $(1)
 	-cd $(1); rm terrabuild-debug.*
 	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild-debug.md $(current_dir)/.out/dotnet/terrabuild $(2)
-	$(call diff_results, $(1))
+	$(call diff_results,$(1))
 endef
 
 run-test-insights:

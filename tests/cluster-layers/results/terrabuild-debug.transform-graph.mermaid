@@ -2,10 +2,10 @@ flowchart LR
 classDef forced stroke:red,stroke-width:3px
 classDef required stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
-A:build(["A:build @dotnet build"])
-B:build(["B:build @dotnet build"])
-D:build(["D:build @dotnet build"])
-E:build(["E:build @dotnet build"])
+A:build(["build A"])
+B:build(["build B"])
+D:build(["build D"])
+E:build(["build E"])
 A:build --> A:build-1
 class A:build forced
 B:build --> B:build-1
@@ -14,9 +14,9 @@ D:build --> C:build
 class D:build forced
 E:build --> C:build
 class E:build forced
-C:build(["C:build @npm build"])
-F:build(["F:build @npm build"])
-G:build(["G:build @npm build"])
+C:build(["build C"])
+F:build(["build F"])
+G:build(["build G"])
 C:build --> C:build-1
 class C:build forced
 F:build --> D:build
@@ -24,9 +24,9 @@ F:build --> E:build
 class F:build forced
 G:build --> C:build
 class G:build forced
-A:build-1(["A:build @shell echo"])
-B:build-1(["B:build @shell echo"])
-C:build-1(["C:build @shell echo"])
+A:build-1(["build A"])
+B:build-1(["build B"])
+C:build-1(["build C"])
 class A:build-1 forced
 class B:build-1 forced
 C:build-1 --> A:build

@@ -2,7 +2,7 @@
   "nodes": {
     "A:build": {
       "id": "A:build",
-      "label": "A:build @shell echo",
+      "label": "build A",
       "project": "A",
       "target": "build",
       "targetOperation": {
@@ -66,7 +66,7 @@
     },
     "B:build": {
       "id": "B:build",
-      "label": "B:build @shell echo",
+      "label": "build B",
       "project": "B",
       "target": "build",
       "targetOperation": {
@@ -129,7 +129,7 @@
     },
     "C:build": {
       "id": "C:build",
-      "label": "C:build @shell echo",
+      "label": "build C",
       "project": "C",
       "target": "build",
       "targetOperation": {

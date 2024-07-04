@@ -2,7 +2,7 @@
   "nodes": {
     "A:build": {
       "id": "A:build",
-      "label": "A:build @dotnet build",
+      "label": "build A",
       "project": "A",
       "target": "build",
       "targetOperation": {
@@ -86,7 +86,7 @@
     },
     "A:build-1": {
       "id": "A:build-1",
-      "label": "A:build @shell echo",
+      "label": "build A",
       "project": "A",
       "target": "build",
       "targetOperation": {
@@ -173,7 +173,7 @@
     },
     "B:build": {
       "id": "B:build",
-      "label": "B:build @dotnet build",
+      "label": "build B",
       "project": "B",
       "target": "build",
       "targetOperation": {
@@ -257,7 +257,7 @@
     },
     "B:build-1": {
       "id": "B:build-1",
-      "label": "B:build @shell echo",
+      "label": "build B",
       "project": "B",
       "target": "build",
       "targetOperation": {
@@ -344,7 +344,7 @@
     },
     "C:build": {
       "id": "C:build",
-      "label": "C:build @npm build",
+      "label": "build C",
       "project": "C",
       "target": "build",
       "targetOperation": {
@@ -418,7 +418,7 @@
     },
     "C:build-1": {
       "id": "C:build-1",
-      "label": "C:build @shell echo",
+      "label": "build C",
       "project": "C",
       "target": "build",
       "targetOperation": {
@@ -498,7 +498,7 @@
     },
     "D:build": {
       "id": "D:build",
-      "label": "D:build @dotnet build",
+      "label": "build D",
       "project": "D",
       "target": "build",
       "targetOperation": {
@@ -565,7 +565,7 @@
     },
     "E:build": {
       "id": "E:build",
-      "label": "E:build @dotnet build",
+      "label": "build E",
       "project": "E",
       "target": "build",
       "targetOperation": {
@@ -632,7 +632,7 @@
     },
     "F:build": {
       "id": "F:build",
-      "label": "F:build @npm build",
+      "label": "build F",
       "project": "F",
       "target": "build",
       "targetOperation": {
@@ -690,7 +690,7 @@
     },
     "G:build": {
       "id": "G:build",
-      "label": "G:build @npm build",
+      "label": "build G",
       "project": "G",
       "target": "build",
       "targetOperation": {
