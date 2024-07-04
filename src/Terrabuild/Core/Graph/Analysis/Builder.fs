@@ -68,13 +68,6 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
                 let hash = hashContent |> Hash.sha256strings
 
-                let isForced =
-                    let isSelectedProject = configuration.SelectedProjects |> Set.contains project
-                    let isSelectedTarget = options.Targets |> Set.contains targetName
-                    let forced = options.Force && isSelectedProject && isSelectedTarget || target.Rebuild
-                    if forced then Log.Debug("{nodeId} must rebuild because force build is requested or target shall rebuild", nodeId)
-                    forced
-
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {project}"
                              
@@ -92,9 +85,8 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.OperationHash = target.Hash
 
                              Node.IsLeaf = isLeaf
-                             Node.IsForced = isForced
-                             Node.IsRequired = isForced
-                             
+                             Node.IsForced = false
+                             Node.IsRequired = false
                              Node.IsLast = true }
 
                 if allNodes.TryAdd(nodeId, node) |> not then
