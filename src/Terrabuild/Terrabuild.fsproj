@@ -30,7 +30,7 @@
     <Compile Include="Core/Graph/Transform/Optimizer.fs" />
     <Compile Include="Core/Build.fs" />
     <Compile Include="Core/Notification.fs" />
-    <!-- <Compile Include="Core/Logs.fs" /> -->
+    <Compile Include="Core/Logs.fs" />
     <Compile Include="SourceControls/Local.fs" />
     <Compile Include="SourceControls/GitHub.fs" />
     <Compile Include="SourceControls/Factory.fs" />

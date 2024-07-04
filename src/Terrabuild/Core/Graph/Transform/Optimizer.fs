@@ -186,7 +186,8 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                     { node with
                         OperationHash = clusterHash
                         Dependencies = node.Dependencies + clusterDependencies
-                        Operations = ops }
+                        Operations = ops
+                        IsBatched = executionRequest.PreOperations |> List.isEmpty |> not }
 
                 allNodes.TryAdd(node.Id, node) |> ignore
         | _ ->

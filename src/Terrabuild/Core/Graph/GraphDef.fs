@@ -49,6 +49,8 @@ type Node = {
     // tell this task is the final in the operation execution chain
     // set by Transform/TaskBuilder
     IsLast: bool
+
+    IsBatched: bool
 }
 
 

@@ -88,7 +88,8 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.IsForced = false
                              Node.IsRequired = false
                              Node.IsFirst = true
-                             Node.IsLast = true }
+                             Node.IsLast = true
+                             Node.IsBatched = false }
 
                 if allNodes.TryAdd(nodeId, node) |> not then
                     TerrabuildException.Raise("Unexpected graph building race")

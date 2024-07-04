@@ -114,8 +114,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         if options.Debug then logGraph buildGraph "build"
 
         if options.WhatIf then
-            // if logs then
-            //     Logs.dumpLogs runId buildGraph cache sourceControl None options.Debug
+            if logs then
+                Logs.dumpLogs runId options cache sourceControl None buildGraph 
             0
         else
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
@@ -126,8 +126,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 let jsonBuild = Json.Serialize summary
                 jsonBuild |> IO.writeTextFile (logFile "build-result.json")
 
-            // if logs || summary.Status <> Build.Status.Success then
-            //     Logs.dumpLogs runId buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
+            if logs || summary.Status <> Build.Status.Success then
+                Logs.dumpLogs runId options cache sourceControl (Some summary.BuildNodes) buildGraph  
 
             let result =
                 match summary.Status with
