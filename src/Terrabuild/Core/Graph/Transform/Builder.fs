@@ -16,7 +16,6 @@ let build (graph: GraphDef.Graph) =
                 // generate a node for each operation
                 let actionNode =
                     { node with
-                        Label = $"{node.Id} {operation.Extension} {operation.Command}"
                         TargetOperation = Some operation
                         OperationHash = operation.Hash
                         Dependencies = dependencies
