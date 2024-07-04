@@ -6,19 +6,14 @@ open System
 
 
 
-let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: SourceControl) (impactedNodes: string Set option) (graph: GraphDef.Graph) =
+let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: SourceControl) (graph: GraphDef.Graph) =
     let stableRandomId (id: string) =
         $"{logId} {id}" |> Hash.md5 |> String.toLower
-
-    let scope =
-        match impactedNodes with
-        | Some impactedNodes -> impactedNodes
-        | _ -> graph.Nodes.Keys |> Set
 
     // filter, collect summaries and dump
     let nodes =
         graph.Nodes
-        |> Seq.choose (fun (KeyValue(nodeId, node)) -> if scope |> Set.contains nodeId then Some node else None)
+        |> Map.values
         |> Seq.map (fun node ->
             let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
             let summary = cache.TryGetSummaryOnly false cacheEntryId

@@ -149,8 +149,8 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                             ContaineredShellOperation.Arguments = operation.Arguments
                         })
 
-                    let clusterNode: GraphDef.Node = {
-                        oneNode with
+                    let clusterNode =
+                        { oneNode with
                             Id = clusterHash
                             Label = $"batch-{oneNode.Target} {clusterHash}"
                             Project = clusterHash
