@@ -269,7 +269,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
     match status with
     | Status.Ok -> ()
     | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Project {projectId} is unknown")
-    | Status.SubscriptionError exn -> TerrabuildException.Raise("Failed to load configuration", exn)
+    | Status.SubscriptionError exn -> TerrabuildException.Raise("Build error", exn)
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
