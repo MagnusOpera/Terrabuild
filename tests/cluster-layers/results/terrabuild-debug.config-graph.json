@@ -69,7 +69,8 @@
       "isForced": false,
       "isRequired": false,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "B:build": {
       "id": "B:build",
@@ -140,7 +141,8 @@
       "isForced": false,
       "isRequired": false,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "C:build": {
       "id": "C:build",
@@ -204,7 +206,8 @@
       "isForced": false,
       "isRequired": false,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "D:build": {
       "id": "D:build",
@@ -260,7 +263,8 @@
       "isForced": false,
       "isRequired": false,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "E:build": {
       "id": "E:build",
@@ -316,7 +320,8 @@
       "isForced": false,
       "isRequired": false,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "F:build": {
       "id": "F:build",
@@ -363,7 +368,8 @@
       "isForced": false,
       "isRequired": false,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "G:build": {
       "id": "G:build",
@@ -409,7 +415,8 @@
       "isForced": false,
       "isRequired": false,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     }
   },
   "rootNodes": [

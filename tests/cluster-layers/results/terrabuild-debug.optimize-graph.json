@@ -83,7 +83,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": true
+      "isLast": true,
+      "isBatched": true
     },
     "A:build-1": {
       "id": "A:build-1",
@@ -177,7 +178,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": false
+      "isLast": false,
+      "isBatched": false
     },
     "B51AB38ACA58C7D630378FF67B76208ED5C486DCA2771FB2D51E39BCFDE3867F": {
       "id": "B51AB38ACA58C7D630378FF67B76208ED5C486DCA2771FB2D51E39BCFDE3867F",
@@ -244,7 +246,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": false
+      "isLast": true,
+      "isBatched": false
     },
     "B:build": {
       "id": "B:build",
@@ -329,7 +332,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": true
+      "isLast": true,
+      "isBatched": true
     },
     "B:build-1": {
       "id": "B:build-1",
@@ -423,7 +427,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": false
+      "isLast": false,
+      "isBatched": false
     },
     "C5861A14298D8048F077B67965DA45589A468538B1E17E7A4A1A5AAB3A0E4C8D": {
       "id": "C5861A14298D8048F077B67965DA45589A468538B1E17E7A4A1A5AAB3A0E4C8D",
@@ -508,7 +513,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": false
+      "isLast": true,
+      "isBatched": false
     },
     "C:build": {
       "id": "C:build",
@@ -595,7 +601,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "C:build-1": {
       "id": "C:build-1",
@@ -682,7 +689,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": false
+      "isLast": false,
+      "isBatched": false
     },
     "D:build": {
       "id": "D:build",
@@ -750,7 +758,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": true
     },
     "E:build": {
       "id": "E:build",
@@ -818,7 +827,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": true
     },
     "F:build": {
       "id": "F:build",
@@ -889,7 +899,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "G:build": {
       "id": "G:build",
@@ -960,7 +971,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     }
   },
   "rootNodes": [

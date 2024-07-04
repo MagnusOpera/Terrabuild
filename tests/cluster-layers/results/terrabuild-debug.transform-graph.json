@@ -82,7 +82,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "A:build-1": {
       "id": "A:build-1",
@@ -169,7 +170,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": false
+      "isLast": false,
+      "isBatched": false
     },
     "B:build": {
       "id": "B:build",
@@ -253,7 +255,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "B:build-1": {
       "id": "B:build-1",
@@ -340,7 +343,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": false
+      "isLast": false,
+      "isBatched": false
     },
     "C:build": {
       "id": "C:build",
@@ -414,7 +418,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "C:build-1": {
       "id": "C:build-1",
@@ -494,7 +499,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": false
+      "isLast": false,
+      "isBatched": false
     },
     "D:build": {
       "id": "D:build",
@@ -561,7 +567,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "E:build": {
       "id": "E:build",
@@ -628,7 +635,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "F:build": {
       "id": "F:build",
@@ -686,7 +694,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "G:build": {
       "id": "G:build",
@@ -743,7 +752,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     }
   },
   "rootNodes": [

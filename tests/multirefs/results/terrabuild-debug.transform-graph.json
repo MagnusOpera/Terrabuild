@@ -62,7 +62,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "B:build": {
       "id": "B:build",
@@ -125,7 +126,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "C:build": {
       "id": "C:build",
@@ -186,7 +188,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     }
   },
   "rootNodes": [

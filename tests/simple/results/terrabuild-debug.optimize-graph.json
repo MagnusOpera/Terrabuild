@@ -73,7 +73,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": false
+      "isLast": true,
+      "isBatched": false
     },
     "deployments/terraform-deploy:build": {
       "id": "deployments/terraform-deploy:build",
@@ -186,7 +187,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "libraries/dotnet-lib:build": {
       "id": "libraries/dotnet-lib:build",
@@ -263,7 +265,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": true
     },
     "libraries/shell-lib:build": {
       "id": "libraries/shell-lib:build",
@@ -331,7 +334,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "projects/dotnet-app:build": {
       "id": "projects/dotnet-app:build",
@@ -409,7 +413,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": true
     },
     "projects/make-app:build": {
       "id": "projects/make-app:build",
@@ -510,7 +515,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": false,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "projects/make-app:build-1": {
       "id": "projects/make-app:build-1",
@@ -606,7 +612,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": false
+      "isLast": false,
+      "isBatched": false
     },
     "projects/npm-app:build": {
       "id": "projects/npm-app:build",
@@ -674,7 +681,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     },
     "projects/rust-app:build": {
       "id": "projects/rust-app:build",
@@ -738,7 +746,8 @@
       "isForced": true,
       "isRequired": true,
       "isFirst": true,
-      "isLast": true
+      "isLast": true,
+      "isBatched": false
     }
   },
   "rootNodes": [
