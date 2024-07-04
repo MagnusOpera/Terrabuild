@@ -1,4 +1,4 @@
-module GraphTransformBuilder
+module GraphTransformer
 open Collections
 open GraphDef
 open System.Collections.Concurrent

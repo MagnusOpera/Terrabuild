@@ -1,4 +1,4 @@
-module GraphAnalysisConsistency
+module GraphConsistency
 open System
 open Collections
 open Serilog

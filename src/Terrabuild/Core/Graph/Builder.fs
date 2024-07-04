@@ -1,4 +1,4 @@
-module GraphAnalysisBuilder
+module GraphBuilder
 open Collections
 open System.Collections.Concurrent
 open Errors

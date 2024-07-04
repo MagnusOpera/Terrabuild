@@ -1,4 +1,4 @@
-module GraphTransformOptimizer
+module GraphOptimizer
 open GraphDef
 open System
 open System.Collections
