@@ -46,13 +46,14 @@ type ArtifactInfo = {
 
 type IEntry =
     abstract NextLogFile: unit -> string
+    abstract CompleteLogFile: summary:TargetSummary -> unit
     abstract Outputs: string with get
-    abstract Complete: summary:TargetSummary -> (string list * int)
+    abstract Complete: unit -> string list * int
 
 type ICache =
     abstract TryGetSummaryOnly: useRemote:bool -> id:string -> TargetSummary option
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
-    abstract CreateEntry: useRemote:bool -> id:string -> IEntry
+    abstract GetEntry: useRemote:bool -> clean:bool -> id:string -> IEntry
     abstract CreateHomeDir: nodeHash:string -> string
     abstract Invalidate: id:string -> unit
 
@@ -90,21 +91,22 @@ let clearHomeCache () =
 
 
 
-type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.Storage) =
-    let mutable logNum = 0
-
+type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storage: Contracts.Storage) =
     let logsDir = FS.combinePath entryDir "logs"
     let outputsDir = FS.combinePath entryDir "outputs"
+    let mutable logNum = 1
 
     do
-        match entryDir with
-        | FS.Directory _ | FS.File _ -> IO.deleteAny entryDir
-        | FS.None _ -> ()
+        if clean then
+            match entryDir with
+            | FS.Directory _ | FS.File _ -> IO.deleteAny entryDir
+            | FS.None _ -> ()
+
         IO.createDirectory entryDir
         IO.createDirectory logsDir
         // NOTE: outputs is created on demand only
 
-    let write (summary: TargetSummary) =
+    let write (summary: TargetSummary) file =
         let summary =
             { summary
                 with Steps = summary.Steps
@@ -113,18 +115,26 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.
                      Outputs = summary.Outputs
                                |> Option.map (fun outputs -> IO.getFilename outputs) }
 
-        let summaryFile = FS.combinePath logsDir summaryFilename
-        summary |> Json.Serialize |> IO.writeTextFile summaryFile
+        summary |> Json.Serialize |> IO.writeTextFile file
 
     interface IEntry with
+
         member _.NextLogFile () =
-            logNum <- logNum + 1
-            let filename = $"step{logNum}.log"
-            FS.combinePath logsDir filename
+            let rec nextLogFile() =
+                let filename = FS.combinePath logsDir $"step{logNum}.log"
+                if IO.exists filename then
+                    logNum <- logNum + 1
+                    nextLogFile()
+                else
+                    filename
+            nextLogFile()
+
+        member _.CompleteLogFile summary =
+            $"step{logNum}.json" |> write summary
 
         member _.Outputs = outputsDir
 
-        member _.Complete summary =
+        member _.Complete() =
             let upload () =
                 let uploadDir sourceDir name =
                     let path = $"{id}/{name}"
@@ -148,7 +158,14 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.
                 else
                     [], 0
 
-            summary |> write
+            let summary =
+                [1..logNum]
+                |> List.map (fun logNum ->
+                    let filename = FS.combinePath logsDir $"step{logNum}.log"
+                    let json = IO.readTextFile filename
+                    json |> Json.Deserialize<TargetSummary>)
+                |> List.reduce (fun s1 s2 -> { s1 with Steps = s1.Steps @ s2.Steps; EndedAt = s2.EndedAt })
+
             let files, size = upload()
             entryDir |> setOrigin summary.Origin
             files, size
@@ -254,11 +271,11 @@ type Cache(storage: Contracts.Storage) =
             let entryDir = FS.combinePath buildCacheDirectory id
             entryDir |> IO.deleteAny
 
-        member _.CreateEntry useRemote id : IEntry =
+        member _.GetEntry useRemote clean id : IEntry =
             // invalidate cache as we are creating a new entry
             cachedSummaries.TryRemove(id) |> ignore
             let entryDir = FS.combinePath buildCacheDirectory id
-            NewEntry(entryDir, useRemote, id, storage)
+            NewEntry(entryDir, useRemote, clean, id, storage)
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash

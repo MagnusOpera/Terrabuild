@@ -21,15 +21,15 @@ let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: Graph
                 Log.Debug("{nodeId} has existing build summary", node.Id)
                 if summary.Status = Cache.TaskStatus.Failure && options.Retry then
                     Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
-                    DateTime.MaxValue, { node with IsForced = true }
+                    DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
                 elif parentStartTime < summary.StartedAt then
                     Log.Debug("{nodeId} must rebuild because it is younger than parent", node.Id)
-                    DateTime.MaxValue, { node with IsForced = true }
+                    DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
                 else
-                    summary.EndedAt, { node with IsRequired = parentRequired }
+                    summary.EndedAt, { node with IsRequired = node.IsRequired || parentRequired }
             | _ ->
                 Log.Debug("{nodeId} has no build summary", node.Id)
-                DateTime.MaxValue, { node with IsForced = true }
+                DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
 
         let isReferenced = node.IsForced || node.IsRequired
         if isReferenced then

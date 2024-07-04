@@ -2,6 +2,16 @@ module GraphDef
 open Collections
 
 
+
+
+[<RequireQualifiedAccess>]
+type ContaineredShellOperation = {
+    Container: string option
+    ContainerVariables: string set
+    Command: string
+    Arguments: string
+}
+
 [<RequireQualifiedAccess>]
 type Node = {
     Id: string
@@ -11,7 +21,7 @@ type Node = {
     Target: string
     TargetOperation: Configuration.TargetOperation option
     ConfigurationTarget: Configuration.Target
-    ShellOperations: Terrabuild.Extensibility.ShellOperations
+    Operations: ContaineredShellOperation list
 
     Dependencies: string set
     Outputs: string set
@@ -32,6 +42,9 @@ type Node = {
     // if outputs are required they can be downloaded from the cache if they exists (ProjectHash/Target/TargetHash)
     // set by Analysis/Builder (init from user) & Analysis/Requirements
     IsRequired: bool
+
+    // tell this task is the first in the operation execution chain
+    IsFirst: bool
 
     // tell this task is the final in the operation execution chain
     // set by Transform/TaskBuilder

@@ -20,6 +20,7 @@ let build (graph: GraphDef.Graph) =
                         TargetOperation = Some operation
                         OperationHash = operation.Hash
                         Dependencies = dependencies
+                        IsFirst = index = 1
                         IsLast = isLast }
 
                 let actionNode =

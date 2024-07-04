@@ -75,7 +75,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
                              Node.TargetOperation = None
-                             Node.ShellOperations = []
+                             Node.Operations = []
 
                              Node.Dependencies = children
                              Node.Outputs = target.Outputs
@@ -87,6 +87,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.IsLeaf = isLeaf
                              Node.IsForced = false
                              Node.IsRequired = false
+                             Node.IsFirst = true
                              Node.IsLast = true }
 
                 if allNodes.TryAdd(nodeId, node) |> not then

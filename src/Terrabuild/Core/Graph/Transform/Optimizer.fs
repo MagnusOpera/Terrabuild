@@ -139,6 +139,15 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                 match executionRequest.PreOperations with
                 | [] -> clusterDependencies
                 | _ ->
+                    let containeredOperations =
+                        executionRequest.PreOperations
+                        |> List.map (fun operation -> {
+                            ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
+                            ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                            ContaineredShellOperation.Command = operation.Command
+                            ContaineredShellOperation.Arguments = operation.Arguments
+                        })
+
                     let clusterNode: GraphDef.Node = {
                         oneNode with
                             Id = cluster
@@ -148,7 +157,7 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                             Outputs = Set.empty
                             ProjectHash = clusterHash
                             OperationHash = cluster
-                            ShellOperations = executionRequest.PreOperations }
+                            Operations = containeredOperations }
                     allNodes.TryAdd(clusterNode.Id, clusterNode) |> ignore
                     Set.singleton clusterNode.Id
 
@@ -160,11 +169,20 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                     | Terrabuild.Extensibility.All ops -> ops
                     | Terrabuild.Extensibility.Each map -> map[node.Id]
 
+                let ops =
+                    ops
+                    |> List.map (fun operation -> {
+                        ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
+                        ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                        ContaineredShellOperation.Command = operation.Command
+                        ContaineredShellOperation.Arguments = operation.Arguments
+                    })
+
                 let node =
                     { node with
                         OperationHash = cluster
                         Dependencies = node.Dependencies + clusterDependencies
-                        ShellOperations = ops }
+                        Operations = ops }
 
                 allNodes.TryAdd(node.Id, node) |> ignore
         | _ ->

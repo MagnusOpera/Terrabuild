@@ -104,43 +104,35 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
             let optimizeGraph = GraphTransformOptimizer.optimize options sourceControl transformGraph
             if options.Debug then logGraph optimizeGraph "optimize"
+
+            let nodesToRun = graph.Nodes.Count
+            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
             optimizeGraph
 
-            // let buildGraph =
-            //     if options.NoBatch then requiredGraph
-            //     else Graph.optimize config requiredGraph options
-            // if options.Debug then logGraph buildGraph "build"
+        if options.WhatIf then
+            // if logs then
+            //     Logs.dumpLogs runId buildGraph cache sourceControl None options.Debug
+            0
+        else
+            let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
+            let summary = Build.run options sourceControl config cache api buildNotification buildGraph
+            buildNotification.WaitCompletion()
 
-            // let nodesToRun = graph.Nodes.Count
-            // $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
-            // buildGraph
+            if options.Debug then
+                let jsonBuild = Json.Serialize summary
+                jsonBuild |> IO.writeTextFile (logFile "build.json")
 
-        0
+            // if logs || summary.Status <> Build.Status.Success then
+            //     Logs.dumpLogs runId buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
 
-        // if options.WhatIf then
-        //     if logs then
-        //         Logs.dumpLogs runId buildGraph cache sourceControl None options.Debug
-        //     0
-        // else
-        //     let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-        //     let summary = Build.run config buildGraph cache api buildNotification options
-        //     buildNotification.WaitCompletion()
+            let result =
+                match summary.Status with
+                | Build.Status.Success -> Ansi.Emojis.happy
+                | _ -> Ansi.Emojis.sad
 
-        //     if options.Debug then
-        //         let jsonBuild = Json.Serialize summary
-        //         jsonBuild |> IO.writeTextFile (logFile "build.json")
-
-        //     if logs || summary.Status <> Build.Status.Success then
-        //         Logs.dumpLogs runId buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
-
-        //     let result =
-        //         match summary.Status with
-        //         | Build.Status.Success -> Ansi.Emojis.happy
-        //         | _ -> Ansi.Emojis.sad
-
-        //     $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
-        //     if summary.Status = Build.Status.Success then 0
-        //     else 5
+            $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
+            if summary.Status = Build.Status.Success then 0
+            else 5
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
         let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")

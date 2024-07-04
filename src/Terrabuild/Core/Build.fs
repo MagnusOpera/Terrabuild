@@ -3,9 +3,8 @@ open System
 open System.Collections.Generic
 open Collections
 open Serilog
-open Terrabuild.Extensibility
 open Terrabuild.PubSub
-open Graph
+open Errors
 
 [<RequireQualifiedAccess>]
 type NodeInfo = {
@@ -46,45 +45,49 @@ type Summary = {
 type IBuildNotification =
     abstract WaitCompletion: unit -> unit
 
-    abstract BuildStarted: graph:Graph.Workspace -> unit
+    abstract BuildStarted: graph:GraphDef.Graph -> unit
     abstract BuildCompleted: summary:Summary -> unit
 
-    abstract NodeScheduled: node:Graph.Node -> unit
-    abstract NodeDownloading: node:Graph.Node -> unit
-    abstract NodeBuilding: node:Graph.Node -> unit
-    abstract NodeUploading: node:Graph.Node -> unit
-    abstract NodeCompleted: node:Graph.Node -> restored: bool -> summary:Cache.TargetSummary -> unit
+    abstract NodeScheduled: node:GraphDef.Node -> unit
+    abstract NodeDownloading: node:GraphDef.Node -> unit
+    abstract NodeBuilding: node:GraphDef.Node -> unit
+    abstract NodeUploading: node:GraphDef.Node -> unit
+    abstract NodeCompleted: node:GraphDef.Node -> restored: bool -> success: bool -> unit
 
 
-let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (options: Configuration.Options) =
-    let targets = graph.Targets |> String.join " "
+let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl) (configuration: Configuration.Workspace) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
+    let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
-    let nodesToRun = graph.Nodes |> Map.filter (fun _ node -> node.Required) |> Map.count
+    let nodesToRun = graph.Nodes |> Map.filter (fun _ node -> node.IsRequired) |> Map.count
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks to run" |> Terminal.writeLine
 
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
-        api |> Option.map (fun api -> api.BuildStart configuration.SourceControl.BranchOrTag configuration.SourceControl.HeadCommit configuration.Configuration configuration.Note configuration.Tag graph.Targets options.Force options.Retry configuration.SourceControl.CI)
+        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit configuration.Configuration configuration.Note configuration.Tag options.Targets options.Force options.Retry sourceControl.CI)
         |> Option.defaultValue ""
+
+    let allowRemoteCache = options.LocalOnly |> not
 
     let workspaceDir = Environment.CurrentDirectory
 
     let containerInfos = Concurrent.ConcurrentDictionary<string, string>()
+
+    let homeDir = cache.CreateHomeDir "container"
 
     let isBuildSuccess = function
         | NodeStatus.Success _ -> true
         | _ -> false
 
     // collect dependencies status
-    let getDependencyStatus nodeId node =
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
+    let getDependencyStatus nodeId (node: GraphDef.Node) =
+        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
         let nodeInfo = 
             { NodeInfo.Project = node.Project
               NodeInfo.Target = node.Target
-              NodeInfo.NodeHash = node.Hash
-              NodeInfo.ProjectHash = node.ProjectHash }
+              NodeInfo.ProjectHash = node.ProjectHash 
+              NodeInfo.NodeHash = node.TargetHash }
 
         match cache.TryGetSummaryOnly false cacheEntryId with
         | Some summary -> 
@@ -94,10 +97,8 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
         | _ -> NodeStatus.Unfulfilled nodeInfo
 
 
-    let buildNode (node: Graph.Node) =
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.Hash}"
-
-        notification.NodeDownloading node
+    let processNode (node: GraphDef.Node) =
+        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
 
         let projectDirectory =
             match node.Project with
@@ -105,74 +106,55 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
             | FS.File projectFile -> FS.parentDirectory projectFile
             | _ -> "."
 
-        // check first if it's possible to restore previously built state
-        let summary = node.BuildSummary
 
-        match summary with
-        | Some summary ->
-            Log.Debug("{Hash}: Restoring '{Project}/{Target}' from cache", node.Hash, node.Project, node.Target)
-            match summary.Outputs with
-            | Some outputs ->
-                let files = IO.enumerateFiles outputs
-                IO.copyFiles projectDirectory outputs files |> ignore
-            | _ -> ()
-            true, summary
-
-        | _ ->
-            Log.Debug("{Hash}: Building '{Project}/{Target}'", node.Hash, node.Project, node.Target)
-            let cacheEntry = cache.CreateEntry configuration.SourceControl.CI cacheEntryId
+        let buildNode() =
             notification.NodeBuilding node
 
-            // NOTE:
-            //  home dir is redirected for container because it's interesting from a cache perspective
-            //  moreover it's likely container architecture is not the same as host
-            let homeDir = cache.CreateHomeDir "container"
-
-            let allCommands =
-                node.CommandLines
-                |> List.collect (fun batch ->
-                    batch.Actions |> List.mapi (fun index commandLine ->
-                        let cmd = "docker"
-                        let wsDir = Environment.CurrentDirectory
-
-                        let getContainerUser (container: string) =
-                            match containerInfos.TryGetValue(container) with
-                            | true, whoami ->
-                                Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
-                                whoami
-                            | _ ->
-                                // discover USER
-                                let args = $"run --rm --name {node.Hash} --entrypoint whoami {container}"
-                                let whoami =
-                                    Log.Debug("Identifying USER for {container}", container)
-                                    match Exec.execCaptureOutput workspaceDir cmd args with
-                                    | Exec.Success (whoami, 0) -> whoami.Trim()
-                                    | _ ->
-                                        Log.Debug("USER identification failed for {container}: using root", container)
-                                        "root"
-
-                                Log.Debug("Using USER {whoami} for {container}", whoami, container)
-                                containerInfos.TryAdd(container, whoami) |> ignore
-                                whoami
-
-                        let metaCommand =
-                            if batch.Actions.Length > 1 then $"{batch.MetaCommand} ({index+1}/{batch.Actions.Length})"
-                            else batch.MetaCommand
-
-                        match batch.Container, options.NoContainer with
-                        | Some container, false ->
-                            let whoami = getContainerUser container
-                            let envs =
-                                batch.ContainerVariables
-                                |> Seq.map (fun var -> $"-e {var}")
-                                |> String.join " "
-                            let args = $"run --rm --net=host --name {node.Hash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {commandLine.Command} {envs} {container} {commandLine.Arguments}"
-                            metaCommand, workspaceDir, cmd, args, batch.Container
-                        | _ -> metaCommand, projectDirectory, commandLine.Command, commandLine.Arguments, batch.Container))
+            let cacheEntry = cache.GetEntry sourceControl.CI node.IsFirst cacheEntryId
 
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
                 else IO.createSnapshot node.Outputs projectDirectory
+
+            // run actions if any
+            let allCommands =
+                node.Operations
+                |> List.map (fun operation ->
+                    let cmd = "docker"
+                    let wsDir = Environment.CurrentDirectory
+
+                    let getContainerUser (container: string) =
+                        match containerInfos.TryGetValue(container) with
+                        | true, whoami ->
+                            Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
+                            whoami
+                        | _ ->
+                            // discover USER
+                            let args = $"run --rm --name {node.TargetHash} --entrypoint whoami {container}"
+                            let whoami =
+                                Log.Debug("Identifying USER for {container}", container)
+                                match Exec.execCaptureOutput workspaceDir cmd args with
+                                | Exec.Success (whoami, 0) -> whoami.Trim()
+                                | _ ->
+                                    Log.Debug("USER identification failed for {container}: using root", container)
+                                    "root"
+
+                            Log.Debug("Using USER {whoami} for {container}", whoami, container)
+                            containerInfos.TryAdd(container, whoami) |> ignore
+                            whoami
+
+                    let metaCommand = $"{operation.Command} {operation.Arguments}"
+
+                    match operation.Container, options.NoContainer with
+                    | Some container, false ->
+                        let whoami = getContainerUser container
+                        let envs =
+                            operation.ContainerVariables
+                            |> Seq.map (fun var -> $"-e {var}")
+                            |> String.join " "
+                        let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                        metaCommand, workspaceDir, cmd, args, operation.Container
+                    | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
 
             let stepLogs = List<Cache.StepSummary>()
             let mutable lastExitCode = 0
@@ -188,7 +170,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                 let logFile = cacheEntry.NextLogFile()                    
                 cmdLineIndex <- cmdLineIndex + 1
 
-                Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.Hash, cmd, args)
+                Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
                 let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
                 cmdLastEndedAt <- DateTime.UtcNow
                 let endedAt = cmdLastEndedAt
@@ -204,67 +186,94 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                                 Cache.StepSummary.ExitCode = exitCode }
                 stepLog |> stepLogs.Add
                 lastExitCode <- exitCode
-                Log.Debug("{Hash}: Execution completed with '{Code}'", node.Hash, exitCode)
+                Log.Debug("{Hash}: Execution completed with '{Code}'", node.TargetHash, exitCode)
 
-            notification.NodeUploading node
-            let afterFiles = IO.createSnapshot node.Outputs projectDirectory
+                let status =
+                    if lastExitCode = 0 then
+                        Log.Debug("{Hash}: Marking as success", node.TargetHash)
+                        Cache.TaskStatus.Success
+                    else
+                        Log.Debug("{Hash}: Marking as failed", node.TargetHash)
+                        Cache.TaskStatus.Failure
 
-            // keep only new or modified files
-            let newFiles = afterFiles - beforeFiles
+                let afterFiles = IO.createSnapshot node.Outputs projectDirectory
 
-            // create an archive with new files
-            let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
+                // keep only new or modified files
+                let newFiles = afterFiles - beforeFiles
+                let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
-            let status =
-                if lastExitCode = 0 then
-                    Log.Debug("{Hash}: Marking as success", node.Hash)
-                    Cache.TaskStatus.Success
-                else
-                    Log.Debug("{Hash}: Marking as failed", node.Hash)
-                    Cache.TaskStatus.Failure
+                let summary = { Cache.TargetSummary.Project = node.Project
+                                Cache.TargetSummary.Target = node.Target
+                                Cache.TargetSummary.Steps = stepLogs |> List.ofSeq
+                                Cache.TargetSummary.Outputs = outputs
+                                Cache.TargetSummary.Status = status
+                                Cache.TargetSummary.StartedAt = cmdFirstStartedAt
+                                Cache.TargetSummary.EndedAt = cmdLastEndedAt
+                                Cache.TargetSummary.Origin = Cache.Origin.Local }
+                cacheEntry.CompleteLogFile summary
+                if status <> Cache.TaskStatus.Success then TerrabuildException.Raise("Build failure")
 
-            let summary = { Cache.TargetSummary.Project = node.Project
-                            Cache.TargetSummary.Target = node.Target
-                            Cache.TargetSummary.Steps = stepLogs |> List.ofSeq
-                            Cache.TargetSummary.Outputs = outputs
-                            Cache.TargetSummary.Status = status
-                            Cache.TargetSummary.StartedAt = cmdFirstStartedAt
-                            Cache.TargetSummary.EndedAt = cmdLastEndedAt
-                            Cache.TargetSummary.Origin = Cache.Origin.Local }
-            let files, size = cacheEntry.Complete summary
-            api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.Hash files size (status = Cache.TaskStatus.Success))
-            false, summary
+
+            if node.IsLast then
+                notification.NodeUploading node
+
+                // create an archive with new files
+                Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
+                let cacheEntry = cache.GetEntry sourceControl.CI false cacheEntryId
+                let files, size = cacheEntry.Complete()
+                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size true)
+                notification.NodeCompleted node (node.IsForced |> not) true
+
+        let restoreNode () =
+            notification.NodeDownloading node
+            let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
+            match cache.TryGetSummary allowRemoteCache cacheEntryId with
+            | Some summary ->
+                Log.Debug("{Hash}: Restoring '{Project}/{Target}' from cache", node.TargetHash, node.Project, node.Target)
+                match summary.Outputs with
+                | Some outputs ->
+                    let files = IO.enumerateFiles outputs
+                    IO.copyFiles projectDirectory outputs files |> ignore
+                | _ -> ()
+            | _ -> TerrabuildException.Raise("Unable to download build output for {cacheEntryId}")
+
+        let success =
+            try
+                if node.IsForced then buildNode()
+                else restoreNode()
+                true
+            with
+                | _ ->
+                    let cacheEntry = cache.GetEntry sourceControl.CI false cacheEntryId
+                    let files, size = cacheEntry.Complete()
+                    api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size false)            
+                    false
+
+        notification.NodeCompleted node (node.IsForced |> not) success
 
     let hub = Hub.Create(options.MaxConcurrency)
-    let requiredNodes = graph.Nodes |> Map.filter (fun _ n -> n.Required)
+    let requiredNodes = graph.Nodes |> Map.filter (fun _ n -> n.IsRequired)
     for (KeyValue(nodeId, node)) in requiredNodes do
-        let nodeComputed = hub.CreateComputed<Node> nodeId
+        let nodeComputed = hub.CreateComputed<GraphDef.Node> nodeId
 
         // await dependencies
         let awaitedDependencies =
             node.Dependencies
-            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Node> awaitedProjectId)
+            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<GraphDef.Node> awaitedProjectId)
             |> Array.ofSeq
 
         let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-        hub.Subscribe awaitedSignals (fun () ->
-            let restored, summary = buildNode node
-            notification.NodeCompleted node restored summary
-
-            if summary.Status = Cache.TaskStatus.Success then
-                nodeComputed.Value <- node
-        )
+        hub.Subscribe awaitedSignals (fun () -> processNode node)
 
     let status = hub.WaitCompletion()
 
-    let headCommit = configuration.SourceControl.HeadCommit
-    let branchOrTag = configuration.SourceControl.BranchOrTag
+    let headCommit = sourceControl.HeadCommit
+    let branchOrTag = sourceControl.BranchOrTag
 
     // nodes that were considered for the whole requested build
     let buildNodes =
         graph.Nodes
-        |> Map.filter (fun nodeId node ->
-            node.Required || node.BuildSummary |> Option.isSome)
+        |> Map.filter (fun nodeId node -> node.IsRequired)
 
     // status of nodes to build
     let buildNodesStatus =
@@ -289,7 +298,7 @@ let run (configuration: Configuration.Workspace) (graph: Graph.Workspace) (cache
                       Summary.BuildDuration = buildDuration
                       Summary.TotalDuration = totalDuration
                       Summary.Status = status
-                      Summary.Targets = graph.Targets
+                      Summary.Targets = options.Targets
                       Summary.Nodes = graph.Nodes |> Map.keys |> Set.ofSeq
                       Summary.RequiredNodes = requiredNodes |> Map.keys |> Set.ofSeq
                       Summary.BuildNodes = buildNodes |> Map.keys |> Set.ofSeq

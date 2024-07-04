@@ -28,6 +28,8 @@ type Options = {
 [<RequireQualifiedAccess>]
 type TargetOperation = {
     Hash: string
+    Container: string option
+    ContainerVariables: string set
     Extension: string
     Command: string
     Script: Terrabuild.Scripting.Script
@@ -353,6 +355,8 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
                         let targetContext = {
                             TargetOperation.Hash = hash
+                            TargetOperation.Container = extension.Container
+                            TargetOperation.ContainerVariables = extension.Variables
                             TargetOperation.Extension = step.Extension
                             TargetOperation.Command = step.Command
                             TargetOperation.Script = script
