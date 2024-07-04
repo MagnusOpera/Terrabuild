@@ -52,7 +52,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .CreateLogger()
         Log.Debug("Log created")
 
-    let runTarget wsDir configuration note tag labels variables logs (options: Configuration.Options) =
+    let runTarget configuration note tag labels variables logs (options: Configuration.Options) =
         let logGraph graph name =
             graph
             |> Json.Serialize
@@ -62,9 +62,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             |> String.join "\n"
             |> IO.writeTextFile (logFile $"{name}-graph.mermaid")
 
-        let wsDir = wsDir |> FS.fullPath
-        Environment.CurrentDirectory <- wsDir
-        Log.Debug("Changing current directory to {directory}", wsDir)
+        Environment.CurrentDirectory <- options.Workspace
+        Log.Debug("Changing current directory to {directory}", options.Workspace)
         Log.Debug("ProcessorCount = {procCount}", Environment.ProcessorCount)
 
         // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
@@ -75,7 +74,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             jsonOptions |> IO.writeTextFile (logFile "options.json")
 
         let sourceControl = SourceControls.Factory.create()
-        let config = Configuration.read wsDir configuration note tag labels variables sourceControl options
+        let config = Configuration.read configuration note tag labels variables sourceControl options
 
         let token =
             if options.LocalOnly then None
@@ -163,8 +162,10 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let localOnly = runArgs.Contains(RunArgs.LocalOnly)
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
-        let whatIf = runArgs.Contains(RunArgs.WhatIf)
-        let options = { Configuration.Options.WhatIf = whatIf
+        let whatIf = runArgs.Contains(RunArgs.WhatIf) 
+
+        let options = { Configuration.Options.Workspace = wsDir |> FS.fullPath
+                        Configuration.Options.WhatIf = whatIf
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = runArgs.Contains(RunArgs.Force)
                         Configuration.Options.MaxConcurrency = maxConcurrency
@@ -175,7 +176,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.IsLog = false
                         Configuration.Options.Targets = Set targets
                         Configuration.Options.LocalOnly = localOnly }
-        runTarget wsDir configuration note tag labels variables logs options
+        runTarget configuration note tag labels variables logs options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
         let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
@@ -189,7 +190,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
-        let options = { Configuration.Options.WhatIf = true
+        let options = { Configuration.Options.Workspace = wsDir |> FS.fullPath
+                        Configuration.Options.WhatIf = true
                         Configuration.Options.Debug = debug
                         Configuration.Options.Force = false
                         Configuration.Options.MaxConcurrency = 1
@@ -200,7 +202,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         Configuration.Options.IsLog = true
                         Configuration.Options.Targets = Set targets
                         Configuration.Options.LocalOnly = true }
-        runTarget wsDir configuration None None labels variables true options
+        runTarget configuration None None labels variables true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearBuildCache()

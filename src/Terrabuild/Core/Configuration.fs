@@ -12,6 +12,7 @@ open Terrabuild.PubSub
 
 [<RequireQualifiedAccess>]
 type Options = {
+    Workspace: string
     WhatIf: bool
     Debug: bool
     MaxConcurrency: int
@@ -96,10 +97,10 @@ type private LoadedProject = {
 }
 
 
-let read workspaceDir configuration note tag labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
+let read configuration note tag labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading {configuration} configuration" |> Terminal.writeLine
 
-    let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
+    let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
             Terrabuild.Configuration.FrontEnd.parseWorkspace workspaceContent
@@ -167,7 +168,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
     // this is the first stage: load project and mostly get dependencies references
     let loadProjectDef projectId =
-        let projectDir = FS.combinePath workspaceDir projectId
+        let projectDir = FS.combinePath options.Workspace projectId
         let projectFile = FS.combinePath projectDir "PROJECT"
 
         let projectContent = File.ReadAllText projectFile
@@ -184,7 +185,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
         let projectScripts =
             projectConfig.Extensions
-            |> Map.map (fun _ ext -> ext.Script |> Option.map (FS.workspaceRelative workspaceDir projectDir))
+            |> Map.map (fun _ ext -> ext.Script |> Option.map (FS.workspaceRelative options.Workspace projectDir))
 
         let scripts =
             scripts
@@ -224,7 +225,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         // convert relative dependencies to absolute dependencies respective to workspaceDirectory
         let projectDependencies =
             projectInfo.Dependencies
-            |> Set.map (fun dep -> FS.workspaceRelative workspaceDir projectDir dep)
+            |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
 
         let projectTargets = projectConfig.Targets
 
@@ -298,7 +299,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                         map |> Map.add "terrabuild_note" noteValue)
 
                 let evaluationContext = {
-                    Eval.EvaluationContext.WorkspaceDir = workspaceDir
+                    Eval.EvaluationContext.WorkspaceDir = options.Workspace
                     Eval.EvaluationContext.ProjectDir = projectDir
                     Eval.EvaluationContext.Versions = versions
                     Eval.EvaluationContext.Variables = actionVariables
@@ -416,13 +417,13 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                 let projectFile =  FS.combinePath dir "PROJECT" 
                 match projectFile with
                 | FS.File file ->
-                    file |> FS.parentDirectory |> FS.relativePath workspaceDir
+                    file |> FS.parentDirectory |> FS.relativePath options.Workspace
                 | _ ->
                     for subdir in dir |> IO.enumerateDirs do
                         yield! findDependencies subdir
             }
 
-        findDependencies workspaceDir
+        findDependencies options.Workspace
 
     let projects = ConcurrentDictionary<string, Project>()
     let hub = Hub.Create(options.MaxConcurrency)
