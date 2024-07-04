@@ -158,6 +158,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building project"
         }
@@ -231,6 +232,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@dotnet build",
           "command": "dotnet",
           "arguments": "build .terrabuild/B51AB38ACA58C7D630378FF67B76208ED5C486DCA2771FB2D51E39BCFDE3867F.sln --configuration Debug    "
         }
@@ -407,6 +409,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building project"
         }
@@ -497,6 +500,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@dotnet build",
           "command": "dotnet",
           "arguments": "build .terrabuild/C5861A14298D8048F077B67965DA45589A468538B1E17E7A4A1A5AAB3A0E4C8D.sln --configuration Debug    "
         }
@@ -578,12 +582,14 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "run build -- "
         }
@@ -671,6 +677,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building project"
         }
@@ -875,12 +882,14 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "run build -- "
         }
@@ -947,12 +956,14 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "run build -- "
         }

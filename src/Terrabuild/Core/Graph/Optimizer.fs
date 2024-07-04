@@ -145,6 +145,7 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                         |> List.map (fun operation -> {
                             ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
                             ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                            ContaineredShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
                             ContaineredShellOperation.Command = operation.Command
                             ContaineredShellOperation.Arguments = operation.Arguments
                         })
@@ -178,6 +179,7 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                     |> List.map (fun operation -> {
                         ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
                         ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                        ContaineredShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
                         ContaineredShellOperation.Command = operation.Command
                         ContaineredShellOperation.Arguments = operation.Arguments
                     })

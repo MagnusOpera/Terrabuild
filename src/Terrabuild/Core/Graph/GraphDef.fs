@@ -8,6 +8,7 @@ open Collections
 type ContaineredShellOperation = {
     Container: string option
     ContainerVariables: string set
+    MetaCommand: string
     Command: string
     Arguments: string
 }

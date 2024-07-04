@@ -60,6 +60,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@dotnet build",
           "command": "dotnet",
           "arguments": "build .terrabuild/103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB.sln --configuration Debug    "
         }
@@ -157,18 +158,21 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@terraform plan",
           "command": "terraform",
           "arguments": "init"
         },
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@terraform plan",
           "command": "terraform",
           "arguments": "workspace select default"
         },
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@terraform plan",
           "command": "terraform",
           "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364\u0022 -var=\u0022npm_app_version=A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E\u0022"
         }
@@ -321,6 +325,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building library1"
         }
@@ -498,6 +503,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@make build",
           "command": "make",
           "arguments": "build secret=\u0022tagada\u0022"
         }
@@ -595,6 +601,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building library1"
         }
@@ -660,12 +667,14 @@
         {
           "container": "node:20",
           "containerVariables": [],
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
           "container": "node:20",
           "containerVariables": [],
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "run build -- "
         }
@@ -730,6 +739,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@cargo build",
           "command": "cargo",
           "arguments": "build --profile dev "
         }

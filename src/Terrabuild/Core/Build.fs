@@ -139,7 +139,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
                             containerInfos.TryAdd(container, whoami) |> ignore
                             whoami
 
-                    let metaCommand = $"{operation.Command} {operation.Arguments}"
+                    let metaCommand = operation.MetaCommand
 
                     match operation.Container, options.NoContainer with
                     | Some container, false ->

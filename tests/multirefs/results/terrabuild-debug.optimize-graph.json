@@ -53,6 +53,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building A"
         }
@@ -125,6 +126,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building A"
         }
@@ -196,6 +198,7 @@
         {
           "container": null,
           "containerVariables": [],
+          "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building A"
         }
