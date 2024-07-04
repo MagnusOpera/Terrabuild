@@ -134,6 +134,9 @@ define run_integration_test
 	$(call diff_results, $(1))
 endef
 
+run-test-insights:
+	dotnet run --project src/Terrabuild -- run build test apply plan -w ../../insights --debug --force --localonly --whatif
+
 run-test-terrabuild:
 	dotnet run --project src/Terrabuild -- run build test publish -w src --debug --force --localonly
 
