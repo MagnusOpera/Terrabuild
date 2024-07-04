@@ -29,7 +29,7 @@ type Origin =
 type TargetSummary = {
     Project: string
     Target: string
-    Steps: StepSummary list
+    Steps: StepSummary list list
     Outputs: string option
     Status: TaskStatus
     StartedAt: DateTime
@@ -110,8 +110,10 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
         let summary =
             { summary
                 with Steps = summary.Steps
-                             |> List.map (fun step -> { step
-                                                        with Log = IO.getFilename step.Log })
+                             |> List.map (fun stepGroup ->
+                                stepGroup
+                                |> List.map (fun step -> { step
+                                                            with Log = IO.getFilename step.Log }))
                      Outputs = summary.Outputs
                                |> Option.map (fun outputs -> IO.getFilename outputs) }
 
@@ -130,7 +132,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
             nextLogFile()
 
         member _.CompleteLogFile summary =
-            $"step{logNum}.json" |> write summary
+            FS.combinePath logsDir $"step{logNum}.json" |> write summary
 
         member _.Outputs = outputsDir
 
@@ -158,13 +160,21 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
                 else
                     [], 0
 
+            let rec collect logNum =
+                seq {
+                    let filename = FS.combinePath logsDir $"step{logNum}.json"
+                    if IO.exists filename then
+                        let json = IO.readTextFile filename
+                        json |> Json.Deserialize<TargetSummary>
+                        yield! collect (logNum+1)
+                }
+
             let summary =
-                [1..logNum]
-                |> List.map (fun logNum ->
-                    let filename = FS.combinePath logsDir $"step{logNum}.log"
-                    let json = IO.readTextFile filename
-                    json |> Json.Deserialize<TargetSummary>)
-                |> List.reduce (fun s1 s2 -> { s1 with Steps = s1.Steps @ s2.Steps; EndedAt = s2.EndedAt })
+                collect 1
+                |> Seq.reduce (fun s1 s2 -> { s1 with Steps = s1.Steps @ s2.Steps; EndedAt = s2.EndedAt })
+
+            let summaryfile = FS.combinePath logsDir "summary.json"
+            write summary summaryfile
 
             let files, size = upload()
             entryDir |> setOrigin summary.Origin
@@ -194,8 +204,10 @@ type Cache(storage: Contracts.Storage) =
         let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
         let summary = { summary
                         with Steps = summary.Steps
+                                     |> List.map (fun stepGroup ->
+                                        stepGroup
                                         |> List.map (fun stepLog -> { stepLog
-                                                                      with Log = FS.combinePath logsDir stepLog.Log })
+                                                                      with Log = FS.combinePath logsDir stepLog.Log }))
                              Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
         summary
 

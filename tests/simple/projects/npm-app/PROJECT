@@ -1,14 +1,14 @@
 
-extension npm {
+extension @npm {
     container = "node:20"
-    script = "../../scripts/npm.fsx"
+#    script = "../../scripts/npm.fsx"
 }
 
 
-project npm {
+project @npm {
     labels = [ "app" ]
 }
 
 target build {
-    npm build { }
+    @npm build { }
 }

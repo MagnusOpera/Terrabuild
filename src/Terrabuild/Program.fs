@@ -102,7 +102,9 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let transformGraph = GraphTransformBuilder.build consistentGraph
             if options.Debug then logGraph transformGraph "transform"
 
-            let optimizeGraph = GraphTransformOptimizer.optimize options sourceControl transformGraph
+            let optimizeGraph =
+                if options.NoBatch then transformGraph
+                else GraphTransformOptimizer.optimize options sourceControl transformGraph
             if options.Debug then logGraph optimizeGraph "optimize"
 
             let nodesToRun = graph.Nodes.Count

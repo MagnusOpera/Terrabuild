@@ -112,10 +112,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
 
             let cacheEntry = cache.GetEntry sourceControl.CI node.IsFirst cacheEntryId
 
-            let beforeFiles =
-                if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
-                else IO.createSnapshot node.Outputs projectDirectory
-
             // run actions if any
             let allCommands =
                 node.Operations
@@ -162,12 +158,14 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
             let cmdFirstStartedAt = DateTime.UtcNow
             let mutable cmdLastEndedAt = cmdFirstStartedAt
 
+            let logFile = cacheEntry.NextLogFile()
+            let beforeFiles = IO.createSnapshot node.Outputs projectDirectory
+
             while cmdLineIndex < allCommands.Length && lastExitCode = 0 do
                 let startedAt =
                     if cmdLineIndex > 0 then DateTime.UtcNow
                     else cmdFirstStartedAt
                 let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
-                let logFile = cacheEntry.NextLogFile()                    
                 cmdLineIndex <- cmdLineIndex + 1
 
                 Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
@@ -188,31 +186,29 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
                 lastExitCode <- exitCode
                 Log.Debug("{Hash}: Execution completed with '{Code}'", node.TargetHash, exitCode)
 
-                let status =
-                    if lastExitCode = 0 then
-                        Log.Debug("{Hash}: Marking as success", node.TargetHash)
-                        Cache.TaskStatus.Success
-                    else
-                        Log.Debug("{Hash}: Marking as failed", node.TargetHash)
-                        Cache.TaskStatus.Failure
+            let status =
+                if lastExitCode = 0 then
+                    Log.Debug("{Hash}: Marking as success", node.TargetHash)
+                    Cache.TaskStatus.Success
+                else
+                    Log.Debug("{Hash}: Marking as failed", node.TargetHash)
+                    Cache.TaskStatus.Failure
 
-                let afterFiles = IO.createSnapshot node.Outputs projectDirectory
+            let afterFiles = IO.createSnapshot node.Outputs projectDirectory
 
-                // keep only new or modified files
-                let newFiles = afterFiles - beforeFiles
-                let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
+            // keep only new or modified files
+            let newFiles = afterFiles - beforeFiles
+            let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
-                let summary = { Cache.TargetSummary.Project = node.Project
-                                Cache.TargetSummary.Target = node.Target
-                                Cache.TargetSummary.Steps = stepLogs |> List.ofSeq
-                                Cache.TargetSummary.Outputs = outputs
-                                Cache.TargetSummary.Status = status
-                                Cache.TargetSummary.StartedAt = cmdFirstStartedAt
-                                Cache.TargetSummary.EndedAt = cmdLastEndedAt
-                                Cache.TargetSummary.Origin = Cache.Origin.Local }
-                cacheEntry.CompleteLogFile summary
-                if status <> Cache.TaskStatus.Success then TerrabuildException.Raise("Build failure")
-
+            let summary = { Cache.TargetSummary.Project = node.Project
+                            Cache.TargetSummary.Target = node.Target
+                            Cache.TargetSummary.Steps = [ stepLogs |> List.ofSeq ]
+                            Cache.TargetSummary.Outputs = outputs
+                            Cache.TargetSummary.Status = status
+                            Cache.TargetSummary.StartedAt = cmdFirstStartedAt
+                            Cache.TargetSummary.EndedAt = cmdLastEndedAt
+                            Cache.TargetSummary.Origin = Cache.Origin.Local }
+            cacheEntry.CompleteLogFile summary
 
             if node.IsLast then
                 notification.NodeUploading node
@@ -223,6 +219,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
                 let files, size = cacheEntry.Complete()
                 api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size true)
                 notification.NodeCompleted node (node.IsForced |> not) true
+
+            if lastExitCode <> 0 then TerrabuildException.Raise("Build failure")
 
         let restoreNode () =
             notification.NodeDownloading node
@@ -237,19 +235,19 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
                 | _ -> ()
             | _ -> TerrabuildException.Raise("Unable to download build output for {cacheEntryId}")
 
-        let success =
-            try
-                if node.IsForced then buildNode()
-                else restoreNode()
-                true
-            with
-                | _ ->
-                    let cacheEntry = cache.GetEntry sourceControl.CI false cacheEntryId
-                    let files, size = cacheEntry.Complete()
-                    api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size false)            
-                    false
+        try
+            if node.IsForced then buildNode()
+            else restoreNode()
+            notification.NodeCompleted node (node.IsForced |> not) true
+        with
+            | exn ->
+                Log.Fatal(exn, "Build failed with error")
+                let cacheEntry = cache.GetEntry sourceControl.CI false cacheEntryId
+                let files, size = cacheEntry.Complete()
+                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size false)            
+                notification.NodeCompleted node (node.IsForced |> not) false
+                reraise()
 
-        notification.NodeCompleted node (node.IsForced |> not) success
 
     let hub = Hub.Create(options.MaxConcurrency)
     let requiredNodes = graph.Nodes |> Map.filter (fun _ n -> n.IsRequired)
@@ -263,9 +261,15 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
             |> Array.ofSeq
 
         let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-        hub.Subscribe awaitedSignals (fun () -> processNode node)
+        hub.Subscribe awaitedSignals (fun () ->
+            processNode node
+            nodeComputed.Value <- node)
 
     let status = hub.WaitCompletion()
+    match status with
+    | Status.Ok -> ()
+    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Project {projectId} is unknown")
+    | Status.SubscriptionError exn -> TerrabuildException.Raise("Failed to load configuration", exn)
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
@@ -273,11 +277,13 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
     // nodes that were considered for the whole requested build
     let buildNodes =
         graph.Nodes
-        |> Map.filter (fun nodeId node -> node.IsRequired)
+        |> Map.filter (fun nodeId node -> node.IsForced)
 
     // status of nodes to build
     let buildNodesStatus =
-        buildNodes
+        graph.RootNodes
+        |> Seq.map (fun depId -> depId, graph.Nodes[depId])
+        |> Map.ofSeq
         |> Map.map getDependencyStatus
         |> Map.values
         |> Set.ofSeq

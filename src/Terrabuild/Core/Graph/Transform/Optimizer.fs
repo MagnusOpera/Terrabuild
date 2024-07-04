@@ -106,6 +106,12 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
 
         match oneNode.TargetOperation with
         | Some targetOperation ->
+            let clusterHash =
+                clusterDependencies
+                |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Id)
+                |> Hash.sha256strings
+            let clusterHash = $"{clusterHash}-{oneNode.Id}" |> Hash.sha256
+
             let optContext = {
                 Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                 Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
@@ -113,6 +119,7 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                 Terrabuild.Extensibility.ActionContext.BranchOrTag = sourceControl.BranchOrTag
                 Terrabuild.Extensibility.ActionContext.TempDir = ".terrabuild"
                 Terrabuild.Extensibility.ActionContext.Projects = projectPaths
+                Terrabuild.Extensibility.ActionContext.UniqueId = clusterHash
             }
 
             let parameters = 
@@ -127,12 +134,6 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                 match Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionExecutionRequest> optContext.Command parameters (Some targetOperation.Script) with
                 | Extensions.InvocationResult.Success executionRequest -> executionRequest
                 | _ -> TerrabuildException.Raise("Failed to get shell operation (extension error)")
-
-            let clusterHash =
-                clusterDependencies
-                |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Id)
-                |> Hash.sha256strings
-            let cluster = $"cluster-{oneNode.Id}" |> Hash.sha256
 
             // create the batch node if required
             let clusterDependencies = 
@@ -150,14 +151,17 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
 
                     let clusterNode: GraphDef.Node = {
                         oneNode with
-                            Id = cluster
-                            Label = $"batch-{oneNode.Target} {cluster}"
-                            Project = $"batch/{cluster}"
+                            Id = clusterHash
+                            Label = $"batch-{oneNode.Target} {clusterHash}"
+                            Project = clusterHash
                             Dependencies = clusterDependencies
                             Outputs = Set.empty
                             ProjectHash = clusterHash
-                            OperationHash = cluster
-                            Operations = containeredOperations }
+                            OperationHash = clusterHash
+                            Operations = containeredOperations
+                            IsLeaf = false
+                            IsFirst = false
+                            IsLast = false }
                     allNodes.TryAdd(clusterNode.Id, clusterNode) |> ignore
                     Set.singleton clusterNode.Id
 
@@ -180,7 +184,7 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
 
                 let node =
                     { node with
-                        OperationHash = cluster
+                        OperationHash = clusterHash
                         Dependencies = node.Dependencies + clusterDependencies
                         Operations = ops }
 

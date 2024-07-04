@@ -1,6 +1,5 @@
 module GraphAnalysisConsistency
 open System
-open System.Collections.Concurrent
 open Collections
 open Serilog
 
@@ -9,10 +8,9 @@ let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: Graph
     let startedAt = DateTime.UtcNow
     let allowRemoteCache = options.LocalOnly |> not
 
-    let allNodes = ConcurrentDictionary<string, GraphDef.Node>()
+    let mutable nodes = graph.Nodes
 
-    let rec enforce (parentStartTime: DateTime) (parentRequired: bool) nodeId =
-        let node = graph.Nodes[nodeId]
+    let rec enforce (parentStartTime: DateTime) (parentRequired: bool) (node: GraphDef.Node) =
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
 
         let startTime, node =
@@ -33,15 +31,20 @@ let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: Graph
 
         let isReferenced = node.IsForced || node.IsRequired
         if isReferenced then
-            allNodes.TryAdd(node.Id, node) |> ignore
-            node.Dependencies |> Set.iter (ignore << enforce startTime isReferenced)
+            nodes <- nodes |> Map.add node.Id node
+            node.Dependencies |> Set.iter (fun nodeId ->
+                let node = nodes |> Map.find nodeId
+                enforce startTime isReferenced node |> ignore)
         isReferenced
 
-    let rootNodes = graph.RootNodes |> Set.filter (enforce DateTime.MaxValue options.Force)
+    let rootNodes = graph.RootNodes |> Set.filter (fun nodeId ->
+        let node = nodes |> Map.find nodeId
+        let node = { node with IsForced = options.Force; IsRequired = options.Force || node.IsRequired }
+        enforce DateTime.MaxValue options.Force node)
 
     let endedAt = DateTime.UtcNow
     let trimDuration = endedAt - startedAt
     Log.Debug("Graph Consistency: {duration}", trimDuration)
 
     { GraphDef.Graph.RootNodes = rootNodes
-      GraphDef.Graph.Nodes = allNodes |> Map.ofDict }
+      GraphDef.Graph.Nodes = nodes }

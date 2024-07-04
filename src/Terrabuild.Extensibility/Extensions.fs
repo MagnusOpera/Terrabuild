@@ -30,6 +30,7 @@ type ActionContext = {
     Command: string
     BranchOrTag: string
 
+    UniqueId: string
     TempDir: string
     Projects: Map<string, string>
 }

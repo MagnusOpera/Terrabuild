@@ -127,7 +127,7 @@ type Dotnet() =
                     |> Map.values
                     |> Seq.map DotnetHelpers.findProjectFile
                     |> Seq.map (fun path -> Path.GetRelativePath(context.TempDir, path))
-                let slnfile = Path.Combine(context.TempDir, $"{System.Guid.NewGuid()}.sln")
+                let slnfile = Path.Combine(context.TempDir, $"{context.UniqueId}.sln")
                 let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
                 IO.writeLines slnfile slnContent
                 buildOps slnfile, All []
