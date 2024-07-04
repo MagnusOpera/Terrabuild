@@ -161,7 +161,7 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                             Operations = containeredOperations
                             IsLeaf = false
                             IsFirst = false
-                            IsLast = false }
+                            IsLast = true }
                     allNodes.TryAdd(clusterNode.Id, clusterNode) |> ignore
                     Set.singleton clusterNode.Id
 
