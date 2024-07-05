@@ -114,8 +114,8 @@ run-build-scaffold:
 	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry
 
 
-#	cp $(1)/$(2) $(1)/results/$(2)
 define diff_file
+#	cp $(1)/$(2) $(1)/results/$(2)
 	diff $(1)/results/$(2) $(1)/$(2)
 endef
 

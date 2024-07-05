@@ -60,8 +60,8 @@
       "targetHash": "04248F14331991CE6BFB33A59B4A2B2E129E1B5702DB0A9200719D8344D18C0E",
       "operationHash": "FD4E492BBC14063F951BD573395F7044BB64448F0CCA60851019067618B27C70",
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
+      "isForced": false,
+      "isRequired": false,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -120,8 +120,8 @@
       "targetHash": "2B54545A15F538FD93FD4ADAAF642161D3E25A5BBC709C099D3EB615CCC22E9D",
       "operationHash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
+      "isForced": false,
+      "isRequired": false,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -166,8 +166,8 @@
       "targetHash": "C432095DAA33C07EE1C2E6A4F053F065373D320CB24C6C500259772EF208608E",
       "operationHash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
+      "isForced": false,
+      "isRequired": false,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -228,8 +228,8 @@
       "targetHash": "DDBE336631053045F003A619F764069C3644E78FAAE597140FCC2B968FB31989",
       "operationHash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
+      "isForced": false,
+      "isRequired": false,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -302,8 +302,8 @@
       "targetHash": "9BDFE24BBEFCEA185D8216BFBB1B52C3CA61B82F25A512ACD9E66BCBFE1B0458",
       "operationHash": "D75E1B5F09A68010CF5A342EF04AB73E0FDE53F31E8A83B5DF5FF248DE965D24",
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
+      "isForced": false,
+      "isRequired": false,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -347,8 +347,8 @@
       "targetHash": "B864E5E2441D5ABDFB79E333250443A85D34E2FA72C676175DA6CEFE84A30999",
       "operationHash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
+      "isForced": false,
+      "isRequired": false,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -394,20 +394,12 @@
       "targetHash": "059335A3E58FBAF6A206191DC7E272D1F67A336053A500676E1ABAA80433AA66",
       "operationHash": "11AAF8064C94EB13A5DBBABB74D237968373D8BA36EDC3C0DAE6A303E3FB71FE",
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
+      "isForced": false,
+      "isRequired": false,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
     }
   },
-  "rootNodes": [
-    "deployments/terraform-deploy:build",
-    "libraries/dotnet-lib:build",
-    "libraries/shell-lib:build",
-    "projects/dotnet-app:build",
-    "projects/make-app:build",
-    "projects/npm-app:build",
-    "projects/rust-app:build"
-  ]
+  "rootNodes": []
 }
