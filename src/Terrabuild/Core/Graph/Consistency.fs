@@ -20,7 +20,7 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
                 match tryGetSummaryOnly allowRemoteCache cacheEntryId with
                 | Some summary ->
                     Log.Debug("{nodeId} has existing build summary", node.Id)
-                    if summary.Status = Cache.TaskStatus.Failure && options.Retry then
+                    if (summary.IsSuccessful |> not) && options.Retry then
                         Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
                         DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
                     elif parentStartTime <= summary.StartedAt then

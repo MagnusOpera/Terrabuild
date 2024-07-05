@@ -90,10 +90,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
               NodeInfo.NodeHash = node.TargetHash }
 
         match cache.TryGetSummaryOnly false cacheEntryId with
-        | Some summary -> 
-            match summary.Status with
-            | Cache.TaskStatus.Success -> NodeStatus.Success nodeInfo
-            | Cache.TaskStatus.Failure -> NodeStatus.Failure nodeInfo
+        | Some summary ->
+            if summary.IsSuccessful then NodeStatus.Success nodeInfo
+            else NodeStatus.Failure nodeInfo
         | _ -> NodeStatus.Unfulfilled nodeInfo
 
 
@@ -152,7 +151,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         metaCommand, workspaceDir, cmd, args, operation.Container
                     | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
 
-            let stepLogs = List<Cache.StepSummary>()
+            let stepLogs = List<Cache.OperationSummary>()
             let mutable lastExitCode = 0
             let mutable cmdLineIndex = 0
             let cmdFirstStartedAt = DateTime.UtcNow
@@ -173,26 +172,22 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 cmdLastEndedAt <- DateTime.UtcNow
                 let endedAt = cmdLastEndedAt
                 let duration = endedAt - startedAt
-                let stepLog = { Cache.StepSummary.MetaCommand = metaCommand
-                                Cache.StepSummary.Command = cmd
-                                Cache.StepSummary.Arguments = args
-                                Cache.StepSummary.Container = container
-                                Cache.StepSummary.StartedAt = startedAt
-                                Cache.StepSummary.EndedAt = endedAt
-                                Cache.StepSummary.Duration = duration
-                                Cache.StepSummary.Log = logFile
-                                Cache.StepSummary.ExitCode = exitCode }
+                let stepLog = { Cache.OperationSummary.MetaCommand = metaCommand
+                                Cache.OperationSummary.Command = cmd
+                                Cache.OperationSummary.Arguments = args
+                                Cache.OperationSummary.Container = container
+                                Cache.OperationSummary.StartedAt = startedAt
+                                Cache.OperationSummary.EndedAt = endedAt
+                                Cache.OperationSummary.Duration = duration
+                                Cache.OperationSummary.Log = logFile
+                                Cache.OperationSummary.ExitCode = exitCode }
                 stepLog |> stepLogs.Add
                 lastExitCode <- exitCode
                 Log.Debug("{Hash}: Execution completed with '{Code}'", node.TargetHash, exitCode)
 
-            let status =
-                if lastExitCode = 0 then
-                    Log.Debug("{Hash}: Marking as success", node.TargetHash)
-                    Cache.TaskStatus.Success
-                else
-                    Log.Debug("{Hash}: Marking as failed", node.TargetHash)
-                    Cache.TaskStatus.Failure
+            let successful = lastExitCode = 0
+            if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)
+            else Log.Debug("{Hash}: Marking as failed", node.TargetHash)
 
             let afterFiles = IO.createSnapshot node.Outputs projectDirectory
 
@@ -202,9 +197,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
             let summary = { Cache.TargetSummary.Project = node.Project
                             Cache.TargetSummary.Target = node.Target
-                            Cache.TargetSummary.Steps = [ stepLogs |> List.ofSeq ]
+                            Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
                             Cache.TargetSummary.Outputs = outputs
-                            Cache.TargetSummary.Status = status
+                            Cache.TargetSummary.IsSuccessful = successful
                             Cache.TargetSummary.StartedAt = cmdFirstStartedAt
                             Cache.TargetSummary.EndedAt = cmdLastEndedAt
                             Cache.TargetSummary.Origin = Cache.Origin.Local }

@@ -24,7 +24,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         nodes
         |> List.forall (fun (node, targetSummary) ->
             match targetSummary with
-            | Some summary -> summary.Status = TaskStatus.Success
+            | Some summary -> summary.IsSuccessful
             | _ -> false)
 
     let dumpMarkdown filename (infos: (GraphDef.Node * TargetSummary option) list) =
@@ -34,15 +34,11 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         let statusEmoji (summary: TargetSummary option) =
             match summary with
             | Some summary ->
-                match summary.Status with
-                | TaskStatus.Success ->
-                    match summary.Origin with
-                    | Origin.Local -> "✅"
-                    | Origin.Remote -> "🍿"
-                | TaskStatus.Failure ->
-                    match summary.Origin with
-                    | Origin.Local -> "❌"
-                    | Origin.Remote -> "🥨"
+                match summary.IsSuccessful, summary.Origin with
+                | true, Origin.Local -> "✅"
+                | true, Origin.Remote -> "🍿"
+                | false, Origin.Local -> "❌"
+                | false, Origin.Remote -> "🥨"
             | _ -> "❓"
 
 
@@ -56,7 +52,6 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                 match summary with
                 | Some summary -> 
                     let dumpLogs () =
-
                         let batchNode =
                             match node.IsBatched, node.Dependencies |> Seq.tryHead with
                             | true, Some batchId -> Some graph.Nodes[batchId]
@@ -67,7 +62,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                             let uniqueId = stableRandomId batchNode.Id
                             $"**Batched with [{batchNode.Label}](#user-content-{uniqueId})**" |> append
                         | _ ->
-                            summary.Steps |> List.iter (fun group ->
+                            summary.Operations |> List.iter (fun group ->
                                 group |> List.iter (fun step ->
                                     $"### {step.MetaCommand}" |> append
                                     if options.Debug then
@@ -79,10 +74,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                                     append "```"
                                 )
                             )
-
-                    match summary.Status with
-                    | TaskStatus.Success -> dumpLogs
-                    | TaskStatus.Failure -> dumpLogs
+                    dumpLogs
                 | _ ->
                     let dumpNoLog() = $"**No logs available**" |> append
                     dumpNoLog
@@ -164,7 +156,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                         match batchNode with
                         | Some batchNode -> $"{Ansi.Styles.yellow}Batched with '{batchNode.Label}'{Ansi.Styles.reset}" |> Terminal.writeLine
                         | _ ->
-                            summary.Steps |> Seq.iter (fun group ->
+                            summary.Operations |> Seq.iter (fun group ->
                                 group |> Seq.iter (fun step ->
                                     $"{Ansi.Styles.yellow}{step.MetaCommand}{Ansi.Styles.reset}" |> Terminal.writeLine
                                     if options.Debug then
@@ -173,9 +165,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                                 )
                             )
 
-                    match summary.Status with
-                    | TaskStatus.Success -> getHeaderFooter true title, dumpLogs
-                    | TaskStatus.Failure -> getHeaderFooter false title, dumpLogs
+                    getHeaderFooter summary.IsSuccessful title, dumpLogs
                 | _ ->
                     let dumpNoLog() = $"{Ansi.Styles.yellow}No logs available{Ansi.Styles.reset}" |> Terminal.writeLine
                     getHeaderFooter false title, dumpNoLog
@@ -190,7 +180,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         infos
         |> List.iter (fun (node, summary) ->
             match summary with
-            | Some summary when summary.Status = TaskStatus.Failure -> sourceControl.LogError $"{node.Label} failed"
+            | Some summary when summary.IsSuccessful |> not -> sourceControl.LogError $"{node.Label} failed"
             | _ -> ())
 
     let logger =

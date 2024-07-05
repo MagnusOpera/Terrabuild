@@ -3,12 +3,7 @@ open System
 open System.IO
 
 [<RequireQualifiedAccess>]
-type TaskStatus =
-    | Success
-    | Failure
-
-[<RequireQualifiedAccess>]
-type StepSummary = {
+type OperationSummary = {
     MetaCommand: string
     Command: string
     Arguments: string
@@ -29,9 +24,9 @@ type Origin =
 type TargetSummary = {
     Project: string
     Target: string
-    Steps: StepSummary list list
+    Operations: OperationSummary list list
     Outputs: string option
-    Status: TaskStatus
+    IsSuccessful: bool
     StartedAt: DateTime
     EndedAt: DateTime
     Origin: Origin
@@ -109,7 +104,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
     let write (summary: TargetSummary) file =
         let summary =
             { summary
-                with Steps = summary.Steps
+                with Operations = summary.Operations
                              |> List.map (fun stepGroup ->
                                 stepGroup
                                 |> List.map (fun step -> { step
@@ -171,7 +166,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
 
             let summary =
                 collect 1
-                |> Seq.reduce (fun s1 s2 -> { s1 with Steps = s1.Steps @ s2.Steps; EndedAt = s2.EndedAt })
+                |> Seq.reduce (fun s1 s2 -> { s1 with Operations = s1.Operations @ s2.Operations; EndedAt = s2.EndedAt })
 
             let summaryfile = FS.combinePath logsDir "summary.json"
             write summary summaryfile
@@ -203,7 +198,7 @@ type Cache(storage: Contracts.IStorage) =
     let loadSummary logsDir outputsDir summaryFile =
         let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
         let summary = { summary
-                        with Steps = summary.Steps
+                        with Operations = summary.Operations
                                      |> List.map (fun stepGroup ->
                                         stepGroup
                                         |> List.map (fun stepLog -> { stepLog
