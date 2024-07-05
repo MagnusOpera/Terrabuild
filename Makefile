@@ -131,6 +131,18 @@ run-dist-playground:
 run-deploy-playground:
 	dotnet run --project src/Terrabuild -- run deploy --workspace ../playground --retry --debug
 
+run-test-insights:
+	dotnet run --project src/Terrabuild -- run build test apply plan -w ../../insights --debug --force --localonly --whatif
+
+run-test-terrabuild:
+	dotnet run --project src/Terrabuild -- run build test publish -w src --debug --force --localonly
+
+run-test-cluster-layers:
+	dotnet run --project src/Terrabuild -- run build -w tests/cluster-layers --debug --force
+
+run-test-simple:
+	dotnet run --project src/Terrabuild -- run build -w tests/simple --debug --force
+
 define diff_file
 #	cp $(1)/$(2) $(1)/results/$(2)
 	diff $(1)/results/$(2) $(1)/$(2)
@@ -156,18 +168,6 @@ define run_integration_test
 	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild-debug.md $(current_dir)/.out/dotnet/terrabuild $(2)
 	$(call diff_results,$(1))
 endef
-
-run-test-insights:
-	dotnet run --project src/Terrabuild -- run build test apply plan -w ../../insights --debug --force --localonly --whatif
-
-run-test-terrabuild:
-	dotnet run --project src/Terrabuild -- run build test publish -w src --debug --force --localonly
-
-run-test-cluster-layers:
-	dotnet run --project src/Terrabuild -- run build -w tests/cluster-layers --debug --force
-
-run-test-simple:
-	dotnet run --project src/Terrabuild -- run build -w tests/simple --debug --force
 
 # $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
 
