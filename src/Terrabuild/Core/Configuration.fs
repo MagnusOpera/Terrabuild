@@ -42,6 +42,16 @@ type TargetOperation = {
     Script: Terrabuild.Scripting.Script
     Context: Value
 }
+with
+    static member MarkAsForced = Some {
+        Hash = String.Empty
+        Container = None
+        ContainerVariables = Set.empty
+        Extension = String.Empty
+        Command = String.Empty
+        Script = Terrabuild.Scripting.Script(typeof<Unit>)
+        Context = Value.Nothing
+    }
 
 [<RequireQualifiedAccess>]
 type Target = {

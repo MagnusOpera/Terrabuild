@@ -59,7 +59,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
-    let nodesToRun = graph.Nodes |> Map.filter (fun _ node -> node.IsRequired) |> Map.count
+    let nodesToRun = graph.Nodes |> Map.filter (fun _ node -> node.TargetOperation.IsSome) |> Map.count
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks to run" |> Terminal.writeLine
 
     let startedAt = DateTime.UtcNow
@@ -218,7 +218,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 let cacheEntry = cache.GetEntry sourceControl.CI false cacheEntryId
                 let files, size = cacheEntry.Complete()
                 api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size true)
-                notification.NodeCompleted node (node.IsForced |> not) true
+                notification.NodeCompleted node node.TargetOperation.IsNone true
 
             if lastExitCode <> 0 then TerrabuildException.Raise("Build failure")
 
@@ -236,21 +236,21 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             | _ -> TerrabuildException.Raise("Unable to download build output for {cacheEntryId}")
 
         try
-            if node.IsForced then buildNode()
+            if node.TargetOperation.IsSome then buildNode()
             else restoreNode()
-            notification.NodeCompleted node (node.IsForced |> not) true
+            notification.NodeCompleted node node.TargetOperation.IsNone true
         with
             | exn ->
                 Log.Fatal(exn, "Build failed with error")
                 let cacheEntry = cache.GetEntry sourceControl.CI false cacheEntryId
                 let files, size = cacheEntry.Complete()
                 api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size false)            
-                notification.NodeCompleted node (node.IsForced |> not) false
+                notification.NodeCompleted node node.TargetOperation.IsNone false
                 reraise()
 
 
     let hub = Hub.Create(options.MaxConcurrency)
-    let requiredNodes = graph.Nodes |> Map.filter (fun _ n -> n.IsRequired)
+    let requiredNodes = graph.Nodes |> Map.filter (fun _ node -> node.TargetOperation.IsSome)
     for (KeyValue(nodeId, node)) in requiredNodes do
         let nodeComputed = hub.CreateComputed<GraphDef.Node> nodeId
 
@@ -277,7 +277,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     // nodes that were considered for the whole requested build
     let buildNodes =
         graph.Nodes
-        |> Map.filter (fun nodeId node -> node.IsForced)
+        |> Map.filter (fun nodeId node -> node.TargetOperation.IsSome)
 
     // status of nodes to build
     let buildNodesStatus =

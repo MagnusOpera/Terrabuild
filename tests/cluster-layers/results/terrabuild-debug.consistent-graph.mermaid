@@ -2,24 +2,31 @@ flowchart TD
 classDef forced stroke:red,stroke-width:3px
 classDef required stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
-F:build(["build F"])
-G:build(["build G"])
+F:build(["F:build
+ "])
+G:build(["G:build
+ "])
 F:build --> D:build
 F:build --> E:build
 class F:build forced
 G:build --> C:build
 class G:build forced
-D:build(["build D"])
-E:build(["build E"])
+D:build(["D:build
+ "])
+E:build(["E:build
+ "])
 D:build --> C:build
 class D:build forced
 E:build --> C:build
 class E:build forced
-C:build(["build C"])
+C:build(["C:build
+ "])
 C:build --> A:build
 C:build --> B:build
 class C:build forced
-A:build(["build A"])
-B:build(["build B"])
+A:build(["A:build
+ "])
+B:build(["B:build
+ "])
 class A:build forced
 class B:build forced

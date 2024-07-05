@@ -1,9 +1,6 @@
 module GraphDef
 open Collections
 
-
-
-
 [<RequireQualifiedAccess>]
 type ContaineredShellOperation = {
     Container: string option
@@ -20,9 +17,7 @@ type Node = {
 
     Project: string
     Target: string
-    TargetOperation: Configuration.TargetOperation option
     ConfigurationTarget: Configuration.Target
-    Operations: ContaineredShellOperation list
 
     Dependencies: string set
     Outputs: string set
@@ -37,7 +32,8 @@ type Node = {
     // tell if a node must be rebuild (requested by user)
     // if forced then cache is ignored
     // set by Analysis/Builder (init from user) & Analysys/Consistency
-    IsForced: bool
+    TargetOperation: Configuration.TargetOperation option
+    Operations: ContaineredShellOperation list
 
     // tell if outputs of a node are required or not
     // if outputs are required they can be downloaded from the cache if they exists (ProjectHash/Target/TargetHash)
@@ -51,6 +47,7 @@ type Node = {
     // set by Transform/TaskBuilder
     IsLast: bool
 
+    // tell if a node is batched or not
     IsBatched: bool
 }
 
@@ -114,7 +111,7 @@ let render (graph: Graph) =
                         let dstNode = graph.Nodes |> Map.find dependency
                         $"{srcNode.Id} --> {dstNode.Id}"
 
-                if srcNode.IsForced then $"class {srcNode.Id} forced"
+                if srcNode.TargetOperation.IsSome then $"class {srcNode.Id} forced"
                 elif srcNode.IsRequired then $"class {srcNode.Id} required"
                 elif graph.RootNodes |> Set.contains srcNode.Id then $"class {srcNode.Id} selected"
     ]

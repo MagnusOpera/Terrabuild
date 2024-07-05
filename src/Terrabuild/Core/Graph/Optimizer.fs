@@ -35,7 +35,7 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                     |> Set.ofSeq
 
                 let declare, clusterId =
-                    if node.IsForced |> not then
+                    if node.TargetOperation.IsNone then
                         // node is not built => let it standalone in own cluster
                         Log.Debug("Node {node} does not need rebuild", node.Id)
                         true, node.Id

@@ -74,7 +74,6 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.Project = project
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
-                             Node.TargetOperation = None
                              Node.Operations = []
 
                              Node.Dependencies = children
@@ -85,7 +84,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.OperationHash = target.Hash
 
                              Node.IsLeaf = isLeaf
-                             Node.IsForced = false
+                             Node.TargetOperation = None
                              Node.IsRequired = false
                              Node.IsFirst = true
                              Node.IsLast = true

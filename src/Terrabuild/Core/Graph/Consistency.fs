@@ -14,26 +14,31 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
 
         let startTime, node =
-            if node.IsForced then
-                DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
+            if node.TargetOperation.IsSome then
+                DateTime.MaxValue, { node with IsRequired = true }
             else
                 match tryGetSummaryOnly allowRemoteCache cacheEntryId with
                 | Some summary ->
                     Log.Debug("{nodeId} has existing build summary", node.Id)
                     if summary.Status = Cache.TaskStatus.Failure && options.Retry then
                         Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
-                        DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
+                        DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
                     elif parentStartTime < summary.StartedAt then
                         Log.Debug("{nodeId} must rebuild because it is younger than parent", node.Id)
-                        DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
+                        DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
                     else
-                        summary.EndedAt, { node with IsRequired = node.IsRequired || parentRequired }
+                        let isRequired = node.TargetOperation.IsSome || parentRequired
+                        summary.EndedAt, { node with 
+                                            TargetOperation =
+                                                if isRequired then Configuration.TargetOperation.MarkAsForced
+                                                else None
+                                            IsRequired = isRequired }
                 | _ ->
                     Log.Debug("{nodeId} has no build summary", node.Id)
-                    DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
+                    DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
 
         let isUsed =
-            let isRequired = node.IsForced || node.IsRequired
+            let isRequired = node.TargetOperation.IsSome || node.IsRequired
             let childRequired =
                 if options.Retry then
                     node.Dependencies
@@ -49,7 +54,11 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
 
     let rootNodes = graph.RootNodes |> Set.filter (fun nodeId ->
         let node = nodes |> Map.find nodeId
-        let node = { node with IsForced = options.Force; IsRequired = options.Force || node.IsRequired }
+        let node = { node with
+                        TargetOperation =
+                            if options.Force then Configuration.TargetOperation.MarkAsForced
+                            else None
+                        IsRequired = options.Force || node.IsRequired }
         enforce DateTime.MaxValue options.Force node)
 
     let endedAt = DateTime.UtcNow

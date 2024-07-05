@@ -7,7 +7,7 @@ let build (graph: GraphDef.Graph) =
     let allNodes = ConcurrentDictionary<string, GraphDef.Node>()
     for (KeyValue(_, node)) in graph.Nodes do
 
-        if node.IsForced then
+        if node.TargetOperation.IsSome then
             let nbOps = node.ConfigurationTarget.Operations.Length
             node.ConfigurationTarget.Operations
             |> List.fold (fun (dependencies, index) operation ->
