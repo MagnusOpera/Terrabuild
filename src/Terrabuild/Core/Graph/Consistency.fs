@@ -29,14 +29,17 @@ let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: Graph
                 Log.Debug("{nodeId} has no build summary", node.Id)
                 DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
 
-        let isReferenced = node.IsForced || node.IsRequired
-        if isReferenced then
-            nodes <- nodes |> Map.add node.Id node
-        if isReferenced || options.Retry then
-            node.Dependencies |> Set.iter (fun nodeId ->
-                let node = nodes |> Map.find nodeId
-                enforce startTime isReferenced node |> ignore)
-        isReferenced
+        let isUsed =
+            if node.IsForced || node.IsRequired || options.Retry then
+                node.Dependencies
+                |> Set.map (fun nodeId ->
+                    let node = nodes |> Map.find nodeId
+                    enforce startTime (node.IsForced || node.IsRequired) node)
+                |> Set.exists id
+            else
+                false
+        if isUsed then nodes <- nodes |> Map.add node.Id node
+        isUsed
 
     let rootNodes = graph.RootNodes |> Set.filter (fun nodeId ->
         let node = nodes |> Map.find nodeId
