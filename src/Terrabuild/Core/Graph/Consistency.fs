@@ -23,7 +23,7 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
                     if summary.Status = Cache.TaskStatus.Failure && options.Retry then
                         Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
                         DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
-                    elif parentStartTime < summary.StartedAt then
+                    elif parentStartTime <= summary.StartedAt then
                         Log.Debug("{nodeId} must rebuild because it is younger than parent", node.Id)
                         DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
                     else
