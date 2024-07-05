@@ -90,7 +90,7 @@ let render (graph: Graph) =
             let clusterNode = nodes |> List.tryFind (fun node -> node.Id = cluster)
             let isCluster = clusterNode |> Option.isSome
 
-            if isCluster then $"subgraph {cluster}[batch {clusterNode.Value.Target}]"
+            if isCluster then $"subgraph {cluster}[\" \"]"
 
             let offset, nodes =
                 if isCluster then "  ", nodes |> List.filter (fun node -> node.Id <> cluster)
