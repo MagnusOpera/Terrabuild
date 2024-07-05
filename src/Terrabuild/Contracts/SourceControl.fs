@@ -1,8 +1,13 @@
 namespace Contracts
 
-[<AbstractClass>]
-type Storage() =
-    abstract Exists: id:string -> bool
-    abstract TryDownload: id:string -> string option
-    abstract Upload: id:string -> summaryFile:string -> unit
+type LogType =
+    | Terminal
+    | Markdown of file:string
+
+type ISourceControl =
+    abstract HeadCommit: string
+    abstract BranchOrTag: string
+    abstract LogType: LogType
+    abstract LogError: string -> unit
+    abstract CI: bool
     abstract Name: string

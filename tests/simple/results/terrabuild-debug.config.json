@@ -557,8 +557,5 @@
         "rust"
       ]
     }
-  },
-  "configuration": "default",
-  "note": null,
-  "tag": null
+  }
 }

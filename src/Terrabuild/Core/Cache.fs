@@ -91,7 +91,7 @@ let clearHomeCache () =
 
 
 
-type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storage: Contracts.Storage) =
+type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storage: Contracts.IStorage) =
     let logsDir = FS.combinePath entryDir "logs"
     let outputsDir = FS.combinePath entryDir "outputs"
     let mutable logNum = 1
@@ -181,7 +181,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
             files, size
 
 
-type Cache(storage: Contracts.Storage) =
+type Cache(storage: Contracts.IStorage) =
     // if there is a entry we already tried to download the summary (result is the value)
     // if not we have never tried to download the summary
     let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary option>()

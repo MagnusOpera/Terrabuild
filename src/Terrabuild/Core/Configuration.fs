@@ -76,15 +76,6 @@ type Workspace = {
 
     // All discovered projects in workspace
     Projects: Map<string, Project>
-
-    // Configuration provided by user
-    Configuration: string
-
-    // Note provided by user
-    Note: string option
-
-    // Tag provided by user
-    Tag: string option
 }
 
 
@@ -103,7 +94,7 @@ type private LoadedProject = {
 }
 
 
-let read (sourceControl: Contracts.SourceControl) (options: Options) =
+let read (sourceControl: Contracts.ISourceControl) (options: Options) =
     $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
@@ -479,7 +470,4 @@ let read (sourceControl: Contracts.SourceControl) (options: Options) =
     { Workspace.Space = workspaceConfig.Space
       Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
-      Workspace.Targets = workspaceConfig.Targets
-      Workspace.Configuration = options.Configuration
-      Workspace.Note = options.Note
-      Workspace.Tag = options.Tag }
+      Workspace.Targets = workspaceConfig.Targets }

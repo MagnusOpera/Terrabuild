@@ -164,7 +164,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             0
         else
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            let summary = Build.run configOptions sourceControl config cache api buildNotification buildGraph
+            let summary = Build.run configOptions sourceControl cache api buildNotification buildGraph
             buildNotification.WaitCompletion()
 
             if options.Debug then

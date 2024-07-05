@@ -55,7 +55,7 @@ type IBuildNotification =
     abstract NodeCompleted: node:GraphDef.Node -> restored: bool -> success: bool -> unit
 
 
-let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl) (configuration: Configuration.Workspace) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
+let run (options: Configuration.Options) (sourceControl: Contracts.ISourceControl) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
@@ -65,7 +65,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.SourceControl
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
-        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit configuration.Configuration configuration.Note configuration.Tag options.Targets options.Force options.Retry sourceControl.CI)
+        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI)
         |> Option.defaultValue ""
 
     let allowRemoteCache = options.LocalOnly |> not

@@ -1,12 +1,11 @@
 module Logs
 open Cache
-open Contracts
 open System
 
 
 
 
-let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: SourceControl) (graph: GraphDef.Graph) =
+let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) =
     let stableRandomId (id: string) =
         $"{logId} {id}" |> Hash.md5 |> String.toLower
 
@@ -196,8 +195,8 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
 
     let logger =
         match sourceControl.LogType with
-        | Terminal -> dumpTerminal
-        | Markdown filename -> dumpMarkdown filename
+        | Contracts.Terminal -> dumpTerminal
+        | Contracts.Markdown filename -> dumpMarkdown filename
 
     nodes |> logger
     nodes |> reportFailedNodes
