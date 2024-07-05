@@ -44,11 +44,11 @@ type TargetOperation = {
 }
 with
     static member MarkAsForced = Some {
-        Hash = String.Empty
+        Hash = "--"
         Container = None
         ContainerVariables = Set.empty
-        Extension = String.Empty
-        Command = String.Empty
+        Extension = "(ᵔ◡ᵔ)"
+        Command = ""
         Script = Terrabuild.Scripting.Script(typeof<Unit>)
         Context = Value.Nothing
     }
