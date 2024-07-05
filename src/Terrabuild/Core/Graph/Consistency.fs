@@ -4,7 +4,7 @@ open Collections
 open Serilog
 
 
-let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: GraphDef.Graph) =
+let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string -> Cache.TargetSummary option) (graph: GraphDef.Graph) =
     let startedAt = DateTime.UtcNow
     let allowRemoteCache = options.LocalOnly |> not
 
@@ -17,7 +17,7 @@ let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: Graph
             if node.IsForced then
                 DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
             else
-                match cache.TryGetSummary allowRemoteCache cacheEntryId with
+                match tryGetSummaryOnly allowRemoteCache cacheEntryId with
                 | Some summary ->
                     Log.Debug("{nodeId} has existing build summary", node.Id)
                     if summary.Status = Cache.TaskStatus.Failure && options.Retry then

@@ -7,7 +7,7 @@ open Terrabuild.PubSub
 open Serilog
 open Errors
 
-let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceControl) (graph: Graph) =
+let optimize (options: Configuration.Options) (graph: Graph) =
     let startedAt = DateTime.UtcNow
 
     let computeClusters remainingNodes =
@@ -115,9 +115,9 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
 
             let optContext = {
                 Terrabuild.Extensibility.ActionContext.Debug = options.Debug
-                Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
+                Terrabuild.Extensibility.ActionContext.CI = options.CI
                 Terrabuild.Extensibility.ActionContext.Command = targetOperation.Command
-                Terrabuild.Extensibility.ActionContext.BranchOrTag = sourceControl.BranchOrTag
+                Terrabuild.Extensibility.ActionContext.BranchOrTag = options.BranchOrTag
                 Terrabuild.Extensibility.ActionContext.TempDir = ".terrabuild"
                 Terrabuild.Extensibility.ActionContext.Projects = hash2project
                 Terrabuild.Extensibility.ActionContext.UniqueId = clusterHash

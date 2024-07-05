@@ -20,10 +20,16 @@ type Options = {
     Retry: bool
     LocalOnly: bool
     StartedAt: DateTime
-    IsLog: bool
     NoContainer: bool
     NoBatch: bool
     Targets: string set
+    CI: bool
+    BranchOrTag: string
+    Configuration: string
+    Note: string option
+    Tag: string option
+    Labels: string set option
+    Variables: Map<string, string>
 }
 
 [<RequireQualifiedAccess>]
@@ -97,8 +103,8 @@ type private LoadedProject = {
 }
 
 
-let read configuration note tag labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
-    $"{Ansi.Emojis.box} Reading {configuration} configuration" |> Terminal.writeLine
+let read (sourceControl: Contracts.SourceControl) (options: Options) =
+    $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
@@ -128,12 +134,12 @@ let read configuration note tag labels (variables: Map<string, string>) (sourceC
         | _ -> Map.empty
 
     let configVariables =
-        match workspaceConfig.Configurations |> Map.tryFind configuration with
+        match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
         | Some variables -> variables.Variables
         | _ ->
-            match configuration with
+            match options.Configuration with
             | "default" -> Map.empty
-            | _ -> TerrabuildException.Raise($"Configuration '{configuration}' not found")
+            | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
 
     let buildVariables =
         defaultVariables
@@ -145,7 +151,7 @@ let read configuration note tag labels (variables: Map<string, string>) (sourceC
             | value -> convertToVarType key expr value)
         // override variable with provided ones on command line if any
         |> Map.map (fun key expr ->
-            match variables |> Map.tryFind (key |> String.toLower) with
+            match options.Variables |> Map.tryFind (key |> String.toLower) with
             | Some value -> convertToVarType key expr value
             | _ -> expr)
 
@@ -281,19 +287,19 @@ let read configuration note tag labels (variables: Map<string, string>) (sourceC
                     buildVariables
                     |> Map.add "terrabuild_project" (Expr.String projectId)
                     |> Map.add "terrabuild_target" (Expr.String targetName)
-                    |> Map.add "terrabuild_configuration" (Expr.String configuration)
+                    |> Map.add "terrabuild_configuration" (Expr.String options.Configuration)
                     |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
                     |> Map.add "terrabuild_retry" (Expr.Boolean options.Retry)
                     |> Map.add "terrabuild_force" (Expr.Boolean options.Force)
                     |> (fun map ->
                         let tagValue =
-                            match tag with
+                            match options.Tag with
                             | Some tag -> Expr.String tag
                             | _ -> Expr.Nothing
                         map |> Map.add "terrabuild_tag" tagValue)
                     |> (fun map ->
                         let noteValue =
-                            match note with
+                            match options.Note with
                             | Some note -> Expr.String note
                             | _ -> Expr.Nothing
                         map |> Map.add "terrabuild_note" noteValue)
@@ -462,7 +468,7 @@ let read configuration note tag labels (variables: Map<string, string>) (sourceC
 
     // select dependencies with labels if any
     let selectedProjects =
-        match labels with
+        match options.Labels with
         | Some labels ->
             projects
             |> Seq.choose (fun (KeyValue(dependency, config)) ->
@@ -474,6 +480,6 @@ let read configuration note tag labels (variables: Map<string, string>) (sourceC
       Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
       Workspace.Targets = workspaceConfig.Targets
-      Workspace.Configuration = configuration
-      Workspace.Note = note
-      Workspace.Tag = tag }
+      Workspace.Configuration = options.Configuration
+      Workspace.Note = options.Note
+      Workspace.Tag = options.Tag }

@@ -122,6 +122,14 @@ run-rebuild-simple:
 run-deploy-simple:
 	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --debug --retry --logs
 
+run-build-playground:
+	dotnet run --project src/Terrabuild -- run build --workspace ../playground --retry --debug
+
+run-dist-playground:
+	dotnet run --project src/Terrabuild -- run dist --workspace ../playground --retry --debug
+
+run-deploy-playground:
+	dotnet run --project src/Terrabuild -- run deploy --workspace ../playground --retry --debug
 
 define diff_file
 #	cp $(1)/$(2) $(1)/results/$(2)
