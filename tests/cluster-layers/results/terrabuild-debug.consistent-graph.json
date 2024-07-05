@@ -66,8 +66,8 @@
       "targetHash": "63E2E3248F4C306ECC86A1715BF4ECBC07970446FB8870626BC0668BDC42003B",
       "operationHash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
       "isLeaf": true,
-      "isForced": false,
-      "isRequired": false,
+      "isForced": true,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -138,8 +138,8 @@
       "targetHash": "42F9DDBF160016079E4C227B4287249C23DE4EEE31AFFED39BE5E47596A6247B",
       "operationHash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
       "isLeaf": true,
-      "isForced": false,
-      "isRequired": false,
+      "isForced": true,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -203,8 +203,8 @@
       "targetHash": "765010FC9C2C165C213A8B0950A97808774A9A8E4DD9F39F639DB69860F04679",
       "operationHash": "7CBFCD2D010F460CED07F894949A860B35492555250E183E1BEB1C76EFB8181B",
       "isLeaf": true,
-      "isForced": false,
-      "isRequired": false,
+      "isForced": true,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -260,8 +260,8 @@
       "targetHash": "97928F3FC667BDC0E61A90E520D885DB84A1A4D506E67AF015FFBDF63013C5D0",
       "operationHash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
       "isLeaf": true,
-      "isForced": false,
-      "isRequired": false,
+      "isForced": true,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -317,8 +317,8 @@
       "targetHash": "B61D947D93CAA67B9A289FCDF5CE5151F0B79580E519BFFF7BCCF97A42604FAB",
       "operationHash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
       "isLeaf": true,
-      "isForced": false,
-      "isRequired": false,
+      "isForced": true,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -365,8 +365,8 @@
       "targetHash": "24F5134247026320EDCABDA652FDC752CA576ED27E4898B9C4C2972E2992E194",
       "operationHash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
       "isLeaf": true,
-      "isForced": false,
-      "isRequired": false,
+      "isForced": true,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -412,12 +412,20 @@
       "targetHash": "A2410BED8127F9D6EE73671494BAF4B05735024377CBBAE8001F825405716B4F",
       "operationHash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
       "isLeaf": true,
-      "isForced": false,
-      "isRequired": false,
+      "isForced": true,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
     }
   },
-  "rootNodes": []
+  "rootNodes": [
+    "A:build",
+    "B:build",
+    "C:build",
+    "D:build",
+    "E:build",
+    "F:build",
+    "G:build"
+  ]
 }

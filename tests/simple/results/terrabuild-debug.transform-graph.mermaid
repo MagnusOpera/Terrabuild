@@ -2,14 +2,24 @@ flowchart LR
 classDef forced stroke:red,stroke-width:3px
 classDef required stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
-projects/rust-app:build(["build projects/rust-app"])
-projects/npm-app:build(["build projects/npm-app"])
-libraries/shell-lib:build(["build libraries/shell-lib"])
-libraries/dotnet-lib:build(["build libraries/dotnet-lib"])
-projects/dotnet-app:build(["build projects/dotnet-app"])
-projects/dotnet-app:build --> libraries/dotnet-lib:build
 projects/make-app:build(["build projects/make-app"])
-projects/make-app:build --> libraries/shell-lib:build
+projects/make-app:build --> projects/make-app:build-1
+class projects/make-app:build forced
+projects/npm-app:build(["build projects/npm-app"])
+class projects/npm-app:build forced
 deployments/terraform-deploy:build(["build deployments/terraform-deploy"])
 deployments/terraform-deploy:build --> projects/dotnet-app:build
 deployments/terraform-deploy:build --> projects/npm-app:build
+class deployments/terraform-deploy:build forced
+libraries/shell-lib:build(["build libraries/shell-lib"])
+projects/make-app:build-1(["build projects/make-app"])
+class libraries/shell-lib:build forced
+projects/make-app:build-1 --> libraries/shell-lib:build
+class projects/make-app:build-1 forced
+projects/rust-app:build(["build projects/rust-app"])
+class projects/rust-app:build forced
+libraries/dotnet-lib:build(["build libraries/dotnet-lib"])
+projects/dotnet-app:build(["build projects/dotnet-app"])
+class libraries/dotnet-lib:build forced
+projects/dotnet-app:build --> libraries/dotnet-lib:build
+class projects/dotnet-app:build forced
