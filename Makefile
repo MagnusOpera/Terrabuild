@@ -102,16 +102,25 @@ terrabuild:
 #
 
 run-build-circular:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/circular
+	dotnet run --project src/Terrabuild -- run build --workspace tests/circular --debug --logs
 
 run-scaffold:
-	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold
+	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --debug --logs
 
 run-rescaffold:
-	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --force
+	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --debug --force --logs
 
 run-build-scaffold:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry
+	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry --logs
+
+run-build-simple:
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --debug --retry --logs
+
+run-rebuild-simple:
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --debug --retry --logs
+
+run-deploy-simple:
+	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --debug --retry --logs
 
 
 define diff_file

@@ -95,7 +95,8 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
             |> Seq.map (fun nodeId -> graph.Nodes |> Map.find nodeId)
             |> List.ofSeq
 
-        let projectPaths = nodes |> List.map (fun node -> node.Id, node.Project) |> Map.ofList
+        let hash2project = nodes |> List.map (fun node -> node.ProjectHash, node.Project) |> Map.ofList
+        let project2hash = nodes |> List.map (fun node -> node.Id, node.ProjectHash) |> Map.ofList
 
         // cluster dependencies gather all nodeIds dependencies
         // nodes forming the cluster are removed (no-self dependencies)
@@ -118,7 +119,7 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                 Terrabuild.Extensibility.ActionContext.Command = targetOperation.Command
                 Terrabuild.Extensibility.ActionContext.BranchOrTag = sourceControl.BranchOrTag
                 Terrabuild.Extensibility.ActionContext.TempDir = ".terrabuild"
-                Terrabuild.Extensibility.ActionContext.Projects = projectPaths
+                Terrabuild.Extensibility.ActionContext.Projects = hash2project
                 Terrabuild.Extensibility.ActionContext.UniqueId = clusterHash
             }
 
@@ -172,7 +173,9 @@ let optimize (options: Configuration.Options) (sourceControl: Contracts.SourceCo
                 let ops =
                     match executionRequest.Operations with
                     | Terrabuild.Extensibility.All ops -> ops
-                    | Terrabuild.Extensibility.Each map -> map[node.Id]
+                    | Terrabuild.Extensibility.Each map ->
+                        let hash = project2hash[node.Id]
+                        map[hash]
 
                 let ops =
                     ops
