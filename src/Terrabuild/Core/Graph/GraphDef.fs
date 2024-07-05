@@ -81,7 +81,7 @@ let render (graph: Graph) =
         |> Map.map (fun _ v -> v |> Seq.map (fun kvp -> kvp.Value) |> List.ofSeq)
 
     let mermaid = [
-        "flowchart LR"
+        "flowchart TD"
         $"classDef forced stroke:red,stroke-width:3px"
         $"classDef required stroke:orange,stroke-width:3px"
         $"classDef selected stroke:black,stroke-width:3px"
@@ -97,7 +97,11 @@ let render (graph: Graph) =
                 else "", nodes
 
             for node in nodes do
-                $"{offset}{node.Id}([\"{node.Label}\"])"
+                let label =
+                    match node.TargetOperation with
+                    | None -> node.Label
+                    | Some targetOperation -> $"{node.Id}\n{targetOperation.Extension} {targetOperation.Command}"
+                $"{offset}{node.Id}([\"{label}\"])"
 
             if isCluster then
                 "end"
