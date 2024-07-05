@@ -7,7 +7,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/Terrabuild/bin/Debug/net8.0/Terrabuild.dll",
-            "args": ["run", "build", "-c", "dev", "--workspace", "src", "--force", "--debug", "-p", "1", "--localonly", "--logs" ],
+            "args": ["run", "build", "-c", "dev", "--workspace", "src", "--force", "--debug", "-p", "1", "--localonly", "--logs", "--retry" ],
             // "args": ["run", "build", "--workspace", "tests/cluster-layers", "--force", "--debug", "-p", "1", "--whatif" ],
             // "args": ["run", "build", "--workspace", "tests/cluster-layers", "--force", "--debug", "-p", "1", "--whatif" ],
             // "args": ["deploy", "--workspace", "../../insights", "--logs", "-c", "dev", "--debug", "-p", "1" ],

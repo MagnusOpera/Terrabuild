@@ -14,30 +14,36 @@ let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: Graph
         let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
 
         let startTime, node =
-            match cache.TryGetSummary allowRemoteCache cacheEntryId with
-            | Some summary ->
-                Log.Debug("{nodeId} has existing build summary", node.Id)
-                if summary.Status = Cache.TaskStatus.Failure && options.Retry then
-                    Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
-                    DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
-                elif parentStartTime < summary.StartedAt then
-                    Log.Debug("{nodeId} must rebuild because it is younger than parent", node.Id)
-                    DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
-                else
-                    summary.EndedAt, { node with IsRequired = node.IsRequired || parentRequired }
-            | _ ->
-                Log.Debug("{nodeId} has no build summary", node.Id)
+            if node.IsForced then
                 DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
+            else
+                match cache.TryGetSummary allowRemoteCache cacheEntryId with
+                | Some summary ->
+                    Log.Debug("{nodeId} has existing build summary", node.Id)
+                    if summary.Status = Cache.TaskStatus.Failure && options.Retry then
+                        Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
+                        DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
+                    elif parentStartTime < summary.StartedAt then
+                        Log.Debug("{nodeId} must rebuild because it is younger than parent", node.Id)
+                        DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
+                    else
+                        summary.EndedAt, { node with IsRequired = node.IsRequired || parentRequired }
+                | _ ->
+                    Log.Debug("{nodeId} has no build summary", node.Id)
+                    DateTime.MaxValue, { node with IsForced = true; IsRequired = true }
 
         let isUsed =
-            if node.IsForced || node.IsRequired || options.Retry then
-                node.Dependencies
-                |> Set.map (fun nodeId ->
-                    let node = nodes |> Map.find nodeId
-                    enforce startTime (node.IsForced || node.IsRequired) node)
-                |> Set.exists id
-            else
-                false
+            let isRequired = node.IsForced || node.IsRequired
+            let childRequired =
+                if options.Retry then
+                    node.Dependencies
+                    |> Set.map (fun nodeId ->
+                        let node = nodes |> Map.find nodeId
+                        enforce startTime isRequired node)
+                    |> Set.exists id
+                else
+                    false
+            isRequired || childRequired
         if isUsed then nodes <- nodes |> Map.add node.Id node
         isUsed
 
