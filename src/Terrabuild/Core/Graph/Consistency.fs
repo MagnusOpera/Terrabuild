@@ -32,6 +32,7 @@ let enforce (options: Configuration.Options) (cache: Cache.ICache) (graph: Graph
         let isReferenced = node.IsForced || node.IsRequired
         if isReferenced then
             nodes <- nodes |> Map.add node.Id node
+        if isReferenced || options.Retry then
             node.Dependencies |> Set.iter (fun nodeId ->
                 let node = nodes |> Map.find nodeId
                 enforce startTime isReferenced node |> ignore)
