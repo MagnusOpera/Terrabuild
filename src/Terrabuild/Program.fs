@@ -141,7 +141,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let graph = GraphBuilder.build configOptions config
             if options.Debug then logGraph graph "config"
 
-            let consistentGraph = GraphConsistency.enforce configOptions cache.TryGetSummaryOnly graph
+            let tryGetSummaryOnly useRemote id = cache.TryGetSummaryOnly useRemote id |> Option.map (fun (_, summary) -> summary)
+            let consistentGraph = GraphConsistency.enforce configOptions tryGetSummaryOnly graph
             if options.Debug then logGraph consistentGraph "consistent"
 
             let transformGraph = GraphTransformer.build consistentGraph

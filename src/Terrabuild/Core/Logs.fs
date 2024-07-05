@@ -15,42 +15,42 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         |> Map.values
         |> Seq.map (fun node ->
             let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
-            let summary = cache.TryGetSummaryOnly false cacheEntryId
-            node, summary)
-        |> Seq.sortBy (fun (_, summary) -> summary |> Option.map (fun summary -> summary.EndedAt))
+            let originSummary = cache.TryGetSummaryOnly false cacheEntryId
+            node, originSummary)
+        |> Seq.sortBy (fun (_, originSummary) -> originSummary |> Option.map (fun (_, summary) -> summary.EndedAt))
         |> List.ofSeq
 
     let successful =
         nodes
-        |> List.forall (fun (node, targetSummary) ->
-            match targetSummary with
-            | Some summary -> summary.IsSuccessful
+        |> List.forall (fun (_, originSummary) ->
+            match originSummary with
+            | Some (_, summary) -> summary.IsSuccessful
             | _ -> false)
 
-    let dumpMarkdown filename (infos: (GraphDef.Node * TargetSummary option) list) =
+    let dumpMarkdown filename (infos: (GraphDef.Node * (Origin*TargetSummary) option) list) =
         let appendLines lines = IO.appendLinesFile filename lines 
         let append line = appendLines [line]
 
-        let statusEmoji (summary: TargetSummary option) =
-            match summary with
-            | Some summary ->
-                match summary.IsSuccessful, summary.Origin with
-                | true, Origin.Local -> "✅"
+        let statusEmoji (originSummary: (Origin * TargetSummary) option) =
+            match originSummary with
+            | Some (origin, summary) ->
+                match summary.IsSuccessful, origin with
                 | true, Origin.Remote -> "🍿"
-                | false, Origin.Local -> "❌"
+                | true, Origin.Local -> "✅"
                 | false, Origin.Remote -> "🥨"
+                | false, Origin.Local -> "❌"
             | _ -> "❓"
 
 
-        let dumpMarkdown (node: GraphDef.Node) (summary: TargetSummary option) =
+        let dumpMarkdown (node: GraphDef.Node) (originSummary: (Origin*TargetSummary) option) =
             let header =
-                let statusEmoji = statusEmoji summary
+                let statusEmoji = statusEmoji originSummary
                 let uniqueId = stableRandomId node.Id
                 $"## <a name=\"user-content-{uniqueId}\"></a> {statusEmoji} {node.Label}"
 
             let dumpLogs =
-                match summary with
-                | Some summary -> 
+                match originSummary with
+                | Some (_, summary) -> 
                     let dumpLogs () =
                         let batchNode =
                             match node.IsBatched, node.Dependencies |> Seq.tryHead with
@@ -96,22 +96,22 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         $"# <a name=\"user-content-{summaryAnchor}\"></a> Summary" |> append
         "| Target | Duration |" |> append
         "|--------|----------|" |> append
-        infos |> List.iter (fun (node, summary) ->
-            let statusEmoji = statusEmoji summary
+        infos |> List.iter (fun (node, originSummary) ->
+            let statusEmoji = statusEmoji originSummary
             let duration =
-                match summary with
-                | Some summary -> $"{summary.EndedAt - summary.StartedAt}"
+                match originSummary with
+                | Some (_, summary) -> $"{summary.EndedAt - summary.StartedAt}"
                 | _ -> ""
 
             let uniqueId = stableRandomId node.Id
             $"| {statusEmoji} [{node.Label}](#user-content-{uniqueId}) | {duration} |" |> append
         )
         let (cost, gain) =
-            infos |> List.fold (fun (cost, gain) (_, summary) ->
-                match summary with
-                | Some summary ->
+            infos |> List.fold (fun (cost, gain) (_, originSummary) ->
+                match originSummary with
+                | Some (origin, summary) ->
                     let duration = summary.EndedAt - summary.StartedAt
-                    if summary.Origin = Origin.Local then cost + duration, gain
+                    if origin = Origin.Local then cost + duration, gain
                     else cost, gain + duration
                 | _ -> cost, gain
             ) (TimeSpan.Zero, TimeSpan.Zero)
@@ -132,8 +132,8 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
 
         "</details>" |> append
 
-    let dumpTerminal (infos: (GraphDef.Node * TargetSummary option) seq) =
-        let dumpTerminal (node: GraphDef.Node) (summary: TargetSummary option) =
+    let dumpTerminal (infos: (GraphDef.Node * (Origin*TargetSummary) option) seq) =
+        let dumpTerminal (node: GraphDef.Node) (originSummary: (Origin*TargetSummary) option) =
             let title = node.Label
 
             let getHeaderFooter success title =
@@ -144,8 +144,8 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                 $"{color} {title}{Ansi.Styles.reset}", ""
 
             let (logStart, logEnd), dumpLogs =
-                match summary with
-                | Some summary -> 
+                match originSummary with
+                | Some (_, summary) -> 
                     let dumpLogs () =
 
                         let batchNode =
@@ -176,11 +176,11 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
 
         infos |> Seq.iter (fun (node, summary) -> dumpTerminal node summary)
 
-    let reportFailedNodes (infos: (GraphDef.Node * TargetSummary option) list) =
+    let reportFailedNodes (infos: (GraphDef.Node * (Origin * TargetSummary) option) list) =
         infos
-        |> List.iter (fun (node, summary) ->
-            match summary with
-            | Some summary when summary.IsSuccessful |> not -> sourceControl.LogError $"{node.Label} failed"
+        |> List.iter (fun (node, originSummary) ->
+            match originSummary with
+            | Some (_, summary) when summary.IsSuccessful |> not -> sourceControl.LogError $"{node.Label} failed"
             | _ -> ())
 
     let logger =

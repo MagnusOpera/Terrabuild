@@ -90,7 +90,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
               NodeInfo.NodeHash = node.TargetHash }
 
         match cache.TryGetSummaryOnly false cacheEntryId with
-        | Some summary ->
+        | Some (_, summary) ->
             if summary.IsSuccessful then NodeStatus.Success nodeInfo
             else NodeStatus.Failure nodeInfo
         | _ -> NodeStatus.Unfulfilled nodeInfo
@@ -201,8 +201,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                             Cache.TargetSummary.Outputs = outputs
                             Cache.TargetSummary.IsSuccessful = successful
                             Cache.TargetSummary.StartedAt = cmdFirstStartedAt
-                            Cache.TargetSummary.EndedAt = cmdLastEndedAt
-                            Cache.TargetSummary.Origin = Cache.Origin.Local }
+                            Cache.TargetSummary.EndedAt = cmdLastEndedAt }
             cacheEntry.CompleteLogFile summary
 
             if node.IsLast then

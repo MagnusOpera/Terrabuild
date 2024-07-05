@@ -1,6 +1,12 @@
 module Cache
 open System
 open System.IO
+open Collections
+
+[<RequireQualifiedAccess>]
+type Origin =
+    | Local
+    | Remote
 
 [<RequireQualifiedAccess>]
 type OperationSummary = {
@@ -16,11 +22,6 @@ type OperationSummary = {
 }
 
 [<RequireQualifiedAccess>]
-type Origin =
-    | Local
-    | Remote
-
-[<RequireQualifiedAccess>]
 type TargetSummary = {
     Project: string
     Target: string
@@ -29,7 +30,6 @@ type TargetSummary = {
     IsSuccessful: bool
     StartedAt: DateTime
     EndedAt: DateTime
-    Origin: Origin
 }
 
 
@@ -46,7 +46,7 @@ type IEntry =
     abstract Complete: unit -> string list * int
 
 type ICache =
-    abstract TryGetSummaryOnly: useRemote:bool -> id:string -> TargetSummary option
+    abstract TryGetSummaryOnly: useRemote:bool -> id:string -> (Origin * TargetSummary) option
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
     abstract GetEntry: useRemote:bool -> clean:bool -> id:string -> IEntry
     abstract CreateHomeDir: nodeHash:string -> string
@@ -55,7 +55,7 @@ type ICache =
 
 let private summaryFilename = "summary.json"
 
-let private completeFilename = "status"
+let private originFilename = "origin"
 
 let terrabuildHome =
     FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
@@ -71,11 +71,11 @@ let private homeDirectory =
     cacheDir
 
 let private setOrigin (origin: Origin) entryDir =
-    let originFile = FS.combinePath entryDir completeFilename
+    let originFile = FS.combinePath entryDir originFilename
     origin |> Json.Serialize |> IO.writeTextFile originFile
 
 let private getOrigin entryDir =
-    let originFile = FS.combinePath entryDir completeFilename
+    let originFile = FS.combinePath entryDir originFilename
     originFile |> IO.readTextFile |> Json.Deserialize<Origin>
 
 let clearBuildCache () =
@@ -172,7 +172,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
             write summary summaryfile
 
             let files, size = upload()
-            entryDir |> setOrigin summary.Origin
+            entryDir |> setOrigin Origin.Local
             files, size
 
 
@@ -208,32 +208,29 @@ type Cache(storage: Contracts.IStorage) =
 
     interface ICache with
         // NOTE: do not use when building - only use for graph building
-        member _.TryGetSummaryOnly useRemote id : TargetSummary option =
+        member _.TryGetSummaryOnly useRemote id : (Origin * TargetSummary) option =
             match cachedSummaries.TryGetValue(id) with
-            | true, targetSummary ->
-                targetSummary
+            | true, targetSummary -> targetSummary |> Option.map (fun summary -> Origin.Remote, summary)
             | false, _ ->
                 let entryDir = FS.combinePath buildCacheDirectory id
                 let logsDir = FS.combinePath entryDir "logs"
                 let outputsDir = FS.combinePath entryDir "outputs"
                 let summaryFile = FS.combinePath logsDir summaryFilename
-                let completeFile = FS.combinePath entryDir completeFilename
+                let completeFile = FS.combinePath entryDir originFilename
 
                 // do we have the summary in local cache?
                 match completeFile with
                 | FS.File _ ->
-                    let origin = getOrigin entryDir
                     let summary = loadSummary logsDir outputsDir summaryFile
-                    let summary = { summary with Origin = origin }
+                    let origin = getOrigin entryDir
                     cachedSummaries.TryAdd(id, Some summary) |> ignore
-                    Some summary
+                    Some (origin, summary)
                 | _ ->
                     if useRemote then
                         if tryDownload logsDir id "logs" then
                             let summary = loadSummary logsDir outputsDir summaryFile
-                            let summary = { summary with Origin = Origin.Remote }
                             cachedSummaries.TryAdd(id, Some summary) |> ignore
-                            Some summary
+                            Some (Origin.Remote, summary)
                         else
                             cachedSummaries.TryAdd(id, None) |> ignore
                             None
@@ -245,28 +242,25 @@ type Cache(storage: Contracts.IStorage) =
             let logsDir = FS.combinePath entryDir "logs"
             let outputsDir = FS.combinePath entryDir "outputs"
             let summaryFile = FS.combinePath logsDir summaryFilename
-            let completeFile = FS.combinePath entryDir completeFilename
+            let completeFile = FS.combinePath entryDir originFilename
 
             match completeFile with
             | FS.File _ ->
-                let origin = getOrigin entryDir
                 let summary = loadSummary logsDir outputsDir summaryFile
-                let summary = { summary with Origin = origin }
                 Some summary
             | _ ->
                 if useRemote then
                     if tryDownload logsDir id "logs" then
                         let summary = loadSummary logsDir outputsDir summaryFile
-                        let summary = { summary with Origin = Origin.Remote }
                         match summary.Outputs with
                         | Some _ ->
                             if tryDownload outputsDir id "outputs" then
-                                entryDir |> setOrigin summary.Origin
+                                entryDir |> setOrigin Origin.Remote
                                 Some summary
                             else
                                 None
                         | _ ->
-                            entryDir |> setOrigin summary.Origin
+                            entryDir |> setOrigin Origin.Remote
                             Some summary
                     else
                         None

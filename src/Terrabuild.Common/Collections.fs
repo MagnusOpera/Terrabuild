@@ -4,6 +4,8 @@ type map<'K, 'V when 'K : comparison> = Map<'K, 'V>
 
 type set<'T when 'T : comparison> = Set<'T>
 
+let (?) (q: bool) (yes: 'a, no: 'a) = if q then yes else no
+
 module Map =
     let ofDict dic = 
         dic 
