@@ -179,7 +179,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
 type Cache(storage: Contracts.IStorage) =
     // if there is a entry we already tried to download the summary (result is the value)
     // if not we have never tried to download the summary
-    let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary option>()
+    let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, (Origin*TargetSummary) option>()
 
     let tryDownload targetDir id name =
         match storage.TryDownload $"{id}/{name}" with
@@ -210,7 +210,7 @@ type Cache(storage: Contracts.IStorage) =
         // NOTE: do not use when building - only use for graph building
         member _.TryGetSummaryOnly useRemote id : (Origin * TargetSummary) option =
             match cachedSummaries.TryGetValue(id) with
-            | true, targetSummary -> targetSummary |> Option.map (fun summary -> Origin.Remote, summary)
+            | true, originSummary -> originSummary
             | false, _ ->
                 let entryDir = FS.combinePath buildCacheDirectory id
                 let logsDir = FS.combinePath entryDir "logs"
@@ -223,13 +223,13 @@ type Cache(storage: Contracts.IStorage) =
                 | FS.File _ ->
                     let summary = loadSummary logsDir outputsDir summaryFile
                     let origin = getOrigin entryDir
-                    cachedSummaries.TryAdd(id, Some summary) |> ignore
+                    cachedSummaries.TryAdd(id, Some (origin, summary)) |> ignore
                     Some (origin, summary)
                 | _ ->
                     if useRemote then
                         if tryDownload logsDir id "logs" then
                             let summary = loadSummary logsDir outputsDir summaryFile
-                            cachedSummaries.TryAdd(id, Some summary) |> ignore
+                            cachedSummaries.TryAdd(id, Some (Origin.Remote, summary)) |> ignore
                             Some (Origin.Remote, summary)
                         else
                             cachedSummaries.TryAdd(id, None) |> ignore
