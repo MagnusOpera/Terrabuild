@@ -47,8 +47,8 @@ with
         Hash = "--"
         Container = None
         ContainerVariables = Set.empty
-        Extension = "(ᵔ◡ᵔ)"
-        Command = ""
+        Extension = ""
+        Command = "👀"
         Script = Terrabuild.Scripting.Script(typeof<Unit>)
         Context = Value.Nothing
     }
