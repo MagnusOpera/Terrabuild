@@ -11,7 +11,7 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
     let mutable nodes = graph.Nodes
 
     let rec enforce (parentStartTime: DateTime) (parentRequired: bool) (node: GraphDef.Node) =
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
+        let cacheEntryId = GraphDef.buildCacheKey node
 
         let startTime, node =
             if node.TargetOperation.IsSome then

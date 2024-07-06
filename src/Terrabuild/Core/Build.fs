@@ -81,8 +81,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         | _ -> false
 
     // collect dependencies status
-    let getDependencyStatus nodeId (node: GraphDef.Node) =
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
+    let getDependencyStatus _ (node: GraphDef.Node) =
+        let cacheEntryId = GraphDef.buildCacheKey node
         let nodeInfo = 
             { NodeInfo.Project = node.Project
               NodeInfo.Target = node.Target
@@ -97,7 +97,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
 
     let processNode (node: GraphDef.Node) =
-        let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
+        let cacheEntryId = GraphDef.buildCacheKey node
 
         let projectDirectory =
             match node.Project with
@@ -218,7 +218,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
         let restoreNode () =
             notification.NodeDownloading node
-            let cacheEntryId = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
+            let cacheEntryId = GraphDef.buildCacheKey node
             match cache.TryGetSummary allowRemoteCache cacheEntryId with
             | Some summary ->
                 Log.Debug("{Hash}: Restoring '{Project}/{Target}' from cache", node.TargetHash, node.Project, node.Target)

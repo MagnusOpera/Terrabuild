@@ -62,6 +62,8 @@ type Graph = {
 
 type GetNodeStatus = string -> string
 
+let buildCacheKey (node: Node) = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
+
 let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
     let clusterColors =
         graph.Nodes
