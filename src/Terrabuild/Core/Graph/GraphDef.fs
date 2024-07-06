@@ -60,10 +60,9 @@ type Graph = {
 
 
 
+type GetNodeStatus = string -> string
 
-
-
-let render (graph: Graph) =
+let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
     let clusterColors =
         graph.Nodes
         |> Seq.map (fun (KeyValue(nodeId, node)) ->
@@ -94,11 +93,16 @@ let render (graph: Graph) =
                 else "", nodes
 
             for node in nodes do
+                let status =
+                    match getNodeStatus with
+                    | Some getNodeStatus -> $"{getNodeStatus node.Id} "
+                    | _ -> ""
+
                 let label =
                     match node.TargetOperation with
                     | None -> node.Label
                     | Some targetOperation -> $"{node.Id}\n{targetOperation.Extension} {targetOperation.Command}"
-                $"{offset}{node.Id}([\"{label}\"])"
+                $"{offset}{node.Id}([\"{status}{label}\"])"
 
             if isCluster then
                 "end"

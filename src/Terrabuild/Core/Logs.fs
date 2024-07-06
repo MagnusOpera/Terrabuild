@@ -119,7 +119,18 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         $"| Gain | {gain} |" |> append
 
         "" |> append
-        let mermaid = GraphDef.render graph
+
+        let mapNodes =
+            nodes
+            |> List.map (fun (node, originSummary) -> node.Id, originSummary)
+            |> Map.ofList
+
+        let getNodeStatus id =
+            match mapNodes |> Map.tryFind id with
+            | Some originSummary -> statusEmoji originSummary
+            | _ -> "🫥"
+
+        let mermaid = GraphDef.render (Some getNodeStatus) graph
         $"# Build Graph" |> append
         "```mermaid" |> append
         mermaid |> appendLines

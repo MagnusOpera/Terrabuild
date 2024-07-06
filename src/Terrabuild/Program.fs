@@ -82,7 +82,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             |> Json.Serialize
             |> IO.writeTextFile (logFile $"{name}-graph.json")
             graph
-            |> GraphDef.render
+            |> GraphDef.render None
             |> String.join "\n"
             |> IO.writeTextFile (logFile $"{name}-graph.mermaid")
 
