@@ -104,7 +104,7 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
                     match node.TargetOperation with
                     | None -> node.Label
                     | Some targetOperation -> $"{node.Id}\n{targetOperation.Extension} {targetOperation.Command}"
-                $"{offset}{node.Id}([\"{status}{label}\"])"
+                $"{offset}{node.Id}(\"{status}{label}\")"
 
             if isCluster then
                 "end"
