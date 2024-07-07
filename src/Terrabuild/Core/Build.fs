@@ -158,7 +158,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let mutable cmdLastEndedAt = cmdFirstStartedAt
 
             let logFile = cacheEntry.NextLogFile()
-            let beforeFiles = IO.createSnapshot node.Outputs projectDirectory
+            let beforeFiles =
+                if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
+                else IO.createSnapshot node.Outputs projectDirectory
 
             while cmdLineIndex < allCommands.Length && lastExitCode = 0 do
                 let startedAt =
