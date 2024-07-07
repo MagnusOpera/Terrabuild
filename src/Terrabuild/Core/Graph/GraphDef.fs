@@ -26,9 +26,6 @@ type Node = {
     TargetHash: string
     OperationHash: string
 
-    // tell if a node is leaf (that is no dependencies in same project)
-    IsLeaf: bool
-
     // tell if a node must be rebuild (requested by user)
     // if forced then cache is ignored
     // set by Analysis/Builder (init from user) & Analysys/Consistency

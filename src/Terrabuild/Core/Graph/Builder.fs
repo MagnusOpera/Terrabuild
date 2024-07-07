@@ -53,9 +53,6 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                             buildTarget dependsOn project, true
                     acc + childDependencies, hasInternalDependencies) (Set.empty, false)
 
-            // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
-            let isLeaf = hasInternalDependencies |> not
-
             // only generate computation node - that is node that generate something
             // barrier nodes are just discarded and dependencies lift level up
             match projectConfig.Targets |> Map.tryFind targetName with
@@ -83,7 +80,6 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.TargetHash = hash
                              Node.OperationHash = target.Hash
 
-                             Node.IsLeaf = isLeaf
                              Node.TargetOperation = None
                              Node.IsRequired = false
                              Node.IsFirst = true
