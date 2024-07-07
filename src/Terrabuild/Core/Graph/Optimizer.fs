@@ -161,6 +161,7 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                             ProjectHash = clusterHash
                             OperationHash = clusterHash
                             Operations = containeredOperations
+                            IsLeaf = false
                             IsFirst = false
                             IsLast = true }
                     allNodes.TryAdd(clusterNode.Id, clusterNode) |> ignore
