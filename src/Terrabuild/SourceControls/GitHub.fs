@@ -17,6 +17,4 @@ type GitHub() =
 
         override _.LogError msg = $"::error::{msg}" |> Terminal.writeLine
 
-        override _.CI = true
-
-        override _.Name = "GitHub"
+        override _.CI = Some "GitHub"

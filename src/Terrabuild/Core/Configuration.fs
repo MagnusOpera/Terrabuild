@@ -23,7 +23,7 @@ type Options = {
     NoContainer: bool
     NoBatch: bool
     Targets: string set
-    CI: bool
+    CI: string option
     BranchOrTag: string
     Configuration: string
     Note: string option
@@ -104,8 +104,17 @@ type private LoadedProject = {
 }
 
 
-let read (sourceControl: Contracts.ISourceControl) (options: Options) =
+let read (options: Options) =
     $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
+
+    if options.Force then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
+
+    if options.Retry then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
+
+    options.CI
+    |> Option.iter (fun ci -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {ci}" |> Terminal.writeLine)
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
@@ -156,12 +165,7 @@ let read (sourceControl: Contracts.ISourceControl) (options: Options) =
             | Some value -> convertToVarType key expr value
             | _ -> expr)
 
-    if options.Force then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
-
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {sourceControl.Name}" |> Terminal.writeLine
-
-    let branchOrTag = sourceControl.BranchOrTag
+    let branchOrTag = options.BranchOrTag
 
     let extensions = 
         Extensions.systemExtensions
@@ -204,7 +208,7 @@ let read (sourceControl: Contracts.ISourceControl) (options: Options) =
                 let parseContext = 
                     let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
                                     Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
-                                    Terrabuild.Extensibility.ExtensionContext.CI = sourceControl.CI }
+                                    Terrabuild.Extensibility.ExtensionContext.CI = options.CI.IsSome }
                     Value.Map (Map [ "context", Value.Object context ])
 
                 let result =

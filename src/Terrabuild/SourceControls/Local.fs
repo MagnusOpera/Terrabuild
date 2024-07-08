@@ -14,6 +14,4 @@ type Local() =
 
         override _.LogError _ = ()
 
-        override _.CI = false
-
-        override _.Name = "Local"
+        override _.CI = None

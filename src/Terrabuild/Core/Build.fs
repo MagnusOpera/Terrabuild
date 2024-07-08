@@ -65,7 +65,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
-        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI)
+        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI.IsSome)
         |> Option.defaultValue ""
 
     let allowRemoteCache = options.LocalOnly |> not
@@ -109,7 +109,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         let buildNode() =
             notification.NodeBuilding node
 
-            let cacheEntry = cache.GetEntry sourceControl.CI node.IsFirst cacheEntryId
+            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome node.IsFirst cacheEntryId
 
             // run actions if any
             let allCommands =
@@ -211,7 +211,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
                 // create an archive with new files
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
-                let cacheEntry = cache.GetEntry sourceControl.CI false cacheEntryId
+                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
                 let files, size = cacheEntry.Complete()
                 api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size true)
                 notification.NodeCompleted node node.TargetOperation.IsNone true
@@ -238,7 +238,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         with
             | exn ->
                 Log.Fatal(exn, "Build failed with error")
-                let cacheEntry = cache.GetEntry sourceControl.CI false cacheEntryId
+                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
                 let files, size = cacheEntry.Complete()
                 api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size false)            
                 notification.NodeCompleted node node.TargetOperation.IsNone false

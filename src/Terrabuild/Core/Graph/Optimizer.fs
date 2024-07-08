@@ -115,7 +115,7 @@ let optimize (options: Configuration.Options) (graph: Graph) =
 
             let optContext = {
                 Terrabuild.Extensibility.ActionContext.Debug = options.Debug
-                Terrabuild.Extensibility.ActionContext.CI = options.CI
+                Terrabuild.Extensibility.ActionContext.CI = options.CI.IsSome
                 Terrabuild.Extensibility.ActionContext.Command = targetOperation.Command
                 Terrabuild.Extensibility.ActionContext.BranchOrTag = options.BranchOrTag
                 Terrabuild.Extensibility.ActionContext.TempDir = ".terrabuild"
