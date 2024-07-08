@@ -61,9 +61,8 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
             completionDate
 
     let rootNodes = graph.RootNodes |> Set.filter (fun nodeId ->
-        markRequired nodeId |> ignore
-        let node = nodes[nodeId]
-        node.IsRequired)
+        let completionDate = markRequired nodeId
+        options.StartedAt < completionDate)
 
     let endedAt = DateTime.UtcNow
     let trimDuration = endedAt - startedAt
