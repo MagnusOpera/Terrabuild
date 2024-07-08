@@ -31,6 +31,7 @@ type TargetSummary = {
     IsSuccessful: bool
     StartedAt: DateTime
     EndedAt: DateTime
+    Duration: TimeSpan
 }
 
 
@@ -168,7 +169,10 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
 
             let summary =
                 collect 1
-                |> Seq.reduce (fun s1 s2 -> { s1 with Operations = s1.Operations @ s2.Operations; EndedAt = s2.EndedAt })
+                |> Seq.reduce (fun s1 s2 -> { s1 with
+                                                    Operations = s1.Operations @ s2.Operations
+                                                    EndedAt = s2.EndedAt
+                                                    Duration = s1.Duration + s2.Duration })
 
             let files, size = upload()
 

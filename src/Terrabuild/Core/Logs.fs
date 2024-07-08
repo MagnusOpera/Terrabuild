@@ -100,7 +100,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
             let statusEmoji = statusEmoji originSummary
             let duration =
                 match originSummary with
-                | Some (_, summary) -> $"{summary.EndedAt - summary.StartedAt}"
+                | Some (_, summary) -> $"{summary.Duration}"
                 | _ -> ""
 
             let uniqueId = stableRandomId node.Id
@@ -110,7 +110,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
             infos |> List.fold (fun (cost, gain) (_, originSummary) ->
                 match originSummary with
                 | Some (origin, summary) ->
-                    let duration = summary.EndedAt - summary.StartedAt
+                    let duration = summary.Duration
                     if origin = Origin.Local then cost + duration, gain
                     else cost, gain + duration
                 | _ -> cost, gain

@@ -203,7 +203,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                             Cache.TargetSummary.Outputs = outputs
                             Cache.TargetSummary.IsSuccessful = successful
                             Cache.TargetSummary.StartedAt = cmdFirstStartedAt
-                            Cache.TargetSummary.EndedAt = DateTime.UtcNow }
+                            Cache.TargetSummary.EndedAt = cmdLastEndedAt
+                            Cache.TargetSummary.Duration = cmdLastEndedAt - cmdFirstStartedAt }
 
             if node.IsLast then
                 notification.NodeUploading node
