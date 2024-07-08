@@ -44,7 +44,7 @@ type IEntry =
     abstract NextLogFile: unit -> string
     abstract CompleteLogFile: summary:TargetSummary -> unit
     abstract Outputs: string with get
-    abstract Complete: unit -> string list * int
+    abstract Complete: summary:TargetSummary -> string list * int
 
 type ICache =
     abstract TryGetSummaryOnly: useRemote:bool -> id:string -> (Origin * TargetSummary) option
@@ -131,7 +131,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
 
         member _.Outputs = outputsDir
 
-        member _.Complete() =
+        member _.Complete summary =
             let upload () =
                 let uploadDir sourceDir name =
                     let path = $"{id}/{name}"
@@ -162,6 +162,8 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
                         let json = IO.readTextFile filename
                         json |> Json.Deserialize<TargetSummary>
                         yield! collect (logNum+1)
+                    else
+                        summary
                 }
 
             let summary =

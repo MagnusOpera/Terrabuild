@@ -197,15 +197,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let newFiles = afterFiles - beforeFiles
             let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
-            if node.IsLast then
-                notification.NodeUploading node
-
-                // create an archive with new files
-                Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
-                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
-                let files, size = cacheEntry.Complete()
-                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size true)
-
             let summary = { Cache.TargetSummary.Project = node.Project
                             Cache.TargetSummary.Target = node.Target
                             Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
@@ -213,9 +204,22 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                             Cache.TargetSummary.IsSuccessful = successful
                             Cache.TargetSummary.StartedAt = cmdFirstStartedAt
                             Cache.TargetSummary.EndedAt = DateTime.UtcNow }
-            cacheEntry.CompleteLogFile summary
 
-            if lastExitCode <> 0 then TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
+            if node.IsLast then
+                notification.NodeUploading node
+
+                // create an archive with new files
+                Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
+                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
+
+                let summary = { summary with EndedAt = DateTime.UtcNow }
+                let files, size = cacheEntry.Complete summary
+                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size true)
+            else
+                cacheEntry.CompleteLogFile summary
+
+            if lastExitCode <> 0 then
+                TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
 
         let restoreNode () =
             notification.NodeDownloading node
@@ -228,7 +232,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                     let files = IO.enumerateFiles outputs
                     IO.copyFiles projectDirectory outputs files |> ignore
                 | _ -> ()
-            | _ -> TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
+            | _ ->
+                TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
         try
             if node.TargetOperation.IsSome then buildNode()
@@ -236,10 +241,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             notification.NodeCompleted node node.TargetOperation.IsNone true
         with
             | exn ->
-                Log.Fatal(exn, "Build failed")
-                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
-                let files, size = cacheEntry.Complete()
-                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size false)            
+                Log.Fatal(exn, "Build node failed")
                 notification.NodeCompleted node node.TargetOperation.IsNone false
                 reraise()
 
