@@ -74,7 +74,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .MinimumLevel.Debug()
                 .WriteTo.File(logFile "log")
                 .CreateLogger()
-        Log.Debug("Log created")
+        Log.Debug("===== [Execution Start] =====")
 
     let runTarget logs (options: RunTargetOptions) =
         let logGraph graph name =
@@ -325,4 +325,5 @@ let main _ =
 
     Environment.CurrentDirectory <- launchDir
     Terminal.showCursor()
+    Log.Debug("===== [Execution End] =====")
     retCode
