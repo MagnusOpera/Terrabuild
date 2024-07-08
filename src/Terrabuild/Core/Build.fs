@@ -240,6 +240,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             if node.TargetOperation.IsSome then buildNode()
             else restoreNode()
             if node.IsLast then notification.NodeCompleted node node.TargetOperation.IsNone true
+            else notification.NodeScheduled node
         with
             | exn ->
                 Log.Fatal(exn, "Build node failed")
