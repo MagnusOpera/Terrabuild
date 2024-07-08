@@ -246,7 +246,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
 
     let hub = Hub.Create(options.MaxConcurrency)
-    let requiredNodes = graph.Nodes |> Map.filter (fun _ node -> node.TargetOperation.IsSome)
+    let requiredNodes = graph.Nodes |> Map.filter (fun _ node -> node.IsRequired)
     for (KeyValue(nodeId, node)) in requiredNodes do
         let nodeComputed = hub.CreateComputed<GraphDef.Node> nodeId
 
