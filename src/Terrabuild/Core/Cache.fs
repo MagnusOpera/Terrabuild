@@ -2,6 +2,7 @@ module Cache
 open System
 open System.IO
 open Collections
+open Serilog
 
 [<RequireQualifiedAccess>]
 type Origin =
@@ -194,16 +195,21 @@ type Cache(storage: Contracts.IStorage) =
         | _ ->
             false
 
-    let loadSummary logsDir outputsDir summaryFile =
-        let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
-        let summary = { summary
-                        with Operations = summary.Operations
-                                     |> List.map (fun stepGroup ->
-                                        stepGroup
-                                        |> List.map (fun stepLog -> { stepLog
-                                                                      with Log = FS.combinePath logsDir stepLog.Log }))
-                             Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
-        summary
+    let tryLoadSummary logsDir outputsDir summaryFile =
+        try
+            let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
+            let summary = { summary with
+                                Operations = summary.Operations
+                                        |> List.map (fun stepGroup ->
+                                            stepGroup
+                                            |> List.map (fun stepLog -> { stepLog with
+                                                                            Log = FS.combinePath logsDir stepLog.Log }))
+                                Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
+            Some summary
+        with
+            | exn ->
+                Log.Error(exn, "Failed to process content {summaryFile}", summaryFile)
+                None
 
     interface ICache with
         // NOTE: do not use when building - only use for graph building
@@ -220,16 +226,20 @@ type Cache(storage: Contracts.IStorage) =
                 // do we have the summary in local cache?
                 match completeFile with
                 | FS.File _ ->
-                    let summary = loadSummary logsDir outputsDir summaryFile
-                    let origin = getOrigin entryDir
-                    cachedSummaries.TryAdd(id, Some (origin, summary)) |> ignore
-                    Some (origin, summary)
+                    match tryLoadSummary logsDir outputsDir summaryFile with
+                    | Some summary ->
+                        let origin = getOrigin entryDir
+                        cachedSummaries.TryAdd(id, Some (origin, summary)) |> ignore
+                        Some (origin, summary)
+                    | _ -> None
                 | _ ->
                     if useRemote then
                         if tryDownload logsDir id "logs" then
-                            let summary = loadSummary logsDir outputsDir summaryFile
-                            cachedSummaries.TryAdd(id, Some (Origin.Remote, summary)) |> ignore
-                            Some (Origin.Remote, summary)
+                            match tryLoadSummary logsDir outputsDir summaryFile with
+                            | Some summary ->
+                                cachedSummaries.TryAdd(id, Some (Origin.Remote, summary)) |> ignore
+                                Some (Origin.Remote, summary)
+                            | _ -> None
                         else
                             cachedSummaries.TryAdd(id, None) |> ignore
                             None
@@ -245,22 +255,23 @@ type Cache(storage: Contracts.IStorage) =
 
             match completeFile with
             | FS.File _ ->
-                let summary = loadSummary logsDir outputsDir summaryFile
-                Some summary
+                tryLoadSummary logsDir outputsDir summaryFile
             | _ ->
                 if useRemote then
                     if tryDownload logsDir id "logs" then
-                        let summary = loadSummary logsDir outputsDir summaryFile
-                        match summary.Outputs with
-                        | Some _ ->
-                            if tryDownload outputsDir id "outputs" then
+                        match tryLoadSummary logsDir outputsDir summaryFile with
+                        | Some summary ->
+                            match summary.Outputs with
+                            | Some _ ->
+                                if tryDownload outputsDir id "outputs" then
+                                    entryDir |> setOrigin Origin.Remote
+                                    Some summary
+                                else
+                                    None
+                            | _ ->
                                 entryDir |> setOrigin Origin.Remote
                                 Some summary
-                            else
-                                None
-                        | _ ->
-                            entryDir |> setOrigin Origin.Remote
-                            Some summary
+                        | _ -> None
                     else
                         None
                 else
