@@ -70,6 +70,10 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
                 let hash = hashContent |> Hash.sha256strings
 
+                let targetOp =
+                    if target.Rebuild then Configuration.TargetOperation.MarkAsForced
+                    else None
+
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {project}"
                              
@@ -86,8 +90,8 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.OperationHash = target.Hash
 
                              Node.IsLeaf = isLeaf
-                             Node.TargetOperation = None
-                             Node.IsRequired = target.Rebuild
+                             Node.TargetOperation = targetOp
+                             Node.IsRequired = false
                              Node.IsFirst = true
                              Node.IsLast = true
                              Node.IsBatched = false }
