@@ -246,8 +246,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
 
     let hub = Hub.Create(options.MaxConcurrency)
-    for nodeId in graph.RootNodes do
-        let node = graph.Nodes[nodeId]
+    let requiredNodes = graph.Nodes |> Map.filter (fun _ node -> node.IsRequired)
+    for (KeyValue(nodeId, node)) in requiredNodes do
         let nodeComputed = hub.CreateComputed<GraphDef.Node> nodeId
 
         // await dependencies
@@ -269,7 +269,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
-    let requiredNodes = graph.Nodes |> Map.filter (fun _ node -> node.IsRequired)
     let buildNodes = graph.Nodes |> Map.filter (fun _ node -> node.TargetOperation.IsSome)
 
     // status of nodes to build
