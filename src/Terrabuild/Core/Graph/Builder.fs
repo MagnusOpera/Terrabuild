@@ -87,7 +87,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
                              Node.IsLeaf = isLeaf
                              Node.TargetOperation = None
-                             Node.IsRequired = false
+                             Node.IsRequired = target.Rebuild
                              Node.IsFirst = true
                              Node.IsLast = true
                              Node.IsBatched = false }

@@ -31,8 +31,14 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
 
             let completionDate, node =
                 // fast path: if children must rebuild do not care to check the cache
-                if maxCompletionChildren = DateTime.MaxValue || options.Force then
-                    Log.Debug("{nodeId} must rebuild because force or child is rebuilding", node.Id)
+                if node.TargetOperation.IsSome then
+                    Log.Debug("{nodeId} must rebuild because rebuild set on target", node.Id)
+                    DateTime.MaxValue, node
+                elif maxCompletionChildren = DateTime.MaxValue then
+                    Log.Debug("{nodeId} must rebuild because child is rebuilding", node.Id)
+                    DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
+                elif options.Force then
+                    Log.Debug("{nodeId} must rebuild because force build requested", node.Id)
                     DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
                 else
                     // slow path: check and apply consistency rules
