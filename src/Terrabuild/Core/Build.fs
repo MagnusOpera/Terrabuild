@@ -246,8 +246,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
 
     let hub = Hub.Create(options.MaxConcurrency)
-    let requiredNodes = graph.Nodes |> Map.filter (fun _ node -> node.IsRequired)
-    for (KeyValue(nodeId, node)) in requiredNodes do
+    for nodeId in graph.RootNodes do
+        let node = graph.Nodes[nodeId]
         let nodeComputed = hub.CreateComputed<GraphDef.Node> nodeId
 
         // await dependencies
@@ -269,11 +269,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
-
-    // nodes that were considered for the whole requested build
-    let buildNodes =
-        graph.Nodes
-        |> Map.filter (fun nodeId node -> node.TargetOperation.IsSome)
+    let requiredNodes = graph.Nodes |> Map.filter (fun _ node -> node.IsRequired)
+    let buildNodes = graph.Nodes |> Map.filter (fun _ node -> node.TargetOperation.IsSome)
 
     // status of nodes to build
     let buildNodesStatus =
@@ -284,14 +281,14 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         |> Map.values
         |> Set.ofSeq
 
-    let endedAt = DateTime.UtcNow
-    let buildDuration = endedAt - startedAt
-    let totalDuration = endedAt - options.StartedAt
-
     let status =
         let isSuccess = buildNodesStatus |> Seq.forall isBuildSuccess
         if isSuccess then Status.Success
         else Status.Failure
+
+    let endedAt = DateTime.UtcNow
+    let buildDuration = endedAt - startedAt
+    let totalDuration = endedAt - options.StartedAt
 
     let buildInfo = { Summary.Commit = headCommit
                       Summary.BranchOrTag = branchOrTag
