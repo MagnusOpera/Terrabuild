@@ -97,19 +97,20 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         "| Target | Duration |" |> append
         "|--------|----------|" |> append
         infos |> List.iter (fun (node, originSummary) ->
-            let statusEmoji = statusEmoji originSummary
-            let duration =
-                match originSummary with
-                | Some (_, summary) -> $"{summary.Duration}"
-                | _ -> ""
+            if node.IsLast then
+                let statusEmoji = statusEmoji originSummary
+                let duration =
+                    match originSummary with
+                    | Some (_, summary) -> $"{summary.Duration}"
+                    | _ -> ""
 
-            let uniqueId = stableRandomId node.Id
-            $"| {statusEmoji} [{node.Label}](#user-content-{uniqueId}) | {duration} |" |> append
+                let uniqueId = stableRandomId node.Id
+                $"| {statusEmoji} [{node.Label}](#user-content-{uniqueId}) | {duration} |" |> append
         )
         let (cost, gain) =
-            infos |> List.fold (fun (cost, gain) (_, originSummary) ->
+            infos |> List.fold (fun (cost, gain) (node, originSummary) ->
                 match originSummary with
-                | Some (origin, summary) ->
+                | Some (origin, summary) when node.IsLast ->
                     let duration = summary.Duration
                     if origin = Origin.Local then cost + duration, gain
                     else cost, gain + duration

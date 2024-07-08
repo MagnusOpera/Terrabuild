@@ -239,7 +239,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         try
             if node.TargetOperation.IsSome then buildNode()
             else restoreNode()
-            notification.NodeCompleted node node.TargetOperation.IsNone true
+            if node.IsLast then notification.NodeCompleted node node.TargetOperation.IsNone true
         with
             | exn ->
                 Log.Fatal(exn, "Build node failed")
