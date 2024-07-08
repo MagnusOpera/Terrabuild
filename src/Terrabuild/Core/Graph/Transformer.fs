@@ -2,8 +2,11 @@ module GraphTransformer
 open Collections
 open GraphDef
 open System.Collections.Concurrent
+open Serilog
 
-let build (graph: GraphDef.Graph) =
+let transform (graph: GraphDef.Graph) =
+    Log.Debug("===== [Graph Transform] =====")
+
     let allNodes = ConcurrentDictionary<string, GraphDef.Node>()
     for (KeyValue(_, node)) in graph.Nodes do
 

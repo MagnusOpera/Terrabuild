@@ -5,6 +5,8 @@ open Serilog
 
 
 let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string -> Cache.TargetSummary option) (graph: GraphDef.Graph) =
+    Log.Debug("===== [Graph Consistency] =====")
+
     let startedAt = DateTime.UtcNow
     let allowRemoteCache = options.LocalOnly |> not
 
@@ -59,8 +61,9 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
             completionDate
 
     let rootNodes = graph.RootNodes |> Set.filter (fun nodeId ->
-        let completionDate = markRequired nodeId
-        options.StartedAt < completionDate)
+        markRequired nodeId |> ignore
+        let node = nodes[nodeId]
+        node.IsRequired)
 
     let endedAt = DateTime.UtcNow
     let trimDuration = endedAt - startedAt

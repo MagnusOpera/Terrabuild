@@ -145,7 +145,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let consistentGraph = GraphConsistency.enforce configOptions tryGetSummaryOnly graph
             if options.Debug then logGraph consistentGraph "consistent"
 
-            let transformGraph = GraphTransformer.build consistentGraph
+            let transformGraph = GraphTransformer.transform consistentGraph
             if options.Debug then logGraph transformGraph "transform"
 
             let optimizeGraph =

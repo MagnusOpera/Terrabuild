@@ -9,6 +9,7 @@ open Errors
 
 let optimize (options: Configuration.Options) (graph: Graph) =
     let startedAt = DateTime.UtcNow
+    Log.Debug("===== [Graph Optimize] =====")
 
     let computeClusters remainingNodes =
         let clusters = Concurrent.ConcurrentDictionary<string, string set>()
