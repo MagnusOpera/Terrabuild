@@ -171,6 +171,8 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
                 |> Seq.reduce (fun s1 s2 -> { s1 with Operations = s1.Operations @ s2.Operations; EndedAt = s2.EndedAt })
 
             let files, size = upload()
+
+            let summary = { summary with EndedAt = DateTime.UtcNow }
             FS.combinePath logsDir "summary.json" |> write summary
             entryDir |> setOrigin Origin.Local
             files, size
