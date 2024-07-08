@@ -38,6 +38,10 @@ module Emojis =
     let recycle = "♻︎"
     let log = "𝍌"
     let rightarrow = "▶"
+    let brain = "🧠"
+    let cloud = "🌤️"
+    let think = "🤔"
+    let eyes = "👀"
 
 
 module Styles =
