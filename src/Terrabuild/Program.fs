@@ -153,8 +153,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 else GraphOptimizer.optimize configOptions transformGraph
             if options.Debug then logGraph optimizeGraph "optimize"
 
-            let nodesToRun = graph.Nodes.Count
-            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
+            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {optimizeGraph.Nodes.Count} tasks" |> Terminal.writeLine
             optimizeGraph
 
         if options.Debug then logGraph buildGraph "build"
