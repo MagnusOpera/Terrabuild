@@ -245,21 +245,27 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 reraise()
 
 
+    let scheduledNodes = Concurrent.ConcurrentDictionary<string, bool>()
     let hub = Hub.Create(options.MaxConcurrency)
-    let requiredNodes = graph.Nodes |> Map.filter (fun _ node -> node.IsRequired)
-    for (KeyValue(nodeId, node)) in requiredNodes do
-        let nodeComputed = hub.CreateComputed<GraphDef.Node> nodeId
+    let rec schedule nodeId =
+        if scheduledNodes.TryAdd(nodeId, true) then
+            let node = graph.Nodes[nodeId]
+            let nodeComputed = hub.CreateComputed<GraphDef.Node> nodeId
 
-        // await dependencies
-        let awaitedDependencies =
-            node.Dependencies
-            |> Seq.map (fun awaitedProjectId -> hub.GetComputed<GraphDef.Node> awaitedProjectId)
-            |> Array.ofSeq
+            // await dependencies
+            let awaitedDependencies =
+                node.Dependencies
+                |> Seq.map (fun awaitedProjectId ->
+                    schedule awaitedProjectId
+                    hub.GetComputed<GraphDef.Node> awaitedProjectId)
+                |> Array.ofSeq
 
-        let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-        hub.Subscribe awaitedSignals (fun () ->
-            processNode node
-            nodeComputed.Value <- node)
+            let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+            hub.Subscribe awaitedSignals (fun () ->
+                processNode node
+                nodeComputed.Value <- node)
+
+    graph.RootNodes |> Seq.iter schedule
 
     let status = hub.WaitCompletion()
     match status with
@@ -298,7 +304,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                       Summary.Status = status
                       Summary.Targets = options.Targets
                       Summary.Nodes = graph.Nodes |> Map.keys |> Set.ofSeq
-                      Summary.RequiredNodes = requiredNodes |> Map.keys |> Set.ofSeq
+                      Summary.RequiredNodes = scheduledNodes.Keys |> Set.ofSeq
                       Summary.BuildNodes = buildNodes |> Map.keys |> Set.ofSeq
                       Summary.BuildNodesStatus = buildNodesStatus  }
 

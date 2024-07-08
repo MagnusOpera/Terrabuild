@@ -60,13 +60,12 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
         | true, completionDate ->
             completionDate
 
-    let rootNodes = graph.RootNodes |> Set.filter (fun nodeId ->
-        let completionDate = markRequired nodeId
-        options.StartedAt < completionDate)
+    let rootNodes = graph.RootNodes |> Set.filter (fun nodeId -> options.StartedAt < markRequired nodeId)
 
     let endedAt = DateTime.UtcNow
     let trimDuration = endedAt - startedAt
     Log.Debug("Graph Consistency: {duration}", trimDuration)
 
-    { GraphDef.Graph.RootNodes = rootNodes
-      GraphDef.Graph.Nodes = nodes }
+    { graph with
+        RootNodes = rootNodes
+        GraphDef.Graph.Nodes = nodes }
