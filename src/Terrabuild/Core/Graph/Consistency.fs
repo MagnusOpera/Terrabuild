@@ -9,57 +9,58 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
     let allowRemoteCache = options.LocalOnly |> not
 
     let mutable nodes = graph.Nodes
+    let processedNodes = Concurrent.ConcurrentDictionary<string, DateTime>()
 
-    let rec enforce (parentStartTime: DateTime) (parentRequired: bool) (node: GraphDef.Node) =
-        let cacheEntryId = GraphDef.buildCacheKey node
+    let rec markRequired nodeId =
+        let node = nodes |> Map.find nodeId
 
-        let startTime, node =
-            if node.TargetOperation.IsSome then
-                DateTime.MaxValue, { node with IsRequired = true }
-            else
-                match tryGetSummaryOnly allowRemoteCache cacheEntryId with
-                | Some summary ->
-                    Log.Debug("{nodeId} has existing build summary", node.Id)
-                    if (summary.IsSuccessful |> not) && options.Retry then
-                        Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
-                        DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
-                    elif parentStartTime <= summary.StartedAt then
-                        Log.Debug("{nodeId} must rebuild because it is younger than parent", node.Id)
-                        DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
-                    else
-                        let isRequired = node.TargetOperation.IsSome || parentRequired
-                        summary.EndedAt, { node with 
-                                            TargetOperation =
-                                                if isRequired then Configuration.TargetOperation.MarkAsForced
-                                                else None
-                                            IsRequired = isRequired }
-                | _ ->
-                    Log.Debug("{nodeId} has no build summary", node.Id)
-                    DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced; IsRequired = true }
+        match processedNodes.TryGetValue nodeId with
+        | false, _ ->
+            // mark node as required since we have been invoked for this node
+            let node = { node with IsRequired = true }
 
-        let isUsed =
-            let isRequired = node.TargetOperation.IsSome || node.IsRequired
-            let childRequired =
-                if isRequired then
-                    node.Dependencies
-                    |> Set.map (fun nodeId ->
-                        let node = nodes |> Map.find nodeId
-                        enforce startTime isRequired node)
-                    |> Set.exists id
+            // find max completion date of children
+            let maxCompletionChildren =
+                node.Dependencies
+                |> Set.map markRequired
+                |> Seq.sortDescending
+                |> Seq.tryHead
+                |> Option.defaultValue DateTime.MinValue
+
+            let completionDate, node =
+                // fast path: if children must rebuild do not care to check the cache
+                if maxCompletionChildren = DateTime.MaxValue || options.Force then
+                    Log.Debug("{nodeId} must rebuild because force or child is rebuilding", node.Id)
+                    DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
                 else
-                    false
-            isRequired || childRequired
-        if isUsed then nodes <- nodes |> Map.add node.Id node
-        isUsed
+                    // slow path: check and apply consistency rules
+                    let cacheEntryId = GraphDef.buildCacheKey node
+                    match tryGetSummaryOnly allowRemoteCache cacheEntryId with
+                    | Some summary ->
+                        Log.Debug("{nodeId} has existing build summary", node.Id)
+                        if summary.StartedAt < maxCompletionChildren then
+                            Log.Debug("{nodeId} must rebuild because it is younger than child", node.Id)
+                            DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
+                        elif (summary.IsSuccessful |> not) && options.Retry then
+                            Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
+                            DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
+                        else
+                            Log.Debug("{nodeId} is only marked as required", node.Id)
+                            summary.EndedAt, node
+                    | _ ->
+                        Log.Debug("{nodeId} must be build since no summary and required", node.Id)
+                        DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
+
+            nodes <- nodes |> Map.add node.Id node
+            processedNodes.TryAdd(nodeId, completionDate) |> ignore
+            completionDate
+
+        | true, completionDate ->
+            completionDate
 
     let rootNodes = graph.RootNodes |> Set.filter (fun nodeId ->
-        let node = nodes |> Map.find nodeId
-        let node = { node with
-                        TargetOperation =
-                            if options.Force then Configuration.TargetOperation.MarkAsForced
-                            else None
-                        IsRequired = options.Force || node.IsRequired }
-        enforce DateTime.MaxValue options.Force node)
+        let completionDate = markRequired nodeId
+        options.StartedAt < completionDate)
 
     let endedAt = DateTime.UtcNow
     let trimDuration = endedAt - startedAt
