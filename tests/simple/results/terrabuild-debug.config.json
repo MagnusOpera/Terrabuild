@@ -1,15 +1,5 @@
 {
   "space": null,
-  "sourceControl": {
-    "headCommit": "1234",
-    "branchOrTag": "main",
-    "logType": [
-      "markdown",
-      "terrabuild-debug.md"
-    ],
-    "ci": true,
-    "name": "GitHub"
-  },
   "selectedProjects": [
     "deployments/terraform-deploy",
     "libraries/dotnet-lib",
@@ -69,7 +59,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "id": "deployments/terraform-deploy",
-      "hash": "C9ADADCABC3D69F000594358EF1CFDD54D535DF8361FDAC716106D70E27D64B1",
+      "hash": "825FA904BFCC88377654659B6021610C28A2856B44369D63969377A7699A4AF3",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
@@ -83,72 +73,73 @@
       ],
       "targets": {
         "build": {
-          "hash": "A7344E05EA320EF316EB1DFE9704D1C0BE3026AED1AC239B4873702951633A85",
-          "variables": {
-            "workspace": "String \u0022default\u0022"
-          },
+          "hash": "FD4E492BBC14063F951BD573395F7044BB64448F0CCA60851019067618B27C70",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [
             "*.planfile"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@terraform plan",
-              "actions": [
-                {
-                  "command": "terraform",
-                  "arguments": "init"
-                },
-                {
-                  "command": "terraform",
-                  "arguments": "workspace select default"
-                },
-                {
-                  "command": "terraform",
-                  "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C\u0022 -var=\u0022npm_app_version=C35EBCC267398EEEC270894F7616EEE6382F70EAEC3C16247A7EBE487A914E4B\u0022"
-                }
-              ],
+              "hash": "8BA1A0F5EC354F7CA3A6E46BAD0B652F6767230BC5323A1AB1841ED9EF7B0AC2",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@terraform",
+              "command": "plan",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "variables": [
+                    "map",
+                    {
+                      "dotnet_app_version": [
+                        "string",
+                        "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364"
+                      ],
+                      "npm_app_version": [
+                        "string",
+                        "A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E"
+                      ]
+                    }
+                  ],
+                  "workspace": [
+                    "string",
+                    "default"
+                  ]
+                }
+              ]
             }
           ]
         },
         "deploy": {
-          "hash": "06393D190E8DBC6D9649B9AD0E1A872FCCF324C5ACDC0BA02C391875CE8CD00D",
-          "variables": {
-            "workspace": "String \u0022default\u0022"
-          },
+          "hash": "43974ADCF2902200291242CF6A7E94FC3FED2764DFC627CF410BCDA6283AD8AF",
+          "rebuild": false,
           "dependsOn": [
             "push"
           ],
           "outputs": [
             "*.planfile"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@terraform apply",
-              "actions": [
-                {
-                  "command": "terraform",
-                  "arguments": "init"
-                },
-                {
-                  "command": "terraform",
-                  "arguments": "workspace select default"
-                },
-                {
-                  "command": "terraform",
-                  "arguments": "apply terrabuild.planfile"
-                }
-              ],
+              "hash": "84DDD67346617D06E275A0B16955228851AFA5211E0262DF72EB4CD8D9917092",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@terraform",
+              "command": "apply",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "workspace": [
+                    "string",
+                    "default"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -168,10 +159,8 @@
       ],
       "targets": {
         "build": {
-          "hash": "13F7CAF67B8934899D1AAA883854B159B9E1E49CFDAB389BDD24E4672F57D826",
-          "variables": {
-            "configuration": "String \u0022Debug\u0022"
-          },
+          "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
@@ -183,42 +172,23 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@dotnet build",
-              "actions": [
-                {
-                  "command": "dotnet",
-                  "arguments": "build  --configuration Debug    "
-                }
-              ],
+              "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
               "container": null,
               "containerVariables": [],
-              "batchContext": {
-                "script": {},
-                "command": "build",
-                "context": [
-                  "map",
-                  {
-                    "configuration": [
-                      "string",
-                      "Debug"
-                    ],
-                    "context": [
-                      "object",
-                      {
-                        "debug": true,
-                        "directory": "libraries/dotnet-lib",
-                        "ci": true,
-                        "nodeHash": "666908E6236D9394711779EEAB166ED8BC6341DF1EEEF724C7DE083D0C9709DC",
-                        "command": "build",
-                        "branchOrTag": "main"
-                      }
-                    ]
-                  }
-                ]
-              }
+              "extension": "@dotnet",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "configuration": [
+                    "string",
+                    "Debug"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -234,25 +204,29 @@
       ],
       "targets": {
         "build": {
-          "hash": "B9AE1A51CFF46F86872F9AF55D2B9D7596DE1F0330CC9AAF307EAB73027D680A",
-          "variables": {},
+          "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@shell echo",
-              "actions": [
-                {
-                  "command": "echo",
-                  "arguments": "building library1"
-                }
-              ],
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@shell",
+              "command": "echo",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "string",
+                    "building library1"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -261,7 +235,7 @@
     },
     "projects/dotnet-app": {
       "id": "projects/dotnet-app",
-      "hash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
+      "hash": "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364",
       "dependencies": [
         "libraries/dotnet-lib"
       ],
@@ -274,10 +248,8 @@
       ],
       "targets": {
         "build": {
-          "hash": "13F7CAF67B8934899D1AAA883854B159B9E1E49CFDAB389BDD24E4672F57D826",
-          "variables": {
-            "configuration": "String \u0022Debug\u0022"
-          },
+          "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
@@ -289,50 +261,29 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@dotnet build",
-              "actions": [
-                {
-                  "command": "dotnet",
-                  "arguments": "build  --configuration Debug    "
-                }
-              ],
+              "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
               "container": null,
               "containerVariables": [],
-              "batchContext": {
-                "script": {},
-                "command": "build",
-                "context": [
-                  "map",
-                  {
-                    "configuration": [
-                      "string",
-                      "Debug"
-                    ],
-                    "context": [
-                      "object",
-                      {
-                        "debug": true,
-                        "directory": "projects/dotnet-app",
-                        "ci": true,
-                        "nodeHash": "BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C",
-                        "command": "build",
-                        "branchOrTag": "main"
-                      }
-                    ]
-                  }
-                ]
-              }
+              "extension": "@dotnet",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "configuration": [
+                    "string",
+                    "Debug"
+                  ]
+                }
+              ]
             }
           ]
         },
         "dist": {
-          "hash": "076CD4BA37B1947AE860169B31A172CECA44175E61ACDAA02DDA5295A8136D6A",
-          "variables": {
-            "configuration": "String \u0022Debug\u0022"
-          },
+          "hash": "1C058F7AEE7F28E71B314DFF9426988F723EC1420B6EC2E39F5320CABC15CAB4",
+          "rebuild": false,
           "dependsOn": [
             "build"
           ],
@@ -344,27 +295,29 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@dotnet publish",
-              "actions": [
-                {
-                  "command": "dotnet",
-                  "arguments": "publish  --no-dependencies --configuration Debug  --no-restore --no-build   "
-                }
-              ],
+              "hash": "1311F62C9C27453F0B03B878877FCB24E63B6EB246A8B3696689DB068197846E",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@dotnet",
+              "command": "publish",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "configuration": [
+                    "string",
+                    "Debug"
+                  ]
+                }
+              ]
             }
           ]
         },
         "docker": {
-          "hash": "CF0E0D7DD67A58796E6CAFCB42180D0916EA97906676B80801C9B19E6D29020B",
-          "variables": {
-            "configuration": "String \u0022Debug\u0022"
-          },
+          "hash": "B2968AD5F493351AE9DDBE6B6349DAF6CA18C306DCE1DE55C51BEBA430CD3A78",
+          "rebuild": false,
           "dependsOn": [
             "dist"
           ],
@@ -376,31 +329,38 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 2,
-              "metaCommand": "@docker build",
-              "actions": [
-                {
-                  "command": "docker",
-                  "arguments": "build --file Dockerfile --tag ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C --build-arg configuration=\u0022Debug\u0022 ."
-                },
-                {
-                  "command": "docker",
-                  "arguments": "push ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C"
-                }
-              ],
+              "hash": "2FBDD2F2C31193CA71F958A6F4B9A9579FB1AFB4D5075063C3826EF9C5F1BE28",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@docker",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "map",
+                    {
+                      "configuration": [
+                        "string",
+                        "Debug"
+                      ]
+                    }
+                  ],
+                  "image": [
+                    "string",
+                    "ghcr.io/magnusopera/dotnet-app"
+                  ]
+                }
+              ]
             }
           ]
         },
         "push": {
-          "hash": "D0A2911832DB7C267ECF603527A489E8A74276D579E1D37EEC32E4D805CD9DFF",
-          "variables": {
-            "configuration": "String \u0022Debug\u0022"
-          },
+          "hash": "DCE5C493853172D5CA5AF33AD12D2D6DE0EEA440D430C23100216B0E3AC335A9",
+          "rebuild": false,
           "dependsOn": [
             "docker"
           ],
@@ -412,19 +372,32 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 2,
-              "metaCommand": "@docker push",
-              "actions": [
-                {
-                  "command": "docker",
-                  "arguments": "buildx imagetools create -t ghcr.io/magnusopera/dotnet-app:main ghcr.io/magnusopera/dotnet-app:BEC245F2B4456F59B4639F883DF1985A35A075E71D4A60D13F980B5A205ECD1C"
-                }
-              ],
+              "hash": "AEF1A65D32F57084416DFD132194426A5BA16C83F444DD18070A887A68C1CA91",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@docker",
+              "command": "push",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "map",
+                    {
+                      "configuration": [
+                        "string",
+                        "Debug"
+                      ]
+                    }
+                  ],
+                  "image": [
+                    "string",
+                    "ghcr.io/magnusopera/dotnet-app"
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -446,42 +419,53 @@
       ],
       "targets": {
         "build": {
-          "hash": "C993863FDB78C411F13AE23D7E328BBF9B33BB4BCC79FBD5BF4E9DA3DDEC9EAA",
-          "variables": {
-            "secret_message": "String \u0022tagada\u0022"
-          },
+          "hash": "D75E1B5F09A68010CF5A342EF04AB73E0FDE53F31E8A83B5DF5FF248DE965D24",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [
             "dist"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@shell echo",
-              "actions": [
-                {
-                  "command": "echo",
-                  "arguments": "building project1"
-                }
-              ],
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@shell",
+              "command": "echo",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "string",
+                    "building project1"
+                  ]
+                }
+              ]
             },
             {
-              "cache": 3,
-              "metaCommand": "@make build",
-              "actions": [
-                {
-                  "command": "make",
-                  "arguments": "build secret=\u0022tagada\u0022"
-                }
-              ],
+              "hash": "60078A7AEF8007B4B5DC060CE7889241884A0FDE6A440EB5732A3FD31ED2D857",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@make",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "variables": [
+                    "map",
+                    {
+                      "secret": [
+                        "string",
+                        "tagada"
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -492,7 +476,7 @@
     },
     "projects/npm-app": {
       "id": "projects/npm-app",
-      "hash": "C35EBCC267398EEEC270894F7616EEE6382F70EAEC3C16247A7EBE487A914E4B",
+      "hash": "A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E",
       "dependencies": [],
       "files": [
         "PROJECT",
@@ -503,31 +487,26 @@
       ],
       "targets": {
         "build": {
-          "hash": "DA919F8E2932BCECA471F3A9528AF01612A914D6C47F24F6A301BBAEB1853BD6",
-          "variables": {},
+          "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [
             "dist/"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "npm build",
-              "actions": [
-                {
-                  "command": "npm",
-                  "arguments": "ci"
-                },
-                {
-                  "command": "npm",
-                  "arguments": "run build -- "
-                }
-              ],
+              "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
               "container": "node:20",
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@npm",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
@@ -548,8 +527,8 @@
       ],
       "targets": {
         "build": {
-          "hash": "1EDA297E2BAAC86B780323E908D35EF2C1FDC8458124D43476741627CFA8400A",
-          "variables": {},
+          "hash": "11AAF8064C94EB13A5DBBABB74D237968373D8BA36EDC3C0DAE6A303E3FB71FE",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
@@ -557,19 +536,18 @@
             "target/debug/",
             "target/release/"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@cargo build",
-              "actions": [
-                {
-                  "command": "cargo",
-                  "arguments": "build --profile dev "
-                }
-              ],
+              "hash": "A8ECD5C3F84E52E8C5C9B4BC04D9FDDC0FA81CE3FE190F10117DE2759DDAAC1D",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@cargo",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
@@ -579,8 +557,5 @@
         "rust"
       ]
     }
-  },
-  "configuration": "default",
-  "note": null,
-  "tag": null
+  }
 }

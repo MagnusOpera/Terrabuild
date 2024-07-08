@@ -23,7 +23,11 @@
     <Compile Include="Core/Auth.fs" />
     <Compile Include="Core/Scaffold.fs" />
     <Compile Include="Core/Configuration.fs" />
-    <Compile Include="Core/Graph.fs" />
+    <Compile Include="Core/Graph/GraphDef.fs" />
+    <Compile Include="Core/Graph/Builder.fs" />
+    <Compile Include="Core/Graph/Consistency.fs" />
+    <Compile Include="Core/Graph/Transformer.fs" />
+    <Compile Include="Core/Graph/Optimizer.fs" />
     <Compile Include="Core/Build.fs" />
     <Compile Include="Core/Notification.fs" />
     <Compile Include="Core/Logs.fs" />

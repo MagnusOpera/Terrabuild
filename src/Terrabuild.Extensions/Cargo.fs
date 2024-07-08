@@ -39,22 +39,6 @@ type Cargo() =
         projectInfo
 
 
-    /// <summary title="Build project.">
-    /// Build project.
-    /// </summary>
-    /// <param name="profile" example="&quot;release&quot;">Profile to use to build project. Default is `dev`.</param>
-    /// <param name="arguments" example="&quot;--keep-going&quot;">Arguments for command.</param>
-    static member build (profile: string option) (arguments: string option) =
-        let profile =
-            profile
-            |> Option.defaultValue "dev"
-
-        let arguments = arguments |> Option.defaultValue ""
-
-        scope Cacheability.Always
-        |> andThen "cargo" $"build --profile {profile} {arguments}"
-
-
     /// <summary>
     /// Run a cargo `command`.
     /// </summary>
@@ -62,8 +46,22 @@ type Cargo() =
     /// <param name="arguments" example="&quot;check&quot;">Arguments for command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
-        scope Cacheability.Always
-        |> andThen (context.Command) arguments
+        
+        let ops = All [ shellOp context.Command arguments ]
+        execRequest Cacheability.Always [] ops
+
+
+    /// <summary title="Build project.">
+    /// Build project.
+    /// </summary>
+    /// <param name="profile" example="&quot;release&quot;">Profile to use to build project. Default is `dev`.</param>
+    /// <param name="arguments" example="&quot;--keep-going&quot;">Arguments for command.</param>
+    static member build (context: ActionContext) (profile: string option) (arguments: string option) =
+        let profile = profile |> Option.defaultValue "dev"
+        let arguments = arguments |> Option.defaultValue ""
+
+        let ops = All [ shellOp "cargo" $"build --profile {profile} {arguments}" ]
+        execRequest Cacheability.Always [] ops
 
 
     /// <summary>
@@ -71,10 +69,9 @@ type Cargo() =
     /// </summary>
     /// <param name="profile" example="&quot;release&quot;">Profile for test command.</param>
     /// <param name="arguments" example="&quot;--blame-hang&quot;">Arguments for command.</param>
-    static member test (profile: string option) (arguments: string option) =
+    static member test (context: ActionContext) (profile: string option) (arguments: string option) =
         let profile = profile |> Option.defaultValue "dev"
         let arguments = arguments |> Option.defaultValue ""
 
-        scope Cacheability.Always
-        |> andThen "cargo" $"test --profile {profile} {arguments}"
-        |> batchable
+        let ops = All [ shellOp "cargo" $"test --profile {profile} {arguments}" ]
+        execRequest Cacheability.Always [] ops

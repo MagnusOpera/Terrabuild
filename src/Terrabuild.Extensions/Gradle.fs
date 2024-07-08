@@ -1,8 +1,5 @@
 namespace Terrabuild.Extensions
-
 open Terrabuild.Extensibility
-
-#nowarn "0077" // op_Explicit
 
 module GradleHelpers =
 
@@ -28,8 +25,9 @@ type Gradle() =
     /// Invoke build task `assemble` for `configuration`.
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration to invoke `assemble`. Default is `Debug`.</param>
-    static member build (configuration: string option) =
+    static member build (context: ActionContext) (configuration: string option) =
         let configuration = configuration |> Option.defaultValue GradleHelpers.defaultConfiguration
 
-        scope Cacheability.Always
-        |> andThen "gradlew" $"assemble{configuration}" 
+        let ops = All [ shellOp "gradlew" $"assemble{configuration}" ]
+
+        execRequest Cacheability.Always [] ops

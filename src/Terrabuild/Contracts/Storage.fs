@@ -1,15 +1,8 @@
 namespace Contracts
 
-type LogType =
-    | Terminal
-    | Markdown of file:string
 
-[<AbstractClass>]
-type SourceControl() =
-    abstract HeadCommit: string
-    abstract BranchOrTag: string
-    abstract LogType: LogType
-    abstract LogError: string -> unit
-    abstract CI: bool
+type IStorage =
+    abstract Exists: id:string -> bool
+    abstract TryDownload: id:string -> string option
+    abstract Upload: id:string -> summaryFile:string -> unit
     abstract Name: string
-

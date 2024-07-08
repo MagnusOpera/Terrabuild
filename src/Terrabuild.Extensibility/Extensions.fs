@@ -26,22 +26,19 @@ with
 [<RequireQualifiedAccess>]
 type ActionContext = {
     Debug: bool
-    Directory: string
     CI: bool
-    NodeHash: string
     Command: string
     BranchOrTag: string
+
+    UniqueId: string
+    TempDir: string
+    Projects: Map<string, string>
 }
 
-
 [<RequireQualifiedAccess>]
-type BatchContext = {
-    Debug: bool
-    CI: bool
-    TempDir: string
-    NodeHash: string
-    BranchOrTag: string
-    ProjectPaths: string list
+type ShellOperation = {
+    Command: string
+    Arguments: string
 }
 
 [<Flags>]
@@ -51,37 +48,26 @@ type Cacheability =
     | Remote = 2
     | Always = 3 // Local + Remote
 
+type ShellOperations = ShellOperation list
+
+type Operations =
+    | Each of Map<string, ShellOperations>
+    | All of ShellOperations
 
 [<RequireQualifiedAccess>]
-type Action = {
-    Command: string
-    Arguments: string
-}
-
-let action cmd args = 
-    { Action.Command = cmd
-      Action.Arguments = args }
-
-[<RequireQualifiedAccess>]
-type ActionSequence = {
+type ActionExecutionRequest = {
     Cache: Cacheability
-    Actions: Action list
-    Batchable: bool
+    PreOperations: ShellOperations
+    Operations: Operations
 }
 
-let scope cache =
-    { ActionSequence.Cache = cache
-      ActionSequence.Actions = []
-      ActionSequence.Batchable = false }
 
-let andThen cmd args (batch: ActionSequence) =
-    let action = action cmd args
-    { batch with
-        ActionSequence.Actions = batch.Actions @ [ action ] }
 
-let andIf predicat (action: ActionSequence -> ActionSequence) (batch: ActionSequence) =
-    if predicat then action batch
-    else batch
+let shellOp cmd args = 
+    { ShellOperation.Command = cmd
+      ShellOperation.Arguments = args }
 
-let batchable (batch: ActionSequence) =
-    { batch with Batchable = true }
+let execRequest cache preOps ops =
+    { ActionExecutionRequest.Cache = cache 
+      ActionExecutionRequest.PreOperations = preOps
+      ActionExecutionRequest.Operations = ops }

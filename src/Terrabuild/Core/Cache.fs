@@ -1,14 +1,15 @@
 module Cache
 open System
 open System.IO
+open Collections
 
 [<RequireQualifiedAccess>]
-type TaskStatus =
-    | Success
-    | Failure
+type Origin =
+    | Local
+    | Remote
 
 [<RequireQualifiedAccess>]
-type StepSummary = {
+type OperationSummary = {
     MetaCommand: string
     Command: string
     Arguments: string
@@ -21,20 +22,14 @@ type StepSummary = {
 }
 
 [<RequireQualifiedAccess>]
-type Origin =
-    | Local
-    | Remote
-
-[<RequireQualifiedAccess>]
 type TargetSummary = {
     Project: string
     Target: string
-    Steps: StepSummary list
+    Operations: OperationSummary list list
     Outputs: string option
-    Status: TaskStatus
+    IsSuccessful: bool
     StartedAt: DateTime
     EndedAt: DateTime
-    Origin: Origin
 }
 
 
@@ -46,20 +41,20 @@ type ArtifactInfo = {
 
 type IEntry =
     abstract NextLogFile: unit -> string
+    abstract CompleteLogFile: summary:TargetSummary -> unit
     abstract Outputs: string with get
-    abstract Complete: summary:TargetSummary -> (string list * int)
+    abstract Complete: unit -> string list * int
 
 type ICache =
-    abstract TryGetSummaryOnly: useRemote:bool -> id:string -> TargetSummary option
+    abstract TryGetSummaryOnly: useRemote:bool -> id:string -> (Origin * TargetSummary) option
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
-    abstract CreateEntry: useRemote:bool -> id:string -> IEntry
+    abstract GetEntry: useRemote:bool -> clean:bool -> id:string -> IEntry
     abstract CreateHomeDir: nodeHash:string -> string
-    abstract Invalidate: id:string -> unit
 
 
 let private summaryFilename = "summary.json"
 
-let private completeFilename = "status"
+let private originFilename = "origin"
 
 let terrabuildHome =
     FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
@@ -75,11 +70,11 @@ let private homeDirectory =
     cacheDir
 
 let private setOrigin (origin: Origin) entryDir =
-    let originFile = FS.combinePath entryDir completeFilename
+    let originFile = FS.combinePath entryDir originFilename
     origin |> Json.Serialize |> IO.writeTextFile originFile
 
 let private getOrigin entryDir =
-    let originFile = FS.combinePath entryDir completeFilename
+    let originFile = FS.combinePath entryDir originFilename
     originFile |> IO.readTextFile |> Json.Deserialize<Origin>
 
 let clearBuildCache () =
@@ -90,41 +85,52 @@ let clearHomeCache () =
 
 
 
-type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.Storage) =
-    let mutable logNum = 0
-
+type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storage: Contracts.IStorage) =
     let logsDir = FS.combinePath entryDir "logs"
     let outputsDir = FS.combinePath entryDir "outputs"
+    let mutable logNum = 1
 
     do
-        match entryDir with
-        | FS.Directory _ | FS.File _ -> IO.deleteAny entryDir
-        | FS.None _ -> ()
+        if clean then
+            match entryDir with
+            | FS.Directory _ | FS.File _ -> IO.deleteAny entryDir
+            | FS.None _ -> ()
+
         IO.createDirectory entryDir
         IO.createDirectory logsDir
         // NOTE: outputs is created on demand only
 
-    let write (summary: TargetSummary) =
+    let write (summary: TargetSummary) file =
         let summary =
             { summary
-                with Steps = summary.Steps
-                             |> List.map (fun step -> { step
-                                                        with Log = IO.getFilename step.Log })
+                with Operations = summary.Operations
+                             |> List.map (fun stepGroup ->
+                                stepGroup
+                                |> List.map (fun step -> { step
+                                                            with Log = IO.getFilename step.Log }))
                      Outputs = summary.Outputs
                                |> Option.map (fun outputs -> IO.getFilename outputs) }
 
-        let summaryFile = FS.combinePath logsDir summaryFilename
-        summary |> Json.Serialize |> IO.writeTextFile summaryFile
+        summary |> Json.Serialize |> IO.writeTextFile file
 
     interface IEntry with
+
         member _.NextLogFile () =
-            logNum <- logNum + 1
-            let filename = $"step{logNum}.log"
-            FS.combinePath logsDir filename
+            let rec nextLogFile() =
+                let filename = FS.combinePath logsDir $"step{logNum}.log"
+                if IO.exists filename then
+                    logNum <- logNum + 1
+                    nextLogFile()
+                else
+                    filename
+            nextLogFile()
+
+        member _.CompleteLogFile summary =
+            FS.combinePath logsDir $"step{logNum}.json" |> write summary
 
         member _.Outputs = outputsDir
 
-        member _.Complete summary =
+        member _.Complete() =
             let upload () =
                 let uploadDir sourceDir name =
                     let path = $"{id}/{name}"
@@ -148,16 +154,31 @@ type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.
                 else
                     [], 0
 
-            summary |> write
+            let rec collect logNum =
+                seq {
+                    let filename = FS.combinePath logsDir $"step{logNum}.json"
+                    if IO.exists filename then
+                        let json = IO.readTextFile filename
+                        json |> Json.Deserialize<TargetSummary>
+                        yield! collect (logNum+1)
+                }
+
+            let summary =
+                collect 1
+                |> Seq.reduce (fun s1 s2 -> { s1 with Operations = s1.Operations @ s2.Operations; EndedAt = s2.EndedAt })
+
+            let summaryfile = FS.combinePath logsDir "summary.json"
+            write summary summaryfile
+
             let files, size = upload()
-            entryDir |> setOrigin summary.Origin
+            entryDir |> setOrigin Origin.Local
             files, size
 
 
-type Cache(storage: Contracts.Storage) =
+type Cache(storage: Contracts.IStorage) =
     // if there is a entry we already tried to download the summary (result is the value)
     // if not we have never tried to download the summary
-    let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, TargetSummary option>()
+    let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, (Origin*TargetSummary) option>()
 
     let tryDownload targetDir id name =
         match storage.TryDownload $"{id}/{name}" with
@@ -176,40 +197,39 @@ type Cache(storage: Contracts.Storage) =
     let loadSummary logsDir outputsDir summaryFile =
         let summary  = summaryFile |> IO.readTextFile |> Json.Deserialize<TargetSummary>
         let summary = { summary
-                        with Steps = summary.Steps
+                        with Operations = summary.Operations
+                                     |> List.map (fun stepGroup ->
+                                        stepGroup
                                         |> List.map (fun stepLog -> { stepLog
-                                                                      with Log = FS.combinePath logsDir stepLog.Log })
+                                                                      with Log = FS.combinePath logsDir stepLog.Log }))
                              Outputs = summary.Outputs |> Option.map (fun _ -> outputsDir) }
         summary
 
     interface ICache with
         // NOTE: do not use when building - only use for graph building
-        member _.TryGetSummaryOnly useRemote id : TargetSummary option =
+        member _.TryGetSummaryOnly useRemote id : (Origin * TargetSummary) option =
             match cachedSummaries.TryGetValue(id) with
-            | true, targetSummary ->
-                targetSummary
+            | true, originSummary -> originSummary
             | false, _ ->
                 let entryDir = FS.combinePath buildCacheDirectory id
                 let logsDir = FS.combinePath entryDir "logs"
                 let outputsDir = FS.combinePath entryDir "outputs"
                 let summaryFile = FS.combinePath logsDir summaryFilename
-                let completeFile = FS.combinePath entryDir completeFilename
+                let completeFile = FS.combinePath entryDir originFilename
 
                 // do we have the summary in local cache?
                 match completeFile with
                 | FS.File _ ->
-                    let origin = getOrigin entryDir
                     let summary = loadSummary logsDir outputsDir summaryFile
-                    let summary = { summary with Origin = origin }
-                    cachedSummaries.TryAdd(id, Some summary) |> ignore
-                    Some summary
+                    let origin = getOrigin entryDir
+                    cachedSummaries.TryAdd(id, Some (origin, summary)) |> ignore
+                    Some (origin, summary)
                 | _ ->
                     if useRemote then
                         if tryDownload logsDir id "logs" then
                             let summary = loadSummary logsDir outputsDir summaryFile
-                            let summary = { summary with Origin = Origin.Remote }
-                            cachedSummaries.TryAdd(id, Some summary) |> ignore
-                            Some summary
+                            cachedSummaries.TryAdd(id, Some (Origin.Remote, summary)) |> ignore
+                            Some (Origin.Remote, summary)
                         else
                             cachedSummaries.TryAdd(id, None) |> ignore
                             None
@@ -221,44 +241,36 @@ type Cache(storage: Contracts.Storage) =
             let logsDir = FS.combinePath entryDir "logs"
             let outputsDir = FS.combinePath entryDir "outputs"
             let summaryFile = FS.combinePath logsDir summaryFilename
-            let completeFile = FS.combinePath entryDir completeFilename
+            let completeFile = FS.combinePath entryDir originFilename
 
             match completeFile with
             | FS.File _ ->
-                let origin = getOrigin entryDir
                 let summary = loadSummary logsDir outputsDir summaryFile
-                let summary = { summary with Origin = origin }
                 Some summary
             | _ ->
                 if useRemote then
                     if tryDownload logsDir id "logs" then
                         let summary = loadSummary logsDir outputsDir summaryFile
-                        let summary = { summary with Origin = Origin.Remote }
                         match summary.Outputs with
                         | Some _ ->
                             if tryDownload outputsDir id "outputs" then
-                                entryDir |> setOrigin summary.Origin
+                                entryDir |> setOrigin Origin.Remote
                                 Some summary
                             else
                                 None
                         | _ ->
-                            entryDir |> setOrigin summary.Origin
+                            entryDir |> setOrigin Origin.Remote
                             Some summary
                     else
                         None
                 else
                     None
 
-        member _.Invalidate id =
-            cachedSummaries.TryRemove(id) |> ignore
-            let entryDir = FS.combinePath buildCacheDirectory id
-            entryDir |> IO.deleteAny
-
-        member _.CreateEntry useRemote id : IEntry =
+        member _.GetEntry useRemote clean id : IEntry =
             // invalidate cache as we are creating a new entry
             cachedSummaries.TryRemove(id) |> ignore
             let entryDir = FS.combinePath buildCacheDirectory id
-            NewEntry(entryDir, useRemote, id, storage)
+            NewEntry(entryDir, useRemote, clean, id, storage)
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash
