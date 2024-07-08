@@ -156,6 +156,8 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
                 else
                     [], 0
 
+            let files, size = upload()
+
             let rec collect logNum =
                 seq {
                     let filename = FS.combinePath logsDir $"step{logNum}.json"
@@ -164,20 +166,20 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
                         json |> Json.Deserialize<TargetSummary>
                         yield! collect (logNum+1)
                     else
-                        summary
+                        let now = DateTime.UtcNow
+                        { summary with
+                            EndedAt = now
+                            Duration = now - summary.StartedAt }
                 }
 
-            let summary =
+            let finalSummary =
                 collect 1
                 |> Seq.reduce (fun s1 s2 -> { s1 with
                                                     Operations = s1.Operations @ s2.Operations
                                                     EndedAt = s2.EndedAt
                                                     Duration = s1.Duration + s2.Duration })
 
-            let files, size = upload()
-
-            let summary = { summary with EndedAt = DateTime.UtcNow }
-            FS.combinePath logsDir "summary.json" |> write summary
+            FS.combinePath logsDir "summary.json" |> write finalSummary
             entryDir |> setOrigin Origin.Local
             files, size
 

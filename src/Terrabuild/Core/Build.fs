@@ -107,8 +107,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
 
         let buildNode() =
-            notification.NodeBuilding node
+            let startedAt = DateTime.UtcNow
 
+            notification.NodeBuilding node
             let cacheEntry = cache.GetEntry sourceControl.CI.IsSome node.IsFirst cacheEntryId
 
             // run actions if any
@@ -202,9 +203,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                             Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
                             Cache.TargetSummary.Outputs = outputs
                             Cache.TargetSummary.IsSuccessful = successful
-                            Cache.TargetSummary.StartedAt = cmdFirstStartedAt
+                            Cache.TargetSummary.StartedAt = startedAt
                             Cache.TargetSummary.EndedAt = cmdLastEndedAt
-                            Cache.TargetSummary.Duration = cmdLastEndedAt - cmdFirstStartedAt }
+                            Cache.TargetSummary.Duration = cmdLastEndedAt - startedAt }
 
             if node.IsLast then
                 notification.NodeUploading node
