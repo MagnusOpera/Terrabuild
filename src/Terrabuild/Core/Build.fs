@@ -59,7 +59,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
-    let nodesToBuild = graph.Nodes |> Map.filter (fun _ node -> node.TargetOperation.IsSome) |> Map.count
+    let nodesToBuild = graph.Nodes |> Seq.filter (fun (KeyValue(_,node)) -> node.TargetOperation.IsSome) |> Seq.length
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToBuild} tasks to build" |> Terminal.writeLine
 
     let startedAt = DateTime.UtcNow
