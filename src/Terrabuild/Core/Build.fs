@@ -198,14 +198,15 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let newFiles = afterFiles - beforeFiles
             let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
+            let endedAt = DateTime.UtcNow
             let summary = { Cache.TargetSummary.Project = node.Project
                             Cache.TargetSummary.Target = node.Target
                             Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
                             Cache.TargetSummary.Outputs = outputs
                             Cache.TargetSummary.IsSuccessful = successful
                             Cache.TargetSummary.StartedAt = startedAt
-                            Cache.TargetSummary.EndedAt = cmdLastEndedAt
-                            Cache.TargetSummary.Duration = cmdLastEndedAt - startedAt }
+                            Cache.TargetSummary.EndedAt = endedAt
+                            Cache.TargetSummary.Duration = endedAt - startedAt }
 
             if node.IsLast then
                 notification.NodeUploading node
