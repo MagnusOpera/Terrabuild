@@ -133,7 +133,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
         member _.Outputs = outputsDir
 
         member _.Complete summary =
-            let upload () =
+            let files, size =
                 let uploadDir sourceDir name =
                     let path = $"{id}/{name}"
                     let tarFile = IO.getTempFilename()
@@ -147,39 +147,40 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
                         IO.deleteAny compressFile
                         IO.deleteAny tarFile
 
+                let genFinalSummary() =
+                    let rec collect logNum =
+                        seq {
+                            let filename = FS.combinePath logsDir $"step{logNum}.json"
+                            if IO.exists filename then
+                                let json = IO.readTextFile filename
+                                json |> Json.Deserialize<TargetSummary>
+                                yield! collect (logNum+1)
+                            else
+                                let now = DateTime.UtcNow
+                                { summary with
+                                    EndedAt = now
+                                    Duration = now - summary.StartedAt }
+                        }
+
+                    let finalSummary =
+                        collect 1
+                        |> Seq.reduce (fun s1 s2 -> { s1 with
+                                                            Operations = s1.Operations @ s2.Operations
+                                                            EndedAt = s2.EndedAt
+                                                            Duration = s1.Duration + s2.Duration })
+                    FS.combinePath logsDir "summary.json" |> write finalSummary
+
                 if useRemote then
                     let fileSizes = [
                         if Directory.Exists outputsDir then uploadDir outputsDir "outputs"
+                        genFinalSummary()
                         uploadDir logsDir "logs"
                     ]
                     fileSizes |> List.fold (fun (files, size) (file, fileSize) -> file :: files, fileSize+size) ([], 0)
                 else
+                    genFinalSummary()
                     [], 0
 
-            let files, size = upload()
-
-            let rec collect logNum =
-                seq {
-                    let filename = FS.combinePath logsDir $"step{logNum}.json"
-                    if IO.exists filename then
-                        let json = IO.readTextFile filename
-                        json |> Json.Deserialize<TargetSummary>
-                        yield! collect (logNum+1)
-                    else
-                        let now = DateTime.UtcNow
-                        { summary with
-                            EndedAt = now
-                            Duration = now - summary.StartedAt }
-                }
-
-            let finalSummary =
-                collect 1
-                |> Seq.reduce (fun s1 s2 -> { s1 with
-                                                    Operations = s1.Operations @ s2.Operations
-                                                    EndedAt = s2.EndedAt
-                                                    Duration = s1.Duration + s2.Duration })
-
-            FS.combinePath logsDir "summary.json" |> write finalSummary
             entryDir |> setOrigin Origin.Local
             files, size
 
