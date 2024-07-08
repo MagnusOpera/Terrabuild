@@ -40,7 +40,7 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
         let isUsed =
             let isRequired = node.TargetOperation.IsSome || node.IsRequired
             let childRequired =
-                if options.Retry then
+                if isRequired then
                     node.Dependencies
                     |> Set.map (fun nodeId ->
                         let node = nodes |> Map.find nodeId
