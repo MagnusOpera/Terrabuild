@@ -15,7 +15,9 @@ project @dotnet {
 }
 
 target build {
+#    @shell echo { arguments: "Building project"}
     @dotnet build { }
+#    @shell echo { arguments: "Building done"}
 }
 
 target dist {

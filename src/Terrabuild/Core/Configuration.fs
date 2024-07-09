@@ -12,43 +12,56 @@ open Terrabuild.PubSub
 
 [<RequireQualifiedAccess>]
 type Options = {
+    Workspace: string
     WhatIf: bool
     Debug: bool
     MaxConcurrency: int
     Force: bool
     Retry: bool
+    LocalOnly: bool
     StartedAt: DateTime
-    IsLog: bool
     NoContainer: bool
     NoBatch: bool
+    Targets: string set
+    CI: string option
+    BranchOrTag: string
+    Configuration: string
+    Note: string option
+    Tag: string option
+    Labels: string set option
+    Variables: Map<string, string>
 }
 
-type BatchContext = {
-    Script: Terrabuild.Scripting.Script
+[<RequireQualifiedAccess>]
+type TargetOperation = {
+    Hash: string
+    Container: string option
+    ContainerVariables: string set
+    Extension: string
     Command: string
+    Script: Terrabuild.Scripting.Script
     Context: Value
 }
+with
+    static member MarkAsForced = Some {
+        Hash = "--"
+        Container = None
+        ContainerVariables = Set.empty
+        Extension = ""
+        Command = "👀"
+        Script = Terrabuild.Scripting.Script(typeof<Unit>)
+        Context = Value.Nothing
+    }
 
 [<RequireQualifiedAccess>]
-type ContaineredActionBatch = {
-    Cache: Cacheability
-    MetaCommand: string
-    Actions: Action list
-
-    Container: string option
-    ContainerVariables: string Set
-    BatchContext: BatchContext option
-}
-
-
-[<RequireQualifiedAccess>]
-type ContaineredTarget = {
+type Target = {
     Hash: string
-    Variables: Map<string, string>
+    Rebuild: bool
     DependsOn: string set
     Outputs: string set
-    Actions: ContaineredActionBatch list
+    Operations: TargetOperation list
 }
+
 
 [<RequireQualifiedAccess>]
 type Project = {
@@ -56,7 +69,7 @@ type Project = {
     Hash: string
     Dependencies: string set
     Files: string set
-    Targets: Map<string, ContaineredTarget>
+    Targets: Map<string, Target>
     Labels: string set
 }
 
@@ -64,9 +77,6 @@ type Project = {
 type Workspace = {
     // Space to use
     Space: string option
-
-    // Source control in use
-    SourceControl: Contracts.SourceControl
 
     // Computed projects selection (derived from user inputs)
     SelectedProjects: string set
@@ -76,15 +86,6 @@ type Workspace = {
 
     // All discovered projects in workspace
     Projects: Map<string, Project>
-
-    // Configuration provided by user
-    Configuration: string
-
-    // Note provided by user
-    Note: string option
-
-    // Tag provided by user
-    Tag: string option
 }
 
 
@@ -96,17 +97,26 @@ type private LoadedProject = {
     Includes: string set
     Ignores: string set
     Outputs: string set
-    Targets: Map<string, Target>
+    Targets: Map<string, Terrabuild.Configuration.Project.AST.Target>
     Labels: string set
     Extensions: Map<string, Extension>
     Scripts: Map<string, LazyScript>
 }
 
 
-let read workspaceDir configuration note tag labels (variables: Map<string, string>) (sourceControl: Contracts.SourceControl) (options: Options) =
-    $"{Ansi.Emojis.box} Reading {configuration} configuration" |> Terminal.writeLine
+let read (options: Options) =
+    $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
 
-    let workspaceContent = FS.combinePath workspaceDir "WORKSPACE" |> File.ReadAllText
+    if options.Force then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
+
+    if options.Retry then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
+
+    options.CI
+    |> Option.iter (fun ci -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {ci}" |> Terminal.writeLine)
+
+    let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
             Terrabuild.Configuration.FrontEnd.parseWorkspace workspaceContent
@@ -134,12 +144,12 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         | _ -> Map.empty
 
     let configVariables =
-        match workspaceConfig.Configurations |> Map.tryFind configuration with
+        match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
         | Some variables -> variables.Variables
         | _ ->
-            match configuration with
+            match options.Configuration with
             | "default" -> Map.empty
-            | _ -> TerrabuildException.Raise($"Configuration '{configuration}' not found")
+            | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
 
     let buildVariables =
         defaultVariables
@@ -151,16 +161,11 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
             | value -> convertToVarType key expr value)
         // override variable with provided ones on command line if any
         |> Map.map (fun key expr ->
-            match variables |> Map.tryFind (key |> String.toLower) with
+            match options.Variables |> Map.tryFind (key |> String.toLower) with
             | Some value -> convertToVarType key expr value
             | _ -> expr)
 
-    if options.Force then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
-
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {sourceControl.Name}" |> Terminal.writeLine
-
-    let branchOrTag = sourceControl.BranchOrTag
+    let branchOrTag = options.BranchOrTag
 
     let extensions = 
         Extensions.systemExtensions
@@ -174,7 +179,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
     // this is the first stage: load project and mostly get dependencies references
     let loadProjectDef projectId =
-        let projectDir = FS.combinePath workspaceDir projectId
+        let projectDir = FS.combinePath options.Workspace projectId
         let projectFile = FS.combinePath projectDir "PROJECT"
 
         let projectContent = File.ReadAllText projectFile
@@ -191,7 +196,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
         let projectScripts =
             projectConfig.Extensions
-            |> Map.map (fun _ ext -> ext.Script |> Option.map (FS.workspaceRelative workspaceDir projectDir))
+            |> Map.map (fun _ ext -> ext.Script |> Option.map (FS.workspaceRelative options.Workspace projectDir))
 
         let scripts =
             scripts
@@ -203,9 +208,9 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                 let parseContext = 
                     let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
                                     Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
-                                    Terrabuild.Extensibility.ExtensionContext.CI = sourceControl.CI }
+                                    Terrabuild.Extensibility.ExtensionContext.CI = options.CI.IsSome }
                     Value.Map (Map [ "context", Value.Object context ])
-                
+
                 let result =
                     Extensions.getScript init scripts
                     |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
@@ -231,7 +236,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
         // convert relative dependencies to absolute dependencies respective to workspaceDirectory
         let projectDependencies =
             projectInfo.Dependencies
-            |> Set.map (fun dep -> FS.workspaceRelative workspaceDir projectDir dep)
+            |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
 
         let projectTargets = projectConfig.Targets
 
@@ -287,25 +292,25 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     buildVariables
                     |> Map.add "terrabuild_project" (Expr.String projectId)
                     |> Map.add "terrabuild_target" (Expr.String targetName)
-                    |> Map.add "terrabuild_configuration" (Expr.String configuration)
+                    |> Map.add "terrabuild_configuration" (Expr.String options.Configuration)
                     |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
                     |> Map.add "terrabuild_retry" (Expr.Boolean options.Retry)
                     |> Map.add "terrabuild_force" (Expr.Boolean options.Force)
                     |> (fun map ->
                         let tagValue =
-                            match tag with
+                            match options.Tag with
                             | Some tag -> Expr.String tag
                             | _ -> Expr.Nothing
                         map |> Map.add "terrabuild_tag" tagValue)
                     |> (fun map ->
                         let noteValue =
-                            match note with
+                            match options.Note with
                             | Some note -> Expr.String note
                             | _ -> Expr.Nothing
                         map |> Map.add "terrabuild_note" noteValue)
 
                 let evaluationContext = {
-                    Eval.EvaluationContext.WorkspaceDir = workspaceDir
+                    Eval.EvaluationContext.WorkspaceDir = options.Workspace
                     Eval.EvaluationContext.ProjectDir = projectDir
                     Eval.EvaluationContext.Versions = versions
                     Eval.EvaluationContext.Variables = actionVariables
@@ -328,92 +333,51 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     | Value.Bool rebuild -> rebuild
                     | _ -> TerrabuildException.Raise("rebuild must evaluate to a bool")
 
-                let usedVariables, actions =
+                let targetOperations =
                     target.Steps
-                    |> List.fold (fun (usedVariables, actions) step ->
-                        // let stepVars: Map<string, string> = Map.empty
-
+                    |> List.fold (fun actions step ->
                         let extension = 
                             match projectDef.Extensions |> Map.tryFind step.Extension with
                             | Some extension -> extension
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                        let stepActions, stepVars =
-                            let actionContext = { Terrabuild.Extensibility.ActionContext.Debug = options.Debug
-                                                  Terrabuild.Extensibility.ActionContext.Directory = projectDir
-                                                  Terrabuild.Extensibility.ActionContext.CI = sourceControl.CI
-                                                  Terrabuild.Extensibility.ActionContext.NodeHash = projectHash
-                                                  Terrabuild.Extensibility.ActionContext.Command = step.Command
-                                                  Terrabuild.Extensibility.ActionContext.BranchOrTag = branchOrTag }
+                        let usedVars, context =
+                            extension.Defaults
+                            |> Map.addMap step.Parameters
+                            |> Expr.Map
+                            |> Eval.eval evaluationContext
 
-                            let usedVars, actionContext =
-                                extension.Defaults
-                                |> Map.addMap step.Parameters
-                                |> Map.add "context" (Expr.Object actionContext)
-                                |> Expr.Map
-                                |> Eval.eval evaluationContext
+                        let script =
+                            match Extensions.getScript step.Extension projectDef.Scripts with
+                            | Some script -> script
+                            | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                            let script = Extensions.getScript step.Extension projectDef.Scripts
-                            let actionGroup =
-                                let result =
-                                    script
-                                    |> Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionSequence> step.Command actionContext
-                                match result with
-                                | Extensions.Success result -> result
-                                | Extensions.ScriptNotFound -> TerrabuildException.Raise($"Script {step.Extension} was not found")
-                                | Extensions.TargetNotFound -> TerrabuildException.Raise($"Script {step.Extension} has no function {step.Command}")
-                                | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '{step.Command}' for extension '{step.Extension}'", exn)
+                        let usedVariables =
+                            usedVars
+                            |> Seq.sort
+                            |> Seq.choose (fun key ->
+                                match buildVariables |> Map.tryFind key with
+                                | Some value -> Some $"{key} = {value}"
+                                | _ -> None)
+                            |> List.ofSeq
 
-                            let batchContext =
-                                if actionGroup.Batchable then
-                                    Some { Script = script.Value
-                                           Command = step.Command
-                                           Context = actionContext }
-                                else
-                                    None
+                        let hash =
+                            [ step.Extension; step.Command ] @ usedVariables
+                            |> Hash.sha256strings
 
-                            // rebuild semantic is implemented by tweaking cacheability
-                            let cache = 
-                                if rebuild then Cacheability.Never
-                                else actionGroup.Cache
+                        let targetContext = {
+                            TargetOperation.Hash = hash
+                            TargetOperation.Container = extension.Container
+                            TargetOperation.ContainerVariables = extension.Variables
+                            TargetOperation.Extension = step.Extension
+                            TargetOperation.Command = step.Command
+                            TargetOperation.Script = script
+                            TargetOperation.Context = context
+                        }
 
-                            let containedActionBatch = {
-                                ContaineredActionBatch.MetaCommand = $"{step.Extension} {step.Command}"
-                                ContaineredActionBatch.BatchContext = batchContext
-                                ContaineredActionBatch.Container = extension.Container
-                                ContaineredActionBatch.ContainerVariables = extension.Variables
-                                ContaineredActionBatch.Cache = cache
-                                ContaineredActionBatch.Actions = actionGroup.Actions
-                            }
-
-                            containedActionBatch, usedVars
-
-                        let usedVariables = usedVariables + stepVars
-                        let actions = actions @ [ stepActions ]
-                        usedVariables, actions
-                    ) (Set.empty, [])
-
-                let usedVariables =
-                    usedVariables
-                    |> Seq.sort
-                    |> Seq.choose (fun k ->
-                        match buildVariables |> Map.tryFind k with
-                        | Some v -> Some (k, $"{v}")
-                        | _ -> None)
-
-                let variableHash =
-                    usedVariables
-                    |> Seq.map (fun (key, value) -> $"{key} = {value}")
-                    |> Hash.sha256strings
-
-                let stepHash =
-                    actions
-                    |> Seq.map (fun action -> action.MetaCommand)
-                    |> Hash.sha256strings
-
-                let hash =
-                    [ stepHash; variableHash ]
-                    |> Hash.sha256strings
+                        let actions = actions @ [ targetContext ]
+                        actions
+                    ) []
 
                 // use value from project target
                 // otherwise use workspace target
@@ -432,11 +396,20 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                     | Some outputs -> outputs
                     | _ -> projectDef.Outputs
 
-                { ContaineredTarget.Hash = hash
-                  ContaineredTarget.Variables = usedVariables |> Map.ofSeq
-                  ContaineredTarget.Actions = actions
-                  ContaineredTarget.DependsOn = dependsOn
-                  ContaineredTarget.Outputs = outputs }
+                let hash =
+                    targetOperations
+                    |> List.map (fun ope -> ope.Hash)
+                    |> Hash.sha256strings
+
+                let target = {
+                    Target.Hash = hash
+                    Target.Rebuild = rebuild
+                    Target.DependsOn = dependsOn
+                    Target.Outputs = outputs
+                    Target.Operations = targetOperations
+                }
+
+                target
             )
 
         let files = files |> Set.map (FS.relativePath projectDir)
@@ -455,13 +428,13 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
                 let projectFile =  FS.combinePath dir "PROJECT" 
                 match projectFile with
                 | FS.File file ->
-                    file |> FS.parentDirectory |> FS.relativePath workspaceDir
+                    file |> FS.parentDirectory |> FS.relativePath options.Workspace
                 | _ ->
                     for subdir in dir |> IO.enumerateDirs do
                         yield! findDependencies subdir
             }
 
-        findDependencies workspaceDir
+        findDependencies options.Workspace
 
     let projects = ConcurrentDictionary<string, Project>()
     let hub = Hub.Create(options.MaxConcurrency)
@@ -500,7 +473,7 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
 
     // select dependencies with labels if any
     let selectedProjects =
-        match labels with
+        match options.Labels with
         | Some labels ->
             projects
             |> Seq.choose (fun (KeyValue(dependency, config)) ->
@@ -511,8 +484,4 @@ let read workspaceDir configuration note tag labels (variables: Map<string, stri
     { Workspace.Space = workspaceConfig.Space
       Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
-      Workspace.Targets = workspaceConfig.Targets
-      Workspace.Configuration = configuration
-      Workspace.Note = note
-      Workspace.Tag = tag
-      Workspace.SourceControl = sourceControl }
+      Workspace.Targets = workspaceConfig.Targets }

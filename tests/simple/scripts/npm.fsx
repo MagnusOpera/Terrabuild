@@ -13,19 +13,23 @@ let __defaults__() =
     projectInfo
 
 let install () =
-    scope Cacheability.Always
-    |> andThen "npm" "ci"
+    let ops = All [ shellOp "npm" "ci" ]
+    execRequest Cacheability.Always [] ops
 
 let build (arguments: string option) =
     let args = arguments |> Option.defaultValue ""
 
-    scope Cacheability.Always
-    |> andThen "npm" "ci" 
-    |> andThen "npm" $"run build -- {args}"
+    let ops = All [
+        shellOp "npm" "ci"
+        shellOp "npm" $"run build -- {args}"
+    ]
+    execRequest Cacheability.Always [] ops
 
 let test (arguments: string option) =
     let args = arguments |> Option.defaultValue ""
 
-    scope Cacheability.Always
-    |> andThen "npm" "ci" 
-    |> andThen "npm" $"run test -- {args}"
+    let ops = All [
+        shellOp "npm" "ci"
+        shellOp "npm" $"run test -- {args}"
+    ]
+    execRequest Cacheability.Always [] ops

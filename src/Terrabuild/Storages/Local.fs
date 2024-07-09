@@ -1,12 +1,11 @@
 namespace Storages
 
 type Local() =
-    inherit Contracts.Storage()
+    interface Contracts.IStorage with
+        override _.Name = "Local"
 
-    override _.Name = "Local"
+        override _.Exists id = false
 
-    override _.Exists id = false
+        override _.TryDownload id = None
 
-    override _.TryDownload id = None
-
-    override _.Upload id summaryFile = ()
+        override _.Upload id summaryFile = ()

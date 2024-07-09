@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - '**'
+  workflow_dispatch:
 
 env:
   TERRABUILD_AZURE_BLOB_STORAGE: ${{ secrets.TERRABUILD_AZURE_BLOB_STORAGE }}

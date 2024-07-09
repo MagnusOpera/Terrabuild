@@ -1,15 +1,5 @@
 {
   "space": null,
-  "sourceControl": {
-    "headCommit": "1234",
-    "branchOrTag": "main",
-    "logType": [
-      "markdown",
-      "terrabuild-debug.md"
-    ],
-    "ci": true,
-    "name": "GitHub"
-  },
   "selectedProjects": [
     "A",
     "B",
@@ -33,7 +23,7 @@
   "projects": {
     "A": {
       "id": "A",
-      "hash": "6765DB78C92AE5CDF6D209FE067DDBE92511B2A720448DCC73DCBAC29E224624",
+      "hash": "1331212E360E341B3A07B89233CA975DD8814EE7E1A31F4CFB97FE46E162F45C",
       "dependencies": [],
       "files": [
         "A.csproj",
@@ -42,8 +32,8 @@
       ],
       "targets": {
         "build": {
-          "hash": "8E44CBB6DB72FF3E4BE587B2D07A78F0EDC7F0F2688AAC4B5B9A2C3E94D72A38",
-          "variables": {},
+          "hash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
@@ -55,38 +45,35 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@dotnet build",
-              "actions": [
-                {
-                  "command": "dotnet",
-                  "arguments": "build  --configuration Debug    "
-                }
-              ],
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
               "container": null,
               "containerVariables": [],
-              "batchContext": {
-                "script": {},
-                "command": "build",
-                "context": [
-                  "map",
-                  {
-                    "context": [
-                      "object",
-                      {
-                        "debug": true,
-                        "directory": "A",
-                        "ci": true,
-                        "nodeHash": "6765DB78C92AE5CDF6D209FE067DDBE92511B2A720448DCC73DCBAC29E224624",
-                        "command": "build",
-                        "branchOrTag": "main"
-                      }
-                    ]
-                  }
-                ]
-              }
+              "extension": "@shell",
+              "command": "echo",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "string",
+                    "building project"
+                  ]
+                }
+              ]
+            },
+            {
+              "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+              "container": null,
+              "containerVariables": [],
+              "extension": "@dotnet",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
@@ -95,7 +82,7 @@
     },
     "B": {
       "id": "B",
-      "hash": "509BAF9F664901BED1F979302A6D189C2A35A9B8450B617893B84316694AEBF1",
+      "hash": "CC8C96EF544914A3802A18E8EF8C10503BDEAE040D90EF613402F34962BD4104",
       "dependencies": [],
       "files": [
         "B.csproj",
@@ -104,8 +91,8 @@
       ],
       "targets": {
         "build": {
-          "hash": "8E44CBB6DB72FF3E4BE587B2D07A78F0EDC7F0F2688AAC4B5B9A2C3E94D72A38",
-          "variables": {},
+          "hash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
@@ -117,38 +104,35 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@dotnet build",
-              "actions": [
-                {
-                  "command": "dotnet",
-                  "arguments": "build  --configuration Debug    "
-                }
-              ],
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
               "container": null,
               "containerVariables": [],
-              "batchContext": {
-                "script": {},
-                "command": "build",
-                "context": [
-                  "map",
-                  {
-                    "context": [
-                      "object",
-                      {
-                        "debug": true,
-                        "directory": "B",
-                        "ci": true,
-                        "nodeHash": "509BAF9F664901BED1F979302A6D189C2A35A9B8450B617893B84316694AEBF1",
-                        "command": "build",
-                        "branchOrTag": "main"
-                      }
-                    ]
-                  }
-                ]
-              }
+              "extension": "@shell",
+              "command": "echo",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "string",
+                    "building project"
+                  ]
+                }
+              ]
+            },
+            {
+              "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+              "container": null,
+              "containerVariables": [],
+              "extension": "@dotnet",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
@@ -157,7 +141,7 @@
     },
     "C": {
       "id": "C",
-      "hash": "8243CB709ACA1CF703BF9D34898D1A3E7EE2A204F8A969856D1B369C80B0BFFE",
+      "hash": "429BA3285F3F1AB8712C6475C79FBCDCA29DFABDDDB30D7B56828B382506D3E9",
       "dependencies": [
         "A",
         "B"
@@ -169,31 +153,43 @@
       ],
       "targets": {
         "build": {
-          "hash": "99DD49C225ABACFB2E7A0437E146E795DB3A0C4ABD4750C8361C18E326A6C0B4",
-          "variables": {},
+          "hash": "7CBFCD2D010F460CED07F894949A860B35492555250E183E1BEB1C76EFB8181B",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [
             "dist/"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@npm build",
-              "actions": [
-                {
-                  "command": "npm",
-                  "arguments": "ci"
-                },
-                {
-                  "command": "npm",
-                  "arguments": "run build -- "
-                }
-              ],
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@shell",
+              "command": "echo",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "arguments": [
+                    "string",
+                    "building project"
+                  ]
+                }
+              ]
+            },
+            {
+              "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+              "container": null,
+              "containerVariables": [],
+              "extension": "@npm",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
@@ -202,7 +198,7 @@
     },
     "D": {
       "id": "D",
-      "hash": "F3F274387FB0965E1A6167C8FC1795B178ED1E51FC4C80FBEC4FF0B01E0C1714",
+      "hash": "48EF5EAF4D5BF0D575315F0C1901BCF5BC83DB8D22530E496764B8BC328FE3B0",
       "dependencies": [
         "C"
       ],
@@ -213,8 +209,8 @@
       ],
       "targets": {
         "build": {
-          "hash": "8E44CBB6DB72FF3E4BE587B2D07A78F0EDC7F0F2688AAC4B5B9A2C3E94D72A38",
-          "variables": {},
+          "hash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
@@ -226,38 +222,18 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@dotnet build",
-              "actions": [
-                {
-                  "command": "dotnet",
-                  "arguments": "build  --configuration Debug    "
-                }
-              ],
+              "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
               "container": null,
               "containerVariables": [],
-              "batchContext": {
-                "script": {},
-                "command": "build",
-                "context": [
-                  "map",
-                  {
-                    "context": [
-                      "object",
-                      {
-                        "debug": true,
-                        "directory": "D",
-                        "ci": true,
-                        "nodeHash": "F3F274387FB0965E1A6167C8FC1795B178ED1E51FC4C80FBEC4FF0B01E0C1714",
-                        "command": "build",
-                        "branchOrTag": "main"
-                      }
-                    ]
-                  }
-                ]
-              }
+              "extension": "@dotnet",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
@@ -266,7 +242,7 @@
     },
     "E": {
       "id": "E",
-      "hash": "E6FE0175538764C73EEBB213E01551D2F05E3CF251434AF6813573BF0BBE9C6A",
+      "hash": "C0258BC9A2BBDE8B5300E3594D728190C18D187B421A690AABE51B589ED7E2FA",
       "dependencies": [
         "C"
       ],
@@ -277,8 +253,8 @@
       ],
       "targets": {
         "build": {
-          "hash": "8E44CBB6DB72FF3E4BE587B2D07A78F0EDC7F0F2688AAC4B5B9A2C3E94D72A38",
-          "variables": {},
+          "hash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
@@ -290,38 +266,18 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@dotnet build",
-              "actions": [
-                {
-                  "command": "dotnet",
-                  "arguments": "build  --configuration Debug    "
-                }
-              ],
+              "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
               "container": null,
               "containerVariables": [],
-              "batchContext": {
-                "script": {},
-                "command": "build",
-                "context": [
-                  "map",
-                  {
-                    "context": [
-                      "object",
-                      {
-                        "debug": true,
-                        "directory": "E",
-                        "ci": true,
-                        "nodeHash": "E6FE0175538764C73EEBB213E01551D2F05E3CF251434AF6813573BF0BBE9C6A",
-                        "command": "build",
-                        "branchOrTag": "main"
-                      }
-                    ]
-                  }
-                ]
-              }
+              "extension": "@dotnet",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
@@ -330,7 +286,7 @@
     },
     "F": {
       "id": "F",
-      "hash": "CADB098228D693FDD16B79A788C2530146BDE1780B0868B157300F373DB7D205",
+      "hash": "4189AF367DD05BFA3DD8519B640CE28F48E188BFEA9F77C4085E0967DFFA9DB5",
       "dependencies": [
         "D",
         "E"
@@ -342,31 +298,26 @@
       ],
       "targets": {
         "build": {
-          "hash": "99DD49C225ABACFB2E7A0437E146E795DB3A0C4ABD4750C8361C18E326A6C0B4",
-          "variables": {},
+          "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [
             "dist/"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@npm build",
-              "actions": [
-                {
-                  "command": "npm",
-                  "arguments": "ci"
-                },
-                {
-                  "command": "npm",
-                  "arguments": "run build -- "
-                }
-              ],
+              "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@npm",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
@@ -375,7 +326,7 @@
     },
     "G": {
       "id": "G",
-      "hash": "98AF58F8627AB8C567A3F08B2C1CEFF8CF4FB9F3482676807E2D673164209178",
+      "hash": "BAD12DC7581DAE34275B88A0C98FAABBDBB7A1969FC0C091F8FA82446A8509B9",
       "dependencies": [
         "C"
       ],
@@ -386,39 +337,31 @@
       ],
       "targets": {
         "build": {
-          "hash": "99DD49C225ABACFB2E7A0437E146E795DB3A0C4ABD4750C8361C18E326A6C0B4",
-          "variables": {},
+          "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+          "rebuild": false,
           "dependsOn": [
             "^build"
           ],
           "outputs": [
             "dist/"
           ],
-          "actions": [
+          "operations": [
             {
-              "cache": 3,
-              "metaCommand": "@npm build",
-              "actions": [
-                {
-                  "command": "npm",
-                  "arguments": "ci"
-                },
-                {
-                  "command": "npm",
-                  "arguments": "run build -- "
-                }
-              ],
+              "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
               "container": null,
               "containerVariables": [],
-              "batchContext": null
+              "extension": "@npm",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
             }
           ]
         }
       },
       "labels": []
     }
-  },
-  "configuration": "default",
-  "note": null,
-  "tag": null
+  }
 }

@@ -23,10 +23,10 @@ type NodeStatus =
 
 [<RequireQualifiedAccess>]
 type PrinterProtocol =
-    | BuildStarted of graph:Graph.Workspace
+    | BuildStarted of graph:GraphDef.Graph
     | BuildCompleted of summary:Build.Summary
-    | NodeStatusChanged of node:Graph.Node * status:NodeStatus
-    | NodeCompleted of node:Graph.Node * restored:bool * summary:Cache.TargetSummary
+    | NodeStatusChanged of node:GraphDef.Node * status:NodeStatus
+    | NodeCompleted of node:GraphDef.Node * restored:bool * success:bool
     | Render
 
 type BuildNotification() =
@@ -60,14 +60,13 @@ type BuildNotification() =
                     | NodeStatus.Downloading -> spinnerDownload, frequencyDownload
                     | NodeStatus.Uploading -> spinnerUpload, frequencyUpload
                     | NodeStatus.Building -> spinnerBuilding, frequencyBuilding
-                renderer.Update node.Hash node.Label spinner frequency
+                renderer.Update node.TargetHash node.Label spinner frequency
                 scheduleUpdate ()
                 return! messageLoop ()
 
-            | PrinterProtocol.NodeCompleted (node, restored, summary) ->
-                let status = summary.Status = Cache.TaskStatus.Success
+            | PrinterProtocol.NodeCompleted (node, restored, success) ->
                 let label = $"{node.Label} {node.Project}"
-                renderer.Complete node.Hash label status restored
+                renderer.Complete node.TargetHash label success restored
                 scheduleUpdate ()
                 return! messageLoop ()
 
@@ -94,22 +93,22 @@ type BuildNotification() =
             PrinterProtocol.BuildCompleted summary
             |> printerAgent.Post
 
-        member _.NodeScheduled(node: Graph.Node) =
+        member _.NodeScheduled(node: GraphDef.Node) =
             PrinterProtocol.NodeStatusChanged (node, NodeStatus.Scheduled)
             |> printerAgent.Post
 
-        member _.NodeDownloading(node: Graph.Node) = 
+        member _.NodeDownloading(node: GraphDef.Node) = 
             PrinterProtocol.NodeStatusChanged (node, NodeStatus.Downloading)
             |> printerAgent.Post
 
-        member _.NodeBuilding(node: Graph.Node) = 
+        member _.NodeBuilding(node: GraphDef.Node) = 
             PrinterProtocol.NodeStatusChanged (node, NodeStatus.Building)
             |> printerAgent.Post
 
-        member _.NodeUploading(node: Graph.Node) = 
+        member _.NodeUploading(node: GraphDef.Node) = 
             PrinterProtocol.NodeStatusChanged (node, NodeStatus.Uploading)
             |> printerAgent.Post
 
-        member _.NodeCompleted (node: Graph.Node) (restored: bool) (status: Cache.TargetSummary) = 
-            PrinterProtocol.NodeCompleted (node, restored, status)
+        member _.NodeCompleted (node: GraphDef.Node) (restored: bool) (success:bool)= 
+            PrinterProtocol.NodeCompleted (node, restored, success)
             |> printerAgent.Post

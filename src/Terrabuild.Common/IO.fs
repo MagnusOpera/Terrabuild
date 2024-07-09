@@ -13,6 +13,9 @@ let readTextFile filename =
 let writeTextFile filename content =
     File.WriteAllText(filename, content)
 
+let writeLines filename (lines: string seq) =
+    File.WriteAllLines(filename, lines)
+
 let appendLinesFile filename content =
     File.AppendAllLines(filename, content)
 

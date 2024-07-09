@@ -102,28 +102,63 @@ terrabuild:
 #
 
 run-build-circular:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/circular
+	dotnet run --project src/Terrabuild -- run build --workspace tests/circular --debug --logs
 
 run-scaffold:
-	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold
+	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --debug --logs
 
 run-rescaffold:
-	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --force
+	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --debug --force --logs
 
 run-build-scaffold:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry
+	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry --logs
 
+run-build-simple:
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --debug --retry --logs
+
+run-rebuild-simple:
+	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --debug --retry --logs
+
+run-deploy-simple:
+	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --debug --retry --logs
+
+run-build-playground:
+	dotnet run --project src/Terrabuild -- run build --workspace ../playground --retry --debug
+
+run-dist-playground:
+	dotnet run --project src/Terrabuild -- run dist --workspace ../playground --retry --debug
+
+run-deploy-playground:
+	dotnet run --project src/Terrabuild -- run deploy --workspace ../playground --retry --debug
+
+run-test-insights:
+	dotnet run --project src/Terrabuild -- run build test apply plan -w ../../insights --debug --force --localonly --whatif
+
+run-test-terrabuild:
+	dotnet run --project src/Terrabuild -- run build test publish -w src --debug --force --localonly
+
+run-test-cluster-layers:
+	dotnet run --project src/Terrabuild -- run build -w tests/cluster-layers --debug --force
+
+run-test-simple:
+	dotnet run --project src/Terrabuild -- run build -w tests/simple --debug --force
+
+define diff_file
+#	cp $(1)/$(2) $(1)/results/$(2)
+	diff $(1)/results/$(2) $(1)/$(2)
+endef
 
 define diff_results
-	diff $(1)/results/terrabuild-debug.config.json $(1)/terrabuild-debug.config.json
-	diff $(1)/results/terrabuild-debug.config-graph.json $(1)/terrabuild-debug.config-graph.json
-	diff $(1)/results/terrabuild-debug.consistent-graph.json $(1)/terrabuild-debug.consistent-graph.json
-	diff $(1)/results/terrabuild-debug.required-graph.json $(1)/terrabuild-debug.required-graph.json
-	diff $(1)/results/terrabuild-debug.build-graph.json $(1)/terrabuild-debug.build-graph.json
-	diff $(1)/results/terrabuild-debug.config-graph.mermaid $(1)/terrabuild-debug.config-graph.mermaid
-	diff $(1)/results/terrabuild-debug.consistent-graph.mermaid $(1)/terrabuild-debug.consistent-graph.mermaid
-	diff $(1)/results/terrabuild-debug.required-graph.mermaid $(1)/terrabuild-debug.required-graph.mermaid
-	diff $(1)/results/terrabuild-debug.build-graph.mermaid $(1)/terrabuild-debug.build-graph.mermaid
+	$(call diff_file,$(1),terrabuild-debug.config.json)
+	$(call diff_file,$(1),terrabuild-debug.config-graph.json)
+	$(call diff_file,$(1),terrabuild-debug.consistent-graph.json)
+	$(call diff_file,$(1),terrabuild-debug.transform-graph.json)
+	$(call diff_file,$(1),terrabuild-debug.optimize-graph.json)
+	$(call diff_file,$(1),terrabuild-debug.config-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.consistent-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.transform-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.optimize-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.build-graph.mermaid)
 endef
 
 
@@ -131,8 +166,10 @@ define run_integration_test
 	@printf "\n*** Running integration test %s ***\n" $(1)
 	-cd $(1); rm terrabuild-debug.*
 	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild-debug.md $(current_dir)/.out/dotnet/terrabuild $(2)
-	$(call diff_results, $(1))
+	$(call diff_results,$(1))
 endef
+
+# $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
 
 self-test-cluster-layers:
 	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)

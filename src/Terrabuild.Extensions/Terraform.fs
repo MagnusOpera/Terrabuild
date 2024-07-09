@@ -21,9 +21,9 @@ type Terraform() =
     /// <summary weight="1">
     /// Init Terraform.
     /// </summary>
-    static member init () =
-        scope Cacheability.Always
-        |> andThen "terraform" "init"
+    static member init (context: ActionContext) =
+        let ops = All [ shellOp "terraform" "init" ]
+        execRequest Cacheability.Always [] ops
 
 
     /// <summary weight="2" title="Generate plan file.">
@@ -34,13 +34,20 @@ type Terraform() =
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
-    static member validate (workspace: string option) =
-        scope Cacheability.Always
-        |> andThen "terraform" "init"
-        |> andIf (workspace |> Option.isSome) (fun batch -> batch |> andThen "terraform" $"workspace select {workspace.Value}")
-        |> andThen "terraform" $"validate"
+    static member validate (context: ActionContext) (workspace: string option) =
+        let ops = All [
+            shellOp "terraform" "init"
+            
+            match workspace with
+            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | _ -> ()
 
-    /// <summary weight="2" title="Generate plan file.">
+            shellOp "terraform" "validate"
+        ]
+        execRequest Cacheability.Always [] ops
+
+
+    /// <summary weight="3" title="Generate plan file.">
     /// This command generates the planfile:
     /// * initialize Terraform
     /// * select workspace
@@ -48,24 +55,37 @@ type Terraform() =
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
-    static member plan (workspace: string option) (variables: Map<string, string>) =
+    static member plan (context: ActionContext) (workspace: string option) (variables: Map<string, string>) =
         let vars = variables |> Seq.fold (fun acc (KeyValue(key, value)) -> acc + $" -var=\"{key}={value}\"") ""
 
-        scope Cacheability.Always
-        |> andThen "terraform" "init"
-        |> andIf (workspace |> Option.isSome) (fun batch -> batch |> andThen "terraform" $"workspace select {workspace.Value}")
-        |> andThen "terraform" $"plan -out=terrabuild.planfile{vars}"
+        let ops = All [
+            shellOp "terraform" "init"
+            
+            match workspace with
+            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | _ -> ()
+
+            shellOp "terraform" $"plan -out=terrabuild.planfile{vars}"
+        ]
+        execRequest Cacheability.Always [] ops
   
 
-    /// <summary weight="3" title="Apply plan file.">
+    /// <summary weight="4" title="Apply plan file.">
     /// Apply the plan file:
     /// * initialize Terraform
     /// * select workspace
     /// * apply plan
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
-    static member apply (workspace: string option) =
-        scope Cacheability.Always
-        |> andThen "terraform" "init"
-        |> andIf (workspace |> Option.isSome) (fun batch -> batch |> andThen "terraform" $"workspace select {workspace.Value}")
-        |> andThen "terraform" "apply terrabuild.planfile"
+    static member apply (context: ActionContext) (workspace: string option) =
+        let ops = All [
+            shellOp "terraform" "init"
+            
+            match workspace with
+            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | _ -> ()
+
+            shellOp "terraform" "apply terrabuild.planfile"
+        ]
+        execRequest Cacheability.Always [] ops
+  

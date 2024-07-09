@@ -3,5 +3,6 @@ project @dotnet {
 }
 
 target build {
+    @shell echo { arguments: "building project" }
     @dotnet build
 }

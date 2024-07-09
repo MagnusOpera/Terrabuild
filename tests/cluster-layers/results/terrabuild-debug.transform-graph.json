@@ -51,6 +51,90 @@
           }
         ]
       },
+      "dependencies": [
+        "A:build-1"
+      ],
+      "outputs": [
+        "**/*.binlog",
+        "bin/",
+        "obj/",
+        "obj/*.json",
+        "obj/*.props",
+        "obj/*.targets"
+      ],
+      "projectHash": "1331212E360E341B3A07B89233CA975DD8814EE7E1A31F4CFB97FE46E162F45C",
+      "targetHash": "63E2E3248F4C306ECC86A1715BF4ECBC07970446FB8870626BC0668BDC42003B",
+      "operationHash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+      "isLeaf": true,
+      "targetOperation": {
+        "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@dotnet",
+        "command": "build",
+        "script": {},
+        "context": [
+          "map",
+          {}
+        ]
+      },
+      "operations": [],
+      "isRequired": true,
+      "isFirst": false,
+      "isLast": true,
+      "isBatched": false
+    },
+    "A:build-1": {
+      "id": "A:build-1",
+      "label": "build A",
+      "project": "A",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "**/*.binlog",
+          "bin/",
+          "obj/",
+          "obj/*.json",
+          "obj/*.props",
+          "obj/*.targets"
+        ],
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "building project"
+                ]
+              }
+            ]
+          },
+          {
+            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@dotnet",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
       "dependencies": [],
       "outputs": [
         "**/*.binlog",
@@ -62,17 +146,117 @@
       ],
       "projectHash": "1331212E360E341B3A07B89233CA975DD8814EE7E1A31F4CFB97FE46E162F45C",
       "targetHash": "63E2E3248F4C306ECC86A1715BF4ECBC07970446FB8870626BC0668BDC42003B",
-      "operationHash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+      "operationHash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
       "isLeaf": true,
-      "targetOperation": null,
+      "targetOperation": {
+        "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@shell",
+        "command": "echo",
+        "script": {},
+        "context": [
+          "map",
+          {
+            "arguments": [
+              "string",
+              "building project"
+            ]
+          }
+        ]
+      },
       "operations": [],
-      "isRequired": false,
+      "isRequired": true,
       "isFirst": true,
-      "isLast": true,
+      "isLast": false,
       "isBatched": false
     },
     "B:build": {
       "id": "B:build",
+      "label": "build B",
+      "project": "B",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "**/*.binlog",
+          "bin/",
+          "obj/",
+          "obj/*.json",
+          "obj/*.props",
+          "obj/*.targets"
+        ],
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "building project"
+                ]
+              }
+            ]
+          },
+          {
+            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@dotnet",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "B:build-1"
+      ],
+      "outputs": [
+        "**/*.binlog",
+        "bin/",
+        "obj/",
+        "obj/*.json",
+        "obj/*.props",
+        "obj/*.targets"
+      ],
+      "projectHash": "CC8C96EF544914A3802A18E8EF8C10503BDEAE040D90EF613402F34962BD4104",
+      "targetHash": "42F9DDBF160016079E4C227B4287249C23DE4EEE31AFFED39BE5E47596A6247B",
+      "operationHash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+      "isLeaf": true,
+      "targetOperation": {
+        "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@dotnet",
+        "command": "build",
+        "script": {},
+        "context": [
+          "map",
+          {}
+        ]
+      },
+      "operations": [],
+      "isRequired": true,
+      "isFirst": false,
+      "isLast": true,
+      "isBatched": false
+    },
+    "B:build-1": {
+      "id": "B:build-1",
       "label": "build B",
       "project": "B",
       "target": "build",
@@ -133,17 +317,107 @@
       ],
       "projectHash": "CC8C96EF544914A3802A18E8EF8C10503BDEAE040D90EF613402F34962BD4104",
       "targetHash": "42F9DDBF160016079E4C227B4287249C23DE4EEE31AFFED39BE5E47596A6247B",
-      "operationHash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+      "operationHash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
       "isLeaf": true,
-      "targetOperation": null,
+      "targetOperation": {
+        "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@shell",
+        "command": "echo",
+        "script": {},
+        "context": [
+          "map",
+          {
+            "arguments": [
+              "string",
+              "building project"
+            ]
+          }
+        ]
+      },
       "operations": [],
-      "isRequired": false,
+      "isRequired": true,
       "isFirst": true,
-      "isLast": true,
+      "isLast": false,
       "isBatched": false
     },
     "C:build": {
       "id": "C:build",
+      "label": "build C",
+      "project": "C",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "7CBFCD2D010F460CED07F894949A860B35492555250E183E1BEB1C76EFB8181B",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/"
+        ],
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "building project"
+                ]
+              }
+            ]
+          },
+          {
+            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@npm",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "C:build-1"
+      ],
+      "outputs": [
+        "dist/"
+      ],
+      "projectHash": "429BA3285F3F1AB8712C6475C79FBCDCA29DFABDDDB30D7B56828B382506D3E9",
+      "targetHash": "765010FC9C2C165C213A8B0950A97808774A9A8E4DD9F39F639DB69860F04679",
+      "operationHash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+      "isLeaf": true,
+      "targetOperation": {
+        "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@npm",
+        "command": "build",
+        "script": {},
+        "context": [
+          "map",
+          {}
+        ]
+      },
+      "operations": [],
+      "isRequired": true,
+      "isFirst": false,
+      "isLast": true,
+      "isBatched": false
+    },
+    "C:build-1": {
+      "id": "C:build-1",
       "label": "build C",
       "project": "C",
       "target": "build",
@@ -197,13 +471,29 @@
       ],
       "projectHash": "429BA3285F3F1AB8712C6475C79FBCDCA29DFABDDDB30D7B56828B382506D3E9",
       "targetHash": "765010FC9C2C165C213A8B0950A97808774A9A8E4DD9F39F639DB69860F04679",
-      "operationHash": "7CBFCD2D010F460CED07F894949A860B35492555250E183E1BEB1C76EFB8181B",
+      "operationHash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
       "isLeaf": true,
-      "targetOperation": null,
+      "targetOperation": {
+        "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@shell",
+        "command": "echo",
+        "script": {},
+        "context": [
+          "map",
+          {
+            "arguments": [
+              "string",
+              "building project"
+            ]
+          }
+        ]
+      },
       "operations": [],
-      "isRequired": false,
+      "isRequired": true,
       "isFirst": true,
-      "isLast": true,
+      "isLast": false,
       "isBatched": false
     },
     "D:build": {
@@ -253,11 +543,22 @@
       ],
       "projectHash": "48EF5EAF4D5BF0D575315F0C1901BCF5BC83DB8D22530E496764B8BC328FE3B0",
       "targetHash": "97928F3FC667BDC0E61A90E520D885DB84A1A4D506E67AF015FFBDF63013C5D0",
-      "operationHash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
+      "operationHash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
       "isLeaf": true,
-      "targetOperation": null,
+      "targetOperation": {
+        "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@dotnet",
+        "command": "build",
+        "script": {},
+        "context": [
+          "map",
+          {}
+        ]
+      },
       "operations": [],
-      "isRequired": false,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -309,11 +610,22 @@
       ],
       "projectHash": "C0258BC9A2BBDE8B5300E3594D728190C18D187B421A690AABE51B589ED7E2FA",
       "targetHash": "B61D947D93CAA67B9A289FCDF5CE5151F0B79580E519BFFF7BCCF97A42604FAB",
-      "operationHash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
+      "operationHash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
       "isLeaf": true,
-      "targetOperation": null,
+      "targetOperation": {
+        "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@dotnet",
+        "command": "build",
+        "script": {},
+        "context": [
+          "map",
+          {}
+        ]
+      },
       "operations": [],
-      "isRequired": false,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -356,11 +668,22 @@
       ],
       "projectHash": "4189AF367DD05BFA3DD8519B640CE28F48E188BFEA9F77C4085E0967DFFA9DB5",
       "targetHash": "24F5134247026320EDCABDA652FDC752CA576ED27E4898B9C4C2972E2992E194",
-      "operationHash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+      "operationHash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
       "isLeaf": true,
-      "targetOperation": null,
+      "targetOperation": {
+        "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@npm",
+        "command": "build",
+        "script": {},
+        "context": [
+          "map",
+          {}
+        ]
+      },
       "operations": [],
-      "isRequired": false,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -402,11 +725,22 @@
       ],
       "projectHash": "BAD12DC7581DAE34275B88A0C98FAABBDBB7A1969FC0C091F8FA82446A8509B9",
       "targetHash": "A2410BED8127F9D6EE73671494BAF4B05735024377CBBAE8001F825405716B4F",
-      "operationHash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+      "operationHash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
       "isLeaf": true,
-      "targetOperation": null,
+      "targetOperation": {
+        "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+        "container": null,
+        "containerVariables": [],
+        "extension": "@npm",
+        "command": "build",
+        "script": {},
+        "context": [
+          "map",
+          {}
+        ]
+      },
       "operations": [],
-      "isRequired": false,
+      "isRequired": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false

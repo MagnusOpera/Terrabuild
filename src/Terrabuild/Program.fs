@@ -4,6 +4,30 @@ open System
 open Serilog
 open Errors
 open System.Reflection
+open Collections
+
+
+[<RequireQualifiedAccess>]
+type RunTargetOptions = {
+    Workspace: string
+    WhatIf: bool
+    Debug: bool
+    MaxConcurrency: int
+    Force: bool
+    Retry: bool
+    LocalOnly: bool
+    StartedAt: DateTime
+    IsLog: bool
+    NoContainer: bool
+    NoBatch: bool
+    Targets: string set
+    Configuration: string
+    Note: string option
+    Tag: string option
+    Labels: string set option
+    Variables: Map<string, string>
+}
+
 
 let rec dumpKnownException (ex: Exception) =
     seq {
@@ -50,35 +74,56 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .MinimumLevel.Debug()
                 .WriteTo.File(logFile "log")
                 .CreateLogger()
-        Log.Debug("Log created")
+        Log.Debug("===== [Execution Start] =====")
 
-    let runTarget wsDir target configuration note tag labels variables localOnly logs (options: Configuration.Options) =
+    let runTarget logs (options: RunTargetOptions) =
         let logGraph graph name =
             graph
             |> Json.Serialize
             |> IO.writeTextFile (logFile $"{name}-graph.json")
             graph
-            |> Graph.graph
+            |> GraphDef.render None
             |> String.join "\n"
             |> IO.writeTextFile (logFile $"{name}-graph.mermaid")
 
-        let wsDir = wsDir |> FS.fullPath
-        Environment.CurrentDirectory <- wsDir
-        Log.Debug("Changing current directory to {directory}", wsDir)
+        Environment.CurrentDirectory <- options.Workspace
+        Log.Debug("Changing current directory to {directory}", options.Workspace)
         Log.Debug("ProcessorCount = {procCount}", Environment.ProcessorCount)
 
         // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
         IO.createDirectory ".terrabuild"
 
+        let sourceControl = SourceControls.Factory.create()
+
+        let configOptions = {
+            Configuration.Options.Workspace = options.Workspace
+            Configuration.Options.WhatIf = options.WhatIf
+            Configuration.Options.Debug = options.Debug
+            Configuration.Options.MaxConcurrency = options.MaxConcurrency
+            Configuration.Options.Force = options.Force
+            Configuration.Options.Retry = options.Retry
+            Configuration.Options.LocalOnly = options.LocalOnly
+            Configuration.Options.StartedAt = options.StartedAt
+            Configuration.Options.NoContainer = options.NoContainer
+            Configuration.Options.NoBatch = options.NoBatch
+            Configuration.Options.Targets = options.Targets
+            Configuration.Options.CI = sourceControl.CI
+            Configuration.Options.BranchOrTag = sourceControl.BranchOrTag
+            Configuration.Options.Configuration = options.Configuration
+            Configuration.Options.Note = options.Note
+            Configuration.Options.Tag = options.Tag
+            Configuration.Options.Labels = options.Labels
+            Configuration.Options.Variables = options.Variables
+        }
+
         if options.Debug then
             let jsonOptions = Json.Serialize options
             jsonOptions |> IO.writeTextFile (logFile "options.json")
 
-        let sourceControl = SourceControls.Factory.create()
-        let config = Configuration.read wsDir configuration note tag labels variables sourceControl options
+        let config = Configuration.read configOptions
 
         let token =
-            if localOnly then None
+            if options.LocalOnly then None
             else config.Space |> Option.bind (fun space -> Auth.readAuthToken space)
         let api = Api.Factory.create config.Space token
         if api |> Option.isSome then
@@ -93,39 +138,41 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let cache = Cache.Cache(storage) :> Cache.ICache
 
         let buildGraph =
-            let graph = Graph.create config target options
+            let graph = GraphBuilder.build configOptions config
             if options.Debug then logGraph graph "config"
 
-            let consistentGraph = Graph.enforceConsistency config graph cache options
+            let tryGetSummaryOnly useRemote id = cache.TryGetSummaryOnly useRemote id |> Option.map (fun (_, summary) -> summary)
+            let consistentGraph = GraphConsistency.enforce configOptions tryGetSummaryOnly graph
             if options.Debug then logGraph consistentGraph "consistent"
 
-            let requiredGraph = Graph.markRequired consistentGraph options
-            if options.Debug then logGraph requiredGraph "required"
+            let transformGraph = GraphTransformer.transform consistentGraph
+            if options.Debug then logGraph transformGraph "transform"
 
-            let buildGraph =
-                if options.NoBatch then requiredGraph
-                else Graph.optimize config requiredGraph options
-            if options.Debug then logGraph buildGraph "build"
+            let optimizeGraph =
+                if options.NoBatch then transformGraph
+                else GraphOptimizer.optimize configOptions transformGraph
+            if options.Debug then logGraph optimizeGraph "optimize"
 
-            let nodesToRun = graph.Nodes.Count
-            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToRun} tasks" |> Terminal.writeLine
-            buildGraph
+            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {optimizeGraph.Nodes.Count} tasks" |> Terminal.writeLine
+            optimizeGraph
+
+        if options.Debug then logGraph buildGraph "build"
 
         if options.WhatIf then
             if logs then
-                Logs.dumpLogs runId buildGraph cache sourceControl None options.Debug
+                Logs.dumpLogs runId configOptions cache sourceControl buildGraph 
             0
         else
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            let summary = Build.run config buildGraph cache api buildNotification options
+            let summary = Build.run configOptions sourceControl cache api buildNotification buildGraph
             buildNotification.WaitCompletion()
 
             if options.Debug then
                 let jsonBuild = Json.Serialize summary
-                jsonBuild |> IO.writeTextFile (logFile "build.json")
+                jsonBuild |> IO.writeTextFile (logFile "build-result.json")
 
             if logs || summary.Status <> Build.Status.Success then
-                Logs.dumpLogs runId buildGraph cache sourceControl (Some summary.BuildNodes) options.Debug
+                Logs.dumpLogs runId configOptions cache sourceControl buildGraph  
 
             let result =
                 match summary.Status with
@@ -161,17 +208,26 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let localOnly = runArgs.Contains(RunArgs.LocalOnly)
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
-        let whatIf = runArgs.Contains(RunArgs.WhatIf)
-        let options = { Configuration.Options.WhatIf = whatIf
-                        Configuration.Options.Debug = debug
-                        Configuration.Options.Force = runArgs.Contains(RunArgs.Force)
-                        Configuration.Options.MaxConcurrency = maxConcurrency
-                        Configuration.Options.NoContainer = noContainer
-                        Configuration.Options.NoBatch = noBatch
-                        Configuration.Options.Retry = runArgs.Contains(RunArgs.Retry)
-                        Configuration.Options.StartedAt = DateTime.UtcNow
-                        Configuration.Options.IsLog = false }
-        runTarget wsDir (Set targets) configuration note tag labels variables localOnly logs options
+        let whatIf = runArgs.Contains(RunArgs.WhatIf) 
+
+        let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
+                        RunTargetOptions.WhatIf = whatIf
+                        RunTargetOptions.Debug = debug
+                        RunTargetOptions.Force = runArgs.Contains(RunArgs.Force)
+                        RunTargetOptions.MaxConcurrency = maxConcurrency
+                        RunTargetOptions.NoContainer = noContainer
+                        RunTargetOptions.NoBatch = noBatch
+                        RunTargetOptions.Retry = runArgs.Contains(RunArgs.Retry)
+                        RunTargetOptions.StartedAt = DateTime.UtcNow
+                        RunTargetOptions.IsLog = false
+                        RunTargetOptions.Targets = Set targets
+                        RunTargetOptions.LocalOnly = localOnly
+                        RunTargetOptions.Configuration = configuration
+                        RunTargetOptions.Note = note
+                        RunTargetOptions.Tag = tag
+                        RunTargetOptions.Labels = labels
+                        RunTargetOptions.Variables = variables }
+        runTarget logs options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
         let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
@@ -185,16 +241,24 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
-        let options = { Configuration.Options.WhatIf = true
-                        Configuration.Options.Debug = debug
-                        Configuration.Options.Force = false
-                        Configuration.Options.MaxConcurrency = 1
-                        Configuration.Options.NoContainer = false
-                        Configuration.Options.NoBatch = true
-                        Configuration.Options.Retry = false
-                        Configuration.Options.StartedAt = DateTime.UtcNow
-                        Configuration.Options.IsLog = true}
-        runTarget wsDir (Set targets) configuration None None labels variables true true options
+        let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
+                        RunTargetOptions.WhatIf = true
+                        RunTargetOptions.Debug = debug
+                        RunTargetOptions.Force = false
+                        RunTargetOptions.MaxConcurrency = 1
+                        RunTargetOptions.NoContainer = false
+                        RunTargetOptions.NoBatch = true
+                        RunTargetOptions.Retry = false
+                        RunTargetOptions.StartedAt = DateTime.UtcNow
+                        RunTargetOptions.IsLog = true
+                        RunTargetOptions.Targets = Set targets
+                        RunTargetOptions.LocalOnly = true 
+                        RunTargetOptions.Configuration = configuration
+                        RunTargetOptions.Note = None
+                        RunTargetOptions.Tag = None
+                        RunTargetOptions.Labels = labels
+                        RunTargetOptions.Variables = variables }
+        runTarget true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearBuildCache()
@@ -261,4 +325,5 @@ let main _ =
 
     Environment.CurrentDirectory <- launchDir
     Terminal.showCursor()
+    Log.Debug("===== [Execution End] =====")
     retCode
