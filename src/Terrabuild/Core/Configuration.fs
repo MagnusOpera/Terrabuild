@@ -292,6 +292,7 @@ let read (options: Options) =
                     buildVariables
                     |> Map.add "terrabuild_project" (Expr.String projectId)
                     |> Map.add "terrabuild_target" (Expr.String targetName)
+                    |> Map.add "terrabuild_hash" (Expr.String projectHash)
                     |> Map.add "terrabuild_configuration" (Expr.String options.Configuration)
                     |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
                     |> Map.add "terrabuild_retry" (Expr.Boolean options.Retry)
