@@ -272,9 +272,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let status = hub.WaitCompletion()
     match status with
-    | Status.Ok -> ()
-    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Project {projectId} is unknown")
-    | Status.SubscriptionError exn -> TerrabuildException.Raise("Build error", exn)
+    | Status.Ok -> Log.Debug("Build successful")
+    | Status.SubcriptionNotRaised projectId -> Log.Debug("Build failed: project {projectId} is unknown", projectId)
+    | Status.SubscriptionError exn -> Log.Debug(exn, "Build failed with exception")
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
