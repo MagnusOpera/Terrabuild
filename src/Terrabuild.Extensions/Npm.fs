@@ -103,3 +103,15 @@ type Npm() =
             shellOp "npm" $"run test -- {args}"   
         ]
         execRequest Cacheability.Always [] ops
+
+    /// <summary>
+    /// Run `run` script.
+    /// </summary>
+    /// <param name="arguments" example="&quot;build-prod&quot;">Arguments to pass to target.</param> 
+    static member run (context: ActionContext) (arguments: string option) =
+        let args = arguments |> Option.defaultValue ""
+
+        let ops = All [
+            shellOp context.Command args
+        ]
+        execRequest Cacheability.Always [] ops
