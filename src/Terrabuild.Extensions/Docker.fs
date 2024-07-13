@@ -31,13 +31,14 @@ type Docker() =
                     shellOp "docker" $"push {image}:{nodehash}"
                 else
                     shellOp "docker" buildArgs])
+            |> Map.map (fun _ ops -> Shell ops)
             |> Each
 
         let cacheability =
             if context.CI then Cacheability.Remote
             else Cacheability.Local
 
-        execRequest cacheability [] ops
+        execRequest cacheability noOp ops
 
 
     /// <summary>
@@ -58,10 +59,11 @@ type Docker() =
                     shellOp "docker" $"buildx imagetools create -t {image}:{imageTag} {image}:{nodehash}"
                 else
                     shellOp "docker" $"tag {image}:{nodehash} {image}:{imageTag}"])
+            |> Map.map (fun _ ops -> Shell ops)
             |> Each
 
         let cacheability =
             if context.CI then Cacheability.Remote
             else Cacheability.Local
 
-        execRequest cacheability [] ops
+        execRequest cacheability noOp ops

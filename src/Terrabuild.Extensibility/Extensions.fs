@@ -43,11 +43,6 @@ type ShellOperation = {
 
 type FunOperation = unit -> unit
 
-[<RequireQualifiedAccess>]
-type Operation =
-    | Shell of ShellOperation
-    | Function of FunOperation
-
 [<Flags>]
 type Cacheability =
     | Never = 0
@@ -55,7 +50,9 @@ type Cacheability =
     | Remote = 2
     | Always = 3 // Local + Remote
 
-type Operations = Operation list
+type Operations = 
+    | Shell of ShellOperation list
+    | Function of FunOperation
 
 type ApplyOperations =
     | Each of Map<string, Operations>
@@ -68,14 +65,11 @@ type ActionExecutionRequest = {
     Operations: ApplyOperations
 }
 
-
+let noOp = Shell []
 
 let shellOp cmd args = 
-    Operation.Shell { ShellOperation.Command = cmd
-                      ShellOperation.Arguments = args }
-
-let funOp f =
-    Operation.Function f
+    { ShellOperation.Command = cmd
+      ShellOperation.Arguments = args }
 
 let execRequest cache preOps ops =
     { ActionExecutionRequest.Cache = cache 

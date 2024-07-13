@@ -120,7 +120,7 @@ type Dotnet() =
     static let buildRequest (context: ActionContext) configuration buildOps =
         let preOps, ops =
             match context.Projects.Count with
-            | 1 -> [], All (buildOps "")
+            | 1 -> noOp, All (buildOps "")
             | _ ->
                 let projects =
                     context.Projects
@@ -130,7 +130,7 @@ type Dotnet() =
                 let slnfile = Path.Combine(context.TempDir, $"{context.UniqueId}.sln")
                 let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
                 IO.writeLines slnfile slnContent
-                buildOps slnfile, All []
+                buildOps slnfile, All noOp
 
         execRequest Cacheability.Always preOps ops
 
@@ -180,7 +180,7 @@ type Dotnet() =
 
         let arguments = arguments |> Option.defaultValue ""
 
-        let buildOps projectFile = [
+        let buildOps projectFile = Shell [
             shellOp "dotnet" $"build {projectFile} --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
         ]
 
@@ -194,8 +194,8 @@ type Dotnet() =
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = All [ shellOp context.Command arguments ]
-        execRequest Cacheability.Always [] ops
+        let ops = All <| Shell [ shellOp context.Command arguments ]
+        execRequest Cacheability.Always noOp ops
 
 
     /// <summary>
@@ -209,7 +209,7 @@ type Dotnet() =
         let version = version |> Option.defaultValue "0.0.0"
         let arguments = arguments |> Option.defaultValue ""
 
-        let buildOps projectFile = [
+        let buildOps projectFile = Shell [
             shellOp "dotnet" $"pack {projectFile} --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
         ]
 
@@ -240,7 +240,7 @@ type Dotnet() =
             | _ -> ""
         let arguments = arguments |> Option.defaultValue ""
 
-        let buildOps projectFile = [
+        let buildOps projectFile = Shell [
             shellOp "dotnet" $"publish {projectFile} --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
         ]
 
@@ -254,8 +254,8 @@ type Dotnet() =
     static member restore (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = All [ shellOp "dotnet" $"restore {arguments}" ]
-        execRequest Cacheability.Local [] ops
+        let ops = All <| Shell [ shellOp "dotnet" $"restore {arguments}" ]
+        execRequest Cacheability.Local noOp ops
 
 
     /// <summary>
@@ -269,7 +269,7 @@ type Dotnet() =
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
         let arguments = arguments |> Option.defaultValue ""
 
-        let buildOps projectFile = [
+        let buildOps projectFile = Shell [
             shellOp "dotnet" $"test {projectFile} --no-build --configuration {configuration} {filter} {arguments}"
         ]
 
