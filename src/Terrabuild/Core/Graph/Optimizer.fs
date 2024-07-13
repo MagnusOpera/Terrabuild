@@ -140,10 +140,11 @@ let optimize (options: Configuration.Options) (graph: Graph) =
             // create the batch node if required
             let clusterDependencies = 
                 match executionRequest.PreOperations with
-                | [] -> clusterDependencies
-                | _ ->
+                | Terrabuild.Extensibility.Function f -> clusterDependencies
+                | Terrabuild.Extensibility.Shell [] -> clusterDependencies
+                | Terrabuild.Extensibility.Shell shellOps ->
                     let containeredOperations =
-                        executionRequest.PreOperations
+                        shellOps
                         |> List.map (fun operation -> {
                             ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
                             ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
