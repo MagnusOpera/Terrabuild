@@ -2,13 +2,21 @@ module GraphDef
 open Collections
 
 [<RequireQualifiedAccess>]
-type ContaineredShellOperation = {
+type ShellOperation = {
     Container: string option
     ContainerVariables: string set
     MetaCommand: string
     Command: string
     Arguments: string
 }
+
+[<RequireQualifiedAccess>]
+type FunOperation = {
+    MetaCommand: string
+    Function: unit -> unit
+}
+
+type Operation = (unit -> unit) list
 
 [<RequireQualifiedAccess>]
 type Node = {
@@ -33,7 +41,7 @@ type Node = {
     // if forced then cache is ignored
     // set by Analysis/Builder (init from user) & Analysys/Consistency
     TargetOperation: Configuration.TargetOperation option
-    Operations: ContaineredShellOperation list
+    Operations: Operation list
 
     // tell if outputs of a node are required or not
     // if outputs are required they can be downloaded from the cache if they exists (ProjectHash/Target/TargetHash)

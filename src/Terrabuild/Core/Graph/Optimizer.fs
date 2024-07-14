@@ -138,20 +138,19 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                 | _ -> TerrabuildException.Raise("Failed to get shell operation (extension error)")
 
             // create the batch node if required
-            let clusterDependencies = 
+            let clusterDependencies, isBatched = 
                 match executionRequest.PreOperations with
-                | Terrabuild.Extensibility.Function f -> clusterDependencies
-                | Terrabuild.Extensibility.Shell [] -> clusterDependencies
+                | Terrabuild.Extensibility.Function f -> clusterDependencies, false
+                | Terrabuild.Extensibility.Shell [] -> clusterDependencies, false
                 | Terrabuild.Extensibility.Shell shellOps ->
                     let containeredOperations =
                         shellOps
-                        |> List.map (fun operation -> {
-                            ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
-                            ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
-                            ContaineredShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
-                            ContaineredShellOperation.Command = operation.Command
-                            ContaineredShellOperation.Arguments = operation.Arguments
-                        })
+                        |> List.map (fun operation ->
+                            Shell { ShellOperation.Container = oneNode.TargetOperation.Value.Container
+                                    ShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                                    ShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
+                                    ShellOperation.Command = operation.Command
+                                    ShellOperation.Arguments = operation.Arguments })
 
                     let clusterNode =
                         { oneNode with
@@ -167,7 +166,7 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                             IsFirst = false
                             IsLast = true }
                     allNodes.TryAdd(clusterNode.Id, clusterNode) |> ignore
-                    Set.singleton clusterNode.Id
+                    Set.singleton clusterNode.Id, true
 
             // patch each nodes to have a dependency on the cluster
             // but still keep dependencies because we want to ensure build order
@@ -180,21 +179,21 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                         map[hash]
 
                 let ops =
+                    
                     ops
-                    |> List.map (fun operation -> {
-                        ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
-                        ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
-                        ContaineredShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
-                        ContaineredShellOperation.Command = operation.Command
-                        ContaineredShellOperation.Arguments = operation.Arguments
-                    })
+                    |> List.map (fun operation ->
+                        { ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
+                          ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                          ContaineredShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
+                          ContaineredShellOperation.Command = operation.Command
+                          ContaineredShellOperation.Arguments = operation.Arguments })
 
                 let node =
                     { node with
                         OperationHash = clusterHash
                         Dependencies = node.Dependencies + clusterDependencies
                         Operations = ops
-                        IsBatched = executionRequest.PreOperations |> List.isEmpty |> not }
+                        IsBatched = isBatched }
 
                 allNodes.TryAdd(node.Id, node) |> ignore
         | _ ->
