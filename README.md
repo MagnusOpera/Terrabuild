@@ -17,7 +17,7 @@ Terrabuild is a tool to maintain and build efficiently monorepos. Terrabuild is 
 - Terrabuild use heavy caching and several graph optimizations to make build fast both on CI and dev environment
 
 # Benefits
-- focus on project and the big picture, not the nitty gritty details
+- focus on project and the big picture, not the nitty-gritty details
 - local build is same as CI one
 - describe instead of tweak yaml
 - ensure consistency and detect impacts earlier in development
