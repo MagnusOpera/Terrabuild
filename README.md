@@ -8,9 +8,20 @@
 [![NuGet version](https://badge.fury.io/nu/terrabuild.svg)](https://www.nuget.org/packages/Terrabuild)
 ![build](https://github.com/magnusopera/terrabuild/actions/workflows/build.yml/badge.svg?branch=main)
 
-**Terrabuild** is the easiest way to maintain and build efficiently a monorepo. Terrabuild leverages a build cache and several graph optimizations to make build fast both on CI and developer environment.
+# What is Terrabuild ?
+Terrabuild is a tool to maintain and build efficiently monorepos. Terrabuild is language agnostic: it just knows about dependencies and how to build a project:
 
-See [📚 Documentation](https://terrabuild.io) for more information.
+- describe a workspace (collection of several projects) using a familiar syntax (HCL-like)
+- focus on how to build a project and its dependencies: Terrabuild will optimize and run concurrent builds whenever possible
+- Terrabuild ships with default extensions but you can implement your own as well
+- Terrabuild use heavy caching and several graph optimizations to make build fast both on CI and dev environment
+
+# Benefits
+- focus on project and the big picture, not the nitty gritty details
+- local build is same as CI one
+- describe instead of tweak yaml
+- ensure consistency and detect impacts earlier in development
+- no lock-in: Terrabuild is not intrusive and can be used without modifying your projects
 
 # Contributing
 Visit [Contributing](CONTRIBUTING.md) for information on building Terrabuild from source or contributing improvements.
