@@ -16,7 +16,9 @@ type FunOperation = {
     Function: unit -> unit
 }
 
-type Operation = (unit -> unit) list
+type Operation =
+    | Shell of ShellOperation
+    | Fun of FunOperation
 
 [<RequireQualifiedAccess>]
 type Node = {

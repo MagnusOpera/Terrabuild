@@ -57,7 +57,7 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir =
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory =
     // run actions if any
     let allCommands =
         node.Operations
@@ -85,18 +85,21 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                     containerInfos.TryAdd(container, whoami) |> ignore
                     whoami
 
-            let metaCommand = operation.MetaCommand
+            match operation with
+            | GraphDef.Shell operation ->
+                let metaCommand = operation.MetaCommand
 
-            match operation.Container, options.NoContainer with
-            | Some container, false ->
-                let whoami = getContainerUser container
-                let envs =
-                    operation.ContainerVariables
-                    |> Seq.map (fun var -> $"-e {var}")
-                    |> String.join " "
-                let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
-                metaCommand, options.Workspace, cmd, args, operation.Container
-            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
+                match operation.Container, options.NoContainer with
+                | Some container, false ->
+                    let whoami = getContainerUser container
+                    let envs =
+                        operation.ContainerVariables
+                        |> Seq.map (fun var -> $"-e {var}")
+                        |> String.join " "
+                    let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {Cache.containerDirectory}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                    metaCommand, options.Workspace, cmd, args, operation.Container
+                | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container
+            | GraphDef.Fun _ -> failwith "Unsupported")
 
     let stepLogs = List<Cache.OperationSummary>()
     let mutable lastExitCode = 0
@@ -147,8 +150,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let allowRemoteCache = options.LocalOnly |> not
 
-    let homeDir = cache.CreateHomeDir "container"
-
     let processNode (node: GraphDef.Node) =
         let cacheEntryId = GraphDef.buildCacheKey node
 
@@ -168,7 +169,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir
+            let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory
 
             let successful = lastExitCode = 0
             if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)

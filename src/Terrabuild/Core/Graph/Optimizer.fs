@@ -138,9 +138,9 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                 | _ -> TerrabuildException.Raise("Failed to get shell operation (extension error)")
 
             // create the batch node if required
-            let clusterDependencies, isBatched = 
-                match executionRequest.PreOperations with
-                | Terrabuild.Extensibility.Function f -> clusterDependencies, false
+            let clusterDependencies, isBatched =
+                match executionRequest.Operations with
+                | Terrabuild.Extensibility.Fun _ -> clusterDependencies, false
                 | Terrabuild.Extensibility.Shell [] -> clusterDependencies, false
                 | Terrabuild.Extensibility.Shell shellOps ->
                     let containeredOperations =
@@ -171,22 +171,22 @@ let optimize (options: Configuration.Options) (graph: Graph) =
             // patch each nodes to have a dependency on the cluster
             // but still keep dependencies because we want to ensure build order
             for node in nodes do
-                let ops =
-                    match executionRequest.Operations with
+                let postOps =
+                    match executionRequest.PostOperations with
                     | Terrabuild.Extensibility.All ops -> ops
-                    | Terrabuild.Extensibility.Each map ->
-                        let hash = project2hash[node.Id]
-                        map[hash]
+                    | Terrabuild.Extensibility.Each map -> map[project2hash[node.Id]]
 
                 let ops =
-                    
-                    ops
-                    |> List.map (fun operation ->
-                        { ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
-                          ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
-                          ContaineredShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
-                          ContaineredShellOperation.Command = operation.Command
-                          ContaineredShellOperation.Arguments = operation.Arguments })
+                    match postOps with
+                    | Terrabuild.Extensibility.Shell ops ->
+                        ops
+                        |> List.map (fun operation -> 
+                                Shell { ShellOperation.Container = oneNode.TargetOperation.Value.Container
+                                        ShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                                        ShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
+                                        ShellOperation.Command = operation.Command
+                                        ShellOperation.Arguments = operation.Arguments })
+                    | Terrabuild.Extensibility.Fun _ -> []
 
                 let node =
                     { node with

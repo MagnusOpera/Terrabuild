@@ -52,17 +52,17 @@ type Cacheability =
 
 type Operations = 
     | Shell of ShellOperation list
-    | Function of FunOperation
+    | Fun of FunOperation list
 
-type ApplyOperations =
+type PostOperations =
     | Each of Map<string, Operations>
     | All of Operations
 
 [<RequireQualifiedAccess>]
 type ActionExecutionRequest = {
     Cache: Cacheability
-    PreOperations: Operations
-    Operations: ApplyOperations
+    Operations: Operations
+    PostOperations: PostOperations
 }
 
 let noOp = Shell []
@@ -73,5 +73,5 @@ let shellOp cmd args =
 
 let execRequest cache preOps ops =
     { ActionExecutionRequest.Cache = cache 
-      ActionExecutionRequest.PreOperations = preOps
-      ActionExecutionRequest.Operations = ops }
+      ActionExecutionRequest.Operations = preOps
+      ActionExecutionRequest.PostOperations = ops }

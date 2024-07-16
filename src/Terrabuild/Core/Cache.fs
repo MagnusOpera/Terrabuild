@@ -51,7 +51,6 @@ type ICache =
     abstract TryGetSummaryOnly: useRemote:bool -> id:string -> (Origin * TargetSummary) option
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
     abstract GetEntry: useRemote:bool -> clean:bool -> id:string -> IEntry
-    abstract CreateHomeDir: nodeHash:string -> string
 
 
 let private summaryFilename = "summary.json"
@@ -61,13 +60,18 @@ let private originFilename = "origin"
 let terrabuildHome =
     FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
 
-let private buildCacheDirectory =
+let buildCacheDirectory =
     let cacheDir = FS.combinePath terrabuildHome "buildcache"
     IO.createDirectory cacheDir
     cacheDir
 
 let private homeDirectory =
     let cacheDir = FS.combinePath terrabuildHome "home"
+    IO.createDirectory cacheDir
+    cacheDir
+
+let containerDirectory =
+    let cacheDir = FS.combinePath homeDirectory "container"
     IO.createDirectory cacheDir
     cacheDir
 
@@ -291,7 +295,3 @@ type Cache(storage: Contracts.IStorage) =
             cachedSummaries.TryRemove(id) |> ignore
             let entryDir = FS.combinePath buildCacheDirectory id
             NewEntry(entryDir, useRemote, clean, id, storage)
-
-        member _.CreateHomeDir nodeHash: string =
-            let homeDir = FS.combinePath homeDirectory nodeHash
-            homeDir
