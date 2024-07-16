@@ -57,10 +57,10 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory =
+let execCommands projectDirectory targetHash operations (cacheEntry: Cache.IEntry) (options: Configuration.Options) =
     // run actions if any
     let allCommands =
-        match node.Operations with
+        match operations with
         | GraphDef.Shell operations ->
             operations
             |> List.map (fun operation ->
@@ -74,7 +74,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                         whoami
                     | _ ->
                         // discover USER
-                        let args = $"run --rm --name {node.TargetHash} --entrypoint whoami {container}"
+                        let args = $"run --rm --name {targetHash} --entrypoint whoami {container}"
                         let whoami =
                             Log.Debug("Identifying USER for {container}", container)
                             match Exec.execCaptureOutput options.Workspace cmd args with
@@ -96,7 +96,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                         operation.ContainerVariables
                         |> Seq.map (fun var -> $"-e {var}")
                         |> String.join " "
-                    let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {Cache.containerDirectory}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                    let args = $"run --rm --net=host --name {targetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {Cache.containerDirectory}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
                     metaCommand, options.Workspace, cmd, args, operation.Container
                 | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
         | GraphDef.Fun _ -> failwith "Unsupported"
@@ -114,7 +114,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
         let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
         cmdLineIndex <- cmdLineIndex + 1
 
-        Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
+        Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", targetHash, cmd, args)
         let logFile = cacheEntry.NextLogFile()
         let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
         cmdLastEndedAt <- DateTime.UtcNow
@@ -131,7 +131,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                         Cache.OperationSummary.ExitCode = exitCode }
         stepLog |> stepLogs.Add
         lastExitCode <- exitCode
-        Log.Debug("{Hash}: Execution completed with '{Code}'", node.TargetHash, exitCode)
+        Log.Debug("{Hash}: Execution completed with '{Code}'", targetHash, exitCode)
 
     lastExitCode, stepLogs
 
@@ -169,7 +169,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory
+            let lastExitCode, stepLogs = execCommands projectDirectory node.TargetHash node.Operations cacheEntry options
 
             let successful = lastExitCode = 0
             if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)
