@@ -146,11 +146,12 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                     let containeredOperations =
                         shellOps
                         |> List.map (fun operation ->
-                            Shell { ShellOperation.Container = oneNode.TargetOperation.Value.Container
-                                    ShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
-                                    ShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
-                                    ShellOperation.Command = operation.Command
-                                    ShellOperation.Arguments = operation.Arguments })
+                            { ShellOperation.Container = oneNode.TargetOperation.Value.Container
+                              ShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                              ShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
+                              ShellOperation.Command = operation.Command
+                              ShellOperation.Arguments = operation.Arguments })
+                        |> Shell
 
                     let clusterNode =
                         { oneNode with
@@ -181,12 +182,19 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                     | Terrabuild.Extensibility.Shell ops ->
                         ops
                         |> List.map (fun operation -> 
-                                Shell { ShellOperation.Container = oneNode.TargetOperation.Value.Container
-                                        ShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
-                                        ShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
-                                        ShellOperation.Command = operation.Command
-                                        ShellOperation.Arguments = operation.Arguments })
-                    | Terrabuild.Extensibility.Fun _ -> []
+                            { ShellOperation.Container = oneNode.TargetOperation.Value.Container
+                              ShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                              ShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
+                              ShellOperation.Command = operation.Command
+                              ShellOperation.Arguments = operation.Arguments })
+                        |> Shell
+                    | Terrabuild.Extensibility.Fun ops ->
+                        ops
+                        |> List.map (fun operation ->
+                            { FunOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
+                              FunOperation.Function = operation }
+                        )
+                        |> Fun
 
                 let node =
                     { node with

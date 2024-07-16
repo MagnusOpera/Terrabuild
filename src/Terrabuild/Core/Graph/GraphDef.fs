@@ -16,9 +16,9 @@ type FunOperation = {
     Function: unit -> unit
 }
 
-type Operation =
-    | Shell of ShellOperation
-    | Fun of FunOperation
+type Operations =
+    | Shell of ShellOperation list
+    | Fun of FunOperation list
 
 [<RequireQualifiedAccess>]
 type Node = {
@@ -43,7 +43,7 @@ type Node = {
     // if forced then cache is ignored
     // set by Analysis/Builder (init from user) & Analysys/Consistency
     TargetOperation: Configuration.TargetOperation option
-    Operations: Operation list
+    Operations: Operations
 
     // tell if outputs of a node are required or not
     // if outputs are required they can be downloaded from the cache if they exists (ProjectHash/Target/TargetHash)

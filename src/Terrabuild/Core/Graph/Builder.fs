@@ -80,7 +80,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.Project = project
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
-                             Node.Operations = []
+                             Node.Operations = Shell []
 
                              Node.Dependencies = children
                              Node.Outputs = target.Outputs
