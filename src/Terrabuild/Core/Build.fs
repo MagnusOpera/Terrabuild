@@ -57,49 +57,46 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let execCommands projectDirectory targetHash operations (cacheEntry: Cache.IEntry) (options: Configuration.Options) =
+let execCommands projectDirectory targetHash (operations: GraphDef.ShellOperation list) (getNextLog: unit -> string) (options: Configuration.Options) =
     // run actions if any
     let allCommands =
-        match operations with
-        | GraphDef.Shell operations ->
-            operations
-            |> List.map (fun operation ->
-                let cmd = "docker"
-                let wsDir = Environment.CurrentDirectory
+        operations
+        |> List.map (fun operation ->
+            let cmd = "docker"
+            let wsDir = Environment.CurrentDirectory
 
-                let getContainerUser (container: string) =
-                    match containerInfos.TryGetValue(container) with
-                    | true, whoami ->
-                        Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
-                        whoami
-                    | _ ->
-                        // discover USER
-                        let args = $"run --rm --name {targetHash} --entrypoint whoami {container}"
-                        let whoami =
-                            Log.Debug("Identifying USER for {container}", container)
-                            match Exec.execCaptureOutput options.Workspace cmd args with
-                            | Exec.Success (whoami, 0) -> whoami.Trim()
-                            | _ ->
-                                Log.Debug("USER identification failed for {container}: using root", container)
-                                "root"
+            let getContainerUser (container: string) =
+                match containerInfos.TryGetValue(container) with
+                | true, whoami ->
+                    Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
+                    whoami
+                | _ ->
+                    // discover USER
+                    let args = $"run --rm --name {targetHash} --entrypoint whoami {container}"
+                    let whoami =
+                        Log.Debug("Identifying USER for {container}", container)
+                        match Exec.execCaptureOutput options.Workspace cmd args with
+                        | Exec.Success (whoami, 0) -> whoami.Trim()
+                        | _ ->
+                            Log.Debug("USER identification failed for {container}: using root", container)
+                            "root"
 
-                        Log.Debug("Using USER {whoami} for {container}", whoami, container)
-                        containerInfos.TryAdd(container, whoami) |> ignore
-                        whoami
+                    Log.Debug("Using USER {whoami} for {container}", whoami, container)
+                    containerInfos.TryAdd(container, whoami) |> ignore
+                    whoami
 
-                let metaCommand = operation.MetaCommand
+            let metaCommand = operation.MetaCommand
 
-                match operation.Container, options.NoContainer with
-                | Some container, false ->
-                    let whoami = getContainerUser container
-                    let envs =
-                        operation.ContainerVariables
-                        |> Seq.map (fun var -> $"-e {var}")
-                        |> String.join " "
-                    let args = $"run --rm --net=host --name {targetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {Cache.containerDirectory}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
-                    metaCommand, options.Workspace, cmd, args, operation.Container
-                | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
-        | GraphDef.Fun _ -> failwith "Unsupported"
+            match operation.Container, options.NoContainer with
+            | Some container, false ->
+                let whoami = getContainerUser container
+                let envs =
+                    operation.ContainerVariables
+                    |> Seq.map (fun var -> $"-e {var}")
+                    |> String.join " "
+                let args = $"run --rm --net=host --name {targetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {Cache.containerDirectory}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                metaCommand, options.Workspace, cmd, args, operation.Container
+            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
 
     let stepLogs = List<Cache.OperationSummary>()
     let mutable lastExitCode = 0
@@ -115,7 +112,7 @@ let execCommands projectDirectory targetHash operations (cacheEntry: Cache.IEntr
         cmdLineIndex <- cmdLineIndex + 1
 
         Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", targetHash, cmd, args)
-        let logFile = cacheEntry.NextLogFile()
+        let logFile = getNextLog()
         let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
         cmdLastEndedAt <- DateTime.UtcNow
         let endedAt = cmdLastEndedAt
@@ -169,7 +166,10 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            let lastExitCode, stepLogs = execCommands projectDirectory node.TargetHash node.Operations cacheEntry options
+            let lastExitCode, stepLogs =
+                match node.Operations with
+                | GraphDef.Shell operations -> execCommands projectDirectory node.TargetHash operations cacheEntry.NextLogFile options
+                | _ -> failwith "Unsupported operations"
 
             let successful = lastExitCode = 0
             if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)
