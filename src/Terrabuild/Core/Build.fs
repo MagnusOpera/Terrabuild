@@ -55,6 +55,83 @@ type IBuildNotification =
     abstract NodeCompleted: node:GraphDef.Node -> restored: bool -> success: bool -> unit
 
 
+let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
+
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir =
+    // run actions if any
+    let allCommands =
+        node.Operations
+        |> List.map (fun operation ->
+            let cmd = "docker"
+            let wsDir = Environment.CurrentDirectory
+
+            let getContainerUser (container: string) =
+                match containerInfos.TryGetValue(container) with
+                | true, whoami ->
+                    Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
+                    whoami
+                | _ ->
+                    // discover USER
+                    let args = $"run --rm --name {node.TargetHash} --entrypoint whoami {container}"
+                    let whoami =
+                        Log.Debug("Identifying USER for {container}", container)
+                        match Exec.execCaptureOutput options.Workspace cmd args with
+                        | Exec.Success (whoami, 0) -> whoami.Trim()
+                        | _ ->
+                            Log.Debug("USER identification failed for {container}: using root", container)
+                            "root"
+
+                    Log.Debug("Using USER {whoami} for {container}", whoami, container)
+                    containerInfos.TryAdd(container, whoami) |> ignore
+                    whoami
+
+            let metaCommand = operation.MetaCommand
+
+            match operation.Container, options.NoContainer with
+            | Some container, false ->
+                let whoami = getContainerUser container
+                let envs =
+                    operation.ContainerVariables
+                    |> Seq.map (fun var -> $"-e {var}")
+                    |> String.join " "
+                let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                metaCommand, options.Workspace, cmd, args, operation.Container
+            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
+
+    let stepLogs = List<Cache.OperationSummary>()
+    let mutable lastExitCode = 0
+    let mutable cmdLineIndex = 0
+    let cmdFirstStartedAt = DateTime.UtcNow
+    let mutable cmdLastEndedAt = cmdFirstStartedAt
+
+    while cmdLineIndex < allCommands.Length && lastExitCode = 0 do
+        let startedAt =
+            if cmdLineIndex > 0 then DateTime.UtcNow
+            else cmdFirstStartedAt
+        let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
+        cmdLineIndex <- cmdLineIndex + 1
+
+        Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
+        let logFile = cacheEntry.NextLogFile()
+        let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
+        cmdLastEndedAt <- DateTime.UtcNow
+        let endedAt = cmdLastEndedAt
+        let duration = endedAt - startedAt
+        let stepLog = { Cache.OperationSummary.MetaCommand = metaCommand
+                        Cache.OperationSummary.Command = cmd
+                        Cache.OperationSummary.Arguments = args
+                        Cache.OperationSummary.Container = container
+                        Cache.OperationSummary.StartedAt = startedAt
+                        Cache.OperationSummary.EndedAt = endedAt
+                        Cache.OperationSummary.Duration = duration
+                        Cache.OperationSummary.Log = logFile
+                        Cache.OperationSummary.ExitCode = exitCode }
+        stepLog |> stepLogs.Add
+        lastExitCode <- exitCode
+        Log.Debug("{Hash}: Execution completed with '{Code}'", node.TargetHash, exitCode)
+
+    lastExitCode, stepLogs
+
 let run (options: Configuration.Options) (sourceControl: Contracts.ISourceControl) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
@@ -70,31 +147,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let allowRemoteCache = options.LocalOnly |> not
 
-    let workspaceDir = Environment.CurrentDirectory
-
-    let containerInfos = Concurrent.ConcurrentDictionary<string, string>()
-
     let homeDir = cache.CreateHomeDir "container"
-
-    let isBuildSuccess = function
-        | NodeStatus.Success _ -> true
-        | _ -> false
-
-    // collect dependencies status
-    let getDependencyStatus _ (node: GraphDef.Node) =
-        let cacheEntryId = GraphDef.buildCacheKey node
-        let nodeInfo = 
-            { NodeInfo.Project = node.Project
-              NodeInfo.Target = node.Target
-              NodeInfo.ProjectHash = node.ProjectHash 
-              NodeInfo.NodeHash = node.TargetHash }
-
-        match cache.TryGetSummaryOnly false cacheEntryId with
-        | Some (_, summary) ->
-            if summary.IsSuccessful then NodeStatus.Success nodeInfo
-            else NodeStatus.Failure nodeInfo
-        | _ -> NodeStatus.Unfulfilled nodeInfo
-
 
     let processNode (node: GraphDef.Node) =
         let cacheEntryId = GraphDef.buildCacheKey node
@@ -105,88 +158,17 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             | FS.File projectFile -> FS.parentDirectory projectFile
             | _ -> "."
 
-
-        let buildNode() =
+        let buildNode () =
             let startedAt = DateTime.UtcNow
 
             notification.NodeBuilding node
             let cacheEntry = cache.GetEntry sourceControl.CI.IsSome node.IsFirst cacheEntryId
 
-            // run actions if any
-            let allCommands =
-                node.Operations
-                |> List.map (fun operation ->
-                    let cmd = "docker"
-                    let wsDir = Environment.CurrentDirectory
-
-                    let getContainerUser (container: string) =
-                        match containerInfos.TryGetValue(container) with
-                        | true, whoami ->
-                            Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
-                            whoami
-                        | _ ->
-                            // discover USER
-                            let args = $"run --rm --name {node.TargetHash} --entrypoint whoami {container}"
-                            let whoami =
-                                Log.Debug("Identifying USER for {container}", container)
-                                match Exec.execCaptureOutput workspaceDir cmd args with
-                                | Exec.Success (whoami, 0) -> whoami.Trim()
-                                | _ ->
-                                    Log.Debug("USER identification failed for {container}: using root", container)
-                                    "root"
-
-                            Log.Debug("Using USER {whoami} for {container}", whoami, container)
-                            containerInfos.TryAdd(container, whoami) |> ignore
-                            whoami
-
-                    let metaCommand = operation.MetaCommand
-
-                    match operation.Container, options.NoContainer with
-                    | Some container, false ->
-                        let whoami = getContainerUser container
-                        let envs =
-                            operation.ContainerVariables
-                            |> Seq.map (fun var -> $"-e {var}")
-                            |> String.join " "
-                        let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
-                        metaCommand, workspaceDir, cmd, args, operation.Container
-                    | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
-
-            let stepLogs = List<Cache.OperationSummary>()
-            let mutable lastExitCode = 0
-            let mutable cmdLineIndex = 0
-            let cmdFirstStartedAt = DateTime.UtcNow
-            let mutable cmdLastEndedAt = cmdFirstStartedAt
-
-            let logFile = cacheEntry.NextLogFile()
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            while cmdLineIndex < allCommands.Length && lastExitCode = 0 do
-                let startedAt =
-                    if cmdLineIndex > 0 then DateTime.UtcNow
-                    else cmdFirstStartedAt
-                let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
-                cmdLineIndex <- cmdLineIndex + 1
-
-                Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
-                let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
-                cmdLastEndedAt <- DateTime.UtcNow
-                let endedAt = cmdLastEndedAt
-                let duration = endedAt - startedAt
-                let stepLog = { Cache.OperationSummary.MetaCommand = metaCommand
-                                Cache.OperationSummary.Command = cmd
-                                Cache.OperationSummary.Arguments = args
-                                Cache.OperationSummary.Container = container
-                                Cache.OperationSummary.StartedAt = startedAt
-                                Cache.OperationSummary.EndedAt = endedAt
-                                Cache.OperationSummary.Duration = duration
-                                Cache.OperationSummary.Log = logFile
-                                Cache.OperationSummary.ExitCode = exitCode }
-                stepLog |> stepLogs.Add
-                lastExitCode <- exitCode
-                Log.Debug("{Hash}: Execution completed with '{Code}'", node.TargetHash, exitCode)
+            let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir
 
             let successful = lastExitCode = 0
             if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)
@@ -282,6 +264,21 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     // status of nodes to build
     let buildNodesStatus =
+        // collect dependencies status
+        let getDependencyStatus _ (node: GraphDef.Node) =
+            let cacheEntryId = GraphDef.buildCacheKey node
+            let nodeInfo = 
+                { NodeInfo.Project = node.Project
+                  NodeInfo.Target = node.Target
+                  NodeInfo.ProjectHash = node.ProjectHash 
+                  NodeInfo.NodeHash = node.TargetHash }
+
+            match cache.TryGetSummaryOnly false cacheEntryId with
+            | Some (_, summary) ->
+                if summary.IsSuccessful then NodeStatus.Success nodeInfo
+                else NodeStatus.Failure nodeInfo
+            | _ -> NodeStatus.Unfulfilled nodeInfo
+
         graph.RootNodes
         |> Seq.map (fun depId -> depId, graph.Nodes[depId])
         |> Map.ofSeq
@@ -290,6 +287,10 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         |> Set.ofSeq
 
     let status =
+        let isBuildSuccess = function
+            | NodeStatus.Success _ -> true
+            | _ -> false
+
         let isSuccess = buildNodesStatus |> Seq.forall isBuildSuccess
         if isSuccess then Status.Success
         else Status.Failure
