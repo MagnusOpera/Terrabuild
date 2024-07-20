@@ -4,7 +4,7 @@
 open Terrabuild.Configuration.Project.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 
-let lexeme  (lexbuf : LexBuffer<char>) = new System.String(lexbuf.Lexeme)
+let lexeme = LexBuffer<_>.LexemeString
 let newline (lexbuf:LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 }
 
