@@ -4,7 +4,8 @@
 open Terrabuild.Configuration.Project.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 
-let lexeme = LexBuffer<_>.LexemeString
+let lexeme  (lexbuf : LexBuffer<char>) = new System.String(lexbuf.Lexeme)
+let newline (lexbuf:LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 }
 
 let doubleQuote = '\"'
@@ -86,11 +87,11 @@ rule token = parse
     }
 
     | whitespace { token lexbuf }
-    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | newline { newline lexbuf; token lexbuf }
     | eof { EOF }
     | _ { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
 
 and singleLineComment = parse
-    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | newline { newline lexbuf; token lexbuf }
     | eof { EOF }
     | _ { singleLineComment lexbuf }

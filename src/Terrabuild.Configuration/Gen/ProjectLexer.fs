@@ -6,9 +6,10 @@ module internal Terrabuild.Configuration.Project.Lexer
 open Terrabuild.Configuration.Project.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 
-let lexeme = LexBuffer<_>.LexemeString
+let lexeme  (lexbuf : LexBuffer<char>) = new System.String(lexbuf.Lexeme)
+let newline (lexbuf:LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 
-# 11 "Gen/ProjectLexer.fs"
+# 12 "Gen/ProjectLexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -425,287 +426,287 @@ let rec _fslex_dummy () = _fslex_dummy()
 and token  lexbuf =
   match _fslex_tables.Interpret(6,lexbuf) with
   | 0 -> ( 
-# 23 "ProjectParser/Lexer.fsl"
+# 24 "ProjectParser/Lexer.fsl"
                                  NOTHING 
-# 430 "Gen/ProjectLexer.fs"
+# 431 "Gen/ProjectLexer.fs"
           )
   | 1 -> ( 
-# 24 "ProjectParser/Lexer.fsl"
+# 25 "ProjectParser/Lexer.fsl"
                               TRUE 
-# 435 "Gen/ProjectLexer.fs"
+# 436 "Gen/ProjectLexer.fs"
           )
   | 2 -> ( 
-# 25 "ProjectParser/Lexer.fsl"
+# 26 "ProjectParser/Lexer.fsl"
                                FALSE 
-# 440 "Gen/ProjectLexer.fs"
+# 441 "Gen/ProjectLexer.fs"
           )
   | 3 -> ( 
-# 26 "ProjectParser/Lexer.fsl"
+# 27 "ProjectParser/Lexer.fsl"
                               TRIM 
-# 445 "Gen/ProjectLexer.fs"
+# 446 "Gen/ProjectLexer.fs"
           )
   | 4 -> ( 
-# 27 "ProjectParser/Lexer.fsl"
+# 28 "ProjectParser/Lexer.fsl"
                                UPPER 
-# 450 "Gen/ProjectLexer.fs"
+# 451 "Gen/ProjectLexer.fs"
           )
   | 5 -> ( 
-# 28 "ProjectParser/Lexer.fsl"
+# 29 "ProjectParser/Lexer.fsl"
                                LOWER 
-# 455 "Gen/ProjectLexer.fs"
+# 456 "Gen/ProjectLexer.fs"
           )
   | 6 -> ( 
-# 29 "ProjectParser/Lexer.fsl"
+# 30 "ProjectParser/Lexer.fsl"
                                  VERSION 
-# 460 "Gen/ProjectLexer.fs"
+# 461 "Gen/ProjectLexer.fs"
           )
   | 7 -> ( 
-# 30 "ProjectParser/Lexer.fsl"
+# 31 "ProjectParser/Lexer.fsl"
                            QUESTION 
-# 465 "Gen/ProjectLexer.fs"
+# 466 "Gen/ProjectLexer.fs"
           )
   | 8 -> ( 
-# 31 "ProjectParser/Lexer.fsl"
+# 32 "ProjectParser/Lexer.fsl"
                            COLON 
-# 470 "Gen/ProjectLexer.fs"
+# 471 "Gen/ProjectLexer.fs"
           )
   | 9 -> ( 
-# 32 "ProjectParser/Lexer.fsl"
+# 33 "ProjectParser/Lexer.fsl"
                             DOUBLE_QUESTION 
-# 475 "Gen/ProjectLexer.fs"
+# 476 "Gen/ProjectLexer.fs"
           )
   | 10 -> ( 
-# 33 "ProjectParser/Lexer.fsl"
+# 34 "ProjectParser/Lexer.fsl"
                             DOT_LSQBRACKET 
-# 480 "Gen/ProjectLexer.fs"
+# 481 "Gen/ProjectLexer.fs"
           )
   | 11 -> ( 
-# 34 "ProjectParser/Lexer.fsl"
+# 35 "ProjectParser/Lexer.fsl"
                              DOT_QUESTION_LSQBRACKET 
-# 485 "Gen/ProjectLexer.fs"
+# 486 "Gen/ProjectLexer.fs"
           )
   | 12 -> ( 
-# 36 "ProjectParser/Lexer.fsl"
+# 37 "ProjectParser/Lexer.fsl"
                            LBRACE 
-# 490 "Gen/ProjectLexer.fs"
+# 491 "Gen/ProjectLexer.fs"
           )
   | 13 -> ( 
-# 37 "ProjectParser/Lexer.fsl"
+# 38 "ProjectParser/Lexer.fsl"
                            RBRACE 
-# 495 "Gen/ProjectLexer.fs"
+# 496 "Gen/ProjectLexer.fs"
           )
   | 14 -> ( 
-# 38 "ProjectParser/Lexer.fsl"
+# 39 "ProjectParser/Lexer.fsl"
                            LSQBRACKET 
-# 500 "Gen/ProjectLexer.fs"
+# 501 "Gen/ProjectLexer.fs"
           )
   | 15 -> ( 
-# 39 "ProjectParser/Lexer.fsl"
+# 40 "ProjectParser/Lexer.fsl"
                            RSQBRACKET 
-# 505 "Gen/ProjectLexer.fs"
+# 506 "Gen/ProjectLexer.fs"
           )
   | 16 -> ( 
-# 40 "ProjectParser/Lexer.fsl"
+# 41 "ProjectParser/Lexer.fsl"
                            LPAREN 
-# 510 "Gen/ProjectLexer.fs"
+# 511 "Gen/ProjectLexer.fs"
           )
   | 17 -> ( 
-# 41 "ProjectParser/Lexer.fsl"
+# 42 "ProjectParser/Lexer.fsl"
                            RPAREN 
-# 515 "Gen/ProjectLexer.fs"
+# 516 "Gen/ProjectLexer.fs"
           )
   | 18 -> ( 
-# 42 "ProjectParser/Lexer.fsl"
+# 43 "ProjectParser/Lexer.fsl"
                            EQUAL 
-# 520 "Gen/ProjectLexer.fs"
+# 521 "Gen/ProjectLexer.fs"
           )
   | 19 -> ( 
-# 43 "ProjectParser/Lexer.fsl"
+# 44 "ProjectParser/Lexer.fsl"
                             NOT_EQUAL 
-# 525 "Gen/ProjectLexer.fs"
+# 526 "Gen/ProjectLexer.fs"
           )
   | 20 -> ( 
-# 44 "ProjectParser/Lexer.fsl"
+# 45 "ProjectParser/Lexer.fsl"
                            COMMA 
-# 530 "Gen/ProjectLexer.fs"
+# 531 "Gen/ProjectLexer.fs"
           )
   | 21 -> ( 
-# 45 "ProjectParser/Lexer.fsl"
+# 46 "ProjectParser/Lexer.fsl"
                            MINUS 
-# 535 "Gen/ProjectLexer.fs"
+# 536 "Gen/ProjectLexer.fs"
           )
   | 22 -> ( 
-# 46 "ProjectParser/Lexer.fsl"
+# 47 "ProjectParser/Lexer.fsl"
                            PLUS 
-# 540 "Gen/ProjectLexer.fs"
+# 541 "Gen/ProjectLexer.fs"
           )
   | 23 -> ( 
-# 48 "ProjectParser/Lexer.fsl"
+# 49 "ProjectParser/Lexer.fsl"
                            singleLineComment lexbuf 
-# 545 "Gen/ProjectLexer.fs"
+# 546 "Gen/ProjectLexer.fs"
           )
   | 24 -> ( 
-# 49 "ProjectParser/Lexer.fsl"
+# 50 "ProjectParser/Lexer.fsl"
                             singleLineComment lexbuf 
-# 550 "Gen/ProjectLexer.fs"
+# 551 "Gen/ProjectLexer.fs"
           )
   | 25 -> ( 
-# 51 "ProjectParser/Lexer.fsl"
+# 52 "ProjectParser/Lexer.fsl"
                                  PROJECT 
-# 555 "Gen/ProjectLexer.fs"
+# 556 "Gen/ProjectLexer.fs"
           )
   | 26 -> ( 
-# 52 "ProjectParser/Lexer.fsl"
+# 53 "ProjectParser/Lexer.fsl"
                                 TARGET 
-# 560 "Gen/ProjectLexer.fs"
+# 561 "Gen/ProjectLexer.fs"
           )
   | 27 -> ( 
-# 53 "ProjectParser/Lexer.fsl"
+# 54 "ProjectParser/Lexer.fsl"
                                       DEPENDENCIES 
-# 565 "Gen/ProjectLexer.fs"
+# 566 "Gen/ProjectLexer.fs"
           )
   | 28 -> ( 
-# 54 "ProjectParser/Lexer.fsl"
+# 55 "ProjectParser/Lexer.fsl"
                                  OUTPUTS 
-# 570 "Gen/ProjectLexer.fs"
+# 571 "Gen/ProjectLexer.fs"
           )
   | 29 -> ( 
-# 55 "ProjectParser/Lexer.fsl"
+# 56 "ProjectParser/Lexer.fsl"
                                  IGNORES 
-# 575 "Gen/ProjectLexer.fs"
+# 576 "Gen/ProjectLexer.fs"
           )
   | 30 -> ( 
-# 56 "ProjectParser/Lexer.fsl"
+# 57 "ProjectParser/Lexer.fsl"
                                   INCLUDES 
-# 580 "Gen/ProjectLexer.fs"
+# 581 "Gen/ProjectLexer.fs"
           )
   | 31 -> ( 
-# 57 "ProjectParser/Lexer.fsl"
+# 58 "ProjectParser/Lexer.fsl"
                                 LABELS 
-# 585 "Gen/ProjectLexer.fs"
+# 586 "Gen/ProjectLexer.fs"
           )
   | 32 -> ( 
-# 58 "ProjectParser/Lexer.fsl"
+# 59 "ProjectParser/Lexer.fsl"
                                 SCRIPT 
-# 590 "Gen/ProjectLexer.fs"
+# 591 "Gen/ProjectLexer.fs"
           )
   | 33 -> ( 
-# 59 "ProjectParser/Lexer.fsl"
+# 60 "ProjectParser/Lexer.fsl"
                                    EXTENSION 
-# 595 "Gen/ProjectLexer.fs"
+# 596 "Gen/ProjectLexer.fs"
           )
   | 34 -> ( 
-# 60 "ProjectParser/Lexer.fsl"
+# 61 "ProjectParser/Lexer.fsl"
                                    CONTAINER 
-# 600 "Gen/ProjectLexer.fs"
+# 601 "Gen/ProjectLexer.fs"
           )
   | 35 -> ( 
-# 61 "ProjectParser/Lexer.fsl"
+# 62 "ProjectParser/Lexer.fsl"
                                    VARIABLES 
-# 605 "Gen/ProjectLexer.fs"
+# 606 "Gen/ProjectLexer.fs"
           )
   | 36 -> ( 
-# 62 "ProjectParser/Lexer.fsl"
+# 63 "ProjectParser/Lexer.fsl"
                                     DEPENDS_ON 
-# 610 "Gen/ProjectLexer.fs"
+# 611 "Gen/ProjectLexer.fs"
           )
   | 37 -> ( 
-# 63 "ProjectParser/Lexer.fsl"
+# 64 "ProjectParser/Lexer.fsl"
                                  REBUILD 
-# 615 "Gen/ProjectLexer.fs"
+# 616 "Gen/ProjectLexer.fs"
           )
   | 38 -> ( 
-# 64 "ProjectParser/Lexer.fsl"
+# 65 "ProjectParser/Lexer.fsl"
                                   DEFAULTS 
-# 620 "Gen/ProjectLexer.fs"
+# 621 "Gen/ProjectLexer.fs"
           )
   | 39 -> ( 
-# 65 "ProjectParser/Lexer.fsl"
+# 66 "ProjectParser/Lexer.fsl"
                               NAME 
-# 625 "Gen/ProjectLexer.fs"
+# 626 "Gen/ProjectLexer.fs"
           )
   | 40 -> ( 
-# 67 "ProjectParser/Lexer.fsl"
+# 68 "ProjectParser/Lexer.fsl"
                                   IDENTIFIER (lexeme lexbuf |> string) 
-# 630 "Gen/ProjectLexer.fs"
+# 631 "Gen/ProjectLexer.fs"
           )
   | 41 -> ( 
-# 68 "ProjectParser/Lexer.fsl"
+# 69 "ProjectParser/Lexer.fsl"
                                            EXTENSION_IDENTIFIER (lexeme lexbuf |> string) 
-# 635 "Gen/ProjectLexer.fs"
+# 636 "Gen/ProjectLexer.fs"
           )
   | 42 -> ( 
-# 69 "ProjectParser/Lexer.fsl"
+# 70 "ProjectParser/Lexer.fsl"
                                         TARGET_IDENTIFIER (lexeme lexbuf |> string) 
-# 640 "Gen/ProjectLexer.fs"
+# 641 "Gen/ProjectLexer.fs"
           )
   | 43 -> ( 
-# 71 "ProjectParser/Lexer.fsl"
+# 72 "ProjectParser/Lexer.fsl"
                                     
                        let s = lexeme lexbuf |> string
                        STRING (s.Substring(1, s.Length-2)) 
-# 647 "Gen/ProjectLexer.fs"
+# 648 "Gen/ProjectLexer.fs"
           )
   | 44 -> ( 
-# 75 "ProjectParser/Lexer.fsl"
+# 76 "ProjectParser/Lexer.fsl"
                           
                        let s = lexeme lexbuf |> string
                        KEY (s.Substring(0, s.Length-1).TrimEnd()) 
-# 654 "Gen/ProjectLexer.fs"
+# 655 "Gen/ProjectLexer.fs"
           )
   | 45 -> ( 
-# 79 "ProjectParser/Lexer.fsl"
+# 80 "ProjectParser/Lexer.fsl"
                                
                        let s = lexeme lexbuf |> string
                        VARIABLE (s.Substring(1, s.Length-1)) 
-# 661 "Gen/ProjectLexer.fs"
+# 662 "Gen/ProjectLexer.fs"
           )
   | 46 -> ( 
-# 83 "ProjectParser/Lexer.fsl"
+# 84 "ProjectParser/Lexer.fsl"
                              
                        let s = lexeme lexbuf |> int
                        NUMBER (s)
                    
-# 669 "Gen/ProjectLexer.fs"
+# 670 "Gen/ProjectLexer.fs"
           )
   | 47 -> ( 
-# 88 "ProjectParser/Lexer.fsl"
+# 89 "ProjectParser/Lexer.fsl"
                                   token lexbuf 
-# 674 "Gen/ProjectLexer.fs"
+# 675 "Gen/ProjectLexer.fs"
           )
   | 48 -> ( 
-# 89 "ProjectParser/Lexer.fsl"
-                               lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
-# 679 "Gen/ProjectLexer.fs"
+# 90 "ProjectParser/Lexer.fsl"
+                               newline lexbuf; token lexbuf 
+# 680 "Gen/ProjectLexer.fs"
           )
   | 49 -> ( 
-# 90 "ProjectParser/Lexer.fsl"
+# 91 "ProjectParser/Lexer.fsl"
                            EOF 
-# 684 "Gen/ProjectLexer.fs"
+# 685 "Gen/ProjectLexer.fs"
           )
   | 50 -> ( 
-# 91 "ProjectParser/Lexer.fsl"
+# 92 "ProjectParser/Lexer.fsl"
                          failwithf "unrecognized input: '%s'" <| lexeme lexbuf 
-# 689 "Gen/ProjectLexer.fs"
+# 690 "Gen/ProjectLexer.fs"
           )
   | _ -> failwith "token"
 // Rule singleLineComment
 and singleLineComment  lexbuf =
   match _fslex_tables.Interpret(0,lexbuf) with
   | 0 -> ( 
-# 94 "ProjectParser/Lexer.fsl"
-                               lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
-# 698 "Gen/ProjectLexer.fs"
+# 95 "ProjectParser/Lexer.fsl"
+                               newline lexbuf; token lexbuf 
+# 699 "Gen/ProjectLexer.fs"
           )
   | 1 -> ( 
-# 95 "ProjectParser/Lexer.fsl"
+# 96 "ProjectParser/Lexer.fsl"
                            EOF 
-# 703 "Gen/ProjectLexer.fs"
+# 704 "Gen/ProjectLexer.fs"
           )
   | 2 -> ( 
-# 96 "ProjectParser/Lexer.fsl"
+# 97 "ProjectParser/Lexer.fsl"
                          singleLineComment lexbuf 
-# 708 "Gen/ProjectLexer.fs"
+# 709 "Gen/ProjectLexer.fs"
           )
   | _ -> failwith "singleLineComment"
 
