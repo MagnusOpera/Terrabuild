@@ -47,10 +47,6 @@ let enumerateFiles rootdir =
     Directory.EnumerateFiles(rootdir, "*", SearchOption.AllDirectories)
     |> List.ofSeq
 
-let enumerateMatchingFiles pattern rootdir =
-    Directory.EnumerateFiles(rootdir, pattern, SearchOption.AllDirectories)
-    |> List.ofSeq
-
 let enumerateFilesBut (matches: string seq) (ignores: string set) rootdir =
     let matcher = Matcher()
     matcher.AddIncludePatterns(matches)
@@ -60,16 +56,6 @@ let enumerateFilesBut (matches: string seq) (ignores: string set) rootdir =
         matcher.GetResultsInFullPath(rootdir)
         |> List.ofSeq
     result
-
-let enumerateFilesMatch (matches: string seq) rootdir =
-    let matcher = Matcher()
-    matcher.AddIncludePatterns(matches)
-
-    let result =
-        matcher.GetResultsInFullPath(rootdir)
-        |> List.ofSeq
-    result
-
 
 let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
     for entry in entries do
@@ -100,6 +86,15 @@ with
         newOutputs
 
 let createSnapshot outputs projectDirectory =
+    let enumerateFilesMatch (matches: string seq) rootdir =
+        let matcher = Matcher()
+        matcher.AddIncludePatterns(matches)
+
+        let result =
+            matcher.GetResultsInFullPath(rootdir)
+            |> List.ofSeq
+        result
+
     let files =
         enumerateFilesMatch outputs projectDirectory
         |> Seq.map (fun output -> output, System.IO.File.GetLastWriteTimeUtc output)
