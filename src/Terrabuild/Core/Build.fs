@@ -197,11 +197,11 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
                 let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
                 let files, size = cacheEntry.Complete summary
-                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size true)
+                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size successful)
             else
                 cacheEntry.CompleteLogFile summary
 
-            if lastExitCode <> 0 then
+            if successful |> not then
                 TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
 
         let restoreNode () =
@@ -214,6 +214,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 | Some outputs ->
                     let files = IO.enumerateFiles outputs
                     IO.copyFiles projectDirectory outputs files |> ignore
+                    api |> Option.iter (fun api -> api.BuildUseArtifact buildId node.ProjectHash node.TargetHash summary.IsSuccessful)
                 | _ -> ()
             | _ ->
                 TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")

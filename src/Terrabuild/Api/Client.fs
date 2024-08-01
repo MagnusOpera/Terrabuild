@@ -77,6 +77,13 @@ module private Build =
         Success: bool
     }
 
+    [<RequireQualifiedAccess>]
+    type UseArtifactInput = {
+        ProjectHash: string
+        Hash: string
+        Success: bool
+    }
+
     let startBuild headers branchOrTag commit configuration note tag targets force retry ci: StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = commit
@@ -99,6 +106,12 @@ module private Build =
           AddArtifactInput.Size = size
           AddArtifactInput.Success = success }
         |> Http.post<AddArtifactInput, Unit> headers $"/builds/{buildId}/add-artifact"
+
+    let useArtifact headers buildId projectHash hash success: Unit =
+        { UseArtifactInput.ProjectHash = projectHash
+          UseArtifactInput.Hash = hash
+          UseArtifactInput.Success = success }
+        |> Http.post<UseArtifactInput, Unit> headers $"/builds/{buildId}/use-artifact"
 
 
     let completeBuild headers buildId success: Unit =
@@ -140,6 +153,9 @@ type Client(space: string, token: string) =
 
         member _.BuildAddArtifact buildId project target projectHash hash files size success =
             Build.addArtifact headers buildId project target projectHash hash files size success
+
+        member _.BuildUseArtifact buildId projectHash hash success =
+            Build.useArtifact headers buildId projectHash hash success
 
         member _.ArtifactGet path =
             let resp = Artifact.getArtifact headers path
