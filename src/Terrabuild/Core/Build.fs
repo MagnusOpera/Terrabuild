@@ -214,7 +214,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 | Some outputs ->
                     let files = IO.enumerateFiles outputs
                     IO.copyFiles projectDirectory outputs files |> ignore
-                    api |> Option.iter (fun api -> api.BuildUseArtifact buildId node.ProjectHash node.TargetHash summary.IsSuccessful)
+                    api |> Option.iter (fun api -> api.BuildUseArtifact buildId node.ProjectHash node.TargetHash)
                 | _ -> ()
             | _ ->
                 TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
@@ -252,6 +252,13 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 nodeComputed.Value <- node)
 
     graph.RootNodes |> Seq.iter schedule
+
+    // mark remaining selected nodes as used
+    api |> Option.iter (fun api ->
+        graph.Nodes
+        |> Map.iter (fun _ node ->
+            if node.IsRequired && node.TargetOperation.IsNone then
+                api.BuildUseArtifact buildId node.ProjectHash node.TargetHash))
 
     let status = hub.WaitCompletion()
     match status with

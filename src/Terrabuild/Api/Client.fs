@@ -81,7 +81,6 @@ module private Build =
     type UseArtifactInput = {
         ProjectHash: string
         Hash: string
-        Success: bool
     }
 
     let startBuild headers branchOrTag commit configuration note tag targets force retry ci: StartBuildOutput =
@@ -107,10 +106,9 @@ module private Build =
           AddArtifactInput.Success = success }
         |> Http.post<AddArtifactInput, Unit> headers $"/builds/{buildId}/add-artifact"
 
-    let useArtifact headers buildId projectHash hash success: Unit =
+    let useArtifact headers buildId projectHash hash: Unit =
         { UseArtifactInput.ProjectHash = projectHash
-          UseArtifactInput.Hash = hash
-          UseArtifactInput.Success = success }
+          UseArtifactInput.Hash = hash }
         |> Http.post<UseArtifactInput, Unit> headers $"/builds/{buildId}/use-artifact"
 
 
@@ -154,8 +152,8 @@ type Client(space: string, token: string) =
         member _.BuildAddArtifact buildId project target projectHash hash files size success =
             Build.addArtifact headers buildId project target projectHash hash files size success
 
-        member _.BuildUseArtifact buildId projectHash hash success =
-            Build.useArtifact headers buildId projectHash hash success
+        member _.BuildUseArtifact buildId projectHash hash =
+            Build.useArtifact headers buildId projectHash hash
 
         member _.ArtifactGet path =
             let resp = Artifact.getArtifact headers path
