@@ -197,8 +197,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
                 let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
                 let files, size = cacheEntry.Complete summary
-                if 0 < files.Length then
-                    api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size successful)
+                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files size successful)
             else
                 cacheEntry.CompleteLogFile summary
 
