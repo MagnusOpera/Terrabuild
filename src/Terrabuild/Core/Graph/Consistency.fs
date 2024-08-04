@@ -4,11 +4,10 @@ open Collections
 open Serilog
 
 
-let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string -> Cache.TargetSummary option) (graph: GraphDef.Graph) =
+let enforce buildAt force retry (tryGetSummaryOnly: string -> Cache.TargetSummary option) (graph: GraphDef.Graph) =
     Log.Debug("===== [Graph Consistency] =====")
 
     let startedAt = DateTime.UtcNow
-    let allowRemoteCache = options.LocalOnly |> not
 
     let mutable nodes = graph.Nodes
     let processedNodes = Concurrent.ConcurrentDictionary<string, DateTime>()
@@ -37,19 +36,19 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
                 elif maxCompletionChildren = DateTime.MaxValue then
                     Log.Debug("{nodeId} must rebuild because child is rebuilding", node.Id)
                     DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
-                elif options.Force then
+                elif force then
                     Log.Debug("{nodeId} must rebuild because force build requested", node.Id)
                     DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
                 else
                     // slow path: check and apply consistency rules
                     let cacheEntryId = GraphDef.buildCacheKey node
-                    match tryGetSummaryOnly allowRemoteCache cacheEntryId with
+                    match tryGetSummaryOnly cacheEntryId with
                     | Some summary ->
                         Log.Debug("{nodeId} has existing build summary", node.Id)
                         if summary.StartedAt < maxCompletionChildren then
                             Log.Debug("{nodeId} must rebuild because it is younger than child", node.Id)
                             DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
-                        elif (summary.IsSuccessful |> not) && options.Retry then
+                        elif (summary.IsSuccessful |> not) && retry then
                             Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
                             DateTime.MaxValue, { node with TargetOperation = Configuration.TargetOperation.MarkAsForced }
                         else
@@ -66,7 +65,7 @@ let enforce (options: Configuration.Options) (tryGetSummaryOnly: bool -> string 
         | true, completionDate ->
             completionDate
 
-    let rootNodes = graph.RootNodes |> Set.filter (fun nodeId -> options.StartedAt < markRequired nodeId)
+    let rootNodes = graph.RootNodes |> Set.filter (fun nodeId -> buildAt < markRequired nodeId)
 
     let endedAt = DateTime.UtcNow
     let trimDuration = endedAt - startedAt
