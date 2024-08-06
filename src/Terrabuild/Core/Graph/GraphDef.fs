@@ -11,6 +11,14 @@ type ContaineredShellOperation = {
 }
 
 [<RequireQualifiedAccess>]
+type NodeUsage =
+    | Used
+    | Build of Configuration.TargetOperation
+    | Skipped
+with member this.ShallBuild = match this with | Build _ -> true | _ -> false 
+
+
+[<RequireQualifiedAccess>]
 type Node = {
     Id: string
     Label: string
@@ -25,20 +33,13 @@ type Node = {
     ProjectHash: string
     TargetHash: string
     OperationHash: string
+    Operations: ContaineredShellOperation list
+
+    // tell role of node
+    Usage: NodeUsage
 
     // tell if a node is leaf (that is no dependencies in same project)
     IsLeaf: bool
-
-    // tell if a node must be rebuild (requested by user)
-    // if forced then cache is ignored
-    // set by Analysis/Builder (init from user) & Analysys/Consistency
-    TargetOperation: Configuration.TargetOperation option
-    Operations: ContaineredShellOperation list
-
-    // tell if outputs of a node are required or not
-    // if outputs are required they can be downloaded from the cache if they exists (ProjectHash/Target/TargetHash)
-    // set by Analysis/Builder (init from user) & Analysis/Requirements
-    IsRequired: bool
 
     // tell this task is the first in the operation execution chain
     IsFirst: bool
@@ -81,7 +82,7 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
     let mermaid = [
         "flowchart TD"
         $"classDef forced stroke:red,stroke-width:3px"
-        $"classDef required stroke:orange,stroke-width:3px"
+        $"classDef used stroke:orange,stroke-width:3px"
         $"classDef selected stroke:black,stroke-width:3px"
 
         for (KeyValue(cluster, nodes)) in clusters do
@@ -101,9 +102,9 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
                     | _ -> ""
 
                 let label =
-                    match node.TargetOperation with
-                    | None -> node.Label
-                    | Some targetOperation -> $"{node.Label}\n{targetOperation.Extension} {targetOperation.Command}"
+                    match node.Usage with
+                    | NodeUsage.Build targetOperation -> $"{node.Label}\n{targetOperation.Extension} {targetOperation.Command}"
+                    | _ -> node.Label
                 $"{offset}{node.Id}(\"{status}{label}\")"
 
             if isCluster then
@@ -117,9 +118,10 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
                         let dstNode = graph.Nodes |> Map.find dependency
                         $"{srcNode.Id} --> {dstNode.Id}"
 
-                if srcNode.TargetOperation.IsSome then $"class {srcNode.Id} forced"
-                elif srcNode.IsRequired then $"class {srcNode.Id} required"
-                elif graph.RootNodes |> Set.contains srcNode.Id then $"class {srcNode.Id} selected"
+                match srcNode.Usage with
+                | NodeUsage.Build _ -> $"class {srcNode.Id} forced"
+                | NodeUsage.Used -> $"class {srcNode.Id} used"
+                | _ -> $"class {srcNode.Id} selected"
     ]
 
     mermaid

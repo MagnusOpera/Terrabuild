@@ -36,7 +36,7 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                     |> Set.ofSeq
 
                 let declare, clusterId =
-                    if node.TargetOperation.IsNone then
+                    if node.Usage.ShallBuild |> not then
                         // node is not built => let it standalone in own cluster
                         Log.Debug("Node {node} does not need rebuild", node.Id)
                         true, node.Id
@@ -106,8 +106,8 @@ let optimize (options: Configuration.Options) (graph: Graph) =
             |> Seq.collect (fun node -> node.Dependencies) |> Set.ofSeq
         let clusterDependencies = clusterDependencies - nodeIds
 
-        match oneNode.TargetOperation with
-        | Some targetOperation ->
+        match oneNode.Usage with
+        | NodeUsage.Build targetOperation ->
             let clusterHash =
                 clusterDependencies
                 |> Seq.map (fun nodeId -> graph.Nodes[nodeId].Id)
@@ -145,8 +145,8 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                     let containeredOperations =
                         executionRequest.PreOperations
                         |> List.map (fun operation -> {
-                            ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
-                            ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                            ContaineredShellOperation.Container = targetOperation.Container
+                            ContaineredShellOperation.ContainerVariables = targetOperation.ContainerVariables
                             ContaineredShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
                             ContaineredShellOperation.Command = operation.Command
                             ContaineredShellOperation.Arguments = operation.Arguments
@@ -181,8 +181,8 @@ let optimize (options: Configuration.Options) (graph: Graph) =
                 let ops =
                     ops
                     |> List.map (fun operation -> {
-                        ContaineredShellOperation.Container = oneNode.TargetOperation.Value.Container
-                        ContaineredShellOperation.ContainerVariables = oneNode.TargetOperation.Value.ContainerVariables
+                        ContaineredShellOperation.Container = targetOperation.Container
+                        ContaineredShellOperation.ContainerVariables = targetOperation.ContainerVariables
                         ContaineredShellOperation.MetaCommand = $"{targetOperation.Extension} {targetOperation.Command}"
                         ContaineredShellOperation.Command = operation.Command
                         ContaineredShellOperation.Arguments = operation.Arguments

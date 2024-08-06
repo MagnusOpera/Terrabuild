@@ -10,7 +10,8 @@ let transform (graph: GraphDef.Graph) =
     let allNodes = ConcurrentDictionary<string, GraphDef.Node>()
     for (KeyValue(_, node)) in graph.Nodes do
 
-        if node.TargetOperation.IsSome then
+        match node.Usage with
+        | NodeUsage.Build _ ->
             let nbOps = node.ConfigurationTarget.Operations.Length
             node.ConfigurationTarget.Operations
             |> List.fold (fun (dependencies, index) operation ->
@@ -19,7 +20,7 @@ let transform (graph: GraphDef.Graph) =
                 // generate a node for each operation
                 let actionNode =
                     { node with
-                        TargetOperation = Some operation
+                        Usage = NodeUsage.Build operation
                         OperationHash = operation.Hash
                         Dependencies = dependencies
                         IsFirst = index = 1
@@ -33,7 +34,7 @@ let transform (graph: GraphDef.Graph) =
                 (actionNode.Id |> Set.singleton, index+1)
             ) (node.Dependencies, 1)
             |> ignore
-        else
+        | _ ->
             allNodes.TryAdd(node.Id, node) |> ignore
 
     { graph with 

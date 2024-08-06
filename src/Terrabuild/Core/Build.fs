@@ -136,7 +136,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
-    let nodesToBuild = graph.Nodes |> Seq.filter (fun (KeyValue(_,node)) -> node.TargetOperation.IsSome) |> Seq.length
+    let nodesToBuild = graph.Nodes |> Seq.filter (fun (KeyValue(_,node)) -> node.Usage.ShallBuild) |> Seq.length
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToBuild} tasks to build" |> Terminal.writeLine
 
     let startedAt = DateTime.UtcNow
@@ -220,14 +220,14 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
         try
-            if node.TargetOperation.IsSome then buildNode()
+            if node.Usage.ShallBuild then buildNode()
             else restoreNode()
-            if node.IsLast then notification.NodeCompleted node node.TargetOperation.IsNone true
+            if node.IsLast then notification.NodeCompleted node (node.Usage.ShallBuild |> not) true
             else notification.NodeScheduled node
         with
             | exn ->
                 Log.Fatal(exn, "Build node failed")
-                notification.NodeCompleted node node.TargetOperation.IsNone false
+                notification.NodeCompleted node (node.Usage.ShallBuild |> not) false
                 reraise()
 
 
@@ -254,11 +254,13 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     graph.RootNodes |> Seq.iter schedule
 
     // mark remaining selected nodes as used
-    api |> Option.iter (fun api ->
+    match api, options.CI with
+    | Some api, Some _ ->
         graph.Nodes
         |> Map.iter (fun _ node ->
-            if node.IsRequired && node.TargetOperation.IsNone then
-                api.BuildUseArtifact buildId node.ProjectHash node.TargetHash))
+            if node.Usage = GraphDef.NodeUsage.Skipped then
+                api.BuildUseArtifact buildId node.ProjectHash node.TargetHash)
+    | _ -> ()
 
     let status = hub.WaitCompletion()
     match status with
@@ -268,7 +270,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
-    let buildNodes = graph.Nodes |> Map.filter (fun _ node -> node.TargetOperation.IsSome)
+    let buildNodes = graph.Nodes |> Map.filter (fun _ node -> node.Usage.ShallBuild)
 
     // status of nodes to build
     let buildNodesStatus =
