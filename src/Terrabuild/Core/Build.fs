@@ -253,6 +253,13 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     graph.RootNodes |> Seq.iter schedule
 
+    // mark remaining selected nodes as used
+    api |> Option.iter (fun api ->
+        graph.Nodes
+        |> Map.iter (fun _ node ->
+            if node.IsRequired && node.TargetOperation.IsNone then
+                api.BuildUseArtifact buildId node.ProjectHash node.TargetHash))
+
     let status = hub.WaitCompletion()
     match status with
     | Status.Ok -> Log.Debug("Build successful")
