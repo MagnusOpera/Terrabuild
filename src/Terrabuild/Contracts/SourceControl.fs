@@ -10,3 +10,4 @@ type ISourceControl =
     abstract LogType: LogType
     abstract LogError: string -> unit
     abstract CI: string option
+    abstract Metadata: string option

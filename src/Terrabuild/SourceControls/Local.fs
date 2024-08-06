@@ -15,3 +15,5 @@ type Local() =
         override _.LogError _ = ()
 
         override _.CI = None
+
+        override _.Metadata = None
