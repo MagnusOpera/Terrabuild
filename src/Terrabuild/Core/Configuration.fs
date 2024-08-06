@@ -43,7 +43,7 @@ type TargetOperation = {
     Context: Value
 }
 with
-    static member MarkAsForced = Some {
+    static member MarkAsForced = {
         Hash = "--"
         Container = None
         ContainerVariables = Set.empty
