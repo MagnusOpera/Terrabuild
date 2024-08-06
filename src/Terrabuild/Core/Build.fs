@@ -142,7 +142,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
-        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI.IsSome)
+        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI sourceControl.Metadata)
         |> Option.defaultValue ""
 
     let allowRemoteCache = options.LocalOnly |> not

@@ -53,7 +53,8 @@ module private Build =
         Targets: string seq
         Force: bool
         Retry: bool
-        CI: bool
+        CI: string option
+        CIMetadata: string option
     }
 
     [<RequireQualifiedAccess>]
@@ -83,7 +84,7 @@ module private Build =
         Hash: string
     }
 
-    let startBuild headers branchOrTag commit configuration note tag targets force retry ci: StartBuildOutput =
+    let startBuild headers branchOrTag commit configuration note tag targets force retry ci cimetadata: StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = commit
           StartBuildInput.Configuration = configuration
@@ -92,7 +93,8 @@ module private Build =
           StartBuildInput.Targets = targets 
           StartBuildInput.Force = force
           StartBuildInput.Retry = retry
-          StartBuildInput.CI = ci }
+          StartBuildInput.CI = ci
+          StartBuildInput.CIMetadata = cimetadata }
           |> Http.post headers "/builds"
 
 
@@ -142,8 +144,8 @@ type Client(space: string, token: string) =
         HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
 
     interface Contracts.IApiClient with
-        member _.BuildStart branchOrTag commit configuration note tag targets force retry ci =
-            let resp = Build.startBuild headers branchOrTag commit configuration note tag targets force retry ci
+        member _.BuildStart branchOrTag commit configuration note tag targets force retry ci cimetadata =
+            let resp = Build.startBuild headers branchOrTag commit configuration note tag targets force retry ci cimetadata
             resp.BuildId
 
         member _.BuildComplete buildId success =
