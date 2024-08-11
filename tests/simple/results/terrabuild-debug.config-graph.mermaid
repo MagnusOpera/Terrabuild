@@ -1,22 +1,22 @@
 flowchart TD
 classDef forced stroke:red,stroke-width:3px
-classDef required stroke:orange,stroke-width:3px
+classDef used stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
 projects/rust-app:build("build projects/rust-app")
-class projects/rust-app:build selected
+class projects/rust-app:build used
 projects/npm-app:build("build projects/npm-app")
-class projects/npm-app:build selected
+class projects/npm-app:build used
 libraries/shell-lib:build("build libraries/shell-lib")
-class libraries/shell-lib:build selected
+class libraries/shell-lib:build used
 libraries/dotnet-lib:build("build libraries/dotnet-lib")
 projects/dotnet-app:build("build projects/dotnet-app")
-class libraries/dotnet-lib:build selected
+class libraries/dotnet-lib:build used
 projects/dotnet-app:build --> libraries/dotnet-lib:build
-class projects/dotnet-app:build selected
+class projects/dotnet-app:build used
 projects/make-app:build("build projects/make-app")
 projects/make-app:build --> libraries/shell-lib:build
-class projects/make-app:build selected
+class projects/make-app:build used
 deployments/terraform-deploy:build("build deployments/terraform-deploy")
 deployments/terraform-deploy:build --> projects/dotnet-app:build
 deployments/terraform-deploy:build --> projects/npm-app:build
-class deployments/terraform-deploy:build selected
+class deployments/terraform-deploy:build used

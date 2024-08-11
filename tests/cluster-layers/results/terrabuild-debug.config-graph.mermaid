@@ -1,25 +1,25 @@
 flowchart TD
 classDef forced stroke:red,stroke-width:3px
-classDef required stroke:orange,stroke-width:3px
+classDef used stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
 F:build("build F")
 G:build("build G")
 F:build --> D:build
 F:build --> E:build
-class F:build selected
+class F:build used
 G:build --> C:build
-class G:build selected
+class G:build used
 D:build("build D")
 E:build("build E")
 D:build --> C:build
-class D:build selected
+class D:build used
 E:build --> C:build
-class E:build selected
+class E:build used
 C:build("build C")
 C:build --> A:build
 C:build --> B:build
-class C:build selected
+class C:build used
 A:build("build A")
 B:build("build B")
-class A:build selected
-class B:build selected
+class A:build used
+class B:build used

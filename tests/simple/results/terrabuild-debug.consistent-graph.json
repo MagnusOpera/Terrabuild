@@ -57,18 +57,20 @@
       "projectHash": "825FA904BFCC88377654659B6021610C28A2856B44369D63969377A7699A4AF3",
       "targetHash": "04248F14331991CE6BFB33A59B4A2B2E129E1B5702DB0A9200719D8344D18C0E",
       "operationHash": "FD4E492BBC14063F951BD573395F7044BB64448F0CCA60851019067618B27C70",
-      "isLeaf": true,
-      "targetOperation": {
-        "hash": "--",
-        "container": null,
-        "containerVariables": [],
-        "extension": "",
-        "command": "\uD83D\uDC40",
-        "script": {},
-        "context": "nothing"
-      },
       "operations": [],
-      "isRequired": true,
+      "usage": [
+        "build",
+        {
+          "hash": "--",
+          "container": null,
+          "containerVariables": [],
+          "extension": "",
+          "command": "\uD83D\uDC40",
+          "script": {},
+          "context": "nothing"
+        }
+      ],
+      "isLeaf": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -124,18 +126,20 @@
       "projectHash": "666908E6236D9394711779EEAB166ED8BC6341DF1EEEF724C7DE083D0C9709DC",
       "targetHash": "2B54545A15F538FD93FD4ADAAF642161D3E25A5BBC709C099D3EB615CCC22E9D",
       "operationHash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
-      "isLeaf": true,
-      "targetOperation": {
-        "hash": "--",
-        "container": null,
-        "containerVariables": [],
-        "extension": "",
-        "command": "\uD83D\uDC40",
-        "script": {},
-        "context": "nothing"
-      },
       "operations": [],
-      "isRequired": true,
+      "usage": [
+        "build",
+        {
+          "hash": "--",
+          "container": null,
+          "containerVariables": [],
+          "extension": "",
+          "command": "\uD83D\uDC40",
+          "script": {},
+          "context": "nothing"
+        }
+      ],
+      "isLeaf": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -177,18 +181,20 @@
       "projectHash": "60F9371D05141EC9C0E9CC759730C62EC37C01D9EEB1330EFE2737AA01F557A6",
       "targetHash": "C432095DAA33C07EE1C2E6A4F053F065373D320CB24C6C500259772EF208608E",
       "operationHash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
-      "isLeaf": true,
-      "targetOperation": {
-        "hash": "--",
-        "container": null,
-        "containerVariables": [],
-        "extension": "",
-        "command": "\uD83D\uDC40",
-        "script": {},
-        "context": "nothing"
-      },
       "operations": [],
-      "isRequired": true,
+      "usage": [
+        "build",
+        {
+          "hash": "--",
+          "container": null,
+          "containerVariables": [],
+          "extension": "",
+          "command": "\uD83D\uDC40",
+          "script": {},
+          "context": "nothing"
+        }
+      ],
+      "isLeaf": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -246,18 +252,20 @@
       "projectHash": "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364",
       "targetHash": "DDBE336631053045F003A619F764069C3644E78FAAE597140FCC2B968FB31989",
       "operationHash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
-      "isLeaf": true,
-      "targetOperation": {
-        "hash": "--",
-        "container": null,
-        "containerVariables": [],
-        "extension": "",
-        "command": "\uD83D\uDC40",
-        "script": {},
-        "context": "nothing"
-      },
       "operations": [],
-      "isRequired": true,
+      "usage": [
+        "build",
+        {
+          "hash": "--",
+          "container": null,
+          "containerVariables": [],
+          "extension": "",
+          "command": "\uD83D\uDC40",
+          "script": {},
+          "context": "nothing"
+        }
+      ],
+      "isLeaf": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -327,18 +335,20 @@
       "projectHash": "47A18E4D676C50894D393158B4C1CE5C7736BD65C6C15CC542E764E876CB2E68",
       "targetHash": "9BDFE24BBEFCEA185D8216BFBB1B52C3CA61B82F25A512ACD9E66BCBFE1B0458",
       "operationHash": "D75E1B5F09A68010CF5A342EF04AB73E0FDE53F31E8A83B5DF5FF248DE965D24",
-      "isLeaf": true,
-      "targetOperation": {
-        "hash": "--",
-        "container": null,
-        "containerVariables": [],
-        "extension": "",
-        "command": "\uD83D\uDC40",
-        "script": {},
-        "context": "nothing"
-      },
       "operations": [],
-      "isRequired": true,
+      "usage": [
+        "build",
+        {
+          "hash": "--",
+          "container": null,
+          "containerVariables": [],
+          "extension": "",
+          "command": "\uD83D\uDC40",
+          "script": {},
+          "context": "nothing"
+        }
+      ],
+      "isLeaf": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -379,18 +389,20 @@
       "projectHash": "A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E",
       "targetHash": "B864E5E2441D5ABDFB79E333250443A85D34E2FA72C676175DA6CEFE84A30999",
       "operationHash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
-      "isLeaf": true,
-      "targetOperation": {
-        "hash": "--",
-        "container": null,
-        "containerVariables": [],
-        "extension": "",
-        "command": "\uD83D\uDC40",
-        "script": {},
-        "context": "nothing"
-      },
       "operations": [],
-      "isRequired": true,
+      "usage": [
+        "build",
+        {
+          "hash": "--",
+          "container": null,
+          "containerVariables": [],
+          "extension": "",
+          "command": "\uD83D\uDC40",
+          "script": {},
+          "context": "nothing"
+        }
+      ],
+      "isLeaf": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
@@ -433,18 +445,20 @@
       "projectHash": "0CEC6981250E3AC5C5CE7EBE9FF15A39800DDC5287F862EBDF540A5C1FF52AC0",
       "targetHash": "059335A3E58FBAF6A206191DC7E272D1F67A336053A500676E1ABAA80433AA66",
       "operationHash": "11AAF8064C94EB13A5DBBABB74D237968373D8BA36EDC3C0DAE6A303E3FB71FE",
-      "isLeaf": true,
-      "targetOperation": {
-        "hash": "--",
-        "container": null,
-        "containerVariables": [],
-        "extension": "",
-        "command": "\uD83D\uDC40",
-        "script": {},
-        "context": "nothing"
-      },
       "operations": [],
-      "isRequired": true,
+      "usage": [
+        "build",
+        {
+          "hash": "--",
+          "container": null,
+          "containerVariables": [],
+          "extension": "",
+          "command": "\uD83D\uDC40",
+          "script": {},
+          "context": "nothing"
+        }
+      ],
+      "isLeaf": true,
       "isFirst": true,
       "isLast": true,
       "isBatched": false
