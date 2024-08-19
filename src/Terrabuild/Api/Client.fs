@@ -73,7 +73,7 @@ module private Build =
         Project: string
         Target: string
         ProjectHash: string
-        Hash: string
+        TargetHash: string
         Files: string list
         Success: bool
     }
@@ -81,7 +81,7 @@ module private Build =
     [<RequireQualifiedAccess>]
     type UseArtifactInput = {
         ProjectHash: string
-        Hash: string
+        TargetHash: string
     }
 
     let startBuild headers branchOrTag commit configuration note tag targets force retry ci ciname cimetadata: StartBuildOutput =
@@ -103,14 +103,14 @@ module private Build =
         { AddArtifactInput.Project = project
           AddArtifactInput.Target = target
           AddArtifactInput.ProjectHash = projectHash
-          AddArtifactInput.Hash = targetHash
+          AddArtifactInput.TargetHash = targetHash
           AddArtifactInput.Files = files
           AddArtifactInput.Success = success }
         |> Http.post<AddArtifactInput, Unit> headers $"/builds/{buildId}/add-artifact"
 
     let useArtifact headers buildId projectHash hash: Unit =
         { UseArtifactInput.ProjectHash = projectHash
-          UseArtifactInput.Hash = hash }
+          UseArtifactInput.TargetHash = hash }
         |> Http.post<UseArtifactInput, Unit> headers $"/builds/{buildId}/use-artifact"
 
 
