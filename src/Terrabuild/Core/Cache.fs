@@ -45,7 +45,7 @@ type IEntry =
     abstract NextLogFile: unit -> string
     abstract CompleteLogFile: summary:TargetSummary -> unit
     abstract Outputs: string with get
-    abstract Complete: summary:TargetSummary -> string list * int
+    abstract Complete: summary:TargetSummary -> string list
 
 type ICache =
     abstract TryGetSummaryOnly: useRemote:bool -> id:string -> (Origin * TargetSummary) option
@@ -133,7 +133,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
         member _.Outputs = outputsDir
 
         member _.Complete summary =
-            let files, size =
+            let files =
                 let uploadDir sourceDir name =
                     let path = $"{id}/{name}"
                     let tarFile = IO.getTempFilename()
@@ -142,7 +142,7 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
                         sourceDir |> Compression.tar tarFile
                         tarFile |> Compression.compress compressFile
                         storage.Upload path compressFile
-                        path, IO.size compressFile
+                        path
                     finally
                         IO.deleteAny compressFile
                         IO.deleteAny tarFile
@@ -171,18 +171,18 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storag
                     FS.combinePath logsDir "summary.json" |> write finalSummary
 
                 if useRemote then
-                    let fileSizes = [
+                    let files = [
                         if Directory.Exists outputsDir then uploadDir outputsDir "outputs"
                         genFinalSummary()
                         uploadDir logsDir "logs"
                     ]
-                    fileSizes |> List.fold (fun (files, size) (file, fileSize) -> file :: files, fileSize+size) ([], 0)
+                    files
                 else
                     genFinalSummary()
-                    [], 0
+                    []
 
             entryDir |> setOrigin Origin.Local
-            files, size
+            files
 
 
 type Cache(storage: Contracts.IStorage) =

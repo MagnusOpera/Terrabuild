@@ -75,7 +75,6 @@ module private Build =
         ProjectHash: string
         Hash: string
         Files: string list
-        Size: int
         Success: bool
     }
 
@@ -100,13 +99,12 @@ module private Build =
           |> Http.post headers "/builds"
 
 
-    let addArtifact headers buildId project target projectHash targetHash files size success: Unit =
+    let addArtifact headers buildId project target projectHash targetHash files success: Unit =
         { AddArtifactInput.Project = project
           AddArtifactInput.Target = target
           AddArtifactInput.ProjectHash = projectHash
           AddArtifactInput.Hash = targetHash
           AddArtifactInput.Files = files
-          AddArtifactInput.Size = size
           AddArtifactInput.Success = success }
         |> Http.post<AddArtifactInput, Unit> headers $"/builds/{buildId}/add-artifact"
 
@@ -153,8 +151,8 @@ type Client(space: string, token: string) =
         member _.BuildComplete buildId success =
             Build.completeBuild headers buildId success
 
-        member _.BuildAddArtifact buildId project target projectHash targetHash files size success =
-            Build.addArtifact headers buildId project target projectHash targetHash files size success
+        member _.BuildAddArtifact buildId project target projectHash targetHash files success =
+            Build.addArtifact headers buildId project target projectHash targetHash files success
 
         member _.BuildUseArtifact buildId projectHash hash =
             Build.useArtifact headers buildId projectHash hash
