@@ -142,7 +142,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
-        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI.IsSome sourceControl.CI sourceControl.Metadata)
+        api |> Option.map (fun api -> api.StartBuild sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI.IsSome sourceControl.CI sourceControl.Metadata)
         |> Option.defaultValue ""
 
     let allowRemoteCache = options.LocalOnly |> not
@@ -150,8 +150,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let homeDir = cache.CreateHomeDir "container"
 
     let processNode (node: GraphDef.Node) =
-        let cacheEntryId = GraphDef.buildCacheKey node
-
         let projectDirectory =
             match node.Project with
             | FS.Directory projectDirectory -> projectDirectory
@@ -161,8 +159,12 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         let buildNode () =
             let startedAt = DateTime.UtcNow
 
+            // invalidate artifact
+            if node.IsFirst then
+                api |> Option.iter (fun api -> api.CreateArtifact node.Project node.Target node.ProjectHash node.TargetHash)
+
             notification.NodeBuilding node
-            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome node.IsFirst cacheEntryId
+            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome node.IsFirst node.ProjectHash node.TargetHash
 
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
@@ -195,9 +197,11 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
                 // create an archive with new files
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
-                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
+                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false node.ProjectHash node.TargetHash
                 let files = cacheEntry.Complete summary
-                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
+                api |> Option.iter (fun api ->
+                    api.CompleteArtifact node.ProjectHash node.TargetHash files successful
+                    api.UseArtifact buildId node.ProjectHash node.TargetHash)
             else
                 cacheEntry.CompleteLogFile summary
 
@@ -206,18 +210,17 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
         let restoreNode () =
             notification.NodeDownloading node
-            let cacheEntryId = GraphDef.buildCacheKey node
-            match cache.TryGetSummary allowRemoteCache cacheEntryId with
+            match cache.TryGetSummary allowRemoteCache node.ProjectHash node.TargetHash with
             | Some summary ->
                 Log.Debug("{Hash}: Restoring '{Project}/{Target}' from cache", node.TargetHash, node.Project, node.Target)
                 match summary.Outputs with
                 | Some outputs ->
                     let files = IO.enumerateFiles outputs
                     IO.copyFiles projectDirectory outputs files |> ignore
-                    api |> Option.iter (fun api -> api.BuildUseArtifact buildId node.ProjectHash node.TargetHash)
+                    api |> Option.iter (fun api -> api.UseArtifact buildId node.ProjectHash node.TargetHash)
                 | _ -> ()
             | _ ->
-                TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
+                TerrabuildException.Raise($"Unable to download build output for node {node.Id}")
 
         try
             if node.Usage.ShallBuild then buildNode()
@@ -259,7 +262,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         graph.Nodes
         |> Map.iter (fun _ node ->
             if node.Usage = GraphDef.NodeUsage.Skipped then
-                api.BuildUseArtifact buildId node.ProjectHash node.TargetHash)
+                api.UseArtifact buildId node.ProjectHash node.TargetHash)
     | _ -> ()
 
     let status = hub.WaitCompletion()
@@ -276,14 +279,13 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let buildNodesStatus =
         // collect dependencies status
         let getDependencyStatus _ (node: GraphDef.Node) =
-            let cacheEntryId = GraphDef.buildCacheKey node
             let nodeInfo = 
                 { NodeInfo.Project = node.Project
                   NodeInfo.Target = node.Target
                   NodeInfo.ProjectHash = node.ProjectHash 
                   NodeInfo.NodeHash = node.TargetHash }
 
-            match cache.TryGetSummaryOnly false cacheEntryId with
+            match cache.TryGetSummaryOnly false node.ProjectHash node.TargetHash with
             | Some (_, summary) ->
                 if summary.IsSuccessful then NodeStatus.Success nodeInfo
                 else NodeStatus.Failure nodeInfo
@@ -323,6 +325,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                       Summary.BuildNodesStatus = buildNodesStatus  }
 
     notification.BuildCompleted buildInfo
-    api |> Option.iter (fun api -> api.BuildComplete buildId (status = Status.Success))
+    api |> Option.iter (fun api -> api.CompleteBuild buildId (status = Status.Success))
 
     buildInfo

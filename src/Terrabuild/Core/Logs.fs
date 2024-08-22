@@ -14,8 +14,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         graph.Nodes
         |> Map.values
         |> Seq.map (fun node ->
-            let cacheEntryId = GraphDef.buildCacheKey node
-            let originSummary = cache.TryGetSummaryOnly false cacheEntryId
+            let originSummary = cache.TryGetSummaryOnly false node.ProjectHash node.TargetHash
             node, originSummary)
         |> Seq.sortBy (fun (_, originSummary) -> originSummary |> Option.map (fun (_, summary) -> summary.EndedAt))
         |> List.ofSeq

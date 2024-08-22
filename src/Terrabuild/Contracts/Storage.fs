@@ -2,7 +2,7 @@ namespace Contracts
 
 
 type IStorage =
-    abstract Exists: id:string -> bool
-    abstract TryDownload: id:string -> string option
-    abstract Upload: id:string -> summaryFile:string -> unit
+    abstract Exists: projectHash:string -> targetHash:string -> part:string -> bool
+    abstract TryDownload: projectHash:string -> targetHash:string -> part:string -> string option
+    abstract Upload: projectHash:string -> targetHash:string -> part:string -> summaryFile:string -> unit
     abstract Name: string

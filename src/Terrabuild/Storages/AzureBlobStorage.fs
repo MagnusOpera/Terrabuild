@@ -8,17 +8,19 @@ type AzureArtifactLocationOutput = {
 }
 
 type AzureBlobStorage(api: Contracts.IApiClient) =
-    let getBlobClient path =
-        let uri = api.ArtifactGet path
+    let getBlobClient projectHash targetHash part  =
+        let uri = api.GetArtifactPart projectHash targetHash part 
         let container = BlobContainerClient(uri)
+
+        let path = $"{projectHash}/{targetHash}/{part}"
         let blobClient = container.GetBlobClient(path)
         blobClient
 
     interface Contracts.IStorage with
         override _.Name = "Azure Blob Storage"
 
-        override _.Exists id =
-            let blobClient = getBlobClient id
+        override _.Exists projectHash targetHash part =
+            let blobClient = getBlobClient projectHash targetHash part
             try
                 let res = blobClient.Exists()
                 res.Value
@@ -29,8 +31,8 @@ type AzureBlobStorage(api: Contracts.IApiClient) =
                 reraise()
 
 
-        override _.TryDownload id =
-            let blobClient = getBlobClient id
+        override _.TryDownload projectHash targetHash part =
+            let blobClient = getBlobClient projectHash targetHash part 
             let tmpFile = System.IO.Path.GetTempFileName()
             try
                 blobClient.DownloadTo(tmpFile) |> ignore
@@ -46,9 +48,9 @@ type AzureBlobStorage(api: Contracts.IApiClient) =
                 reraise()
 
 
-        override _.Upload id summaryFile =
+        override _.Upload projectHash targetHash part summaryFile =
             try
-                let blobClient = getBlobClient id
+                let blobClient = getBlobClient projectHash targetHash part
                 blobClient.Upload(summaryFile, true) |> ignore
                 Log.Debug("AzureBlobStorage: upload of '{Id}' successful", id)
             with
