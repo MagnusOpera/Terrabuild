@@ -260,7 +260,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     | Some api, Some _ ->
         graph.Nodes
         |> Map.iter (fun _ node ->
-            if node.Usage = GraphDef.NodeUsage.Skipped then
+            if node.Usage = GraphDef.NodeUsage.Selected then
                 api.UseArtifact buildId node.ProjectHash node.TargetHash)
     | _ -> ()
 

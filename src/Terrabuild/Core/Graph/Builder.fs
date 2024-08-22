@@ -72,7 +72,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
                 let usage =
                     if target.Rebuild then NodeUsage.Build Configuration.TargetOperation.MarkAsForced
-                    else NodeUsage.Used
+                    else NodeUsage.Selected
 
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {project}"

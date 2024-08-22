@@ -14,6 +14,7 @@ let enforce buildAt force retry (tryGetSummaryOnly: string -> string -> Cache.Ta
     let processedNodes = Concurrent.ConcurrentDictionary<string, DateTime>()
 
     let rec markRequired nodeId =
+        // NOTE: node is either Selected or Build - all other states are invalid
         let node = nodes |> Map.find nodeId
 
         match processedNodes.TryGetValue nodeId with
@@ -49,8 +50,8 @@ let enforce buildAt force retry (tryGetSummaryOnly: string -> string -> Cache.Ta
                             Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
                             DateTime.MaxValue, { node with Usage = NodeUsage.Build Configuration.TargetOperation.MarkAsForced }
                         else
-                            Log.Debug("{nodeId} is marked as skipped", node.Id)
-                            summary.EndedAt, { node with Usage = NodeUsage.Skipped }
+                            Log.Debug("{nodeId} is marked as used", node.Id)
+                            summary.EndedAt, { node with Usage = NodeUsage.Used }
                     | _ ->
                         Log.Debug("{nodeId} must be build since no summary and required", node.Id)
                         DateTime.MaxValue, { node with Usage = NodeUsage.Build Configuration.TargetOperation.MarkAsForced }

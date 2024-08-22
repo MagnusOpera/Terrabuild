@@ -12,9 +12,9 @@ type ContaineredShellOperation = {
 
 [<RequireQualifiedAccess>]
 type NodeUsage =
+    | Selected
     | Used
     | Build of Configuration.TargetOperation
-    | Skipped
 with member this.ShallBuild = match this with | Build _ -> true | _ -> false 
 
 
