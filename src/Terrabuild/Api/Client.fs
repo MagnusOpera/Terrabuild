@@ -102,6 +102,7 @@ module private Build =
 module private Artifact =
     [<RequireQualifiedAccess>]
     type CreateArtifactInput = {
+        BuildId: string
         Project: string
         Target: string
         ProjectHash: string
@@ -110,6 +111,7 @@ module private Artifact =
 
     [<RequireQualifiedAccess>]
     type CompleteArtifactInput = {
+        BuildId: string
         Parts: string list
         Success: bool
     }
@@ -119,15 +121,17 @@ module private Artifact =
         Uri: string
     }
 
-    let createArtifact headers project target projectHash targetHash =
-        { CreateArtifactInput.ProjectHash = projectHash
+    let createArtifact headers buildId project target projectHash targetHash =
+        { CreateArtifactInput.BuildId = buildId
+          CreateArtifactInput.ProjectHash = projectHash
           CreateArtifactInput.TargetHash = targetHash            
           CreateArtifactInput.Project = project
           CreateArtifactInput.Target = target }
         |> Http.post<CreateArtifactInput, Unit> headers $"/artifacts"
 
-    let completeArtifact headers projectHash targetHash parts success =
-        { CompleteArtifactInput.Parts = parts
+    let completeArtifact headers buildId projectHash targetHash parts success =
+        { CompleteArtifactInput.BuildId = buildId
+          CompleteArtifactInput.Parts = parts
           CompleteArtifactInput.Success = success }
         |> Http.put<CompleteArtifactInput, Unit> headers $"/artifacts/{projectHash}/{targetHash}/complete"
 
@@ -159,12 +163,12 @@ type Client(space: string, token: string) =
         member _.UseArtifact buildId projectHash targetHash =
             Build.useArtifact headers buildId projectHash targetHash
 
+        member _.CreateArtifact buildId project target projectHash targetHash =
+            Artifact.createArtifact headers buildId project target projectHash targetHash
+
+        member _.CompleteArtifact buildId projectHash targetHash parts success =
+            Artifact.completeArtifact headers buildId projectHash targetHash parts success
+
         member _.GetArtifactPart projectHash targetHash part =
             let resp = Artifact.getArtifactPart headers projectHash targetHash part
             Uri(resp.Uri)
-
-        member _.CreateArtifact project target projectHash targetHash =
-            Artifact.createArtifact headers project target projectHash targetHash
-
-        member _.CompleteArtifact projectHash targetHash parts success =
-            Artifact.completeArtifact headers projectHash targetHash parts success
