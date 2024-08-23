@@ -161,7 +161,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
             // invalidate artifact
             if node.IsFirst then
-                api |> Option.iter (fun api -> api.CreateArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash)
+                api |> Option.iter (fun api -> api.CreateArtifact node.Project node.Target node.ProjectHash node.TargetHash)
 
             notification.NodeBuilding node
             let cacheEntry = cache.GetEntry sourceControl.CI.IsSome node.IsFirst node.ProjectHash node.TargetHash
@@ -200,7 +200,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false node.ProjectHash node.TargetHash
                 let files = cacheEntry.Complete summary
                 api |> Option.iter (fun api ->
-                    api.CompleteArtifact buildId node.ProjectHash node.TargetHash files successful)
+                    api.CompleteArtifact node.ProjectHash node.TargetHash files successful
+                    api.UseArtifact buildId node.ProjectHash node.TargetHash)
             else
                 cacheEntry.CompleteLogFile summary
 
