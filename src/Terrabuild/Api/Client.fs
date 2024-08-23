@@ -75,23 +75,6 @@ module private Build =
         TargetHash: string
     }
 
-    [<RequireQualifiedAccess>]
-    type CreateArtifactInput = {
-        BuildId: string
-        Project: string
-        Target: string
-        ProjectHash: string
-        TargetHash: string
-    }
-
-    [<RequireQualifiedAccess>]
-    type CompleteArtifactInput = {
-        BuildId: string
-        Parts: string list
-        Success: bool
-    }
-
-
     let startBuild headers branchOrTag commit configuration note tag targets force retry ci ciname cimetadata: StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = commit
@@ -115,6 +98,29 @@ module private Build =
           UseArtifactInput.TargetHash = targetHash }
         |> Http.put<UseArtifactInput, Unit> headers $"/builds/{buildId}/use-artifact"
 
+
+module private Artifact =
+    [<RequireQualifiedAccess>]
+    type CreateArtifactInput = {
+        BuildId: string
+        Project: string
+        Target: string
+        ProjectHash: string
+        TargetHash: string
+    }
+
+    [<RequireQualifiedAccess>]
+    type CompleteArtifactInput = {
+        BuildId: string
+        Parts: string list
+        Success: bool
+    }
+
+    [<RequireQualifiedAccess>]
+    type AzureArtifactLocationOutput = {
+        Uri: string
+    }
+
     let createArtifact headers buildId project target projectHash targetHash =
         { CreateArtifactInput.BuildId = buildId
           CreateArtifactInput.ProjectHash = projectHash
@@ -128,13 +134,6 @@ module private Build =
           CompleteArtifactInput.Parts = parts
           CompleteArtifactInput.Success = success }
         |> Http.put<CompleteArtifactInput, Unit> headers $"/artifacts/{projectHash}/{targetHash}/complete"
-
-
-module private Artifact =
-    [<RequireQualifiedAccess>]
-    type AzureArtifactLocationOutput = {
-        Uri: string
-    }
 
     let getArtifactPart headers projectHash targetHash part =
         Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts/{projectHash}/{targetHash}/{part}" ()
@@ -165,10 +164,10 @@ type Client(space: string, token: string) =
             Build.useArtifact headers buildId projectHash targetHash
 
         member _.CreateArtifact buildId project target projectHash targetHash =
-            Build.createArtifact headers buildId project target projectHash targetHash
+            Artifact.createArtifact headers buildId project target projectHash targetHash
 
         member _.CompleteArtifact buildId projectHash targetHash parts success =
-            Build.completeArtifact headers buildId projectHash targetHash parts success
+            Artifact.completeArtifact headers buildId projectHash targetHash parts success
 
         member _.GetArtifactPart projectHash targetHash part =
             let resp = Artifact.getArtifactPart headers projectHash targetHash part
