@@ -5,7 +5,7 @@ open Serilog
 open GraphDef
 
 
-let enforce buildAt force retry (tryGetSummaryOnly: string -> string -> Cache.TargetSummary option) (graph: GraphDef.Graph) =
+let enforce buildAt force retry (tryGetSummaryOnly: string -> Cache.TargetSummary option) (graph: GraphDef.Graph) =
     Log.Debug("===== [Graph Consistency] =====")
 
     let startedAt = DateTime.UtcNow
@@ -40,7 +40,8 @@ let enforce buildAt force retry (tryGetSummaryOnly: string -> string -> Cache.Ta
                     DateTime.MaxValue, { node with Usage = NodeUsage.Build Configuration.TargetOperation.MarkAsForced }
                 else
                     // slow path: check and apply consistency rules
-                    match tryGetSummaryOnly node.ProjectHash node.TargetHash with
+                    let cacheEntryId = GraphDef.buildCacheKey node
+                    match tryGetSummaryOnly cacheEntryId with
                     | Some summary ->
                         Log.Debug("{nodeId} has existing build summary", node.Id)
                         if summary.StartedAt < maxCompletionChildren then

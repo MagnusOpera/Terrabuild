@@ -4,8 +4,8 @@ type Local() =
     interface Contracts.IStorage with
         override _.Name = "Local"
 
-        override _.Exists projectHash targetHash part = false
+        override _.Exists id = false
 
-        override _.TryDownload projectHash targetHash part = None
+        override _.TryDownload id = None
 
-        override _.Upload projectHash targetHash part summaryFile = ()
+        override _.Upload id summaryFile = ()

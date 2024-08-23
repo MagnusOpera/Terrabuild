@@ -48,9 +48,9 @@ type IEntry =
     abstract Complete: summary:TargetSummary -> string list
 
 type ICache =
-    abstract TryGetSummaryOnly: useRemote:bool -> projectHash:string -> targetHash:string -> (Origin * TargetSummary) option
-    abstract TryGetSummary: useRemote:bool -> projectHash:string -> targetHash:string -> TargetSummary option
-    abstract GetEntry: useRemote:bool -> clean:bool -> projectHash:string -> targetHash:string -> IEntry
+    abstract TryGetSummaryOnly: useRemote:bool -> id:string -> (Origin * TargetSummary) option
+    abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
+    abstract GetEntry: useRemote:bool -> clean:bool -> id:string -> IEntry
     abstract CreateHomeDir: nodeHash:string -> string
 
 
@@ -87,7 +87,7 @@ let clearHomeCache () =
 
 
 
-type NewEntry(entryDir: string, useRemote: bool, clean: bool, projectHash:string, targetHash: string, storage: Contracts.IStorage) =
+type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storage: Contracts.IStorage) =
     let logsDir = FS.combinePath entryDir "logs"
     let outputsDir = FS.combinePath entryDir "outputs"
     let mutable logNum = 1
@@ -134,14 +134,14 @@ type NewEntry(entryDir: string, useRemote: bool, clean: bool, projectHash:string
 
         member _.Complete summary =
             let files =
-                let uploadDir sourceDir part =
-                    let path = $"{projectHash}/{targetHash}/{part}"
+                let uploadDir sourceDir name =
+                    let path = $"{id}/{name}"
                     let tarFile = IO.getTempFilename()
                     let compressFile = IO.getTempFilename()
                     try
                         sourceDir |> Compression.tar tarFile
                         tarFile |> Compression.compress compressFile
-                        storage.Upload projectHash targetHash part compressFile
+                        storage.Upload path compressFile
                         path
                     finally
                         IO.deleteAny compressFile
@@ -190,8 +190,8 @@ type Cache(storage: Contracts.IStorage) =
     // if not we have never tried to download the summary
     let cachedSummaries = System.Collections.Concurrent.ConcurrentDictionary<string, (Origin*TargetSummary) option>()
 
-    let tryDownload targetDir projectHash targetHash part =
-        match storage.TryDownload projectHash targetHash part with
+    let tryDownload targetDir id name =
+        match storage.TryDownload $"{id}/{name}" with
         | Some file ->
             let uncompressFile = IO.getTempFilename()
             try
@@ -222,8 +222,7 @@ type Cache(storage: Contracts.IStorage) =
 
     interface ICache with
         // NOTE: do not use when building - only use for graph building
-        member _.TryGetSummaryOnly useRemote projectHash targetHash : (Origin * TargetSummary) option =
-            let id = $"{projectHash}/{targetHash}"
+        member _.TryGetSummaryOnly useRemote id : (Origin * TargetSummary) option =
             match cachedSummaries.TryGetValue(id) with
             | true, originSummary -> originSummary
             | false, _ ->
@@ -244,7 +243,7 @@ type Cache(storage: Contracts.IStorage) =
                     | _ -> None
                 | _ ->
                     if useRemote then
-                        if tryDownload logsDir projectHash targetHash "logs" then
+                        if tryDownload logsDir id "logs" then
                             match tryLoadSummary logsDir outputsDir summaryFile with
                             | Some summary ->
                                 cachedSummaries.TryAdd(id, Some (Origin.Remote, summary)) |> ignore
@@ -256,8 +255,7 @@ type Cache(storage: Contracts.IStorage) =
                     else
                         None
 
-        member _.TryGetSummary useRemote projectHash targetHash : TargetSummary option =
-            let id = $"{projectHash}/{targetHash}"
+        member _.TryGetSummary useRemote id : TargetSummary option =
             let entryDir = FS.combinePath buildCacheDirectory id
             let logsDir = FS.combinePath entryDir "logs"
             let outputsDir = FS.combinePath entryDir "outputs"
@@ -269,12 +267,12 @@ type Cache(storage: Contracts.IStorage) =
                 tryLoadSummary logsDir outputsDir summaryFile
             | _ ->
                 if useRemote then
-                    if tryDownload logsDir projectHash targetHash "logs" then
+                    if tryDownload logsDir id "logs" then
                         match tryLoadSummary logsDir outputsDir summaryFile with
                         | Some summary ->
                             match summary.Outputs with
                             | Some _ ->
-                                if tryDownload outputsDir projectHash targetHash "outputs" then
+                                if tryDownload outputsDir id "outputs" then
                                     entryDir |> setOrigin Origin.Remote
                                     Some summary
                                 else
@@ -288,12 +286,11 @@ type Cache(storage: Contracts.IStorage) =
                 else
                     None
 
-        member _.GetEntry useRemote clean projectHash targetHash =
-            let id = $"{projectHash}/{targetHash}"
+        member _.GetEntry useRemote clean id : IEntry =
             // invalidate cache as we are creating a new entry
             cachedSummaries.TryRemove(id) |> ignore
             let entryDir = FS.combinePath buildCacheDirectory id
-            NewEntry(entryDir, useRemote, clean, projectHash, targetHash, storage)
+            NewEntry(entryDir, useRemote, clean, id, storage)
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash

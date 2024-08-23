@@ -22,7 +22,6 @@ module private Http =
 
     let get<'req, 'resp> = request<'req, 'resp> HttpMethod.Get
     let post<'req, 'resp> = request<'req, 'resp> HttpMethod.Post
-    let put<'req, 'resp> = request<'req, 'resp> HttpMethod.Put
 
 
 module private Auth =
@@ -70,6 +69,16 @@ module private Build =
     }
 
     [<RequireQualifiedAccess>]
+    type AddArtifactInput = {
+        Project: string
+        Target: string
+        ProjectHash: string
+        TargetHash: string
+        Files: string list
+        Success: bool
+    }
+
+    [<RequireQualifiedAccess>]
     type UseArtifactInput = {
         ProjectHash: string
         TargetHash: string
@@ -89,50 +98,36 @@ module private Build =
           StartBuildInput.CIMetadata = cimetadata }
           |> Http.post headers "/builds"
 
+
+    let addArtifact headers buildId project target projectHash targetHash files success: Unit =
+        { AddArtifactInput.Project = project
+          AddArtifactInput.Target = target
+          AddArtifactInput.ProjectHash = projectHash
+          AddArtifactInput.TargetHash = targetHash
+          AddArtifactInput.Files = files
+          AddArtifactInput.Success = success }
+        |> Http.post<AddArtifactInput, Unit> headers $"/builds/{buildId}/add-artifact"
+
+    let useArtifact headers buildId projectHash hash: Unit =
+        { UseArtifactInput.ProjectHash = projectHash
+          UseArtifactInput.TargetHash = hash }
+        |> Http.post<UseArtifactInput, Unit> headers $"/builds/{buildId}/use-artifact"
+
+
     let completeBuild headers buildId success: Unit =
         { CompleteBuildInput.Success = success }
         |> Http.post headers $"/builds/{buildId}/complete"
 
-    let useArtifact headers buildId projectHash targetHash =
-        { UseArtifactInput.ProjectHash = projectHash
-          UseArtifactInput.TargetHash = targetHash }
-        |> Http.put<UseArtifactInput, Unit> headers $"/builds/{buildId}/use-artifact"
-
 
 module private Artifact =
-    [<RequireQualifiedAccess>]
-    type CreateArtifactInput = {
-        Project: string
-        Target: string
-        ProjectHash: string
-        TargetHash: string
-    }
-
-    [<RequireQualifiedAccess>]
-    type CompleteArtifactInput = {
-        Parts: string list
-        Success: bool
-    }
-
     [<RequireQualifiedAccess>]
     type AzureArtifactLocationOutput = {
         Uri: string
     }
 
-    let createArtifact headers project target projectHash targetHash =
-        { CreateArtifactInput.ProjectHash = projectHash
-          CreateArtifactInput.TargetHash = targetHash            
-          CreateArtifactInput.Project = project
-          CreateArtifactInput.Target = target }
-        |> Http.post<CreateArtifactInput, Unit> headers $"/artifacts"
+    let getArtifact headers path: AzureArtifactLocationOutput =
+        Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts?path={path}" ()
 
-    let completeArtifact headers projectHash targetHash parts success =
-        { CompleteArtifactInput.Parts = parts
-          CompleteArtifactInput.Success = success }
-        |> Http.put<CompleteArtifactInput, Unit> headers $"/artifacts/{projectHash}/{targetHash}/complete"
-
-    let getArtifactPart headers projectHash targetHash part =
-        Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts/{projectHash}/{targetHash}/{part}" ()
 
 type Client(space: string, token: string) =
     let accesstoken =
@@ -149,22 +144,19 @@ type Client(space: string, token: string) =
         HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
 
     interface Contracts.IApiClient with
-        member _.StartBuild branchOrTag commit configuration note tag targets force retry ci ciname cimetadata =
+        member _.BuildStart branchOrTag commit configuration note tag targets force retry ci ciname cimetadata =
             let resp = Build.startBuild headers branchOrTag commit configuration note tag targets force retry ci ciname cimetadata
             resp.BuildId
 
-        member _.CompleteBuild buildId success =
+        member _.BuildComplete buildId success =
             Build.completeBuild headers buildId success
 
-        member _.UseArtifact buildId projectHash targetHash =
-            Build.useArtifact headers buildId projectHash targetHash
+        member _.BuildAddArtifact buildId project target projectHash targetHash files success =
+            Build.addArtifact headers buildId project target projectHash targetHash files success
 
-        member _.GetArtifactPart projectHash targetHash part =
-            let resp = Artifact.getArtifactPart headers projectHash targetHash part
+        member _.BuildUseArtifact buildId projectHash hash =
+            Build.useArtifact headers buildId projectHash hash
+
+        member _.ArtifactGet path =
+            let resp = Artifact.getArtifact headers path
             Uri(resp.Uri)
-
-        member _.CreateArtifact project target projectHash targetHash =
-            Artifact.createArtifact headers project target projectHash targetHash
-
-        member _.CompleteArtifact projectHash targetHash parts success =
-            Artifact.completeArtifact headers projectHash targetHash parts success
