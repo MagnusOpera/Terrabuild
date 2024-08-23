@@ -9,7 +9,7 @@ type AzureArtifactLocationOutput = {
 
 type AzureBlobStorage(api: Contracts.IApiClient) =
     let getBlobClient path =
-        let uri = api.ArtifactGet path
+        let uri = api.GetArtifact path
         let container = BlobContainerClient(uri)
         let blobClient = container.GetBlobClient(path)
         blobClient
