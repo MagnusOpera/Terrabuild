@@ -150,19 +150,19 @@ type Client(space: string, token: string) =
         HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
 
     interface Contracts.IApiClient with
-        member _.BuildStart branchOrTag commit configuration note tag targets force retry ci ciname cimetadata =
+        member _.StartBuild branchOrTag commit configuration note tag targets force retry ci ciname cimetadata =
             let resp = Build.startBuild headers branchOrTag commit configuration note tag targets force retry ci ciname cimetadata
             resp.BuildId
 
-        member _.BuildComplete buildId success =
+        member _.CompleteBuild buildId success =
             Build.completeBuild headers buildId success
 
-        member _.BuildAddArtifact buildId project target projectHash targetHash files success =
+        member _.AddArtifact buildId project target projectHash targetHash files success =
             Build.addArtifact headers buildId project target projectHash targetHash files success
 
-        member _.BuildUseArtifact buildId projectHash hash =
+        member _.UseArtifact buildId projectHash hash =
             Build.useArtifact headers buildId projectHash hash
 
-        member _.ArtifactGet path =
+        member _.GetArtifact path =
             let resp = Artifact.getArtifact headers path
             Uri(resp.Uri)

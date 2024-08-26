@@ -142,7 +142,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     let buildId =
-        api |> Option.map (fun api -> api.BuildStart sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI.IsSome sourceControl.CI sourceControl.Metadata)
+        api |> Option.map (fun api -> api.StartBuild sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI.IsSome sourceControl.CI sourceControl.Metadata)
         |> Option.defaultValue ""
 
     let allowRemoteCache = options.LocalOnly |> not
@@ -197,7 +197,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
                 let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
                 let files = cacheEntry.Complete summary
-                api |> Option.iter (fun api -> api.BuildAddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
+                api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
             else
                 cacheEntry.CompleteLogFile summary
 
@@ -214,7 +214,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 | Some outputs ->
                     let files = IO.enumerateFiles outputs
                     IO.copyFiles projectDirectory outputs files |> ignore
-                    api |> Option.iter (fun api -> api.BuildUseArtifact buildId node.ProjectHash node.TargetHash)
+                    api |> Option.iter (fun api -> api.UseArtifact buildId node.ProjectHash node.TargetHash)
                 | _ -> ()
             | _ ->
                 TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
@@ -258,8 +258,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     | Some api, Some _ ->
         graph.Nodes
         |> Map.iter (fun _ node ->
-            if node.Usage = GraphDef.NodeUsage.Skipped then
-                api.BuildUseArtifact buildId node.ProjectHash node.TargetHash)
+            if node.Usage = GraphDef.NodeUsage.Selected then
+                api.UseArtifact buildId node.ProjectHash node.TargetHash)
     | _ -> ()
 
     let status = hub.WaitCompletion()
@@ -323,6 +323,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                       Summary.BuildNodesStatus = buildNodesStatus  }
 
     notification.BuildCompleted buildInfo
-    api |> Option.iter (fun api -> api.BuildComplete buildId (status = Status.Success))
+    api |> Option.iter (fun api -> api.CompleteBuild buildId (status = Status.Success))
 
     buildInfo
