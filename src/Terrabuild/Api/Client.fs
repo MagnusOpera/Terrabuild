@@ -5,6 +5,7 @@ open Collections
 
 
 module private Http =
+    open Serilog
     let apiUrl =
         let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
         Uri(baseUrl)
@@ -15,10 +16,15 @@ module private Http =
             if typeof<'req> <> typeof<Unit> then request |> Json.Serialize |> TextRequest |> Some
             else None
 
-        let response = Http.RequestString(url = url, headers = headers, ?body = body, httpMethod = method)
+        try
+            let response = Http.RequestString(url = url, headers = headers, ?body = body, httpMethod = method)
 
-        if typeof<'resp> <> typeof<Unit> then response |> Json.Deserialize<'resp>
-        else Unchecked.defaultof<'resp>
+            if typeof<'resp> <> typeof<Unit> then response |> Json.Deserialize<'resp>
+            else Unchecked.defaultof<'resp>
+        with
+        | exn ->
+            Log.Fatal(exn, "{method} {url} with content {body}", method, url, body)
+            reraise()
 
     let get<'req, 'resp> = request<'req, 'resp> HttpMethod.Get
     let post<'req, 'resp> = request<'req, 'resp> HttpMethod.Post
