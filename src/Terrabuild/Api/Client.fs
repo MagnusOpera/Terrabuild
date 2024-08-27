@@ -6,6 +6,8 @@ open Collections
 
 module private Http =
     open Serilog
+    open System.Net
+    open Errors
     let apiUrl =
         let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
         Uri(baseUrl)
@@ -21,10 +23,23 @@ module private Http =
 
             if typeof<'resp> <> typeof<Unit> then response |> Json.Deserialize<'resp>
             else Unchecked.defaultof<'resp>
+
         with
         | exn ->
-            Log.Fatal(exn, "{method} {url} with content {body}", method, url, body)
-            reraise()
+            Log.Fatal(exn, "API error: {method} {url} with content {body}", method, url, body)
+
+            let errorCode =
+                match exn.InnerException with
+                | :? WebException as innerEx ->
+                    match innerEx.Response with
+                    | :? HttpWebResponse as hwr -> hwr.StatusCode.ToString()
+                    | _ -> exn.Message
+                | _ -> exn.Message
+
+            if errorCode = "422" then
+                TerrabuildException.Raise($"Storage limit exceeded, please check your subscription.", exn)
+            else
+                TerrabuildException.Raise($"Api failed with error {errorCode}.", exn)
 
     let get<'req, 'resp> = request<'req, 'resp> HttpMethod.Get
     let post<'req, 'resp> = request<'req, 'resp> HttpMethod.Post
