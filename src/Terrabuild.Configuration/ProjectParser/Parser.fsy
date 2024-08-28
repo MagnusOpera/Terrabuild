@@ -33,7 +33,7 @@ let debugPrint s = ignore s
 %token TRIM UPPER LOWER VERSION DOUBLE_QUESTION QUESTION COLON
 %token EOF
 %token PROJECT EXTENSION TARGET 
-%token DEPENDENCIES OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS NAME
+%token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS NAME
 
 // associativity and precedences
 
@@ -86,12 +86,15 @@ Project:
 ProjectComponents:
     | /* empty */ { [] }
     | ProjectComponents ProjectDependencies { $1 @ [$2] }
+    | ProjectComponents ProjectLinks { $1 @ [$2] }
     | ProjectComponents ProjectOutputs { $1 @ [$2] }
     | ProjectComponents ProjectIgnores { $1 @ [$2] }
     | ProjectComponents ProjectIncludes { $1 @ [$2] }
     | ProjectComponents ProjectLabels { $1 @ [$2] }
 ProjectDependencies:
     | DEPENDENCIES EQUAL ListOfString { ProjectComponents.Dependencies $3 }
+ProjectLinks:
+    | LINKS EQUAL ListOfString { ProjectComponents.Links $3 }
 ProjectOutputs:
     | OUTPUTS EQUAL ListOfString { ProjectComponents.Outputs $3 }
 ProjectIgnores:

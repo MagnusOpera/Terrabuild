@@ -2,6 +2,7 @@
 module internal Terrabuild.Configuration.Project.Parser
 type token = 
   | DEPENDENCIES
+  | LINKS
   | OUTPUTS
   | IGNORES
   | INCLUDES
@@ -50,6 +51,7 @@ type token =
   | FALSE
 type tokenId = 
     | TOKEN_DEPENDENCIES
+    | TOKEN_LINKS
     | TOKEN_OUTPUTS
     | TOKEN_IGNORES
     | TOKEN_INCLUDES
@@ -111,6 +113,7 @@ type nonTerminalId =
     | NONTERM_Project
     | NONTERM_ProjectComponents
     | NONTERM_ProjectDependencies
+    | NONTERM_ProjectLinks
     | NONTERM_ProjectOutputs
     | NONTERM_ProjectIgnores
     | NONTERM_ProjectIncludes

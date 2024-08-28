@@ -6,6 +6,7 @@ open Errors
 [<RequireQualifiedAccess>]
 type ProjectComponents =
     | Dependencies of string list
+    | Links of string list
     | Outputs of string list
     | Ignores of string list
     | Includes of string list
@@ -14,6 +15,7 @@ type ProjectComponents =
 type Project = {
     Init: string option
     Dependencies: Set<string> option
+    Links: Set<string> option
     Outputs: Set<string> option
     Ignores: Set<string> option
     Includes: Set<string> option
@@ -26,6 +28,12 @@ with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
             | _ -> TerrabuildException.Raise("multiple dependencies declared")
+
+        let links =
+            match components |> List.choose (function | ProjectComponents.Links value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value |> Set.ofList |> Some
+            | _ -> TerrabuildException.Raise("multiple links declared")
 
         let outputs =
             match components |> List.choose (function | ProjectComponents.Outputs value -> Some value | _ -> None) with
@@ -53,6 +61,7 @@ with
 
         { Init = init
           Dependencies = dependencies
+          Links = links
           Outputs = outputs
           Ignores = ignores
           Includes = includes

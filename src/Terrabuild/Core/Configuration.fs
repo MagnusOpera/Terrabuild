@@ -94,6 +94,7 @@ type private LazyScript = Lazy<Terrabuild.Scripting.Script>
 [<RequireQualifiedAccess>]
 type private LoadedProject = {
     Dependencies: string set
+    Links: string set
     Includes: string set
     Ignores: string set
     Outputs: string set
@@ -227,6 +228,7 @@ let read (options: Options) =
             with Ignores = projectInfo.Ignores + (projectConfig.Project.Ignores |> Option.defaultValue Set.empty)
                  Outputs = projectInfo.Outputs + (projectConfig.Project.Outputs |> Option.defaultValue Set.empty)
                  Dependencies = projectInfo.Dependencies + (projectConfig.Project.Dependencies |> Option.defaultValue Set.empty)
+                 Links = projectInfo.Links + (projectConfig.Project.Links |> Option.defaultValue Set.empty)
                  Includes = projectInfo.Includes + (projectConfig.Project.Includes |> Option.defaultValue Set.empty) }
 
         let labels = projectConfig.Project.Labels
@@ -236,6 +238,9 @@ let read (options: Options) =
         // convert relative dependencies to absolute dependencies respective to workspaceDirectory
         let projectDependencies =
             projectInfo.Dependencies
+            |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
+        let projectLinks =
+            projectInfo.Links
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
 
         let projectTargets = projectConfig.Targets
@@ -247,6 +252,7 @@ let read (options: Options) =
             |> Set.union projectInfo.Includes
 
         { LoadedProject.Dependencies = projectDependencies
+          LoadedProject.Links = projectLinks
           LoadedProject.Includes = includes
           LoadedProject.Ignores = projectIgnores
           LoadedProject.Outputs = projectOutputs
@@ -257,7 +263,7 @@ let read (options: Options) =
 
 
     // this is the final stage: create targets and create the project
-    let finalizeProject projectId (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
+    let finalizeProject projectId (projectDef: LoadedProject) (projectReferences: Map<string, Project>) =
         let projectDir = projectId
 
         // get dependencies on files
@@ -265,19 +271,28 @@ let read (options: Options) =
             projectDir
             |> IO.enumerateFilesBut (projectDef.Includes) (projectDef.Outputs + projectDef.Ignores)
             |> Set
+
         let filesHash =
             files
             |> Seq.sort
             |> Hash.sha256files
 
-        let versions =
-            projectDependencies
-            |> Map.map (fun _ depProj -> depProj.Hash)
-
         let dependenciesHash =
-            versions.Values
+            let projectDependencies =
+                projectReferences
+                |> Map.filter (fun projectId _ -> projectDef.Dependencies |> Set.contains projectId)
+
+            let versionDependencies =
+                projectDependencies
+                |> Map.map (fun _ depProj -> depProj.Hash)
+
+            versionDependencies.Values
             |> Seq.sort
             |> Hash.sha256strings
+
+        let versions = 
+            projectReferences
+            |> Map.map (fun _ depProj -> depProj.Hash)
 
         // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
         let projectHash =
@@ -447,7 +462,7 @@ let read (options: Options) =
 
             // await dependencies to be loaded
             let awaitedProjects =
-                loadedProject.Dependencies
+                (loadedProject.Dependencies + loadedProject.Links)
                 |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Project> awaitedProjectId)
                 |> Array.ofSeq
 
