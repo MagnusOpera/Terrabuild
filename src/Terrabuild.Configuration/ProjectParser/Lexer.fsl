@@ -51,6 +51,7 @@ rule token = parse
     | "project" { PROJECT }
     | "target" { TARGET }
     | "dependencies" { DEPENDENCIES }
+    | "links" { LINKS }
     | "outputs" { OUTPUTS }
     | "ignores" { IGNORES }
     | "includes" { INCLUDES }
