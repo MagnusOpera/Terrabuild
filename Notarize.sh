@@ -8,8 +8,9 @@
 ## FileName $5 ./filename.zip
 
 
-files=( $5 )
+files=( .out/terrabuild-*-darwin-x64.zip )
 file=${files[0]}
+echo "Notarizing $file"
 
 #xcrun altool --notarize-app --primary-bundle-id "$3" --username $1 --password "$2" --asc-provider "$4" --file "$5"
 requestUUID=$(xcrun altool --notarize-app --primary-bundle-id "$3" --username $1 --password "$2" --asc-provider "$4" --file "$file">&1  | awk '/RequestUUID/ { print $NF; }')

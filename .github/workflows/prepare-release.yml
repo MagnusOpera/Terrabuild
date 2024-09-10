@@ -48,7 +48,7 @@ jobs:
         run: make dist-all config=Release version=${{ env.BUILD_VERSION }} version_suffix=${{ env.BUILD_VERSION_SUFFIX }}
 
       - name: Notarize Binaries 
-        run: ./Notarize.sh ${{ secrets.MAC_CERT_LOGIN }} ${{ secrets.MAC_CERT_PASSWORD }} ${{ secrets.MAC_CERT_BUNDLE_ID }} ${{ secrets.MAC_CERT_TEAM_ID }} .out/terrabuild-*-darwin-x64.zip
+        run: ./Notarize.sh ${{ secrets.MAC_CERT_LOGIN }} ${{ secrets.MAC_CERT_PASSWORD }} ${{ secrets.MAC_CERT_BUNDLE_ID }} ${{ secrets.MAC_CERT_TEAM_ID }}
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
