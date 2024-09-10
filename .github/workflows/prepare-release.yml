@@ -38,17 +38,16 @@ jobs:
           echo "BUILD_VERSION: $BUILD_VERSION"
           echo "BUILD_VERSION_SUFFIX: $BUILD_VERSION_SUFFIX"
 
-      - name: Add Cert to Keychain
-        uses: apple-actions/import-codesign-certs@v3
-        with: 
-          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
-          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
-
       - name: Build & Publish
         run: make dist-all config=Release version=${{ env.BUILD_VERSION }} version_suffix=${{ env.BUILD_VERSION_SUFFIX }}
 
-      - name: Notarize Binaries 
-        run: ./Notarize.sh ${{ secrets.MAC_CERT_LOGIN }} ${{ secrets.MAC_CERT_PASSWORD }} ${{ secrets.MAC_CERT_BUNDLE_ID }} ${{ secrets.MAC_CERT_TEAM_ID }}
+      - name: Notarize
+        uses: GuillaumeFalourd/notary-tools@v1
+        with:
+          product_path: ".out/darwin/terrabuild-darwin-x64.zip" # or .pkg or .dmg
+          apple_id: ${{ secrets.MAC_DEV_LOGIN }}
+          password: ${{ secrets.MAC_DEV_PASSWORD }}
+          team_id: ${{ secrets.MAC_DEV_TEAM_ID }}
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
