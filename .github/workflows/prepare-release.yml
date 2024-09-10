@@ -50,7 +50,7 @@ jobs:
       - name: Notarize
         uses: GuillaumeFalourd/notary-tools@v1
         with:
-          product_path: ".out/darwin/terrabuild-darwin-x64.zip" # or .pkg or .dmg
+          product_path: ".out/terrabuild-darwin-x64.zip" # or .pkg or .dmg
           apple_id: ${{ secrets.MAC_DEV_LOGIN }}
           password: ${{ secrets.MAC_DEV_PASSWORD }}
           team_id: ${{ secrets.MAC_DEV_TEAM_ID }}
