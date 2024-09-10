@@ -105,7 +105,7 @@
         "type": "Project",
         "dependencies": {
           "FSharp.Core": "[8.0.300, )",
-          "Terrabuild.Common": "[1.0.0, )"
+          "Terrabuild.Common": "[0.0.0, )"
         }
       }
     }

@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Info
@@ -38,8 +38,18 @@ jobs:
           echo "BUILD_VERSION: $BUILD_VERSION"
           echo "BUILD_VERSION_SUFFIX: $BUILD_VERSION_SUFFIX"
 
+      - name: Add Cert to Keychain
+        uses: apple-actions/import-codesign-certs@v3
+        with: 
+          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
+          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
+
       - name: Build & Publish
         run: make dist-all config=Release version=${{ env.BUILD_VERSION }} version_suffix=${{ env.BUILD_VERSION_SUFFIX }}
+
+      - name: Notarize Binaries 
+        run: |
+          ./Notarize.sh ${{ secret.MAC_CERT_LOGIN }} ${{ secret.MAC_CERT_PASSWORD}} ${{ secret.MAC_CERT_BUNDLE_ID}} ${{ secret.MAC_CERT_TEAM_ID }} .out/terrabuild-*-darwin-x64.zip
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
