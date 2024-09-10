@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 ## usage sh Notarize.sh "devemail" "Password1." "group.com.company" "DEVID" "./filename.zip"
 ## dev_account $1 "devemail"
