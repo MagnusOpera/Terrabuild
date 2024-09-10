@@ -8,7 +8,7 @@
 ## FileName $5 ./filename.zip
 
 
-files=( $pattern )
+files=( $5 )
 file=${files[0]}
 
 #xcrun altool --notarize-app --primary-bundle-id "$3" --username $1 --password "$2" --asc-provider "$4" --file "$5"
