@@ -74,12 +74,6 @@ publish-all: clean
 
 	dotnet publish -c $(buildconfig) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/linux src/Terrabuild
 
-pack-all:
-	cd .out/dotnet; zip -u ../dotnet.zip ./*
-	cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe
-	cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild
-	cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild
-
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(buildconfig) /p:GenerateDocumentationFile=true
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net8.0/Terrabuild.Extensions.xml ../website/content/docs/extensions

@@ -58,8 +58,11 @@ jobs:
           name: outputs
           path: .out
 
-      - name: Dump
-        run: ls -alR .
+      - name: Add Cert to Keychain
+        uses: apple-actions/import-codesign-certs@v3
+        with: 
+          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
+          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
 
       - name: Sign
         run: |
@@ -67,10 +70,12 @@ jobs:
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
           lipo -create -output $(PWD)/.out/darwin/terrabuild $(PWD)/.out/darwin/x64/terrabuild $(PWD)/.out/darwin/arm64/terrabuild
 
-      - name: Archive outputs
+      - name: Archive signed outputs
         uses: actions/upload-artifact@v4
         with:
           name: outputs
+          include-hidden-files: true
+          overwrite: true
           path: .out
 
   create-release:
@@ -99,7 +104,11 @@ jobs:
           echo "BUILD_VERSION_SUFFIX: $BUILD_VERSION_SUFFIX"
 
       - name: Pack
-        run: make pack-all config=Release version=${{ env.BUILD_VERSION }} version_suffix=${{ env.BUILD_VERSION_SUFFIX }}
+        run: |
+          cd .out/dotnet; zip -u ../dotnet.zip ./*
+          cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe
+          cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild
+          cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
