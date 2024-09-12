@@ -43,9 +43,9 @@ jobs:
 
       - name: Pack
         run: |
-          cd .out/dotnet; zip -u ../dotnet.zip ./*
-          cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe
-          cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild
+          (cd .out/dotnet; zip -u ../dotnet.zip ./*)
+          (cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe)
+          (cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild)
 
       - name: Archive outputs
         uses: actions/upload-artifact@v4
