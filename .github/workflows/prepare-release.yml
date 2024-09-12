@@ -41,26 +41,38 @@ jobs:
       - name: Build & Publish
         run: make publish-all config=Release version=${{ env.BUILD_VERSION }} version_suffix=${{ env.BUILD_VERSION_SUFFIX }}
 
+      - name: Pack
+        run: |
+          cd .out/dotnet; zip -u ../dotnet.zip ./*
+          cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe
+          cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild
+
       - name: Archive outputs
         uses: actions/upload-artifact@v4
         with:
           name: outputs
           include-hidden-files: true
           path: |
-            .out/
+            .out/*.zip
+            .out/*.nupkg
+
+      - name: Archive macOS outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs-macos
+          include-hidden-files: true
+          path: |
+            .out/darwin
             entitlements.plist
 
   sign:
     runs-on: macos-latest
     needs: build
     steps:
-      - name: Download outputs
+      - name: Download macOS outputs
         uses: actions/download-artifact@v4
         with:
-          name: outputs
-
-      - name: Dump
-        run: ls -alR .
+          name: outputs-macos
 
       - name: Add Cert to Keychain
         uses: apple-actions/import-codesign-certs@v3
@@ -70,17 +82,17 @@ jobs:
 
       - name: Sign
         run: |
-          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-          lipo -create -output darwin/terrabuild darwin/x64/terrabuild darwin/arm64/terrabuild
+          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
+          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
+          lipo -create -output .out/darwin/terrabuild darwin/x64/terrabuild darwin/arm64/terrabuild
+          cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild
 
       - name: Archive signed outputs
         uses: actions/upload-artifact@v4
         with:
-          name: outputs
+          name: outputs-macos-signed
           include-hidden-files: true
-          overwrite: true
-          path: .
+          path: .out/darwin
 
   create-release:
     runs-on: ubuntu-latest
@@ -90,6 +102,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: outputs
+
+      - name: Download macOS outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: outputs-macos-signed
 
       - name: Extract Version/Version Suffix
         run: |
@@ -103,13 +120,6 @@ jobs:
           echo "BUILD_VERSION: $BUILD_VERSION"
           echo "BUILD_VERSION_SUFFIX: $BUILD_VERSION_SUFFIX"
 
-      - name: Pack
-        run: |
-          cd dotnet; zip -u ../dotnet.zip ./*
-          cd windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe
-          cd darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild
-          cd linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild
-
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
         with:
@@ -117,5 +127,5 @@ jobs:
           prerelease: ${{ env.BUILD_VERSION_SUFFIX != '' }}
           generate_release_notes: true
           files: |
-            ./*.zip
-            ./*.nupkg
+            .out/*.zip
+            .out/*.nupkg
