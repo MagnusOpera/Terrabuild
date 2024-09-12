@@ -46,7 +46,7 @@ jobs:
           (cd .out/dotnet; zip -u ../terrabuild-dotnet.zip ./*)
           (cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe)
           (cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild)
-          (cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip .)
+          (cd .out/darwin; zip -ur ../terrabuild-darwin-universal.zip .)
 
       - name: Archive .net Outputs
         uses: actions/upload-artifact@v4
