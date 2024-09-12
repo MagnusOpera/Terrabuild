@@ -148,3 +148,7 @@ jobs:
           files: |
             .out/*.zip
             .out/*.nupkg
+
+      - uses: geekyeggo/delete-artifact@v5.1.0
+        with:
+            name: "*"
