@@ -23,7 +23,33 @@ jobs:
         uses: robinraju/release-downloader@v1.11
         with:
           tag: ${{github.ref_name}}
-          fileName: '*'
+          fileName: '*.nupkg'
 
       - name: NuGet Release
-        run: dotnet nuget push ./Terrabuild.${{github.ref_name}}.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push Terrabuild.${{github.ref_name}}.nupkg --skip-duplicate --api-key ${{secrets.NUGET_KEY}} --source https://api.nuget.org/v3/index.json
+
+  notarize:
+    runs-on: macos-latest
+    steps:
+      - name: Download Github Release artifacts
+        uses: robinraju/release-downloader@v1.11
+        with:
+          tag: ${{github.ref_name}}
+          fileName: 'terrabuild-darwin-*.zip'
+
+      - name: Add Cert to Keychain
+        uses: apple-actions/import-codesign-certs@v3
+        with: 
+          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
+          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
+
+      - name: Notarize
+        uses: GuillaumeFalourd/notary-tools@v1
+        timeout-minutes: 5
+        with:
+          product_path: "terrabuild-darwin-universal.zip"
+          apple_id: ${{ secrets.MAC_DEV_LOGIN }}
+          password: ${{ secrets.MAC_DEV_PASSWORD }}
+          team_id: ${{ secrets.MAC_DEV_TEAM_ID }}
+          xcode_path: '/Applications/Xcode_15.3.app'
+          staple: false
