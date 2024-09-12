@@ -46,7 +46,9 @@ jobs:
         with:
           name: outputs
           include-hidden-files: true
-          path: .out/
+          path: |
+            .out/
+            entitlements.plist
 
   sign:
     runs-on: macos-latest
@@ -66,8 +68,8 @@ jobs:
 
       - name: Sign
         run: |
-          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
+          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements .out/entitlements.plist
+          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements .out/entitlements.plist
           lipo -create -output $(PWD)/.out/darwin/terrabuild $(PWD)/.out/darwin/x64/terrabuild $(PWD)/.out/darwin/arm64/terrabuild
 
       - name: Archive signed outputs
