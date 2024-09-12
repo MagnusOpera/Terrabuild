@@ -94,10 +94,8 @@ jobs:
         with:
           name: unsigned-macos
 
-      - name: Dump
-        run: |
-          ls -alR .
-          unzip -d .out/darwin .out/terrabuild-darwin-binaries.zip
+      - name: Extract Binaries
+        run: unzip -d .out/darwin .out/terrabuild-darwin-binaries.zip
 
       - name: Add Cert to Keychain
         uses: apple-actions/import-codesign-certs@v3
@@ -105,17 +103,14 @@ jobs:
           p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
           p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
 
-      - name: Sign
+      - name: Sign Binaries
         run: |
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
           lipo -create -output .out/darwin/terrabuild .out/darwin/x64/terrabuild .out/darwin/arm64/terrabuild
           (cd .out/darwin; zip ../terrabuild-darwin-universal.zip ./terrabuild)
 
-      - name: Dump2
-        run: ls -alR .
-
-      - name: Archive signed outputs
+      - name: Archive Signed Binaries
         uses: actions/upload-artifact@v4
         with:
           name: outputs-macos
