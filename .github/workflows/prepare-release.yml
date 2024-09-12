@@ -50,11 +50,15 @@ jobs:
       - name: Notarize
         uses: GuillaumeFalourd/notary-tools@v1
         with:
-          product_path: ".out/terrabuild-darwin-x64.zip" # or .pkg or .dmg
+          product_path: ".out/darwin/terrabuild" # or .pkg or .dmg
           apple_id: ${{ secrets.MAC_DEV_LOGIN }}
           password: ${{ secrets.MAC_DEV_PASSWORD }}
           team_id: ${{ secrets.MAC_DEV_TEAM_ID }}
           xcode_path: '/Applications/Xcode_15.3.app'
+          staple: false
+
+      - name: Pack
+        run: make pack-all config=Release version=${{ env.BUILD_VERSION }} version_suffix=${{ env.BUILD_VERSION_SUFFIX }}
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
