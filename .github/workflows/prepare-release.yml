@@ -46,6 +46,7 @@ jobs:
           (cd .out/dotnet; zip -u ../terrabuild-dotnet.zip ./*)
           (cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe)
           (cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild)
+          (cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip .)
 
       - name: Archive .net Outputs
         uses: actions/upload-artifact@v4
@@ -81,7 +82,7 @@ jobs:
           name: unsigned-macos
           include-hidden-files: true
           path: |
-            .out/darwin/
+            .out/terrabuild-darwin-universal.zip
             entitlements.plist
 
   sign:
@@ -94,6 +95,11 @@ jobs:
           name: unsigned-macos
 
       - name: Dump
+        run: |
+          ls -alR .
+          unzip -d .out .out/terrabuild-darwin-universal.zip
+
+      - name: Dump2
         run: ls -alR .
 
       - name: Add Cert to Keychain
