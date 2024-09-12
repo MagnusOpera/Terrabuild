@@ -6,5 +6,6 @@
         <VSTestLogger>trx</VSTestLogger>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <DebugType>embedded</DebugType>
+        <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64</RuntimeIdentifiers>
     </PropertyGroup>
 </Project>
