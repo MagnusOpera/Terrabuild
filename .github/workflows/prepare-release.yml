@@ -43,10 +43,10 @@ jobs:
 
       - name: Pack
         run: |
-          (cd .out/dotnet; zip -u ../terrabuild-dotnet.zip ./*)
-          (cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe)
-          (cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild)
-          (cd .out/darwin; zip -ur ../terrabuild-darwin-universal.zip .)
+          (cd .out/dotnet; zip ../terrabuild-dotnet.zip ./*)
+          (cd .out/windows; zip ../terrabuild-windows-x64.zip ./terrabuild.exe)
+          (cd .out/linux; zip ../terrabuild-linux-x64.zip ./terrabuild)
+          (cd .out/darwin; zip -r ../terrabuild-darwin-universal.zip .)
 
       - name: Archive .net Outputs
         uses: actions/upload-artifact@v4
@@ -82,7 +82,7 @@ jobs:
           name: unsigned-macos
           include-hidden-files: true
           path: |
-            .out/terrabuild-darwin-universal.zip
+            .out/terrabuild-darwin-binaries.zip
             entitlements.plist
 
   sign:
@@ -97,7 +97,7 @@ jobs:
       - name: Dump
         run: |
           ls -alR .
-          unzip -d .out/darwin .out/terrabuild-darwin-universal.zip
+          unzip -d .out/darwin .out/terrabuild-darwin-binaries.zip
 
       - name: Add Cert to Keychain
         uses: apple-actions/import-codesign-certs@v3
@@ -110,7 +110,7 @@ jobs:
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
           lipo -create -output .out/darwin/terrabuild .out/darwin/x64/terrabuild .out/darwin/arm64/terrabuild
-          (cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild)
+          (cd .out/darwin; zip ../terrabuild-darwin-universal.zip ./terrabuild)
 
       - name: Dump2
         run: ls -alR .
