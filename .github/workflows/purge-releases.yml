@@ -20,4 +20,4 @@ jobs:
           draft-drop: true
           draft-drop-count: 2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MAGNUSOPERA_CONTENT_TOKEN }}
