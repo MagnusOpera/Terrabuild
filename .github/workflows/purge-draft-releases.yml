@@ -1,0 +1,16 @@
+on:
+  workflow_dispatch:
+
+name: Delete Draft Releases older than 7 days
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete drafts
+        uses: magnusopera/delete-draft-releases@v1
+        with:
+          threshold: 7d
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
