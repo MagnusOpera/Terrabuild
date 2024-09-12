@@ -71,9 +71,6 @@ publish-all: clean
 
 	dotnet publish -c $(buildconfig) -r osx-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/darwin/x64 src/Terrabuild
 	dotnet publish -c $(buildconfig) -r osx-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/darwin/arm64 src/Terrabuild
-	codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (Q82FMQF3MW)" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-	codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (Q82FMQF3MW)" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-	lipo -create -output $(PWD)/.out/darwin/terrabuild $(PWD)/.out/darwin/x64/terrabuild $(PWD)/.out/darwin/arm64/terrabuild
 
 	dotnet publish -c $(buildconfig) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/linux src/Terrabuild
 
@@ -82,8 +79,6 @@ pack-all:
 	cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe
 	cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild
 	cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild
-
-dist-all: publish-all pack-all
 
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(buildconfig) /p:GenerateDocumentationFile=true
