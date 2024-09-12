@@ -1,7 +1,7 @@
 on:
   workflow_dispatch:
 
-name: Delete Draft Releases older than 7 days
+name: delete-draft-releases
 
 jobs:
   build:
