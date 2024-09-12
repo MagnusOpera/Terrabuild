@@ -1,0 +1,23 @@
+on:
+  workflow_dispatch:
+
+name: delete-releases
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: sgpublic/delete-release-action@v1.2
+        with:
+          repo: magnusopera/terrabuild
+          release-drop: false
+          release-keep-count: 0
+          release-drop-tag: false
+          pre-release-drop: true
+          pre-release-keep-count: 2
+          pre-release-drop-tag: true
+          draft-drop: true
+          draft-drop-count: 2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
