@@ -59,6 +59,9 @@ jobs:
         with:
           name: outputs
 
+      - name: Dump
+        run: ls -alR .
+
       - name: Add Cert to Keychain
         uses: apple-actions/import-codesign-certs@v3
         with: 
