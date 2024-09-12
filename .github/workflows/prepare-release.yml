@@ -97,7 +97,7 @@ jobs:
       - name: Dump
         run: |
           ls -alR .
-          unzip -d .out .out/terrabuild-darwin-universal.zip
+          unzip -d .out/darwin .out/terrabuild-darwin-universal.zip
 
       - name: Dump2
         run: ls -alR .
