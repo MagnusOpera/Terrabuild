@@ -57,9 +57,6 @@ jobs:
           xcode_path: '/Applications/Xcode_15.3.app'
           staple: false
 
-      - name: Pack
-        run: make pack-all config=Release version=${{ env.BUILD_VERSION }} version_suffix=${{ env.BUILD_VERSION_SUFFIX }}
-
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
         with:
