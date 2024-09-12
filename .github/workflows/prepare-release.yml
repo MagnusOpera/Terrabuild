@@ -58,7 +58,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: outputs
-          path: .out
 
       - name: Add Cert to Keychain
         uses: apple-actions/import-codesign-certs@v3
@@ -68,9 +67,9 @@ jobs:
 
       - name: Sign
         run: |
-          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements .out/entitlements.plist
-          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements .out/entitlements.plist
-          lipo -create -output $(PWD)/.out/darwin/terrabuild $(PWD)/.out/darwin/x64/terrabuild $(PWD)/.out/darwin/arm64/terrabuild
+          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
+          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
+          lipo -create -output darwin/terrabuild darwin/x64/terrabuild darwin/arm64/terrabuild
 
       - name: Archive signed outputs
         uses: actions/upload-artifact@v4
@@ -78,20 +77,16 @@ jobs:
           name: outputs
           include-hidden-files: true
           overwrite: true
-          path: .out
+          path: .
 
   create-release:
     runs-on: ubuntu-latest
     needs: sign
     steps:
-      - name: Cloning repository
-        uses: actions/checkout@v4
-
       - name: Download outputs
         uses: actions/download-artifact@v4
         with:
           name: outputs
-          path: .out
 
       - name: Extract Version/Version Suffix
         run: |
@@ -107,10 +102,10 @@ jobs:
 
       - name: Pack
         run: |
-          cd .out/dotnet; zip -u ../dotnet.zip ./*
-          cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe
-          cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild
-          cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild
+          cd dotnet; zip -u ../dotnet.zip ./*
+          cd windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe
+          cd darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild
+          cd linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2.0.6
@@ -119,5 +114,5 @@ jobs:
           prerelease: ${{ env.BUILD_VERSION_SUFFIX != '' }}
           generate_release_notes: true
           files: |
-            ./.out/*.zip
-            ./.out/*.nupkg
+            ./*.zip
+            ./*.nupkg
