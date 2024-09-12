@@ -92,7 +92,6 @@
           "FSharp.Data.Runtime.Utilities": "6.4.0"
         }
       }
-    },
-    "net8.0/osx-arm64": {}
+    }
   }
 }

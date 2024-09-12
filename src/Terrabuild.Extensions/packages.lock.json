@@ -59,7 +59,7 @@
         }
       }
     },
-    "net8.0/osx-arm64": {
+    "net8.0/linux-x64": {
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "6.0.0",
