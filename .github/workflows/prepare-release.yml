@@ -43,23 +43,38 @@ jobs:
 
       - name: Pack
         run: |
-          (cd .out/dotnet; zip -u ../dotnet.zip ./*)
+          (cd .out/dotnet; zip -u ../terrabuild-dotnet.zip ./*)
           (cd .out/windows; zip -u ../terrabuild-windows-x64.zip ./terrabuild.exe)
           (cd .out/linux; zip -u ../terrabuild-linux-x64.zip ./terrabuild)
 
-      - name: Archive outputs
+      - name: Archive .net Outputs
         uses: actions/upload-artifact@v4
         with:
-          name: outputs
-          include-hidden-files: true
-          path: |
-            .out/*.zip
-            .out/*.nupkg
+          name: outputs-dotnet
+          path: .out/terrabuild-dotnet.zip
+
+      - name: Archive NuGet Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs-nuget
+          path: .out/*.nupkg
+
+      - name: Archive Windows Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs-windows
+          path: .out/terrabuild-windows-x64.zip
+
+      - name: Archive Linux Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs-linux
+          path: .out/terrabuild-linux-x64.zip
 
       - name: Archive macOS outputs
         uses: actions/upload-artifact@v4
         with:
-          name: outputs-macos
+          name: unsigned-macos
           include-hidden-files: true
           path: |
             .out/darwin/
@@ -72,7 +87,7 @@ jobs:
       - name: Download macOS outputs
         uses: actions/download-artifact@v4
         with:
-          name: outputs-macos
+          name: unsigned-macos
 
       - name: Dump
         run: ls -alR .
@@ -93,9 +108,9 @@ jobs:
       - name: Archive signed outputs
         uses: actions/upload-artifact@v4
         with:
-          name: outputs-macos-signed
+          name: outputs-macos
           include-hidden-files: true
-          path: .out/darwin/*.zip
+          path: .out/terrabuild-darwin-universal.zip
 
   create-release:
     runs-on: ubuntu-latest
@@ -104,12 +119,7 @@ jobs:
       - name: Download outputs
         uses: actions/download-artifact@v4
         with:
-          name: outputs
-
-      - name: Download macOS outputs
-        uses: actions/download-artifact@v4
-        with:
-          name: outputs-macos-signed
+          pattern: outputs-*
 
       - name: Extract Version/Version Suffix
         run: |
