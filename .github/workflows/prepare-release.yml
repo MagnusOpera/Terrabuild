@@ -87,7 +87,7 @@ jobs:
         run: |
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-          lipo -create -output .out/darwin/terrabuild darwin/x64/terrabuild darwin/arm64/terrabuild
+          lipo -create -output .out/darwin/terrabuild .out/darwin/x64/terrabuild .out/darwin/arm64/terrabuild
           (cd .out/darwin; zip -u ../terrabuild-darwin-universal.zip ./terrabuild)
 
       - name: Archive signed outputs
