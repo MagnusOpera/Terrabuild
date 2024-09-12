@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: sgpublic/delete-release-action@v1.1
+      - uses: sgpublic/delete-release-action@v1.2
         with:
           release-drop: false
           release-keep-count: 0
