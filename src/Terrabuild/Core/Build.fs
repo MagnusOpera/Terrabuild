@@ -58,6 +58,9 @@ type IBuildNotification =
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
 let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir =
+    let homeDir = FS.combinePath homeDir node.ProjectHash
+    IO.createDirectory homeDir
+
     // run actions if any
     let allCommands =
         node.Operations
