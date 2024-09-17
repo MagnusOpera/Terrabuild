@@ -40,16 +40,6 @@ type Node = {
 
     // tell if a node is leaf (that is no dependencies in same project)
     IsLeaf: bool
-
-    // tell this task is the first in the operation execution chain
-    IsFirst: bool
-
-    // tell this task is the final in the operation execution chain
-    // set by Transform/TaskBuilder
-    IsLast: bool
-
-    // tell if a node is batched or not
-    IsBatched: bool
 }
 
 

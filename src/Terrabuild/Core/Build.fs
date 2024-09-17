@@ -162,7 +162,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let startedAt = DateTime.UtcNow
 
             notification.NodeBuilding node
-            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome node.IsFirst cacheEntryId
+            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
 
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
@@ -190,16 +190,12 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                             Cache.TargetSummary.EndedAt = endedAt
                             Cache.TargetSummary.Duration = endedAt - startedAt }
 
-            if node.IsLast then
-                notification.NodeUploading node
+            notification.NodeUploading node
 
-                // create an archive with new files
-                Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
-                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
-                let files = cacheEntry.Complete summary
-                api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
-            else
-                cacheEntry.CompleteLogFile summary
+            // create an archive with new files
+            Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
+            let files = cacheEntry.Complete summary
+            api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
             if successful |> not then
                 TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
@@ -222,8 +218,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         try
             if node.Usage.ShallBuild then buildNode()
             else restoreNode()
-            if node.IsLast then notification.NodeCompleted node (node.Usage.ShallBuild |> not) true
-            else notification.NodeScheduled node
+            notification.NodeCompleted node (node.Usage.ShallBuild |> not) true
         with
             | exn ->
                 Log.Fatal(exn, "Build node failed")
