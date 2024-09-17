@@ -47,8 +47,8 @@ type Cargo() =
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         
-        let ops = All [ shellOp context.Command arguments ]
-        execRequest Cacheability.Always [] ops
+        let ops = [ shellOp context.Command arguments ]
+        execRequest Cacheability.Always ops
 
 
     /// <summary title="Build project.">
@@ -60,8 +60,8 @@ type Cargo() =
         let profile = profile |> Option.defaultValue "dev"
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = All [ shellOp "cargo" $"build --profile {profile} {arguments}" ]
-        execRequest Cacheability.Always [] ops
+        let ops = [ shellOp "cargo" $"build --profile {profile} {arguments}" ]
+        execRequest Cacheability.Always ops
 
 
     /// <summary>
@@ -73,5 +73,5 @@ type Cargo() =
         let profile = profile |> Option.defaultValue "dev"
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = All [ shellOp "cargo" $"test --profile {profile} {arguments}" ]
-        execRequest Cacheability.Always [] ops
+        let ops = [ shellOp "cargo" $"test --profile {profile} {arguments}" ]
+        execRequest Cacheability.Always ops

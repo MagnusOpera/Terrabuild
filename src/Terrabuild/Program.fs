@@ -147,8 +147,11 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let consistentGraph = GraphConsistency.enforce configOptions.StartedAt configOptions.Force configOptions.Retry tryGetSummaryOnly graph
             if options.Debug then logGraph consistentGraph "consistent"
 
-            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {consistentGraph.Nodes.Count} tasks" |> Terminal.writeLine
-            consistentGraph
+            let transformGraph = GraphTransformer.transform configOptions consistentGraph
+            if options.Debug then logGraph transformGraph "transform"
+
+            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {transformGraph.Nodes.Count} tasks" |> Terminal.writeLine
+            transformGraph
 
         if options.Debug then logGraph buildGraph "build"
 

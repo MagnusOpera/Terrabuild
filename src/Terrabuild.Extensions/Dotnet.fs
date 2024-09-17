@@ -50,89 +50,14 @@ module DotnetHelpers =
     let defaultConfiguration = "Debug"
 
 
-
-
-
-
-    let ext2ProjectType ext = ext2projType |> Map.tryFind ext
-
-    let GenerateGuidFromString (input : string) =
-        use md5 = System.Security.Cryptography.MD5.Create()
-        let inputBytes = System.Text.Encoding.GetEncoding(0).GetBytes(input)
-        let hashBytes = md5.ComputeHash(inputBytes)
-        let hashGuid = System.Guid(hashBytes)
-        hashGuid
-
-    let ToVSGuid (guid : System.Guid) =
-        guid.ToString("D").ToUpperInvariant()
-
-
-    let GenerateSolutionContent (projects : string seq) (configuration: string) =
-        let string2guid s =
-            s
-            |> GenerateGuidFromString 
-            |> ToVSGuid
-
-        let guids =
-            projects
-            |> Seq.map (fun x -> x, string2guid x)
-            |> Map
-
-        seq {
-            yield "Microsoft Visual Studio Solution File, Format Version 12.00"
-            yield "# Visual Studio 17"
-
-            for project in projects do
-                let fileName = project
-                let projectType = fileName |> Path.GetExtension |> ext2ProjectType
-                match projectType with
-                | Some prjType -> yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}"""
-                                    prjType
-                                    (fileName |> Path.GetFileNameWithoutExtension)
-                                    fileName
-                                    (guids[fileName])
-                                  yield "EndProject"
-                | None -> failwith $"Unsupported project {fileName}"
-
-            yield "Global"
-
-            yield "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution"
-            yield $"\t\t{configuration}|Any CPU = {configuration}|Any CPU"
-            yield "\tEndGlobalSection"
-
-            yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
-            for project in projects do
-                let guid = guids[project]
-                yield $"\t\t{{{guid}}}.{configuration}|Any CPU.ActiveCfg = {configuration}|Any CPU"
-                yield $"\t\t{{{guid}}}.{configuration}|Any CPU.Build.0 = {configuration}|Any CPU"
-            yield "\tEndGlobalSection"
-
-            yield "EndGlobal"
-        }
-
-
 /// <summary>
 /// Add support for .net projects.
 /// </summary>
 
 type Dotnet() =
 
-    static let buildRequest (context: ActionContext) configuration buildOps =
-        let preOps, ops =
-            match context.Projects.Count with
-            | 1 -> [], All (buildOps "")
-            | _ ->
-                let projects =
-                    context.Projects
-                    |> Map.values
-                    |> Seq.map DotnetHelpers.findProjectFile
-                    |> Seq.map (fun path -> Path.GetRelativePath(context.TempDir, path))
-                let slnfile = Path.Combine(context.TempDir, $"{context.UniqueId}.sln")
-                let slnContent = DotnetHelpers.GenerateSolutionContent projects configuration
-                IO.writeLines slnfile slnContent
-                buildOps slnfile, All []
-
-        execRequest Cacheability.Always preOps ops
+    static let buildRequest (context: ActionContext) buildOps =
+        execRequest Cacheability.Always buildOps
 
     /// <summary>
     /// Provides default values for project.
@@ -180,11 +105,11 @@ type Dotnet() =
 
         let arguments = arguments |> Option.defaultValue ""
 
-        let buildOps projectFile = [
-            shellOp "dotnet" $"build {projectFile} --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
+        let buildOps = [
+            shellOp "dotnet" $"build --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
         ]
 
-        buildRequest context configuration buildOps
+        buildRequest context buildOps
 
     /// <summary>
     /// Run a dotnet `command`.
@@ -194,8 +119,8 @@ type Dotnet() =
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = All [ shellOp context.Command arguments ]
-        execRequest Cacheability.Always [] ops
+        let ops = [ shellOp context.Command arguments ]
+        execRequest Cacheability.Always ops
 
 
     /// <summary>
@@ -209,11 +134,11 @@ type Dotnet() =
         let version = version |> Option.defaultValue "0.0.0"
         let arguments = arguments |> Option.defaultValue ""
 
-        let buildOps projectFile = [
-            shellOp "dotnet" $"pack {projectFile} --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
+        let buildOps = [
+            shellOp "dotnet" $"pack --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
         ]
 
-        buildRequest context configuration buildOps
+        buildRequest context buildOps
 
     /// <summary>
     /// Publish a project.
@@ -240,11 +165,11 @@ type Dotnet() =
             | _ -> ""
         let arguments = arguments |> Option.defaultValue ""
 
-        let buildOps projectFile = [
-            shellOp "dotnet" $"publish {projectFile} --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
+        let buildOps = [
+            shellOp "dotnet" $"publish --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
         ]
 
-        buildRequest context configuration buildOps
+        buildRequest context buildOps
 
     /// <summary>
     /// Restore packages.
@@ -254,8 +179,8 @@ type Dotnet() =
     static member restore (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = All [ shellOp "dotnet" $"restore {arguments}" ]
-        execRequest Cacheability.Local [] ops
+        let ops = [ shellOp "dotnet" $"restore {arguments}" ]
+        execRequest Cacheability.Local ops
 
 
     /// <summary>
@@ -269,8 +194,8 @@ type Dotnet() =
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
         let arguments = arguments |> Option.defaultValue ""
 
-        let buildOps projectFile = [
-            shellOp "dotnet" $"test {projectFile} --no-build --configuration {configuration} {filter} {arguments}"
+        let buildOps = [
+            shellOp "dotnet" $"test --no-build --configuration {configuration} {filter} {arguments}"
         ]
 
-        buildRequest context configuration buildOps
+        buildRequest context buildOps

@@ -32,9 +32,7 @@ type ActionContext = {
     Command: string
     BranchOrTag: string
 
-    UniqueId: string
-    TempDir: string
-    Projects: Map<string, string>
+    Hash: string
 }
 
 [<RequireQualifiedAccess>]
@@ -52,15 +50,10 @@ type Cacheability =
 
 type ShellOperations = ShellOperation list
 
-type Operations =
-    | Each of Map<string, ShellOperations>
-    | All of ShellOperations
-
 [<RequireQualifiedAccess>]
 type ActionExecutionRequest = {
     Cache: Cacheability
-    PreOperations: ShellOperations
-    Operations: Operations
+    Operations: ShellOperations
 }
 
 
@@ -69,7 +62,6 @@ let shellOp cmd args =
     { ShellOperation.Command = cmd
       ShellOperation.Arguments = args }
 
-let execRequest cache preOps ops =
+let execRequest cache ops =
     { ActionExecutionRequest.Cache = cache 
-      ActionExecutionRequest.PreOperations = preOps
       ActionExecutionRequest.Operations = ops }

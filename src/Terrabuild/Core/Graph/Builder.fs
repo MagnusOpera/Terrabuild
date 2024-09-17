@@ -87,7 +87,6 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
                              Node.ProjectHash = projectConfig.Hash
                              Node.TargetHash = hash
-                             Node.OperationHash = target.Hash
 
                              Node.IsLeaf = isLeaf
                              Node.Usage = usage }

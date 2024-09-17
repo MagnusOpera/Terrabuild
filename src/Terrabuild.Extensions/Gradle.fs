@@ -28,6 +28,6 @@ type Gradle() =
     static member build (context: ActionContext) (configuration: string option) =
         let configuration = configuration |> Option.defaultValue GradleHelpers.defaultConfiguration
 
-        let ops = All [ shellOp "gradlew" $"assemble{configuration}" ]
+        let ops = [ shellOp "gradlew" $"assemble{configuration}" ]
 
-        execRequest Cacheability.Always [] ops
+        execRequest Cacheability.Always ops
