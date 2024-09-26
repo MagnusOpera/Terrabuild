@@ -68,7 +68,7 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
                 | _ -> ""
 
             let label = node.Label
-            $"{node.Id}(\"{status} {label}\")"
+            $"{node.Id}(\"{label}\n{status}\")"
 
         for (KeyValue(_, node)) in graph.Nodes do
             for dependency in node.Dependencies do
