@@ -2,36 +2,28 @@ flowchart TD
 classDef forced stroke:red,stroke-width:3px
 classDef used stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
-subgraph 103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB[" "]
-  libraries/dotnet-lib:build("build libraries/dotnet-lib
-@dotnet build")
-  projects/dotnet-app:build("build projects/dotnet-app
-@dotnet build")
-end
-classDef cluster-103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB stroke:#8C4,stroke-width:3px,fill:white,rx:10,ry:10
-class 103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB cluster-103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB
-class libraries/dotnet-lib:build forced
-projects/dotnet-app:build --> libraries/dotnet-lib:build
-class projects/dotnet-app:build forced
-projects/make-app:build("build projects/make-app
-@make build")
-projects/make-app:build --> projects/make-app:build-1
-class projects/make-app:build forced
-projects/rust-app:build("build projects/rust-app
-@cargo build")
-class projects/rust-app:build forced
-libraries/shell-lib:build("build libraries/shell-lib
-@shell echo")
-projects/make-app:build-1("build projects/make-app
-@shell echo")
-class libraries/shell-lib:build forced
-projects/make-app:build-1 --> libraries/shell-lib:build
-class projects/make-app:build-1 forced
 deployments/terraform-deploy:build("build deployments/terraform-deploy
-@terraform plan")
+ 👀")
+libraries/dotnet-lib:build("build libraries/dotnet-lib
+ 👀")
+libraries/shell-lib:build("build libraries/shell-lib
+ 👀")
+projects/dotnet-app:build("build projects/dotnet-app
+ 👀")
+projects/make-app:build("build projects/make-app
+ 👀")
+projects/npm-app:build("build projects/npm-app
+ 👀")
+projects/rust-app:build("build projects/rust-app
+ 👀")
 deployments/terraform-deploy:build --> projects/dotnet-app:build
 deployments/terraform-deploy:build --> projects/npm-app:build
 class deployments/terraform-deploy:build forced
-projects/npm-app:build("build projects/npm-app
-@npm build")
+class libraries/dotnet-lib:build forced
+class libraries/shell-lib:build forced
+projects/dotnet-app:build --> libraries/dotnet-lib:build
+class projects/dotnet-app:build forced
+projects/make-app:build --> libraries/shell-lib:build
+class projects/make-app:build forced
 class projects/npm-app:build forced
+class projects/rust-app:build forced
