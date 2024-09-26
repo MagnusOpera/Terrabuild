@@ -2,31 +2,31 @@ flowchart TD
 classDef forced stroke:red,stroke-width:3px
 classDef used stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
+A:build("build A
+ 👀")
+B:build("build B
+ 👀")
+C:build("build C
+ 👀")
+D:build("build D
+ 👀")
+E:build("build E
+ 👀")
 F:build("build F
  👀")
 G:build("build G
  👀")
+class A:build forced
+class B:build forced
+C:build --> A:build
+C:build --> B:build
+class C:build forced
+D:build --> C:build
+class D:build forced
+E:build --> C:build
+class E:build forced
 F:build --> D:build
 F:build --> E:build
 class F:build forced
 G:build --> C:build
 class G:build forced
-D:build("build D
- 👀")
-E:build("build E
- 👀")
-D:build --> C:build
-class D:build forced
-E:build --> C:build
-class E:build forced
-C:build("build C
- 👀")
-C:build --> A:build
-C:build --> B:build
-class C:build forced
-A:build("build A
- 👀")
-B:build("build B
- 👀")
-class A:build forced
-class B:build forced

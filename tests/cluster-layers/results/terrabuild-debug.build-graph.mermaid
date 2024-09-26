@@ -2,52 +2,31 @@ flowchart TD
 classDef forced stroke:red,stroke-width:3px
 classDef used stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
-A:build-1("build A
-@shell echo")
-B:build-1("build B
-@shell echo")
-class A:build-1 forced
-class B:build-1 forced
+A:build("build A
+ 👀")
+B:build("build B
+ 👀")
+C:build("build C
+ 👀")
+D:build("build D
+ 👀")
+E:build("build E
+ 👀")
 F:build("build F
-@npm build")
-F:build --> D:build
-F:build --> E:build
-class F:build forced
-C:build-1("build C
-@shell echo")
-C:build-1 --> A:build
-C:build-1 --> B:build
-class C:build-1 forced
-subgraph B51AB38ACA58C7D630378FF67B76208ED5C486DCA2771FB2D51E39BCFDE3867F[" "]
-  D:build("build D
-@dotnet build")
-  E:build("build E
-@dotnet build")
-end
-classDef cluster-B51AB38ACA58C7D630378FF67B76208ED5C486DCA2771FB2D51E39BCFDE3867F stroke:#361,stroke-width:3px,fill:white,rx:10,ry:10
-class B51AB38ACA58C7D630378FF67B76208ED5C486DCA2771FB2D51E39BCFDE3867F cluster-B51AB38ACA58C7D630378FF67B76208ED5C486DCA2771FB2D51E39BCFDE3867F
+ 👀")
+G:build("build G
+ 👀")
+class A:build forced
+class B:build forced
+C:build --> A:build
+C:build --> B:build
+class C:build forced
 D:build --> C:build
 class D:build forced
 E:build --> C:build
 class E:build forced
-subgraph C5861A14298D8048F077B67965DA45589A468538B1E17E7A4A1A5AAB3A0E4C8D[" "]
-  A:build("build A
-@dotnet build")
-  B:build("build B
-@dotnet build")
-end
-classDef cluster-C5861A14298D8048F077B67965DA45589A468538B1E17E7A4A1A5AAB3A0E4C8D stroke:#F26,stroke-width:3px,fill:white,rx:10,ry:10
-class C5861A14298D8048F077B67965DA45589A468538B1E17E7A4A1A5AAB3A0E4C8D cluster-C5861A14298D8048F077B67965DA45589A468538B1E17E7A4A1A5AAB3A0E4C8D
-A:build --> A:build-1
-class A:build forced
-B:build --> B:build-1
-class B:build forced
-C:build("build C
-@npm build")
-G:build("build G
-@npm build")
-C:build --> C:build-1
-class C:build forced
+F:build --> D:build
+F:build --> E:build
+class F:build forced
 G:build --> C:build
-G:build --> C:build-1
 class G:build forced

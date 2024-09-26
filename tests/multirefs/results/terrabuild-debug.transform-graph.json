@@ -39,32 +39,28 @@
       "outputs": [],
       "projectHash": "50F53DAE0A28CB085245C3DAA8E068FA1026C7B0A13395C1A60BEE8B56DDA77E",
       "targetHash": "65DBBF9ADFB332D1EFABD6FFE9C3F09779FF5D7F7DC853C5567A2178ADC5E87B",
-      "operationHash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-      "operations": [],
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "building A"
+        }
+      ],
       "usage": [
         "build",
         {
-          "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+          "hash": "--",
           "container": null,
           "containerVariables": [],
-          "extension": "@shell",
-          "command": "echo",
+          "extension": "",
+          "command": "\uD83D\uDC40",
           "script": {},
-          "context": [
-            "map",
-            {
-              "arguments": [
-                "string",
-                "building A"
-              ]
-            }
-          ]
+          "context": "nothing"
         }
       ],
-      "isLeaf": true,
-      "isFirst": true,
-      "isLast": true,
-      "isBatched": false
+      "isLeaf": true
     },
     "B:build": {
       "id": "B:build",
@@ -104,32 +100,28 @@
       "outputs": [],
       "projectHash": "0058E0305878067C8E3793E674633FEE00820654CFD00805FD0664FA9033718F",
       "targetHash": "AB2E8E2EB65DCF6223D4B42D1C909AAFD1B78C6D84D979FDB609702F3AEFACA2",
-      "operationHash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-      "operations": [],
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "building B"
+        }
+      ],
       "usage": [
         "build",
         {
-          "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+          "hash": "--",
           "container": null,
           "containerVariables": [],
-          "extension": "@shell",
-          "command": "echo",
+          "extension": "",
+          "command": "\uD83D\uDC40",
           "script": {},
-          "context": [
-            "map",
-            {
-              "arguments": [
-                "string",
-                "building B"
-              ]
-            }
-          ]
+          "context": "nothing"
         }
       ],
-      "isLeaf": true,
-      "isFirst": true,
-      "isLast": true,
-      "isBatched": false
+      "isLeaf": true
     },
     "C:build": {
       "id": "C:build",
@@ -167,32 +159,28 @@
       "outputs": [],
       "projectHash": "0EFEA7392B648CE721962FA473E3D5E1B52006332B3DC8ED8B81FB24D2101481",
       "targetHash": "A9BAEAAA1C770FBEF9E8DA9F1DD54CC031D9BE0240F2919770B170B4C4E0ECE8",
-      "operationHash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-      "operations": [],
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "building C"
+        }
+      ],
       "usage": [
         "build",
         {
-          "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+          "hash": "--",
           "container": null,
           "containerVariables": [],
-          "extension": "@shell",
-          "command": "echo",
+          "extension": "",
+          "command": "\uD83D\uDC40",
           "script": {},
-          "context": [
-            "map",
-            {
-              "arguments": [
-                "string",
-                "building C"
-              ]
-            }
-          ]
+          "context": "nothing"
         }
       ],
-      "isLeaf": true,
-      "isFirst": true,
-      "isLast": true,
-      "isBatched": false
+      "isLeaf": true
     }
   },
   "rootNodes": [

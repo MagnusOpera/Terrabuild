@@ -3,42 +3,30 @@ classDef forced stroke:red,stroke-width:3px
 classDef used stroke:orange,stroke-width:3px
 classDef selected stroke:black,stroke-width:3px
 A:build("build A
-@dotnet build")
+ 👀")
 B:build("build B
-@dotnet build")
+ 👀")
+C:build("build C
+ 👀")
 D:build("build D
-@dotnet build")
+ 👀")
 E:build("build E
-@dotnet build")
-A:build --> A:build-1
+ 👀")
+F:build("build F
+ 👀")
+G:build("build G
+ 👀")
 class A:build forced
-B:build --> B:build-1
 class B:build forced
+C:build --> A:build
+C:build --> B:build
+class C:build forced
 D:build --> C:build
 class D:build forced
 E:build --> C:build
 class E:build forced
-C:build("build C
-@npm build")
-F:build("build F
-@npm build")
-G:build("build G
-@npm build")
-C:build --> C:build-1
-class C:build forced
 F:build --> D:build
 F:build --> E:build
 class F:build forced
 G:build --> C:build
 class G:build forced
-A:build-1("build A
-@shell echo")
-B:build-1("build B
-@shell echo")
-C:build-1("build C
-@shell echo")
-class A:build-1 forced
-class B:build-1 forced
-C:build-1 --> A:build
-C:build-1 --> B:build
-class C:build-1 forced

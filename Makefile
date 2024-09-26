@@ -137,7 +137,7 @@ run-test-simple:
 	dotnet run --project src/Terrabuild -- run build -w tests/simple --debug --force
 
 define diff_file
-#	cp $(1)/$(2) $(1)/results/$(2)
+	cp $(1)/$(2) $(1)/results/$(2)
 	diff $(1)/results/$(2) $(1)/$(2)
 endef
 
