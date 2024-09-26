@@ -67,11 +67,8 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
                 | Some getNodeStatus -> $"{getNodeStatus node.Id} "
                 | _ -> ""
 
-            let label =
-                match node.Usage with
-                | NodeUsage.Build targetOperation -> $"{node.Label}\n{targetOperation.Extension}"
-                | _ -> node.Label
-            $"{node.Id}(\"{status}{label}\")"
+            let label = node.Label
+            $"{node.Id}(\"{status} {label}\")"
 
         for (KeyValue(_, node)) in graph.Nodes do
             for dependency in node.Dependencies do
