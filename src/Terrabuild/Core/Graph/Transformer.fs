@@ -14,8 +14,6 @@ let transform (options: Configuration.Options) (graph: GraphDef.Graph) =
         let node =
             match node.Usage with
             | NodeUsage.Build _ ->
-                let targetOperation = node.ConfigurationTarget
-
                 let ops =
                     node.ConfigurationTarget.Operations
                     |> List.collect (fun operation ->

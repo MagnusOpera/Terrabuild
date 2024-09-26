@@ -69,7 +69,7 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
 
             let label =
                 match node.Usage with
-                | NodeUsage.Build targetOperation -> $"{node.Label}\n{targetOperation.Extension} {targetOperation.Command}"
+                | NodeUsage.Build targetOperation -> $"{node.Label}\n{targetOperation.Extension}"
                 | _ -> node.Label
             $"{node.Id}(\"{status}{label}\")"
 
