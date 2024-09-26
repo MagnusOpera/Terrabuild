@@ -58,9 +58,6 @@ type IBuildNotification =
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
 let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir =
-    let homeDir = FS.combinePath homeDir node.ProjectHash
-    IO.createDirectory homeDir
-
     // run actions if any
     let allCommands =
         node.Operations
@@ -150,7 +147,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let allowRemoteCache = options.LocalOnly |> not
 
-    let homeDir = cache.CreateHomeDir "container"
+    let homeDir = cache.CreateHomeDir "containers"
 
     let processNode (node: GraphDef.Node) =
         let cacheEntryId = GraphDef.buildCacheKey node
