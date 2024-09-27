@@ -39,6 +39,11 @@ target publish {
 
 extension @dotnet {
     container = "mcr.microsoft.com/dotnet/sdk:8.0.302"
+    variables = [
+        "DOTNET_CLI_TELEMETRY_OPTOUT"
+        "DOTNET_NOLOGO"
+        "DOTNET_CLI_TELEMETRY_OPTOUT"
+    ]
     defaults = {
         configuration: $configuration
     }
