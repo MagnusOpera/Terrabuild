@@ -303,7 +303,7 @@ let main _ =
             Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
             let errorHandler = TerrabuildExiter()
             let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
-            let result = parser.ParseCommandLine()
+            let result = parser.ParseCommandLine(ignoreUnrecognized=false)
             debug <- result.Contains(TerrabuildArgs.Debug)
             processCommandLine parser result
         with
