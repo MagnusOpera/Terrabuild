@@ -106,7 +106,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            shellOp "dotnet" $"build --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
+            shellOp "dotnet" $"build --no-dependencies --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
         ]
 
         buildRequest context buildOps
