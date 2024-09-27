@@ -94,7 +94,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                     operation.ContainerVariables
                     |> Seq.map (fun var -> $"-e {var}")
                     |> String.join " "
-                let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v /tmp/.dotnet -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v /tmp/.dotnet -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} -e DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 -e DOTNET_NOLOGO=true -e DOTNET_CLI_TELEMETRY_OPTOUT=true {container} {operation.Arguments}"
                 metaCommand, options.Workspace, cmd, args, operation.Container
             | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
 
