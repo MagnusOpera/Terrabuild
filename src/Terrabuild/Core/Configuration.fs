@@ -21,7 +21,6 @@ type Options = {
     LocalOnly: bool
     StartedAt: DateTime
     NoContainer: bool
-    NoBatch: bool
     Targets: string set
     CI: string option
     BranchOrTag: string

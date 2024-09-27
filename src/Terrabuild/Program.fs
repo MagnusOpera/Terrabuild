@@ -105,7 +105,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             Configuration.Options.LocalOnly = options.LocalOnly
             Configuration.Options.StartedAt = options.StartedAt
             Configuration.Options.NoContainer = options.NoContainer
-            Configuration.Options.NoBatch = options.NoBatch
             Configuration.Options.Targets = options.Targets
             Configuration.Options.CI = sourceControl.CI
             Configuration.Options.BranchOrTag = sourceControl.BranchOrTag
