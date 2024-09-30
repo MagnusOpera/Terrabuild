@@ -277,12 +277,9 @@ let read (options: Options) =
             |> Hash.sha256files
 
         let dependenciesHash =
-            let projectDependencies =
-                projectReferences
-                |> Map.filter (fun projectId _ -> projectDef.Dependencies |> Set.contains projectId)
-
             let versionDependencies =
-                projectDependencies
+                projectReferences
+                |> Map.filter (fun projectId _ -> (Set.contains projectId projectDef.Dependencies) || (Set.contains projectId projectDef.Links))
                 |> Map.map (fun _ depProj -> depProj.Hash)
 
             versionDependencies.Values
@@ -473,7 +470,7 @@ let read (options: Options) =
                     awaitedProjects
                     |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value)
                     |> Map.ofSeq
-    
+
                 let project = finalizeProject projectId loadedProject projectDependencies
                 projects.TryAdd(projectId, project) |> ignore
 
