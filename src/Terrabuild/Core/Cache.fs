@@ -296,6 +296,8 @@ type Cache(storage: Contracts.IStorage) =
             homeDir |> IO.createDirectory
 
             // long standing bug with .net: https://github.com/dotnet/runtime/issues/36823
-            File.SetUnixFileMode(homeDir, enum<UnixFileMode>(0o777))
+            // user, group, other: RWX
+            // sticky bit
+            File.SetUnixFileMode(homeDir, enum<UnixFileMode>(0o1777))
 
             homeDir
