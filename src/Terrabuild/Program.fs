@@ -19,7 +19,6 @@ type RunTargetOptions = {
     StartedAt: DateTime
     IsLog: bool
     NoContainer: bool
-    NoBatch: bool
     Targets: string set
     Configuration: string
     Note: string option
@@ -200,7 +199,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let variables = runArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let noContainer = runArgs.Contains(RunArgs.NoContainer)
-        let noBatch = runArgs.Contains(RunArgs.NoBatch)
         let localOnly = runArgs.Contains(RunArgs.LocalOnly)
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
@@ -212,7 +210,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Force = runArgs.Contains(RunArgs.Force)
                         RunTargetOptions.MaxConcurrency = maxConcurrency
                         RunTargetOptions.NoContainer = noContainer
-                        RunTargetOptions.NoBatch = noBatch
                         RunTargetOptions.Retry = runArgs.Contains(RunArgs.Retry)
                         RunTargetOptions.StartedAt = DateTime.UtcNow
                         RunTargetOptions.IsLog = false
@@ -243,7 +240,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Force = false
                         RunTargetOptions.MaxConcurrency = 1
                         RunTargetOptions.NoContainer = false
-                        RunTargetOptions.NoBatch = true
                         RunTargetOptions.Retry = false
                         RunTargetOptions.StartedAt = DateTime.UtcNow
                         RunTargetOptions.IsLog = true
