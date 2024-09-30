@@ -31,8 +31,7 @@ type ActionContext = {
     CI: bool
     Command: string
     BranchOrTag: string
-
-    Hash: string
+    ProjectHash: string
 }
 
 [<RequireQualifiedAccess>]

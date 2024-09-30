@@ -22,7 +22,7 @@ let transform (options: Configuration.Options) (graph: GraphDef.Graph) =
                             Terrabuild.Extensibility.ActionContext.CI = options.CI.IsSome
                             Terrabuild.Extensibility.ActionContext.Command = operation.Command
                             Terrabuild.Extensibility.ActionContext.BranchOrTag = options.BranchOrTag
-                            Terrabuild.Extensibility.ActionContext.Hash = operation.Hash
+                            Terrabuild.Extensibility.ActionContext.ProjectHash = node.ProjectHash
                         }
 
                         let parameters = 
