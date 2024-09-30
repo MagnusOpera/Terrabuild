@@ -149,7 +149,7 @@
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
-          "arguments": "build --configuration Debug    "
+          "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
       "usage": [
@@ -283,7 +283,7 @@
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
-          "arguments": "build --configuration Debug    "
+          "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
       "usage": [
