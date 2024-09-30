@@ -97,11 +97,14 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
             | _ ->
                 children
 
-        if processedNodes.TryAdd(nodeId, true) then processNode()
+        if options.Targets |> Set.contains targetName then
+            if processedNodes.TryAdd(nodeId, true) then processNode()
+            else
+                match allNodes.TryGetValue(nodeId) with
+                | true, _ -> Set.singleton nodeId
+                | _ -> Set.empty
         else
-            match allNodes.TryGetValue(nodeId) with
-            | true, _ -> Set.singleton nodeId
-            | _ -> Set.empty
+            Set.empty
 
     let rootNodes =
         configuration.SelectedProjects
