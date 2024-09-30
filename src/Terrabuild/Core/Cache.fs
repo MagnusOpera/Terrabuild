@@ -293,4 +293,9 @@ type Cache(storage: Contracts.IStorage) =
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash
+            homeDir |> IO.createDirectory
+
+            // long standing bug with .net: https://github.com/dotnet/runtime/issues/36823
+            File.SetUnixFileMode(homeDir, enum<UnixFileMode>(0o777))
+
             homeDir
