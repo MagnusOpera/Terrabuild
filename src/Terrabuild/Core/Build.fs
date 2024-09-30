@@ -57,7 +57,7 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir =
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir tmpDir =
     // run actions if any
     let allCommands =
         node.Operations
@@ -65,36 +65,36 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
             let cmd = "docker"
             let wsDir = Environment.CurrentDirectory
 
-            let getContainerUser (container: string) =
+            let getContainerUserHome (container: string) =
                 match containerInfos.TryGetValue(container) with
-                | true, whoami ->
-                    Log.Debug("Reusing USER {whoami} for {container}", whoami, container)
-                    whoami
+                | true, containerHome ->
+                    Log.Debug("Reusing USER {containerHome} for {container}", containerHome, container)
+                    containerHome
                 | _ ->
                     // discover USER
-                    let args = $"run --rm --name {node.TargetHash} --entrypoint whoami {container}"
-                    let whoami =
+                    let args = $"run --rm --name {node.TargetHash} --entrypoint sh {container} \"echo -n \\$HOME\""
+                    let containerHome =
                         Log.Debug("Identifying USER for {container}", container)
                         match Exec.execCaptureOutput options.Workspace cmd args with
-                        | Exec.Success (whoami, 0) -> whoami.Trim()
+                        | Exec.Success (containerHome, 0) -> containerHome.Trim()
                         | _ ->
                             Log.Debug("USER identification failed for {container}: using root", container)
-                            "root"
+                            "/root"
 
-                    Log.Debug("Using USER {whoami} for {container}", whoami, container)
-                    containerInfos.TryAdd(container, whoami) |> ignore
-                    whoami
+                    Log.Debug("Using USER {containerHome} for {container}", containerHome, container)
+                    containerInfos.TryAdd(container, containerHome) |> ignore
+                    containerHome
 
             let metaCommand = operation.MetaCommand
 
             match operation.Container, options.NoContainer with
             | Some container, false ->
-                let whoami = getContainerUser container
+                let containerHome = getContainerUserHome container
                 let envs =
                     operation.ContainerVariables
                     |> Seq.map (fun var -> $"-e {var}")
                     |> String.join " "
-                let args = $"run --rm --net=host --name {node.TargetHash} -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:/{whoami} -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
                 metaCommand, options.Workspace, cmd, args, operation.Container
             | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
 
@@ -147,7 +147,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let allowRemoteCache = options.LocalOnly |> not
 
-    let homeDir = cache.CreateHomeDir "container"
+    let homeDir = cache.CreateHomeDir "containers"
+    let tmpDir = cache.CreateHomeDir "tmp"
 
     let processNode (node: GraphDef.Node) =
         let cacheEntryId = GraphDef.buildCacheKey node
@@ -162,13 +163,13 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let startedAt = DateTime.UtcNow
 
             notification.NodeBuilding node
-            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome node.IsFirst cacheEntryId
+            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
 
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir
+            let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
             let successful = lastExitCode = 0
             if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)
@@ -190,16 +191,12 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                             Cache.TargetSummary.EndedAt = endedAt
                             Cache.TargetSummary.Duration = endedAt - startedAt }
 
-            if node.IsLast then
-                notification.NodeUploading node
+            notification.NodeUploading node
 
-                // create an archive with new files
-                Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
-                let cacheEntry = cache.GetEntry sourceControl.CI.IsSome false cacheEntryId
-                let files = cacheEntry.Complete summary
-                api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
-            else
-                cacheEntry.CompleteLogFile summary
+            // create an archive with new files
+            Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
+            let files = cacheEntry.Complete summary
+            api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
             if successful |> not then
                 TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
@@ -222,8 +219,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         try
             if node.Usage.ShallBuild then buildNode()
             else restoreNode()
-            if node.IsLast then notification.NodeCompleted node (node.Usage.ShallBuild |> not) true
-            else notification.NodeScheduled node
+            notification.NodeCompleted node (node.Usage.ShallBuild |> not) true
         with
             | exn ->
                 Log.Fatal(exn, "Build node failed")

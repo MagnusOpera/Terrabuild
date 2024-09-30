@@ -13,7 +13,7 @@
             // "args": ["deploy", "--workspace", "../../insights", "--logs", "-c", "dev", "--debug", "-p", "1" ],
             // "args": ["build", "-w", "src", "-t", "0.47.0" ],
             // "args": ["logs", "build", "-w", "src", "--debug" ],
-            // "args": ["run", "build", "-w", "tests/simple", "--debug", "-p", "1", "--force", "--nobatch" ],
+            // "args": ["run", "build", "-w", "tests/simple", "--debug", "-p", "1", "--force" ],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"

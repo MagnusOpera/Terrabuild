@@ -19,7 +19,6 @@ type RunTargetOptions = {
     StartedAt: DateTime
     IsLog: bool
     NoContainer: bool
-    NoBatch: bool
     Targets: string set
     Configuration: string
     Note: string option
@@ -105,7 +104,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             Configuration.Options.LocalOnly = options.LocalOnly
             Configuration.Options.StartedAt = options.StartedAt
             Configuration.Options.NoContainer = options.NoContainer
-            Configuration.Options.NoBatch = options.NoBatch
             Configuration.Options.Targets = options.Targets
             Configuration.Options.CI = sourceControl.CI
             Configuration.Options.BranchOrTag = sourceControl.BranchOrTag
@@ -147,16 +145,11 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let consistentGraph = GraphConsistency.enforce configOptions.StartedAt configOptions.Force configOptions.Retry tryGetSummaryOnly graph
             if options.Debug then logGraph consistentGraph "consistent"
 
-            let transformGraph = GraphTransformer.transform consistentGraph
+            let transformGraph = GraphTransformer.transform configOptions consistentGraph
             if options.Debug then logGraph transformGraph "transform"
 
-            let optimizeGraph =
-                if options.NoBatch then transformGraph
-                else GraphOptimizer.optimize configOptions transformGraph
-            if options.Debug then logGraph optimizeGraph "optimize"
-
-            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {optimizeGraph.Nodes.Count} tasks" |> Terminal.writeLine
-            optimizeGraph
+            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {transformGraph.Nodes.Count} tasks" |> Terminal.writeLine
+            transformGraph
 
         if options.Debug then logGraph buildGraph "build"
 
@@ -206,7 +199,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let variables = runArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let noContainer = runArgs.Contains(RunArgs.NoContainer)
-        let noBatch = runArgs.Contains(RunArgs.NoBatch)
         let localOnly = runArgs.Contains(RunArgs.LocalOnly)
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
@@ -218,7 +210,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Force = runArgs.Contains(RunArgs.Force)
                         RunTargetOptions.MaxConcurrency = maxConcurrency
                         RunTargetOptions.NoContainer = noContainer
-                        RunTargetOptions.NoBatch = noBatch
                         RunTargetOptions.Retry = runArgs.Contains(RunArgs.Retry)
                         RunTargetOptions.StartedAt = DateTime.UtcNow
                         RunTargetOptions.IsLog = false
@@ -249,7 +240,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Force = false
                         RunTargetOptions.MaxConcurrency = 1
                         RunTargetOptions.NoContainer = false
-                        RunTargetOptions.NoBatch = true
                         RunTargetOptions.Retry = false
                         RunTargetOptions.StartedAt = DateTime.UtcNow
                         RunTargetOptions.IsLog = true

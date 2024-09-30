@@ -13,7 +13,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
     let startedAt = DateTime.UtcNow
     Log.Debug("===== [Graph Build] =====")
 
-    $"{Ansi.Emojis.eyes} Building graph" |> Terminal.writeLine
+    $"{Ansi.Emojis.gear} Building graph" |> Terminal.writeLine
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
@@ -87,13 +87,9 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
                              Node.ProjectHash = projectConfig.Hash
                              Node.TargetHash = hash
-                             Node.OperationHash = target.Hash
 
                              Node.IsLeaf = isLeaf
-                             Node.Usage = usage
-                             Node.IsFirst = true
-                             Node.IsLast = true
-                             Node.IsBatched = false }
+                             Node.Usage = usage }
 
                 if allNodes.TryAdd(nodeId, node) |> not then
                     TerrabuildException.Raise("Unexpected graph building race")

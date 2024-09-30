@@ -52,28 +52,18 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                 match originSummary with
                 | Some (_, summary) -> 
                     let dumpLogs () =
-                        let batchNode =
-                            match node.IsBatched, node.Dependencies |> Seq.tryHead with
-                            | true, Some batchId -> Some graph.Nodes[batchId]
-                            | _ -> None
+                        summary.Operations |> List.iter (fun group ->
+                            group |> List.iter (fun step ->
+                                $"### {step.MetaCommand}" |> append
+                                if options.Debug then
+                                    let cmd = $"{step.Command} {step.Arguments}" |> String.trim
+                                    $"*{cmd}*" |> append
 
-                        match batchNode with
-                        | Some batchNode ->
-                            let uniqueId = stableRandomId batchNode.Id
-                            $"**Batched with [{batchNode.Label}](#user-content-{uniqueId})**" |> append
-                        | _ ->
-                            summary.Operations |> List.iter (fun group ->
-                                group |> List.iter (fun step ->
-                                    $"### {step.MetaCommand}" |> append
-                                    if options.Debug then
-                                        let cmd = $"{step.Command} {step.Arguments}" |> String.trim
-                                        $"*{cmd}*" |> append
-
-                                    append "```"
-                                    step.Log |> IO.readTextFile |> append
-                                    append "```"
-                                )
+                                append "```"
+                                step.Log |> IO.readTextFile |> append
+                                append "```"
                             )
+                        )
                     dumpLogs
                 | _ ->
                     let dumpNoLog() = $"**No logs available**" |> append
@@ -97,20 +87,19 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         "| Target | Duration |" |> append
         "|--------|----------|" |> append
         infos |> List.iter (fun (node, originSummary) ->
-            if node.IsLast then
-                let statusEmoji = statusEmoji originSummary
-                let duration =
-                    match originSummary with
-                    | Some (_, summary) -> $"{summary.Duration}"
-                    | _ -> ""
+            let statusEmoji = statusEmoji originSummary
+            let duration =
+                match originSummary with
+                | Some (_, summary) -> $"{summary.Duration}"
+                | _ -> ""
 
-                let uniqueId = stableRandomId node.Id
-                $"| {statusEmoji} [{node.Label}](#user-content-{uniqueId}) | {duration} |" |> append
+            let uniqueId = stableRandomId node.Id
+            $"| {statusEmoji} [{node.Label}](#user-content-{uniqueId}) | {duration} |" |> append
         )
         let (cost, gain) =
             infos |> List.fold (fun (cost, gain) (node, originSummary) ->
                 match originSummary with
-                | Some (origin, summary) when node.IsLast ->
+                | Some (origin, summary) ->
                     let duration = summary.Duration
                     if origin = Origin.Local then cost + duration, gain
                     else cost, gain + duration
@@ -159,23 +148,14 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                 match originSummary with
                 | Some (_, summary) -> 
                     let dumpLogs () =
-
-                        let batchNode =
-                            match node.IsBatched, node.Dependencies |> Seq.tryHead with
-                            | true, Some batchId -> Some graph.Nodes[batchId]
-                            | _ -> None
-
-                        match batchNode with
-                        | Some batchNode -> $"{Ansi.Styles.yellow}Batched with '{batchNode.Label}'{Ansi.Styles.reset}" |> Terminal.writeLine
-                        | _ ->
-                            summary.Operations |> Seq.iter (fun group ->
-                                group |> Seq.iter (fun step ->
-                                    $"{Ansi.Styles.yellow}{step.MetaCommand}{Ansi.Styles.reset}" |> Terminal.writeLine
-                                    if options.Debug then
-                                        $"{Ansi.Styles.cyan}{step.Command} {step.Arguments}{Ansi.Styles.reset}" |> Terminal.writeLine
-                                    step.Log |> IO.readTextFile |> Terminal.write
-                                )
+                        summary.Operations |> Seq.iter (fun group ->
+                            group |> Seq.iter (fun step ->
+                                $"{Ansi.Styles.yellow}{step.MetaCommand}{Ansi.Styles.reset}" |> Terminal.writeLine
+                                if options.Debug then
+                                    $"{Ansi.Styles.cyan}{step.Command} {step.Arguments}{Ansi.Styles.reset}" |> Terminal.writeLine
+                                step.Log |> IO.readTextFile |> Terminal.write
                             )
+                        )
 
                     getHeaderFooter summary.IsSuccessful title, dumpLogs
                 | _ ->

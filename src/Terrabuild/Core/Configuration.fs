@@ -21,7 +21,6 @@ type Options = {
     LocalOnly: bool
     StartedAt: DateTime
     NoContainer: bool
-    NoBatch: bool
     Targets: string set
     CI: string option
     BranchOrTag: string
@@ -312,6 +311,7 @@ let read (options: Options) =
                     |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
                     |> Map.add "terrabuild_retry" (Expr.Boolean options.Retry)
                     |> Map.add "terrabuild_force" (Expr.Boolean options.Force)
+                    |> Map.add "terrabuild_ci" (Expr.Boolean options.CI.IsSome)
                     |> (fun map ->
                         let tagValue =
                             match options.Tag with

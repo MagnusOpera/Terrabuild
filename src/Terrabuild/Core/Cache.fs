@@ -50,7 +50,7 @@ type IEntry =
 type ICache =
     abstract TryGetSummaryOnly: useRemote:bool -> id:string -> (Origin * TargetSummary) option
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
-    abstract GetEntry: useRemote:bool -> clean:bool -> id:string -> IEntry
+    abstract GetEntry: useRemote:bool -> id:string -> IEntry
     abstract CreateHomeDir: nodeHash:string -> string
 
 
@@ -87,16 +87,15 @@ let clearHomeCache () =
 
 
 
-type NewEntry(entryDir: string, useRemote: bool, clean: bool, id: string, storage: Contracts.IStorage) =
+type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.IStorage) =
     let logsDir = FS.combinePath entryDir "logs"
     let outputsDir = FS.combinePath entryDir "outputs"
     let mutable logNum = 1
 
     do
-        if clean then
-            match entryDir with
-            | FS.Directory _ | FS.File _ -> IO.deleteAny entryDir
-            | FS.None _ -> ()
+        match entryDir with
+        | FS.Directory _ | FS.File _ -> IO.deleteAny entryDir
+        | FS.None _ -> ()
 
         IO.createDirectory entryDir
         IO.createDirectory logsDir
@@ -286,11 +285,11 @@ type Cache(storage: Contracts.IStorage) =
                 else
                     None
 
-        member _.GetEntry useRemote clean id : IEntry =
+        member _.GetEntry useRemote id : IEntry =
             // invalidate cache as we are creating a new entry
             cachedSummaries.TryRemove(id) |> ignore
             let entryDir = FS.combinePath buildCacheDirectory id
-            NewEntry(entryDir, useRemote, clean, id, storage)
+            NewEntry(entryDir, useRemote, id, storage)
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash

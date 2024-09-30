@@ -23,21 +23,20 @@ type Docker() =
         let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
 
         let ops = 
-            context.Projects 
-            |> Map.map (fun nodehash _ -> [
-                let buildArgs = $"build --file {dockerfile} --tag {image}:{nodehash}{args}{platform} ."
+            [
+                let buildArgs = $"build --file {dockerfile} --tag {image}:{context.Hash}{args}{platform} ."
                 if context.CI then
                     shellOp "docker" buildArgs
-                    shellOp "docker" $"push {image}:{nodehash}"
+                    shellOp "docker" $"push {image}:{context.Hash}"
                 else
-                    shellOp "docker" buildArgs])
-            |> Each
+                    shellOp "docker" buildArgs
+            ]
 
         let cacheability =
             if context.CI then Cacheability.Remote
             else Cacheability.Local
 
-        execRequest cacheability [] ops
+        execRequest cacheability ops
 
 
     /// <summary>
@@ -52,16 +51,15 @@ type Docker() =
             | _ -> context.BranchOrTag.Replace("/", "-")
 
         let ops =
-            context.Projects
-            |> Map.map (fun nodehash _ -> [
+            [
                 if context.CI then
-                    shellOp "docker" $"buildx imagetools create -t {image}:{imageTag} {image}:{nodehash}"
+                    shellOp "docker" $"buildx imagetools create -t {image}:{imageTag} {image}:{context.Hash}"
                 else
-                    shellOp "docker" $"tag {image}:{nodehash} {image}:{imageTag}"])
-            |> Each
+                    shellOp "docker" $"tag {image}:{context.Hash} {image}:{imageTag}"
+            ]
 
         let cacheability =
             if context.CI then Cacheability.Remote
             else Cacheability.Local
 
-        execRequest cacheability [] ops
+        execRequest cacheability ops

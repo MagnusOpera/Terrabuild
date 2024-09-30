@@ -22,8 +22,8 @@ type Terraform() =
     /// Init Terraform.
     /// </summary>
     static member init (context: ActionContext) =
-        let ops = All [ shellOp "terraform" "init" ]
-        execRequest Cacheability.Always [] ops
+        let ops = [ shellOp "terraform" "init" ]
+        execRequest Cacheability.Always ops
 
 
     /// <summary weight="2" title="Generate plan file.">
@@ -35,7 +35,7 @@ type Terraform() =
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
     static member validate (context: ActionContext) (workspace: string option) =
-        let ops = All [
+        let ops = [
             shellOp "terraform" "init"
             
             match workspace with
@@ -44,7 +44,7 @@ type Terraform() =
 
             shellOp "terraform" "validate"
         ]
-        execRequest Cacheability.Always [] ops
+        execRequest Cacheability.Always ops
 
 
     /// <summary weight="3" title="Generate plan file.">
@@ -58,7 +58,7 @@ type Terraform() =
     static member plan (context: ActionContext) (workspace: string option) (variables: Map<string, string>) =
         let vars = variables |> Seq.fold (fun acc (KeyValue(key, value)) -> acc + $" -var=\"{key}={value}\"") ""
 
-        let ops = All [
+        let ops = [
             shellOp "terraform" "init"
             
             match workspace with
@@ -67,7 +67,7 @@ type Terraform() =
 
             shellOp "terraform" $"plan -out=terrabuild.planfile{vars}"
         ]
-        execRequest Cacheability.Always [] ops
+        execRequest Cacheability.Always ops
   
 
     /// <summary weight="4" title="Apply plan file.">
@@ -78,7 +78,7 @@ type Terraform() =
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     static member apply (context: ActionContext) (workspace: string option) =
-        let ops = All [
+        let ops = [
             shellOp "terraform" "init"
             
             match workspace with
@@ -87,5 +87,5 @@ type Terraform() =
 
             shellOp "terraform" "apply terrabuild.planfile"
         ]
-        execRequest Cacheability.Always [] ops
+        execRequest Cacheability.Always ops
   
