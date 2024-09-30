@@ -293,12 +293,4 @@ type Cache(storage: Contracts.IStorage) =
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash
-            homeDir |> IO.createDirectory
-
-            // NOTE: just in case it's not correct because this does not fix the bug with Docker
-            // long standing bug with .net: https://github.com/dotnet/runtime/issues/36823
-            // user, group, other: RWX
-            // sticky bit
-            File.SetUnixFileMode(homeDir, enum<UnixFileMode>(0o1777))
-
             homeDir
