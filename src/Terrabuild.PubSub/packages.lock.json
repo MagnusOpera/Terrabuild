@@ -4,9 +4,9 @@
     "net8.0": {
       "FSharp.Core": {
         "type": "Direct",
-        "requested": "[8.0.300, )",
-        "resolved": "8.0.300",
-        "contentHash": "Jv44fV7TNglyMku89lQcA4Q6mFKLyHb2bs1Yb72nvSVc+cHplEnoZ4XQUaaTLJGUTx/iMqcrkYGtaLzkkIhpaA=="
+        "requested": "[8.0.400, )",
+        "resolved": "8.0.400",
+        "contentHash": "kHMdDDmlZl98tujgHCmL8/HNH9VKbxsRMC9s7wbwr4noR40SSa5D4d00yF8cMK52s8jabVuiLLcrUw9r+PkKDQ=="
       }
     },
     "net8.0/linux-x64": {},

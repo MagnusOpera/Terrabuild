@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FsLexYacc" Version="10.2.0" />
+    <PackageReference Include="FsLexYacc" Version="11.3.0" />
   </ItemGroup>
 
   <ItemGroup>
