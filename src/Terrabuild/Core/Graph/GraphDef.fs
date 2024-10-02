@@ -14,8 +14,8 @@ type ContaineredShellOperation = {
 type NodeUsage =
     | Selected
     | Used
-    | Build of Configuration.TargetOperation
-with member this.ShallBuild = match this with | Build _ -> true | _ -> false 
+    | Build
+with member this.ShallBuild = match this with | Build -> true | _ -> false 
 
 
 [<RequireQualifiedAccess>]
@@ -33,6 +33,7 @@ type Node = {
     ProjectHash: string
     TargetHash: string
     Operations: ContaineredShellOperation list
+    Cache: Terrabuild.Extensibility.Cacheability
 
     // tell role of node
     Usage: NodeUsage
@@ -76,7 +77,7 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
                 $"{node.Id} --> {dstNode.Id}"
 
             match node.Usage with
-            | NodeUsage.Build _ -> $"class {node.Id} forced"
+            | NodeUsage.Build -> $"class {node.Id} forced"
             | NodeUsage.Used -> $"class {node.Id} used"
             | _ -> $"class {node.Id} selected"
     ]

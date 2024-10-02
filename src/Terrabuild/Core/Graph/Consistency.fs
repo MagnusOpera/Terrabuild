@@ -3,6 +3,7 @@ open System
 open Collections
 open Serilog
 open GraphDef
+open Terrabuild.Extensibility
 
 
 let enforce buildAt force retry (tryGetSummaryOnly: string -> Cache.TargetSummary option) (graph: GraphDef.Graph) =
@@ -34,10 +35,10 @@ let enforce buildAt force retry (tryGetSummaryOnly: string -> Cache.TargetSummar
                     DateTime.MaxValue, node
                 elif maxCompletionChildren = DateTime.MaxValue then
                     Log.Debug("{nodeId} must rebuild because child is rebuilding", node.Id)
-                    DateTime.MaxValue, { node with Usage = NodeUsage.Build Configuration.TargetOperation.MarkAsForced }
+                    DateTime.MaxValue, { node with Usage = NodeUsage.Build }
                 elif force then
                     Log.Debug("{nodeId} must rebuild because force build requested", node.Id)
-                    DateTime.MaxValue, { node with Usage = NodeUsage.Build Configuration.TargetOperation.MarkAsForced }
+                    DateTime.MaxValue, { node with Usage = NodeUsage.Build }
                 else
                     // slow path: check and apply consistency rules
                     let cacheEntryId = GraphDef.buildCacheKey node
@@ -46,16 +47,16 @@ let enforce buildAt force retry (tryGetSummaryOnly: string -> Cache.TargetSummar
                         Log.Debug("{nodeId} has existing build summary", node.Id)
                         if summary.StartedAt < maxCompletionChildren then
                             Log.Debug("{nodeId} must rebuild because it is younger than child", node.Id)
-                            DateTime.MaxValue, { node with Usage = NodeUsage.Build Configuration.TargetOperation.MarkAsForced }
+                            DateTime.MaxValue, { node with Usage = NodeUsage.Build }
                         elif (summary.IsSuccessful |> not) && retry then
                             Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
-                            DateTime.MaxValue, { node with Usage = NodeUsage.Build Configuration.TargetOperation.MarkAsForced }
+                            DateTime.MaxValue, { node with Usage = NodeUsage.Build }
                         else
                             Log.Debug("{nodeId} is marked as used", node.Id)
                             summary.EndedAt, { node with Usage = NodeUsage.Used }
                     | _ ->
                         Log.Debug("{nodeId} must be build since no summary and required", node.Id)
-                        DateTime.MaxValue, { node with Usage = NodeUsage.Build Configuration.TargetOperation.MarkAsForced }
+                        DateTime.MaxValue, { node with Usage = NodeUsage.Build }
 
             nodes <- nodes |> Map.add node.Id node
             processedNodes.TryAdd(nodeId, completionDate) |> ignore

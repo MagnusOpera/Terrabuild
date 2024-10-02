@@ -71,8 +71,45 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                 let hash = hashContent |> Hash.sha256strings
 
                 let usage =
-                    if target.Rebuild then NodeUsage.Build Configuration.TargetOperation.MarkAsForced
+                    if target.Rebuild then NodeUsage.Build
                     else NodeUsage.Selected
+
+                let cache, ops =
+                    target.Operations
+                    |> List.fold (fun (cache, ops) operation ->
+                        let optContext = {
+                            Terrabuild.Extensibility.ActionContext.Debug = options.Debug
+                            Terrabuild.Extensibility.ActionContext.CI = options.CI.IsSome
+                            Terrabuild.Extensibility.ActionContext.Command = operation.Command
+                            Terrabuild.Extensibility.ActionContext.BranchOrTag = options.BranchOrTag
+                            Terrabuild.Extensibility.ActionContext.ProjectHash = projectConfig.Hash
+                        }
+
+                        let parameters = 
+                            match operation.Context with
+                            | Terrabuild.Expressions.Value.Map map ->
+                                map
+                                |> Map.add "context" (Terrabuild.Expressions.Value.Object optContext)
+                                |> Terrabuild.Expressions.Value.Map
+                            | _ -> TerrabuildException.Raise("Failed to get context (internal error)")
+
+                        let executionRequest =
+                            match Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionExecutionRequest> optContext.Command parameters (Some operation.Script) with
+                            | Extensions.InvocationResult.Success executionRequest -> executionRequest
+                            | _ -> TerrabuildException.Raise("Failed to get shell operation (extension error)")
+
+                        let newops =
+                            executionRequest.Operations
+                            |> List.map (fun shellOperation -> {
+                                ContaineredShellOperation.Container = operation.Container
+                                ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
+                                ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
+                                ContaineredShellOperation.Command = shellOperation.Command
+                                ContaineredShellOperation.Arguments = shellOperation.Arguments
+                            })
+
+                        cache &&& executionRequest.Cache, ops @ newops
+                    ) (Terrabuild.Extensibility.Cacheability.Always, [])
 
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {project}"
@@ -80,7 +117,8 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.Project = project
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
-                             Node.Operations = []
+                             Node.Operations = ops
+                             Node.Cache = cache
 
                              Node.Dependencies = children
                              Node.Outputs = target.Outputs
