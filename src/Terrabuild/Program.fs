@@ -135,19 +135,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let storage = Storages.Factory.create api
         let cache = Cache.Cache(storage) :> Cache.ICache
 
-        let buildGraph =
-            let graph = GraphBuilder.build configOptions config
-            if options.Debug then logGraph graph "config"
-
-            let tryGetSummaryOnly id =
-                let allowRemoteCache = options.LocalOnly |> not
-                cache.TryGetSummaryOnly allowRemoteCache id |> Option.map (fun (_, summary) -> summary)
-            let consistentGraph = GraphConsistency.enforce configOptions.StartedAt configOptions.Force configOptions.Retry tryGetSummaryOnly graph
-            if options.Debug then logGraph consistentGraph "consistent"
-
-            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {consistentGraph.Nodes.Count} tasks" |> Terminal.writeLine
-            consistentGraph
-
+        let buildGraph = GraphBuilder.build configOptions config
         if options.Debug then logGraph buildGraph "build"
 
         if options.WhatIf then
