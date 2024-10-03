@@ -39,8 +39,8 @@ let enforce buildAt force retry (tryGetSummaryOnly: string -> Cache.TargetSummar
                 elif force then
                     Log.Debug("{nodeId} must rebuild because force build requested", node.Id)
                     DateTime.MaxValue, { node with Usage = NodeUsage.Build }
-                else
-                    // slow path: check and apply consistency rules
+                // slow path: check and apply consistency rules
+                elif (node.Cache &&& Cacheability.Always) <> Cacheability.Never then
                     let cacheEntryId = buildCacheKey node
                     match tryGetSummaryOnly cacheEntryId with
                     | Some summary ->
@@ -57,6 +57,9 @@ let enforce buildAt force retry (tryGetSummaryOnly: string -> Cache.TargetSummar
                     | _ ->
                         Log.Debug("{nodeId} must be build since no summary and required", node.Id)
                         DateTime.MaxValue, { node with Usage = NodeUsage.Build }
+                // Encompass Dynamic case which is resolved at Build step
+                else
+                    DateTime.MaxValue, { node with Usage = NodeUsage.Build }
 
             nodes <- nodes |> Map.add node.Id node
             processedNodes.TryAdd(nodeId, completionDate) |> ignore
