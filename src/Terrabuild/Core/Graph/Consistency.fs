@@ -41,7 +41,7 @@ let enforce buildAt force retry (tryGetSummaryOnly: string -> Cache.TargetSummar
                     DateTime.MaxValue, { node with Usage = NodeUsage.Build }
                 else
                     // slow path: check and apply consistency rules
-                    let cacheEntryId = GraphDef.buildCacheKey node
+                    let cacheEntryId = buildCacheKey node
                     match tryGetSummaryOnly cacheEntryId with
                     | Some summary ->
                         Log.Debug("{nodeId} has existing build summary", node.Id)

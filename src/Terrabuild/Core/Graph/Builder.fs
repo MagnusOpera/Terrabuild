@@ -5,6 +5,7 @@ open Errors
 open Serilog
 open System
 open GraphDef
+open Terrabuild.Extensibility
 
 
 
@@ -17,6 +18,11 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
+
+    let defaultCacheability = 
+        if options.Force then Cacheability.Never
+        elif options.LocalOnly then Cacheability.Local
+        else Cacheability.Always
 
     // first check all targets exist in WORKSPACE
     match options.Targets |> Seq.tryFind (fun targetName -> configuration.Targets |> Map.containsKey targetName |> not) with
@@ -109,7 +115,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                             })
 
                         cache &&& executionRequest.Cache, ops @ newops
-                    ) (Terrabuild.Extensibility.Cacheability.Always, [])
+                    ) (defaultCacheability, [])
 
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {project}"
