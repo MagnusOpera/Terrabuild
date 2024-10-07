@@ -95,20 +95,20 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                     |> Seq.map (fun var -> $"-e {var}")
                     |> String.join " "
                 let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
-                metaCommand, options.Workspace, cmd, args, operation.Container
-            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
+                metaCommand, options.Workspace, cmd, args, operation.Container, operation.ExitCodes
+            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
 
     let stepLogs = List<Cache.OperationSummary>()
-    let mutable lastExitCode = 0
+    let mutable lastExitCode = Terrabuild.Extensibility.ExitCodes.Ok
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
 
-    while cmdLineIndex < allCommands.Length && lastExitCode = 0 do
+    while cmdLineIndex < allCommands.Length && lastExitCode = Terrabuild.Extensibility.ExitCodes.Ok do
         let startedAt =
             if cmdLineIndex > 0 then DateTime.UtcNow
             else cmdFirstStartedAt
-        let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
+        let metaCommand, workDir, cmd, args, container, exitCodes = allCommands[cmdLineIndex]
         cmdLineIndex <- cmdLineIndex + 1
 
         Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
@@ -127,8 +127,12 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                         Cache.OperationSummary.Log = logFile
                         Cache.OperationSummary.ExitCode = exitCode }
         stepLog |> stepLogs.Add
-        lastExitCode <- exitCode
-        Log.Debug("{Hash}: Execution completed with '{Code}'", node.TargetHash, exitCode)
+
+        lastExitCode <-
+            match exitCodes |> Map.tryFind exitCode with
+            | Some status -> status
+            | _ -> Terrabuild.Extensibility.ExitCodes.Error exitCode
+        Log.Debug("{Hash}: Execution completed with '{Code}' ({Status})", node.TargetHash, exitCode, lastExitCode)
 
     lastExitCode, stepLogs
 
@@ -181,7 +185,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
             let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
-            let successful = lastExitCode = 0
+            let successful = lastExitCode = Terrabuild.Extensibility.ExitCodes.Ok
             if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)
             else Log.Debug("{Hash}: Marking as failed", node.TargetHash)
 

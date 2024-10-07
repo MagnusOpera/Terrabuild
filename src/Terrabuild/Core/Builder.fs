@@ -108,7 +108,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                                 ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
                                 ContaineredShellOperation.Command = shellOperation.Command
                                 ContaineredShellOperation.Arguments = shellOperation.Arguments
-                            })
+                                ContaineredShellOperation.ExitCodes = shellOperation.ExitCodes })
 
                         cache &&& executionRequest.Cache, ops @ newops
                     ) (defaultCacheability, [])

@@ -35,9 +35,15 @@ type ActionContext = {
 }
 
 [<RequireQualifiedAccess>]
+type ExitCodes =
+    | Ok
+    | Error of int
+
+[<RequireQualifiedAccess>]
 type ShellOperation = {
     Command: string
     Arguments: string
+    ExitCodes: Map<int, ExitCodes>
 }
 
 [<Flags>]
@@ -58,9 +64,18 @@ type ActionExecutionRequest = {
 
 
 
+let defaultExitCodes = Map [ 0, ExitCodes.Ok ]
+
 let shellOp cmd args = 
     { ShellOperation.Command = cmd
-      ShellOperation.Arguments = args }
+      ShellOperation.Arguments = args
+      ShellOperation.ExitCodes = defaultExitCodes }
+
+let checkOp cmd args exitCodes = 
+    { ShellOperation.Command = cmd
+      ShellOperation.Arguments = args
+      ShellOperation.ExitCodes = exitCodes }
+
 
 let execRequest cache ops =
     { ActionExecutionRequest.Cache = cache 
