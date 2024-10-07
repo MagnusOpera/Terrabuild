@@ -178,12 +178,11 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             notification.NodeBuilding node
             processedNodes.TryAdd(node.Id, { node with Usage = GraphDef.NodeUsage.Build }) |> ignore
 
-            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
-
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty
                 else IO.createSnapshot node.Outputs projectDirectory
 
+            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
             let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
             let successful = lastExitCode.IsOkish
