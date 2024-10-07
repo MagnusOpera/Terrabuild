@@ -183,14 +183,14 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 else IO.createSnapshot node.Outputs projectDirectory
 
             let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
-            let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
+            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
-            let successful = lastExitCode.IsOkish
+            let successful = lastStatusCode.IsOkish
             if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)
             else Log.Debug("{Hash}: Marking as failed", node.TargetHash)
 
-            match lastExitCode with
-            | Terrabuild.Extensibility.StatusCode.Ok false ->
+            match lastStatusCode with
+            | Terrabuild.Extensibility.StatusCode.Ok true ->
                 let afterFiles = IO.createSnapshot node.Outputs projectDirectory
 
                 // keep only new or modified files
@@ -214,10 +214,10 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 let files = cacheEntry.Complete summary
                 api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
                 endedAt
-            | Terrabuild.Extensibility.StatusCode.Ok true ->
+            | Terrabuild.Extensibility.StatusCode.Ok false ->
                 currentCompletionDate
             | Terrabuild.Extensibility.StatusCode.Error _ ->
-                TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
+                TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastStatusCode}")
 
         let restoreNode () =
             notification.NodeDownloading node

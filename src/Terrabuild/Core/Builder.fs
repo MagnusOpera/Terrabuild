@@ -110,7 +110,10 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                                 ContaineredShellOperation.Arguments = shellOperation.Arguments
                                 ContaineredShellOperation.ExitCodes = shellOperation.ExitCodes })
 
-                        cache &&& executionRequest.Cache, ops @ newops
+                        let cache =
+                            cache &&& executionRequest.Cache
+                            ||| Cacheability.Dynamic &&& (cache ||| executionRequest.Cache)
+                        cache, ops @ newops
                     ) (defaultCacheability, [])
 
                 let node = { Node.Id = nodeId

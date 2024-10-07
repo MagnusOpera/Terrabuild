@@ -36,7 +36,7 @@ type ActionContext = {
 
 [<RequireQualifiedAccess>]
 type StatusCode =
-    | Ok of updated:bool
+    | Ok of update:bool
     | Error of exitCode:int
 with
     member this.IsOkish =
@@ -69,7 +69,7 @@ type ActionExecutionRequest = {
 
 
 
-let defaultExitCodes = Map [ 0, StatusCode.Ok false ]
+let defaultExitCodes = Map [ 0, StatusCode.Ok true ]
 
 let shellOp cmd args = 
     { ShellOperation.Command = cmd
