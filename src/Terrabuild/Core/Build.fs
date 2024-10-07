@@ -52,7 +52,7 @@ type IBuildNotification =
     abstract NodeDownloading: node:GraphDef.Node -> unit
     abstract NodeBuilding: node:GraphDef.Node -> unit
     abstract NodeUploading: node:GraphDef.Node -> unit
-    abstract NodeCompleted: node:GraphDef.Node -> restored: bool -> success: bool -> unit
+    abstract NodeCompleted: node:GraphDef.Node -> success: bool -> unit
 
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
@@ -136,8 +136,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
-    let nodesToBuild = graph.Nodes |> Seq.filter (fun (KeyValue(_,node)) -> node.Usage.ShallBuild) |> Seq.length
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {nodesToBuild} tasks to build" |> Terminal.writeLine
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {graph.Nodes.Count} tasks to build" |> Terminal.writeLine
 
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
@@ -150,7 +149,16 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let homeDir = cache.CreateHomeDir "containers"
     let tmpDir = cache.CreateHomeDir "tmp"
 
-    let processNode (node: GraphDef.Node) =
+    let tryGetSummaryOnly id =
+        let allowRemoteCache = options.LocalOnly |> not
+        cache.TryGetSummaryOnly allowRemoteCache id |> Option.map (fun (_, summary) -> summary)
+
+    let force = options.Force
+    let retry = options.Retry
+
+    let processedNodes = Concurrent.ConcurrentDictionary<string, GraphDef.Node>()
+
+    let processNode (maxCompletionChildren: DateTime) (node: GraphDef.Node) =
         let cacheEntryId = GraphDef.buildCacheKey node
 
         let projectDirectory =
@@ -163,6 +171,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let startedAt = DateTime.UtcNow
 
             notification.NodeBuilding node
+            processedNodes.TryAdd(node.Id, { node with Usage = GraphDef.NodeUsage.Build }) |> ignore
+
             let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
 
             let beforeFiles =
@@ -198,11 +208,13 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let files = cacheEntry.Complete summary
             api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
-            if successful |> not then
-                TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
+            if successful then endedAt
+            else TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
 
         let restoreNode () =
             notification.NodeDownloading node
+            processedNodes.TryAdd(node.Id, { node with Usage = GraphDef.NodeUsage.Restore }) |> ignore
+
             let cacheEntryId = GraphDef.buildCacheKey node
             match cache.TryGetSummary allowRemoteCache cacheEntryId with
             | Some summary ->
@@ -216,15 +228,51 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             | _ ->
                 TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
-        try
-            if node.Usage.ShallBuild then buildNode()
-            else restoreNode()
-            notification.NodeCompleted node (node.Usage.ShallBuild |> not) true
-        with
-            | exn ->
-                Log.Fatal(exn, "Build node failed")
-                notification.NodeCompleted node (node.Usage.ShallBuild |> not) false
-                reraise()
+        let buildDynamicNode () =
+            DateTime.MaxValue, node
+
+        let completionDate, node =
+            // fast path: if children must rebuild do not care to check the cache
+            if force then
+                Log.Debug("{nodeId} must rebuild because force build requested", node.Id)
+                DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+            elif maxCompletionChildren = DateTime.MaxValue then
+                Log.Debug("{nodeId} must rebuild because child is rebuilding", node.Id)
+                DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+            elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
+                buildDynamicNode()
+            elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Always) <> Terrabuild.Extensibility.Cacheability.Never then
+                let cacheEntryId = GraphDef.buildCacheKey node
+                match tryGetSummaryOnly cacheEntryId with
+                | Some summary ->
+                    Log.Debug("{nodeId} has existing build summary", node.Id)
+                    if summary.StartedAt < maxCompletionChildren then
+                        Log.Debug("{nodeId} must rebuild because it is younger than child", node.Id)
+                        DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+                    elif (summary.IsSuccessful |> not) && retry then
+                        Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
+                        DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+                    else
+                        Log.Debug("{nodeId} is marked as used", node.Id)
+                        summary.EndedAt, { node with Usage = GraphDef.NodeUsage.Restore }
+                | _ ->
+                    Log.Debug("{nodeId} must be build since no summary and required", node.Id)
+                    DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+            // Encompass Dynamic case which is resolved at Build step
+            else
+                DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+
+        // TODO: check error
+        processedNodes.TryAdd(node.Id, node) |> ignore
+
+        match node.Usage with
+        | GraphDef.NodeUsage.Build ->
+            buildNode()
+        | GraphDef.NodeUsage.Restore ->
+            restoreNode()
+            completionDate
+        | _ ->
+            completionDate
 
 
     let scheduledNodes = Concurrent.ConcurrentDictionary<string, bool>()
@@ -232,31 +280,37 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let rec schedule nodeId =
         if scheduledNodes.TryAdd(nodeId, true) then
             let node = graph.Nodes[nodeId]
-            let nodeComputed = hub.CreateComputed<GraphDef.Node> nodeId
+            let nodeComputed = hub.CreateComputed<DateTime> nodeId
 
             // await dependencies
             let awaitedDependencies =
                 node.Dependencies
                 |> Seq.map (fun awaitedProjectId ->
                     schedule awaitedProjectId
-                    hub.GetComputed<GraphDef.Node> awaitedProjectId)
+                    hub.GetComputed<DateTime> awaitedProjectId)
                 |> Array.ofSeq
 
             let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
             hub.Subscribe awaitedSignals (fun () ->
-                processNode node
-                nodeComputed.Value <- node)
+                try
+                    let maxCompletionChildren =
+                        awaitedDependencies
+                        |> Seq.map (fun dep -> dep.Value)
+                        |> Seq.sortDescending
+                        |> Seq.tryHead
+                        |> Option.defaultValue DateTime.MinValue
+
+                    nodeComputed.Value <- processNode maxCompletionChildren node
+                    notification.NodeCompleted node true
+                with
+                    exn ->
+                        Log.Fatal(exn, $"Attempt to build node {nodeId} failed")
+
+                        // TODO: fix first false
+                        notification.NodeCompleted node false
+                        reraise())
 
     graph.RootNodes |> Seq.iter schedule
-
-    // mark remaining selected nodes as used
-    match api, options.CI with
-    | Some api, Some _ ->
-        graph.Nodes
-        |> Map.iter (fun _ node ->
-            if node.Usage = GraphDef.NodeUsage.Selected then
-                api.UseArtifact buildId node.ProjectHash node.TargetHash)
-    | _ -> ()
 
     let status = hub.WaitCompletion()
     match status with
@@ -266,7 +320,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
-    let buildNodes = graph.Nodes |> Map.filter (fun _ node -> node.Usage.ShallBuild)
+    let buildNodes = graph.Nodes |> Map.filter (fun _ node -> node.Usage = GraphDef.NodeUsage.Build)
 
     // status of nodes to build
     let buildNodesStatus =

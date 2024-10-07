@@ -76,10 +76,6 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
                 let hash = hashContent |> Hash.sha256strings
 
-                let usage =
-                    if target.Rebuild then NodeUsage.Build
-                    else NodeUsage.Selected
-
                 let cache, ops =
                     target.Operations
                     |> List.fold (fun (cache, ops) operation ->
@@ -133,7 +129,8 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.TargetHash = hash
 
                              Node.IsLeaf = isLeaf
-                             Node.Usage = usage }
+                             
+                             Node.Usage = NodeUsage.Ignore}
 
                 if allNodes.TryAdd(nodeId, node) |> not then
                     TerrabuildException.Raise("Unexpected graph building race")

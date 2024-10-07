@@ -12,10 +12,9 @@ type ContaineredShellOperation = {
 
 [<RequireQualifiedAccess>]
 type NodeUsage =
-    | Selected
-    | Used
+    | Ignore
+    | Restore
     | Build
-with member this.ShallBuild = match this with | Build -> true | _ -> false 
 
 
 [<RequireQualifiedAccess>]
@@ -35,11 +34,10 @@ type Node = {
     Operations: ContaineredShellOperation list
     Cache: Terrabuild.Extensibility.Cacheability
 
-    // tell role of node
-    Usage: NodeUsage
-
     // tell if a node is leaf (that is no dependencies in same project)
     IsLeaf: bool
+
+    Usage: NodeUsage
 }
 
 
@@ -58,9 +56,9 @@ let buildCacheKey (node: Node) = $"{node.ProjectHash}/{node.Target}/{node.Target
 let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
     let mermaid = [
         "flowchart TD"
-        $"classDef forced stroke:red,stroke-width:3px"
+        $"classDef built stroke:red,stroke-width:3px"
         $"classDef used stroke:orange,stroke-width:3px"
-        $"classDef selected stroke:black,stroke-width:3px"
+        $"classDef ignored stroke:black,stroke-width:3px"
 
         for (KeyValue(_, node)) in graph.Nodes do
             let status =
@@ -77,9 +75,9 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
                 $"{node.Id} --> {dstNode.Id}"
 
             match node.Usage with
-            | NodeUsage.Build -> $"class {node.Id} forced"
-            | NodeUsage.Used -> $"class {node.Id} used"
-            | _ -> $"class {node.Id} selected"
+            | NodeUsage.Build -> $"class {node.Id} built"
+            | NodeUsage.Restore -> $"class {node.Id} used"
+            | _ -> $"class {node.Id} ignored"
     ]
 
     mermaid
