@@ -35,15 +35,20 @@ type ActionContext = {
 }
 
 [<RequireQualifiedAccess>]
-type ExitCodes =
-    | Ok
-    | Error of int
+type StatusCodes =
+    | Ok of updated:bool
+    | Error of exitCode:int
+with
+    member this.IsOkish =
+        match this with
+        | Ok _ -> true
+        | _ -> false
 
 [<RequireQualifiedAccess>]
 type ShellOperation = {
     Command: string
     Arguments: string
-    ExitCodes: Map<int, ExitCodes>
+    ExitCodes: Map<int, StatusCodes>
 }
 
 [<Flags>]
@@ -52,7 +57,7 @@ type Cacheability =
     | Local = 1
     | Remote = 2
     | Always = 3 // Local + Remote
-    | Dynamic = 4 // NOTE: mutually exclusive with Local/Remote
+    | Dynamic = 4 // NOTE: mutually exclusive with Local or Remote
 
 type ShellOperations = ShellOperation list
 
@@ -64,7 +69,7 @@ type ActionExecutionRequest = {
 
 
 
-let defaultExitCodes = Map [ 0, ExitCodes.Ok ]
+let defaultExitCodes = Map [ 0, StatusCodes.Ok false ]
 
 let shellOp cmd args = 
     { ShellOperation.Command = cmd
@@ -75,7 +80,6 @@ let checkOp cmd args exitCodes =
     { ShellOperation.Command = cmd
       ShellOperation.Arguments = args
       ShellOperation.ExitCodes = exitCodes }
-
 
 let execRequest cache ops =
     { ActionExecutionRequest.Cache = cache 

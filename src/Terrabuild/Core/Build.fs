@@ -99,12 +99,12 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
             | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
 
     let stepLogs = List<Cache.OperationSummary>()
-    let mutable lastExitCode = Terrabuild.Extensibility.ExitCodes.Ok
+    let mutable lastStatusCode = Terrabuild.Extensibility.StatusCodes.Ok false
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
 
-    while cmdLineIndex < allCommands.Length && lastExitCode = Terrabuild.Extensibility.ExitCodes.Ok do
+    while cmdLineIndex < allCommands.Length && lastStatusCode.IsOkish do
         let startedAt =
             if cmdLineIndex > 0 then DateTime.UtcNow
             else cmdFirstStartedAt
@@ -128,13 +128,14 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                         Cache.OperationSummary.ExitCode = exitCode }
         stepLog |> stepLogs.Add
 
-        lastExitCode <-
+        let statusCode =
             match exitCodes |> Map.tryFind exitCode with
-            | Some status -> status
-            | _ -> Terrabuild.Extensibility.ExitCodes.Error exitCode
-        Log.Debug("{Hash}: Execution completed with '{Code}' ({Status})", node.TargetHash, exitCode, lastExitCode)
+            | Some statusCode -> statusCode
+            | _ -> Terrabuild.Extensibility.StatusCodes.Error exitCode
+        lastStatusCode <- statusCode
+        Log.Debug("{Hash}: Execution completed with '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
 
-    lastExitCode, stepLogs
+    lastStatusCode, stepLogs
 
 let run (options: Configuration.Options) (sourceControl: Contracts.ISourceControl) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
     let targets = options.Targets |> String.join " "
@@ -171,7 +172,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             | FS.File projectFile -> FS.parentDirectory projectFile
             | _ -> "."
 
-        let buildNode () =
+        let buildNode currentCompletionDate =
             let startedAt = DateTime.UtcNow
 
             notification.NodeBuilding node
@@ -180,40 +181,44 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
 
             let beforeFiles =
-                if node.IsLeaf then IO.Snapshot.Empty // FileSystem.createSnapshot projectDirectory node.Outputs
+                if node.IsLeaf then IO.Snapshot.Empty
                 else IO.createSnapshot node.Outputs projectDirectory
 
             let lastExitCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
-            let successful = lastExitCode = Terrabuild.Extensibility.ExitCodes.Ok
+            let successful = lastExitCode.IsOkish
             if successful then Log.Debug("{Hash}: Marking as success", node.TargetHash)
             else Log.Debug("{Hash}: Marking as failed", node.TargetHash)
 
-            let afterFiles = IO.createSnapshot node.Outputs projectDirectory
+            match lastExitCode with
+            | Terrabuild.Extensibility.StatusCodes.Ok false ->
+                let afterFiles = IO.createSnapshot node.Outputs projectDirectory
 
-            // keep only new or modified files
-            let newFiles = afterFiles - beforeFiles
-            let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
+                // keep only new or modified files
+                let newFiles = afterFiles - beforeFiles
+                let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
-            let endedAt = DateTime.UtcNow
-            let summary = { Cache.TargetSummary.Project = node.Project
-                            Cache.TargetSummary.Target = node.Target
-                            Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
-                            Cache.TargetSummary.Outputs = outputs
-                            Cache.TargetSummary.IsSuccessful = successful
-                            Cache.TargetSummary.StartedAt = startedAt
-                            Cache.TargetSummary.EndedAt = endedAt
-                            Cache.TargetSummary.Duration = endedAt - startedAt }
+                let endedAt = DateTime.UtcNow
+                let summary = { Cache.TargetSummary.Project = node.Project
+                                Cache.TargetSummary.Target = node.Target
+                                Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
+                                Cache.TargetSummary.Outputs = outputs
+                                Cache.TargetSummary.IsSuccessful = successful
+                                Cache.TargetSummary.StartedAt = startedAt
+                                Cache.TargetSummary.EndedAt = endedAt
+                                Cache.TargetSummary.Duration = endedAt - startedAt }
 
-            notification.NodeUploading node
+                notification.NodeUploading node
 
-            // create an archive with new files
-            Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
-            let files = cacheEntry.Complete summary
-            api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
-
-            if successful then endedAt
-            else TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
+                // create an archive with new files
+                Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
+                let files = cacheEntry.Complete summary
+                api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
+                endedAt
+            | Terrabuild.Extensibility.StatusCodes.Ok true ->
+                currentCompletionDate
+            | Terrabuild.Extensibility.StatusCodes.Error _ ->
+                TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
 
         let restoreNode () =
             notification.NodeDownloading node
@@ -232,51 +237,48 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             | _ ->
                 TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
-        let buildDynamicNode () =
-            DateTime.MaxValue, node
-
         let completionDate, node =
-            // fast path: if children must rebuild do not care to check the cache
             if force then
                 Log.Debug("{nodeId} must rebuild because force build requested", node.Id)
-                DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+                buildNode DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
             elif maxCompletionChildren = DateTime.MaxValue then
                 Log.Debug("{nodeId} must rebuild because child is rebuilding", node.Id)
-                DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
-            elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
-                buildDynamicNode()
-            elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Always) <> Terrabuild.Extensibility.Cacheability.Never then
+                buildNode DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+            elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
                 let cacheEntryId = GraphDef.buildCacheKey node
                 match tryGetSummaryOnly cacheEntryId with
                 | Some summary ->
                     Log.Debug("{nodeId} has existing build summary", node.Id)
+                    // task is younger than children
                     if summary.StartedAt < maxCompletionChildren then
                         Log.Debug("{nodeId} must rebuild because it is younger than child", node.Id)
-                        DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
-                    elif (summary.IsSuccessful |> not) && retry then
+                        buildNode DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+                    // task is failed and retry requested
+                    elif retry && not summary.IsSuccessful then
                         Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
-                        DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+                        buildNode DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+                    // task is dynamic
+                    elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
+                        let completionDate = buildNode summary.EndedAt
+                        if completionDate < maxCompletionChildren then
+                            // NOTE: restore to respect idempotency
+                            restoreNode()
+                            completionDate, { node with Usage = GraphDef.NodeUsage.Restore }
+                        else
+                            completionDate, { node with Usage = GraphDef.NodeUsage.Build }
+                    // task is cached
                     else
                         Log.Debug("{nodeId} is marked as used", node.Id)
+                        restoreNode()
                         summary.EndedAt, { node with Usage = GraphDef.NodeUsage.Restore }
                 | _ ->
                     Log.Debug("{nodeId} must be build since no summary and required", node.Id)
-                    DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
-            // Encompass Dynamic case which is resolved at Build step
+                    buildNode DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
             else
-                DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
+                buildNode DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
 
-        // TODO: check error
         processedNodes.TryAdd(node.Id, node) |> ignore
-
-        match node.Usage with
-        | GraphDef.NodeUsage.Build ->
-            buildNode()
-        | GraphDef.NodeUsage.Restore ->
-            restoreNode()
-            completionDate
-        | _ ->
-            completionDate
+        completionDate
 
 
     let scheduledNodes = Concurrent.ConcurrentDictionary<string, bool>()
@@ -309,8 +311,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 with
                     exn ->
                         Log.Fatal(exn, $"Attempt to build node {nodeId} failed")
-
-                        // TODO: fix first false
                         notification.NodeCompleted node false
                         reraise())
 
