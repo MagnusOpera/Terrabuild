@@ -176,7 +176,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let startedAt = DateTime.UtcNow
 
             notification.NodeBuilding node
-            processedNodes.TryAdd(node.Id, { node with Usage = GraphDef.NodeUsage.Build }) |> ignore
 
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty
@@ -221,7 +220,6 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
         let restoreNode () =
             notification.NodeDownloading node
-            processedNodes.TryAdd(node.Id, { node with Usage = GraphDef.NodeUsage.Restore }) |> ignore
 
             let cacheEntryId = GraphDef.buildCacheKey node
             match cache.TryGetSummary allowRemoteCache cacheEntryId with
@@ -322,7 +320,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
-    let buildNodes = graph.Nodes |> Map.filter (fun _ node -> node.Usage = GraphDef.NodeUsage.Build)
+    let buildNodes = 
+        processedNodes |> Map.ofDict
+        |> Map.filter (fun _ node -> node.Usage = GraphDef.NodeUsage.Build)
 
     // status of nodes to build
     let buildNodesStatus =

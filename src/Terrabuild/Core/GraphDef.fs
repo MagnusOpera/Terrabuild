@@ -64,11 +64,11 @@ let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
         for (KeyValue(_, node)) in graph.Nodes do
             let status =
                 match getNodeStatus with
-                | Some getNodeStatus -> $"{getNodeStatus node.Id} "
+                | Some getNodeStatus -> $"\n{getNodeStatus node.Id} "
                 | _ -> ""
 
             let label = node.Label
-            $"{node.Id}(\"{label}\n{status}\")"
+            $"{node.Id}(\"{label}{status}\")"
 
         for (KeyValue(_, node)) in graph.Nodes do
             for dependency in node.Dependencies do
