@@ -143,12 +143,7 @@ endef
 
 define diff_results
 	$(call diff_file,$(1),terrabuild-debug.config.json)
-	$(call diff_file,$(1),terrabuild-debug.config-graph.json)
-	$(call diff_file,$(1),terrabuild-debug.consistent-graph.json)
-	$(call diff_file,$(1),terrabuild-debug.transform-graph.json)
-	$(call diff_file,$(1),terrabuild-debug.config-graph.mermaid)
-	$(call diff_file,$(1),terrabuild-debug.consistent-graph.mermaid)
-	$(call diff_file,$(1),terrabuild-debug.transform-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.build-graph.json)
 	$(call diff_file,$(1),terrabuild-debug.build-graph.mermaid)
 endef
 

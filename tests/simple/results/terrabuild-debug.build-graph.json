@@ -1,115 +1,10 @@
 {
   "nodes": {
-    "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB": {
-      "id": "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB",
-      "label": "batch-build 103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB",
-      "project": "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB",
-      "target": "build",
-      "targetOperation": {
-        "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
-        "container": null,
-        "containerVariables": [],
-        "extension": "@dotnet",
-        "command": "build",
-        "script": {},
-        "context": [
-          "map",
-          {
-            "configuration": [
-              "string",
-              "Debug"
-            ]
-          }
-        ]
-      },
-      "configurationTarget": {
-        "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
-        "rebuild": false,
-        "dependsOn": [
-          "^build"
-        ],
-        "outputs": [
-          "**/*.binlog",
-          "bin/",
-          "obj/",
-          "obj/*.json",
-          "obj/*.props",
-          "obj/*.targets"
-        ],
-        "operations": [
-          {
-            "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
-            "container": null,
-            "containerVariables": [],
-            "extension": "@dotnet",
-            "command": "build",
-            "script": {},
-            "context": [
-              "map",
-              {
-                "configuration": [
-                  "string",
-                  "Debug"
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "operations": [
-        {
-          "container": null,
-          "containerVariables": [],
-          "command": "dotnet",
-          "arguments": "build .terrabuild/103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB.sln --configuration Debug    "
-        }
-      ],
-      "dependencies": [],
-      "outputs": [],
-      "projectHash": "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB",
-      "targetHash": "2B54545A15F538FD93FD4ADAAF642161D3E25A5BBC709C099D3EB615CCC22E9D",
-      "operationHash": "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB",
-      "isLeaf": false,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": false,
-      "isLast": false
-    },
     "deployments/terraform-deploy:build": {
       "id": "deployments/terraform-deploy:build",
-      "label": "deployments/terraform-deploy:build @terraform plan",
+      "label": "build deployments/terraform-deploy",
       "project": "deployments/terraform-deploy",
       "target": "build",
-      "targetOperation": {
-        "hash": "8BA1A0F5EC354F7CA3A6E46BAD0B652F6767230BC5323A1AB1841ED9EF7B0AC2",
-        "container": null,
-        "containerVariables": [],
-        "extension": "@terraform",
-        "command": "plan",
-        "script": {},
-        "context": [
-          "map",
-          {
-            "variables": [
-              "map",
-              {
-                "dotnet_app_version": [
-                  "string",
-                  "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364"
-                ],
-                "npm_app_version": [
-                  "string",
-                  "A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E"
-                ]
-              }
-            ],
-            "workspace": [
-              "string",
-              "default"
-            ]
-          }
-        ]
-      },
       "configurationTarget": {
         "hash": "FD4E492BBC14063F951BD573395F7044BB64448F0CCA60851019067618B27C70",
         "rebuild": false,
@@ -152,26 +47,6 @@
           }
         ]
       },
-      "operations": [
-        {
-          "container": null,
-          "containerVariables": [],
-          "command": "terraform",
-          "arguments": "init"
-        },
-        {
-          "container": null,
-          "containerVariables": [],
-          "command": "terraform",
-          "arguments": "workspace select default"
-        },
-        {
-          "container": null,
-          "containerVariables": [],
-          "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364\u0022 -var=\u0022npm_app_version=A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E\u0022"
-        }
-      ],
       "dependencies": [
         "projects/dotnet-app:build",
         "projects/npm-app:build"
@@ -181,35 +56,72 @@
       ],
       "projectHash": "825FA904BFCC88377654659B6021610C28A2856B44369D63969377A7699A4AF3",
       "targetHash": "04248F14331991CE6BFB33A59B4A2B2E129E1B5702DB0A9200719D8344D18C0E",
-      "operationHash": "77F8F41D0F1391FB41BCA4045AF5453FF79FF9285DA93596FAB430494CE88E03",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@terraform plan",
+          "command": "terraform",
+          "arguments": "init",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@terraform plan",
+          "command": "terraform",
+          "arguments": "workspace select default",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@terraform plan",
+          "command": "terraform",
+          "arguments": "plan -detailed-exitcode -out=terrabuild.planfile -var=\u0022dotnet_app_version=3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364\u0022 -var=\u0022npm_app_version=A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E\u0022",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                false
+              ]
+            ],
+            [
+              2,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        }
+      ],
+      "cache": 4,
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": true,
-      "isLast": true
+      "usage": "ignore"
     },
     "libraries/dotnet-lib:build": {
       "id": "libraries/dotnet-lib:build",
-      "label": "libraries/dotnet-lib:build @dotnet build",
+      "label": "build libraries/dotnet-lib",
       "project": "libraries/dotnet-lib",
       "target": "build",
-      "targetOperation": {
-        "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
-        "container": null,
-        "containerVariables": [],
-        "extension": "@dotnet",
-        "command": "build",
-        "script": {},
-        "context": [
-          "map",
-          {
-            "configuration": [
-              "string",
-              "Debug"
-            ]
-          }
-        ]
-      },
       "configurationTarget": {
         "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
         "rebuild": false,
@@ -244,10 +156,7 @@
           }
         ]
       },
-      "operations": [],
-      "dependencies": [
-        "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB"
-      ],
+      "dependencies": [],
       "outputs": [
         "**/*.binlog",
         "bin/",
@@ -258,35 +167,33 @@
       ],
       "projectHash": "666908E6236D9394711779EEAB166ED8BC6341DF1EEEF724C7DE083D0C9709DC",
       "targetHash": "2B54545A15F538FD93FD4ADAAF642161D3E25A5BBC709C099D3EB615CCC22E9D",
-      "operationHash": "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@dotnet build",
+          "command": "dotnet",
+          "arguments": "build --no-dependencies --configuration Debug    ",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        }
+      ],
+      "cache": 0,
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": true,
-      "isLast": true
+      "usage": "ignore"
     },
     "libraries/shell-lib:build": {
       "id": "libraries/shell-lib:build",
-      "label": "libraries/shell-lib:build @shell echo",
+      "label": "build libraries/shell-lib",
       "project": "libraries/shell-lib",
       "target": "build",
-      "targetOperation": {
-        "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-        "container": null,
-        "containerVariables": [],
-        "extension": "@shell",
-        "command": "echo",
-        "script": {},
-        "context": [
-          "map",
-          {
-            "arguments": [
-              "string",
-              "building library1"
-            ]
-          }
-        ]
-      },
       "configurationTarget": {
         "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
         "rebuild": false,
@@ -314,47 +221,37 @@
           }
         ]
       },
-      "operations": [
-        {
-          "container": null,
-          "containerVariables": [],
-          "command": "echo",
-          "arguments": "building library1"
-        }
-      ],
       "dependencies": [],
       "outputs": [],
       "projectHash": "60F9371D05141EC9C0E9CC759730C62EC37C01D9EEB1330EFE2737AA01F557A6",
       "targetHash": "C432095DAA33C07EE1C2E6A4F053F065373D320CB24C6C500259772EF208608E",
-      "operationHash": "6255D622815D1A2DFF855D7E5960E83D76F22A035D9624C191F583A78E48F2C9",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "building library1",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        }
+      ],
+      "cache": 0,
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": true,
-      "isLast": true
+      "usage": "ignore"
     },
     "projects/dotnet-app:build": {
       "id": "projects/dotnet-app:build",
-      "label": "projects/dotnet-app:build @dotnet build",
+      "label": "build projects/dotnet-app",
       "project": "projects/dotnet-app",
       "target": "build",
-      "targetOperation": {
-        "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
-        "container": null,
-        "containerVariables": [],
-        "extension": "@dotnet",
-        "command": "build",
-        "script": {},
-        "context": [
-          "map",
-          {
-            "configuration": [
-              "string",
-              "Debug"
-            ]
-          }
-        ]
-      },
       "configurationTarget": {
         "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
         "rebuild": false,
@@ -389,9 +286,7 @@
           }
         ]
       },
-      "operations": [],
       "dependencies": [
-        "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB",
         "libraries/dotnet-lib:build"
       ],
       "outputs": [
@@ -404,40 +299,33 @@
       ],
       "projectHash": "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364",
       "targetHash": "DDBE336631053045F003A619F764069C3644E78FAAE597140FCC2B968FB31989",
-      "operationHash": "103324D667786719E66BCF80622362240D839C7846917272A00ABB3A18112ACB",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@dotnet build",
+          "command": "dotnet",
+          "arguments": "build --no-dependencies --configuration Debug    ",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        }
+      ],
+      "cache": 0,
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": true,
-      "isLast": true
+      "usage": "ignore"
     },
     "projects/make-app:build": {
       "id": "projects/make-app:build",
-      "label": "projects/make-app:build @make build",
+      "label": "build projects/make-app",
       "project": "projects/make-app",
       "target": "build",
-      "targetOperation": {
-        "hash": "60078A7AEF8007B4B5DC060CE7889241884A0FDE6A440EB5732A3FD31ED2D857",
-        "container": null,
-        "containerVariables": [],
-        "extension": "@make",
-        "command": "build",
-        "script": {},
-        "context": [
-          "map",
-          {
-            "variables": [
-              "map",
-              {
-                "secret": [
-                  "string",
-                  "tagada"
-                ]
-              }
-            ]
-          }
-        ]
-      },
       "configurationTarget": {
         "hash": "D75E1B5F09A68010CF5A342EF04AB73E0FDE53F31E8A83B5DF5FF248DE965D24",
         "rebuild": false,
@@ -489,110 +377,6 @@
           }
         ]
       },
-      "operations": [
-        {
-          "container": null,
-          "containerVariables": [],
-          "command": "make",
-          "arguments": "build secret=\u0022tagada\u0022"
-        }
-      ],
-      "dependencies": [
-        "projects/make-app:build-1"
-      ],
-      "outputs": [
-        "dist"
-      ],
-      "projectHash": "47A18E4D676C50894D393158B4C1CE5C7736BD65C6C15CC542E764E876CB2E68",
-      "targetHash": "9BDFE24BBEFCEA185D8216BFBB1B52C3CA61B82F25A512ACD9E66BCBFE1B0458",
-      "operationHash": "356D964BA59E96115392C7865DD57B6964419ED1CE56EF9C7E460E7DE2BFF79F",
-      "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": false,
-      "isLast": true
-    },
-    "projects/make-app:build-1": {
-      "id": "projects/make-app:build-1",
-      "label": "projects/make-app:build @shell echo",
-      "project": "projects/make-app",
-      "target": "build",
-      "targetOperation": {
-        "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-        "container": null,
-        "containerVariables": [],
-        "extension": "@shell",
-        "command": "echo",
-        "script": {},
-        "context": [
-          "map",
-          {
-            "arguments": [
-              "string",
-              "building project1"
-            ]
-          }
-        ]
-      },
-      "configurationTarget": {
-        "hash": "D75E1B5F09A68010CF5A342EF04AB73E0FDE53F31E8A83B5DF5FF248DE965D24",
-        "rebuild": false,
-        "dependsOn": [
-          "^build"
-        ],
-        "outputs": [
-          "dist"
-        ],
-        "operations": [
-          {
-            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-            "container": null,
-            "containerVariables": [],
-            "extension": "@shell",
-            "command": "echo",
-            "script": {},
-            "context": [
-              "map",
-              {
-                "arguments": [
-                  "string",
-                  "building project1"
-                ]
-              }
-            ]
-          },
-          {
-            "hash": "60078A7AEF8007B4B5DC060CE7889241884A0FDE6A440EB5732A3FD31ED2D857",
-            "container": null,
-            "containerVariables": [],
-            "extension": "@make",
-            "command": "build",
-            "script": {},
-            "context": [
-              "map",
-              {
-                "variables": [
-                  "map",
-                  {
-                    "secret": [
-                      "string",
-                      "tagada"
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "operations": [
-        {
-          "container": null,
-          "containerVariables": [],
-          "command": "echo",
-          "arguments": "building library1"
-        }
-      ],
       "dependencies": [
         "libraries/shell-lib:build"
       ],
@@ -601,30 +385,49 @@
       ],
       "projectHash": "47A18E4D676C50894D393158B4C1CE5C7736BD65C6C15CC542E764E876CB2E68",
       "targetHash": "9BDFE24BBEFCEA185D8216BFBB1B52C3CA61B82F25A512ACD9E66BCBFE1B0458",
-      "operationHash": "6255D622815D1A2DFF855D7E5960E83D76F22A035D9624C191F583A78E48F2C9",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "building project1",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@make build",
+          "command": "make",
+          "arguments": "build secret=\u0022tagada\u0022",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        }
+      ],
+      "cache": 0,
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": true,
-      "isLast": false
+      "usage": "ignore"
     },
     "projects/npm-app:build": {
       "id": "projects/npm-app:build",
-      "label": "projects/npm-app:build @npm build",
+      "label": "build projects/npm-app",
       "project": "projects/npm-app",
       "target": "build",
-      "targetOperation": {
-        "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
-        "container": "node:20",
-        "containerVariables": [],
-        "extension": "@npm",
-        "command": "build",
-        "script": {},
-        "context": [
-          "map",
-          {}
-        ]
-      },
       "configurationTarget": {
         "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
         "rebuild": false,
@@ -649,50 +452,55 @@
           }
         ]
       },
-      "operations": [
-        {
-          "container": "node:20",
-          "containerVariables": [],
-          "command": "npm",
-          "arguments": "ci"
-        },
-        {
-          "container": "node:20",
-          "containerVariables": [],
-          "command": "npm",
-          "arguments": "run build -- "
-        }
-      ],
       "dependencies": [],
       "outputs": [
         "dist/"
       ],
       "projectHash": "A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E",
       "targetHash": "B864E5E2441D5ABDFB79E333250443A85D34E2FA72C676175DA6CEFE84A30999",
-      "operationHash": "CB09FB794D5448373C87F1E8D9AB71003405EF368DE7F757896E901171F8918F",
+      "operations": [
+        {
+          "container": "node:20",
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "ci",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        },
+        {
+          "container": "node:20",
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "run build -- ",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        }
+      ],
+      "cache": 0,
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": true,
-      "isLast": true
+      "usage": "ignore"
     },
     "projects/rust-app:build": {
       "id": "projects/rust-app:build",
-      "label": "projects/rust-app:build @cargo build",
+      "label": "build projects/rust-app",
       "project": "projects/rust-app",
       "target": "build",
-      "targetOperation": {
-        "hash": "A8ECD5C3F84E52E8C5C9B4BC04D9FDDC0FA81CE3FE190F10117DE2759DDAAC1D",
-        "container": null,
-        "containerVariables": [],
-        "extension": "@cargo",
-        "command": "build",
-        "script": {},
-        "context": [
-          "map",
-          {}
-        ]
-      },
       "configurationTarget": {
         "hash": "11AAF8064C94EB13A5DBBABB74D237968373D8BA36EDC3C0DAE6A303E3FB71FE",
         "rebuild": false,
@@ -706,7 +514,7 @@
         "operations": [
           {
             "hash": "A8ECD5C3F84E52E8C5C9B4BC04D9FDDC0FA81CE3FE190F10117DE2759DDAAC1D",
-            "container": null,
+            "container": "rust:1.81.0-slim",
             "containerVariables": [],
             "extension": "@cargo",
             "command": "build",
@@ -718,14 +526,6 @@
           }
         ]
       },
-      "operations": [
-        {
-          "container": null,
-          "containerVariables": [],
-          "command": "cargo",
-          "arguments": "build --profile dev "
-        }
-      ],
       "dependencies": [],
       "outputs": [
         "target/debug/",
@@ -733,12 +533,27 @@
       ],
       "projectHash": "0CEC6981250E3AC5C5CE7EBE9FF15A39800DDC5287F862EBDF540A5C1FF52AC0",
       "targetHash": "059335A3E58FBAF6A206191DC7E272D1F67A336053A500676E1ABAA80433AA66",
-      "operationHash": "51BC914BF760DB688CC142567BB6288D70561A99116873ED8FE03D3F04AD5F7F",
+      "operations": [
+        {
+          "container": "rust:1.81.0-slim",
+          "containerVariables": [],
+          "metaCommand": "@cargo build",
+          "command": "cargo",
+          "arguments": "build --profile dev ",
+          "exitCodes": [
+            [
+              0,
+              [
+                "ok",
+                true
+              ]
+            ]
+          ]
+        }
+      ],
+      "cache": 0,
       "isLeaf": true,
-      "isForced": true,
-      "isRequired": true,
-      "isFirst": true,
-      "isLast": true
+      "usage": "ignore"
     }
   },
   "rootNodes": [

@@ -49,3 +49,7 @@ extension @terraform {
       workspace: $workspace
     }
 }
+
+extension @cargo {
+    container = "rust:1.81.0-slim"
+}
