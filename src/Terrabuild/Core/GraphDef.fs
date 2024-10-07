@@ -8,7 +8,7 @@ type ContaineredShellOperation = {
     MetaCommand: string
     Command: string
     Arguments: string
-    ExitCodes: Map<int, Terrabuild.Extensibility.StatusCodes>
+    ExitCodes: Map<int, Terrabuild.Extensibility.StatusCode>
 }
 
 [<RequireQualifiedAccess>]

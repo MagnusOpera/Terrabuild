@@ -99,7 +99,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
             | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
 
     let stepLogs = List<Cache.OperationSummary>()
-    let mutable lastStatusCode = Terrabuild.Extensibility.StatusCodes.Ok false
+    let mutable lastStatusCode = Terrabuild.Extensibility.StatusCode.Ok false
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
@@ -131,7 +131,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
         let statusCode =
             match exitCodes |> Map.tryFind exitCode with
             | Some statusCode -> statusCode
-            | _ -> Terrabuild.Extensibility.StatusCodes.Error exitCode
+            | _ -> Terrabuild.Extensibility.StatusCode.Error exitCode
         lastStatusCode <- statusCode
         Log.Debug("{Hash}: Execution completed with '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
 
@@ -191,7 +191,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             else Log.Debug("{Hash}: Marking as failed", node.TargetHash)
 
             match lastExitCode with
-            | Terrabuild.Extensibility.StatusCodes.Ok false ->
+            | Terrabuild.Extensibility.StatusCode.Ok false ->
                 let afterFiles = IO.createSnapshot node.Outputs projectDirectory
 
                 // keep only new or modified files
@@ -215,9 +215,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 let files = cacheEntry.Complete summary
                 api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
                 endedAt
-            | Terrabuild.Extensibility.StatusCodes.Ok true ->
+            | Terrabuild.Extensibility.StatusCode.Ok true ->
                 currentCompletionDate
-            | Terrabuild.Extensibility.StatusCodes.Error _ ->
+            | Terrabuild.Extensibility.StatusCode.Error _ ->
                 TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastExitCode}")
 
         let restoreNode () =
