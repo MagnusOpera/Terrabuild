@@ -133,7 +133,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
             | Some statusCode -> statusCode
             | _ -> Terrabuild.Extensibility.StatusCode.Error exitCode
         lastStatusCode <- statusCode
-        Log.Debug("{Hash}: Execution completed with '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
+        Log.Debug("{Hash}: Execution completed with exit code '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
 
     lastStatusCode, stepLogs
 
