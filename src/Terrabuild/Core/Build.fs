@@ -233,6 +233,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                     IO.copyFiles projectDirectory outputs files |> ignore
                     api |> Option.iter (fun api -> api.UseArtifact buildId node.ProjectHash node.TargetHash)
                 | _ -> ()
+                summary.EndedAt
             | _ ->
                 TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
@@ -261,15 +262,13 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         let completionDate = buildNode summary.EndedAt
                         if completionDate < maxCompletionChildren then
                             // NOTE: restore to respect idempotency
-                            restoreNode()
-                            completionDate, { node with Usage = GraphDef.NodeUsage.Restore }
+                            restoreNode(), { node with Usage = GraphDef.NodeUsage.Restore }
                         else
                             completionDate, { node with Usage = GraphDef.NodeUsage.Build }
                     // task is cached
                     else
                         Log.Debug("{nodeId} is marked as used", node.Id)
-                        restoreNode()
-                        summary.EndedAt, { node with Usage = GraphDef.NodeUsage.Restore }
+                        restoreNode(), { node with Usage = GraphDef.NodeUsage.Restore }
                 | _ ->
                     Log.Debug("{nodeId} must be build since no summary and required", node.Id)
                     buildNode DateTime.MaxValue, { node with Usage = GraphDef.NodeUsage.Build }
