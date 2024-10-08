@@ -120,8 +120,13 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
             | Some originSummary -> statusEmoji originSummary
             | _ -> "🫥"
 
+        let getOrigin id =
+            match mapNodes |> Map.tryFind id with
+            | Some (Some (origin, _)) -> Some origin
+            | _ -> None
+
         // TODO: pass build action getter
-        let mermaid = Mermaid.render (Some getNodeStatus) None graph
+        let mermaid = Mermaid.render (Some getNodeStatus) (Some getOrigin) graph
         $"# Build Graph" |> append
         "```mermaid" |> append
         mermaid |> appendLines

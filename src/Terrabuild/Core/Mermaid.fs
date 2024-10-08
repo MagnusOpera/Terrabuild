@@ -5,9 +5,9 @@ open GraphDef
 
 type GetNodeStatus = string -> string
 
-type GetBuildAction = string -> Build.BuildAction
+type GetNodeOrigin = string -> Cache.Origin option
 
-let render (getNodeStatus: GetNodeStatus option) (getBuildAction: GetBuildAction option) (graph: Graph) =
+let render (getNodeStatus: GetNodeStatus option) (getOrigin: GetNodeOrigin option) (graph: Graph) =
     let mermaid = [
         "flowchart TD"
         $"classDef build stroke:red,stroke-width:3px"
@@ -28,14 +28,13 @@ let render (getNodeStatus: GetNodeStatus option) (getBuildAction: GetBuildAction
                 let dstNode = graph.Nodes |> Map.find dependency
                 $"{node.Id} --> {dstNode.Id}"
 
-            let buildAction =
-                getBuildAction
-                |> Option.map (fun getBuildAction -> getBuildAction node.Id)
-                |> Option.defaultValue Build.BuildAction.Unknown
+            let origin =
+                getOrigin
+                |> Option.bind (fun getOrigin -> getOrigin node.Id)
 
-            match buildAction with
-            | Build.BuildAction.Build -> $"class {node.Id} build"
-            | Build.BuildAction.Ignore -> $"class {node.Id} restore"
+            match origin with
+            | Some Cache.Origin.Local -> $"class {node.Id} build"
+            | Some Cache.Origin.Remote -> $"class {node.Id} restore"
             | _ -> $"class {node.Id} ignore"
     ]
 

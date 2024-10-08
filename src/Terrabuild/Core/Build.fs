@@ -8,7 +8,6 @@ open Errors
 
 [<RequireQualifiedAccess>]
 type BuildAction =
-    | Unknown
     | Ignore
     | Restore
     | Build
