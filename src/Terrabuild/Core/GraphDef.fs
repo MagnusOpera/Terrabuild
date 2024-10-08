@@ -12,13 +12,6 @@ type ContaineredShellOperation = {
 }
 
 [<RequireQualifiedAccess>]
-type NodeUsage =
-    | Ignore
-    | Restore
-    | Build
-
-
-[<RequireQualifiedAccess>]
 type Node = {
     Id: string
     Label: string
@@ -37,8 +30,6 @@ type Node = {
 
     // tell if a node is leaf (that is no dependencies in same project)
     IsLeaf: bool
-
-    Usage: NodeUsage
 }
 
 
@@ -49,37 +40,4 @@ type Graph = {
 }
 
 
-
-type GetNodeStatus = string -> string
-
 let buildCacheKey (node: Node) = $"{node.ProjectHash}/{node.Target}/{node.TargetHash}"
-
-let render (getNodeStatus: GetNodeStatus option) (graph: Graph) =
-    let mermaid = [
-        "flowchart TD"
-        $"classDef built stroke:red,stroke-width:3px"
-        $"classDef used stroke:orange,stroke-width:3px"
-        $"classDef ignored stroke:black,stroke-width:3px"
-
-        for (KeyValue(_, node)) in graph.Nodes do
-            let status =
-                match getNodeStatus with
-                | Some getNodeStatus -> $"\n{getNodeStatus node.Id} "
-                | _ -> ""
-
-            let label = node.Label
-            $"{node.Id}(\"{label}{status}\")"
-
-        for (KeyValue(_, node)) in graph.Nodes do
-            for dependency in node.Dependencies do
-                let dstNode = graph.Nodes |> Map.find dependency
-                $"{node.Id} --> {dstNode.Id}"
-
-            match node.Usage with
-            | NodeUsage.Build -> $"class {node.Id} built"
-            | NodeUsage.Restore -> $"class {node.Id} used"
-            | _ -> $"class {node.Id} ignored"
-    ]
-
-    mermaid
-

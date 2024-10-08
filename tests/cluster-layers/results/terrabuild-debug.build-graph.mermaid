@@ -1,7 +1,7 @@
 flowchart TD
-classDef built stroke:red,stroke-width:3px
-classDef used stroke:orange,stroke-width:3px
-classDef ignored stroke:black,stroke-width:3px
+classDef build stroke:red,stroke-width:3px
+classDef restore stroke:orange,stroke-width:3px
+classDef ignore stroke:black,stroke-width:3px
 A:build("build A")
 B:build("build B")
 C:build("build C")
@@ -9,17 +9,17 @@ D:build("build D")
 E:build("build E")
 F:build("build F")
 G:build("build G")
-class A:build ignored
-class B:build ignored
+class A:build ignore
+class B:build ignore
 C:build --> A:build
 C:build --> B:build
-class C:build ignored
+class C:build ignore
 D:build --> C:build
-class D:build ignored
+class D:build ignore
 E:build --> C:build
-class E:build ignored
+class E:build ignore
 F:build --> D:build
 F:build --> E:build
-class F:build ignored
+class F:build ignore
 G:build --> C:build
-class G:build ignored
+class G:build ignore

@@ -131,9 +131,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.ProjectHash = projectConfig.Hash
                              Node.TargetHash = hash
 
-                             Node.IsLeaf = isLeaf
-                             
-                             Node.Usage = NodeUsage.Ignore}
+                             Node.IsLeaf = isLeaf }
 
                 if allNodes.TryAdd(nodeId, node) |> not then
                     TerrabuildException.Raise("Unexpected graph building race")

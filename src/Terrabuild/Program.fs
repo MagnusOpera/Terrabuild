@@ -81,7 +81,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             |> Json.Serialize
             |> IO.writeTextFile (logFile $"{name}-graph.json")
             graph
-            |> GraphDef.render None
+            |> Mermaid.render None None
             |> String.join "\n"
             |> IO.writeTextFile (logFile $"{name}-graph.mermaid")
 
@@ -151,16 +151,15 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 let jsonBuild = Json.Serialize summary
                 jsonBuild |> IO.writeTextFile (logFile "build-result.json")
 
-            if logs || summary.Status <> Build.Status.Success then
+            if logs || not summary.IsSuccess then
                 Logs.dumpLogs runId configOptions cache sourceControl buildGraph  
 
             let result =
-                match summary.Status with
-                | Build.Status.Success -> Ansi.Emojis.happy
-                | _ -> Ansi.Emojis.sad
+                if summary.IsSuccess then Ansi.Emojis.happy
+                else Ansi.Emojis.sad
 
             $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
-            if summary.Status = Build.Status.Success then 0
+            if summary.IsSuccess then 0
             else 5
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =

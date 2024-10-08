@@ -58,8 +58,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     },
     "B:build": {
       "id": "B:build",
@@ -118,8 +117,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     },
     "C:build": {
       "id": "C:build",
@@ -176,8 +174,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     }
   },
   "rootNodes": [

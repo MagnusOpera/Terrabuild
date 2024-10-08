@@ -114,8 +114,7 @@
         }
       ],
       "cache": 4,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     },
     "libraries/dotnet-lib:build": {
       "id": "libraries/dotnet-lib:build",
@@ -186,8 +185,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     },
     "libraries/shell-lib:build": {
       "id": "libraries/shell-lib:build",
@@ -244,8 +242,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     },
     "projects/dotnet-app:build": {
       "id": "projects/dotnet-app:build",
@@ -318,8 +315,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     },
     "projects/make-app:build": {
       "id": "projects/make-app:build",
@@ -420,8 +416,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     },
     "projects/npm-app:build": {
       "id": "projects/npm-app:build",
@@ -493,8 +488,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     },
     "projects/rust-app:build": {
       "id": "projects/rust-app:build",
@@ -552,8 +546,7 @@
         }
       ],
       "cache": 0,
-      "isLeaf": true,
-      "usage": "ignore"
+      "isLeaf": true
     }
   },
   "rootNodes": [

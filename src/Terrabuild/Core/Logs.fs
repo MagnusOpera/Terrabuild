@@ -120,7 +120,8 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
             | Some originSummary -> statusEmoji originSummary
             | _ -> "🫥"
 
-        let mermaid = GraphDef.render (Some getNodeStatus) graph
+        // TODO: pass build action getter
+        let mermaid = Mermaid.render (Some getNodeStatus) None graph
         $"# Build Graph" |> append
         "```mermaid" |> append
         mermaid |> appendLines
