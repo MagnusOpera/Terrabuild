@@ -132,6 +132,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         "" |> append
 
         "</details>" |> append
+        "" |> append
 
 
 
