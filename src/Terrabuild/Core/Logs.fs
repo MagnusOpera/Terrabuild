@@ -10,13 +10,13 @@ module Iconography =
     let task_pending = Ansi.Emojis.snowflake
 
 
-let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) (summary: Build.Summary) =
+let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) (summary: Build.Summary option) =
     let stableRandomId (id: string) =
         $"{logId} {id}" |> Hash.md5 |> String.toLower
 
-    let successful = summary.IsSuccess
 
-    let dumpMarkdown filename (nodes: GraphDef.Node seq) =
+    let dumpMarkdown (summary: Build.Summary) filename (nodes: GraphDef.Node seq) =
+        let successful = summary.IsSuccess
         let appendLines lines = IO.appendLinesFile filename lines 
         let append line = appendLines [line]
 
@@ -172,35 +172,24 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
 
         nodes |> Seq.iter (fun node -> dumpTerminal node)
 
-
-
-    let reportFailedNodes (nodes: GraphDef.Node seq) =
-        nodes
-        |> Seq.iter (fun node ->
-            match summary.Nodes |> Map.tryFind node.Id with
-            | Some nodeInfo ->
-                match nodeInfo.Status with
-                | Build.TaskStatus.Failure (completionDate, msg) ->
-                    sourceControl.LogError $"{node.Id} failed on {completionDate}:\n{msg}"
-                | _ -> ()
-            | _ -> sourceControl.LogError $"{node.Id} was not built")
-
     let logger =
-        match sourceControl.LogType with
-        | Contracts.Terminal -> dumpTerminal
-        | Contracts.Markdown filename -> dumpMarkdown filename
+        match sourceControl.LogType, summary with
+        | Contracts.Markdown filename, Some summary -> dumpMarkdown summary filename
+        | _ -> dumpTerminal
 
     let sortedNodes =
-        graph.Nodes
-        |> Seq.map (fun (KeyValue(_, node)) -> node)
-        |> Seq.sortBy (fun node ->
-            match summary.Nodes |> Map.tryFind node.Id with
-            | Some nodeInfo ->
-                match nodeInfo.Status with
-                | Build.TaskStatus.Success completionDate -> completionDate
-                | Build.TaskStatus.Failure (completionDate, _) -> completionDate
-            | _ -> DateTime.MaxValue)
-        |> List.ofSeq
+        match summary with
+        | Some summary ->
+            graph.Nodes
+            |> Seq.map (fun (KeyValue(_, node)) -> node)
+            |> Seq.sortBy (fun node ->
+                match summary.Nodes |> Map.tryFind node.Id with
+                | Some nodeInfo ->
+                    match nodeInfo.Status with
+                    | Build.TaskStatus.Success completionDate -> completionDate
+                    | Build.TaskStatus.Failure (completionDate, _) -> completionDate
+                | _ -> DateTime.MaxValue)
+            |> List.ofSeq
+        | _ -> graph.Nodes.Values |> List.ofSeq
 
     sortedNodes |> logger
-    sortedNodes |> reportFailedNodes
