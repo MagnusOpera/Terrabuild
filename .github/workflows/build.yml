@@ -42,9 +42,11 @@ jobs:
           make self env=dev
 
       - name: Self Integration Tests
-        run: |
-          make self-test-all
+        run: make self-test-all
 
+      - name: Include Build Logs
+        if: always()
+        run: |
           echo "# Self Tests" >> $GITHUB_STEP_SUMMARY
           echo "## simple" >> $GITHUB_STEP_SUMMARY
           cat tests/simple/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
