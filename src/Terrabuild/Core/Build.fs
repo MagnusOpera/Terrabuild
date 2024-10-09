@@ -56,7 +56,7 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir tmpDir =
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir tmpDir uid gid =
     // run actions if any
     let allCommands =
         node.Operations
@@ -93,7 +93,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                     operation.ContainerVariables
                     |> Seq.map (fun var -> $"-e {var}")
                     |> String.join " "
-                let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                let args = $"run --rm --net=host -u {uid}:{gid} --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
                 metaCommand, options.Workspace, cmd, args, operation.Container, operation.ExitCodes
             | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
 
@@ -152,6 +152,14 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let homeDir = cache.CreateHomeDir "containers"
     let tmpDir = cache.CreateHomeDir "tmp"
+    let uid =
+        match Exec.execCaptureOutput Environment.CurrentDirectory "id" "-u" with
+        | Exec.CaptureResult.Success (content, 0) -> content.ReplaceLineEndings("")
+        | _ -> TerrabuildException.Raise("Failure to identify user uid.")
+    let gid =
+        match Exec.execCaptureOutput Environment.CurrentDirectory "id" "-g" with
+        | Exec.CaptureResult.Success (content, 0) -> content.ReplaceLineEndings("")
+        | _ -> TerrabuildException.Raise("Failure to identify user gid.")
 
     let tryGetSummaryOnly id =
         let allowRemoteCache = options.LocalOnly |> not
@@ -181,7 +189,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 else IO.createSnapshot node.Outputs projectDirectory
 
             let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
-            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
+            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir uid gid
 
             let successful = lastStatusCode.IsOkish
 
