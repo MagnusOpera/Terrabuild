@@ -508,7 +508,7 @@
         "operations": [
           {
             "hash": "A8ECD5C3F84E52E8C5C9B4BC04D9FDDC0FA81CE3FE190F10117DE2759DDAAC1D",
-            "container": null,
+            "container": "rust:1.81.0-slim",
             "containerVariables": [],
             "extension": "@cargo",
             "command": "build",
@@ -529,7 +529,7 @@
       "targetHash": "059335A3E58FBAF6A206191DC7E272D1F67A336053A500676E1ABAA80433AA66",
       "operations": [
         {
-          "container": null,
+          "container": "rust:1.81.0-slim",
           "containerVariables": [],
           "metaCommand": "@cargo build",
           "command": "cargo",

@@ -45,11 +45,11 @@ extension @dotnet {
 }
 
 extension @terraform {
-    defaults = {
-      workspace: $workspace
-    }
+  defaults = {
+    workspace: $workspace
+  }
 }
 
 extension @cargo {
-    // container = "rust:1.81.0-slim"
+  container = "rust:1.81.0-slim"
 }
