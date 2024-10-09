@@ -4,6 +4,9 @@ open Microsoft.Extensions.FileSystemGlobbing
 open Collections
 open System
 
+let chmod permissions (path: string) =
+    File.SetUnixFileMode(path, permissions)
+
 let createDirectory (path: string) =
     Directory.CreateDirectory(path) |> ignore
 
@@ -63,7 +66,7 @@ let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
         let target = FS.combinePath targetDir relative
         let targetDir = FS.parentDirectory target
         Directory.CreateDirectory targetDir |> ignore
-        if File.Exists(entry) then File.Copy(entry, target, true)
+        File.Copy(entry, target, true)
     if entries |> List.isEmpty then None
     else Some targetDir
 
