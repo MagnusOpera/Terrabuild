@@ -184,41 +184,35 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let cacheEntry = cache.GetEntry (isBuild && sourceControl.CI.IsSome) cacheEntryId
             let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
+            // keep only new or modified files
+            let afterFiles = IO.createSnapshot node.Outputs projectDirectory
+            let newFiles = afterFiles - beforeFiles
+            let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
+
+            let successful = lastStatusCode.IsOkish
             let endedAt = DateTime.UtcNow
+            let summary = { Cache.TargetSummary.Project = node.Project
+                            Cache.TargetSummary.Target = node.Target
+                            Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
+                            Cache.TargetSummary.Outputs = outputs
+                            Cache.TargetSummary.IsSuccessful = successful
+                            Cache.TargetSummary.StartedAt = startedAt
+                            Cache.TargetSummary.EndedAt = endedAt
+                            Cache.TargetSummary.Duration = endedAt - startedAt }
 
-            let complete() =
-                let successful = lastStatusCode.IsOkish
+            notification.NodeUploading node
 
-                let afterFiles = IO.createSnapshot node.Outputs projectDirectory
-
-                // keep only new or modified files
-                let newFiles = afterFiles - beforeFiles
-                let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
-
-                let summary = { Cache.TargetSummary.Project = node.Project
-                                Cache.TargetSummary.Target = node.Target
-                                Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
-                                Cache.TargetSummary.Outputs = outputs
-                                Cache.TargetSummary.IsSuccessful = successful
-                                Cache.TargetSummary.StartedAt = startedAt
-                                Cache.TargetSummary.EndedAt = endedAt
-                                Cache.TargetSummary.Duration = endedAt - startedAt }
-
-                notification.NodeUploading node
-
-                // create an archive with new files
-                Log.Debug("{NodeId}: Building '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
-                let files = cacheEntry.Complete summary
-                api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
+            // create an archive with new files
+            Log.Debug("{NodeId}: Building '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+            let files = cacheEntry.Complete summary
+            api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
             match lastStatusCode with
             | Terrabuild.Extensibility.StatusCode.Ok true ->
-                complete()
                 TaskStatus.Success endedAt
             | Terrabuild.Extensibility.StatusCode.Ok false ->
                 TaskStatus.Success currentCompletionDate
             | Terrabuild.Extensibility.StatusCode.Error _ ->
-                complete()
                 TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
 
         let restoreNode () =
