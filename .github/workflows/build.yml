@@ -50,7 +50,7 @@ jobs:
         with:
           name: Terrabuild Debug
           path: |
-            terrabuild-debug.*
+            **/terrabuild-debug.*
 
       - name: Create Test Report
         uses: magnusopera/test-reporter@main
