@@ -56,7 +56,7 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir tmpDir uid gid =
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir tmpDir user =
     // run actions if any
     let allCommands =
         node.Operations
@@ -93,7 +93,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                     operation.ContainerVariables
                     |> Seq.map (fun var -> $"-e {var}")
                     |> String.join " "
-                let args = $"run --rm --net=host --user {uid}:{gid} --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                let args = $"run --rm --net=host {user} --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
                 metaCommand, options.Workspace, cmd, args, operation.Container, operation.ExitCodes
             | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
 
@@ -152,14 +152,19 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let homeDir = cache.CreateHomeDir "containers"
     let tmpDir = cache.CreateHomeDir "tmp"
-    let uid =
-        match Exec.execCaptureOutput Environment.CurrentDirectory "id" "-u" with
-        | Exec.CaptureResult.Success (content, 0) -> content.ReplaceLineEndings("")
-        | _ -> TerrabuildException.Raise("Failure to identify user uid.")
-    let gid =
-        match Exec.execCaptureOutput Environment.CurrentDirectory "id" "-g" with
-        | Exec.CaptureResult.Success (content, 0) -> content.ReplaceLineEndings("")
-        | _ -> TerrabuildException.Raise("Failure to identify user gid.")
+    let user =
+        if Environment.IsLinux then
+            let uid =
+                match Exec.execCaptureOutput Environment.CurrentDirectory "id" "-u" with
+                | Exec.CaptureResult.Success (content, 0) -> content.ReplaceLineEndings("")
+                | _ -> TerrabuildException.Raise("Failure to identify user uid.")
+            let gid =
+                match Exec.execCaptureOutput Environment.CurrentDirectory "id" "-g" with
+                | Exec.CaptureResult.Success (content, 0) -> content.ReplaceLineEndings("")
+                | _ -> TerrabuildException.Raise("Failure to identify user gid.")
+            $"--user {uid}:{gid}"
+        else
+            ""
 
     let tryGetSummaryOnly id =
         let allowRemoteCache = options.LocalOnly |> not
@@ -181,6 +186,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
         let buildNode currentCompletionDate =
             let startedAt = DateTime.UtcNow
+            let isBuild = currentCompletionDate = DateTime.MaxValue
 
             notification.NodeBuilding node
 
@@ -188,20 +194,20 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 if node.IsLeaf then IO.Snapshot.Empty
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            let cacheEntry = cache.GetEntry sourceControl.CI.IsSome cacheEntryId
-            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir uid gid
+            let cacheEntry = cache.GetEntry (isBuild && sourceControl.CI.IsSome) cacheEntryId
+            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir user
 
-            let successful = lastStatusCode.IsOkish
+            let endedAt = DateTime.UtcNow
 
-            match lastStatusCode with
-            | Terrabuild.Extensibility.StatusCode.Ok true ->
+            let complete() =
+                let successful = lastStatusCode.IsOkish
+
                 let afterFiles = IO.createSnapshot node.Outputs projectDirectory
 
                 // keep only new or modified files
                 let newFiles = afterFiles - beforeFiles
                 let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
-                let endedAt = DateTime.UtcNow
                 let summary = { Cache.TargetSummary.Project = node.Project
                                 Cache.TargetSummary.Target = node.Target
                                 Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
@@ -214,14 +220,19 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 notification.NodeUploading node
 
                 // create an archive with new files
-                Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
+                Log.Debug("{NodeId}: Building '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
                 let files = cacheEntry.Complete summary
                 api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
+
+            match lastStatusCode with
+            | Terrabuild.Extensibility.StatusCode.Ok true ->
+                complete()
                 TaskStatus.Success endedAt
             | Terrabuild.Extensibility.StatusCode.Ok false ->
                 TaskStatus.Success currentCompletionDate
             | Terrabuild.Extensibility.StatusCode.Error _ ->
-                TaskStatus.Failure (DateTime.UtcNow, $"Node {node.Id} failed with exit code {lastStatusCode}")
+                complete()
+                TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
 
         let restoreNode () =
             notification.NodeDownloading node
@@ -229,7 +240,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             let cacheEntryId = GraphDef.buildCacheKey node
             match cache.TryGetSummary allowRemoteCache cacheEntryId with
             | Some summary ->
-                Log.Debug("{Hash}: Restoring '{Project}/{Target}' from cache", node.TargetHash, node.Project, node.Target)
+                Log.Debug("{NodeId}: Restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
                 match summary.Outputs with
                 | Some outputs ->
                     let files = IO.enumerateFiles outputs
@@ -324,7 +335,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         notification.NodeCompleted node buildRequest false
                 with
                     exn ->
-                        Log.Fatal(exn, $"Attempt to build node {nodeId} failed")
+                        Log.Fatal(exn, $"{nodeId} unexpectedly failed to build")
 
                         nodeResults.TryAdd(node.Id, (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))) |> ignore
                         notification.NodeCompleted node TaskRequest.Build false

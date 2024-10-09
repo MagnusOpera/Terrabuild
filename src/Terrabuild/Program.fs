@@ -148,7 +148,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 jsonBuild |> IO.writeTextFile (logFile "build-result.json")
 
             if logs || not summary.IsSuccess then
-                Logs.dumpLogs runId configOptions cache sourceControl buildGraph (Some summary)
+                Logs.dumpLogs runId configOptions cache sourceControl buildGraph summary
 
             let result =
                 if summary.IsSuccess then Ansi.Emojis.happy
@@ -158,7 +158,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             if summary.IsSuccess then 0
             else 5
         else
-            if logs then Logs.dumpLogs runId configOptions cache sourceControl buildGraph None
             0
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =

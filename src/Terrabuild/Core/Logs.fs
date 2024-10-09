@@ -10,12 +10,19 @@ module Iconography =
     let task_pending = Ansi.Emojis.snowflake
 
 
-let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) (summary: Build.Summary option) =
+let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) (summary: Build.Summary) =
     let stableRandomId (id: string) =
         $"{logId} {id}" |> Hash.md5 |> String.toLower
 
 
-    let dumpMarkdown (summary: Build.Summary) filename (nodes: GraphDef.Node seq) =
+    let dumpMarkdown filename (nodes: GraphDef.Node seq) =
+        let originSummaries =
+            nodes
+            |> Seq.map (fun node ->
+                let cacheEntryId = GraphDef.buildCacheKey node
+                node.Id, cache.TryGetSummaryOnly false cacheEntryId)
+            |> Map.ofSeq
+
         let successful = summary.IsSuccess
         let appendLines lines = IO.appendLinesFile filename lines 
         let append line = appendLines [line]
@@ -37,8 +44,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                 $"## <a name=\"user-content-{uniqueId}\"></a> {statusEmoji} {node.Label}"
 
             let dumpLogs =
-                let cacheEntryId = GraphDef.buildCacheKey node
-                let originSummary = cache.TryGetSummaryOnly false cacheEntryId
+                let originSummary = originSummaries[node.Id]
                 match originSummary with
                 | Some (_, summary) -> 
                     let dumpLogs () =
@@ -76,13 +82,6 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         $"# <a name=\"user-content-{summaryAnchor}\"></a> Summary" |> append
         "| Target | Duration |" |> append
         "|--------|----------|" |> append
-
-        let originSummaries =
-            nodes
-            |> Seq.map (fun node ->
-                let cacheEntryId = GraphDef.buildCacheKey node
-                node.Id, cache.TryGetSummaryOnly false cacheEntryId)
-            |> Map.ofSeq
 
         nodes |> Seq.iter (fun node ->
             let originSummary = originSummaries[node.Id]
@@ -128,7 +127,9 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
 
         "" |> append
         "# Details" |> append
-        nodes |> Seq.iter dumpMarkdown
+        nodes
+        |> Seq.filter (fun node -> summary.Nodes |> Map.containsKey node.Id)
+        |> Seq.iter dumpMarkdown
         "" |> append
 
         "</details>" |> append
@@ -171,26 +172,25 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
             dumpLogs ()
             logEnd |> Terminal.writeLine
 
-        nodes |> Seq.iter (fun node -> dumpTerminal node)
+        nodes
+        |> Seq.filter (fun node -> summary.Nodes |> Map.containsKey node.Id)
+        |> Seq.iter dumpTerminal
 
     let logger =
-        match sourceControl.LogType, summary with
-        | Contracts.Markdown filename, Some summary -> dumpMarkdown summary filename
+        match sourceControl.LogType with
+        | Contracts.Markdown filename -> dumpMarkdown filename
         | _ -> dumpTerminal
 
     let sortedNodes =
-        match summary with
-        | Some summary ->
-            graph.Nodes
-            |> Seq.map (fun (KeyValue(_, node)) -> node)
-            |> Seq.sortBy (fun node ->
-                match summary.Nodes |> Map.tryFind node.Id with
-                | Some nodeInfo ->
-                    match nodeInfo.Status with
-                    | Build.TaskStatus.Success completionDate -> completionDate
-                    | Build.TaskStatus.Failure (completionDate, _) -> completionDate
-                | _ -> DateTime.MaxValue)
-            |> List.ofSeq
-        | _ -> graph.Nodes.Values |> List.ofSeq
+        graph.Nodes
+        |> Seq.map (fun (KeyValue(_, node)) -> node)
+        |> Seq.sortBy (fun node ->
+            match summary.Nodes |> Map.tryFind node.Id with
+            | Some nodeInfo ->
+                match nodeInfo.Status with
+                | Build.TaskStatus.Success completionDate -> completionDate
+                | Build.TaskStatus.Failure (completionDate, _) -> completionDate
+            | _ -> DateTime.MaxValue)
+        |> List.ofSeq
 
     sortedNodes |> logger
