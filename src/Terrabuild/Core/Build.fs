@@ -328,8 +328,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let status = hub.WaitCompletion()
     match status with
     | Status.Ok -> Log.Debug("Build successful")
-    | Status.SubcriptionNotRaised projectId -> Log.Debug("Build failed: project {projectId} is unknown", projectId)
-    | Status.SubscriptionError exn -> Log.Debug(exn, "Build failed with exception")
+    | Status.SubcriptionNotRaised projectId -> Log.Debug("Build failed: project {projectId} is not processed", projectId)
+    | Status.SubscriptionError exn -> Log.Fatal(exn, "Build failed with exception")
 
     let headCommit = sourceControl.HeadCommit
     let branchOrTag = sourceControl.BranchOrTag
