@@ -160,8 +160,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let force = options.Force
     let retry = options.Retry
 
-    let nodeRequests = Concurrent.ConcurrentDictionary<string, TaskRequest>()
-    let nodeResults = Concurrent.ConcurrentDictionary<string, TaskStatus>()
+    let nodeResults = Concurrent.ConcurrentDictionary<string, TaskRequest * TaskStatus>()
 
     let processNode (maxCompletionChildren: DateTime) (node: GraphDef.Node) =
         let cacheEntryId = GraphDef.buildCacheKey node
@@ -306,8 +305,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
                     let buildRequest, completionStatus = processNode maxCompletionChildren node
                     Log.Debug("{nodeId} has completed for request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
-                    nodeRequests.TryAdd(node.Id, buildRequest) |> ignore
-                    nodeResults.TryAdd(node.Id, completionStatus) |> ignore
+                    nodeResults.TryAdd(node.Id, (buildRequest, completionStatus)) |> ignore
 
                     match completionStatus with
                     | TaskStatus.Success completionDate ->
@@ -319,7 +317,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                     exn ->
                         Log.Fatal(exn, $"Attempt to build node {nodeId} failed")
 
-                        nodeResults.TryAdd(node.Id, TaskStatus.Failure (DateTime.UtcNow, exn.Message)) |> ignore
+                        nodeResults.TryAdd(node.Id, (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))) |> ignore
                         notification.NodeCompleted node TaskRequest.Build false
 
                         reraise())
@@ -341,10 +339,10 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let nodeStatus =
         let getDependencyStatus _ (node: GraphDef.Node) =
-            match nodeRequests.TryGetValue node.Id with
-            | true, request ->
+            match nodeResults.TryGetValue node.Id with
+            | true, (request, status) ->
                 { NodeInfo.Request = request
-                  NodeInfo.Status = nodeResults[node.Id]
+                  NodeInfo.Status = status
                   NodeInfo.Project = node.Project
                   NodeInfo.Target = node.Target
                   NodeInfo.ProjectHash = node.ProjectHash 
