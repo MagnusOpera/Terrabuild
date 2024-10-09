@@ -3,11 +3,11 @@ open GraphDef
 
 
 
-type GetNodeStatus = Node -> string
+type GetStatus = Node -> string
 
-type GetNodeOrigin = Node -> Cache.Origin option
+type GetOrigin = Node -> Build.TaskRequest option
 
-let render (getNodeStatus: GetNodeStatus option) (getOrigin: GetNodeOrigin option) (graph: Graph) =
+let render (getStatus: GetStatus option) (getOrigin: GetOrigin option) (graph: Graph) =
     let mermaid = [
         "flowchart TD"
         $"classDef build stroke:red,stroke-width:3px"
@@ -16,7 +16,7 @@ let render (getNodeStatus: GetNodeStatus option) (getOrigin: GetNodeOrigin optio
 
         for (KeyValue(_, node)) in graph.Nodes do
             let status =
-                getNodeStatus
+                getStatus
                 |> Option.map (fun getNodeStatus -> getNodeStatus node)
                 |> Option.defaultValue ""
 
@@ -32,8 +32,8 @@ let render (getNodeStatus: GetNodeStatus option) (getOrigin: GetNodeOrigin optio
                 |> Option.bind (fun getOrigin -> getOrigin node)
 
             match origin with
-            | Some Cache.Origin.Local -> $"class {node.Id} build"
-            | Some Cache.Origin.Remote -> $"class {node.Id} restore"
+            | Some Build.TaskRequest.Build -> $"class {node.Id} build"
+            | Some Build.TaskRequest.Restore -> $"class {node.Id} restore"
             | _ -> $"class {node.Id} ignore"
     ]
 

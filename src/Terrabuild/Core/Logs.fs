@@ -114,9 +114,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
             | _ -> Iconography.task_pending
 
         let getOrigin (node: GraphDef.Node) =
-            match originSummaries |> Map.tryFind node.Id with
-            | Some (Some (origin, _)) -> Some origin
-            | _ -> None
+            summary.Nodes |> Map.tryFind node.Id |> Option.map (fun nodeInfo -> nodeInfo.Request)
 
         // TODO: pass build action getter
         let mermaid = Mermaid.render (Some getNodeStatus) (Some getOrigin) graph
