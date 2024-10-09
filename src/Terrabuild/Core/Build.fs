@@ -198,7 +198,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                             Cache.TargetSummary.IsSuccessful = successful
                             Cache.TargetSummary.StartedAt = startedAt
                             Cache.TargetSummary.EndedAt = endedAt
-                            Cache.TargetSummary.Duration = endedAt - startedAt }
+                            Cache.TargetSummary.Duration = endedAt - startedAt
+                            Cache.TargetSummary.Cache = node.Cache }
 
             notification.NodeUploading node
 
