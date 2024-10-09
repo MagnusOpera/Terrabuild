@@ -47,6 +47,8 @@ jobs:
       - name: Include Build Logs
         if: always()
         run: |
+          ls -alR > terrabuild-debug.files.txt
+
           echo "# Self Tests" >> $GITHUB_STEP_SUMMARY
           echo "## simple" >> $GITHUB_STEP_SUMMARY
           cat tests/simple/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
