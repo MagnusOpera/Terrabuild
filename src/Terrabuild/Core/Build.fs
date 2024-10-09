@@ -264,10 +264,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         let completionStatus = buildNode summary.EndedAt
                         match completionStatus with
                         | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
-                        | TaskStatus.Success completionDate when summary.EndedAt = completionDate -> 
-                            // NOTE: restore to respect idempotency
-                            Log.Debug("{nodeId} state has not changed, restoring", node.Id)
-                            TaskRequest.Restore, restoreNode()
+                        | TaskStatus.Success completionDate when summary.EndedAt = completionDate ->
+                            Log.Debug("{nodeId} state has not changed", node.Id)
+                            TaskRequest.Restore, completionStatus
                         | _ ->
                             Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
                             TaskRequest.Build, completionStatus
@@ -322,7 +321,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         notification.NodeCompleted node buildRequest false
                 with
                     exn ->
-                        Log.Fatal(exn, $"{nodeId} unexpectedly failed to build")
+                        Log.Fatal(exn, $"{nodeId} unexpected failure while building")
 
                         nodeResults.TryAdd(node.Id, (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))) |> ignore
                         notification.NodeCompleted node TaskRequest.Build false
