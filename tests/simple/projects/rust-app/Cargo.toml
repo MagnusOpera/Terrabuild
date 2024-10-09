@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 
-[profile]
+[profile.dev]
 incremental = false
