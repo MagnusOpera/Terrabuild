@@ -47,6 +47,7 @@ module Emojis =
     let red_cross = "❌"
     let snowflake = "❄️"
     let question_mark = "❓"
+    let coffee = "☕️"
 
 module Styles =
     let reset = csi 0
