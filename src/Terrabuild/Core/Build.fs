@@ -256,6 +256,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                     // task is dynamic
                     elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
                         Log.Debug("{nodeId} is dynamic, checking if state has changed", node.Id)
+                        restoreNode() |> ignore
                         let completionStatus = buildNode summary.EndedAt
                         match completionStatus with
                         | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
