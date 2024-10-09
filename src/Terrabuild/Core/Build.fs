@@ -273,6 +273,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                     Log.Debug("{nodeId} must be build since no summary and required", node.Id)
                     TaskRequest.Build, buildNode DateTime.MaxValue
             else
+                Log.Debug("{nodeId} is not cacheable", node.Id)
                 TaskRequest.Build, buildNode DateTime.MaxValue
 
         buildRequest, completionDate
@@ -304,11 +305,10 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         |> Option.defaultValue DateTime.MinValue
 
                     let buildRequest, completionStatus = processNode maxCompletionChildren node
-
                     Log.Debug("{nodeId} has completed for request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
                     nodeRequests.TryAdd(node.Id, buildRequest) |> ignore
-
                     nodeResults.TryAdd(node.Id, completionStatus) |> ignore
+
                     match completionStatus with
                     | TaskStatus.Success completionDate ->
                         nodeComputed.Value <- completionDate
@@ -341,10 +341,10 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let nodeStatus =
         let getDependencyStatus _ (node: GraphDef.Node) =
-            match nodeResults.TryGetValue node.Id with
-            | true, status ->
-                { NodeInfo.Request = nodeRequests[node.Id]
-                  NodeInfo.Status = status
+            match nodeRequests.TryGetValue node.Id with
+            | true, request ->
+                { NodeInfo.Request = request
+                  NodeInfo.Status = nodeResults[node.Id]
                   NodeInfo.Project = node.Project
                   NodeInfo.Target = node.Target
                   NodeInfo.ProjectHash = node.ProjectHash 
@@ -354,7 +354,9 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         graph.Nodes
         |> Map.choose getDependencyStatus
 
-    let isSuccess = nodeStatus |> Map.forall (fun _ nodeInfo -> match nodeInfo.Status with | TaskStatus.Success _ -> true | _ -> false)
+    let isSuccess =
+        graph.Nodes.Count = nodeStatus.Count
+        && nodeStatus |> Map.forall (fun _ nodeInfo -> match nodeInfo.Status with | TaskStatus.Success _ -> true | _ -> false)
 
     let buildInfo = { Summary.Commit = headCommit
                       Summary.BranchOrTag = branchOrTag
