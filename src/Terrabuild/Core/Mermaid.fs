@@ -3,9 +3,9 @@ open GraphDef
 
 
 
-type GetNodeStatus = string -> string
+type GetNodeStatus = Node -> string
 
-type GetNodeOrigin = string -> Cache.Origin option
+type GetNodeOrigin = Node -> Cache.Origin option
 
 let render (getNodeStatus: GetNodeStatus option) (getOrigin: GetNodeOrigin option) (graph: Graph) =
     let mermaid = [
@@ -17,11 +17,10 @@ let render (getNodeStatus: GetNodeStatus option) (getOrigin: GetNodeOrigin optio
         for (KeyValue(_, node)) in graph.Nodes do
             let status =
                 getNodeStatus
-                |> Option.map (fun getNodeStatus -> $"\n{getNodeStatus node.Id} ")
+                |> Option.map (fun getNodeStatus -> getNodeStatus node)
                 |> Option.defaultValue ""
 
-            let label = node.Label
-            $"{node.Id}(\"{label}{status}\")"
+            $"{node.Id}(\"{node.Project}\n{node.Target} {status}\")"
 
         for (KeyValue(_, node)) in graph.Nodes do
             for dependency in node.Dependencies do
@@ -30,7 +29,7 @@ let render (getNodeStatus: GetNodeStatus option) (getOrigin: GetNodeOrigin optio
 
             let origin =
                 getOrigin
-                |> Option.bind (fun getOrigin -> getOrigin node.Id)
+                |> Option.bind (fun getOrigin -> getOrigin node)
 
             match origin with
             | Some Cache.Origin.Local -> $"class {node.Id} build"

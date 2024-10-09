@@ -7,19 +7,19 @@ open Terrabuild.PubSub
 open Errors
 
 [<RequireQualifiedAccess>]
-type BuildRequest =
+type TaskRequest =
     | Restore
     | Build
 
 [<RequireQualifiedAccess>]
-type BuildStatus =
-    | Success
-    | Failure
-    | Unfulfilled
+type TaskStatus =
+    | Success of completionDate:DateTime
+    | Failure of completionDate:DateTime * message:string
 
 [<RequireQualifiedAccess>]
 type NodeInfo = {
-    Status: BuildStatus
+    Request: TaskRequest
+    Status: TaskStatus
     Project: string
     Target: string
     ProjectHash: string
@@ -51,7 +51,7 @@ type IBuildNotification =
     abstract NodeDownloading: node:GraphDef.Node -> unit
     abstract NodeBuilding: node:GraphDef.Node -> unit
     abstract NodeUploading: node:GraphDef.Node -> unit
-    abstract NodeCompleted: node:GraphDef.Node -> request:BuildRequest -> success:bool -> unit
+    abstract NodeCompleted: node:GraphDef.Node -> request:TaskRequest -> success:bool -> unit
 
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
@@ -160,8 +160,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     let force = options.Force
     let retry = options.Retry
 
-    let nodeRequests = Concurrent.ConcurrentDictionary<string, BuildRequest>()
-    let nodeResults = Concurrent.ConcurrentDictionary<string, BuildStatus>()
+    let nodeRequests = Concurrent.ConcurrentDictionary<string, TaskRequest>()
+    let nodeResults = Concurrent.ConcurrentDictionary<string, TaskStatus>()
 
     let processNode (maxCompletionChildren: DateTime) (node: GraphDef.Node) =
         let cacheEntryId = GraphDef.buildCacheKey node
@@ -210,11 +210,11 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 Log.Debug("{Hash}: Building '{Project}/{Target}'", node.TargetHash, node.Project, node.Target)
                 let files = cacheEntry.Complete summary
                 api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
-                endedAt
+                TaskStatus.Success endedAt
             | Terrabuild.Extensibility.StatusCode.Ok false ->
-                currentCompletionDate
+                TaskStatus.Success currentCompletionDate
             | Terrabuild.Extensibility.StatusCode.Error _ ->
-                TerrabuildException.Raise($"Node {node.Id} failed with exit code {lastStatusCode}")
+                TaskStatus.Failure (DateTime.UtcNow, $"Node {node.Id} failed with exit code {lastStatusCode}")
 
         let restoreNode () =
             notification.NodeDownloading node
@@ -229,17 +229,17 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                     IO.copyFiles projectDirectory outputs files |> ignore
                     api |> Option.iter (fun api -> api.UseArtifact buildId node.ProjectHash node.TargetHash)
                 | _ -> ()
-                summary.EndedAt
+                TaskStatus.Success summary.EndedAt
             | _ ->
-                TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
+                TaskStatus.Failure (DateTime.UtcNow, $"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
         let buildRequest, completionDate =
             if force then
                 Log.Debug("{nodeId} must rebuild because force build requested", node.Id)
-                BuildRequest.Build, buildNode DateTime.MaxValue
+                TaskRequest.Build, buildNode DateTime.MaxValue
             elif maxCompletionChildren = DateTime.MaxValue then
                 Log.Debug("{nodeId} must rebuild because child is rebuilding", node.Id)
-                BuildRequest.Build, buildNode DateTime.MaxValue
+                TaskRequest.Build, buildNode DateTime.MaxValue
             elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
                 let cacheEntryId = GraphDef.buildCacheKey node
                 match tryGetSummaryOnly cacheEntryId with
@@ -248,28 +248,29 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                     // task is younger than children
                     if summary.StartedAt < maxCompletionChildren then
                         Log.Debug("{nodeId} must rebuild because it is younger than child", node.Id)
-                        BuildRequest.Build, buildNode DateTime.MaxValue
+                        TaskRequest.Build, buildNode DateTime.MaxValue
                     // task is failed and retry requested
                     elif retry && not summary.IsSuccessful then
                         Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
-                        BuildRequest.Build, buildNode DateTime.MaxValue
+                        TaskRequest.Build, buildNode DateTime.MaxValue
                     // task is dynamic
                     elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
-                        let completionDate = buildNode summary.EndedAt
-                        if completionDate < maxCompletionChildren then
+                        let completionStatus = buildNode summary.EndedAt
+                        match completionStatus with
+                        | TaskStatus.Success completionDate when completionDate < maxCompletionChildren -> 
                             // NOTE: restore to respect idempotency
-                            BuildRequest.Restore, restoreNode()
-                        else
-                            BuildRequest.Build, completionDate
+                            TaskRequest.Restore, restoreNode()
+                        | _ ->
+                            TaskRequest.Build, completionStatus
                     // task is cached
                     else
                         Log.Debug("{nodeId} is marked as used", node.Id)
-                        BuildRequest.Restore, restoreNode()
+                        TaskRequest.Restore, restoreNode()
                 | _ ->
                     Log.Debug("{nodeId} must be build since no summary and required", node.Id)
-                    BuildRequest.Build, buildNode DateTime.MaxValue
+                    TaskRequest.Build, buildNode DateTime.MaxValue
             else
-                BuildRequest.Build, buildNode DateTime.MaxValue
+                TaskRequest.Build, buildNode DateTime.MaxValue
 
         buildRequest, completionDate
 
@@ -299,22 +300,24 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         |> Seq.tryHead
                         |> Option.defaultValue DateTime.MinValue
 
-                    let buildRequest, completionDate = processNode maxCompletionChildren node
+                    let buildRequest, completionStatus = processNode maxCompletionChildren node
 
-                    Log.Debug("{nodeId} has succeeded", node.Id)
+                    Log.Debug("{nodeId} has completed with status {Status}", node.Id, completionStatus)
                     nodeRequests.TryAdd(node.Id, buildRequest) |> ignore
 
-                    nodeResults.TryAdd(node.Id, BuildStatus.Success) |> ignore
-                    nodeComputed.Value <- completionDate
-
-                    notification.NodeCompleted node buildRequest true
+                    nodeResults.TryAdd(node.Id, completionStatus) |> ignore
+                    match completionStatus with
+                    | TaskStatus.Success completionDate ->
+                        nodeComputed.Value <- completionDate
+                        notification.NodeCompleted node buildRequest true
+                    | _ ->
+                        notification.NodeCompleted node buildRequest false
                 with
                     exn ->
                         Log.Fatal(exn, $"Attempt to build node {nodeId} failed")
-                        Log.Debug("{nodeId} has failed", node.Id)
 
-                        nodeResults.TryAdd(node.Id, BuildStatus.Failure) |> ignore
-                        notification.NodeCompleted node BuildRequest.Build false
+                        nodeResults.TryAdd(node.Id, TaskStatus.Failure (DateTime.UtcNow, exn.Message)) |> ignore
+                        notification.NodeCompleted node TaskRequest.Build false
 
                         reraise())
 
@@ -335,21 +338,20 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let nodeStatus =
         let getDependencyStatus _ (node: GraphDef.Node) =
-            let status =
-                match nodeResults.TryGetValue node.Id with
-                | true, status -> status
-                | _ -> BuildStatus.Unfulfilled
-
-            { NodeInfo.Status = status
-              NodeInfo.Project = node.Project
-              NodeInfo.Target = node.Target
-              NodeInfo.ProjectHash = node.ProjectHash 
-              NodeInfo.TargetHash = node.TargetHash }
+            match nodeResults.TryGetValue node.Id with
+            | true, status ->
+                { NodeInfo.Request = nodeRequests[node.Id]
+                  NodeInfo.Status = status
+                  NodeInfo.Project = node.Project
+                  NodeInfo.Target = node.Target
+                  NodeInfo.ProjectHash = node.ProjectHash 
+                  NodeInfo.TargetHash = node.TargetHash } |> Some
+            | _ -> None
 
         graph.Nodes
-        |> Map.map getDependencyStatus
+        |> Map.choose getDependencyStatus
 
-    let isSuccess = nodeStatus |> Map.forall (fun _ nodeInfo -> nodeInfo.Status = BuildStatus.Success)
+    let isSuccess = nodeStatus |> Map.forall (fun _ nodeInfo -> match nodeInfo.Status with | TaskStatus.Success _ -> true | _ -> false)
 
     let buildInfo = { Summary.Commit = headCommit
                       Summary.BranchOrTag = branchOrTag

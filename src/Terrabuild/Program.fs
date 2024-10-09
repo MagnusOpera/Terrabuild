@@ -138,11 +138,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let buildGraph = GraphBuilder.build configOptions config
         if options.Debug then logGraph buildGraph "build"
 
-        if options.WhatIf then
-            if logs then
-                Logs.dumpLogs runId configOptions cache sourceControl buildGraph 
-            0
-        else
+        if not options.WhatIf then
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
             let summary = Build.run configOptions sourceControl cache api buildNotification buildGraph
             buildNotification.WaitCompletion()
@@ -152,7 +148,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 jsonBuild |> IO.writeTextFile (logFile "build-result.json")
 
             if logs || not summary.IsSuccess then
-                Logs.dumpLogs runId configOptions cache sourceControl buildGraph  
+                Logs.dumpLogs runId configOptions cache sourceControl buildGraph summary
 
             let result =
                 if summary.IsSuccess then Ansi.Emojis.happy
@@ -161,6 +157,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
             if summary.IsSuccess then 0
             else 5
+        else
+            0
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
         let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")

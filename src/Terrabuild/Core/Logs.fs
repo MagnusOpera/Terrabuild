@@ -2,53 +2,43 @@ module Logs
 open Cache
 open System
 
+module Iconography =
+    let restore_ok = Ansi.Emojis.popcorn
+    let restore_ko = Ansi.Emojis.pretzel
+    let build_ok = Ansi.Emojis.green_checkmark
+    let build_ko = Ansi.Emojis.red_cross
+    let task_pending = Ansi.Emojis.snowflake
 
 
-
-let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) =
+let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) (summary: Build.Summary) =
     let stableRandomId (id: string) =
         $"{logId} {id}" |> Hash.md5 |> String.toLower
 
-    // filter, collect summaries and dump
-    let nodes =
-        graph.Nodes
-        |> Map.values
-        |> Seq.map (fun node ->
-            let cacheEntryId = GraphDef.buildCacheKey node
-            let originSummary = cache.TryGetSummaryOnly false cacheEntryId
-            node, originSummary)
-        |> Seq.sortBy (fun (_, originSummary) -> originSummary |> Option.map (fun (_, summary) -> summary.EndedAt))
-        |> List.ofSeq
+    let successful = summary.IsSuccess
 
-    let successful =
-        nodes
-        |> List.forall (fun (_, originSummary) ->
-            match originSummary with
-            | Some (_, summary) -> summary.IsSuccessful
-            | _ -> false)
-
-    let dumpMarkdown filename (infos: (GraphDef.Node * (Origin*TargetSummary) option) list) =
+    let dumpMarkdown filename (nodes: GraphDef.Node seq) =
         let appendLines lines = IO.appendLinesFile filename lines 
         let append line = appendLines [line]
 
-        let statusEmoji (originSummary: (Origin * TargetSummary) option) =
-            match originSummary with
-            | Some (origin, summary) ->
-                match summary.IsSuccessful, origin with
-                | true, Origin.Remote -> "🍿"
-                | true, Origin.Local -> "✅"
-                | false, Origin.Remote -> "🥨"
-                | false, Origin.Local -> "❌"
-            | _ -> "❓"
+        let statusEmoji (node: GraphDef.Node) =
+            match summary.Nodes |> Map.tryFind node.Id with
+            | Some nodeInfo ->
+                match nodeInfo.Request, nodeInfo.Status with
+                | Build.TaskRequest.Restore, Build.TaskStatus.Success _ -> Iconography.restore_ok
+                | Build.TaskRequest.Restore, Build.TaskStatus.Failure _ -> Iconography.restore_ko
+                | Build.TaskRequest.Build, Build.TaskStatus.Success _ -> Iconography.build_ok
+                | Build.TaskRequest.Build, Build.TaskStatus.Failure _ -> Iconography.build_ko
+            | _ -> Iconography.task_pending
 
-
-        let dumpMarkdown (node: GraphDef.Node) (originSummary: (Origin*TargetSummary) option) =
+        let dumpMarkdown (node: GraphDef.Node) =
             let header =
-                let statusEmoji = statusEmoji originSummary
+                let statusEmoji = statusEmoji node
                 let uniqueId = stableRandomId node.Id
                 $"## <a name=\"user-content-{uniqueId}\"></a> {statusEmoji} {node.Label}"
 
             let dumpLogs =
+                let cacheEntryId = GraphDef.buildCacheKey node
+                let originSummary = cache.TryGetSummaryOnly false cacheEntryId
                 match originSummary with
                 | Some (_, summary) -> 
                     let dumpLogs () =
@@ -86,8 +76,17 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         $"# <a name=\"user-content-{summaryAnchor}\"></a> Summary" |> append
         "| Target | Duration |" |> append
         "|--------|----------|" |> append
-        infos |> List.iter (fun (node, originSummary) ->
-            let statusEmoji = statusEmoji originSummary
+
+        let originSummaries =
+            nodes
+            |> Seq.map (fun node ->
+                let cacheEntryId = GraphDef.buildCacheKey node
+                node.Id, cache.TryGetSummaryOnly false cacheEntryId)
+            |> Map.ofSeq
+
+        nodes |> Seq.iter (fun node ->
+            let originSummary = originSummaries[node.Id]
+            let statusEmoji = statusEmoji node
             let duration =
                 match originSummary with
                 | Some (_, summary) -> $"{summary.Duration}"
@@ -97,7 +96,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
             $"| {statusEmoji} [{node.Label}](#user-content-{uniqueId}) | {duration} |" |> append
         )
         let (cost, gain) =
-            infos |> List.fold (fun (cost, gain) (node, originSummary) ->
+            originSummaries |> Map.fold (fun (cost, gain) _ originSummary ->
                 match originSummary with
                 | Some (origin, summary) ->
                     let duration = summary.Duration
@@ -110,18 +109,13 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
 
         "" |> append
 
-        let mapNodes =
-            nodes
-            |> List.map (fun (node, originSummary) -> node.Id, originSummary)
-            |> Map.ofList
+        let getNodeStatus (node: GraphDef.Node) =
+            match originSummaries |> Map.tryFind node.Id with
+            | Some _ -> statusEmoji node
+            | _ -> Iconography.task_pending
 
-        let getNodeStatus id =
-            match mapNodes |> Map.tryFind id with
-            | Some originSummary -> statusEmoji originSummary
-            | _ -> "🫥"
-
-        let getOrigin id =
-            match mapNodes |> Map.tryFind id with
+        let getOrigin (node: GraphDef.Node) =
+            match originSummaries |> Map.tryFind node.Id with
             | Some (Some (origin, _)) -> Some origin
             | _ -> None
 
@@ -134,13 +128,15 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
 
         "" |> append
         "# Details" |> append
-        infos |> List.iter (fun (node, summary) -> dumpMarkdown node summary)
+        nodes |> Seq.iter dumpMarkdown
         "" |> append
 
         "</details>" |> append
 
-    let dumpTerminal (infos: (GraphDef.Node * (Origin*TargetSummary) option) seq) =
-        let dumpTerminal (node: GraphDef.Node) (originSummary: (Origin*TargetSummary) option) =
+
+
+    let dumpTerminal (nodes: GraphDef.Node seq) =
+        let dumpTerminal (node: GraphDef.Node) =
             let title = node.Label
 
             let getHeaderFooter success title =
@@ -151,6 +147,8 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
                 $"{color} {title}{Ansi.Styles.reset}", ""
 
             let (logStart, logEnd), dumpLogs =
+                let cacheEntryId = GraphDef.buildCacheKey node
+                let originSummary = cache.TryGetSummaryOnly false cacheEntryId
                 match originSummary with
                 | Some (_, summary) -> 
                     let dumpLogs () =
@@ -172,19 +170,37 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
             dumpLogs ()
             logEnd |> Terminal.writeLine
 
-        infos |> Seq.iter (fun (node, summary) -> dumpTerminal node summary)
+        nodes |> Seq.iter (fun node -> dumpTerminal node)
 
-    let reportFailedNodes (infos: (GraphDef.Node * (Origin * TargetSummary) option) list) =
-        infos
-        |> List.iter (fun (node, originSummary) ->
-            match originSummary with
-            | Some (_, summary) when summary.IsSuccessful |> not -> sourceControl.LogError $"{node.Label} failed"
-            | _ -> ())
+
+
+    let reportFailedNodes (nodes: GraphDef.Node seq) =
+        nodes
+        |> Seq.iter (fun node ->
+            match summary.Nodes |> Map.tryFind node.Id with
+            | Some nodeInfo ->
+                match nodeInfo.Status with
+                | Build.TaskStatus.Failure (completionDate, msg) ->
+                    sourceControl.LogError $"{node.Id} failed on {completionDate}:\n{msg}"
+                | _ -> ()
+            | _ -> sourceControl.LogError $"{node.Id} was not built")
 
     let logger =
         match sourceControl.LogType with
         | Contracts.Terminal -> dumpTerminal
         | Contracts.Markdown filename -> dumpMarkdown filename
 
-    nodes |> logger
-    nodes |> reportFailedNodes
+    let sortedNodes =
+        graph.Nodes
+        |> Seq.map (fun (KeyValue(_, node)) -> node)
+        |> Seq.sortBy (fun node ->
+            match summary.Nodes |> Map.tryFind node.Id with
+            | Some nodeInfo ->
+                match nodeInfo.Status with
+                | Build.TaskStatus.Success completionDate -> completionDate
+                | Build.TaskStatus.Failure (completionDate, _) -> completionDate
+            | _ -> DateTime.MaxValue)
+        |> List.ofSeq
+
+    sortedNodes |> logger
+    sortedNodes |> reportFailedNodes
