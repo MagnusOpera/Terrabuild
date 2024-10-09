@@ -489,64 +489,6 @@
       ],
       "cache": 0,
       "isLeaf": true
-    },
-    "projects/rust-app:build": {
-      "id": "projects/rust-app:build",
-      "label": "build projects/rust-app",
-      "project": "projects/rust-app",
-      "target": "build",
-      "configurationTarget": {
-        "hash": "11AAF8064C94EB13A5DBBABB74D237968373D8BA36EDC3C0DAE6A303E3FB71FE",
-        "rebuild": false,
-        "dependsOn": [
-          "^build"
-        ],
-        "outputs": [
-          "target/debug/",
-          "target/release/"
-        ],
-        "operations": [
-          {
-            "hash": "A8ECD5C3F84E52E8C5C9B4BC04D9FDDC0FA81CE3FE190F10117DE2759DDAAC1D",
-            "container": "rust:1.81.0-slim",
-            "containerVariables": [],
-            "extension": "@cargo",
-            "command": "build",
-            "script": {},
-            "context": [
-              "map",
-              {}
-            ]
-          }
-        ]
-      },
-      "dependencies": [],
-      "outputs": [
-        "target/debug/",
-        "target/release/"
-      ],
-      "projectHash": "0CEC6981250E3AC5C5CE7EBE9FF15A39800DDC5287F862EBDF540A5C1FF52AC0",
-      "targetHash": "059335A3E58FBAF6A206191DC7E272D1F67A336053A500676E1ABAA80433AA66",
-      "operations": [
-        {
-          "container": "rust:1.81.0-slim",
-          "containerVariables": [],
-          "metaCommand": "@cargo build",
-          "command": "cargo",
-          "arguments": "build --profile dev ",
-          "exitCodes": [
-            [
-              0,
-              [
-                "ok",
-                true
-              ]
-            ]
-          ]
-        }
-      ],
-      "cache": 0,
-      "isLeaf": true
     }
   },
   "rootNodes": [
@@ -555,7 +497,6 @@
     "libraries/shell-lib:build",
     "projects/dotnet-app:build",
     "projects/make-app:build",
-    "projects/npm-app:build",
-    "projects/rust-app:build"
+    "projects/npm-app:build"
   ]
 }
