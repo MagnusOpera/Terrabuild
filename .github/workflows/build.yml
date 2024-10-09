@@ -44,6 +44,15 @@ jobs:
         run: |
           make self-test-all
 
+          echo "# Test simple" >> $GITHUB_STEP_SUMMARY
+          cat tests/simple/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
+
+          echo "# Test multirefs" >> $GITHUB_STEP_SUMMARY
+          cat tests/multirefs/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
+
+          echo "# Test cluster-layers" >> $GITHUB_STEP_SUMMARY
+          cat tests/cluster-layers/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
+
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
         if: always()
