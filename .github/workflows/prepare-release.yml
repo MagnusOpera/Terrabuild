@@ -118,9 +118,7 @@ jobs:
         with:
           name: outputs-macos
           include-hidden-files: true
-          path: |
-            .out/terrabuild-darwin-x64.zip
-            .out/terrabuild-darwin-arm64.zip
+          path: .out/darwin/terrabuild-darwin-*.zip
 
   create-release:
     runs-on: ubuntu-latest
