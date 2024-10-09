@@ -257,7 +257,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         Log.Debug("{nodeId} is dynamic, checking if state has changed", node.Id)
                         let completionStatus = buildNode summary.EndedAt
                         match completionStatus with
-                        | TaskStatus.Success completionDate when summary.EndedAt < completionDate -> 
+                        | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
+                        | TaskStatus.Success completionDate when summary.EndedAt = completionDate -> 
                             // NOTE: restore to respect idempotency
                             Log.Debug("{nodeId} state has not changed, restoring", node.Id)
                             TaskRequest.Restore, restoreNode()
