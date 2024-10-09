@@ -293,6 +293,4 @@ type Cache(storage: Contracts.IStorage) =
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash
-            homeDir |> IO.createDirectory
-            homeDir |> IO.chmod (enum<UnixFileMode>(0o777))
             homeDir
