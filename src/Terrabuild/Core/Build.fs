@@ -255,12 +255,15 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                         TaskRequest.Build, buildNode DateTime.MaxValue
                     // task is dynamic
                     elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
+                        Log.Debug("{nodeId} is dynamic, checking if state has changed", node.Id)
                         let completionStatus = buildNode summary.EndedAt
                         match completionStatus with
                         | TaskStatus.Success completionDate when completionDate < maxCompletionChildren -> 
                             // NOTE: restore to respect idempotency
+                            Log.Debug("{nodeId} state has not changed, restoring", node.Id)
                             TaskRequest.Restore, restoreNode()
                         | _ ->
+                            Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
                             TaskRequest.Build, completionStatus
                     // task is cached
                     else
@@ -302,7 +305,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
                     let buildRequest, completionStatus = processNode maxCompletionChildren node
 
-                    Log.Debug("{nodeId} has completed with status {Status}", node.Id, completionStatus)
+                    Log.Debug("{nodeId} has completed for request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
                     nodeRequests.TryAdd(node.Id, buildRequest) |> ignore
 
                     nodeResults.TryAdd(node.Id, completionStatus) |> ignore
