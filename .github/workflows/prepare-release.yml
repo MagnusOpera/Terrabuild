@@ -107,16 +107,18 @@ jobs:
         run: |
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-          lipo -create -output .out/darwin/terrabuild .out/darwin/x64/terrabuild .out/darwin/arm64/terrabuild
-          codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-          (cd .out/darwin; zip ../terrabuild-darwin-universal.zip ./terrabuild)
+          (cd .out/darwin/x64; zip ../terrabuild-darwin-x64.zip ./terrabuild)
+          (cd .out/darwin/arm64; zip ../terrabuild-darwin-arm64.zip ./terrabuild)
+          # lipo -create -output .out/darwin/terrabuild .out/darwin/x64/terrabuild .out/darwin/arm64/terrabuild
+          # codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
+          # (cd .out/darwin; zip ../terrabuild-darwin-universal.zip ./terrabuild)
 
       - name: Archive Signed Binaries
         uses: actions/upload-artifact@v4
         with:
           name: outputs-macos
           include-hidden-files: true
-          path: .out/terrabuild-darwin-universal.zip
+          path: .out/terrabuild-darwin-*.zip
 
   create-release:
     runs-on: ubuntu-latest
