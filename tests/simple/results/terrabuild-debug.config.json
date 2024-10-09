@@ -6,7 +6,8 @@
     "libraries/shell-lib",
     "projects/dotnet-app",
     "projects/make-app",
-    "projects/npm-app"
+    "projects/npm-app",
+    "projects/rust-app"
   ],
   "targets": {
     "build": {
@@ -512,6 +513,48 @@
       },
       "labels": [
         "app"
+      ]
+    },
+    "projects/rust-app": {
+      "id": "projects/rust-app",
+      "hash": "0CEC6981250E3AC5C5CE7EBE9FF15A39800DDC5287F862EBDF540A5C1FF52AC0",
+      "dependencies": [],
+      "files": [
+        "Cargo.lock",
+        "Cargo.toml",
+        "PROJECT",
+        "src/main.rs"
+      ],
+      "targets": {
+        "build": {
+          "hash": "11AAF8064C94EB13A5DBBABB74D237968373D8BA36EDC3C0DAE6A303E3FB71FE",
+          "rebuild": false,
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "target/debug/",
+            "target/release/"
+          ],
+          "operations": [
+            {
+              "hash": "A8ECD5C3F84E52E8C5C9B4BC04D9FDDC0FA81CE3FE190F10117DE2759DDAAC1D",
+              "container": null,
+              "containerVariables": [],
+              "extension": "@cargo",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
+            }
+          ]
+        }
+      },
+      "labels": [
+        "app",
+        "rust"
       ]
     }
   }

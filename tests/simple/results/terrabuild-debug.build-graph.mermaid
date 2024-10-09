@@ -14,6 +14,8 @@ projects/make-app:build("projects/make-app
 build ")
 projects/npm-app:build("projects/npm-app
 build ")
+projects/rust-app:build("projects/rust-app
+build ")
 deployments/terraform-deploy:build --> projects/dotnet-app:build
 deployments/terraform-deploy:build --> projects/npm-app:build
 class deployments/terraform-deploy:build ignore
@@ -24,3 +26,4 @@ class projects/dotnet-app:build ignore
 projects/make-app:build --> libraries/shell-lib:build
 class projects/make-app:build ignore
 class projects/npm-app:build ignore
+class projects/rust-app:build ignore

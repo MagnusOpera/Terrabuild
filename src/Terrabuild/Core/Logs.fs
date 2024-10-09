@@ -7,7 +7,7 @@ module Iconography =
     let restore_ko = Ansi.Emojis.pretzel
     let build_ok = Ansi.Emojis.green_checkmark
     let build_ko = Ansi.Emojis.red_cross
-    let task_pending = Ansi.Emojis.coffee
+    let task_pending = Ansi.Emojis.bang_mark
 
 
 let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) (summary: Build.Summary) =
