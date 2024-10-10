@@ -146,7 +146,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     notification.BuildStarted graph
     api |> Option.iter (fun api -> api.StartBuild())
 
-    let allowRemoteCache = not options.LocalOnly && options.CI.IsSome
+    let allowRemoteCache = options.CI.IsSome
 
     let homeDir = cache.CreateHomeDir "containers"
     let tmpDir = cache.CreateHomeDir "tmp"
@@ -271,9 +271,12 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                                 Log.Debug("{nodeId} state has not changed", node.Id)
                                 TaskRequest.Restore, completionStatus
                             | _ ->
-                                // changes have been detected so continue pretenting it's been rebuilt
-                                Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
-                                TaskRequest.Build, completionStatus
+                                // changes have been detected so continue pretenting it's been rebuilt iif retry is requested
+                                if options.Retry then
+                                    Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
+                                    TaskRequest.Build, completionStatus
+                                else
+                                    TaskRequest.Restore, TaskStatus.Failure (summary.EndedAt, "External state is no more valid. Rerun with retry.")
                     // task is cached
                     else
                         Log.Debug("{nodeId} is marked as used", node.Id)
