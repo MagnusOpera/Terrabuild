@@ -65,8 +65,8 @@ type Terraform() =
             | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
             | _ -> ()
 
-            let statusCode = Map [ 0, StatusCode.Ok false
-                                   2, StatusCode.Ok true ]
+            let statusCode = Map [ 0, StatusCode.Success
+                                   2, StatusCode.SuccessUpdate ]
             checkOp "terraform" $"plan -detailed-exitcode -out=terrabuild.planfile{vars}" statusCode
         ]
         execRequest Cacheability.Dynamic ops

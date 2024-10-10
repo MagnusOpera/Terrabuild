@@ -66,10 +66,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         },
@@ -82,10 +79,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         },
@@ -98,17 +92,11 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                false
-              ]
+              "success"
             ],
             [
               2,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }
@@ -176,10 +164,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }
@@ -233,10 +218,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }
@@ -306,10 +288,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }
@@ -391,10 +370,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         },
@@ -407,10 +383,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }
@@ -463,10 +436,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         },
@@ -479,10 +449,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }
@@ -537,10 +504,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }

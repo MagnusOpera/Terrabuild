@@ -49,10 +49,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }
@@ -108,10 +105,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }
@@ -165,10 +159,7 @@
           "exitCodes": [
             [
               0,
-              [
-                "ok",
-                true
-              ]
+              "successUpdate"
             ]
           ]
         }

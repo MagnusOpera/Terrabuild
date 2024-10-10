@@ -97,7 +97,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
             | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
 
     let stepLogs = List<Cache.OperationSummary>()
-    let mutable lastStatusCode = Terrabuild.Extensibility.StatusCode.Ok false
+    let mutable lastStatusCode = Terrabuild.Extensibility.StatusCode.Success
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
@@ -206,9 +206,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             api |> Option.iter (fun api -> api.AddArtifact node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
             match lastStatusCode with
-            | Terrabuild.Extensibility.StatusCode.Ok true ->
+            | Terrabuild.Extensibility.StatusCode.SuccessUpdate ->
                 TaskStatus.Success endedAt
-            | Terrabuild.Extensibility.StatusCode.Ok false ->
+            | Terrabuild.Extensibility.StatusCode.Success ->
                 TaskStatus.Success currentCompletionDate
             | Terrabuild.Extensibility.StatusCode.Error _ ->
                 TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
