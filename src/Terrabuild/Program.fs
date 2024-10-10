@@ -95,37 +95,40 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         let sourceControl = SourceControls.Factory.create()
 
-        let configOptions = {
-            Configuration.Options.Workspace = options.Workspace
-            Configuration.Options.WhatIf = options.WhatIf
-            Configuration.Options.Debug = options.Debug
-            Configuration.Options.MaxConcurrency = options.MaxConcurrency
-            Configuration.Options.Force = options.Force
-            Configuration.Options.Retry = options.Retry
-            Configuration.Options.LocalOnly = options.LocalOnly
-            Configuration.Options.CheckState = options.CheckState
-            Configuration.Options.StartedAt = options.StartedAt
-            Configuration.Options.NoContainer = options.NoContainer
-            Configuration.Options.Targets = options.Targets
-            Configuration.Options.CI = sourceControl.CI
-            Configuration.Options.BranchOrTag = sourceControl.BranchOrTag
-            Configuration.Options.Configuration = options.Configuration
-            Configuration.Options.Note = options.Note
-            Configuration.Options.Tag = options.Tag
-            Configuration.Options.Labels = options.Labels
-            Configuration.Options.Variables = options.Variables
+        let options = {
+            ConfigOptions.Options.Workspace = options.Workspace
+            ConfigOptions.Options.WhatIf = options.WhatIf
+            ConfigOptions.Options.Debug = options.Debug
+            ConfigOptions.Options.MaxConcurrency = options.MaxConcurrency
+            ConfigOptions.Options.Force = options.Force
+            ConfigOptions.Options.Retry = options.Retry
+            ConfigOptions.Options.LocalOnly = options.LocalOnly
+            ConfigOptions.Options.CheckState = options.CheckState
+            ConfigOptions.Options.StartedAt = options.StartedAt
+            ConfigOptions.Options.NoContainer = options.NoContainer
+            ConfigOptions.Options.Targets = options.Targets
+            ConfigOptions.Options.CI = sourceControl.CI
+            ConfigOptions.Options.BranchOrTag = sourceControl.BranchOrTag
+            ConfigOptions.Options.HeadCommit = sourceControl.HeadCommit
+            ConfigOptions.Options.Metadata = sourceControl.Metadata
+            ConfigOptions.Options.LogType = sourceControl.LogType
+            ConfigOptions.Options.Configuration = options.Configuration
+            ConfigOptions.Options.Note = options.Note
+            ConfigOptions.Options.Tag = options.Tag
+            ConfigOptions.Options.Labels = options.Labels
+            ConfigOptions.Options.Variables = options.Variables
         }
 
         if options.Debug then
             let jsonOptions = Json.Serialize options
             jsonOptions |> IO.writeTextFile (logFile "options.json")
 
-        let config = Configuration.read configOptions
+        let config = Configuration.read options
 
         let token =
             if options.LocalOnly then None
             else config.Space |> Option.bind (fun space -> Auth.readAuthToken space)
-        let api = Api.Factory.create config.Space token
+        let api = Api.Factory.create config.Space token options
         if api |> Option.isSome then
             Log.Debug("Connected to API")
             $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} Connected to Insights" |> Terminal.writeLine
@@ -137,20 +140,22 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let storage = Storages.Factory.create api
         let cache = Cache.Cache(storage) :> Cache.ICache
 
-        let buildGraph = GraphBuilder.build configOptions config
+        let buildGraph = GraphBuilder.build options config
         if options.Debug then logGraph buildGraph "build"
 
         if not options.WhatIf then
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-            let summary = Build.run configOptions sourceControl cache api buildNotification buildGraph
+
+            let summary = Build.run options cache api buildNotification buildGraph
             buildNotification.WaitCompletion()
+            api |> Option.iter (fun api -> api.CompleteBuild summary.IsSuccess)
 
             if options.Debug then
                 let jsonBuild = Json.Serialize summary
                 jsonBuild |> IO.writeTextFile (logFile "build-result.json")
 
             if logs || not summary.IsSuccess then
-                Logs.dumpLogs runId configOptions cache sourceControl buildGraph summary
+                Logs.dumpLogs runId options cache buildGraph summary
 
             let result =
                 if summary.IsSuccess then Ansi.Emojis.happy

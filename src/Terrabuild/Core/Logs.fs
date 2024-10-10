@@ -10,7 +10,7 @@ module Iconography =
     let task_pending = Ansi.Emojis.bang_mark
 
 
-let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sourceControl: Contracts.ISourceControl) (graph: GraphDef.Graph) (summary: Build.Summary) =
+let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (graph: GraphDef.Graph) (summary: Build.Summary) =
     let stableRandomId (id: string) =
         $"{logId} {id}" |> Hash.md5 |> String.toLower
 
@@ -176,7 +176,7 @@ let dumpLogs (logId: Guid) (options: Configuration.Options) (cache: ICache) (sou
         |> Seq.iter dumpTerminal
 
     let logger =
-        match sourceControl.LogType with
+        match options.LogType with
         | Contracts.Markdown filename -> dumpMarkdown filename
         | _ -> dumpTerminal
 

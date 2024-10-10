@@ -56,7 +56,7 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Configuration.Options) projectDirectory homeDir tmpDir =
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) projectDirectory homeDir tmpDir =
     // run actions if any
     let allCommands =
         node.Operations
@@ -136,7 +136,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
 
     lastStatusCode, stepLogs
 
-let run (options: Configuration.Options) (sourceControl: Contracts.ISourceControl) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
+let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
@@ -144,9 +144,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
     let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
-    let buildId =
-        api |> Option.map (fun api -> api.StartBuild sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI.IsSome sourceControl.CI sourceControl.Metadata)
-        |> Option.defaultValue ""
+    api |> Option.iter (fun api -> api.StartBuild())
 
     let allowRemoteCache = not options.LocalOnly && options.CI.IsSome
 
@@ -206,7 +204,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
             // create an archive with new files
             Log.Debug("{NodeId}: Building '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
             let files = cacheEntry.Complete summary
-            api |> Option.iter (fun api -> api.AddArtifact buildId node.Project node.Target node.ProjectHash node.TargetHash files successful)
+            api |> Option.iter (fun api -> api.AddArtifact node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
             match lastStatusCode with
             | Terrabuild.Extensibility.StatusCode.Ok true ->
@@ -227,7 +225,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 | Some outputs ->
                     let files = IO.enumerateFiles outputs
                     IO.copyFiles projectDirectory outputs files |> ignore
-                    api |> Option.iter (fun api -> api.UseArtifact buildId node.ProjectHash node.TargetHash)
+                    api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
                 | _ -> ()
                 TaskStatus.Success summary.EndedAt
             | _ ->
@@ -342,8 +340,8 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
     | Status.SubcriptionNotRaised projectId -> Log.Debug("Build failed: project {projectId} is not processed", projectId)
     | Status.SubscriptionError exn -> Log.Fatal(exn, "Build failed with exception")
 
-    let headCommit = sourceControl.HeadCommit
-    let branchOrTag = sourceControl.BranchOrTag
+    let headCommit = options.HeadCommit
+    let branchOrTag = options.BranchOrTag
 
     let endedAt = DateTime.UtcNow
     let buildDuration = endedAt - startedAt
@@ -379,6 +377,5 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                       Summary.Nodes = nodeStatus }
 
     notification.BuildCompleted buildInfo
-    api |> Option.iter (fun api -> api.CompleteBuild buildId isSuccess)
 
     buildInfo

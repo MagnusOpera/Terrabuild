@@ -10,7 +10,7 @@ open Terrabuild.Extensibility
 
 
 // build the high-level graph from configuration
-let build (options: Configuration.Options) (configuration: Configuration.Workspace) =
+let build (options: ConfigOptions.Options) (configuration: Configuration.Workspace) =
     let startedAt = DateTime.UtcNow
     Log.Debug("===== [Graph Build] =====")
 
