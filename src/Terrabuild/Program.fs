@@ -16,6 +16,7 @@ type RunTargetOptions = {
     Force: bool
     Retry: bool
     LocalOnly: bool
+    CheckState: bool
     StartedAt: DateTime
     IsLog: bool
     NoContainer: bool
@@ -102,6 +103,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             Configuration.Options.Force = options.Force
             Configuration.Options.Retry = options.Retry
             Configuration.Options.LocalOnly = options.LocalOnly
+            Configuration.Options.CheckState = options.CheckState
             Configuration.Options.StartedAt = options.StartedAt
             Configuration.Options.NoContainer = options.NoContainer
             Configuration.Options.Targets = options.Targets
@@ -182,6 +184,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let noContainer = runArgs.Contains(RunArgs.NoContainer)
         let localOnly = runArgs.Contains(RunArgs.LocalOnly)
+        let checkState = runArgs.Contains(RunArgs.CheckState)
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
         let whatIf = runArgs.Contains(RunArgs.WhatIf) 
@@ -197,6 +200,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.IsLog = false
                         RunTargetOptions.Targets = Set targets
                         RunTargetOptions.LocalOnly = localOnly
+                        RunTargetOptions.CheckState = checkState
                         RunTargetOptions.Configuration = configuration
                         RunTargetOptions.Note = note
                         RunTargetOptions.Tag = tag
@@ -227,6 +231,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.IsLog = true
                         RunTargetOptions.Targets = Set targets
                         RunTargetOptions.LocalOnly = true 
+                        RunTargetOptions.CheckState = false
                         RunTargetOptions.Configuration = configuration
                         RunTargetOptions.Note = None
                         RunTargetOptions.Tag = None

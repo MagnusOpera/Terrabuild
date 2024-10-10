@@ -19,6 +19,7 @@ type Options = {
     Force: bool
     Retry: bool
     LocalOnly: bool
+    CheckState: bool
     StartedAt: DateTime
     NoContainer: bool
     Targets: string set

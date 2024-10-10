@@ -148,7 +148,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
         api |> Option.map (fun api -> api.StartBuild sourceControl.BranchOrTag sourceControl.HeadCommit options.Configuration options.Note options.Tag options.Targets options.Force options.Retry sourceControl.CI.IsSome sourceControl.CI sourceControl.Metadata)
         |> Option.defaultValue ""
 
-    let allowRemoteCache = options.LocalOnly |> not
+    let allowRemoteCache = not options.LocalOnly && options.CI.IsSome
 
     let homeDir = cache.CreateHomeDir "containers"
     let tmpDir = cache.CreateHomeDir "tmp"
@@ -173,7 +173,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
 
         let buildNode currentCompletionDate =
             let startedAt = DateTime.UtcNow
-            let isBuild = currentCompletionDate = DateTime.MaxValue
+            let allowUpload = options.Retry || currentCompletionDate = DateTime.MaxValue
 
             notification.NodeBuilding node
 
@@ -181,7 +181,7 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                 if node.IsLeaf then IO.Snapshot.Empty
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            let cacheEntry = cache.GetEntry (isBuild && sourceControl.CI.IsSome) cacheEntryId
+            let cacheEntry = cache.GetEntry allowUpload cacheEntryId
             let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
             // keep only new or modified files
@@ -253,19 +253,29 @@ let run (options: Configuration.Options) (sourceControl: Contracts.ISourceContro
                     elif retry && not summary.IsSuccessful then
                         Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
                         TaskRequest.Build, buildNode DateTime.MaxValue
-                    // task is dynamic
-                    elif (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
+                    // task is dynamic - it's complex :-(
+                    elif options.CheckState && (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
                         Log.Debug("{nodeId} is dynamic, checking if state has changed", node.Id)
-                        restoreNode() |> ignore
-                        let completionStatus = buildNode summary.EndedAt
-                        match completionStatus with
-                        | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
-                        | TaskStatus.Success completionDate when summary.EndedAt = completionDate ->
-                            Log.Debug("{nodeId} state has not changed", node.Id)
-                            TaskRequest.Restore, completionStatus
-                        | _ ->
-                            Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
-                            TaskRequest.Build, completionStatus
+                        // first restore node because we want to have asset
+                        // this **must** be ok since we were able to fetch metadata
+                        let restoreCompletionStatus = restoreNode()
+                        match restoreCompletionStatus with
+                        | TaskStatus.Failure _ -> TaskRequest.Restore, restoreCompletionStatus
+                        | TaskStatus.Success _ ->
+                            // if retry is requested then completion date is either:
+                            // - the local build with a new completionDate on changes
+                            // - the local build with provided completionDate if no changes
+                            let completionStatus = buildNode summary.EndedAt
+                            match completionStatus with
+                            | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
+                            | TaskStatus.Success completionDate when summary.EndedAt = completionDate ->
+                                // successfuly validated restore so continue pretenting it's been restored
+                                Log.Debug("{nodeId} state has not changed", node.Id)
+                                TaskRequest.Restore, completionStatus
+                            | _ ->
+                                // changes have been detected so continue pretenting it's been rebuilt
+                                Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
+                                TaskRequest.Build, completionStatus
                     // task is cached
                     else
                         Log.Debug("{nodeId} is marked as used", node.Id)
