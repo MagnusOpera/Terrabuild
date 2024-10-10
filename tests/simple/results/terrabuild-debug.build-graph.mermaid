@@ -1,29 +1,29 @@
 flowchart TD
-classDef forced stroke:red,stroke-width:3px
-classDef used stroke:orange,stroke-width:3px
-classDef selected stroke:black,stroke-width:3px
-deployments/terraform-deploy:build("build deployments/terraform-deploy
-")
-libraries/dotnet-lib:build("build libraries/dotnet-lib
-")
-libraries/shell-lib:build("build libraries/shell-lib
-")
-projects/dotnet-app:build("build projects/dotnet-app
-")
-projects/make-app:build("build projects/make-app
-")
-projects/npm-app:build("build projects/npm-app
-")
-projects/rust-app:build("build projects/rust-app
-")
+classDef build stroke:red,stroke-width:3px
+classDef restore stroke:orange,stroke-width:3px
+classDef ignore stroke:black,stroke-width:3px
+deployments/terraform-deploy:build("deployments/terraform-deploy
+build ")
+libraries/dotnet-lib:build("libraries/dotnet-lib
+build ")
+libraries/shell-lib:build("libraries/shell-lib
+build ")
+projects/dotnet-app:build("projects/dotnet-app
+build ")
+projects/make-app:build("projects/make-app
+build ")
+projects/npm-app:build("projects/npm-app
+build ")
+projects/rust-app:build("projects/rust-app
+build ")
 deployments/terraform-deploy:build --> projects/dotnet-app:build
 deployments/terraform-deploy:build --> projects/npm-app:build
-class deployments/terraform-deploy:build forced
-class libraries/dotnet-lib:build forced
-class libraries/shell-lib:build forced
+class deployments/terraform-deploy:build ignore
+class libraries/dotnet-lib:build ignore
+class libraries/shell-lib:build ignore
 projects/dotnet-app:build --> libraries/dotnet-lib:build
-class projects/dotnet-app:build forced
+class projects/dotnet-app:build ignore
 projects/make-app:build --> libraries/shell-lib:build
-class projects/make-app:build forced
-class projects/npm-app:build forced
-class projects/rust-app:build forced
+class projects/make-app:build ignore
+class projects/npm-app:build ignore
+class projects/rust-app:build ignore

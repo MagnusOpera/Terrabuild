@@ -39,10 +39,18 @@ module Emojis =
     let log = "𝍌"
     let rightarrow = "▶"
     let brain = "🧠"
-    let cloud = "🌤️"
+    let sun_cloud = "🌤️"
     let think = "🤔"
     let eyes = "👀"
-
+    let pretzel = "🥨"
+    let green_checkmark = "✅"
+    let red_cross = "❌"
+    let snowflake = "❄️"
+    let question_mark = "❓"
+    let bang_mark = "❗️"
+    let coffee = "☕️"
+    let construction = "🚧"
+    let tombstone = "🪦"
 
 module Styles =
     let reset = csi 0

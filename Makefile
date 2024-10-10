@@ -143,12 +143,7 @@ endef
 
 define diff_results
 	$(call diff_file,$(1),terrabuild-debug.config.json)
-	$(call diff_file,$(1),terrabuild-debug.config-graph.json)
-	$(call diff_file,$(1),terrabuild-debug.consistent-graph.json)
-	$(call diff_file,$(1),terrabuild-debug.transform-graph.json)
-	$(call diff_file,$(1),terrabuild-debug.config-graph.mermaid)
-	$(call diff_file,$(1),terrabuild-debug.consistent-graph.mermaid)
-	$(call diff_file,$(1),terrabuild-debug.transform-graph.mermaid)
+	$(call diff_file,$(1),terrabuild-debug.build-graph.json)
 	$(call diff_file,$(1),terrabuild-debug.build-graph.mermaid)
 endef
 
@@ -156,7 +151,7 @@ endef
 define run_integration_test
 	@printf "\n*** Running integration test %s ***\n" $(1)
 	-cd $(1); rm terrabuild-debug.*
-	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild-debug.md $(current_dir)/.out/dotnet/terrabuild $(2)
+	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild-debug.md GITHUB_REPOSITORY=MagnusOpera/Terrabuild GITHUB_RUN_ID=42 $(current_dir)/.out/dotnet/terrabuild $(2)
 	$(call diff_results,$(1))
 endef
 

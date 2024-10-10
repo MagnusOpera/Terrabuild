@@ -150,7 +150,7 @@ module private Artifact =
         Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts?path={path}" ()
 
 
-type Client(space: string, token: string) =
+type Client(space: string, token: string, options: ConfigOptions.Options) =
     let accesstoken =
         let headers = [
             HttpRequestHeaders.Accept HttpContentTypes.Json
@@ -164,18 +164,33 @@ type Client(space: string, token: string) =
         HttpRequestHeaders.ContentType HttpContentTypes.Json
         HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
 
-    interface Contracts.IApiClient with
-        member _.StartBuild branchOrTag commit configuration note tag targets force retry ci ciname cimetadata =
-            let resp = Build.startBuild headers branchOrTag commit configuration note tag targets force retry ci ciname cimetadata
-            resp.BuildId
+    let buildId =
+        lazy(
+            let resp = Build.startBuild headers
+                                        options.BranchOrTag
+                                        options.HeadCommit
+                                        options.Configuration
+                                        options.Note
+                                        options.Tag
+                                        options.Targets
+                                        options.Force
+                                        options.Retry
+                                        options.CI.IsSome
+                                        options.CI
+                                        options.Metadata
+            resp.BuildId)
 
-        member _.CompleteBuild buildId success =
+    interface Contracts.IApiClient with
+        member _.StartBuild () =
+            buildId.Force() |> ignore
+
+        member _.CompleteBuild success =
             Build.completeBuild headers buildId success
 
-        member _.AddArtifact buildId project target projectHash targetHash files success =
+        member _.AddArtifact project target projectHash targetHash files success =
             Build.addArtifact headers buildId project target projectHash targetHash files success
 
-        member _.UseArtifact buildId projectHash hash =
+        member _.UseArtifact projectHash hash =
             Build.useArtifact headers buildId projectHash hash
 
         member _.GetArtifact path =

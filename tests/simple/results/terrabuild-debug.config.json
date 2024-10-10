@@ -517,7 +517,7 @@
     },
     "projects/rust-app": {
       "id": "projects/rust-app",
-      "hash": "0CEC6981250E3AC5C5CE7EBE9FF15A39800DDC5287F862EBDF540A5C1FF52AC0",
+      "hash": "15CDC8C81F5A3D2B0215AE61D6D429F52345A71EE01246776049C72C2351CAE1",
       "dependencies": [],
       "files": [
         "Cargo.lock",
@@ -539,7 +539,7 @@
           "operations": [
             {
               "hash": "A8ECD5C3F84E52E8C5C9B4BC04D9FDDC0FA81CE3FE190F10117DE2759DDAAC1D",
-              "container": null,
+              "container": "rust:1.81.0-slim",
               "containerVariables": [],
               "extension": "@cargo",
               "command": "build",

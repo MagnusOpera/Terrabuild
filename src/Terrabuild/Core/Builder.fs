@@ -5,11 +5,12 @@ open Errors
 open Serilog
 open System
 open GraphDef
+open Terrabuild.Extensibility
 
 
 
 // build the high-level graph from configuration
-let build (options: Configuration.Options) (configuration: Configuration.Workspace) =
+let build (options: ConfigOptions.Options) (configuration: Configuration.Workspace) =
     let startedAt = DateTime.UtcNow
     Log.Debug("===== [Graph Build] =====")
 
@@ -17,6 +18,11 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
+
+    let defaultCacheability = 
+        if options.Force then Cacheability.Never
+        elif options.LocalOnly then Cacheability.Local
+        else Cacheability.Always
 
     // first check all targets exist in WORKSPACE
     match options.Targets |> Seq.tryFind (fun targetName -> configuration.Targets |> Map.containsKey targetName |> not) with
@@ -70,9 +76,45 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
 
                 let hash = hashContent |> Hash.sha256strings
 
-                let usage =
-                    if target.Rebuild then NodeUsage.Build Configuration.TargetOperation.MarkAsForced
-                    else NodeUsage.Selected
+                let cache, ops =
+                    target.Operations
+                    |> List.fold (fun (cache, ops) operation ->
+                        let optContext = {
+                            Terrabuild.Extensibility.ActionContext.Debug = options.Debug
+                            Terrabuild.Extensibility.ActionContext.CI = options.CI.IsSome
+                            Terrabuild.Extensibility.ActionContext.Command = operation.Command
+                            Terrabuild.Extensibility.ActionContext.BranchOrTag = options.BranchOrTag
+                            Terrabuild.Extensibility.ActionContext.ProjectHash = projectConfig.Hash
+                        }
+
+                        let parameters = 
+                            match operation.Context with
+                            | Terrabuild.Expressions.Value.Map map ->
+                                map
+                                |> Map.add "context" (Terrabuild.Expressions.Value.Object optContext)
+                                |> Terrabuild.Expressions.Value.Map
+                            | _ -> TerrabuildException.Raise("Failed to get context (internal error)")
+
+                        let executionRequest =
+                            match Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionExecutionRequest> optContext.Command parameters (Some operation.Script) with
+                            | Extensions.InvocationResult.Success executionRequest -> executionRequest
+                            | _ -> TerrabuildException.Raise("Failed to get shell operation (extension error)")
+
+                        let newops =
+                            executionRequest.Operations
+                            |> List.map (fun shellOperation -> {
+                                ContaineredShellOperation.Container = operation.Container
+                                ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
+                                ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
+                                ContaineredShellOperation.Command = shellOperation.Command
+                                ContaineredShellOperation.Arguments = shellOperation.Arguments
+                                ContaineredShellOperation.ExitCodes = shellOperation.ExitCodes })
+
+                        let cache =
+                            cache &&& executionRequest.Cache
+                            ||| Cacheability.Dynamic &&& (cache ||| executionRequest.Cache)
+                        cache, ops @ newops
+                    ) (defaultCacheability, [])
 
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {project}"
@@ -80,7 +122,8 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.Project = project
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
-                             Node.Operations = []
+                             Node.Operations = ops
+                             Node.Cache = cache
 
                              Node.Dependencies = children
                              Node.Outputs = target.Outputs
@@ -88,8 +131,7 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
                              Node.ProjectHash = projectConfig.Hash
                              Node.TargetHash = hash
 
-                             Node.IsLeaf = isLeaf
-                             Node.Usage = usage }
+                             Node.IsLeaf = isLeaf }
 
                 if allNodes.TryAdd(nodeId, node) |> not then
                     TerrabuildException.Raise("Unexpected graph building race")
@@ -112,6 +154,8 @@ let build (options: Configuration.Options) (configuration: Configuration.Workspa
     let endedAt = DateTime.UtcNow
     let buildDuration = endedAt - startedAt
     Log.Debug("Graph Build: {duration}", buildDuration)
+
+    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {allNodes.Count} tasks" |> Terminal.writeLine
 
     { Graph.Nodes = allNodes |> Map.ofDict
       Graph.RootNodes = rootNodes }

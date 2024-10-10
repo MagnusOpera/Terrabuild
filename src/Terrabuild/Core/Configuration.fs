@@ -11,27 +11,6 @@ open Errors
 open Terrabuild.PubSub
 
 [<RequireQualifiedAccess>]
-type Options = {
-    Workspace: string
-    WhatIf: bool
-    Debug: bool
-    MaxConcurrency: int
-    Force: bool
-    Retry: bool
-    LocalOnly: bool
-    StartedAt: DateTime
-    NoContainer: bool
-    Targets: string set
-    CI: string option
-    BranchOrTag: string
-    Configuration: string
-    Note: string option
-    Tag: string option
-    Labels: string set option
-    Variables: Map<string, string>
-}
-
-[<RequireQualifiedAccess>]
 type TargetOperation = {
     Hash: string
     Container: string option
@@ -41,16 +20,6 @@ type TargetOperation = {
     Script: Terrabuild.Scripting.Script
     Context: Value
 }
-with
-    static member MarkAsForced = {
-        Hash = "--"
-        Container = None
-        ContainerVariables = Set.empty
-        Extension = ""
-        Command = "👀"
-        Script = Terrabuild.Scripting.Script(typeof<Unit>)
-        Context = Value.Nothing
-    }
 
 [<RequireQualifiedAccess>]
 type Target = {
@@ -104,14 +73,17 @@ type private LoadedProject = {
 }
 
 
-let read (options: Options) =
+let read (options: ConfigOptions.Options) =
     $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
 
     if options.Force then
         $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
+    else
+        if options.Retry then
+            $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
 
-    if options.Retry then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
+    if options.WhatIf then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} whatif mode requested" |> Terminal.writeLine
 
     options.CI
     |> Option.iter (fun ci -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {ci}" |> Terminal.writeLine)
@@ -166,6 +138,7 @@ let read (options: Options) =
             | _ -> expr)
 
     let branchOrTag = options.BranchOrTag
+    let headCommit = options.HeadCommit
 
     let extensions = 
         Extensions.systemExtensions
@@ -306,6 +279,7 @@ let read (options: Options) =
                     |> Map.add "terrabuild_hash" (Expr.String projectHash)
                     |> Map.add "terrabuild_configuration" (Expr.String options.Configuration)
                     |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
+                    |> Map.add "terrabuild_head_commit" (Expr.String headCommit)
                     |> Map.add "terrabuild_retry" (Expr.Boolean options.Retry)
                     |> Map.add "terrabuild_force" (Expr.Boolean options.Force)
                     |> Map.add "terrabuild_ci" (Expr.Boolean options.CI.IsSome)

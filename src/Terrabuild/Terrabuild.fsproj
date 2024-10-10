@@ -11,6 +11,7 @@
     <Compile Include="Contracts/Api.fs" />
     <Compile Include="Contracts/Storage.fs" />
     <Compile Include="Contracts/SourceControl.fs" />
+    <Compile Include="Contracts/ConfigOptions.fs" />
     <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/Exec.fs" />
     <Compile Include="Helpers/Git.fs" />
@@ -23,12 +24,11 @@
     <Compile Include="Core/Auth.fs" />
     <Compile Include="Core/Scaffold.fs" />
     <Compile Include="Core/Configuration.fs" />
-    <Compile Include="Core/Graph/GraphDef.fs" />
-    <Compile Include="Core/Graph/Builder.fs" />
-    <Compile Include="Core/Graph/Consistency.fs" />
-    <Compile Include="Core/Graph/Transformer.fs" />
+    <Compile Include="Core/GraphDef.fs" />
+    <Compile Include="Core/Builder.fs" />
     <Compile Include="Core/Build.fs" />
     <Compile Include="Core/Notification.fs" />
+    <Compile Include="Core/Mermaid.fs" />
     <Compile Include="Core/Logs.fs" />
     <Compile Include="SourceControls/Local.fs" />
     <Compile Include="SourceControls/GitHub.fs" />

@@ -4,6 +4,9 @@ open Microsoft.Extensions.FileSystemGlobbing
 open Collections
 open System
 
+let chmod permissions (path: string) =
+    File.SetUnixFileMode(path, permissions)
+
 let createDirectory (path: string) =
     Directory.CreateDirectory(path) |> ignore
 

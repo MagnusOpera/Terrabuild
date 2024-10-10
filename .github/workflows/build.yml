@@ -38,11 +38,26 @@ jobs:
 
       - name: Build Self
         run: |
+          echo "# Self Build" >> $GITHUB_STEP_SUMMARY
           make self env=dev
 
       - name: Self Integration Tests
+        run: make self-test-all
+
+      - name: Include Build Logs
+        if: always()
         run: |
-          make self-test-all
+          ls -alR > terrabuild-debug.files.txt
+
+          echo "# Self Tests" >> $GITHUB_STEP_SUMMARY
+          echo "## simple" >> $GITHUB_STEP_SUMMARY
+          cat tests/simple/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
+
+          echo "## multirefs" >> $GITHUB_STEP_SUMMARY
+          cat tests/multirefs/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
+
+          echo "## cluster-layers" >> $GITHUB_STEP_SUMMARY
+          cat tests/cluster-layers/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Terrabuild Debug
         uses: actions/upload-artifact@v4
@@ -50,7 +65,7 @@ jobs:
         with:
           name: Terrabuild Debug
           path: |
-            terrabuild-debug.*
+            **/terrabuild-debug.*
 
       - name: Create Test Report
         uses: magnusopera/test-reporter@main

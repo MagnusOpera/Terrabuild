@@ -51,7 +51,7 @@ let readAuthToken (space: string) =
 
 
 let login space token =
-    let api = Api.Factory.create (Some space) (Some token)
+    Api.Factory.create (Some space) (Some token) |> ignore
     addAuthToken space token
 
 let logout space =
