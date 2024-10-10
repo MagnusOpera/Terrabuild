@@ -142,7 +142,6 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
     $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {graph.Nodes.Count} tasks to build" |> Terminal.writeLine
 
-    let startedAt = DateTime.UtcNow
     notification.BuildStarted graph
     api |> Option.iter (fun api -> api.StartBuild())
 
