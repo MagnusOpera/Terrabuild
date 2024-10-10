@@ -157,6 +157,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
     let force = options.Force
     let retry = options.Retry
+    let checkState = options.CheckState
 
     let nodeResults = Concurrent.ConcurrentDictionary<string, TaskRequest * TaskStatus>()
 
@@ -171,7 +172,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
         let buildNode currentCompletionDate =
             let startedAt = DateTime.UtcNow
-            let allowUpload = options.Retry || currentCompletionDate = DateTime.MaxValue
+            let allowUpload = retry || currentCompletionDate = DateTime.MaxValue
 
             notification.NodeBuilding node
 
@@ -252,7 +253,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
                         TaskRequest.Build, buildNode DateTime.MaxValue
                     // task is dynamic - it's complex :-(
-                    elif options.CheckState && (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
+                    elif checkState && (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
                         Log.Debug("{nodeId} is dynamic, checking if state has changed", node.Id)
                         // first restore node because we want to have asset
                         // this **must** be ok since we were able to fetch metadata
@@ -272,7 +273,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                                 TaskRequest.Restore, completionStatus
                             | _ ->
                                 // changes have been detected so continue pretenting it's been rebuilt iif retry is requested
-                                if options.Retry then
+                                if retry then
                                     Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
                                     TaskRequest.Build, completionStatus
                                 else
@@ -346,9 +347,10 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     let headCommit = options.HeadCommit
     let branchOrTag = options.BranchOrTag
 
+    let startedAt = options.StartedAt
     let endedAt = DateTime.UtcNow
     let buildDuration = endedAt - startedAt
-    let totalDuration = endedAt - options.StartedAt
+    let totalDuration = endedAt - startedAt
 
     let nodeStatus =
         let getDependencyStatus _ (node: GraphDef.Node) =
@@ -371,7 +373,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
     let buildInfo = { Summary.Commit = headCommit
                       Summary.BranchOrTag = branchOrTag
-                      Summary.StartedAt = options.StartedAt
+                      Summary.StartedAt = startedAt
                       Summary.EndedAt = endedAt
                       Summary.BuildDuration = buildDuration
                       Summary.TotalDuration = totalDuration
