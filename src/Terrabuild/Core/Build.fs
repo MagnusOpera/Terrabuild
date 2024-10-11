@@ -135,6 +135,19 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
 
     lastStatusCode, stepLogs
 
+
+
+
+
+type Restorable(action: unit -> unit, dependencies: Restorable list) =
+    let restore = lazy(
+        dependencies |> List.iter (fun restorable -> restorable.Restore())
+        action()
+    )
+
+    member _.Restore() = restore.Force()
+
+
 let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
@@ -158,6 +171,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     let checkState = options.CheckState
 
     let nodeResults = Concurrent.ConcurrentDictionary<string, TaskRequest * TaskStatus>()
+    let restorables = Concurrent.ConcurrentDictionary<string, Restorable>()
 
     let processNode (maxCompletionChildren: DateTime) (node: GraphDef.Node) =
         let cacheEntryId = GraphDef.buildCacheKey node
@@ -173,6 +187,13 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             let allowUpload = retry || currentCompletionDate = DateTime.MaxValue
 
             notification.NodeBuilding node
+
+            // restore lazy dependencies
+            node.Dependencies
+            |> Seq.iter (fun nodeId ->
+                match restorables.TryGetValue nodeId with
+                | true, restorable -> restorable.Restore()
+                | _ -> ())
 
             let beforeFiles =
                 if node.IsLeaf then IO.Snapshot.Empty
@@ -213,22 +234,38 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             | Terrabuild.Extensibility.StatusCode.Error _ ->
                 TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
 
-        let restoreNode () =
-            notification.NodeDownloading node
 
-            let cacheEntryId = GraphDef.buildCacheKey node
-            match cache.TryGetSummary allowRemoteCache cacheEntryId with
-            | Some summary ->
-                Log.Debug("{NodeId}: Restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
-                match summary.Outputs with
-                | Some outputs ->
-                    let files = IO.enumerateFiles outputs
-                    IO.copyFiles projectDirectory outputs files |> ignore
-                    api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
-                | _ -> ()
-                TaskStatus.Success summary.EndedAt
-            | _ ->
-                TaskStatus.Failure (DateTime.UtcNow, $"Unable to download build output for {cacheEntryId} for node {node.Id}")
+        let restoreNode () =
+            let callback() =
+                notification.NodeDownloading node
+                let cacheEntryId = GraphDef.buildCacheKey node
+                match cache.TryGetSummary allowRemoteCache cacheEntryId with
+                | Some summary ->
+                    Log.Debug("{NodeId}: Restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                    match summary.Outputs with
+                    | Some outputs ->
+                        let files = IO.enumerateFiles outputs
+                        IO.copyFiles projectDirectory outputs files |> ignore
+                        api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
+                    | _ -> ()
+                    notification.NodeCompleted node TaskRequest.Restore true
+                | _ ->
+                    notification.NodeCompleted node TaskRequest.Restore false
+                    Errors.TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
+
+            let dependencies =
+                node.Dependencies
+                |> Seq.choose (fun nodeId -> 
+                    match restorables.TryGetValue nodeId with
+                    | true, restorable -> Some restorable
+                    | _ -> None)
+                |> List.ofSeq
+
+            notification.NodeScheduled node
+            let restorable = Restorable(callback, dependencies)
+            restorables.TryAdd(node.Id, restorable) |> ignore
+            TaskStatus.Success DateTime.UtcNow
+
 
         let buildRequest, completionDate =
             if force then
