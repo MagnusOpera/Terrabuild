@@ -193,3 +193,60 @@ let computed_must_match_type() =
 
     let computed2 = hub.CreateComputed<string>("computed2")
     (fun () -> hub.GetComputed<int>("computed2") |> ignore) |> should throw typeof<Exception>
+
+
+[<Test>]
+let lazy_computed_single_execution() =
+    let hub = Hub.Create(1)
+
+    let value1 = hub.GetComputed<int>("computed1")
+    let computed2 = hub.CreateComputed<string>("computed2")
+
+    let computed1 = hub.CreateComputed<int>("computed1")
+    let value2 = hub.GetComputed<string>("computed2")
+
+    let lazyValue1 = hub.CreateLazyComputed<int>("lazyComputed1")
+
+    let mutable triggered0 = false
+    let callback0() =
+        triggered0 <- true
+
+    let mutable triggered1 = false
+    let callback1() =
+        value1.Value |> should equal 42
+        computed2.Value <- "tralala"
+        triggered1 <- true
+
+    let mutable triggered2 = false
+    let mutable triggered3 = false
+    let callback2() =
+        value1.Value |> should equal 42
+        value2.Value |> should equal "tralala"
+        triggered2 <- true
+
+        // callback3 must be immediately triggered as computed1/2 are immediately available
+        let callback3() =
+            // getting another computed lead to same value
+            value1.Value |> should equal 42
+            value2.Value |> should equal "tralala"
+            hub.GetComputed<int>("computed1").Value |> should equal 42
+            triggered3 <- true
+
+        hub.Subscribe [| value1; value2 |] callback3
+
+
+    hub.Subscribe [| |] callback0
+    hub.Subscribe [| value1 |] callback1
+    hub.Subscribe [| value1; value2 |] callback2
+
+    computed1.Value <- 42
+
+    let status = hub.WaitCompletion()
+
+    status |> should equal Status.Ok
+    value1.Value |> should equal 42
+    value2.Value |> should equal "tralala"
+    triggered0 |> should equal true
+    triggered1 |> should equal true
+    triggered2 |> should equal true
+    triggered3 |> should equal true

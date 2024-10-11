@@ -96,21 +96,16 @@ type private Signal(name, eventQueue: IEventQueue) as this =
 
 type IComputedGetter<'T> =
     inherit ISignal
-    abstract Name: string
     abstract Value: 'T with get
 
 type IComputedSetter<'T> =
     abstract Value: 'T with set
 
 
-type private Computed<'T>(name, eventQueue) =
-    inherit Signal(name, eventQueue)
-
+type private Computed<'T>(signal: Signal) =
     let mutable value = None
 
     interface IComputedGetter<'T> with
-        member _.Name = name
-
         member this.Value =
             lock this (fun () ->
                 match value with
@@ -125,10 +120,33 @@ type private Computed<'T>(name, eventQueue) =
                 | Some _ -> failwith "Computed has already a value"
                 | _ ->
                     value <- Some newValue
-                    this.Raise()
+                    signal.Raise()
             )
 
 
+type private LazyComputed<'T>(signal: Signal, callback) =
+    let mutable value = None
+
+    interface IComputedGetter<'T> with
+        member this.Value =
+            lock this (fun () ->
+                match value with
+                | Some value -> value
+                | _ -> 
+                    let newValue = callback()
+                    value <- Some newValue
+                    newValue
+            )
+
+    interface IComputedSetter<'T> with
+        member this.Value with set(newValue) =
+            lock this (fun () ->
+                match value with
+                | Some _ -> failwith "Computed has already a value"
+                | _ ->
+                    value <- Some newValue
+                    signal.Raise()
+            )
 
 
 type private Subscription(name, eventQueue, signals: ISignal array) as this =
@@ -156,6 +174,7 @@ type Status =
 type IHub =
     abstract GetComputed<'T>: name:string -> IComputedGetter<'T>
     abstract CreateComputed<'T>: name:string -> IComputedSetter<'T>
+    abstract CreateLazyComputed<'T>: name:string -> callback: (Unit -> 'T) -> IComputedSetter<'T>
 
     // array used because it's covariant
     abstract Subscribe: signals:ISignal array -> handler:SignalCompleted -> unit
@@ -165,22 +184,24 @@ type IHub =
 
 type Hub(maxConcurrency) =
     let eventQueue = EventQueue(maxConcurrency)
-    let computeds = ConcurrentDictionary<string, Signal>()
+    let signals = ConcurrentDictionary<string, Signal>()
     let subscriptions = ConcurrentDictionary<string, Signal>()
 
     interface IHub with
         member _.GetComputed<'T> name =
-            let getOrAdd _ = Computed<'T>(name, eventQueue) :> Signal
-            match computeds.GetOrAdd(name, getOrAdd) with
-            | :? Computed<'T> as computed -> computed
-            | _ -> failwith "Unexpected Signal type"
+            let getOrAdd _ = Signal(name, eventQueue)
+            let signal = signals.GetOrAdd(name, getOrAdd)
+            Computed<'T>(signal)
 
         member _.CreateComputed<'T> name =
-            let getOrAdd _ = Computed<'T>(name, eventQueue) :> Signal
-            match computeds.GetOrAdd(name, getOrAdd) with
-            | :? Computed<'T> as computed -> 
-                computed
-            | _ -> failwith "Unexpected Signal type"
+            let getOrAdd _ = Signal(name, eventQueue)
+            let signal = signals.GetOrAdd(name, getOrAdd)
+            Computed<'T>(signal)
+
+        member _.CreateLazyComputed name callback = 
+            let getOrAdd _ = Signal(name, eventQueue)
+            let signal = signals.GetOrAdd(name, getOrAdd)
+            LazyComputed<'T>(signal, callback)
 
         member _.Subscribe signals handler =
             let name =
