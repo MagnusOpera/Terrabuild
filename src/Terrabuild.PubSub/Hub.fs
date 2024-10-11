@@ -61,107 +61,71 @@ type private EventQueue(maxConcurrency: int) as this =
 
 type SignalCompleted = unit -> unit
 
-type ISignal = interface end
+type ISignal =
+    abstract Name: string
+    abstract IsRaised: unit -> bool
+    abstract Subscribe: SignalCompleted -> unit
 
-type private Signal(name, eventQueue: IEventQueue) as this =
-    let subscribers = Queue<SignalCompleted>()
-    let mutable raised = false
-
-    member val Name = name
-
-    member _.IsRaised() =
-        lock this (fun () -> raised)
-
-    member _.Subscribe(onCompleted: SignalCompleted) =
-        lock this (fun () -> 
-            if raised then eventQueue.Enqueue(onCompleted)
-            else subscribers.Enqueue(onCompleted)
-        )
-
-    member _.Raise() =
-        lock this (fun () ->
-            if raised then failwith "Signal is already raised"
-            else
-                let rec notify() =
-                    match subscribers.TryDequeue() with
-                    | true, subscriber ->
-                        eventQueue.Enqueue(subscriber)
-                        notify()
-                    | _ -> ()
-
-                raised <- true
-                notify()
-        )
-
-
-type IComputedGetter<'T> =
+type ISignal<'T> =
     inherit ISignal
-    abstract Value: 'T with get
+    abstract Value: 'T with get, set
 
-type IComputedSetter<'T> =
-    abstract Value: 'T with set
+type private Signal<'T>(name, eventQueue: IEventQueue, lazyValue: (unit -> 'T) option) as this =
+    let subscribers = Queue<SignalCompleted>()
+    let mutable raised = None
 
+    interface ISignal with
+        member _.Name = name
 
-type private Computed<'T>(signal: Signal) =
-    let mutable value = None
+        member _.IsRaised() =
+            lock this (fun () -> raised.IsSome )
 
-    interface IComputedGetter<'T> with
-        member this.Value =
+        member _.Subscribe(onCompleted: SignalCompleted) =
             lock this (fun () ->
-                match value with
-                | Some value -> value
-                | _ -> failwith "Computed has no value set"            
+                match raised with
+                | Some _ -> eventQueue.Enqueue(onCompleted)
+                | _ -> subscribers.Enqueue(onCompleted)
             )
 
-    interface IComputedSetter<'T> with
-        member this.Value with set(newValue) =
-            lock this (fun () ->
-                match value with
-                | Some _ -> failwith "Computed has already a value"
-                | _ ->
-                    value <- Some newValue
-                    signal.Raise()
-            )
-
-
-type private LazyComputed<'T>(signal: Signal, callback) =
-    let mutable value = None
-
-    interface IComputedGetter<'T> with
-        member this.Value =
-            lock this (fun () ->
-                match value with
-                | Some value -> value
+    interface ISignal<'T> with
+        member _.Value
+            with get () = lock this (fun () -> 
+                match raised with
+                | Some raised -> raised
                 | _ -> 
-                    let newValue = callback()
-                    value <- Some newValue
-                    newValue
-            )
+                    match lazyValue with
+                    | Some lazyValue ->
+                        let value = lazyValue()
+                        (this :> ISignal<'T>).Value <- value
+                        value
+                    | _ -> failwith "Signal is not raised")
 
-    interface IComputedSetter<'T> with
-        member this.Value with set(newValue) =
-            lock this (fun () ->
-                match value with
-                | Some _ -> failwith "Computed has already a value"
-                | _ ->
-                    value <- Some newValue
-                    signal.Raise()
-            )
+            and set value = lock this (fun () ->
+                match raised with
+                | Some _ -> failwith "Signal is already raised"
+                | _ -> 
+                    let rec notify() =
+                        match subscribers.TryDequeue() with
+                        | true, subscriber ->
+                            eventQueue.Enqueue(subscriber)
+                            notify()
+                        | _ -> ()
+
+                    raised <- Some value
+                    notify())
 
 
-type private Subscription(name, eventQueue, signals: ISignal array) as this =
-    inherit Signal(name, eventQueue)
-
+type private Subscription(signal: ISignal<Unit>, signals: ISignal array) as this =
     let mutable count = signals.Length
 
     do
-        if count = 0 then base.Raise()
-        else signals |> Seq.iter (fun signal -> (signal :?> Signal).Subscribe(this.Callback))
+        if count = 0 then signal.Value <- ()
+        else signals |> Seq.iter (fun signal -> signal.Subscribe(this.Callback))
 
     member private _.Callback() =
         let count = lock this (fun () -> count <- count - 1; count)
         match count with
-        | 0 -> base.Raise()
+        | 0 -> signal.Value <- ()
         | _ -> ()
  
 
@@ -172,11 +136,8 @@ type Status =
     | SubscriptionError of Exception
 
 type IHub =
-    abstract GetComputed<'T>: name:string -> IComputedGetter<'T>
-    abstract CreateComputed<'T>: name:string -> IComputedSetter<'T>
-    abstract CreateLazyComputed<'T>: name:string -> callback: (Unit -> 'T) -> IComputedSetter<'T>
-
-    // array used because it's covariant
+    abstract GetSignal<'T>: name:string -> ISignal<'T>
+    abstract GetLazySignal<'T>: name: string -> callback: (Unit -> 'T) -> ISignal<'T>
     abstract Subscribe: signals:ISignal array -> handler:SignalCompleted -> unit
 
     abstract WaitCompletion: unit -> Status
@@ -184,35 +145,35 @@ type IHub =
 
 type Hub(maxConcurrency) =
     let eventQueue = EventQueue(maxConcurrency)
-    let signals = ConcurrentDictionary<string, Signal>()
-    let subscriptions = ConcurrentDictionary<string, Signal>()
+    let signals = ConcurrentDictionary<string, ISignal>()
+    let subscriptions = ConcurrentDictionary<string, ISignal>()
 
     interface IHub with
-        member _.GetComputed<'T> name =
-            let getOrAdd _ = Signal(name, eventQueue)
+        member _.GetSignal<'T> name =
+            let getOrAdd _ = Signal<'T>(name, eventQueue, None) :> ISignal
             let signal = signals.GetOrAdd(name, getOrAdd)
-            Computed<'T>(signal)
+            match signal with
+            | :? Signal<'T> as signal -> signal
+            | _ -> failwith "Unexpected Signal type"
 
-        member _.CreateComputed<'T> name =
-            let getOrAdd _ = Signal(name, eventQueue)
+        member _.GetLazySignal<'T> name callback = 
+            let getOrAdd _ = Signal<'T>(name, eventQueue, Some callback) :> ISignal
             let signal = signals.GetOrAdd(name, getOrAdd)
-            Computed<'T>(signal)
-
-        member _.CreateLazyComputed name callback = 
-            let getOrAdd _ = Signal(name, eventQueue)
-            let signal = signals.GetOrAdd(name, getOrAdd)
-            LazyComputed<'T>(signal, callback)
+            match signal with
+            | :? Signal<'T> as signal -> signal
+            | _ -> failwith "Unexpected Signal type"
 
         member _.Subscribe signals handler =
             let name =
                 match signals with
                 | [| |] -> Guid.NewGuid().ToString()
                 | signals ->
-                    let names = signals |> Array.map (fun signal -> (signal :?> Signal).Name)
+                    let names = signals |> Array.map (fun signal -> signal.Name)
                     String.Join(",", names)
-            let subscription = Subscription(name, eventQueue, signals)
-            subscriptions.TryAdd(name, subscription) |> ignore
-            subscription.Subscribe(handler)
+            let signal = Signal<Unit>(name, eventQueue, None)
+            let subscription = Subscription(signal, signals)
+            subscriptions.TryAdd(name, signal) |> ignore
+            (signal :> ISignal).Subscribe(handler)
 
         member _.WaitCompletion() =
             match eventQueue.WaitCompletion() with

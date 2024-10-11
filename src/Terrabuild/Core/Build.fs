@@ -295,14 +295,14 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     let rec schedule nodeId =
         if scheduledNodes.TryAdd(nodeId, true) then
             let node = graph.Nodes[nodeId]
-            let nodeComputed = hub.CreateComputed<DateTime> nodeId
+            let nodeComputed = hub.GetSignal<DateTime> nodeId
 
             // await dependencies
             let awaitedDependencies =
                 node.Dependencies
                 |> Seq.map (fun awaitedProjectId ->
                     schedule awaitedProjectId
-                    hub.GetComputed<DateTime> awaitedProjectId)
+                    hub.GetSignal<DateTime> awaitedProjectId)
                 |> Array.ofSeq
 
             let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
