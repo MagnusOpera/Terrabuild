@@ -253,18 +253,23 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     notification.NodeCompleted node TaskRequest.Restore false
                     Errors.TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
-            let dependencies =
-                node.Dependencies
-                |> Seq.choose (fun nodeId -> 
-                    match restorables.TryGetValue nodeId with
-                    | true, restorable -> Some restorable
-                    | _ -> None)
-                |> List.ofSeq
-
             notification.NodeScheduled node
-            let restorable = Restorable(callback, dependencies)
-            restorables.TryAdd(node.Id, restorable) |> ignore
-            TaskStatus.Success DateTime.UtcNow
+            let cacheEntryId = GraphDef.buildCacheKey node
+            match tryGetSummaryOnly cacheEntryId with
+            | Some summary -> 
+                let dependencies =
+                    node.Dependencies
+                    |> Seq.choose (fun nodeId -> 
+                        match restorables.TryGetValue nodeId with
+                        | true, restorable -> Some restorable
+                        | _ -> None)
+                    |> List.ofSeq
+
+                let restorable = Restorable(callback, dependencies)
+                restorables.TryAdd(node.Id, restorable) |> ignore
+                TaskStatus.Success summary.EndedAt
+            | _ ->
+                TaskStatus.Failure (DateTime.UtcNow, $"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
 
         let buildRequest, completionDate =
