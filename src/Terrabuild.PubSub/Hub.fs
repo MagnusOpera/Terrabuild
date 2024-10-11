@@ -122,10 +122,6 @@ type private Subscription(signal: ISignal<Unit>, signals: ISignal array) as this
         if count = 0 then signal.Value <- ()
         else signals |> Seq.iter (fun signal -> signal.Subscribe(this.Callback))
 
-    member _.IsRaised() = signal.IsRaised()
-
-    member _.Name = signal.Name
-
     member private _.Callback() =
         let count = lock this (fun () -> count <- count - 1; count)
         match count with
@@ -148,7 +144,7 @@ type IHub =
 type Hub(maxConcurrency) =
     let eventQueue = EventQueue(maxConcurrency)
     let signals = ConcurrentDictionary<string, ISignal>()
-    let subscriptions = ConcurrentDictionary<string, Subscription>()
+    let subscriptions = ConcurrentDictionary<string, ISignal>()
 
     interface IHub with
         member _.GetSignal<'T> name =
@@ -167,7 +163,7 @@ type Hub(maxConcurrency) =
                     String.Join(",", names)
             let signal = Signal<Unit>(name, eventQueue, None)
             let subscription = Subscription(signal, signals)
-            subscriptions.TryAdd(name, subscription) |> ignore
+            subscriptions.TryAdd(name, signal) |> ignore
             (signal :> ISignal).Subscribe(handler)
 
         member _.WaitCompletion() =
