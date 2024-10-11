@@ -122,6 +122,10 @@ type private Subscription(signal: ISignal<Unit>, signals: ISignal array) as this
         if count = 0 then signal.Value <- ()
         else signals |> Seq.iter (fun signal -> signal.Subscribe(this.Callback))
 
+    member _.IsRaised() = signal.IsRaised()
+
+    member _.Name = signal.Name
+
     member private _.Callback() =
         let count = lock this (fun () -> count <- count - 1; count)
         match count with
@@ -137,27 +141,18 @@ type Status =
 
 type IHub =
     abstract GetSignal<'T>: name:string -> ISignal<'T>
-    abstract GetLazySignal<'T>: name: string -> callback: (Unit -> 'T) -> ISignal<'T>
     abstract Subscribe: signals:ISignal array -> handler:SignalCompleted -> unit
-
     abstract WaitCompletion: unit -> Status
 
 
 type Hub(maxConcurrency) =
     let eventQueue = EventQueue(maxConcurrency)
     let signals = ConcurrentDictionary<string, ISignal>()
-    let subscriptions = ConcurrentDictionary<string, ISignal>()
+    let subscriptions = ConcurrentDictionary<string, Subscription>()
 
     interface IHub with
         member _.GetSignal<'T> name =
             let getOrAdd _ = Signal<'T>(name, eventQueue, None) :> ISignal
-            let signal = signals.GetOrAdd(name, getOrAdd)
-            match signal with
-            | :? Signal<'T> as signal -> signal
-            | _ -> failwith "Unexpected Signal type"
-
-        member _.GetLazySignal<'T> name callback = 
-            let getOrAdd _ = Signal<'T>(name, eventQueue, Some callback) :> ISignal
             let signal = signals.GetOrAdd(name, getOrAdd)
             match signal with
             | :? Signal<'T> as signal -> signal
@@ -172,7 +167,7 @@ type Hub(maxConcurrency) =
                     String.Join(",", names)
             let signal = Signal<Unit>(name, eventQueue, None)
             let subscription = Subscription(signal, signals)
-            subscriptions.TryAdd(name, signal) |> ignore
+            subscriptions.TryAdd(name, subscription) |> ignore
             (signal :> ISignal).Subscribe(handler)
 
         member _.WaitCompletion() =
