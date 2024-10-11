@@ -236,23 +236,6 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
 
         let restoreNode () =
-            let callback() =
-                notification.NodeDownloading node
-                let cacheEntryId = GraphDef.buildCacheKey node
-                match cache.TryGetSummary allowRemoteCache cacheEntryId with
-                | Some summary ->
-                    Log.Debug("{NodeId}: Restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
-                    match summary.Outputs with
-                    | Some outputs ->
-                        let files = IO.enumerateFiles outputs
-                        IO.copyFiles projectDirectory outputs files |> ignore
-                        api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
-                    | _ -> ()
-                    notification.NodeCompleted node TaskRequest.Restore true
-                | _ ->
-                    notification.NodeCompleted node TaskRequest.Restore false
-                    Errors.TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
-
             notification.NodeScheduled node
             let cacheEntryId = GraphDef.buildCacheKey node
             match tryGetSummaryOnly cacheEntryId with
@@ -264,6 +247,22 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         | true, restorable -> Some restorable
                         | _ -> None)
                     |> List.ofSeq
+
+                let callback() =
+                    notification.NodeDownloading node
+                    match cache.TryGetSummary allowRemoteCache cacheEntryId with
+                    | Some summary ->
+                        Log.Debug("{NodeId}: Restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                        match summary.Outputs with
+                        | Some outputs ->
+                            let files = IO.enumerateFiles outputs
+                            IO.copyFiles projectDirectory outputs files |> ignore
+                            api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
+                        | _ -> ()
+                        notification.NodeCompleted node TaskRequest.Restore true
+                    | _ ->
+                        notification.NodeCompleted node TaskRequest.Restore false
+                        Errors.TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
                 let restorable = Restorable(callback, dependencies)
                 restorables.TryAdd(node.Id, restorable) |> ignore
