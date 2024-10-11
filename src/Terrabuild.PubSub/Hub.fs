@@ -70,7 +70,7 @@ type ISignal<'T> =
     inherit ISignal
     abstract Value: 'T with get, set
 
-type private Signal<'T>(name, eventQueue: IEventQueue, lazyValue: (unit -> 'T) option) as this =
+type private Signal<'T>(name, eventQueue: IEventQueue) as this =
     let subscribers = Queue<SignalCompleted>()
     let mutable raised = None
 
@@ -92,13 +92,7 @@ type private Signal<'T>(name, eventQueue: IEventQueue, lazyValue: (unit -> 'T) o
             with get () = lock this (fun () -> 
                 match raised with
                 | Some raised -> raised
-                | _ -> 
-                    match lazyValue with
-                    | Some lazyValue ->
-                        let value = lazyValue()
-                        (this :> ISignal<'T>).Value <- value
-                        value
-                    | _ -> failwith "Signal is not raised")
+                | _ -> failwith "Signal is not raised")
 
             and set value = lock this (fun () ->
                 match raised with
@@ -148,7 +142,7 @@ type Hub(maxConcurrency) =
 
     interface IHub with
         member _.GetSignal<'T> name =
-            let getOrAdd _ = Signal<'T>(name, eventQueue, None) :> ISignal
+            let getOrAdd _ = Signal<'T>(name, eventQueue) :> ISignal
             let signal = signals.GetOrAdd(name, getOrAdd)
             match signal with
             | :? Signal<'T> as signal -> signal
@@ -161,7 +155,7 @@ type Hub(maxConcurrency) =
                 | signals ->
                     let names = signals |> Array.map (fun signal -> signal.Name)
                     String.Join(",", names)
-            let signal = Signal<Unit>(name, eventQueue, None)
+            let signal = Signal<Unit>(name, eventQueue)
             let subscription = Subscription(signal, signals)
             subscriptions.TryAdd(name, signal) |> ignore
             (signal :> ISignal).Subscribe(handler)
