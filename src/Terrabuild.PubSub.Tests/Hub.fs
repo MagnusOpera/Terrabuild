@@ -9,11 +9,11 @@ open System
 let successful() =
     let hub = Hub.Create(1)
 
-    let value1 = hub.GetComputed<int>("computed1")
-    let computed2 = hub.CreateComputed<string>("computed2")
+    let value1 = hub.GetSignal<int>("computed1")
+    let computed2 = hub.GetSignal<string>("computed2")
 
-    let computed1 = hub.CreateComputed<int>("computed1")
-    let value2 = hub.GetComputed<string>("computed2")
+    let computed1 = hub.GetSignal<int>("computed1")
+    let value2 = hub.GetSignal<string>("computed2")
 
     let mutable triggered0 = false
     let callback0() =
@@ -37,7 +37,7 @@ let successful() =
             // getting another computed lead to same value
             value1.Value |> should equal 42
             value2.Value |> should equal "tralala"
-            hub.GetComputed<int>("computed1").Value |> should equal 42
+            hub.GetSignal<int>("computed1").Value |> should equal 42
             triggered3 <- true
 
         hub.Subscribe [| value1; value2 |] callback3
@@ -64,13 +64,13 @@ let successful() =
 let exception_in_callback_is_error() =
     let hub = Hub.Create(1)
 
-    let value1 = hub.GetComputed<int>("computed1")
-    let computed2 = hub.CreateComputed<string>("computed2")
-    let value3 = hub.GetComputed<float>("computed3")
+    let value1 = hub.GetSignal<int>("computed1")
+    let computed2 = hub.GetSignal<string>("computed2")
+    let value3 = hub.GetSignal<float>("computed3")
 
-    let computed1 = hub.CreateComputed<int>("computed1")
-    let value2 = hub.GetComputed<string>("computed2")
-    let computed3 = hub.CreateComputed<float>("computed3")
+    let computed1 = hub.GetSignal<int>("computed1")
+    let value2 = hub.GetSignal<string>("computed2")
+    let computed3 = hub.GetSignal<float>("computed3")
 
     let mutable triggered1 = false
     let callback() =
@@ -106,13 +106,13 @@ let exception_in_callback_is_error() =
 let unsignaled_subscription1_is_error() =
     let hub = Hub.Create(1)
 
-    let value1 = hub.GetComputed<int>("computed1")
-    let computed2 = hub.CreateComputed<string>("computed2")
-    let value3 = hub.GetComputed<float>("computed3")
+    let value1 = hub.GetSignal<int>("computed1")
+    let computed2 = hub.GetSignal<string>("computed2")
+    let value3 = hub.GetSignal<float>("computed3")
 
-    let computed1 = hub.CreateComputed<int>("computed1")
-    let value2 = hub.GetComputed<string>("computed2")
-    let computed3 = hub.CreateComputed<float>("computed3")
+    let computed1 = hub.GetSignal<int>("computed1")
+    let value2 = hub.GetSignal<string>("computed2")
+    let computed3 = hub.GetSignal<float>("computed3")
 
     let mutable triggered1 = false
     let callback() =
@@ -148,13 +148,13 @@ let unsignaled_subscription1_is_error() =
 let unsignaled_subscription2_is_error() =
     let hub = Hub.Create(1)
 
-    let value1 = hub.GetComputed<int>("computed1")
-    let computed2 = hub.CreateComputed<string>("computed2")
-    let value3 = hub.GetComputed<float>("computed3")
+    let value1 = hub.GetSignal<int>("computed1")
+    let computed2 = hub.GetSignal<string>("computed2")
+    let value3 = hub.GetSignal<float>("computed3")
 
-    let computed1 = hub.CreateComputed<int>("computed1")
-    let value2 = hub.GetComputed<string>("computed2")
-    let computed3 = hub.CreateComputed<float>("computed3")
+    let computed1 = hub.GetSignal<int>("computed1")
+    let value2 = hub.GetSignal<string>("computed2")
+    let computed3 = hub.GetSignal<float>("computed3")
 
     let mutable triggered1 = false
     let callback() =
@@ -188,8 +188,8 @@ let unsignaled_subscription2_is_error() =
 let computed_must_match_type() =
     let hub = Hub.Create(1)
 
-    let value1 = hub.GetComputed<int>("computed1")
-    (fun () -> hub.CreateComputed<string>("computed1") |> ignore) |> should throw typeof<Exception>
+    let value1 = hub.GetSignal<int>("computed1")
+    (fun () -> hub.GetSignal<string>("computed1") |> ignore) |> should throw typeof<Exception>
 
-    let computed2 = hub.CreateComputed<string>("computed2")
-    (fun () -> hub.GetComputed<int>("computed2") |> ignore) |> should throw typeof<Exception>
+    let computed2 = hub.GetSignal<string>("computed2")
+    (fun () -> hub.GetSignal<int>("computed2") |> ignore) |> should throw typeof<Exception>

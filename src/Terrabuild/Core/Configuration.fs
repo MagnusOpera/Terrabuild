@@ -434,7 +434,7 @@ let read (options: ConfigOptions.Options) =
             // await dependencies to be loaded
             let awaitedProjects =
                 (loadedProject.Dependencies + loadedProject.Links)
-                |> Seq.map (fun awaitedProjectId -> hub.GetComputed<Project> awaitedProjectId)
+                |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
                 |> Array.ofSeq
 
             let awaitedSignals = awaitedProjects |> Array.map (fun entry -> entry :> ISignal)
@@ -448,7 +448,7 @@ let read (options: ConfigOptions.Options) =
                 let project = finalizeProject projectId loadedProject projectDependencies
                 projects.TryAdd(projectId, project) |> ignore
 
-                let loadedProjectSignal = hub.CreateComputed<Project> projectId
+                let loadedProjectSignal = hub.GetSignal<Project> projectId
                 loadedProjectSignal.Value <- project)
         )
 
