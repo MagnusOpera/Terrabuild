@@ -7,6 +7,7 @@ type Function =
     | Trim
     | Upper
     | Lower
+    | Replace
     | Version
     | Item
     | TryItem
