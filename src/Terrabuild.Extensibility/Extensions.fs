@@ -39,11 +39,6 @@ type StatusCode =
     | SuccessUpdate
     | Success
     | Error of exitCode:int
-with
-    member this.IsOkish =
-        match this with
-        | Success | SuccessUpdate -> true
-        | _ -> false
 
 [<RequireQualifiedAccess>]
 type ShellOperation = {

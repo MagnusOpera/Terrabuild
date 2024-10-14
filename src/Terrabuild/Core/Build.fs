@@ -55,6 +55,13 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
+let isOkish statusCode =
+    match statusCode with
+    | Terrabuild.Extensibility.StatusCode.Success
+    | Terrabuild.Extensibility.StatusCode.SuccessUpdate -> true
+    | _ -> false
+
+
 let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) projectDirectory homeDir tmpDir =
     // run actions if any
     let allCommands =
@@ -102,7 +109,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
 
-    while cmdLineIndex < allCommands.Length && lastStatusCode.IsOkish do
+    while cmdLineIndex < allCommands.Length && isOkish lastStatusCode do
         let startedAt =
             if cmdLineIndex > 0 then DateTime.UtcNow
             else cmdFirstStartedAt
@@ -207,7 +214,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             let newFiles = afterFiles - beforeFiles
             let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
-            let successful = lastStatusCode.IsOkish
+            let successful = isOkish lastStatusCode
             let endedAt = DateTime.UtcNow
             let summary = { Cache.TargetSummary.Project = node.Project
                             Cache.TargetSummary.Target = node.Target
