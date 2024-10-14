@@ -73,7 +73,7 @@ type Terraform() =
                                    2, StatusCode.SuccessUpdate ]
             checkOp "terraform" $"plan -detailed-exitcode -out=terrabuild.planfile{vars}" statusCode
         ]
-        execRequest Cacheability.Dynamic ops
+        execRequest Cacheability.External ops
   
 
     /// <summary weight="4" title="Apply plan file.">

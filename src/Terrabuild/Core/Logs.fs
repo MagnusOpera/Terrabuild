@@ -99,8 +99,8 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
                 match originSummary with
                 | Some (origin, summary) ->
                     let duration = summary.Duration
-                    let isDynamic = (summary.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never
-                    if origin = Origin.Local || isDynamic then cost + duration, gain
+                    let isExternal = (summary.Cache &&& Terrabuild.Extensibility.Cacheability.External) <> Terrabuild.Extensibility.Cacheability.Never
+                    if origin = Origin.Local || isExternal then cost + duration, gain
                     else cost, gain + duration
                 | _ -> cost, gain
             ) (TimeSpan.Zero, TimeSpan.Zero)

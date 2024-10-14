@@ -112,7 +112,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
                         let cache =
                             cache &&& executionRequest.Cache
-                            ||| Cacheability.Dynamic &&& (cache ||| executionRequest.Cache)
+                            ||| Cacheability.External &&& (cache ||| executionRequest.Cache)
                         cache, ops @ newops
                     ) (defaultCacheability, [])
 

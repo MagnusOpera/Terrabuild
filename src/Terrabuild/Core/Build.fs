@@ -291,9 +291,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     elif retry && not summary.IsSuccessful then
                         Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
                         TaskRequest.Build, buildNode DateTime.MaxValue
-                    // task is dynamic - it's complex :-(
-                    elif checkState && (node.Cache &&& Terrabuild.Extensibility.Cacheability.Dynamic) <> Terrabuild.Extensibility.Cacheability.Never then
-                        Log.Debug("{nodeId} is dynamic, checking if state has changed", node.Id)
+                    // state is external - it's getting complex :-(
+                    elif checkState && (node.Cache &&& Terrabuild.Extensibility.Cacheability.External) <> Terrabuild.Extensibility.Cacheability.Never then
+                        Log.Debug("{nodeId} is external, checking if state has changed", node.Id)
                         // first restore node because we want to have asset
                         // this **must** be ok since we were able to fetch metadata
                         let restoreCompletionStatus = restoreNode()

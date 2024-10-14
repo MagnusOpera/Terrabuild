@@ -58,7 +58,7 @@ type Cacheability =
     | Local = 1
     | Remote = 2
     | Always = 3 // Local + Remote
-    | Dynamic = 4 // NOTE: mutually exclusive with Local or Remote
+    | External = 4 // NOTE: mutually exclusive with Local or Remote
 
 type ShellOperations = ShellOperation list
 
