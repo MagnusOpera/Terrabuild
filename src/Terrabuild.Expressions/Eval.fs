@@ -48,6 +48,9 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Lower, [Value.String str] -> Value.String (str.ToLowerInvariant())
                 | Function.Lower, [Value.Nothing] -> Value.Nothing
 
+                | Function.Replace, [Value.String str; Value.String value; Value.String newValue] -> Value.String (str.Replace(value, newValue))
+                | Function.Replace, [Value.Nothing; _; _] -> Value.Nothing
+
                 | Function.Version, [Value.String str] ->
                     let projectName = FS.workspaceRelative context.WorkspaceDir context.ProjectDir str
                     match context.Versions |> Map.tryFind projectName with
