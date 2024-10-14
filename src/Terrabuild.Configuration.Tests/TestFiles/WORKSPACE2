@@ -45,6 +45,7 @@ extension dotnet {
   defaults = {
     configuration1: $map.["toto"]
     configuration2: $map.[titi]
+    configuration3: replace("toto titi" "toto" "titi")
   }
 }
 
