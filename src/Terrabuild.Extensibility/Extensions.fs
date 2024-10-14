@@ -30,7 +30,6 @@ type ActionContext = {
     Debug: bool
     CI: bool
     Command: string
-    BranchOrTag: string
     ProjectHash: string
 }
 

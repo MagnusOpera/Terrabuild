@@ -44,18 +44,12 @@ type Docker() =
     /// </summary>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
     /// <param name="tag" required="false" example="&quot;1.2.3-stable&quot;">Apply tag on image (use branch or tag otherwise).</param>
-    static member push (context: ActionContext) (image: string) (tag: string option)=
-        let imageTag =
-            match tag with
-            | Some tag -> tag
-            | _ -> context.BranchOrTag.Replace("/", "-")
-
-        let ops =
-            [
+    static member push (context: ActionContext) (image: string) (tag: string)=
+        let ops = [
                 if context.CI then
-                    shellOp "docker" $"buildx imagetools create -t {image}:{imageTag} {image}:{context.ProjectHash}"
+                    shellOp "docker" $"buildx imagetools create -t {image}:{tag} {image}:{context.ProjectHash}"
                 else
-                    shellOp "docker" $"tag {image}:{context.ProjectHash} {image}:{imageTag}"
+                    shellOp "docker" $"tag {image}:{context.ProjectHash} {image}:{tag}"
             ]
 
         let cacheability =

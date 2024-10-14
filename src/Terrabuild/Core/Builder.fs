@@ -83,7 +83,6 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                             Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                             Terrabuild.Extensibility.ActionContext.CI = options.CI.IsSome
                             Terrabuild.Extensibility.ActionContext.Command = operation.Command
-                            Terrabuild.Extensibility.ActionContext.BranchOrTag = options.BranchOrTag
                             Terrabuild.Extensibility.ActionContext.ProjectHash = projectConfig.Hash
                         }
 
