@@ -274,6 +274,7 @@ let read (options: ConfigOptions.Options) =
 
                 let actionVariables =
                     buildVariables
+                    |> Map.add "terrabuild_debug" (Expr.Boolean options.Debug)
                     |> Map.add "terrabuild_project" (Expr.String projectId)
                     |> Map.add "terrabuild_target" (Expr.String targetName)
                     |> Map.add "terrabuild_hash" (Expr.String projectHash)
