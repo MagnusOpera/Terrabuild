@@ -27,6 +27,7 @@ rule token = parse
     | "upper" { UPPER }
     | "lower" { LOWER }
     | "replace" { REPLACE }
+    | "count" { COUNT }
     | "version" { VERSION }
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }

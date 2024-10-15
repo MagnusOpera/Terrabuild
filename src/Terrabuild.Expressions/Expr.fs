@@ -8,6 +8,7 @@ type Function =
     | Upper
     | Lower
     | Replace
+    | Count
     | Version
     | Item
     | TryItem

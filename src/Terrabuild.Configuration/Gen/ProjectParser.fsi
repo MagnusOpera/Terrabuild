@@ -23,6 +23,7 @@ type token =
   | UPPER
   | LOWER
   | REPLACE
+  | COUNT
   | VERSION
   | DOUBLE_QUESTION
   | QUESTION
@@ -73,6 +74,7 @@ type tokenId =
     | TOKEN_UPPER
     | TOKEN_LOWER
     | TOKEN_REPLACE
+    | TOKEN_COUNT
     | TOKEN_VERSION
     | TOKEN_DOUBLE_QUESTION
     | TOKEN_QUESTION
@@ -129,6 +131,7 @@ type nonTerminalId =
     | NONTERM_Expr
     | NONTERM_TargetIdentifier
     | NONTERM_ExtensionIdentifier
+    | NONTERM_ExprIndex
     | NONTERM_Bool
     | NONTERM_String
     | NONTERM_ExprList
