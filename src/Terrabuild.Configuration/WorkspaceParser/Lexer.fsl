@@ -28,11 +28,11 @@ rule token = parse
     | "lower" { LOWER }
     | "replace" { REPLACE }
     | "version" { VERSION }
-    | "?" { QUESTION }
-    | ":" { COLON }
     | "??" { DOUBLE_QUESTION }
-    | ".[" { DOT_LSQBRACKET }
-    | ".?[" { DOT_QUESTION_LSQBRACKET }
+    | "?" { QUESTION }
+    | ".?" { DOT_QUESTION }
+    | "." { DOT }
+    | ":" { COLON }
 
     | "{" { LBRACE }
     | "}" { RBRACE }

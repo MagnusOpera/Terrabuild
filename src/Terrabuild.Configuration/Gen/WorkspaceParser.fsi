@@ -31,8 +31,8 @@ type token =
   | NOT_EQUAL
   | LPAREN
   | RPAREN
-  | DOT_LSQBRACKET
-  | DOT_QUESTION_LSQBRACKET
+  | DOT
+  | DOT_QUESTION
   | LSQBRACKET
   | RSQBRACKET
   | LBRACE
@@ -78,8 +78,8 @@ type tokenId =
     | TOKEN_NOT_EQUAL
     | TOKEN_LPAREN
     | TOKEN_RPAREN
-    | TOKEN_DOT_LSQBRACKET
-    | TOKEN_DOT_QUESTION_LSQBRACKET
+    | TOKEN_DOT
+    | TOKEN_DOT_QUESTION
     | TOKEN_LSQBRACKET
     | TOKEN_RSQBRACKET
     | TOKEN_LBRACE
@@ -121,7 +121,6 @@ type nonTerminalId =
     | NONTERM_ExtensionIdentifier
     | NONTERM_Bool
     | NONTERM_String
-    | NONTERM_ExprIndex
     | NONTERM_ExprList
     | NONTERM_ExprListContent
     | NONTERM_ExprMap
