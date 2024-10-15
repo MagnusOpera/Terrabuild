@@ -27,12 +27,13 @@ rule token = parse
     | "upper" { UPPER }
     | "lower" { LOWER }
     | "replace" { REPLACE }
+    | "count" { COUNT }
     | "version" { VERSION }
-    | "?" { QUESTION }
-    | ":" { COLON }
     | "??" { DOUBLE_QUESTION }
-    | ".[" { DOT_LSQBRACKET }
-    | ".?[" { DOT_QUESTION_LSQBRACKET }
+    | "?" { QUESTION }
+    | ".?" { DOT_QUESTION }
+    | "." { DOT }
+    | ":" { COLON }
 
     | "{" { LBRACE }
     | "}" { RBRACE }

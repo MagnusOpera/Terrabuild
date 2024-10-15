@@ -23,6 +23,7 @@ type token =
   | UPPER
   | LOWER
   | REPLACE
+  | COUNT
   | VERSION
   | DOUBLE_QUESTION
   | QUESTION
@@ -34,8 +35,8 @@ type token =
   | NOT_EQUAL
   | LPAREN
   | RPAREN
-  | DOT_LSQBRACKET
-  | DOT_QUESTION_LSQBRACKET
+  | DOT
+  | DOT_QUESTION
   | LSQBRACKET
   | RSQBRACKET
   | LBRACE
@@ -73,6 +74,7 @@ type tokenId =
     | TOKEN_UPPER
     | TOKEN_LOWER
     | TOKEN_REPLACE
+    | TOKEN_COUNT
     | TOKEN_VERSION
     | TOKEN_DOUBLE_QUESTION
     | TOKEN_QUESTION
@@ -84,8 +86,8 @@ type tokenId =
     | TOKEN_NOT_EQUAL
     | TOKEN_LPAREN
     | TOKEN_RPAREN
-    | TOKEN_DOT_LSQBRACKET
-    | TOKEN_DOT_QUESTION_LSQBRACKET
+    | TOKEN_DOT
+    | TOKEN_DOT_QUESTION
     | TOKEN_LSQBRACKET
     | TOKEN_RSQBRACKET
     | TOKEN_LBRACE
@@ -126,22 +128,22 @@ type nonTerminalId =
     | NONTERM_TargetRebuild
     | NONTERM_TargetOutputs
     | NONTERM_TargetStep
+    | NONTERM_Expr
+    | NONTERM_TargetIdentifier
+    | NONTERM_ExtensionIdentifier
+    | NONTERM_ExprIndex
     | NONTERM_Bool
     | NONTERM_String
+    | NONTERM_ExprList
+    | NONTERM_ExprListContent
+    | NONTERM_ExprMap
+    | NONTERM_ExprMapContent
     | NONTERM_ListOfString
     | NONTERM_Strings
     | NONTERM_ListOfIdentifiers
     | NONTERM_Identifiers
     | NONTERM_ListOfTargetIdentifiers
     | NONTERM_TargetIdentifiers
-    | NONTERM_TargetIdentifier
-    | NONTERM_ExtensionIdentifier
-    | NONTERM_Expr
-    | NONTERM_ExprIndex
-    | NONTERM_ExprList
-    | NONTERM_ExprListContent
-    | NONTERM_ExprMap
-    | NONTERM_ExprMapContent
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int
 

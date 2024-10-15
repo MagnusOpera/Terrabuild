@@ -187,3 +187,24 @@ let notEqualValue() =
     let varUsed, result = eval evaluationContext (Expr.Function (Function.Equal, [Expr.String "toto"; Expr.Number 42]))
     varUsed |> should be Empty
     result |> should equal expected
+
+[<Test>]
+let replaceString() =
+    let expected = Value.String "titi titi"
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Replace, [Expr.String "toto titi"; Expr.String "toto"; Expr.String "titi"]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let countList() =
+    let expected = Value.Number 3
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Count, [Expr.List [Expr.Number 1; Expr.String "toto"; Expr.Boolean false]]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let countMap() =
+    let expected = Value.Number 1
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Count, [Expr.Map (Map [ "toto", Expr.Number 42 ])]))
+    varUsed |> should be Empty
+    result |> should equal expected

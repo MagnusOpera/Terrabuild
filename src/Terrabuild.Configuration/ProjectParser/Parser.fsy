@@ -25,12 +25,12 @@ let debugPrint s = ignore s
 %token <int> NUMBER
 
 %token LBRACE RBRACE
-%token DOT_LSQBRACKET DOT_QUESTION_LSQBRACKET LSQBRACKET RSQBRACKET
+%token DOT DOT_QUESTION LSQBRACKET RSQBRACKET
 %token LPAREN RPAREN
 %token EQUAL NOT_EQUAL
 %token COMMA
 %token MINUS PLUS
-%token TRIM UPPER LOWER REPLACE VERSION DOUBLE_QUESTION QUESTION COLON
+%token TRIM UPPER LOWER REPLACE COUNT VERSION DOUBLE_QUESTION QUESTION COLON
 %token EOF
 %token PROJECT EXTENSION TARGET 
 %token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS NAME
@@ -45,7 +45,7 @@ let debugPrint s = ignore s
 %left EQUAL NOT_EQUAL
 %left MINUS
 %left PLUS
-%left DOT_LSQBRACKET DOT_QUESTION_LSQBRACKET
+%left DOT DOT_QUESTION
 
 %type <Terrabuild.Configuration.Project.AST.ProjectFile> ProjectFile
 %% 
@@ -122,40 +122,6 @@ TargetStep:
     | ExtensionIdentifier IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | ExtensionIdentifier IDENTIFIER ExprMap { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $3 } }
 
-
-Bool:
-    | TRUE { true }
-    | FALSE { false }
-
-String:
-    | STRING { $1 }
-ListOfString:
-    | LSQBRACKET Strings RSQBRACKET { $2 }
-Strings:
-    | /* empty */ { [] }
-    | Strings String { $1 @ [$2] }
-
-ListOfIdentifiers:
-    | LSQBRACKET Identifiers RSQBRACKET { $2 }
-Identifiers:
-    | /* empty */ { [] }
-    | Identifiers IDENTIFIER { $1 @ [$2] }
-
-
-ListOfTargetIdentifiers:
-    | LSQBRACKET TargetIdentifiers RSQBRACKET { $2 }
-TargetIdentifiers:
-    | /* empty */ { [] }
-    | TargetIdentifiers TargetIdentifier { $1 @ [$2] }
-
-TargetIdentifier:
-    | TARGET_IDENTIFIER { $1 }
-    | IDENTIFIER { $1 }
-
-ExtensionIdentifier:
-    | EXTENSION_IDENTIFIER { $1 }
-    | IDENTIFIER { $1 }
-
 Expr:
     /* scalars */
     | NOTHING { Expr.Nothing }
@@ -168,8 +134,8 @@ Expr:
     | ExprList { Expr.List $1 }
     | ExprMap { Expr.Map $1 }
     /* functions */
-    | Expr DOT_LSQBRACKET ExprIndex RSQBRACKET { Expr.Function (Function.Item, [$1; $3]) }
-    | Expr DOT_QUESTION_LSQBRACKET ExprIndex RSQBRACKET { Expr.Function (Function.TryItem, [$1; $3]) }
+    | Expr DOT ExprIndex { Expr.Function (Function.Item, [$1;  $3]) }
+    | Expr DOT_QUESTION ExprIndex { Expr.Function (Function.TryItem, [$1; $3]) }
     | Expr EQUAL Expr { Expr.Function (Function.Equal, [$1; $3]) }
     | Expr NOT_EQUAL Expr { Expr.Function (Function.NotEqual, [$1; $3]) }
     | Expr PLUS Expr { Expr.Function (Function.Plus, [$1; $3]) }
@@ -178,13 +144,29 @@ Expr:
     | UPPER LPAREN Expr RPAREN { Expr.Function (Function.Upper, [$3]) }
     | LOWER LPAREN Expr RPAREN { Expr.Function (Function.Lower, [$3]) }
     | REPLACE LPAREN Expr Expr Expr RPAREN { Expr.Function (Function.Replace, [$3; $4; $5]) }
+    | COUNT LPAREN Expr RPAREN { Expr.Function (Function.Count, [$3])}
     | VERSION LPAREN Expr RPAREN { Expr.Function (Function.Version, [$3]) }
     | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }
     | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
 
+TargetIdentifier:
+    | TARGET_IDENTIFIER { $1 }
+    | IDENTIFIER { $1 }
+
+ExtensionIdentifier:
+    | EXTENSION_IDENTIFIER { $1 }
+    | IDENTIFIER { $1 }
+
 ExprIndex:
-    | Expr { $1 }
+    | NUMBER { Expr.Number $1 }
     | IDENTIFIER { Expr.String $1 }
+
+Bool:
+    | TRUE { true }
+    | FALSE { false }
+
+String:
+    | STRING { $1 }
 
 ExprList:
     | LSQBRACKET ExprListContent RSQBRACKET { $2 }
@@ -197,3 +179,21 @@ ExprMap:
 ExprMapContent:
     | /* empty */ { Map.empty }
     | ExprMapContent KEY Expr { $1.Add ($2, $3) }
+
+ListOfString:
+    | LSQBRACKET Strings RSQBRACKET { $2 }
+Strings:
+    | /* empty */ { [] }
+    | Strings String { $1 @ [$2] }
+
+ListOfIdentifiers:
+    | LSQBRACKET Identifiers RSQBRACKET { $2 }
+Identifiers:
+    | /* empty */ { [] }
+    | Identifiers IDENTIFIER { $1 @ [$2] }
+
+ListOfTargetIdentifiers:
+    | LSQBRACKET TargetIdentifiers RSQBRACKET { $2 }
+TargetIdentifiers:
+    | /* empty */ { [] }
+    | TargetIdentifiers TargetIdentifier { $1 @ [$2] }
