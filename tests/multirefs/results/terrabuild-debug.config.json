@@ -11,7 +11,7 @@
         "^build"
       ],
       "rebuild": [
-        "boolean",
+        "bool",
         false
       ]
     },
@@ -21,7 +21,7 @@
         "publish"
       ],
       "rebuild": [
-        "boolean",
+        "bool",
         false
       ]
     },
@@ -30,7 +30,7 @@
         "build"
       ],
       "rebuild": [
-        "boolean",
+        "bool",
         false
       ]
     },
@@ -39,7 +39,7 @@
         "docker"
       ],
       "rebuild": [
-        "boolean",
+        "bool",
         false
       ]
     }

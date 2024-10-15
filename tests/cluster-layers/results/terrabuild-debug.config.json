@@ -15,7 +15,7 @@
         "^build"
       ],
       "rebuild": [
-        "boolean",
+        "bool",
         false
       ]
     }
