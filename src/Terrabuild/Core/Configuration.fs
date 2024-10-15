@@ -283,6 +283,7 @@ let read (options: ConfigOptions.Options) =
                     |> Map.add "terrabuild_retry" (Expr.Boolean options.Retry)
                     |> Map.add "terrabuild_force" (Expr.Boolean options.Force)
                     |> Map.add "terrabuild_ci" (Expr.Boolean options.CI.IsSome)
+                    |> Map.add "terrabuild_debug" (Expr.Boolean options.Debug)
                     |> (fun map ->
                         let tagValue =
                             match options.Tag with
