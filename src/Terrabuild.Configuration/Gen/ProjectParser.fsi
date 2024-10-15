@@ -126,22 +126,22 @@ type nonTerminalId =
     | NONTERM_TargetRebuild
     | NONTERM_TargetOutputs
     | NONTERM_TargetStep
+    | NONTERM_Expr
+    | NONTERM_TargetIdentifier
+    | NONTERM_ExtensionIdentifier
     | NONTERM_Bool
     | NONTERM_String
+    | NONTERM_ExprIndex
+    | NONTERM_ExprList
+    | NONTERM_ExprListContent
+    | NONTERM_ExprMap
+    | NONTERM_ExprMapContent
     | NONTERM_ListOfString
     | NONTERM_Strings
     | NONTERM_ListOfIdentifiers
     | NONTERM_Identifiers
     | NONTERM_ListOfTargetIdentifiers
     | NONTERM_TargetIdentifiers
-    | NONTERM_TargetIdentifier
-    | NONTERM_ExtensionIdentifier
-    | NONTERM_Expr
-    | NONTERM_ExprIndex
-    | NONTERM_ExprList
-    | NONTERM_ExprListContent
-    | NONTERM_ExprMap
-    | NONTERM_ExprMapContent
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int
 

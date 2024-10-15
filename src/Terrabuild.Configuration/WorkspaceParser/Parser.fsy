@@ -106,32 +106,6 @@ ExtensionScript:
 ExtensionDefaults:
     | DEFAULTS EQUAL ExprMap { ExtensionComponents.Defaults $3 }
 
-Bool:
-    | TRUE { true }
-    | FALSE { false }
-
-String:
-    | STRING { $1 }
-ListOfString:
-    | LSQBRACKET Strings RSQBRACKET { $2 }
-Strings:
-    | /* empty */ { [] }
-    | Strings String { $1 @ [$2] }
-
-ListOfTargetIdentifiers:
-    | LSQBRACKET TargetIdentifiers RSQBRACKET { $2 }
-TargetIdentifiers:
-    | /* empty */ { [] }
-    | TargetIdentifiers TargetIdentifier { $1 @ [$2] }
-
-TargetIdentifier:
-    | TARGET_IDENTIFIER { $1 }
-    | IDENTIFIER { $1 }
-
-ExtensionIdentifier:
-    | EXTENSION_IDENTIFIER { $1 }
-    | IDENTIFIER { $1 }
-
 Expr:
     /* scalars */
     | NOTHING { Expr.Nothing }
@@ -158,6 +132,21 @@ Expr:
     | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }
     | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
 
+TargetIdentifier:
+    | TARGET_IDENTIFIER { $1 }
+    | IDENTIFIER { $1 }
+
+ExtensionIdentifier:
+    | EXTENSION_IDENTIFIER { $1 }
+    | IDENTIFIER { $1 }
+
+Bool:
+    | TRUE { true }
+    | FALSE { false }
+
+String:
+    | STRING { $1 }
+
 ExprIndex:
     | Expr { $1 }
     | IDENTIFIER { Expr.String $1 }
@@ -173,3 +162,15 @@ ExprMap:
 ExprMapContent:
     | /* empty */ { Map.empty }
     | ExprMapContent KEY Expr { $1.Add ($2, $3) }
+
+ListOfString:
+    | LSQBRACKET Strings RSQBRACKET { $2 }
+Strings:
+    | /* empty */ { [] }
+    | Strings String { $1 @ [$2] }
+
+ListOfTargetIdentifiers:
+    | LSQBRACKET TargetIdentifiers RSQBRACKET { $2 }
+TargetIdentifiers:
+    | /* empty */ { [] }
+    | TargetIdentifiers TargetIdentifier { $1 @ [$2] }
