@@ -37,6 +37,7 @@ configuration dummy
 configuration {
     variables = {
         secret:  $map.toto = "prod" ? 1234 : 5678
+        secret2: $list.2
     }
 }
 
