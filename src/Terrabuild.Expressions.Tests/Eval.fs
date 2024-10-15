@@ -28,7 +28,7 @@ let valueString() =
 [<Test>]
 let valueBool() =
     let expected = Value.Bool true
-    let varUsed, result = eval evaluationContext (Expr.Boolean true)
+    let varUsed, result = eval evaluationContext (Expr.Bool true)
     varUsed |> should be Empty
     result |> should equal expected
 
@@ -198,7 +198,7 @@ let replaceString() =
 [<Test>]
 let countList() =
     let expected = Value.Number 3
-    let varUsed, result = eval evaluationContext (Expr.Function (Function.Count, [Expr.List [Expr.Number 1; Expr.String "toto"; Expr.Boolean false]]))
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Count, [Expr.List [Expr.Number 1; Expr.String "toto"; Expr.Bool false]]))
     varUsed |> should be Empty
     result |> should equal expected
 
@@ -208,3 +208,25 @@ let countMap() =
     let varUsed, result = eval evaluationContext (Expr.Function (Function.Count, [Expr.Map (Map [ "toto", Expr.Number 42 ])]))
     varUsed |> should be Empty
     result |> should equal expected
+
+[<Test>]
+let notBool() =
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Not, [Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal (Value.Bool true)
+
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Not, [Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal (Value.Bool false)
+
+[<Test>]
+let notNothing() =
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Not, [Expr.Nothing]))
+    varUsed |> should be Empty
+    result |> should equal (Value.Bool true)
+
+[<Test>]
+let notAnything() =
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Not, [Expr.Number 42]))
+    varUsed |> should be Empty
+    result |> should equal (Value.Bool false)

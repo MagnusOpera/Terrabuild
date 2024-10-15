@@ -41,11 +41,13 @@ rule token = parse
     | "]" { RSQBRACKET }
     | "(" { LPAREN }
     | ")" { RPAREN }
+    | "==" { DOUBLE_EQUAL }
     | "=" { EQUAL }
     | "!=" { NOT_EQUAL }
     | "," { COMMA }
     | "-" { MINUS }
     | "+" { PLUS }
+    | "!" { BANG }
 
     | "#" { singleLineComment lexbuf }
     | "//" { singleLineComment lexbuf }

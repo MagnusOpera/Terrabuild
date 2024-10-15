@@ -103,9 +103,9 @@ let read (options: ConfigOptions.Options) =
             match value |> Int32.TryParse with
             | true, value -> Expr.Number value
             | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to number variable {key}")
-        | Expr.Boolean _ ->
+        | Expr.Bool _ ->
             match value |> Boolean.TryParse with
-            | true, value -> Expr.Boolean value
+            | true, value -> Expr.Bool value
             | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
         | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
 
@@ -280,10 +280,10 @@ let read (options: ConfigOptions.Options) =
                     |> Map.add "terrabuild_configuration" (Expr.String options.Configuration)
                     |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
                     |> Map.add "terrabuild_head_commit" (Expr.String headCommit)
-                    |> Map.add "terrabuild_retry" (Expr.Boolean options.Retry)
-                    |> Map.add "terrabuild_force" (Expr.Boolean options.Force)
-                    |> Map.add "terrabuild_ci" (Expr.Boolean options.CI.IsSome)
-                    |> Map.add "terrabuild_debug" (Expr.Boolean options.Debug)
+                    |> Map.add "terrabuild_retry" (Expr.Bool options.Retry)
+                    |> Map.add "terrabuild_force" (Expr.Bool options.Force)
+                    |> Map.add "terrabuild_ci" (Expr.Bool options.CI.IsSome)
+                    |> Map.add "terrabuild_debug" (Expr.Bool options.Debug)
                     |> (fun map ->
                         let tagValue =
                             match options.Tag with
@@ -314,7 +314,7 @@ let read (options: ConfigOptions.Options) =
                             workspaceConfig.Targets
                             |> Map.tryFind targetName
                             |> Option.map (fun target -> target.Rebuild)
-                            |> Option.defaultValue (Expr.Boolean false))
+                            |> Option.defaultValue (Expr.Bool false))
                     Eval.eval evaluationContext rebuild
                 let rebuild =
                     match rebuild with

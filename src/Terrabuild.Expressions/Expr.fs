@@ -16,11 +16,12 @@ type Function =
     | Ternary
     | Equal
     | NotEqual
+    | Not
 
 [<RequireQualifiedAccessAttribute>]
 type Expr =
     | Nothing
-    | Boolean of value:bool
+    | Bool of value:bool
     | String of value:string
     | Number of value:int
     | Map of Map<string, Expr>

@@ -13,7 +13,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
     let rec eval (varUsed: Set<string>) (expr: Expr) =
         match expr with
         | Expr.Nothing -> varUsed, Value.Nothing
-        | Expr.Boolean bool -> varUsed, Value.Bool bool
+        | Expr.Bool bool -> varUsed, Value.Bool bool
         | Expr.String str -> varUsed, Value.String str
         | Expr.Number num -> varUsed, Value.Number num
         | Expr.Object obj -> varUsed, Value.Object obj
@@ -53,6 +53,10 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
 
                 | Function.Count, [Value.Map map] -> Value.Number map.Count
                 | Function.Count, [Value.List list] -> Value.Number list.Length
+
+                | Function.Not, [Value.Nothing] -> Value.Bool true
+                | Function.Not, [Value.Bool bool] -> Value.Bool (not bool)
+                | Function.Not, [_] -> Value.Bool false
 
                 | Function.Version, [Value.String str] ->
                     let projectName = FS.workspaceRelative context.WorkspaceDir context.ProjectDir str

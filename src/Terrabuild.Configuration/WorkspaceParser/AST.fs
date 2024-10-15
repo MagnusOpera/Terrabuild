@@ -40,7 +40,7 @@ with
 
         let rebuild =
             match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
-            | [] -> Expr.Boolean false
+            | [] -> Expr.Bool false
             | [value] -> value
             | _ -> TerrabuildException.Raise("multiple rebuild declared")
 

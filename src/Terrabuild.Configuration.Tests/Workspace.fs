@@ -13,13 +13,13 @@ let parseWorkspace() =
     let expectedWorkspace =
         let targetBuild = 
             { DependsOn = Set [ "^build" ]
-              Rebuild = Expr.Boolean false }
+              Rebuild = Expr.Bool false }
         let targetDist =
             { DependsOn = Set [ "build" ]
-              Rebuild = Expr.Boolean true }
+              Rebuild = Expr.Bool true }
         let targetDummy =
             { DependsOn = Set.empty
-              Rebuild = Expr.Boolean false }
+              Rebuild = Expr.Bool false }
 
         let envRelease =
             { Variables = Map [ "configuration", Expr.String "Release" ] }
@@ -58,13 +58,13 @@ let parseWorkspace2() =
     let expectedWorkspace =
         let targetBuild = 
             { DependsOn = Set [ "^build" ]
-              Rebuild = Expr.Boolean false }
+              Rebuild = Expr.Bool false }
         let targetDist =
             { DependsOn = Set [ "build" ]
-              Rebuild = Expr.Boolean true }
+              Rebuild = Expr.Bool true }
         let targetDummy =
             { DependsOn = Set.empty
-              Rebuild = Expr.Boolean false }
+              Rebuild = Expr.Bool false }
 
         let envRelease =
             { Variables = Map [ "configuration", Expr.String "Release"
@@ -82,7 +82,10 @@ let parseWorkspace2() =
                                                                                                               Expr.String "prod"])
                                                                              Expr.Number 1234
                                                                              Expr.Number 5678 ]) 
-                                "secret2", Expr.Function (Function.Item, [Expr.Variable "list"; Expr.Number 2]) ] }
+                                "secret2", Expr.Function (Function.Item, [Expr.Variable "list"; Expr.Number 2]) 
+                                "secret3", Expr.Function (Function.Plus, [
+                                    Expr.Function (Function.Not, [ Expr.Bool false ])
+                                    Expr.Function (Function.Not, [ Expr.Bool true ]) ]) ] }
 
         let extDotnet =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
