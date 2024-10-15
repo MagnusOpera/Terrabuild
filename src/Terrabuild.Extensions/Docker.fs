@@ -43,8 +43,8 @@ type Docker() =
     /// Push a docker image to registry.
     /// </summary>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
-    /// <param name="tag" required="false" example="&quot;1.2.3-stable&quot;">Apply tag on image (use branch or tag otherwise).</param>
-    static member push (context: ActionContext) (image: string) (tag: string option)=
+    /// <param name="tag" required="true" example="&quot;1.2.3-stable&quot;">Apply tag on image (use branch or tag otherwise).</param>
+    static member push (context: ActionContext) (image: string) (tag: string) =
         let ops =
             [
                 if context.CI then
