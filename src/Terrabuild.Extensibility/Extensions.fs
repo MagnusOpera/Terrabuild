@@ -30,7 +30,7 @@ type ActionContext = {
     Debug: bool
     CI: bool
     Command: string
-    ProjectHash: string
+    Hash: string
 }
 
 [<RequireQualifiedAccess>]

@@ -24,10 +24,10 @@ type Docker() =
 
         let ops = 
             [
-                let buildArgs = $"build --file {dockerfile} --tag {image}:{context.ProjectHash}{args}{platform} ."
+                let buildArgs = $"build --file {dockerfile} --tag {image}:{context.Hash}{args}{platform} ."
                 if context.CI then
                     shellOp "docker" buildArgs
-                    shellOp "docker" $"push {image}:{context.ProjectHash}"
+                    shellOp "docker" $"push {image}:{context.Hash}"
                 else
                     shellOp "docker" buildArgs
             ]
@@ -48,9 +48,9 @@ type Docker() =
         let ops =
             [
                 if context.CI then
-                    shellOp "docker" $"buildx imagetools create -t {image}:{tag} {image}:{context.ProjectHash}"
+                    shellOp "docker" $"buildx imagetools create -t {image}:{tag} {image}:{context.Hash}"
                 else
-                    shellOp "docker" $"tag {image}:{context.ProjectHash} {image}:{tag}"
+                    shellOp "docker" $"tag {image}:{context.Hash} {image}:{tag}"
             ]
 
         let cacheability =
