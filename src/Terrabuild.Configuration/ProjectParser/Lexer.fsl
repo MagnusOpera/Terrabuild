@@ -26,6 +26,7 @@ rule token = parse
     | "trim" { TRIM }
     | "upper" { UPPER }
     | "lower" { LOWER }
+    | "replace" { REPLACE }
     | "version" { VERSION }
     | "?" { QUESTION }
     | ":" { COLON }

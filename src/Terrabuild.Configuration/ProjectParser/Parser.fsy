@@ -30,7 +30,7 @@ let debugPrint s = ignore s
 %token EQUAL NOT_EQUAL
 %token COMMA
 %token MINUS PLUS
-%token TRIM UPPER LOWER VERSION DOUBLE_QUESTION QUESTION COLON
+%token TRIM UPPER LOWER REPLACE VERSION DOUBLE_QUESTION QUESTION COLON
 %token EOF
 %token PROJECT EXTENSION TARGET 
 %token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS NAME
@@ -177,6 +177,7 @@ Expr:
     | TRIM LPAREN Expr RPAREN { Expr.Function (Function.Trim, [$3]) }
     | UPPER LPAREN Expr RPAREN { Expr.Function (Function.Upper, [$3]) }
     | LOWER LPAREN Expr RPAREN { Expr.Function (Function.Lower, [$3]) }
+    | REPLACE LPAREN Expr Expr Expr RPAREN { Expr.Function (Function.Replace, [$3; $4; $5]) }
     | VERSION LPAREN Expr RPAREN { Expr.Function (Function.Version, [$3]) }
     | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }
     | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }

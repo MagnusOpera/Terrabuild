@@ -22,6 +22,7 @@ type token =
   | TRIM
   | UPPER
   | LOWER
+  | REPLACE
   | VERSION
   | DOUBLE_QUESTION
   | QUESTION
@@ -71,6 +72,7 @@ type tokenId =
     | TOKEN_TRIM
     | TOKEN_UPPER
     | TOKEN_LOWER
+    | TOKEN_REPLACE
     | TOKEN_VERSION
     | TOKEN_DOUBLE_QUESTION
     | TOKEN_QUESTION
