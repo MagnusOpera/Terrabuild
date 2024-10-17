@@ -340,17 +340,22 @@ let read (options: ConfigOptions.Options) =
                             | Some script -> script
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                        let usedVariables =
-                            usedVars
-                            |> Seq.sort
-                            |> Seq.choose (fun key ->
-                                match buildVariables |> Map.tryFind key with
-                                | Some value -> Some $"{key} = {value}"
-                                | _ -> None)
-                            |> List.ofSeq
-
                         let hash =
-                            [ step.Extension; step.Command; $"{extension.Container}" ] @ usedVariables
+                            let usedVariables =
+                                usedVars
+                                |> Seq.sort
+                                |> Seq.choose (fun key ->
+                                    match buildVariables |> Map.tryFind key with
+                                    | Some value -> Some $"{key} = {value}"
+                                    | _ -> None)
+                                |> List.ofSeq
+
+                            let containerInfos = 
+                                match extension.Container with
+                                | Some container -> [ container ] @ List.ofSeq extension.Variables
+                                | _ -> []
+
+                            [ step.Extension; step.Command ] @ usedVariables @ containerInfos
                             |> Hash.sha256strings
 
                         let targetContext = {
