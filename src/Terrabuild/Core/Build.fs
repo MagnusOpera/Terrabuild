@@ -357,11 +357,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             hub.Subscribe awaitedSignals (fun () ->
                 try
                     let maxCompletionChildren =
-                        awaitedDependencies
-                        |> Seq.map (fun dep -> dep.Value)
-                        |> Seq.sortDescending
-                        |> Seq.tryHead
-                        |> Option.defaultValue DateTime.MinValue
+                        match awaitedDependencies with
+                        | [| |] -> DateTime.MinValue
+                        | _ -> awaitedDependencies |> Seq.maxBy (fun dep -> dep.Value) |> (fun dep -> dep.Value)
 
                     let buildRequest, completionStatus = processNode maxCompletionChildren node
                     Log.Debug("{nodeId} has completed for request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
