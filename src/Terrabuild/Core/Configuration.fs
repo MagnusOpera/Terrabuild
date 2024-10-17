@@ -350,7 +350,7 @@ let read (options: ConfigOptions.Options) =
                             |> List.ofSeq
 
                         let hash =
-                            [ step.Extension; step.Command ] @ usedVariables
+                            [ step.Extension; step.Command; $"{extension.Container}" ] @ usedVariables
                             |> Hash.sha256strings
 
                         let targetContext = {
@@ -376,8 +376,7 @@ let read (options: ConfigOptions.Options) =
                         workspaceConfig.Targets
                         |> Map.tryFind targetName
                         |> Option.map (fun target -> target.DependsOn)
-                        |> Option.defaultValue Set.empty
-                    )
+                        |> Option.defaultValue Set.empty)
 
                 let outputs =
                     match target.Outputs with
