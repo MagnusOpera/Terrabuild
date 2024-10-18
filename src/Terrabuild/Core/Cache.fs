@@ -294,4 +294,5 @@ type Cache(storage: Contracts.IStorage) =
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash
+            IO.createDirectory homeDir
             homeDir
