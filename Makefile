@@ -158,12 +158,12 @@ endef
 # $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
 
 self-test-cluster-layers:
-	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
+	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs --containertool docker)
 
 self-test-multirefs:
-	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --logs)
+	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --logs --containertool docker)
 
 self-test-simple:
-	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs)
+	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs --containertool docker)
 
 self-test-all: publish self-test-cluster-layers self-test-multirefs self-test-simple

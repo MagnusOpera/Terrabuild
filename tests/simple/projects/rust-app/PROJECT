@@ -1,11 +1,4 @@
 
-extension @docker {
-    defaults = {
-        image: "ghcr.io/magnusopera/rust-app"
-        arguments: { profile: $configuration }
-    }
-}
-
 project @cargo {
     labels = [ "app"
                "rust" ]

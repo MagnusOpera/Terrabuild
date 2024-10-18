@@ -60,7 +60,9 @@ let private summaryFilename = "summary.json"
 let private originFilename = "origin"
 
 let terrabuildHome =
-    FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
+    let tbDir = FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
+    IO.createDirectory tbDir
+    tbDir
 
 let private buildCacheDirectory =
     let cacheDir = FS.combinePath terrabuildHome "buildcache"
@@ -294,4 +296,5 @@ type Cache(storage: Contracts.IStorage) =
 
         member _.CreateHomeDir nodeHash: string =
             let homeDir = FS.combinePath homeDirectory nodeHash
+            IO.createDirectory homeDir
             homeDir

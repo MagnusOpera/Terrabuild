@@ -67,7 +67,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
     let allCommands =
         node.Operations
         |> List.map (fun operation ->
-            let cmd = "docker"
+            let cmd = options.ContainerTool |> Option.defaultValue "docker"
             let wsDir = Environment.CurrentDirectory
 
             let getContainerUserHome (container: string) =

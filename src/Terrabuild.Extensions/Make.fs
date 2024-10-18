@@ -2,7 +2,9 @@ namespace Terrabuild.Extensions
 
 open Terrabuild.Extensibility
 
-/// `make` extension provides support for Makefile.
+/// <summary>
+/// Add support for Makefile.
+/// </summary>
 type Make() =
 
     /// <summary>

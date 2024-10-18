@@ -1,5 +1,5 @@
 
-extension @docker {
+extension @container {
     defaults = {
         image: "ghcr.io/magnusopera/dotnet-app"
         arguments: { configuration: $configuration }
@@ -25,9 +25,9 @@ target dist {
 }
 
 target docker {
-    @docker build { }
+    @container build { }
 }
 
 target push {
-    @docker push { }
+    @container push { }
 }
