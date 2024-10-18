@@ -195,7 +195,11 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
         let whatIf = runArgs.Contains(RunArgs.WhatIf)
-        let containerTool = runArgs.TryGetResult(RunArgs.ContainerTool)
+        let containerTool =
+            match runArgs.TryGetResult(RunArgs.ContainerTool) with
+            | Some ContainerTool.Docker -> Some "docker"
+            | Some ContainerTool.Podman -> Some "podman"
+            | _ -> None
 
         let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
                         RunTargetOptions.WhatIf = whatIf

@@ -2,6 +2,11 @@ module CLI
 open Argu
 
 [<RequireQualifiedAccess>]
+type ContainerTool =
+    | Docker
+    | Podman
+
+[<RequireQualifiedAccess>]
 type ScaffoldArgs =
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique>] Force
@@ -44,7 +49,7 @@ type RunArgs =
     | [<Unique; AltCommandLine("-cs")>] CheckState
     | [<Unique; AltCommandLine("-n")>] Note of note:string
     | [<Unique; AltCommandLine("-t")>] Tag of tag:string
-    | [<Unique; AltCommandLine("-ct")>] ContainerTool of tool:string
+    | [<Unique; AltCommandLine("-ct")>] ContainerTool of tool:ContainerTool
     | [<Unique>] Logs
     | [<Unique; Inherit>] WhatIf
 with
