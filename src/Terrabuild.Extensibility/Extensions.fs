@@ -31,6 +31,7 @@ type ActionContext = {
     CI: bool
     Command: string
     Hash: string
+    ContainerTool: string option
 }
 
 [<RequireQualifiedAccess>]

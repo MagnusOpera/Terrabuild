@@ -30,7 +30,7 @@
                   {
                     "dotnet_app_version": [
                       "string",
-                      "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364"
+                      "3030D2BE5BAACEC957EB7AE699E69160A68B1DAA932F02F4E6EE9A61342CF28E"
                     ],
                     "npm_app_version": [
                       "string",
@@ -54,8 +54,8 @@
       "outputs": [
         "*.planfile"
       ],
-      "projectHash": "825FA904BFCC88377654659B6021610C28A2856B44369D63969377A7699A4AF3",
-      "targetHash": "E96887A83E69C309C87661FA91B22AEC8C0D6FC25610EAA177360B3794ED6021",
+      "projectHash": "0A5B81547090BA469D428B9C3E69C3DB96F5571451E8CBD1B61765721D1F1B03",
+      "targetHash": "9CCA83F6CEACF179BE0821A2CC28000FDFE0D24E50E81AB928A69894E13AFC42",
       "operations": [
         {
           "container": null,
@@ -88,7 +88,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -detailed-exitcode -out=terrabuild.planfile -var=\u0022dotnet_app_version=3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364\u0022 -var=\u0022npm_app_version=A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E\u0022",
+          "arguments": "plan -detailed-exitcode -out=terrabuild.planfile -var=\u0022dotnet_app_version=3030D2BE5BAACEC957EB7AE699E69160A68B1DAA932F02F4E6EE9A61342CF28E\u0022 -var=\u0022npm_app_version=A440C869D51BECC00CA8E1AADDFEEF52676E0E9A543260A6970ED95CB00EB63E\u0022",
           "exitCodes": [
             [
               0,
@@ -276,8 +276,8 @@
         "obj/*.props",
         "obj/*.targets"
       ],
-      "projectHash": "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364",
-      "targetHash": "DDBE336631053045F003A619F764069C3644E78FAAE597140FCC2B968FB31989",
+      "projectHash": "3030D2BE5BAACEC957EB7AE699E69160A68B1DAA932F02F4E6EE9A61342CF28E",
+      "targetHash": "666292DCE28BBD81F67FF2A987B06A497D293CCD3004E88CD2EE6E1860C37CFA",
       "operations": [
         {
           "container": null,
@@ -492,8 +492,8 @@
         "target/debug/",
         "target/release/"
       ],
-      "projectHash": "15CDC8C81F5A3D2B0215AE61D6D429F52345A71EE01246776049C72C2351CAE1",
-      "targetHash": "01352F59D33340734D5DC13053AFCCCE77ED0010491CDAB74F58CF715848AA77",
+      "projectHash": "73C109F30331258C43B747E614DED629DC2709C0EBFDA63D38C2E3CC9BD6F2D8",
+      "targetHash": "8B1735F7730A8E2BAE402811400A87915562027ABF0CA81892FDD53FFF8E4A9C",
       "operations": [
         {
           "container": "rust:1.81.0-slim",

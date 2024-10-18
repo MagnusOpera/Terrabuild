@@ -19,7 +19,6 @@ module CargoHelpers =
 /// <summary>
 /// Add support for cargo (rust) projects.
 /// </summary>
-
 type Cargo() =
 
     /// <summary>

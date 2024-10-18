@@ -53,7 +53,6 @@ module DotnetHelpers =
 /// <summary>
 /// Add support for .net projects.
 /// </summary>
-
 type Dotnet() =
 
     static let buildRequest (context: ActionContext) buildOps =

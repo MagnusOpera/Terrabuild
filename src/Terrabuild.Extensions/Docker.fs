@@ -2,7 +2,9 @@ namespace Terrabuild.Extensions
 
 open Terrabuild.Extensibility
 
-/// `terraform` extension provides commands to handle a Terraform project.
+/// <summary>
+/// Add support for Docker projects.
+/// </summary>
 type Docker() =
 
     /// <summary>
@@ -40,7 +42,7 @@ type Docker() =
 
 
     /// <summary>
-    /// Push a docker image to registry.
+    /// Push target container image to registry.
     /// </summary>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
     /// <param name="tag" required="true" example="&quot;1.2.3-stable&quot;">Apply tag on image (use branch or tag otherwise).</param>

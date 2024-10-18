@@ -59,7 +59,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "id": "deployments/terraform-deploy",
-      "hash": "825FA904BFCC88377654659B6021610C28A2856B44369D63969377A7699A4AF3",
+      "hash": "0A5B81547090BA469D428B9C3E69C3DB96F5571451E8CBD1B61765721D1F1B03",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
@@ -97,7 +97,7 @@
                     {
                       "dotnet_app_version": [
                         "string",
-                        "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364"
+                        "3030D2BE5BAACEC957EB7AE699E69160A68B1DAA932F02F4E6EE9A61342CF28E"
                       ],
                       "npm_app_version": [
                         "string",
@@ -235,7 +235,7 @@
     },
     "projects/dotnet-app": {
       "id": "projects/dotnet-app",
-      "hash": "3EE0CC7786480EF592E5E7FB73BC2691CA3328D8CDFC5CFDA16CBEE006389364",
+      "hash": "3030D2BE5BAACEC957EB7AE699E69160A68B1DAA932F02F4E6EE9A61342CF28E",
       "dependencies": [
         "libraries/dotnet-lib"
       ],
@@ -316,7 +316,7 @@
           ]
         },
         "docker": {
-          "hash": "B2968AD5F493351AE9DDBE6B6349DAF6CA18C306DCE1DE55C51BEBA430CD3A78",
+          "hash": "C06A2293E8572F31C46818B2B14A4DAE6CBDFF6AD3A9D77BF35E9360E540A984",
           "rebuild": false,
           "dependsOn": [
             "dist"
@@ -331,10 +331,10 @@
           ],
           "operations": [
             {
-              "hash": "2FBDD2F2C31193CA71F958A6F4B9A9579FB1AFB4D5075063C3826EF9C5F1BE28",
+              "hash": "89C283A8FBD1534DE3941241D180ACFDE16919C1B3723477F3408227CED0B5E0",
               "container": null,
               "containerVariables": [],
-              "extension": "@docker",
+              "extension": "@container",
               "command": "build",
               "script": {},
               "context": [
@@ -359,7 +359,7 @@
           ]
         },
         "push": {
-          "hash": "DCE5C493853172D5CA5AF33AD12D2D6DE0EEA440D430C23100216B0E3AC335A9",
+          "hash": "FA1C5DB596E37CF56E3E54D4C6A3EDD18D821B24ED62B8E571B6A5F26996F3BF",
           "rebuild": false,
           "dependsOn": [
             "docker"
@@ -374,10 +374,10 @@
           ],
           "operations": [
             {
-              "hash": "AEF1A65D32F57084416DFD132194426A5BA16C83F444DD18070A887A68C1CA91",
+              "hash": "AC87E09842A6927D322B8AA58397AC633E3BCF134FE3CD095D4C75D1000B9818",
               "container": null,
               "containerVariables": [],
-              "extension": "@docker",
+              "extension": "@container",
               "command": "push",
               "script": {},
               "context": [
@@ -517,7 +517,7 @@
     },
     "projects/rust-app": {
       "id": "projects/rust-app",
-      "hash": "15CDC8C81F5A3D2B0215AE61D6D429F52345A71EE01246776049C72C2351CAE1",
+      "hash": "73C109F30331258C43B747E614DED629DC2709C0EBFDA63D38C2E3CC9BD6F2D8",
       "dependencies": [],
       "files": [
         "Cargo.lock",
