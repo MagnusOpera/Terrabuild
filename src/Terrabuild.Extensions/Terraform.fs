@@ -6,9 +6,9 @@ open Terrabuild.Extensibility
 /// <summary>
 /// `terraform` extension provides commands to handle a Terraform project.
 ///
-/// {{< callout type="warning"  >}}
+/// {{&lt; callout type="warning" &gt;}}
 /// This extension relies on external Terraform state.
-/// {{< /callout >}}
+/// {{&lt; /callout &gt;}}
 /// </summary>
 type Terraform() =
 
