@@ -310,6 +310,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                             // if retry is requested then completion date is either:
                             // - the local build with a new completionDate on changes
                             // - the local build with provided completionDate if no changes
+                            Log.Debug("{nodeId} checking external state by building node again", node.Id)
                             let completionStatus = buildNode summary.EndedAt
                             match completionStatus with
                             | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
@@ -323,6 +324,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                                     Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
                                     TaskRequest.Build, completionStatus
                                 else
+                                    Log.Debug("{nodeId} mark node as failed since state has changed", node.Id)
                                     TaskRequest.Restore, TaskStatus.Failure (summary.EndedAt, "External state is no more valid. Rerun with retry.")
                     // task is cached
                     else
