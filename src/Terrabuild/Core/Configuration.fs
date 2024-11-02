@@ -237,11 +237,12 @@ let read (options: ConfigOptions.Options) =
     // this is the final stage: create targets and create the project
     let finalizeProject projectId (projectDef: LoadedProject) (projectReferences: Map<string, Project>) =
         let projectDir = projectId
+        let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
         // get dependencies on files
         let files =
             projectDir
-            |> IO.enumerateFilesBut (projectDef.Includes) (projectDef.Outputs + projectDef.Ignores)
+            |> IO.enumerateFilesBut projectDef.Includes (projectDef.Outputs + projectDef.Ignores + tbFiles)
             |> Set
 
         let filesHash =
