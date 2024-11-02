@@ -76,7 +76,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                         | Value.Bool b -> if b then "true" else "false"
                         | Value.Number n -> $"{n}"
                         | Value.String s -> s
-                        | _ -> TerrabuildException.Raise($"Unsupported type for format")
+                        | _ -> TerrabuildException.Raise($"Unsupported type for format {v}")
 
                     values
                     |> List.fold (fun acc value -> $"{acc}{formatValue value}") ""
