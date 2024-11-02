@@ -14,6 +14,7 @@ type Container() =
     /// <param name="platforms" required="false" example="[ &quot;linux/amd64&quot; ]">List of platform to build. Default is host.</param>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
     /// <param name="arguments" example="{ configuration: &quot;Release&quot; }">Named arguments to build image (see Dockerfile [ARG](https://docs.docker.com/reference/dockerfile/#arg)).</param> 
+    /// <param name="tool" required="false" example="&quot;docker&quot;">Build tool to use: podman (default) or docker</param>
     static member build (context: ActionContext) (dockerfile: string option) (platforms: string list option) (image: string) (arguments: Map<string, string>) (tool: string option) =
         let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
 
@@ -53,6 +54,7 @@ type Container() =
     /// </summary>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Container image to build.</param>
     /// <param name="tag" required="true" example="&quot;1.2.3-stable&quot;">Apply tag on image (use branch or tag otherwise).</param>
+    /// <param name="tool" required="false" example="&quot;docker&quot;">Build tool to use: podman (default) or docker</param>
     static member push (context: ActionContext) (image: string) (tag: string) (tool: string option) =
         let ops =
             match tool with
