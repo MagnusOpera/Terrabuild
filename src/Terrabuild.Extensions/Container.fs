@@ -3,7 +3,7 @@ namespace Terrabuild.Extensions
 open Terrabuild.Extensibility
 
 /// <summary>
-/// Add support for container projects using Podman/Skopeo (default) or Docker.
+/// Add support for container projects using Docker (default) or Podman/Skopeo.
 /// </summary>
 type Container() =
 
