@@ -63,6 +63,43 @@ let addNumber() =
     result |> should equal expected
 
 [<Test>]
+let addMap() =
+    let expected = Value.Map (Map [ "toto", Value.Number 42
+                                    "titi", Value.String "pouet" ])
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Plus, [ Expr.Map (Map [ "toto", Expr.String "pouet"
+                                                                                                  "titi", Expr.String "pouet" ])
+                                                                                  Expr.Map (Map [ "toto", Expr.Number 42
+                                                                                                  "titi", Expr.String "pouet" ]) ]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let addMapNothing() =
+    let expected = Value.Map (Map [ "toto", Value.Number 42
+                                    "titi", Value.String "pouet" ])
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Plus, [ Expr.Map (Map [ "toto", Expr.Number 42
+                                                                                                  "titi", Expr.String "pouet" ])
+                                                                                  Expr.Nothing ]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let addList() =
+    let expected = Value.List ([ Value.String "toto"; Value.Number 42 ])
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Plus, [ Expr.List [Expr.String "toto"]
+                                                                                  Expr.List [Expr.Number 42] ]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let addListNothing() =
+    let expected = Value.List ([ Value.String "toto" ])
+    let varUsed, result = eval evaluationContext (Expr.Function (Function.Plus, [ Expr.List [Expr.String "toto"]
+                                                                                  Expr.Nothing ]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
 let subNumber() =
     let expected = Value.Number 3
     let varUsed, result = eval evaluationContext (Expr.Function (Function.Minus, [Expr.Number 5; Expr.Number 2]))
@@ -113,6 +150,25 @@ let version() =
         eval context (Expr.Function (Function.Version, [ Expr.String "../net8.0/toto"]))
     varUsed |> should be Empty
     result |> should equal expected
+
+[<Test>]
+let format() =
+    let expected = Value.String "\\o/42truetiti"
+    let expectedUsedVars = Set [ "toto" ]
+
+    let context = { evaluationContext
+                    with Variables = Map ["toto", Expr.String "\\o/"] }
+
+    let varUsed, result =
+        eval context (Expr.Function (Function.Format, [
+            Expr.Variable "toto"
+            Expr.Number 42
+            Expr.Nothing
+            Expr.Bool true
+            Expr.String "titi" ]))
+    varUsed |> should equal expectedUsedVars
+    result |> should equal expected
+
 
 [<Test>]
 let listItem() =

@@ -30,7 +30,8 @@ let debugPrint s = ignore s
 %token EQUAL DOUBLE_EQUAL NOT_EQUAL
 %token COMMA
 %token MINUS PLUS
-%token TRIM UPPER LOWER REPLACE COUNT VERSION DOUBLE_QUESTION QUESTION COLON BANG
+%token TRIM UPPER LOWER REPLACE COUNT VERSION FORMAT
+%token DOUBLE_QUESTION QUESTION COLON BANG
 %token EOF
 %token WORKSPACE TARGET CONFIGURATION EXTENSION
 %token PROJECT SPACE DEPENDS_ON REBUILD VARIABLES CONTAINER INIT SCRIPT DEFAULTS NAME
@@ -131,6 +132,7 @@ Expr:
     | REPLACE LPAREN Expr Expr Expr RPAREN { Expr.Function (Function.Replace, [$3; $4; $5]) }
     | COUNT LPAREN Expr RPAREN { Expr.Function (Function.Count, [$3])}
     | VERSION LPAREN Expr RPAREN { Expr.Function (Function.Version, [$3]) }
+    | FORMAT LPAREN ExprListContent RPAREN { Expr.Function (Function.Format, $3) }
     | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }
     | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
     | BANG Expr { Expr.Function (Function.Not, [$2]) }

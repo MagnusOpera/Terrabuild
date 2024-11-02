@@ -10,6 +10,7 @@ type Function =
     | Replace
     | Count
     | Version
+    | Format
     | Item
     | TryItem
     | Coalesce

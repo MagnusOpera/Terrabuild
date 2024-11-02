@@ -29,6 +29,7 @@ rule token = parse
     | "replace" { REPLACE }
     | "count" { COUNT }
     | "version" { VERSION }
+    | "format" { FORMAT }
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }
     | ".?" { DOT_QUESTION }

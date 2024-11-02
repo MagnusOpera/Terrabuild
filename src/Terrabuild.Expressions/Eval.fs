@@ -1,6 +1,7 @@
 ﻿module Terrabuild.Expressions.Eval
 open Terrabuild.Expressions
 open Errors
+open Collections
 
 type EvaluationContext = {
     WorkspaceDir: string
@@ -35,10 +36,14 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
             let varUsed, values = exprs |> List.fold (fun (varUsed, exprs) expr ->
                 let vu, e = eval varUsed expr
                 varUsed+vu, (exprs @ [e])) (varUsed, [])
-            let res = 
+            let res =
                 match f, values with
                 | Function.Plus, [Value.String left; Value.String right] -> Value.String (left + right)
                 | Function.Plus, [Value.Number left; Value.Number right] -> Value.Number (left + right)
+                | Function.Plus, [Value.Map left; Value.Map right] -> Value.Map (left |> Map.addMap right)
+                | Function.Plus, [Value.Map left; Value.Nothing] -> Value.Map left
+                | Function.Plus, [Value.List left; Value.List right] -> Value.List (left @ right)
+                | Function.Plus, [Value.List left; Value.Nothing] -> Value.List left
                 | Function.Minus, [Value.Number left; Value.Number right] -> Value.Number (left - right)
                 | Function.Trim, [Value.String str] -> Value.String (str.Trim())
 
@@ -63,6 +68,19 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     match context.Versions |> Map.tryFind projectName with
                     | Some version -> Value.String version
                     | _ -> TerrabuildException.Raise($"Unknown project reference '{str}'")
+
+                | Function.Format, values ->
+                    let formatValue v =
+                        match v with
+                        | Value.Nothing -> ""
+                        | Value.Bool b -> if b then "true" else "false"
+                        | Value.Number n -> $"{n}"
+                        | Value.String s -> s
+                        | _ -> TerrabuildException.Raise($"Unsupported type for format")
+
+                    values
+                    |> List.fold (fun acc value -> $"{acc}{formatValue value}") ""
+                    |> Value.String
 
                 | Function.Item, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with
