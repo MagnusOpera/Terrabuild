@@ -69,6 +69,19 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | Some version -> Value.String version
                     | _ -> TerrabuildException.Raise($"Unknown project reference '{str}'")
 
+                | Function.Format, values ->
+                    let formatValue v =
+                        match v with
+                        | Value.Nothing -> ""
+                        | Value.Bool b -> if b then "true" else "false"
+                        | Value.Number n -> $"{n}"
+                        | Value.String s -> s
+                        | _ -> TerrabuildException.Raise($"Unsupported type for format")
+
+                    values
+                    |> List.fold (fun acc value -> $"{acc}{formatValue value}") ""
+                    |> Value.String
+
                 | Function.Item, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with
                     | Some value -> value

@@ -85,7 +85,14 @@ let parseWorkspace2() =
                                 "secret2", Expr.Function (Function.Item, [Expr.Variable "list"; Expr.Number 2]) 
                                 "secret3", Expr.Function (Function.Plus, [
                                     Expr.Function (Function.Not, [ Expr.Bool false ])
-                                    Expr.Function (Function.Not, [ Expr.Bool true ]) ]) ] }
+                                    Expr.Function (Function.Not, [ Expr.Bool true ]) ])
+                                "secret4", Expr.Function (Function.Format, [
+                                    Expr.String "1"
+                                    Expr.Number 2
+                                    Expr.Variable "toto"
+                                    Expr.Bool true
+                                    Expr.Nothing
+                                ]) ] }
 
         let extDotnet =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"

@@ -39,6 +39,7 @@ configuration {
         secret:  $map.toto == "prod" ? 1234 : 5678
         secret2: $list.2
         secret3: !false + !true
+        secret4: format("1" 2 $toto true nothing)
     }
 }
 

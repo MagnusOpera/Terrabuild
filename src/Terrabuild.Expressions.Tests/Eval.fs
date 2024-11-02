@@ -152,6 +152,25 @@ let version() =
     result |> should equal expected
 
 [<Test>]
+let format() =
+    let expected = Value.String "\\o/42truetiti"
+    let expectedUsedVars = Set [ "toto" ]
+
+    let context = { evaluationContext
+                    with Variables = Map ["toto", Expr.String "\\o/"] }
+
+    let varUsed, result =
+        eval context (Expr.Function (Function.Format, [
+            Expr.Variable "toto"
+            Expr.Number 42
+            Expr.Nothing
+            Expr.Bool true
+            Expr.String "titi" ]))
+    varUsed |> should equal expectedUsedVars
+    result |> should equal expected
+
+
+[<Test>]
 let listItem() =
     let expected = Value.Number 42
     let expectedUsedVars = Set ["tagada"]
