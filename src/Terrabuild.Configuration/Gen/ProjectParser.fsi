@@ -140,6 +140,8 @@ type nonTerminalId =
     | NONTERM_ExprIndex
     | NONTERM_Bool
     | NONTERM_String
+    | NONTERM_ExprTuple
+    | NONTERM_ExprTupleContent
     | NONTERM_ExprList
     | NONTERM_ExprListContent
     | NONTERM_ExprMap
