@@ -3,6 +3,7 @@ module Terrabuild.Expressions.Tests
 open NUnit.Framework
 open FsUnit
 open Eval
+open Errors
 
 let private evaluationContext = {
     Eval.EvaluationContext.WorkspaceDir = TestContext.CurrentContext.WorkDirectory
@@ -47,6 +48,14 @@ let valueVariable() =
     let varUsed, result = eval context (Expr.Variable "toto")
     varUsed |> should equal expectedUsedVars
     result |> should equal expected
+
+[<Test>]
+let valueVariableCircular() =
+    let context = { evaluationContext with Variables = Map ["toto", Expr.Variable "titi"
+                                                            "titi", Expr.Variable "toto"] }
+    
+    (fun () -> eval context (Expr.Variable "toto") |> ignore)
+    |> should (throwWithMessage "Variable toto has circular definition") typeof<TerrabuildException>
 
 [<Test>]
 let concatString() =

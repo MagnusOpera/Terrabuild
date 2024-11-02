@@ -19,6 +19,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
         | Expr.Number num -> varUsed, Value.Number num
         | Expr.Object obj -> varUsed, Value.Object obj
         | Expr.Variable var ->
+            if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
             match context.Variables |> Map.tryFind var with
             | None -> TerrabuildException.Raise($"Variable '{var}' is not defined")
             | Some value -> eval (varUsed |> Set.add var) value
