@@ -1,10 +1,11 @@
 namespace Terrabuild.Extensions
 open Terrabuild.Extensibility
 
+
 /// <summary>
-/// Provides support for `npm`.
+/// Provides support for `yarn`.
 /// </summary>
-type Npm() =
+type Yarn() =
 
     /// <summary>
     /// Provides default values.
@@ -26,7 +27,7 @@ type Npm() =
     /// Install packages using lock file.
     /// </summary>
     static member install (context: ActionContext) =
-        let ops = [ shellOp "npm" "ci" ]
+        let ops = [ shellOp "yarn" "install --frozen-lockfile" ]
         execRequest Cacheability.Always ops
 
 
@@ -38,8 +39,8 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "npm" "ci"
-            shellOp "npm" $"run build -- {args}"   
+            shellOp "yarn" "install --frozen-lockfile"
+            shellOp "yarn" $"build -- {args}"   
         ]
         execRequest Cacheability.Always ops
 
@@ -52,8 +53,8 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "npm" "ci"
-            shellOp "npm" $"run test -- {args}"   
+            shellOp "yarn" "install --frozen-lockfile"
+            shellOp "yarn" $"test -- {args}"   
         ]
         execRequest Cacheability.Always ops
 
@@ -65,6 +66,6 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "npm" $"run {command} -- {args}"
+            shellOp "yarn" $"{command} -- {args}"
         ]
         execRequest Cacheability.Always ops
