@@ -137,9 +137,6 @@ let read (options: ConfigOptions.Options) =
             | Some value -> convertToVarType key expr value
             | _ -> expr)
 
-    let branchOrTag = options.BranchOrTag
-    let headCommit = options.HeadCommit
-
     let extensions = 
         Extensions.systemExtensions
         |> Map.addMap workspaceConfig.Extensions
@@ -279,8 +276,8 @@ let read (options: ConfigOptions.Options) =
                     |> Map.add "terrabuild_target" (Expr.String targetName)
                     |> Map.add "terrabuild_hash" (Expr.String projectHash)
                     |> Map.add "terrabuild_configuration" (Expr.String options.Configuration)
-                    |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
-                    |> Map.add "terrabuild_head_commit" (Expr.String headCommit)
+                    |> Map.add "terrabuild_branch_or_tag" (Expr.String options.BranchOrTag)
+                    |> Map.add "terrabuild_head_commit" (Expr.String options.HeadCommit)
                     |> Map.add "terrabuild_retry" (Expr.Bool options.Retry)
                     |> Map.add "terrabuild_force" (Expr.Bool options.Force)
                     |> Map.add "terrabuild_ci" (Expr.Bool options.CI.IsSome)
