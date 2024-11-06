@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Helpers/Npm.fs" />
     <Compile Include="Cargo.fs" />
     <Compile Include="Container.fs" />
     <Compile Include="Docker.fs" />
@@ -16,6 +17,7 @@
     <Compile Include="Null.fs" />
     <Compile Include="Shell.fs" />
     <Compile Include="Terraform.fs" />
+    <Compile Include="Yarn.fs" />
     <Compile Include="Factory.fs" />
   </ItemGroup>
 
