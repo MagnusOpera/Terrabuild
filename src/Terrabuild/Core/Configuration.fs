@@ -95,34 +95,49 @@ let read (options: ConfigOptions.Options) =
         with exn ->
             TerrabuildException.Raise("Failed to read WORKSPACE configuration file", exn)
 
-    let convertToVarType (key: string) (expr: Expr) (value: string) =
-        match expr with
-        | Expr.String _ ->
-            Expr.String value
-        | Expr.Number _ ->
+    let convertToVarType (key: string) (existingValue: Value) (value: string) =
+        match existingValue with
+        | Value.String _ ->
+            Value.String value
+        | Value.Number _ ->
             match value |> Int32.TryParse with
-            | true, value -> Expr.Number value
+            | true, value -> Value.Number value
             | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to number variable {key}")
-        | Expr.Bool _ ->
+        | Value.Bool _ ->
             match value |> Boolean.TryParse with
-            | true, value -> Expr.Bool value
+            | true, value -> Value.Bool value
             | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
         | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
+
+    let evaluationContext = {
+        Eval.EvaluationContext.WorkspaceDir = options.Workspace
+        Eval.EvaluationContext.ProjectDir = ""
+        Eval.EvaluationContext.Versions = Map.empty
+        Eval.EvaluationContext.Variables = Map.empty
+    }
 
     // variables = default configuration vars + configuration vars + env vars + args vars
     let defaultVariables =
         match workspaceConfig.Configurations |> Map.tryFind "default" with
-        | Some config -> config.Variables
+        | Some config ->
+            config.Variables
+            |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
         | _ -> Map.empty
 
+    let evaluationContext = { evaluationContext
+                              with Eval.Variables = evaluationContext.Variables |> Map.addMap defaultVariables }
     let configVariables =
         match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
-        | Some variables -> variables.Variables
+        | Some variables ->
+            variables.Variables
+            |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
         | _ ->
             match options.Configuration with
             | "default" -> Map.empty
             | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
 
+    let evaluationContext = { evaluationContext
+                              with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
     let buildVariables =
         defaultVariables
         |> Map.addMap configVariables
@@ -130,15 +145,15 @@ let read (options: ConfigOptions.Options) =
         |> Map.map (fun key expr ->
             match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
             | null -> expr
-            | value -> convertToVarType key expr value)
+            | value -> convertToVarType key (expr |> fst) value, Set.empty)
         // override variable with provided ones on command line if any
         |> Map.map (fun key expr ->
             match options.Variables |> Map.tryFind (key |> String.toLower) with
-            | Some value -> convertToVarType key expr value
+            | Some value -> convertToVarType key (expr |> fst) value, Set.empty
             | _ -> expr)
 
-    let branchOrTag = options.BranchOrTag
-    let headCommit = options.HeadCommit
+    // let branchOrTag = options.BranchOrTag
+    // let headCommit = options.HeadCommit
 
     let extensions = 
         Extensions.systemExtensions
@@ -275,40 +290,40 @@ let read (options: ConfigOptions.Options) =
 
                 let actionVariables =
                     buildVariables
-                    |> Map.add "terrabuild_project" (Expr.String projectId)
-                    |> Map.add "terrabuild_target" (Expr.String targetName)
-                    |> Map.add "terrabuild_hash" (Expr.String projectHash)
-                    |> Map.add "terrabuild_configuration" (Expr.String options.Configuration)
-                    |> Map.add "terrabuild_branch_or_tag" (Expr.String branchOrTag)
-                    |> Map.add "terrabuild_head_commit" (Expr.String headCommit)
-                    |> Map.add "terrabuild_retry" (Expr.Bool options.Retry)
-                    |> Map.add "terrabuild_force" (Expr.Bool options.Force)
-                    |> Map.add "terrabuild_ci" (Expr.Bool options.CI.IsSome)
-                    |> Map.add "terrabuild_debug" (Expr.Bool options.Debug)
+                    |> Map.add "terrabuild_project" (Value.String projectId, Set.empty)
+                    |> Map.add "terrabuild_target" (Value.String targetName, Set.empty)
+                    |> Map.add "terrabuild_hash" (Value.String projectHash, Set.empty)
+                    |> Map.add "terrabuild_configuration" (Value.String options.Configuration, Set.empty)
+                    |> Map.add "terrabuild_branch_or_tag" (Value.String options.BranchOrTag, Set.empty)
+                    |> Map.add "terrabuild_head_commit" (Value.String options.HeadCommit, Set.empty)
+                    |> Map.add "terrabuild_retry" (Value.Bool options.Retry, Set.empty)
+                    |> Map.add "terrabuild_force" (Value.Bool options.Force, Set.empty)
+                    |> Map.add "terrabuild_ci" (Value.Bool options.CI.IsSome, Set.empty)
+                    |> Map.add "terrabuild_debug" (Value.Bool options.Debug, Set.empty)
                     |> (fun map ->
                         let tagValue =
                             match options.Tag with
-                            | Some tag -> Expr.String tag
-                            | _ -> Expr.Nothing
-                        map |> Map.add "terrabuild_tag" tagValue)
+                            | Some tag -> Value.String tag
+                            | _ -> Value.Nothing
+                        map |> Map.add "terrabuild_tag" (tagValue, Set.empty))
                     |> (fun map ->
                         let noteValue =
                             match options.Note with
-                            | Some note -> Expr.String note
-                            | _ -> Expr.Nothing
-                        map |> Map.add "terrabuild_note" noteValue)
+                            | Some note -> Value.String note
+                            | _ -> Value.Nothing
+                        map |> Map.add "terrabuild_note" (noteValue, Set.empty))
 
                 let evaluationContext = {
-                    Eval.EvaluationContext.WorkspaceDir = options.Workspace
-                    Eval.EvaluationContext.ProjectDir = projectDir
-                    Eval.EvaluationContext.Versions = versions
-                    Eval.EvaluationContext.Variables = actionVariables
+                    evaluationContext with
+                        Eval.ProjectDir = projectDir
+                        Eval.Versions = versions
+                        Eval.Variables = evaluationContext.Variables |> Map.addMap actionVariables
                 }
 
                 // use value from project target
                 // otherwise use workspace target
                 // defaults to allow caching
-                let _, rebuild =
+                let rebuild, _ =
                     let rebuild =
                         target.Rebuild
                         |> Option.defaultWith (fun () ->
@@ -330,7 +345,7 @@ let read (options: ConfigOptions.Options) =
                             | Some extension -> extension
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                        let usedVars, context =
+                        let context, usedVars =
                             extension.Defaults
                             |> Map.addMap step.Parameters
                             |> Expr.Map
