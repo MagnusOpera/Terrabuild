@@ -3,7 +3,6 @@ module Terrabuild.Expressions.Tests
 open NUnit.Framework
 open FsUnit
 open Eval
-open Errors
 
 let mkVar value =
     value, Set.empty
@@ -38,9 +37,20 @@ let valueBool() =
 
 [<Test>]
 let valueMap() =
+    let expectedUsedVars = Set [ "toto" ]
     let expected = Value.Map (Map ["hello", Value.String "world"])
-    let result, varUsed = eval evaluationContext (Expr.Map (Map ["hello", Expr.String "world"]))
-    varUsed |> should be Empty
+    let context = { evaluationContext with Variables = Map ["toto", (Value.String "world", Set.empty)] }
+    let result, varUsed = eval context (Expr.Map (Map ["hello", Expr.Variable "toto"]))
+    varUsed |> should equal expectedUsedVars
+    result |> should equal expected
+
+[<Test>]
+let valueList() =
+    let expectedUsedVars = Set [ "toto" ]
+    let expected = Value.List [Value.String "hello"; Value.String "world"]
+    let context = { evaluationContext with Variables = Map ["toto", (Value.String "world", Set.empty)] }
+    let result, varUsed = eval context (Expr.List [Expr.String "hello"; Expr.Variable "toto"])
+    varUsed |> should equal expectedUsedVars
     result |> should equal expected
 
 [<Test>]
@@ -51,14 +61,6 @@ let valueVariable() =
     let result, varUsed = eval context (Expr.Variable "toto")
     varUsed |> should equal expectedUsedVars
     result |> should equal expected
-
-// [<Test>]
-// let valueVariableCircular() =
-//     let context = { evaluationContext with Variables = Map ["toto", (Value.String "titi", Set.empty)
-//                                                             "titi", (Value.String "toto", Set.singleton "toto")] }
-    
-//     (fun () -> eval context (Expr.Variable "toto") |> ignore)
-//     |> should (throwWithMessage "Variable toto has circular definition") typeof<TerrabuildException>
 
 [<Test>]
 let concatString() =

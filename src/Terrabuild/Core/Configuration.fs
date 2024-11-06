@@ -95,17 +95,17 @@ let read (options: ConfigOptions.Options) =
         with exn ->
             TerrabuildException.Raise("Failed to read WORKSPACE configuration file", exn)
 
-    let convertToVarType (key: string) (existingValue: Value) (value: string) =
+    let convertToVarType (key: string) ((existingValue, existingDeps): Value*Set<string>) (value: string) =
         match existingValue with
         | Value.String _ ->
-            Value.String value
+            Value.String value, existingDeps
         | Value.Number _ ->
             match value |> Int32.TryParse with
-            | true, value -> Value.Number value
+            | true, value -> Value.Number value, existingDeps
             | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to number variable {key}")
         | Value.Bool _ ->
             match value |> Boolean.TryParse with
-            | true, value -> Value.Bool value
+            | true, value -> Value.Bool value, existingDeps
             | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
         | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
 
@@ -126,6 +126,21 @@ let read (options: ConfigOptions.Options) =
 
     let evaluationContext = { evaluationContext
                               with Eval.Variables = evaluationContext.Variables |> Map.addMap defaultVariables }
+    let buildVariables =
+        defaultVariables
+        // override variable with configuration variable if any
+        |> Map.map (fun key expr ->
+            match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
+            | null -> expr
+            | value -> convertToVarType key expr value)
+        // override variable with provided ones on command line if any
+        |> Map.map (fun key expr ->
+            match options.Variables |> Map.tryFind (key |> String.toLower) with
+            | Some value -> convertToVarType key expr value
+            | _ -> expr)
+
+    let evaluationContext = { evaluationContext
+                              with Eval.Variables = evaluationContext.Variables |> Map.addMap buildVariables }
     let configVariables =
         match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
         | Some variables ->
@@ -138,22 +153,6 @@ let read (options: ConfigOptions.Options) =
 
     let evaluationContext = { evaluationContext
                               with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
-    let buildVariables =
-        defaultVariables
-        |> Map.addMap configVariables
-        // override variable with configuration variable if any
-        |> Map.map (fun key expr ->
-            match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
-            | null -> expr
-            | value -> convertToVarType key (expr |> fst) value, Set.empty)
-        // override variable with provided ones on command line if any
-        |> Map.map (fun key expr ->
-            match options.Variables |> Map.tryFind (key |> String.toLower) with
-            | Some value -> convertToVarType key (expr |> fst) value, Set.empty
-            | _ -> expr)
-
-    let evaluationContext = { evaluationContext
-                              with Eval.Variables = evaluationContext.Variables |> Map.addMap buildVariables }
 
     let extensions = 
         Extensions.systemExtensions
