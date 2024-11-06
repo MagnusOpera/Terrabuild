@@ -22,7 +22,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
             // if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
             match context.Variables |> Map.tryFind var with
             | None -> TerrabuildException.Raise($"Variable '{var}' is not defined")
-            | Some (value, varUsed) -> value, (varUsed + Set.singleton var)
+            | Some (value, varUsed) -> value, (varUsed |> Set.add var)
         | Expr.Map map ->
             let values, varUsed = map |> Map.fold (fun (map, varUsed) k v ->
                 let mv, mvu = eval v
