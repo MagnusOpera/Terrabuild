@@ -152,8 +152,8 @@ let read (options: ConfigOptions.Options) =
             | Some value -> convertToVarType key (expr |> fst) value, Set.empty
             | _ -> expr)
 
-    // let branchOrTag = options.BranchOrTag
-    // let headCommit = options.HeadCommit
+    let evaluationContext = { evaluationContext
+                              with Eval.Variables = evaluationContext.Variables |> Map.addMap buildVariables }
 
     let extensions = 
         Extensions.systemExtensions
