@@ -286,37 +286,37 @@ let read (options: ConfigOptions.Options) =
             projectDef.Targets
             |> Map.map (fun targetName target ->
 
-                let tagValue = 
-                    match options.Tag with
-                    | Some tag -> Value.String tag
-                    | _ -> Value.Nothing
+                let evaluationContext =
+                    let actionVariables =
+                        let tagValue = 
+                            match options.Tag with
+                            | Some tag -> Value.String tag
+                            | _ -> Value.Nothing
 
-                let noteValue =
-                    match options.Note with
-                    | Some note -> Value.String note
-                    | _ -> Value.Nothing
+                        let noteValue =
+                            match options.Note with
+                            | Some note -> Value.String note
+                            | _ -> Value.Nothing
 
-                let actionVariables = Map [
-                    "terrabuild_project", (Value.String projectId, Set.empty)
-                    "terrabuild_target", (Value.String targetName, Set.empty)
-                    "terrabuild_hash", (Value.String projectHash, Set.empty)
-                    "terrabuild_configuration", (Value.String options.Configuration, Set.empty)
-                    "terrabuild_branch_or_tag", (Value.String options.BranchOrTag, Set.empty)
-                    "terrabuild_head_commit", (Value.String options.HeadCommit, Set.empty)
-                    "terrabuild_retry", (Value.Bool options.Retry, Set.empty)
-                    "terrabuild_force", (Value.Bool options.Force, Set.empty)
-                    "terrabuild_ci", (Value.Bool options.CI.IsSome, Set.empty)
-                    "terrabuild_debug", (Value.Bool options.Debug, Set.empty)
-                    "terrabuild_tag", (tagValue, Set.empty)
-                    "terrabuild_note", (noteValue, Set.empty)
-                ]
+                        [ "terrabuild_project", Value.String projectId
+                          "terrabuild_target" , Value.String targetName
+                          "terrabuild_hash", Value.String projectHash 
+                          "terrabuild_configuration", Value.String options.Configuration
+                          "terrabuild_branch_or_tag", Value.String options.BranchOrTag 
+                          "terrabuild_head_commit", Value.String options.HeadCommit 
+                          "terrabuild_retry", Value.Bool options.Retry 
+                          "terrabuild_force", Value.Bool options.Force 
+                          "terrabuild_ci", Value.Bool options.CI.IsSome 
+                          "terrabuild_debug", Value.Bool options.Debug 
+                          "terrabuild_tag", tagValue 
+                          "terrabuild_note", noteValue ]
+                        |> Seq.map (fun (name, value) -> name, (value, Set.empty))
+                        |> Map.ofSeq
 
-                let evaluationContext = {
-                    evaluationContext with
+                    { evaluationContext with
                         Eval.ProjectDir = Some projectDir
                         Eval.Versions = versions
-                        Eval.Variables = evaluationContext.Variables |> Map.addMap actionVariables
-                }
+                        Eval.Variables = evaluationContext.Variables |> Map.addMap actionVariables }
 
                 // use value from project target
                 // otherwise use workspace target
