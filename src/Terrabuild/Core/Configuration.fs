@@ -361,7 +361,7 @@ let read (options: ConfigOptions.Options) =
                                 |> Seq.sort
                                 |> Seq.choose (fun key ->
                                     match buildVariables |> Map.tryFind key with
-                                    | Some value -> Some $"{key} = {value}"
+                                    | Some (value, _) -> Some $"{key} = {value}"
                                     | _ -> None)
                                 |> List.ofSeq
 
