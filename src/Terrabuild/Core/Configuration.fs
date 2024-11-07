@@ -95,64 +95,63 @@ let read (options: ConfigOptions.Options) =
         with exn ->
             TerrabuildException.Raise("Failed to read WORKSPACE configuration file", exn)
 
-    let convertToVarType (key: string) ((existingValue, existingDeps): Value*Set<string>) (value: string) =
-        match existingValue with
-        | Value.String _ ->
-            Value.String value, existingDeps
-        | Value.Number _ ->
-            match value |> Int32.TryParse with
-            | true, value -> Value.Number value, existingDeps
-            | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to number variable {key}")
-        | Value.Bool _ ->
-            match value |> Boolean.TryParse with
-            | true, value -> Value.Bool value, existingDeps
-            | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
-        | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
+    let evaluationContext =
+        let convertToVarType (key: string) ((existingValue, existingDeps): Value*Set<string>) (value: string) =
+            match existingValue with
+            | Value.String _ ->
+                Value.String value, existingDeps
+            | Value.Number _ ->
+                match value |> Int32.TryParse with
+                | true, value -> Value.Number value, existingDeps
+                | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to number variable {key}")
+            | Value.Bool _ ->
+                match value |> Boolean.TryParse with
+                | true, value -> Value.Bool value, existingDeps
+                | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
+            | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
 
-    let evaluationContext = {
-        Eval.EvaluationContext.WorkspaceDir = options.Workspace
-        Eval.EvaluationContext.ProjectDir = ""
-        Eval.EvaluationContext.Versions = Map.empty
-        Eval.EvaluationContext.Variables = Map.empty
-    }
+        let defaultEvaluationContext = {
+            Eval.EvaluationContext.WorkspaceDir = options.Workspace
+            Eval.EvaluationContext.ProjectDir = None
+            Eval.EvaluationContext.Versions = Map.empty
+            Eval.EvaluationContext.Variables = Map.empty
+        }
 
-    // variables = default configuration vars + configuration vars + env vars + args vars
-    let defaultVariables =
-        match workspaceConfig.Configurations |> Map.tryFind "default" with
-        | Some config ->
-            config.Variables
-            |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
-        | _ -> Map.empty
+        // variables = default configuration vars + configuration vars + env vars + args vars
+        let defaultVariables =
+            match workspaceConfig.Configurations |> Map.tryFind "default" with
+            | Some config ->
+                config.Variables
+                |> Map.map (fun _ expr -> Eval.eval defaultEvaluationContext expr)
+            | _ -> Map.empty
 
-    let evaluationContext = { evaluationContext
-                              with Eval.Variables = evaluationContext.Variables |> Map.addMap defaultVariables }
-    let buildVariables =
-        defaultVariables
-        // override variable with configuration variable if any
-        |> Map.map (fun key expr ->
-            match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
-            | null -> expr
-            | value -> convertToVarType key expr value)
-        // override variable with provided ones on command line if any
-        |> Map.map (fun key expr ->
-            match options.Variables |> Map.tryFind (key |> String.toLower) with
-            | Some value -> convertToVarType key expr value
-            | _ -> expr)
+        let evaluationContext = { defaultEvaluationContext with Eval.Variables = defaultEvaluationContext.Variables |> Map.addMap defaultVariables }
+        let buildVariables =
+            defaultVariables
+            // override variable with configuration variable if any
+            |> Map.map (fun key expr ->
+                match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
+                | null -> expr
+                | value -> convertToVarType key expr value)
+            // override variable with provided ones on command line if any
+            |> Map.map (fun key expr ->
+                match options.Variables |> Map.tryFind (key |> String.toLower) with
+                | Some value -> convertToVarType key expr value
+                | _ -> expr)
 
-    let evaluationContext = { evaluationContext
-                              with Eval.Variables = evaluationContext.Variables |> Map.addMap buildVariables }
-    let configVariables =
-        match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
-        | Some variables ->
-            variables.Variables
-            |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
-        | _ ->
-            match options.Configuration with
-            | "default" -> Map.empty
-            | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
+        let evaluationContext = { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap buildVariables }
+        let configVariables =
+            match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
+            | Some variables ->
+                variables.Variables
+                |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
+            | _ ->
+                match options.Configuration with
+                | "default" -> Map.empty
+                | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
 
-    let evaluationContext = { evaluationContext
-                              with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
+        { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
+
 
     let extensions = 
         Extensions.systemExtensions
@@ -287,34 +286,34 @@ let read (options: ConfigOptions.Options) =
             projectDef.Targets
             |> Map.map (fun targetName target ->
 
-                let actionVariables =
-                    buildVariables
-                    |> Map.add "terrabuild_project" (Value.String projectId, Set.empty)
-                    |> Map.add "terrabuild_target" (Value.String targetName, Set.empty)
-                    |> Map.add "terrabuild_hash" (Value.String projectHash, Set.empty)
-                    |> Map.add "terrabuild_configuration" (Value.String options.Configuration, Set.empty)
-                    |> Map.add "terrabuild_branch_or_tag" (Value.String options.BranchOrTag, Set.empty)
-                    |> Map.add "terrabuild_head_commit" (Value.String options.HeadCommit, Set.empty)
-                    |> Map.add "terrabuild_retry" (Value.Bool options.Retry, Set.empty)
-                    |> Map.add "terrabuild_force" (Value.Bool options.Force, Set.empty)
-                    |> Map.add "terrabuild_ci" (Value.Bool options.CI.IsSome, Set.empty)
-                    |> Map.add "terrabuild_debug" (Value.Bool options.Debug, Set.empty)
-                    |> (fun map ->
-                        let tagValue =
-                            match options.Tag with
-                            | Some tag -> Value.String tag
-                            | _ -> Value.Nothing
-                        map |> Map.add "terrabuild_tag" (tagValue, Set.empty))
-                    |> (fun map ->
-                        let noteValue =
-                            match options.Note with
-                            | Some note -> Value.String note
-                            | _ -> Value.Nothing
-                        map |> Map.add "terrabuild_note" (noteValue, Set.empty))
+                let tagValue = 
+                    match options.Tag with
+                    | Some tag -> Value.String tag
+                    | _ -> Value.Nothing
+
+                let noteValue =
+                    match options.Note with
+                    | Some note -> Value.String note
+                    | _ -> Value.Nothing
+
+                let actionVariables = Map [
+                    "terrabuild_project", (Value.String projectId, Set.empty)
+                    "terrabuild_target", (Value.String targetName, Set.empty)
+                    "terrabuild_hash", (Value.String projectHash, Set.empty)
+                    "terrabuild_configuration", (Value.String options.Configuration, Set.empty)
+                    "terrabuild_branch_or_tag", (Value.String options.BranchOrTag, Set.empty)
+                    "terrabuild_head_commit", (Value.String options.HeadCommit, Set.empty)
+                    "terrabuild_retry", (Value.Bool options.Retry, Set.empty)
+                    "terrabuild_force", (Value.Bool options.Force, Set.empty)
+                    "terrabuild_ci", (Value.Bool options.CI.IsSome, Set.empty)
+                    "terrabuild_debug", (Value.Bool options.Debug, Set.empty)
+                    "terrabuild_tag", (tagValue, Set.empty)
+                    "terrabuild_note", (noteValue, Set.empty)
+                ]
 
                 let evaluationContext = {
                     evaluationContext with
-                        Eval.ProjectDir = projectDir
+                        Eval.ProjectDir = Some projectDir
                         Eval.Versions = versions
                         Eval.Variables = evaluationContext.Variables |> Map.addMap actionVariables
                 }
@@ -360,7 +359,7 @@ let read (options: ConfigOptions.Options) =
                                 usedVars
                                 |> Seq.sort
                                 |> Seq.choose (fun key ->
-                                    match buildVariables |> Map.tryFind key with
+                                    match evaluationContext.Variables |> Map.tryFind key with
                                     | Some (value, _) -> Some $"{key} = {value}"
                                     | _ -> None)
                                 |> List.ofSeq

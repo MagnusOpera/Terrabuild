@@ -5,7 +5,7 @@ open Collections
 
 type EvaluationContext = {
     WorkspaceDir: string
-    ProjectDir: string
+    ProjectDir: string option
     Versions: Map<string, string>
     Variables: Map<string, Value * Set<string>>
 }
@@ -65,7 +65,12 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Not, [_] -> Value.Bool false
 
                 | Function.Version, [Value.String str] ->
-                    let projectName = FS.workspaceRelative context.WorkspaceDir context.ProjectDir str
+                    let projectDir =
+                        match context.ProjectDir with
+                        | Some projectDir -> projectDir
+                        | _ -> TerrabuildException.Raise($"Project dir not available in this context.")
+
+                    let projectName = FS.workspaceRelative context.WorkspaceDir projectDir str
                     match context.Versions |> Map.tryFind projectName with
                     | Some version -> Value.String version
                     | _ -> TerrabuildException.Raise($"Unknown project reference '{str}'")

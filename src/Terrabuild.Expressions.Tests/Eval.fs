@@ -9,7 +9,7 @@ let mkVar value =
 
 let private evaluationContext = {
     Eval.EvaluationContext.WorkspaceDir = TestContext.CurrentContext.WorkDirectory
-    Eval.EvaluationContext.ProjectDir = TestContext.CurrentContext.TestDirectory
+    Eval.EvaluationContext.ProjectDir = Some TestContext.CurrentContext.TestDirectory
     Eval.EvaluationContext.Variables = Map.empty
     Eval.EvaluationContext.Versions = Map.empty
 }
