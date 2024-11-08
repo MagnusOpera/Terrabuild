@@ -27,11 +27,8 @@ type Docker() =
         let ops = 
             [
                 let buildArgs = $"build --file {dockerfile} --tag {image}:{context.Hash}{args}{platform} ."
-                if context.CI then
-                    shellOp "docker" buildArgs
-                    shellOp "docker" $"push {image}:{context.Hash}"
-                else
-                    shellOp "docker" buildArgs
+                shellOp "docker" buildArgs
+                if context.CI then shellOp "docker" $"push {image}:{context.Hash}"
             ]
 
         let cacheability =
