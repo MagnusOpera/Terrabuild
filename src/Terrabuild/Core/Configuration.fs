@@ -196,9 +196,15 @@ let read (options: ConfigOptions.Options) =
         // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
         // Order is important as we just want to override in the project and reduce as much as possible scripts compilation
         // In other terms: we only compile what's changed
-        let extensions =
-            extensions
-            |> Map.addMap projectConfig.Extensions
+        let extensions = 
+            let overridenExtensions =
+                Map [
+                    for (KeyValue(extName, extension)) in projectConfig.Extensions do
+                        match extensions |> Map.tryFind extName with
+                        | Some overridenExt -> extName, { overridenExt with Defaults = overridenExt.Defaults |> Map.addMap extension.Defaults }
+                        | None -> extName, extension
+                ]
+            extensions |> Map.addMap overridenExtensions
 
         let projectScripts =
             projectConfig.Extensions

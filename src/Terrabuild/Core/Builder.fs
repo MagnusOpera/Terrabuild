@@ -76,6 +76,8 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
                 let hash = hashContent |> Hash.sha256strings
 
+                Log.Debug($"Node {nodeId} has ProjectHash {projectConfig.Hash} and TargetHash {hash}")
+
                 let cache, ops =
                     target.Operations
                     |> List.fold (fun (cache, ops) operation ->
@@ -95,10 +97,13 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                                 |> Terrabuild.Expressions.Value.Map
                             | _ -> TerrabuildException.Raise("Failed to get context (internal error)")
 
+                        Log.Debug($"{hash}: Invoking extension '{operation.Extension}::{operation.Command}' with args {parameters}")
+
                         let executionRequest =
                             match Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionExecutionRequest> optContext.Command parameters (Some operation.Script) with
                             | Extensions.InvocationResult.Success executionRequest -> executionRequest
-                            | _ -> TerrabuildException.Raise("Failed to get shell operation (extension error)")
+                            | Extensions.InvocationResult.ErrorTarget ex -> TerrabuildException.Raise($"{hash}: Failed to get shell operation (extension error)", ex)
+                            | _ -> TerrabuildException.Raise($"{hash}: Failed to get shell operation (extension error)")
 
                         let newops =
                             executionRequest.Operations

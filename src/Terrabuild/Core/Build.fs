@@ -259,7 +259,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     notification.NodeDownloading node
                     match cache.TryGetSummary allowRemoteCache cacheEntryId with
                     | Some summary ->
-                        Log.Debug("{NodeId}: Restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                        Log.Debug("{NodeId} restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
                         match summary.Outputs with
                         | Some outputs ->
                             let files = IO.enumerateFiles outputs
@@ -280,27 +280,27 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
         let buildRequest, completionDate =
             if force then
-                Log.Debug("{nodeId} must rebuild because force build requested", node.Id)
+                Log.Debug("{NodeId} must rebuild because force build requested", node.Id)
                 TaskRequest.Build, buildNode DateTime.MaxValue
             elif maxCompletionChildren = DateTime.MaxValue then
-                Log.Debug("{nodeId} must rebuild because child is rebuilding", node.Id)
+                Log.Debug("{NodeId} must rebuild because child is rebuilding", node.Id)
                 TaskRequest.Build, buildNode DateTime.MaxValue
             elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
                 let cacheEntryId = GraphDef.buildCacheKey node
                 match tryGetSummaryOnly cacheEntryId with
                 | Some summary ->
-                    Log.Debug("{nodeId} has existing build summary", node.Id)
+                    Log.Debug("{NodeId} has existing build summary", node.Id)
                     // task is younger than children
                     if summary.StartedAt < maxCompletionChildren then
-                        Log.Debug("{nodeId} must rebuild because it is younger than child", node.Id)
+                        Log.Debug("{NodeId} must rebuild because it is younger than child", node.Id)
                         TaskRequest.Build, buildNode DateTime.MaxValue
                     // task is failed and retry requested
                     elif retry && not summary.IsSuccessful then
-                        Log.Debug("{nodeId} must rebuild because node is failed and retry requested", node.Id)
+                        Log.Debug("{NodeId} must rebuild because node is failed and retry requested", node.Id)
                         TaskRequest.Build, buildNode DateTime.MaxValue
                     // state is external - it's getting complex :-(
                     elif checkState && (node.Cache &&& Terrabuild.Extensibility.Cacheability.External) <> Terrabuild.Extensibility.Cacheability.Never then
-                        Log.Debug("{nodeId} is external, checking if state has changed", node.Id)
+                        Log.Debug("{NodeId} is external, checking if state has changed", node.Id)
                         // first restore node because we want to have asset
                         // this **must** be ok since we were able to fetch metadata
                         let restoreCompletionStatus = restoreNode()
@@ -310,31 +310,31 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                             // if retry is requested then completion date is either:
                             // - the local build with a new completionDate on changes
                             // - the local build with provided completionDate if no changes
-                            Log.Debug("{nodeId} checking external state by building node again", node.Id)
+                            Log.Debug("{NodeId} checking external state by building node again", node.Id)
                             let completionStatus = buildNode summary.EndedAt
                             match completionStatus with
                             | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
                             | TaskStatus.Success completionDate when summary.EndedAt = completionDate ->
                                 // successfuly validated restore so continue pretenting it's been restored
-                                Log.Debug("{nodeId} state has not changed", node.Id)
+                                Log.Debug("{NodeId} state has not changed", node.Id)
                                 TaskRequest.Restore, completionStatus
                             | _ ->
                                 // changes have been detected so continue pretenting it's been rebuilt iif retry is requested
                                 if retry then
-                                    Log.Debug("{nodeId} state has changed, keeping changes", node.Id)
+                                    Log.Debug("{NodeId} state has changed, keeping changes", node.Id)
                                     TaskRequest.Build, completionStatus
                                 else
-                                    Log.Debug("{nodeId} mark node as failed since state has changed", node.Id)
+                                    Log.Debug("{NodeId} mark node as failed since state has changed", node.Id)
                                     TaskRequest.Restore, TaskStatus.Failure (summary.EndedAt, "External state is no more valid. Rerun with retry.")
                     // task is cached
                     else
-                        Log.Debug("{nodeId} is marked as used", node.Id)
+                        Log.Debug("{NodeId} is marked as used", node.Id)
                         TaskRequest.Restore, restoreNode()
                 | _ ->
-                    Log.Debug("{nodeId} must be build since no summary and required", node.Id)
+                    Log.Debug("{NodeId} must be build since no summary and required", node.Id)
                     TaskRequest.Build, buildNode DateTime.MaxValue
             else
-                Log.Debug("{nodeId} is not cacheable", node.Id)
+                Log.Debug("{NodeId} is not cacheable", node.Id)
                 TaskRequest.Build, buildNode DateTime.MaxValue
 
         buildRequest, completionDate
@@ -364,7 +364,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         | _ -> awaitedDependencies |> Seq.maxBy (fun dep -> dep.Value) |> (fun dep -> dep.Value)
 
                     let buildRequest, completionStatus = processNode maxCompletionChildren node
-                    Log.Debug("{nodeId} has completed for request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
+                    Log.Debug("{NodeId} completed request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
                     nodeResults.TryAdd(node.Id, (buildRequest, completionStatus)) |> ignore
 
                     match completionStatus with
@@ -375,7 +375,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         notification.NodeCompleted node buildRequest false
                 with
                     exn ->
-                        Log.Fatal(exn, $"{nodeId} unexpected failure while building")
+                        Log.Fatal(exn, "{NodeId} unexpected failure while building", node.Id)
 
                         nodeResults.TryAdd(node.Id, (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))) |> ignore
                         notification.NodeCompleted node TaskRequest.Build false

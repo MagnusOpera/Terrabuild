@@ -81,14 +81,20 @@ type Invocable(method: MethodInfo) =
             | TypeHelpers.TypeKind.FsMap ->
                 let values = map |> Map.map (fun name value -> mapParameter value name typeof<string> :?> string)
                 values
-            | _ -> TerrabuildException.Raise($"Can't assign default value to parameter '{name}'")
+            | TypeHelpers.TypeKind.FsOption ->
+                let values = map |> Map.map (fun name value -> mapParameter value name typeof<string> :?> string)
+                convertToSome prmType values
+            | tpe -> TerrabuildException.Raise($"Can't assign default value to parameter '{name}' with type '{tpe}'")
 
         | Value.List list ->
             match TypeHelpers.getKind prmType with
             | TypeHelpers.TypeKind.FsList ->
                 let values = list |> List.map (fun value -> mapParameter value name typeof<string> :?> string)
                 values
-            | _ -> TerrabuildException.Raise($"Can't assign default value to parameter '{name}'")
+            | TypeHelpers.TypeKind.FsOption -> 
+                let values = list |> List.map (fun value -> mapParameter value name typeof<string> :?> string)
+                convertToSome prmType values
+            | tpe -> TerrabuildException.Raise($"Can't assign default value to parameter '{name}' with type '{tpe}'")
 
     let mapParameters (map: Map<string, Value>) (prms: ParameterInfo array) =
         prms
