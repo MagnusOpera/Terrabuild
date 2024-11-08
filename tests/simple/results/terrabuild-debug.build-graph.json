@@ -55,7 +55,7 @@
         "*.planfile"
       ],
       "projectHash": "CE426EC571F3C843461F3A03141057B5D98BA99F25D3BE0C24993C6D70FBF5C3",
-      "targetHash": "73F0BC3BF9E1B1F2FFB93E8F806E8087D44D3672A2EC568501CFC567E7861FBA",
+      "targetHash": "B5F9AEEEE57EDA098C0B9759820121C751157E83127CE2AFBDEC0B0739853F7C",
       "operations": [
         {
           "container": null,
@@ -397,7 +397,7 @@
       "project": "projects/npm-app",
       "target": "build",
       "configurationTarget": {
-        "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+        "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -407,8 +407,8 @@
         ],
         "operations": [
           {
-            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
-            "container": null,
+            "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
+            "container": "node:20",
             "containerVariables": [],
             "extension": "@npm",
             "command": "build",
@@ -425,10 +425,10 @@
         "dist/"
       ],
       "projectHash": "CDC8669D68A39BC7EEBCB7B814DAD6CB598222B2FEBED705C3CA3F4015BB923D",
-      "targetHash": "B17CF505E01B8190F7E924A649588C4EA71D55ACEEE71305ED0F65E96343923F",
+      "targetHash": "3849B10D93463AC4874DFE28FB7552A2B03D6248314CCDF65F9191406B9E320F",
       "operations": [
         {
-          "container": null,
+          "container": "node:20",
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
@@ -441,7 +441,7 @@
           ]
         },
         {
-          "container": null,
+          "container": "node:20",
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
