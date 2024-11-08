@@ -110,11 +110,31 @@ let read (options: ConfigOptions.Options) =
                 | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
             | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
 
+        let tagValue = 
+            match options.Tag with
+            | Some tag -> Value.String tag
+            | _ -> Value.Nothing
+
+        let noteValue =
+            match options.Note with
+            | Some note -> Value.String note
+            | _ -> Value.Nothing
+
         let defaultEvaluationContext = {
             Eval.EvaluationContext.WorkspaceDir = options.Workspace
             Eval.EvaluationContext.ProjectDir = None
             Eval.EvaluationContext.Versions = Map.empty
-            Eval.EvaluationContext.Variables = Map.empty
+            Eval.EvaluationContext.Variables = Map [
+                "terrabuild_configuration", Value.String options.Configuration
+                "terrabuild_branch_or_tag", Value.String options.BranchOrTag 
+                "terrabuild_head_commit", Value.String options.HeadCommit 
+                "terrabuild_retry", Value.Bool options.Retry 
+                "terrabuild_force", Value.Bool options.Force 
+                "terrabuild_ci", Value.Bool options.CI.IsSome 
+                "terrabuild_debug", Value.Bool options.Debug 
+                "terrabuild_tag", tagValue 
+                "terrabuild_note", noteValue ]
+            |> Map.map (fun _ value -> (value, Set.empty))
         }
 
         // variables = default configuration vars + configuration vars + env vars + args vars
@@ -288,30 +308,10 @@ let read (options: ConfigOptions.Options) =
 
                 let evaluationContext =
                     let actionVariables =
-                        let tagValue = 
-                            match options.Tag with
-                            | Some tag -> Value.String tag
-                            | _ -> Value.Nothing
-
-                        let noteValue =
-                            match options.Note with
-                            | Some note -> Value.String note
-                            | _ -> Value.Nothing
-
-                        [ "terrabuild_project", Value.String projectId
-                          "terrabuild_target" , Value.String targetName
-                          "terrabuild_hash", Value.String projectHash 
-                          "terrabuild_configuration", Value.String options.Configuration
-                          "terrabuild_branch_or_tag", Value.String options.BranchOrTag 
-                          "terrabuild_head_commit", Value.String options.HeadCommit 
-                          "terrabuild_retry", Value.Bool options.Retry 
-                          "terrabuild_force", Value.Bool options.Force 
-                          "terrabuild_ci", Value.Bool options.CI.IsSome 
-                          "terrabuild_debug", Value.Bool options.Debug 
-                          "terrabuild_tag", tagValue 
-                          "terrabuild_note", noteValue ]
-                        |> Seq.map (fun (name, value) -> name, (value, Set.empty))
-                        |> Map.ofSeq
+                        Map [ "terrabuild_project", Value.String projectId
+                              "terrabuild_target" , Value.String targetName
+                              "terrabuild_hash", Value.String projectHash ]
+                        |> Map.map (fun _ value -> (value, Set.empty))
 
                     { evaluationContext with
                         Eval.ProjectDir = Some projectDir
