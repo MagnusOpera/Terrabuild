@@ -480,7 +480,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
+          "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -490,8 +490,8 @@
           ],
           "operations": [
             {
-              "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
-              "container": "node:20",
+              "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+              "container": null,
               "containerVariables": [],
               "extension": "@npm",
               "command": "build",
