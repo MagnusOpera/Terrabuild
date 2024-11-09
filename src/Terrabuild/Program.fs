@@ -26,7 +26,6 @@ type RunTargetOptions = {
     Tag: string option
     Labels: string set option
     Variables: Map<string, string>
-    ContainerTool: string option
 }
 
 
@@ -118,7 +117,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.Tag = options.Tag
             ConfigOptions.Options.Labels = options.Labels
             ConfigOptions.Options.Variables = options.Variables
-            ConfigOptions.Options.ContainerTool = options.ContainerTool
         }
 
         if options.Debug then
@@ -195,11 +193,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
         let whatIf = runArgs.Contains(RunArgs.WhatIf)
-        let containerTool =
-            match runArgs.TryGetResult(RunArgs.ContainerTool) with
-            | Some ContainerTool.Docker -> Some "docker"
-            | Some ContainerTool.Podman -> Some "podman"
-            | _ -> None
 
         let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
                         RunTargetOptions.WhatIf = whatIf
@@ -217,8 +210,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Note = note
                         RunTargetOptions.Tag = tag
                         RunTargetOptions.Labels = labels
-                        RunTargetOptions.Variables = variables
-                        RunTargetOptions.ContainerTool = containerTool }
+                        RunTargetOptions.Variables = variables }
         runTarget logs options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
@@ -250,8 +242,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Note = None
                         RunTargetOptions.Tag = None
                         RunTargetOptions.Labels = labels
-                        RunTargetOptions.Variables = variables
-                        RunTargetOptions.ContainerTool = None }
+                        RunTargetOptions.Variables = variables }
         runTarget true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =

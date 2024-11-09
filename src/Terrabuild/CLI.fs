@@ -2,11 +2,6 @@ module CLI
 open Argu
 
 [<RequireQualifiedAccess>]
-type ContainerTool =
-    | Docker
-    | Podman
-
-[<RequireQualifiedAccess>]
 type ScaffoldArgs =
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique>] Force
@@ -49,7 +44,6 @@ type RunArgs =
     | [<Unique; AltCommandLine("-cs")>] CheckState
     | [<Unique; AltCommandLine("-n")>] Note of note:string
     | [<Unique; AltCommandLine("-t")>] Tag of tag:string
-    | [<Unique; AltCommandLine("-ct")>] ContainerTool of tool:ContainerTool
     | [<Unique>] Logs
     | [<Unique; Inherit>] WhatIf
 with
@@ -70,7 +64,6 @@ with
             | Note _ -> "Note for the build."
             | Logs -> "Output logs for impacted projects."
             | Tag _ -> "Tag for build."
-            | ContainerTool _ -> "Container Tool to use (docker or podman)."
             | WhatIf -> "Prepare the action but do not apply."
 
 [<RequireQualifiedAccess>]

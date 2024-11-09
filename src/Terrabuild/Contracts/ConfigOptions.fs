@@ -25,5 +25,4 @@ type Options = {
     Tag: string option
     Labels: string set option
     Variables: Map<string, string>
-    ContainerTool: string option
 }

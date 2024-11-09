@@ -8,7 +8,6 @@
   <ItemGroup>
     <Compile Include="Helpers/Npm.fs" />
     <Compile Include="Cargo.fs" />
-    <Compile Include="Container.fs" />
     <Compile Include="Docker.fs" />
     <Compile Include="Dotnet.fs" />
     <Compile Include="Gradle.fs" />
