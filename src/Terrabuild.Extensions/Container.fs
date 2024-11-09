@@ -31,15 +31,12 @@ type Container() =
                 match tool with
                 | Some "podman" ->
                     let buildArgs = $"build --file {dockerfile} --tag {image}:{context.Hash}{args}{platformArgs} ."
-                    if context.CI then
-                        shellOp "podman" buildArgs
-                        shellOp "podman" $"push {image}:{context.Hash}"
-                    else
-                        shellOp "podman" buildArgs
+                    shellOp "podman" buildArgs
+                    if context.CI then shellOp "podman" $"push {image}:{context.Hash}"
                 | _ ->
-                    let pushArgs = if context.CI then " --push" else ""
-                    let buildArgs = $"buildx build --file {dockerfile} --tag {image}:{context.Hash}{args}{platformArgs}{pushArgs} ."
+                    let buildArgs = $"build --file {dockerfile} --tag {image}:{context.Hash}{args}{platformArgs} ."
                     shellOp "docker" buildArgs
+                    if context.CI then shellOp "docker" $"push {image}:{context.Hash}"
         ]
 
         let cacheability =
