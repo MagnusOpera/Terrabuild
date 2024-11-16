@@ -13,7 +13,7 @@ let createDirectory (path: string) =
 let readTextFile filename =
     filename |> File.ReadAllText
 
-let writeTextFile filename content =
+let writeTextFile filename (content: string) =
     File.WriteAllText(filename, content)
 
 let writeLines filename (lines: string seq) =
