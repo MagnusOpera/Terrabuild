@@ -27,7 +27,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.302
+          dotnet-version: 9.0.100
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3

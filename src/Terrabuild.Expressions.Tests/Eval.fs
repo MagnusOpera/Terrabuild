@@ -9,7 +9,7 @@ let mkVar value =
 
 let private evaluationContext = {
     Eval.EvaluationContext.WorkspaceDir = TestContext.CurrentContext.WorkDirectory
-    Eval.EvaluationContext.ProjectDir = Some TestContext.CurrentContext.TestDirectory
+    Eval.EvaluationContext.ProjectDir = FS.combinePath TestContext.CurrentContext.WorkDirectory "project-path" |> Some
     Eval.EvaluationContext.Variables = Map.empty
     Eval.EvaluationContext.Versions = Map.empty
 }
@@ -161,7 +161,7 @@ let version() =
     printfn $"{context.ProjectDir}"
 
     let result, varUsed =
-        eval context (Expr.Function (Function.Version, [ Expr.String "../net8.0/toto"]))
+        eval context (Expr.Function (Function.Version, [ Expr.String "../toto"]))
     varUsed |> should be Empty
     result |> should equal expected
 

@@ -1,17 +1,23 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0": {
+    "net9.0": {
       "FSharp.Core": {
         "type": "Direct",
-        "requested": "[8.0.401, )",
-        "resolved": "8.0.401",
-        "contentHash": "pvmquLrs82m8WqWB49Gj+hsmnWURkUbc++pJ0P2NdrEv1ZVVrhDNjSiFNP4wW4HiTowwaRhjiBc5IKNV35Vf/A=="
+        "requested": "[9.0.100, )",
+        "resolved": "9.0.100",
+        "contentHash": "ye8yagHGsH08H2Twno5GRWkSbrMtxK/SWiHuPcF+3nODpW65/VJ8RO0aWxp8n9+KQbmahg90wAEL3TEXjF0r6A=="
+      },
+      "System.Text.Json": {
+        "type": "Direct",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "js7+qAu/9mQvnhA4EfGMZNEzXtJCDxgkgj8ohuxq/Qxv+R56G+ljefhiJHOxTNiw54q8vmABCWUwkMulNdlZ4A=="
       }
     },
-    "net8.0/linux-x64": {},
-    "net8.0/osx-arm64": {},
-    "net8.0/osx-x64": {},
-    "net8.0/win-x64": {}
+    "net9.0/linux-x64": {},
+    "net9.0/osx-arm64": {},
+    "net9.0/osx-x64": {},
+    "net9.0/win-x64": {}
   }
 }
