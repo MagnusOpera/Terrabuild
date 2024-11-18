@@ -187,13 +187,13 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let labels = runArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = runArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
-        let localOnly = runArgs.Contains(RunArgs.LocalOnly)
-        let checkState = runArgs.Contains(RunArgs.CheckState)
+        let localOnly = runArgs.Contains(RunArgs.Local_Only)
+        let checkState = runArgs.Contains(RunArgs.Check_State)
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
         let whatIf = runArgs.Contains(RunArgs.WhatIf)
         let containerTool =
-            match runArgs.TryGetResult(RunArgs.ContainerTool) with
+            match runArgs.TryGetResult(RunArgs.Container_Tool) with
             | Some ContainerTool.Docker -> Some "docker"
             | Some ContainerTool.Podman -> Some "podman"
             | Some ContainerTool.None -> None

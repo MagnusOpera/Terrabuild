@@ -45,11 +45,11 @@ type RunArgs =
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
-    | [<Unique; AltCommandLine("-lo")>] LocalOnly
-    | [<Unique; AltCommandLine("-cs")>] CheckState
+    | [<Unique; AltCommandLine("-lo")>] Local_Only
+    | [<Unique; AltCommandLine("-cs")>] Check_State
     | [<Unique; AltCommandLine("-n")>] Note of note:string
     | [<Unique; AltCommandLine("-t")>] Tag of tag:string
-    | [<Unique; AltCommandLine("-ct")>] ContainerTool of tool:ContainerTool
+    | [<Unique; AltCommandLine("-ct")>] Container_Tool of tool:ContainerTool
     | [<Unique>] Logs
     | [<Unique; Inherit>] WhatIf
 with
@@ -64,12 +64,12 @@ with
             | Label _-> "Select projects based on labels."
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
-            | LocalOnly -> "Use local cache only."
-            | CheckState -> "Ensure external state is valid."
+            | Local_Only -> "Use local cache only."
+            | Check_State -> "Ensure external state is valid."
             | Note _ -> "Note for the build."
             | Logs -> "Output logs for impacted projects."
             | Tag _ -> "Tag for build."
-            | ContainerTool _ -> "Container Tool to use (docker or podman)."
+            | Container_Tool _ -> "Container Tool to use (docker or podman)."
             | WhatIf -> "Prepare the action but do not apply."
 
 [<RequireQualifiedAccess>]
