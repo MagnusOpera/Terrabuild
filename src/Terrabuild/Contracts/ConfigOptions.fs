@@ -13,7 +13,6 @@ type Options = {
     LocalOnly: bool
     CheckState: bool
     StartedAt: DateTime
-    NoContainer: bool
     Targets: string set
     CI: string option
     Metadata: string option

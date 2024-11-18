@@ -67,34 +67,31 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
     let allCommands =
         node.Operations
         |> List.map (fun operation ->
-            let cmd = options.ContainerTool |> Option.defaultValue "docker"
-            let wsDir = Environment.CurrentDirectory
-
-            let getContainerUserHome (container: string) =
-                match containerInfos.TryGetValue(container) with
-                | true, containerHome ->
-                    Log.Debug("Reusing USER {containerHome} for {container}", containerHome, container)
-                    containerHome
-                | _ ->
-                    // discover USER
-                    let args = $"run --rm --name {node.TargetHash} --entrypoint sh {container} \"echo -n \\$HOME\""
-                    let containerHome =
-                        Log.Debug("Identifying USER for {container}", container)
-                        match Exec.execCaptureOutput options.Workspace cmd args with
-                        | Exec.Success (containerHome, 0) -> containerHome.Trim()
-                        | _ ->
-                            Log.Debug("USER identification failed for {container}: using root", container)
-                            "/root"
-
-                    Log.Debug("Using USER {containerHome} for {container}", containerHome, container)
-                    containerInfos.TryAdd(container, containerHome) |> ignore
-                    containerHome
-
             let metaCommand = operation.MetaCommand
+            match options.ContainerTool, operation.Container with
+            | Some cmd, Some container ->
+                let wsDir = Environment.CurrentDirectory
 
-            match operation.Container, options.NoContainer with
-            | Some container, false ->
-                let containerHome = getContainerUserHome container
+                let containerHome =
+                    match containerInfos.TryGetValue(container) with
+                    | true, containerHome ->
+                        Log.Debug("Reusing USER {containerHome} for {container}", containerHome, container)
+                        containerHome
+                    | _ ->
+                        // discover USER
+                        let args = $"run --rm --name {node.TargetHash} --entrypoint sh {container} \"echo -n \\$HOME\""
+                        let containerHome =
+                            Log.Debug("Identifying USER for {container}", container)
+                            match Exec.execCaptureOutput options.Workspace cmd args with
+                            | Exec.Success (containerHome, 0) -> containerHome.Trim()
+                            | _ ->
+                                Log.Debug("USER identification failed for {container}: using root", container)
+                                "/root"
+
+                        Log.Debug("Using USER {containerHome} for {container}", containerHome, container)
+                        containerInfos.TryAdd(container, containerHome) |> ignore
+                        containerHome
+
                 let envs =
                     operation.ContainerVariables
                     |> Seq.map (fun var -> $"-e {var}")
@@ -102,7 +99,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                 let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
                 metaCommand, options.Workspace, cmd, args, operation.Container, operation.ExitCodes
             | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
-
+ 
     let stepLogs = List<Cache.OperationSummary>()
     let mutable lastStatusCode = Terrabuild.Extensibility.StatusCode.Success
     let mutable cmdLineIndex = 0

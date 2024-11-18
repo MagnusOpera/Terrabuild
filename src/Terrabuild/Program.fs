@@ -19,7 +19,6 @@ type RunTargetOptions = {
     CheckState: bool
     StartedAt: DateTime
     IsLog: bool
-    NoContainer: bool
     Targets: string set
     Configuration: string
     Note: string option
@@ -106,7 +105,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.LocalOnly = options.LocalOnly
             ConfigOptions.Options.CheckState = options.CheckState
             ConfigOptions.Options.StartedAt = options.StartedAt
-            ConfigOptions.Options.NoContainer = options.NoContainer
             ConfigOptions.Options.Targets = options.Targets
             ConfigOptions.Options.CI = sourceControl.CI
             ConfigOptions.Options.BranchOrTag = sourceControl.BranchOrTag
@@ -189,7 +187,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let labels = runArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = runArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
-        let noContainer = runArgs.Contains(RunArgs.NoContainer)
         let localOnly = runArgs.Contains(RunArgs.LocalOnly)
         let checkState = runArgs.Contains(RunArgs.CheckState)
         let logs = runArgs.Contains(RunArgs.Logs)
@@ -199,14 +196,14 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             match runArgs.TryGetResult(RunArgs.ContainerTool) with
             | Some ContainerTool.Docker -> Some "docker"
             | Some ContainerTool.Podman -> Some "podman"
-            | _ -> None
+            | Some ContainerTool.None -> None
+            | _ -> Some "docker"
 
         let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
                         RunTargetOptions.WhatIf = whatIf
                         RunTargetOptions.Debug = debug
                         RunTargetOptions.Force = runArgs.Contains(RunArgs.Force)
                         RunTargetOptions.MaxConcurrency = maxConcurrency
-                        RunTargetOptions.NoContainer = noContainer
                         RunTargetOptions.Retry = runArgs.Contains(RunArgs.Retry)
                         RunTargetOptions.StartedAt = DateTime.UtcNow
                         RunTargetOptions.IsLog = false
@@ -239,7 +236,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Debug = debug
                         RunTargetOptions.Force = false
                         RunTargetOptions.MaxConcurrency = 1
-                        RunTargetOptions.NoContainer = false
                         RunTargetOptions.Retry = false
                         RunTargetOptions.StartedAt = DateTime.UtcNow
                         RunTargetOptions.IsLog = true
