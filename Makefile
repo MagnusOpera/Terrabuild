@@ -79,10 +79,10 @@ docs:
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net8.0/Terrabuild.Extensions.xml ../website/content/docs/extensions
 
 self: clean publish
-	.out/dotnet/terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --localonly
+	.out/dotnet/terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --local-only
 
 terrabuild:
-	terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --localonly
+	terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --local-only
 
 
 #
@@ -125,10 +125,10 @@ run-deploy-playground:
 	dotnet run --project src/Terrabuild -- run deploy --workspace ../playground --retry --debug
 
 run-test-insights:
-	dotnet run --project src/Terrabuild -- run build test apply plan -w ../../insights --debug --force --localonly --whatif
+	dotnet run --project src/Terrabuild -- run build test apply plan -w ../../insights --debug --force --local-only --whatif
 
 run-test-terrabuild:
-	dotnet run --project src/Terrabuild -- run build test publish -w src --debug --force --localonly
+	dotnet run --project src/Terrabuild -- run build test publish -w src --debug --force --local-only
 
 run-test-cluster-layers:
 	dotnet run --project src/Terrabuild -- run build -w tests/cluster-layers --debug --force
@@ -158,12 +158,12 @@ endef
 # $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
 
 self-test-cluster-layers:
-	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs --containertool docker)
+	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs --container-tool docker)
 
 self-test-multirefs:
-	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --logs --containertool docker)
+	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --logs --container-tool docker)
 
 self-test-simple:
-	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs --containertool docker)
+	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs --container-tool docker)
 
 self-test-all: publish self-test-cluster-layers self-test-multirefs self-test-simple
