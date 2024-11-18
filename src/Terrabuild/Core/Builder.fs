@@ -86,7 +86,6 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                             Terrabuild.Extensibility.ActionContext.CI = options.CI.IsSome
                             Terrabuild.Extensibility.ActionContext.Command = operation.Command
                             Terrabuild.Extensibility.ActionContext.Hash = projectConfig.Hash
-                            Terrabuild.Extensibility.ActionContext.ContainerTool = options.ContainerTool
                         }
 
                         let parameters = 

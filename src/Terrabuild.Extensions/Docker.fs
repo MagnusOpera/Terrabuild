@@ -14,19 +14,21 @@ type Docker() =
     /// <param name="platform" required="false" example="&quot;linux/amd64&quot;">Target platform. Default is host.</param>
     /// <param name="image" required="true" example="&quot;ghcr.io/example/project&quot;">Docker image to build.</param>
     /// <param name="arguments" example="{ configuration: &quot;Release&quot; }">Named arguments to build image (see Dockerfile [ARG](https://docs.docker.com/reference/dockerfile/#arg)).</param> 
-    static member build (context: ActionContext) (dockerfile: string option) (platform: string option) (image: string) (arguments: Map<string, string>) =
+    static member build (context: ActionContext) (dockerfile: string option) (platforms: string list option) (image: string) (arguments: Map<string, string>) =
         let dockerfile = dockerfile |> Option.defaultValue "Dockerfile"
 
-        let platform =
-            match platform with
-            | Some platform -> $" --platform {platform}"
-            | _ -> ""
+        let platformArgs =
+            match platforms with
+            | None -> ""
+            | Some platforms ->
+                platforms
+                |> Seq.fold (fun acc platform -> $"{acc} --platform {platform}") ""
 
         let args = arguments |> Seq.fold (fun acc kvp -> $"{acc} --build-arg {kvp.Key}=\"{kvp.Value}\"") ""
 
         let ops = 
             [
-                let buildArgs = $"build --file {dockerfile} --tag {image}:{context.Hash}{args}{platform} ."
+                let buildArgs = $"build --file {dockerfile} --tag {image}:{context.Hash}{args}{platformArgs} ."
                 shellOp "docker" buildArgs
                 if context.CI then shellOp "docker" $"push {image}:{context.Hash}"
             ]

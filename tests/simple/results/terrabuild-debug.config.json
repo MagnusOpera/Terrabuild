@@ -311,7 +311,7 @@
           ]
         },
         "docker": {
-          "hash": "C06A2293E8572F31C46818B2B14A4DAE6CBDFF6AD3A9D77BF35E9360E540A984",
+          "hash": "B2968AD5F493351AE9DDBE6B6349DAF6CA18C306DCE1DE55C51BEBA430CD3A78",
           "rebuild": false,
           "dependsOn": [
             "dist"
@@ -326,10 +326,10 @@
           ],
           "operations": [
             {
-              "hash": "89C283A8FBD1534DE3941241D180ACFDE16919C1B3723477F3408227CED0B5E0",
+              "hash": "2FBDD2F2C31193CA71F958A6F4B9A9579FB1AFB4D5075063C3826EF9C5F1BE28",
               "container": null,
               "containerVariables": [],
-              "extension": "@container",
+              "extension": "@docker",
               "command": "build",
               "script": {},
               "context": [
@@ -354,7 +354,7 @@
           ]
         },
         "push": {
-          "hash": "FA1C5DB596E37CF56E3E54D4C6A3EDD18D821B24ED62B8E571B6A5F26996F3BF",
+          "hash": "DCE5C493853172D5CA5AF33AD12D2D6DE0EEA440D430C23100216B0E3AC335A9",
           "rebuild": false,
           "dependsOn": [
             "docker"
@@ -369,10 +369,10 @@
           ],
           "operations": [
             {
-              "hash": "AC87E09842A6927D322B8AA58397AC633E3BCF134FE3CD095D4C75D1000B9818",
+              "hash": "AEF1A65D32F57084416DFD132194426A5BA16C83F444DD18070A887A68C1CA91",
               "container": null,
               "containerVariables": [],
-              "extension": "@container",
+              "extension": "@docker",
               "command": "push",
               "script": {},
               "context": [
