@@ -127,7 +127,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         let token =
             if options.LocalOnly then None
-            else config.Space |> Option.bind (fun space -> Auth.readAuthToken space)
+            else config.Space |> Option.bind Auth.readAuthToken
         let api = Api.Factory.create config.Space token options
         if api |> Option.isSome then
             Log.Debug("Connected to API")
@@ -185,7 +185,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let configuration = runArgs.TryGetResult(RunArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let note = runArgs.TryGetResult(RunArgs.Note)
         let labels = runArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
-        let variables = runArgs.GetResults(RunArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
+        let variables = runArgs.GetResults(RunArgs.Variable) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let localOnly = runArgs.Contains(RunArgs.Local_Only)
         let checkState = runArgs.Contains(RunArgs.Check_State)
@@ -229,7 +229,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
-        let variables = logsArgs.GetResults(LogsArgs.Variable) |> Seq.map (fun (k, v) -> k, v) |> Map
+        let variables = logsArgs.GetResults(LogsArgs.Variable) |> Map
 
         let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
                         RunTargetOptions.WhatIf = true

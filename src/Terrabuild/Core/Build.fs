@@ -312,7 +312,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                             match completionStatus with
                             | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
                             | TaskStatus.Success completionDate when summary.EndedAt = completionDate ->
-                                // successfuly validated restore so continue pretenting it's been restored
+                                // successfully validated restore so continue pretenting it's been restored
                                 Log.Debug("{NodeId} state has not changed", node.Id)
                                 TaskRequest.Restore, completionStatus
                             | _ ->
@@ -405,7 +405,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                   NodeInfo.Status = status
                   NodeInfo.Project = node.Project
                   NodeInfo.Target = node.Target
-                  NodeInfo.ProjectHash = node.ProjectHash 
+                  NodeInfo.ProjectHash = node.ProjectHash
                   NodeInfo.TargetHash = node.TargetHash } |> Some
             | _ -> None
 
