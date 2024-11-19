@@ -352,8 +352,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     hub.GetSignal<DateTime> awaitedProjectId)
                 |> Array.ofSeq
 
-            let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-            hub.Subscribe awaitedSignals (fun () ->
+            let onAllSignaled () =
                 try
                     let maxCompletionChildren =
                         match awaitedDependencies with
@@ -377,7 +376,10 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         nodeResults.TryAdd(node.Id, (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))) |> ignore
                         notification.NodeCompleted node TaskRequest.Build false
 
-                        reraise())
+                        reraise()
+
+            let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+            hub.Subscribe awaitedSignals onAllSignaled
 
     graph.RootNodes |> Seq.iter schedule
 
