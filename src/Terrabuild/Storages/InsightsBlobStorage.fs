@@ -7,7 +7,7 @@ type AzureArtifactLocationOutput = {
     Uri: string
 }
 
-type AzureBlobStorage(api: Contracts.IApiClient) =
+type InsightsBlobStorage(api: Contracts.IApiClient) =
     let getBlobClient path =
         let uri = api.GetArtifact path
         let container = BlobContainerClient(uri)
@@ -15,8 +15,6 @@ type AzureBlobStorage(api: Contracts.IApiClient) =
         blobClient
 
     interface Contracts.IStorage with
-        override _.Name = "Azure Blob Storage"
-
         override _.Exists id =
             let blobClient = getBlobClient id
             try

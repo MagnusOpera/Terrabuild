@@ -1,9 +1,7 @@
 namespace Storages
 
-type Local() =
+type NoneStorage() =
     interface Contracts.IStorage with
-        override _.Name = "Local"
-
         override _.Exists id = false
 
         override _.TryDownload id = None
