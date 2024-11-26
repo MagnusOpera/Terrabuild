@@ -93,7 +93,7 @@ type Terraform() =
             | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
             | _ -> ()
 
-            shellOp "terraform" "apply terrabuild.planfile"
+            shellOp "terraform" "apply -input=false terrabuild.planfile"
         ]
         execRequest Cacheability.Always ops
   
