@@ -30,6 +30,7 @@ rule token = parse
     | "count" { COUNT }
     | "version" { VERSION }
     | "format" { FORMAT }
+    | "tostring" { TOSTRING }
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }
     | ".?" { DOT_QUESTION }

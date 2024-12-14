@@ -11,6 +11,7 @@ type Function =
     | Count
     | Version
     | Format
+    | ToString
     | Item
     | TryItem
     | Coalesce

@@ -84,6 +84,8 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | Some version -> Value.String version
                     | _ -> TerrabuildException.Raise($"Unknown project reference '{str}'")
 
+                | Function.ToString, [value] -> valueToString value |> Value.String
+
                 | Function.Format, [Value.String template; Value.Map values] ->
                     let rec replaceAll template =
                         match template with
