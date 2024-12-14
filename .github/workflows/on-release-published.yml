@@ -1,4 +1,4 @@
-name: release
+name: On Release Published
 run-name: Release ${{github.ref_name}}
 
 on:

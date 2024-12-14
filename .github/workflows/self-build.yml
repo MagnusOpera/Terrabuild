@@ -1,4 +1,4 @@
-name: build-with-version
+name: Self Build
 run-name: "${{ github.name }} ${{ inputs.retry == true && 'retry' || '' }} ${{ inputs.force == true && 'force' || '' }}"
 
 on:

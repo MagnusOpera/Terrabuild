@@ -1,4 +1,4 @@
-name: prepare-release
+name: Prepare Release
 run-name: Prepare release ${{github.ref_name}}
 
 on:

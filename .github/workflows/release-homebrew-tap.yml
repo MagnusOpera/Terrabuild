@@ -1,4 +1,4 @@
-name: Post-Release Homebrew Tap
+name: Update Homebrew Tap
 
 permissions:
   contents: read
