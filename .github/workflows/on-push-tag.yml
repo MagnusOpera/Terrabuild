@@ -1,4 +1,4 @@
-name: Prepare Release
+name: On Push Tag
 run-name: Prepare release ${{github.ref_name}}
 
 on:
