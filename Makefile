@@ -76,7 +76,7 @@ publish-all: clean
 
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(buildconfig) /p:GenerateDocumentationFile=true
-	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net9.0/Terrabuild.Extensions.xml ../terrabuild.io/content/docs/extensions
+	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net9.0/Terrabuild.Extensions.xml ../../websites/terrabuild.io/content/docs/extensions
 
 self: clean publish
 	.out/dotnet/terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --local-only
