@@ -1,4 +1,4 @@
-name: 🤖 On Release Published
+name: ⚡️ On Release Published
 run-name: Release ${{github.ref_name}}
 
 on:
