@@ -1,9 +1,9 @@
+name: Purge Releases
+
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
-
-name: delete-releases
 
 jobs:
   build:
