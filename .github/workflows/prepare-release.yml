@@ -43,9 +43,9 @@ jobs:
 
       - name: Pack
         run: |
-          (cd .out/dotnet; zip ../terrabuild-dotnet.zip ./*)
-          (cd .out/windows; zip ../terrabuild-windows-x64.zip ./terrabuild.exe)
-          (cd .out/linux; zip ../terrabuild-linux-x64.zip ./terrabuild)
+          (cd .out/dotnet; zip ../terrabuild-${BUILD_VERSION}-dotnet.zip ./*)
+          (cd .out/windows; zip ../terrabuild-${BUILD_VERSION}-windows-x64.zip ./terrabuild.exe)
+          (cd .out/linux; zip ../terrabuild-${BUILD_VERSION}-linux-x64.zip ./terrabuild)
           (cd .out/darwin; zip -r ../terrabuild-darwin-binaries.zip .)
 
       - name: Archive .net Outputs
@@ -53,7 +53,7 @@ jobs:
         with:
           name: outputs-dotnet
           include-hidden-files: true
-          path: .out/terrabuild-dotnet.zip
+          path: .out/terrabuild-*-dotnet.zip
 
       - name: Archive NuGet Outputs
         uses: actions/upload-artifact@v4
@@ -67,14 +67,14 @@ jobs:
         with:
           name: outputs-windows
           include-hidden-files: true
-          path: .out/terrabuild-windows-x64.zip
+          path: .out/terrabuild-*-windows-x64.zip
 
       - name: Archive Linux Outputs
         uses: actions/upload-artifact@v4
         with:
           name: outputs-linux
           include-hidden-files: true
-          path: .out/terrabuild-linux-x64.zip
+          path: .out/terrabuild-*-linux-x64.zip
 
       - name: Archive macOS outputs
         uses: actions/upload-artifact@v4
@@ -97,6 +97,18 @@ jobs:
       - name: Extract Binaries
         run: unzip -d .out/darwin .out/terrabuild-darwin-binaries.zip
 
+      - name: Signing Version/Version Suffix
+        run: |
+          s=${{github.ref_name}}
+          pat="([^-]*)-?([^-]*)"
+          [[ $s =~ $pat ]]
+          BUILD_VERSION=${BASH_REMATCH[1]}
+          BUILD_VERSION_SUFFIX=${BASH_REMATCH[2]}
+          echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
+          echo "BUILD_VERSION_SUFFIX=$BUILD_VERSION_SUFFIX" >> $GITHUB_ENV
+          echo "BUILD_VERSION: $BUILD_VERSION"
+          echo "BUILD_VERSION_SUFFIX: $BUILD_VERSION_SUFFIX"
+
       - name: Add Cert to Keychain
         uses: apple-actions/import-codesign-certs@v3
         with: 
@@ -107,18 +119,15 @@ jobs:
         run: |
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/x64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
           codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/arm64/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-          (cd .out/darwin/x64; zip ../terrabuild-darwin-x64.zip ./terrabuild)
-          (cd .out/darwin/arm64; zip ../terrabuild-darwin-arm64.zip ./terrabuild)
-          # lipo -create -output .out/darwin/terrabuild .out/darwin/x64/terrabuild .out/darwin/arm64/terrabuild
-          # codesign --force --timestamp --sign "Developer ID Application: Magnus Opera (${{ secrets.MAC_DEV_TEAM_ID }})" .out/darwin/terrabuild --options=runtime --no-strict --entitlements entitlements.plist
-          # (cd .out/darwin; zip ../terrabuild-darwin-universal.zip ./terrabuild)
+          (cd .out/darwin/x64; zip ../terrabuild-${BUILD_VERSION}-darwin-x64.zip ./terrabuild)
+          (cd .out/darwin/arm64; zip ../terrabuild-${BUILD_VERSION}-darwin-arm64.zip ./terrabuild)
 
       - name: Archive Signed Binaries
         uses: actions/upload-artifact@v4
         with:
           name: outputs-macos
           include-hidden-files: true
-          path: .out/darwin/terrabuild-darwin-*.zip
+          path: .out/darwin/terrabuild-*-darwin-*.zip
 
   create-release:
     runs-on: ubuntu-latest

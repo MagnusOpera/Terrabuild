@@ -64,3 +64,6 @@ jobs:
           team_id: ${{ secrets.MAC_DEV_TEAM_ID }}
           xcode_path: '/Applications/Xcode_15.3.app'
           staple: false
+
+  brew:
+     
