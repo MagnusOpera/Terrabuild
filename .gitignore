@@ -418,3 +418,4 @@ terrabuild-debug.md
 .out
 .nuget
 .mono
+*.zip

@@ -1,0 +1,86 @@
+name: Post-Release Homebrew Tap
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        description: "GitHub ref to use"
+        type: string
+      version:
+        required: true
+        description: "Version to produce"
+        type: string
+      dry-run:
+        required: false
+        default: true
+        description: "Whether to run in dry-run mode and skip pushing the commit"
+        type: boolean
+  workflow_dispatch:
+    inputs:
+      ref:
+        required: true
+        description: "GitHub ref to use"
+        type: string
+      version:
+        required: true
+        description: "Version to produce"
+        type: string
+      dry-run:
+        required: false
+        default: true
+        description: "Whether to run in dry-run mode and skip pushing the commit"
+        type: boolean
+
+env:
+  TERRABUILD_VERSION: ${{ inputs.version }}
+  GITHUB_TOKEN: ${{ secrets.GIT_PAT }}
+
+jobs:
+  update-homebrew-tap:
+    name: Update Homebrew Tap
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          path: terrabuild
+      - name: Checkout tap repo
+        uses: actions/checkout@v4
+        with:
+          repository: MagnusOpera/homebrew-tap
+          path: homebrew-tap
+          token: ${{ secrets.GIT_PAT }}
+      - name: Update Homebrew Tap
+        run: |
+          set -euo pipefail
+
+          # Can simulate this by cloning MagnusOpera/terrabuild & MagnusOpera/homebrew-tap to adacent directories
+          # and running from their parent:
+
+          ./terrabuild/.github/scripts/generate-homebrew-tap \
+            "${TERRABUILD_VERSION}" ./terrabuild/.github/scripts/terrabuild-tap-template.rb \
+            > ./homebrew-tap/Casks/terrabuild.rb
+      - name: Commit updated formula
+        working-directory: homebrew-tap
+        run: |
+          set -euo pipefail
+
+          git config user.name magnusopera-bot
+          git config user.email bot@magnusopera.io
+          git add Casks/terrabuild.rb
+          echo "::group::git diff"
+          git  --no-pager diff
+          echo "::endgroup::"
+          git commit -m "Brew formula update for Terrabuild version ${TERRABUILD_VERSION}"
+      - name: Push formula
+        working-directory: homebrew-tap
+        if: ${{ !inputs.dry-run }}
+        run: |
+          set -euo pipefail
+
+          git push origin HEAD:main
