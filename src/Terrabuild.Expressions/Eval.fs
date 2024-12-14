@@ -11,6 +11,14 @@ type EvaluationContext = {
 }
 
 let rec eval (context: EvaluationContext) (expr: Expr) =
+    let valueToString v =
+        match v with
+        | Value.Nothing -> ""
+        | Value.Bool b -> if b then "true" else "false"
+        | Value.Number n -> $"{n}"
+        | Value.String s -> s
+        | _ -> TerrabuildException.Raise($"Unsupported type for format {v}")
+
     let rec eval (expr: Expr) =
         match expr with
         | Expr.Nothing -> Value.Nothing, Set.empty
@@ -76,18 +84,41 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | Some version -> Value.String version
                     | _ -> TerrabuildException.Raise($"Unknown project reference '{str}'")
 
-                | Function.Format, values ->
-                    let formatValue v =
-                        match v with
-                        | Value.Nothing -> ""
-                        | Value.Bool b -> if b then "true" else "false"
-                        | Value.Number n -> $"{n}"
-                        | Value.String s -> s
-                        | _ -> TerrabuildException.Raise($"Unsupported type for format {v}")
+                | Function.ToString, [value] -> valueToString value |> Value.String
 
-                    values
-                    |> List.fold (fun acc value -> $"{acc}{formatValue value}") ""
-                    |> Value.String
+                | Function.Format, [Value.String template; Value.Map values] ->
+                    let rec replaceAll template =
+                        match template with
+                        | String.Regex "{([^}]+)}" [name] ->
+                            let value =
+                                match values |> Map.tryFind name with
+                                | Some value -> valueToString value
+                                | _ -> TerrabuildException.Raise($"Field {name} does not exist")
+                            template
+                            |> String.replace $"{{{name}}}" value
+                            |> replaceAll
+                        | _ -> template
+
+                    replaceAll template |> Value.String
+
+                | Function.Format, Value.String template :: values ->
+                    let values = values |> List.map valueToString
+
+                    let rec replaceAll template =
+                        match template with
+                        | String.Regex "{([^}]+)}" [index] ->
+                            let value =
+                                match System.Int32.TryParse index with
+                                | (true, index) -> 
+                                    if 0 <= index && index < values.Length then values[index]
+                                    else TerrabuildException.Raise($"Format index is out of range")
+                                | _ -> TerrabuildException.Raise($"Format index is not a number")
+                            template
+                            |> String.replace $"{{{index}}}" value
+                            |> replaceAll
+                        | _ -> template
+
+                    replaceAll template |> Value.String
 
                 | Function.Item, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with

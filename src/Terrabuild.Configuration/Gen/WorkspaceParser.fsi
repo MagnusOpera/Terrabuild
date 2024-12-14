@@ -27,6 +27,7 @@ type token =
   | COUNT
   | VERSION
   | FORMAT
+  | TOSTRING
   | MINUS
   | PLUS
   | COMMA
@@ -78,6 +79,7 @@ type tokenId =
     | TOKEN_COUNT
     | TOKEN_VERSION
     | TOKEN_FORMAT
+    | TOKEN_TOSTRING
     | TOKEN_MINUS
     | TOKEN_PLUS
     | TOKEN_COMMA

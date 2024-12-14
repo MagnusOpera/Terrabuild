@@ -166,20 +166,41 @@ let version() =
     result |> should equal expected
 
 [<Test>]
-let format() =
-    let expected = Value.String "\\o/42truetiti"
+let formatList() =
+    let expected = Value.String "\\o/THIS42ISAtrueTEMPLATEtiti"
     let expectedUsedVars = Set [ "toto" ]
 
     let context = { evaluationContext
                     with Variables = Map ["toto", Value.String "\\o/" |> mkVar] }
 
+    // format("{0}THIS{1}IS{2}A{3}TEMPLATE{4}", $toto, 42, nothing, true, "titi")
     let result, varUsed =
         eval context (Expr.Function (Function.Format, [
+            Expr.String "{0}THIS{1}IS{2}A{3}TEMPLATE{4}"
             Expr.Variable "toto"
             Expr.Number 42
             Expr.Nothing
             Expr.Bool true
             Expr.String "titi" ]))
+    varUsed |> should equal expectedUsedVars
+    result |> should equal expected
+
+[<Test>]
+let formatMap() =
+    let expected = Value.String "THIS\\o/IS42ATEMPLATEtrue"
+    let expectedUsedVars = Set [ "args" ]
+
+    let context = { evaluationContext
+                    with Variables = Map ["args", Value.Map (Map [ "string", Value.String "\\o/"
+                                                                   "number", Value.Number 42
+                                                                   "nothing", Value.Nothing
+                                                                   "bool", Value.Bool true ]) |> mkVar ] }
+ 
+    // format("THIS{string}IS{number}A{nothing}TEMPLATE{bool}", $args)
+    let result, varUsed =
+        eval context (Expr.Function (Function.Format, [
+            Expr.String "THIS{string}IS{number}A{nothing}TEMPLATE{bool}"
+            Expr.Variable "args" ]))
     varUsed |> should equal expectedUsedVars
     result |> should equal expected
 

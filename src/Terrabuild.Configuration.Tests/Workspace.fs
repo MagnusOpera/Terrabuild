@@ -91,8 +91,9 @@ let parseWorkspace2() =
                                     Expr.Number 2
                                     Expr.Variable "toto"
                                     Expr.Bool true
-                                    Expr.Nothing
-                                ]) ] }
+                                    Expr.Nothing ])
+                                "secret5", Expr.Function (Function.ToString, [Expr.Number 42])
+                              ] }
 
         let extDotnet =
             { Container = Some "mcr.microsoft.com/dotnet/sdk:8.0.101"
