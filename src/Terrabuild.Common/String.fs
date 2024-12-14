@@ -29,3 +29,6 @@ let startsWith (start: string) (s: string) =
 
 let trim (s: string) =
     s.Trim()
+
+let replace (substring: string) (value: string) (s: string) =
+    s.Replace(substring, value)
