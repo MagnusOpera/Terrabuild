@@ -36,8 +36,8 @@ on:
         type: boolean
 
 env:
-  PULUMI_VERSION: ${{ inputs.version }}
-  GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+  TERRABUILD_VERSION: ${{ inputs.version }}
+  GITHUB_TOKEN: ${{ secrets.GIT_PAT }}
 
 jobs:
   update-homebrew-tap:
@@ -72,11 +72,11 @@ jobs:
 
           git config user.name magnusopera-bot
           git config user.email bot@magnusopera.io
-          git add Formula/terrabuild.rb
+          git add Casks/terrabuild.rb
           echo "::group::git diff"
           git  --no-pager diff
           echo "::endgroup::"
-          git commit -m "Brew formula update for Terrabuild version ${PULUMI_VERSION}"
+          git commit -m "Brew formula update for Terrabuild version ${TERRABUILD_VERSION}"
       - name: Push formula
         working-directory: homebrew-tap
         if: ${{ !inputs.dry-run }}
