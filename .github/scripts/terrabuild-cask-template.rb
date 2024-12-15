@@ -21,10 +21,10 @@ cask "terrabuild" do
     end
 
     on_linux do
-    #   if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-    #     url "${TERRABUILD_LINUX_ARM64_URL}"
-    #     sha256 "${TERRABUILD_LINUX_ARM64_SHA256}"
-    #   end
+      if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+        url "${TERRABUILD_LINUX_ARM64_URL}"
+        sha256 "${TERRABUILD_LINUX_ARM64_SHA256}"
+      end
       if Hardware::CPU.intel?
         url "${TERRABUILD_LINUX_X64_URL}"
         sha256 "${TERRABUILD_LINUX_X64_SHA256}"
