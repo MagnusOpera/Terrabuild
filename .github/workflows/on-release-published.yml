@@ -47,7 +47,7 @@ jobs:
         uses: GuillaumeFalourd/notary-tools@v1
         timeout-minutes: 5
         with:
-          product_path: "terrabuild-*-darwin-x64.zip"
+          product_path: "terrabuild-${{github.ref_name}}-darwin-x64.zip"
           apple_id: ${{ secrets.MAC_DEV_LOGIN }}
           password: ${{ secrets.MAC_DEV_PASSWORD }}
           team_id: ${{ secrets.MAC_DEV_TEAM_ID }}
@@ -58,7 +58,7 @@ jobs:
         uses: GuillaumeFalourd/notary-tools@v1
         timeout-minutes: 5
         with:
-          product_path: "terrabuild-darwin-arm64.zip"
+          product_path: "terrabuild-${{github.ref_name}}-darwin-arm64.zip"
           apple_id: ${{ secrets.MAC_DEV_LOGIN }}
           password: ${{ secrets.MAC_DEV_PASSWORD }}
           team_id: ${{ secrets.MAC_DEV_TEAM_ID }}
