@@ -10,14 +10,12 @@ cd "$(mktemp -d)"
 
 >&2 echo "::info Generating Homebrew Tap..."
 >&2 echo "::group::Download release assets"
->&2 gh release download --repo magnusopera/terrabuild "${TERRABUILD_VERSION}" -p 'terrabuild*darwin*.zip' -p 'terrabuild*linux*.zip' --skip-existing
+>&2 gh release download --repo magnusopera/terrabuild "${TERRABUILD_VERSION}" -p 'terrabuild*darwin*.zip' --skip-existing
 >&2 echo "::endgroup::"
 
 for i in \
   "darwin x64   TERRABUILD_DARWIN_X64" \
   "darwin arm64 TERRABUILD_DARWIN_ARM64" \
-  "linux x64    TERRABUILD_LINUX_X64" \
-  "linux arm64  TERRABUILD_LINUX_ARM64" \
   ; do
   # shellcheck disable=SC2086 # intentional, we want to split the strings
   set -- $i # read loop strings as args
@@ -39,4 +37,4 @@ for i in \
 done
 
 # shellcheck disable=SC2016 # intentional, envsubst requires us to pass variable names with $ prefixes.
-envsubst '$TERRABUILD_VERSION,$TERRABUILD_DARWIN_X64_URL,$TERRABUILD_DARWIN_X64_SHA256,$TERRABUILD_DARWIN_ARM64_URL,$TERRABUILD_DARWIN_ARM64_SHA256,$TERRABUILD_LINUX_X64_URL,$TERRABUILD_LINUX_X64_SHA256,$TERRABUILD_LINUX_ARM64_URL,$TERRABUILD_LINUX_ARM64_SHA256' < "${CASK_FILE}"
+envsubst '$TERRABUILD_VERSION,$TERRABUILD_DARWIN_X64_URL,$TERRABUILD_DARWIN_X64_SHA256,$TERRABUILD_DARWIN_ARM64_URL,$TERRABUILD_DARWIN_ARM64_SHA256' < "${CASK_FILE}"
