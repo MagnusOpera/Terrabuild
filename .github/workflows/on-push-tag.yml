@@ -11,7 +11,7 @@ permissions:
   packages: write
 
 env:
-  BUILD_VERSION=${{github.ref_name}}
+  BUILD_VERSION: ${{ github.ref_name }}
 
 jobs:
   build:
