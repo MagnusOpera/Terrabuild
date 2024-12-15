@@ -3,8 +3,8 @@
 set -euo pipefail
 
 export TERRABUILD_VERSION="${1}"
-CASK_FILE="${2:-"./.github/scripts/homebrew-cask.rb}"}"
-CASK_FILE="$(realpath "${CASK_FILE}")"
+TAP_FILE="${2:-"./.github/scripts/homebrew-tap.rb}"}"
+TAP_FILE="$(realpath "${TAP_FILE}")"
 
 cd "$(mktemp -d)"
 
@@ -37,4 +37,4 @@ for i in \
 done
 
 # shellcheck disable=SC2016 # intentional, envsubst requires us to pass variable names with $ prefixes.
-envsubst '$TERRABUILD_VERSION,$TERRABUILD_DARWIN_X64_URL,$TERRABUILD_DARWIN_X64_SHA256,$TERRABUILD_DARWIN_ARM64_URL,$TERRABUILD_DARWIN_ARM64_SHA256' < "${CASK_FILE}"
+envsubst '$TERRABUILD_VERSION,$TERRABUILD_DARWIN_X64_URL,$TERRABUILD_DARWIN_X64_SHA256,$TERRABUILD_DARWIN_ARM64_URL,$TERRABUILD_DARWIN_ARM64_SHA256' < "${TAP_FILE}"

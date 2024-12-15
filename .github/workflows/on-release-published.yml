@@ -65,10 +65,10 @@ jobs:
           xcode_path: '/Applications/Xcode_15.3.app'
           staple: false
      
-  update-homebrew-cask:
-    name: Update Homebrew Cask
+  update-homebrew-tap:
+    name: Update Homebrew Tap
     if: inputs.run-dispatch-commands && !contains(inputs.version, '-')
-    uses: ./.github/workflows/release-homebrew-cask.yml
+    uses: ./.github/workflows/release-homebrew-tap.yml
     permissions:
       contents: read
     with:
