@@ -93,6 +93,7 @@ let parseWorkspace2() =
                                     Expr.Bool true
                                     Expr.Nothing ])
                                 "secret5", Expr.Function (Function.ToString, [Expr.Number 42])
+                                "secret6", Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false])
                               ] }
 
         let extDotnet =

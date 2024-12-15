@@ -49,29 +49,25 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 match f, values with
                 | Function.Plus, [Value.String left; Value.String right] -> Value.String (left + right)
                 | Function.Upper, [Value.String str] -> Value.String (str.ToUpperInvariant())
-                | Function.Upper, [Value.Nothing] -> Value.Nothing
                 | Function.Trim, [Value.String str] -> Value.String (str.Trim())
                 | Function.Lower, [Value.String str] -> Value.String (str.ToLowerInvariant())
-                | Function.Lower, [Value.Nothing] -> Value.Nothing
                 | Function.Replace, [Value.String str; Value.String value; Value.String newValue] -> Value.String (str.Replace(value, newValue))
-                | Function.Replace, [Value.Nothing; _; _] -> Value.Nothing
 
                 | Function.Plus, [Value.Number left; Value.Number right] -> Value.Number (left + right)
                 | Function.Minus, [Value.Number left; Value.Number right] -> Value.Number (left - right)
 
                 | Function.Plus, [Value.Map left; Value.Map right] -> Value.Map (left |> Map.addMap right)
-                | Function.Plus, [Value.Nothing; Value.Map right] -> Value.Map right
-                | Function.Plus, [Value.Map left; Value.Nothing] -> Value.Map left
                 | Function.Count, [Value.Map map] -> Value.Number map.Count
 
                 | Function.Plus, [Value.List left; Value.List right] -> Value.List (left @ right)
-                | Function.Plus, [Value.Nothing; Value.List right] -> Value.List right
-                | Function.Plus, [Value.List left; Value.Nothing] -> Value.List left
                 | Function.Count, [Value.List list] -> Value.Number list.Length
 
                 | Function.Not, [Value.Nothing] -> Value.Bool true
                 | Function.Not, [Value.Bool bool] -> Value.Bool (not bool)
                 | Function.Not, [_] -> Value.Bool false
+
+                | Function.And, [Value.Bool left; Value.Bool right] -> Value.Bool (left && right)
+                | Function.Or, [Value.Bool left; Value.Bool right] -> Value.Bool (left || right)
 
                 | Function.Version, [Value.String str] ->
                     let projectDir =
