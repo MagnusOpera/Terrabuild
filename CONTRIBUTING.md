@@ -5,7 +5,7 @@ Thanks for contributing to Terrabuild and helping make it better. We appreciate 
 ## Communications
 
 You are welcome to join the [Terrabuild Community Slack](https://terrabuild.io/community/) for questions and feature requests.
-We discuss features and file bugs on GitHub via [Issues](https://github.com/MagnusOpera/Terrabuild/issues).
+We discuss features and file bugs on GitHub via [Issues](https://github.com/magnusopera/terrabuild/issues).
 
 ### Issues
 
@@ -15,8 +15,8 @@ Please keep in mind Terrabuild is a young product. We are doing our best to move
 
 ### Feature Work
 
-For larger features, we'd appreciate it if you open a [new issue](https://github.com/MagnusOpera/Terrabuild/issues/new) before investing a lot of time so we can discuss the feature together.
-Please also be sure to browse [current issues](https://github.com/MagnusOpera/Terrabuild/issues) to make sure your issue is unique, to lighten the triage burden on our maintainers.
+For larger features, we'd appreciate it if you open a [new issue](https://github.com/magnusopera/terrabuild/issues/new) before investing a lot of time so we can discuss the feature together.
+Please also be sure to browse [current issues](https://github.com/magnusopera/terrabuild/issues) to make sure your issue is unique, to lighten the triage burden on our maintainers.
 Finally, please limit your pull requests to contain only one feature at a time. Separating feature work into individual pull requests helps speed up code review and reduces the barrier to merge.
 
 ## Developing

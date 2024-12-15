@@ -73,8 +73,8 @@
     <Description>Terrabuild</Description>
     <Copyright>Copyright 2023-2024 Magnus Opera</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/MagnusOpera/Terrabuild</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MagnusOpera/Terrabuild.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/magnusopera/terrabuild</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/magnusopera/terrabuild.git</RepositoryUrl>
     <PackageTags>terrabuild;build;monorepo</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>Terrabuild.png</PackageIcon>

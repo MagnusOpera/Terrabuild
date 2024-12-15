@@ -1,4 +1,4 @@
-name: 🦄 Update Homebrew Tap
+name: 🦄 Update Homebrew Cask
 
 permissions:
   contents: read
@@ -40,8 +40,8 @@ env:
   GITHUB_TOKEN: ${{ secrets.GIT_PAT }}
 
 jobs:
-  update-homebrew-tap:
-    name: Update Homebrew Tap
+  update-homebrew-cask:
+    name: Update Homebrew Cask
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -49,24 +49,24 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           path: terrabuild
-      - name: Checkout tap repo
+      - name: Checkout cask repo
         uses: actions/checkout@v4
         with:
-          repository: MagnusOpera/homebrew-tap
-          path: homebrew-tap
+          repository: magnusopera/homebrew-cask
+          path: homebrew-cask
           token: ${{ secrets.GIT_PAT }}
-      - name: Update Homebrew Tap
+      - name: Update Homebrew Cask
         run: |
           set -euo pipefail
 
-          # Can simulate this by cloning MagnusOpera/terrabuild & MagnusOpera/homebrew-tap to adacent directories
+          # Can simulate this by cloning magnusopera/terrabuild & magnusopera/homebrew-cask to adacent directories
           # and running from their parent:
 
-          ./terrabuild/.github/scripts/generate-homebrew-tap \
-            "${TERRABUILD_VERSION}" ./terrabuild/.github/scripts/terrabuild-tap-template.rb \
-            > ./homebrew-tap/Casks/terrabuild.rb
-      - name: Commit updated formula
-        working-directory: homebrew-tap
+          ./terrabuild/.github/scripts/generate-homebrew-cask \
+            "${TERRABUILD_VERSION}" ./terrabuild/.github/scripts/terrabuild-cask-template.rb \
+            > ./homebrew-cask/Casks/terrabuild.rb
+      - name: Commit Updated Cask
+        working-directory: homebrew-cask
         run: |
           set -euo pipefail
 
@@ -76,9 +76,9 @@ jobs:
           echo "::group::git diff"
           git  --no-pager diff
           echo "::endgroup::"
-          git commit -m "Brew formula update for Terrabuild version ${TERRABUILD_VERSION}"
-      - name: Push formula
-        working-directory: homebrew-tap
+          git commit -m "Brew Cask update for Terrabuild version ${TERRABUILD_VERSION}"
+      - name: Push Cask
+        working-directory: homebrew-cask
         if: ${{ !inputs.dry-run }}
         run: |
           set -euo pipefail
