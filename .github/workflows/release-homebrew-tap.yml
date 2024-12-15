@@ -63,8 +63,8 @@ jobs:
           # and running from their parent:
 
           ./terrabuild/.github/scripts/generate-homebrew-tap \
-            "${TERRABUILD_VERSION}" ./terrabuild/.github/scripts/terrabuild-cask-template.rb \
-            > ./homebrew-tap/Casks/terrabuild.rb
+            "${TERRABUILD_VERSION}" ./terrabuild/.github/scripts/terrabuild-formula-template.rb \
+            > ./homebrew-tap/Formula/terrabuild.rb
       - name: Commit Updated Tap
         working-directory: homebrew-tap
         run: |
@@ -72,11 +72,11 @@ jobs:
 
           git config user.name magnusopera-bot
           git config user.email bot@magnusopera.io
-          git add Casks/terrabuild.rb
+          git add Formula/terrabuild.rb
           echo "::group::git diff"
           git  --no-pager diff
           echo "::endgroup::"
-          git commit -m "Brew Cask update for Terrabuild version ${TERRABUILD_VERSION}"
+          git commit -m "Brew Formula update for Terrabuild version ${TERRABUILD_VERSION}"
       - name: Push Tap
         working-directory: homebrew-tap
         if: ${{ !inputs.dry-run }}
