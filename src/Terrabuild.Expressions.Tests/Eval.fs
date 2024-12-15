@@ -303,3 +303,47 @@ let notAnything() =
     let result, varUsed = eval evaluationContext (Expr.Function (Function.Not, [Expr.Number 42]))
     varUsed |> should be Empty
     result |> should equal (Value.Bool false)
+
+[<Test>]
+let andBool() =
+    let expected = Value.Bool false
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool false; Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool false
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool false; Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool false
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool true; Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let orBool() =
+    let expected = Value.Bool false
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool false; Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool false; Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool true; Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool true; Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal expected
