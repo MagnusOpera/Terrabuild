@@ -43,10 +43,8 @@ let debugPrint s = ignore s
 %right QUESTION
 %left DOUBLE_QUESTION
 %left DOUBLE_EQUAL NOT_EQUAL
-%left MINUS
-%left PLUS
-%left AND
-%left OR
+%left MINUS PLUS
+%left OR AND
 %left DOT DOT_QUESTION
 %right BANG
 %left COMMA

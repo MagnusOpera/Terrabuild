@@ -92,8 +92,9 @@ let parseWorkspace2() =
                                     Expr.Variable "toto"
                                     Expr.Bool true
                                     Expr.Nothing ])
-                                "secret5", Expr.Function (Function.ToString, [Expr.Number 42])
-                                "secret6", Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false])
+                                "secret5", Expr.Function (Function.ToString, [Expr.Function (Function.Plus, [Expr.Function (Function.Plus, [Expr.Number 40; Expr.Number 1]); Expr.Number 2])])
+                                "secret6", Expr.Function (Function.Or, [ Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false])
+                                                                         Expr.Bool true ])
                               ] }
 
         let extDotnet =
