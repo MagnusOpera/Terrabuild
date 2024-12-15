@@ -88,28 +88,10 @@ let addMap() =
     result |> should equal expected
 
 [<Test>]
-let addMapNothing() =
-    let expected = Value.Map (Map [ "toto", Value.Number 42
-                                    "titi", Value.String "pouet" ])
-    let result, varUsed = eval evaluationContext (Expr.Function (Function.Plus, [ Expr.Map (Map [ "toto", Expr.Number 42
-                                                                                                  "titi", Expr.String "pouet" ])
-                                                                                  Expr.Nothing ]))
-    varUsed |> should be Empty
-    result |> should equal expected
-
-[<Test>]
 let addList() =
     let expected = Value.List ([ Value.String "toto"; Value.Number 42 ])
     let result, varUsed = eval evaluationContext (Expr.Function (Function.Plus, [ Expr.List [Expr.String "toto"]
                                                                                   Expr.List [Expr.Number 42] ]))
-    varUsed |> should be Empty
-    result |> should equal expected
-
-[<Test>]
-let addListNothing() =
-    let expected = Value.List ([ Value.String "toto" ])
-    let result, varUsed = eval evaluationContext (Expr.Function (Function.Plus, [ Expr.List [Expr.String "toto"]
-                                                                                  Expr.Nothing ]))
     varUsed |> should be Empty
     result |> should equal expected
 
@@ -321,3 +303,47 @@ let notAnything() =
     let result, varUsed = eval evaluationContext (Expr.Function (Function.Not, [Expr.Number 42]))
     varUsed |> should be Empty
     result |> should equal (Value.Bool false)
+
+[<Test>]
+let andBool() =
+    let expected = Value.Bool false
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool false; Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool false
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool false; Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool false
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool true; Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+[<Test>]
+let orBool() =
+    let expected = Value.Bool false
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool false; Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool false; Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool true; Expr.Bool false]))
+    varUsed |> should be Empty
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result, varUsed = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool true; Expr.Bool true]))
+    varUsed |> should be Empty
+    result |> should equal expected

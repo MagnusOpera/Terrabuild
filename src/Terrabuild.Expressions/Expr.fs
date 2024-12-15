@@ -19,6 +19,8 @@ type Function =
     | Equal
     | NotEqual
     | Not
+    | And
+    | Or
 
 [<RequireQualifiedAccessAttribute>]
 type Expr =

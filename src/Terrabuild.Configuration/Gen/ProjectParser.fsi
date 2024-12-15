@@ -23,6 +23,8 @@ type token =
   | QUESTION
   | COLON
   | BANG
+  | AND
+  | OR
   | TRIM
   | UPPER
   | LOWER
@@ -78,6 +80,8 @@ type tokenId =
     | TOKEN_QUESTION
     | TOKEN_COLON
     | TOKEN_BANG
+    | TOKEN_AND
+    | TOKEN_OR
     | TOKEN_TRIM
     | TOKEN_UPPER
     | TOKEN_LOWER
