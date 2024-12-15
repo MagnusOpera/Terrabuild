@@ -35,9 +35,11 @@ jobs:
       - name: Pack
         run: |
           (cd .out/dotnet; zip ../terrabuild-${BUILD_VERSION}-dotnet.zip ./*)
-          (cd .out/windows; zip ../terrabuild-${BUILD_VERSION}-windows-x64.zip ./terrabuild.exe)
-          (cd .out/linux; zip ../terrabuild-${BUILD_VERSION}-linux-x64.zip ./terrabuild)
-          (cd .out/darwin; zip -r ../terrabuild-${BUILD_VERSION}-darwin-binaries.zip .)
+          (cd .out/windows/x64; zip ../../terrabuild-${BUILD_VERSION}-windows-x64.zip ./terrabuild.exe)
+          (cd .out/windows/arm64; zip ../../terrabuild-${BUILD_VERSION}-windows-arm64.zip ./terrabuild.exe)
+          (cd .out/linux/x64; zip ../../terrabuild-${BUILD_VERSION}-linux-x64.zip ./terrabuild)
+          (cd .out/linux/arm64; zip ../../terrabuild-${BUILD_VERSION}-linux-arm64.zip ./terrabuild)
+          (cd .out/darwin; zip -r ../terrabuild-${BUILD_VERSION}-darwin-unsigned.zip .)
 
       - name: Archive .net Outputs
         uses: actions/upload-artifact@v4
@@ -58,14 +60,14 @@ jobs:
         with:
           name: outputs-windows
           include-hidden-files: true
-          path: .out/terrabuild-*-windows-x64.zip
+          path: .out/terrabuild-*-windows-*.zip
 
       - name: Archive Linux Outputs
         uses: actions/upload-artifact@v4
         with:
           name: outputs-linux
           include-hidden-files: true
-          path: .out/terrabuild-*-linux-x64.zip
+          path: .out/terrabuild-*-linux-*.zip
 
       - name: Archive macOS outputs
         uses: actions/upload-artifact@v4
@@ -73,7 +75,7 @@ jobs:
           name: unsigned-macos
           include-hidden-files: true
           path: |
-            .out/terrabuild-*-darwin-binaries.zip
+            .out/terrabuild-*-darwin-unsigned.zip
             entitlements.plist
 
   sign:
@@ -86,7 +88,7 @@ jobs:
           name: unsigned-macos
 
       - name: Extract Binaries
-        run: unzip -d .out/darwin .out/terrabuild-${BUILD_VERSION}-darwin-binaries.zip
+        run: unzip -d .out/darwin .out/terrabuild-${BUILD_VERSION}-darwin-unsigned.zip
 
       - name: Add Cert to Keychain
         uses: apple-actions/import-codesign-certs@v3
