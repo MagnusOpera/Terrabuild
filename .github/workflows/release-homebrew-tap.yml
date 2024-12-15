@@ -41,7 +41,7 @@ env:
 
 jobs:
   update-homebrew-tap:
-    name: Update Homebrew Cask
+    name: Update Homebrew Tap
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -49,13 +49,13 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           path: terrabuild
-      - name: Checkout cask repo
+      - name: Checkout tap repo
         uses: actions/checkout@v4
         with:
           repository: magnusopera/homebrew-tap
           path: homebrew-tap
           token: ${{ secrets.GIT_PAT }}
-      - name: Update Homebrew Cask
+      - name: Update Homebrew Tap
         run: |
           set -euo pipefail
 
@@ -65,7 +65,7 @@ jobs:
           ./terrabuild/.github/scripts/generate-homebrew-tap \
             "${TERRABUILD_VERSION}" ./terrabuild/.github/scripts/terrabuild-cask-template.rb \
             > ./homebrew-tap/Casks/terrabuild.rb
-      - name: Commit Updated Cask
+      - name: Commit Updated Tap
         working-directory: homebrew-tap
         run: |
           set -euo pipefail
@@ -77,7 +77,7 @@ jobs:
           git  --no-pager diff
           echo "::endgroup::"
           git commit -m "Brew Cask update for Terrabuild version ${TERRABUILD_VERSION}"
-      - name: Push Cask
+      - name: Push Tap
         working-directory: homebrew-tap
         if: ${{ !inputs.dry-run }}
         run: |
