@@ -65,3 +65,14 @@ jobs:
           xcode_path: '/Applications/Xcode_15.3.app'
           staple: false
      
+  update-homebrew-cask:
+    name: Update Homebrew Cask
+    if: inputs.run-dispatch-commands && !contains(inputs.version, '-')
+    uses: ./.github/workflows/release-homebrew-cask.yml
+    permissions:
+      contents: read
+    with:
+      ref: ${{ github.ref }}
+      version: ${{ github.ref_name }}
+      dry-run: false
+    secrets: inherit
