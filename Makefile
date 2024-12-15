@@ -2,18 +2,11 @@ config ?= default
 env ?= default
 
 version ?= 0.0.0
-version_suffix ?=
 
 ifeq ($(config), default)
 	buildconfig = Debug
 else
 	buildconfig = $(config)
-endif
-
-ifeq ($(version_suffix), )
-	full_version = $(version)
-else
-	full_version = $(version)-$(version_suffix)
 endif
 
 current_dir = $(shell pwd)
@@ -60,19 +53,19 @@ usage:
 #
 
 publish:
-	dotnet publish -c $(buildconfig) -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/dotnet src/Terrabuild
+	dotnet publish -c $(buildconfig) -p:Version=$(version) -o $(PWD)/.out/dotnet src/Terrabuild
 
 publish-all: clean
-	dotnet publish -c $(buildconfig) -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/dotnet src/Terrabuild
+	dotnet publish -c $(buildconfig) -p:Version=$(version) -o $(PWD)/.out/dotnet src/Terrabuild
 
-	dotnet pack -c $(buildconfig) -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o .out
+	dotnet pack -c $(buildconfig) -p:Version=$(version) -o .out
 
-	dotnet publish -c $(buildconfig) -r win-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/windows src/Terrabuild
+	dotnet publish -c $(buildconfig) -r win-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/windows src/Terrabuild
 
-	dotnet publish -c $(buildconfig) -r osx-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/darwin/x64 src/Terrabuild
-	dotnet publish -c $(buildconfig) -r osx-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/darwin/arm64 src/Terrabuild
+	dotnet publish -c $(buildconfig) -r osx-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/darwin/x64 src/Terrabuild
+	dotnet publish -c $(buildconfig) -r osx-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/darwin/arm64 src/Terrabuild
 
-	dotnet publish -c $(buildconfig) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(full_version) -p:VersionSuffix=$(version_suffix) -o $(PWD)/.out/linux src/Terrabuild
+	dotnet publish -c $(buildconfig) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/linux src/Terrabuild
 
 docs:
 	dotnet build src/Terrabuild.Extensions -c $(buildconfig) /p:GenerateDocumentationFile=true
