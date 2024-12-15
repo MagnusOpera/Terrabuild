@@ -66,8 +66,7 @@ jobs:
           staple: false
      
   update-homebrew-tap:
-    name: Update Homebrew Tap
-    if: inputs.run-dispatch-commands && !contains(inputs.version, '-')
+    if: ${{ !contains(github.ref_name, '-') }}
     uses: ./.github/workflows/release-homebrew-tap.yml
     permissions:
       contents: read
