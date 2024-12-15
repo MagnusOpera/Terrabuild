@@ -119,6 +119,7 @@ jobs:
           merge-multiple: true
           path: .out
 
+      - name: Extract Version Suffix
         run: |
           s=${{github.ref_name}}
           pat="([^-]*)-?([^-]*)"
