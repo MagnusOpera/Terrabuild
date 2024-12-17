@@ -34,7 +34,7 @@
                     ],
                     "npm_app_version": [
                       "string",
-                      "F07C5D37FEDA7DE586B4D788039B7CEC8F9F342B614DE8C54C40A775EB68E3AC"
+                      "A71734CCA5A86963CA047B7BC71307B97D033947AA78A86FA016B264EFDCE00A"
                     ]
                   }
                 ],
@@ -54,8 +54,8 @@
       "outputs": [
         "*.planfile"
       ],
-      "projectHash": "1B5CF7C8D2E99407E72458C8F0944BF7DF40242EEB33989EF13F6A6AD2957152",
-      "targetHash": "94CD04189595F0E2DFF5E4B33AE8BD717B1F7A71552037A299A899B68D5DF426",
+      "projectHash": "1D9D181CA27265DB8FD5FC388964C19FC0D9041CCDEA740A1FA9B55CF0172A7B",
+      "targetHash": "4686CEE54D66DBF5B5CC350ABE720194A923CBA1F305C42E9266FBEF6BD18DF2",
       "operations": [
         {
           "container": null,
@@ -88,7 +88,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -detailed-exitcode -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=F07C5D37FEDA7DE586B4D788039B7CEC8F9F342B614DE8C54C40A775EB68E3AC\u0022",
+          "arguments": "plan -detailed-exitcode -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=A71734CCA5A86963CA047B7BC71307B97D033947AA78A86FA016B264EFDCE00A\u0022",
           "exitCodes": [
             [
               0,
@@ -457,6 +457,74 @@
       "cache": 0,
       "isLeaf": true
     },
+    "projects/npm-app2:build": {
+      "id": "projects/npm-app2:build",
+      "label": "build projects/npm-app2",
+      "project": "projects/npm-app2",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/"
+        ],
+        "operations": [
+          {
+            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@npm",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "libraries/npm-lib:build"
+      ],
+      "outputs": [
+        "dist/"
+      ],
+      "projectHash": "7FA115E9D0395AE686FDF7083A9A7ED2AB183A228AC0949D61DFEFE19B70D627",
+      "targetHash": "8FB85BF22DCDFAE322DD1BCAA8EE7A23E6EEF200E11C471B836F13E590C8B62A",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "ci",
+          "exitCodes": [
+            [
+              0,
+              "successUpdate"
+            ]
+          ]
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "run build -- ",
+          "exitCodes": [
+            [
+              0,
+              "successUpdate"
+            ]
+          ]
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
     "projects/npm-app:build": {
       "id": "projects/npm-app:build",
       "label": "build projects/npm-app",
@@ -492,8 +560,8 @@
       "outputs": [
         "dist/"
       ],
-      "projectHash": "F07C5D37FEDA7DE586B4D788039B7CEC8F9F342B614DE8C54C40A775EB68E3AC",
-      "targetHash": "C224E2BFDB2153E2F35E52B4024CB2D10CCC3422AF733169BB104CA1D055FEE7",
+      "projectHash": "A71734CCA5A86963CA047B7BC71307B97D033947AA78A86FA016B264EFDCE00A",
+      "targetHash": "AAE46088F081D71179A3697E6D2AEB17050CA1C95C99A5DC5873A2749C5BF44A",
       "operations": [
         {
           "container": null,
@@ -588,6 +656,7 @@
     "libraries/shell-lib:build",
     "projects/dotnet-app:build",
     "projects/make-app:build",
+    "projects/npm-app2:build",
     "projects/npm-app:build",
     "projects/rust-app:build"
   ]

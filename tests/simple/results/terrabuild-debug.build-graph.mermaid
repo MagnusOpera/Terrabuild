@@ -14,6 +14,8 @@ projects/dotnet-app:build("projects/dotnet-app
 build ")
 projects/make-app:build("projects/make-app
 build ")
+projects/npm-app2:build("projects/npm-app2
+build ")
 projects/npm-app:build("projects/npm-app
 build ")
 projects/rust-app:build("projects/rust-app
@@ -28,6 +30,8 @@ projects/dotnet-app:build --> libraries/dotnet-lib:build
 class projects/dotnet-app:build ignore
 projects/make-app:build --> libraries/shell-lib:build
 class projects/make-app:build ignore
+projects/npm-app2:build --> libraries/npm-lib:build
+class projects/npm-app2:build ignore
 projects/npm-app:build --> libraries/npm-lib:build
 class projects/npm-app:build ignore
 class projects/rust-app:build ignore
