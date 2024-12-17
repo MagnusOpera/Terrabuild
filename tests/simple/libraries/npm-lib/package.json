@@ -1,7 +1,7 @@
 {
-    "name": "npm-app",
+    "name": "npm-lib",
     "version": "1.0.0",
-    "description": "npm app",
+    "description": "npm library",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
@@ -9,9 +9,6 @@
       "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "pct",
-    "dependencies": {
-        "npm-lib": "file:../../libraries/npm-lib"
-    },
     "devDependencies": {
       "typescript": "^5.2.2"
     }

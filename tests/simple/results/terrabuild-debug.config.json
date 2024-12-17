@@ -3,6 +3,7 @@
   "selectedProjects": [
     "deployments/terraform-deploy",
     "libraries/dotnet-lib",
+    "libraries/npm-lib",
     "libraries/shell-lib",
     "projects/dotnet-app",
     "projects/make-app",
@@ -59,7 +60,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "id": "deployments/terraform-deploy",
-      "hash": "CE426EC571F3C843461F3A03141057B5D98BA99F25D3BE0C24993C6D70FBF5C3",
+      "hash": "1B5CF7C8D2E99407E72458C8F0944BF7DF40242EEB33989EF13F6A6AD2957152",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
@@ -100,7 +101,7 @@
                       ],
                       "npm_app_version": [
                         "string",
-                        "CDC8669D68A39BC7EEBCB7B814DAD6CB598222B2FEBED705C3CA3F4015BB923D"
+                        "F07C5D37FEDA7DE586B4D788039B7CEC8F9F342B614DE8C54C40A775EB68E3AC"
                       ]
                     }
                   ],
@@ -192,6 +193,47 @@
         }
       },
       "labels": []
+    },
+    "libraries/npm-lib": {
+      "id": "libraries/npm-lib",
+      "hash": "97391FA6034385830B247FAA582DCF05BE4CB31B0CE4D8363A001D59927D57B2",
+      "dependencies": [],
+      "files": [
+        "package-lock.json",
+        "package.json",
+        "src/index.ts",
+        "src/logger.ts",
+        "tsconfig.json"
+      ],
+      "targets": {
+        "build": {
+          "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+          "rebuild": false,
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [
+            "dist/"
+          ],
+          "operations": [
+            {
+              "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+              "container": null,
+              "containerVariables": [],
+              "extension": "@npm",
+              "command": "build",
+              "script": {},
+              "context": [
+                "map",
+                {}
+              ]
+            }
+          ]
+        }
+      },
+      "labels": [
+        "app"
+      ]
     },
     "libraries/shell-lib": {
       "id": "libraries/shell-lib",
@@ -470,12 +512,14 @@
     },
     "projects/npm-app": {
       "id": "projects/npm-app",
-      "hash": "CDC8669D68A39BC7EEBCB7B814DAD6CB598222B2FEBED705C3CA3F4015BB923D",
-      "dependencies": [],
+      "hash": "F07C5D37FEDA7DE586B4D788039B7CEC8F9F342B614DE8C54C40A775EB68E3AC",
+      "dependencies": [
+        "libraries/npm-lib"
+      ],
       "files": [
-        "lib/main.ts",
         "package-lock.json",
         "package.json",
+        "src/main.ts",
         "tsconfig.json"
       ],
       "targets": {

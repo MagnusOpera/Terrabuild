@@ -34,7 +34,7 @@
                     ],
                     "npm_app_version": [
                       "string",
-                      "CDC8669D68A39BC7EEBCB7B814DAD6CB598222B2FEBED705C3CA3F4015BB923D"
+                      "F07C5D37FEDA7DE586B4D788039B7CEC8F9F342B614DE8C54C40A775EB68E3AC"
                     ]
                   }
                 ],
@@ -54,8 +54,8 @@
       "outputs": [
         "*.planfile"
       ],
-      "projectHash": "CE426EC571F3C843461F3A03141057B5D98BA99F25D3BE0C24993C6D70FBF5C3",
-      "targetHash": "73F0BC3BF9E1B1F2FFB93E8F806E8087D44D3672A2EC568501CFC567E7861FBA",
+      "projectHash": "1B5CF7C8D2E99407E72458C8F0944BF7DF40242EEB33989EF13F6A6AD2957152",
+      "targetHash": "94CD04189595F0E2DFF5E4B33AE8BD717B1F7A71552037A299A899B68D5DF426",
       "operations": [
         {
           "container": null,
@@ -88,7 +88,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -detailed-exitcode -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=CDC8669D68A39BC7EEBCB7B814DAD6CB598222B2FEBED705C3CA3F4015BB923D\u0022",
+          "arguments": "plan -detailed-exitcode -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=F07C5D37FEDA7DE586B4D788039B7CEC8F9F342B614DE8C54C40A775EB68E3AC\u0022",
           "exitCodes": [
             [
               0,
@@ -161,6 +161,72 @@
           "metaCommand": "@dotnet build",
           "command": "dotnet",
           "arguments": "build --no-dependencies --configuration Debug    ",
+          "exitCodes": [
+            [
+              0,
+              "successUpdate"
+            ]
+          ]
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
+    "libraries/npm-lib:build": {
+      "id": "libraries/npm-lib:build",
+      "label": "build libraries/npm-lib",
+      "project": "libraries/npm-lib",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/"
+        ],
+        "operations": [
+          {
+            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@npm",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [],
+      "outputs": [
+        "dist/"
+      ],
+      "projectHash": "97391FA6034385830B247FAA582DCF05BE4CB31B0CE4D8363A001D59927D57B2",
+      "targetHash": "53B80D524ECC6244D4AA5161CE7866BA60CB6E8CA462CA433A74B75BEFD57655",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "ci",
+          "exitCodes": [
+            [
+              0,
+              "successUpdate"
+            ]
+          ]
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "run build -- ",
           "exitCodes": [
             [
               0,
@@ -420,12 +486,14 @@
           }
         ]
       },
-      "dependencies": [],
+      "dependencies": [
+        "libraries/npm-lib:build"
+      ],
       "outputs": [
         "dist/"
       ],
-      "projectHash": "CDC8669D68A39BC7EEBCB7B814DAD6CB598222B2FEBED705C3CA3F4015BB923D",
-      "targetHash": "B17CF505E01B8190F7E924A649588C4EA71D55ACEEE71305ED0F65E96343923F",
+      "projectHash": "F07C5D37FEDA7DE586B4D788039B7CEC8F9F342B614DE8C54C40A775EB68E3AC",
+      "targetHash": "C224E2BFDB2153E2F35E52B4024CB2D10CCC3422AF733169BB104CA1D055FEE7",
       "operations": [
         {
           "container": null,
@@ -516,6 +584,7 @@
   "rootNodes": [
     "deployments/terraform-deploy:build",
     "libraries/dotnet-lib:build",
+    "libraries/npm-lib:build",
     "libraries/shell-lib:build",
     "projects/dotnet-app:build",
     "projects/make-app:build",
