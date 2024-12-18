@@ -27,7 +27,3 @@ target dist {
 target docker {
     @docker build { }
 }
-
-target push {
-    @docker push { }
-}
