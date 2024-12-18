@@ -395,49 +395,6 @@
               ]
             }
           ]
-        },
-        "push": {
-          "hash": "DCE5C493853172D5CA5AF33AD12D2D6DE0EEA440D430C23100216B0E3AC335A9",
-          "rebuild": false,
-          "dependsOn": [
-            "docker"
-          ],
-          "outputs": [
-            "**/*.binlog",
-            "bin/",
-            "obj/",
-            "obj/*.json",
-            "obj/*.props",
-            "obj/*.targets"
-          ],
-          "operations": [
-            {
-              "hash": "AEF1A65D32F57084416DFD132194426A5BA16C83F444DD18070A887A68C1CA91",
-              "container": null,
-              "containerVariables": [],
-              "extension": "@docker",
-              "command": "push",
-              "script": {},
-              "context": [
-                "map",
-                {
-                  "arguments": [
-                    "map",
-                    {
-                      "configuration": [
-                        "string",
-                        "Debug"
-                      ]
-                    }
-                  ],
-                  "image": [
-                    "string",
-                    "ghcr.io/magnusopera/dotnet-app"
-                  ]
-                }
-              ]
-            }
-          ]
         }
       },
       "labels": [
