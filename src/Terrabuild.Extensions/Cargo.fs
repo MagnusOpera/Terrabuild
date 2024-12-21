@@ -45,8 +45,9 @@ type Cargo() =
     /// <param name="arguments" example="&quot;check&quot;">Arguments for command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
-        
-        let ops = [ shellOp context.Command arguments ]
+        let arguments = $"{context.Command} {arguments}"
+
+        let ops = [ shellOp "cargo" arguments ]
         execRequest Cacheability.Always ops
 
 
