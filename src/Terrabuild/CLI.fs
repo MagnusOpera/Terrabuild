@@ -73,6 +73,24 @@ with
             | WhatIf -> "Prepare the action but do not apply."
 
 [<RequireQualifiedAccess>]
+type ServeArgs =
+    | [<Unique; AltCommandLine("-w")>] Workspace of path:string
+    | [<Unique; AltCommandLine("-c")>] Configuration of name:string
+    | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
+    | [<Unique; AltCommandLine("-l")>] Label of labels:string list
+    | [<Unique>] Logs
+with
+    interface IArgParserTemplate with
+        member this.Usage =
+            match this with
+            | Workspace _ -> "Root of workspace. If not specified, current directory is used."
+            | Configuration _ -> "Configuration to use."
+            | Variable _ -> "Set variable."
+            | Label _-> "Select projects based on labels."
+            | Logs -> "Output logs for impacted projects."
+
+
+[<RequireQualifiedAccess>]
 type ClearArgs =
     | [<Unique>] Cache
     | [<Unique>] Home
@@ -110,6 +128,7 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Scaffold of ParseResults<ScaffoldArgs>
     | [<CliPrefix(CliPrefix.None)>] Logs of ParseResults<LogsArgs>
     | [<CliPrefix(CliPrefix.None)>] Run of ParseResults<RunArgs>
+    | [<CliPrefix(CliPrefix.None)>] Serve of ParseResults<ServeArgs>
     | [<CliPrefix(CliPrefix.None)>] Clear of ParseResults<ClearArgs>
     | [<CliPrefix(CliPrefix.None)>] Login of ParseResults<LoginArgs>
     | [<CliPrefix(CliPrefix.None)>] Logout of ParseResults<LogoutArgs>
@@ -122,6 +141,7 @@ with
             | Scaffold _ -> "Scaffold workspace."
             | Logs _ -> "dump logs."
             | Run _ -> "Run specified targets."
+            | Serve _ -> "Serve specified targets."
             | Clear _ -> "Clear specified caches."
             | Login _ -> "Connect to backend."
             | Logout _ -> "Disconnect from backend."
