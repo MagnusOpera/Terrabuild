@@ -115,7 +115,11 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
 
         Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
         let logFile = cacheEntry.NextLogFile()
-        let exitCode = Exec.execCaptureTimestampedOutput workDir cmd args logFile
+        let exitCode =
+            if options.Targets |> Set.contains "serve" then
+                Exec.execConsole workDir cmd args
+            else
+                Exec.execCaptureTimestampedOutput workDir cmd args logFile
         cmdLastEndedAt <- DateTime.UtcNow
         let endedAt = cmdLastEndedAt
         let duration = endedAt - startedAt
