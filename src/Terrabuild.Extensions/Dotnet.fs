@@ -75,6 +75,19 @@ type Dotnet() =
         projectInfo
 
 
+    /// <summary>
+    /// Run a dotnet `command`.
+    /// </summary>
+    /// <param name="__dispatch__" example="run">Example.</param>
+    /// <param name="arguments" example="-v">Arguments for command.</param>
+    static member __dispatch__ (context: ActionContext) (arguments: string option) =
+        let arguments = arguments |> Option.defaultValue ""
+        let arguments = $"{context.Command} {arguments}"
+
+        let ops = [ shellOp "dotnet" arguments ]
+        execRequest Cacheability.Always ops
+
+
     /// <summary title="Build project.">
     /// Build project and ensure packages are available first.
     /// </summary>
@@ -109,17 +122,6 @@ type Dotnet() =
         ]
 
         buildRequest context buildOps
-
-    /// <summary>
-    /// Run a dotnet `command`.
-    /// </summary>
-    /// <param name="__dispatch__" example="format">Example.</param>
-    /// <param name="arguments" example="&quot;--verify-no-changes&quot;">Arguments for command.</param>
-    static member __dispatch__ (context: ActionContext) (arguments: string option) =
-        let arguments = arguments |> Option.defaultValue ""
-
-        let ops = [ shellOp context.Command arguments ]
-        execRequest Cacheability.Always ops
 
 
     /// <summary>

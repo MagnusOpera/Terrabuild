@@ -24,6 +24,20 @@ type Terraform() =
                    Outputs = Set [ "*.planfile" ] }
         projectInfo
 
+
+    /// <summary>
+    /// Run a terraform `command`.
+    /// </summary>
+    /// <param name="__dispatch__" example="fmt">Example.</param>
+    /// <param name="arguments" example="-write=false">Arguments for command.</param>
+    static member __dispatch__ (context: ActionContext) (arguments: string option) =
+        let arguments = arguments |> Option.defaultValue ""
+        let arguments = $"{context.Command} {arguments}"
+
+        let ops = [ shellOp "terraform" arguments ]
+        execRequest Cacheability.Always ops
+
+
     /// <summary weight="1">
     /// Init Terraform.
     /// </summary>

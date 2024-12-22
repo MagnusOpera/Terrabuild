@@ -23,6 +23,21 @@ type Npm() =
 
 
     /// <summary>
+    /// Run npm command.
+    /// </summary>
+    /// <param name="arguments" example="&quot;--port=1337&quot;">Arguments to pass to target.</param> 
+    static member __dispatch__ (context: ActionContext) (arguments: string option) =
+        let cmd = context.Command
+        let arguments = arguments |> Option.defaultValue ""
+
+        let ops = [
+            shellOp "npm" "ci"
+            shellOp "npm" $"run {cmd} -- {arguments}"   
+        ]
+        execRequest Cacheability.Always ops
+
+
+    /// <summary>
     /// Install packages using lock file.
     /// </summary>
     static member install (context: ActionContext) =

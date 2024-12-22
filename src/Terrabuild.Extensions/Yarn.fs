@@ -24,6 +24,21 @@ type Yarn() =
 
 
     /// <summary>
+    /// Run yarn `command`.
+    /// </summary>
+    /// <param name="arguments" example="&quot;--port=1337&quot;">Arguments to pass to target.</param> 
+    static member __dispatch__ (context: ActionContext) (arguments: string option) =
+        let arguments = arguments |> Option.defaultValue ""
+        let cmd = context.Command
+
+        let ops = [
+            shellOp "yarn" "install --frozen-lockfile"
+            shellOp "yarn" $"{cmd} -- {arguments}"   
+        ]
+        execRequest Cacheability.Always ops
+
+
+    /// <summary>
     /// Install packages using lock file.
     /// </summary>
     static member install (context: ActionContext) =

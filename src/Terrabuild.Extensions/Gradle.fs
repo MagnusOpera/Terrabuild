@@ -22,6 +22,19 @@ type Gradle() =
         projectInfo
 
     /// <summary>
+    /// Run a gradle `command`.
+    /// </summary>
+    /// <param name="__dispatch__" example="clean">Example.</param>
+    /// <param name="arguments" example="">Arguments for command.</param>
+    static member __dispatch__ (context: ActionContext) (arguments: string option) =
+        let arguments = arguments |> Option.defaultValue ""
+        let arguments = $"{context.Command} {arguments}"
+
+        let ops = [ shellOp "gradle" arguments ]
+        execRequest Cacheability.Always ops
+
+
+    /// <summary>
     /// Invoke build task `assemble` for `configuration`.
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration to invoke `assemble`. Default is `Debug`.</param>

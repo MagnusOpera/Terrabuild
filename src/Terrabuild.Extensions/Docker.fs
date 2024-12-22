@@ -8,6 +8,19 @@ open Terrabuild.Extensibility
 type Docker() =
 
     /// <summary>
+    /// Run a docker `command`.
+    /// </summary>
+    /// <param name="__dispatch__" example="image">Example.</param>
+    /// <param name="arguments" example="prune -f">Arguments for command.</param>
+    static member __dispatch__ (context: ActionContext) (arguments: string option) =
+        let arguments = arguments |> Option.defaultValue ""
+        let arguments = $"{context.Command} {arguments}"
+
+        let ops = [ shellOp "docker" arguments ]
+        execRequest Cacheability.Always ops
+
+
+    /// <summary>
     /// Build a Dockerfile.
     /// </summary>
     /// <param name="dockerfile" example="&quot;Dockerfile&quot;">Use alternative Dockerfile. Default is Dockerfile.</param>

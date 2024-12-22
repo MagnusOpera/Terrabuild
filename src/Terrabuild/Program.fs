@@ -174,7 +174,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         0
 
     let run (runArgs: ParseResults<RunArgs>) =
-        let targets = runArgs.GetResult(RunArgs.Target) |> Seq.map String.toLower
         let wsDir =
             match runArgs.TryGetResult(RunArgs.Workspace) with
             | Some ws -> ws
@@ -182,6 +181,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 match Environment.CurrentDirectory |> findWorkspace with
                 | Some ws -> ws
                 | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+        let targets = runArgs.GetResult(RunArgs.Target) |> Seq.map String.toLower
         let configuration = runArgs.TryGetResult(RunArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let note = runArgs.TryGetResult(RunArgs.Note)
         let labels = runArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
@@ -217,6 +217,36 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Variables = variables
                         RunTargetOptions.ContainerTool = containerTool }
         runTarget logs options
+
+    let serve (serveArgs: ParseResults<ServeArgs>) =
+        let wsDir =
+            match serveArgs.TryGetResult(ServeArgs.Workspace) with
+            | Some ws -> ws
+            | _ ->
+                match Environment.CurrentDirectory |> findWorkspace with
+                | Some ws -> ws
+                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+        let configuration = serveArgs.TryGetResult(ServeArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
+        let labels = serveArgs.TryGetResult(ServeArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
+        let variables = serveArgs.GetResults(ServeArgs.Variable) |> Map
+        let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
+                        RunTargetOptions.WhatIf = false
+                        RunTargetOptions.Debug = debug
+                        RunTargetOptions.Force = false
+                        RunTargetOptions.MaxConcurrency = Int32.MaxValue
+                        RunTargetOptions.Retry = true
+                        RunTargetOptions.StartedAt = DateTime.UtcNow
+                        RunTargetOptions.IsLog = false
+                        RunTargetOptions.Targets = Set [ "serve" ]
+                        RunTargetOptions.LocalOnly = true
+                        RunTargetOptions.CheckState = false
+                        RunTargetOptions.Configuration = configuration
+                        RunTargetOptions.Note = None
+                        RunTargetOptions.Tag = None
+                        RunTargetOptions.Labels = labels
+                        RunTargetOptions.Variables = variables
+                        RunTargetOptions.ContainerTool = None }
+        runTarget true options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
         let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
@@ -279,6 +309,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
     | p when p.Contains(TerrabuildArgs.Scaffold) -> p.GetResult(TerrabuildArgs.Scaffold) |> scaffold
     | p when p.Contains(TerrabuildArgs.Logs) -> p.GetResult(TerrabuildArgs.Logs) |> logs
     | p when p.Contains(TerrabuildArgs.Run) -> p.GetResult(TerrabuildArgs.Run) |> run
+    | p when p.Contains(TerrabuildArgs.Serve) -> p.GetResult(TerrabuildArgs.Serve) |> serve
     | p when p.Contains(TerrabuildArgs.Clear) -> p.GetResult(TerrabuildArgs.Clear) |> clear
     | p when p.Contains(TerrabuildArgs.Login) -> p.GetResult(TerrabuildArgs.Login) |> login
     | p when p.Contains(TerrabuildArgs.Logout) -> p.GetResult(TerrabuildArgs.Logout) |> logout

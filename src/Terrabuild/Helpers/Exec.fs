@@ -9,23 +9,32 @@ type CaptureResult =
     | Success of string*int
     | Error of string*int
 
-let private createProcess workingDir command args =
+let private createProcess workingDir command args redirect =
     let psi = ProcessStartInfo (FileName = command,
                                 Arguments = args,
                                 UseShellExecute = false,
                                 WorkingDirectory = workingDir,
-                                RedirectStandardOutput = true,
-                                RedirectStandardError = true)
+                                RedirectStandardOutput = redirect,
+                                RedirectStandardError = redirect)
     new Process(StartInfo = psi)
 
 let execCaptureOutput (workingDir: string) (command: string) (args: string) =
-    use proc = createProcess workingDir command args
+    use proc = createProcess workingDir command args true
     proc.Start() |> ignore
     proc.WaitForExit()
 
     match proc.ExitCode with
     | 0 -> Success (proc.StandardOutput.ReadToEnd(), proc.ExitCode)
     | _ -> Error (proc.StandardError.ReadToEnd(), proc.ExitCode)
+
+let execConsole (workingDir: string) (command: string) (args: string) =
+    try
+        use proc = createProcess workingDir command args false
+        proc.Start() |> ignore
+        proc.WaitForExit()
+        proc.ExitCode
+    with
+        | exn -> TerrabuildException.Raise($"Process '{command} {args} in directory '{workingDir}' failed", exn)
 
 let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: string) (logFile: string) =
     try
@@ -35,14 +44,13 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
         let inline lockWrite (from: string) (msg: string) =
             lock writeLock (fun () -> logWriter.WriteLine($"{DateTime.UtcNow} {from} {msg}"))
 
-        use proc = createProcess workingDir command args
+        use proc = createProcess workingDir command args true
         proc.OutputDataReceived.Add(fun e -> lockWrite "OUT" e.Data)
         proc.ErrorDataReceived.Add(fun e -> lockWrite "ERR" e.Data)
         proc.Start() |> ignore
         proc.BeginOutputReadLine()
         proc.BeginErrorReadLine()
         proc.WaitForExit()
-
         proc.ExitCode
     with
         | exn -> TerrabuildException.Raise($"Process '{command} {args} in directory '{workingDir}' failed", exn)
