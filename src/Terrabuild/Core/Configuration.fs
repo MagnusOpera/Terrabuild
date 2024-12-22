@@ -437,7 +437,7 @@ let read (options: ConfigOptions.Options) =
     let projectFiles = 
         let rec findDependencies dir =
             seq {
-                let projectFile =  FS.combinePath dir "PROJECT" 
+                let projectFile = FS.combinePath dir "PROJECT" 
                 match projectFile with
                 | FS.File file ->
                     file |> FS.parentDirectory |> FS.relativePath options.Workspace

@@ -1266,6 +1266,12 @@
           "System.Xml.ReaderWriter": "4.3.0"
         }
       },
+      "spectre.console": {
+        "type": "Project",
+        "dependencies": {
+          "System.Text.Json": "[9.0.0, )"
+        }
+      },
       "terrabuild": {
         "type": "Project",
         "dependencies": {
@@ -1276,6 +1282,7 @@
           "FSharp.Data": "[6.4.0, )",
           "FSharp.SystemTextJson": "[1.3.13, )",
           "Serilog.Sinks.File": "[6.0.0, )",
+          "Spectre.Console": "[1.0.0, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )",
           "Terrabuild.Configuration": "[1.0.0, )",

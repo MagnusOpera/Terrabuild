@@ -1213,6 +1213,12 @@
           "System.Xml.ReaderWriter": "4.3.0"
         }
       },
+      "spectre.console": {
+        "type": "Project",
+        "dependencies": {
+          "System.Text.Json": "[9.0.0, )"
+        }
+      },
       "terrabuild.common": {
         "type": "Project",
         "dependencies": {

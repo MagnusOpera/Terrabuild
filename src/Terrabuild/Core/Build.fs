@@ -49,6 +49,7 @@ type IBuildNotification =
     abstract NodeScheduled: node:GraphDef.Node -> unit
     abstract NodeDownloading: node:GraphDef.Node -> unit
     abstract NodeBuilding: node:GraphDef.Node -> unit
+    abstract NodeOutput: node:GraphDef.Node -> line:string -> unit
     abstract NodeUploading: node:GraphDef.Node -> unit
     abstract NodeCompleted: node:GraphDef.Node -> request:TaskRequest -> success:bool -> unit
 
@@ -62,7 +63,7 @@ let isOkish statusCode =
     | _ -> false
 
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) projectDirectory homeDir tmpDir =
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) (notification: IBuildNotification) projectDirectory homeDir tmpDir =
     // run actions if any
     let allCommands =
         node.Operations
@@ -117,7 +118,8 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
         let logFile = cacheEntry.NextLogFile()
         let exitCode =
             if options.Targets |> Set.contains "serve" then
-                Exec.execConsole workDir cmd args
+                let consoleCallback line = notification.NodeOutput node line
+                Exec.execConsole workDir cmd args consoleCallback
             else
                 Exec.execCaptureTimestampedOutput workDir cmd args logFile
         cmdLastEndedAt <- DateTime.UtcNow
@@ -208,7 +210,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 else IO.createSnapshot node.Outputs projectDirectory
 
             let cacheEntry = cache.GetEntry allowUpload cacheEntryId
-            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
+            let lastStatusCode, stepLogs = execCommands node cacheEntry options notification projectDirectory homeDir tmpDir
 
             // keep only new or modified files
             let afterFiles = IO.createSnapshot node.Outputs projectDirectory

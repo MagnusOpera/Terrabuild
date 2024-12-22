@@ -1,0 +1,8 @@
+
+project @dotnet {
+    labels = [ "dotnet"]
+}
+
+target build {
+    @dotnet build { version: $terrabuild_tag }
+}

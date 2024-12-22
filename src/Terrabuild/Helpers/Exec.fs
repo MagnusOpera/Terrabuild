@@ -27,10 +27,15 @@ let execCaptureOutput (workingDir: string) (command: string) (args: string) =
     | 0 -> Success (proc.StandardOutput.ReadToEnd(), proc.ExitCode)
     | _ -> Error (proc.StandardError.ReadToEnd(), proc.ExitCode)
 
-let execConsole (workingDir: string) (command: string) (args: string) =
+let execConsole (workingDir: string) (command: string) (args: string) callback =
     try
-        use proc = createProcess workingDir command args false
+        let inline lockWrite (from: string) (msg: string) = callback msg
+        use proc = createProcess workingDir command args true
+        proc.OutputDataReceived.Add(fun e -> lockWrite "OUT" e.Data)
+        proc.ErrorDataReceived.Add(fun e -> lockWrite "ERR" e.Data)
         proc.Start() |> ignore
+        proc.BeginOutputReadLine()
+        proc.BeginErrorReadLine()
         proc.WaitForExit()
         proc.ExitCode
     with
