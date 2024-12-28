@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/github/license/magnusopera/terrabuild)](LICENSE)
 [![NuGet version](https://badge.fury.io/nu/terrabuild.svg)](https://www.nuget.org/packages/Terrabuild)
-![build](https://github.com/magnusopera/terrabuild/actions/workflows/build.yml/badge.svg?branch=main)
+![build](https://github.com/magnusopera/terrabuild/actions/workflows/on-push-branch.yml/badge.svg?branch=main)
 
 # What is Terrabuild ?
 Terrabuild is a tool to maintain and build efficiently monorepos. Terrabuild is language agnostic: it just knows about dependencies and how to build a project:
