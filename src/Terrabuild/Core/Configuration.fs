@@ -74,19 +74,19 @@ type private LoadedProject = {
 
 
 let read (options: ConfigOptions.Options) =
-    $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
+    $"{Terminal.center Ansi.Emojis.box}Reading {options.Configuration} configuration" |> Terminal.writeLine
 
     if options.Force then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
+        $"{Ansi.Styles.yellow}{Terminal.center Ansi.Emojis.bang}{Ansi.Styles.reset}force build requested" |> Terminal.writeLine
     else
         if options.Retry then
-            $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
+            $"{Ansi.Styles.yellow}{Terminal.center Ansi.Emojis.bang}{Ansi.Styles.reset}retry build requested" |> Terminal.writeLine
 
     if options.WhatIf then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} whatif mode requested" |> Terminal.writeLine
+        $"{Ansi.Styles.yellow}{Terminal.center Ansi.Emojis.bang}{Ansi.Styles.reset}whatif mode requested" |> Terminal.writeLine
 
     options.CI
-    |> Option.iter (fun ci -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {ci}" |> Terminal.writeLine)
+    |> Option.iter (fun ci -> $"{Ansi.Styles.green}{Terminal.center Ansi.Emojis.checkmark}{Ansi.Styles.reset}source control is {ci}" |> Terminal.writeLine)
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =

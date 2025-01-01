@@ -131,7 +131,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let api = Api.Factory.create config.Space token options
         if api |> Option.isSome then
             Log.Debug("Connected to API")
-            $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} Connected to Insights" |> Terminal.writeLine
+            $"{Ansi.Styles.green} {Terminal.center Ansi.Emojis.checkmark}{Ansi.Styles.reset}Connected to Insights" |> Terminal.writeLine
 
         if options.Debug then
             let jsonConfig = Json.Serialize config
@@ -157,11 +157,11 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             if logs || not summary.IsSuccess then
                 Logs.dumpLogs runId options cache buildGraph summary
 
-            let result =
+            let successEmoji =
                 if summary.IsSuccess then Ansi.Emojis.happy
                 else Ansi.Emojis.sad
 
-            $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
+            $"{Terminal.center successEmoji}Completed in {summary.TotalDuration}" |> Terminal.writeLine
             if summary.IsSuccess then 0
             else 5
         else
@@ -325,7 +325,7 @@ let main _ =
         try
             DotNetEnv.Env.TraversePath().Load() |> ignore
             Terminal.hideCursor()
-            Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
+            Console.CancelKeyPress.Add (fun _ -> $"{Terminal.center Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
             let errorHandler = TerrabuildExiter()
             let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
             let result = parser.ParseCommandLine()
@@ -337,11 +337,11 @@ let main _ =
                 let reason =
                     if debug then ex.ToString()
                     else dumpKnownException ex |> String.join "\n   "
-                $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
+                $"{Terminal.center Ansi.Emojis.explosion}{reason}" |> Terminal.writeLine
                 5
             | ex ->
                 Log.Fatal("Failed with {Exception}", ex)
-                $"{Ansi.Emojis.explosion} {ex}" |> Terminal.writeLine
+                $"{Terminal.center Ansi.Emojis.explosion}{ex}" |> Terminal.writeLine
                 5
 
     Environment.CurrentDirectory <- launchDir

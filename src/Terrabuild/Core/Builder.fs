@@ -14,7 +14,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
     let startedAt = DateTime.UtcNow
     Log.Debug("===== [Graph Build] =====")
 
-    $"{Ansi.Emojis.gear} Building graph" |> Terminal.writeLine
+    $"{Terminal.center Ansi.Emojis.gear}Building graph" |> Terminal.writeLine
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
@@ -159,7 +159,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
     let buildDuration = endedAt - startedAt
     Log.Debug("Graph Build: {duration}", buildDuration)
 
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {allNodes.Count} tasks" |> Terminal.writeLine
+    $"{Ansi.Styles.green}{Terminal.center Ansi.Emojis.checkmark}{Ansi.Styles.reset}{allNodes.Count} tasks" |> Terminal.writeLine
 
     { Graph.Nodes = allNodes |> Map.ofDict
       Graph.RootNodes = rootNodes }

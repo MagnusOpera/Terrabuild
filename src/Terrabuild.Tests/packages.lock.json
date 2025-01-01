@@ -46,6 +46,12 @@
         "resolved": "9.0.0",
         "contentHash": "js7+qAu/9mQvnhA4EfGMZNEzXtJCDxgkgj8ohuxq/Qxv+R56G+ljefhiJHOxTNiw54q8vmABCWUwkMulNdlZ4A=="
       },
+      "Unicode.net": {
+        "type": "Direct",
+        "requested": "[2.0.0, )",
+        "resolved": "2.0.0",
+        "contentHash": "fGf8GapJphDqeqGLp6uwSM/KQ2Sm2Y+KtMcFV0zh/C8eUWaBtIRFPH+FYAokBtgxGLpaCVCLsjQCymPMl4Z1EA=="
+      },
       "Argu": {
         "type": "Transitive",
         "resolved": "6.2.4",
@@ -1282,7 +1288,8 @@
           "Terrabuild.Extensibility": "[1.0.0, )",
           "Terrabuild.Extensions": "[1.0.0, )",
           "Terrabuild.PubSub": "[1.0.0, )",
-          "Terrabuild.Scripting": "[1.0.0, )"
+          "Terrabuild.Scripting": "[1.0.0, )",
+          "Unicode.net": "[2.0.0, )"
         }
       },
       "terrabuild.common": {

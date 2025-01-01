@@ -1,7 +1,8 @@
 module Progress
 open System
-open Ansi.Styles
-open Ansi.Emojis
+open Ansi
+// open Ansi.Styles
+// open Ansi.Emojis
 
 [<RequireQualifiedAccess>]
 type ProgressStatus =
@@ -31,27 +32,28 @@ type ProgressRenderer() =
     let printableStatus item =
         match item.Status with
         | ProgressStatus.Success restored ->
-            let icon = if restored then clockwise else checkmark            
-            green + " " + icon + reset
+            let icon = if restored then Emojis.clockwise else Emojis.checkmark
+            $"{Styles.green}{Terminal.center icon}{Styles.reset}"            
         | ProgressStatus.Fail restored ->
-            let icon = if restored then clockwise else crossmark
-            red + " " + icon + reset
+            let icon = if restored then Emojis.clockwise else Emojis.crossmark
+            $"{Styles.red}{Terminal.center icon}{Styles.reset}"
         | ProgressStatus.Running (startedAt, spinner, frequency) ->
             let diff = ((DateTime.Now - startedAt).TotalMilliseconds / frequency) |> int
             let offset = diff % spinner.Length
-            $"{yellow} {spinner[offset]}{reset}"
+            let spinner = $"{spinner[offset]}"
+            $"{Styles.yellow}{Terminal.center spinner}{Styles.reset}"
 
     let printableItem item =
         let status = printableStatus item
-        $"{status} {item.Label}"
+        $"{status}{item.Label}"
 
     member _.Refresh () =
         if Terminal.supportAnsi then
             // update status: move home, move top, write status
             let updateCmd =
                 items
-                |> List.fold (fun acc item -> acc + $"{Ansi.cursorHome}{Ansi.cursorUp 1}" + (item |> printableStatus)) ""
-            let updateCmd = updateCmd + $"{Ansi.cursorHome}{Ansi.cursorDown items.Length}"
+                |> List.fold (fun acc item -> acc + $"{cursorHome}{cursorUp 1}" + (item |> printableStatus)) ""
+            let updateCmd = updateCmd + $"{cursorHome}{cursorDown items.Length}"
             updateCmd |> Terminal.write |> Terminal.flush
 
     member _.Update (id: string) (label: string) (spinner: string) (frequency: double) =

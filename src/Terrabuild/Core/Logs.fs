@@ -41,7 +41,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
             let header =
                 let statusEmoji = statusEmoji node
                 let uniqueId = stableRandomId node.Id
-                $"## <a name=\"user-content-{uniqueId}\"></a> {statusEmoji} {node.Label}"
+                $"## <a name=\"user-content-{uniqueId}\"></a> {Terminal.center statusEmoji}{node.Label}"
 
             let dumpLogs =
                 let originSummary = originSummaries[node.Id]
@@ -141,11 +141,11 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
             let title = node.Label
 
             let getHeaderFooter success title =
-                let color =
-                    if success then $"{Ansi.Styles.green}{Ansi.Emojis.checkmark}"
-                    else $"{Ansi.Styles.red}{Ansi.Emojis.crossmark}"
+                let successEmoji =
+                    if success then $"{Ansi.Styles.green}{Terminal.center Ansi.Emojis.checkmark}"
+                    else $"{Ansi.Styles.red}{Terminal.center Ansi.Emojis.crossmark}"
 
-                $"{color} {title}{Ansi.Styles.reset}", ""
+                $"{successEmoji}{title}{Ansi.Styles.reset}", ""
 
             let (logStart, logEnd), dumpLogs =
                 let cacheEntryId = GraphDef.buildCacheKey node

@@ -234,7 +234,7 @@ let scaffold workspaceDir force =
 
     projects
     |> Seq.iter (fun project ->
-        printfn $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} PROJECT {project.Directory}"
+        printfn $"{Ansi.Styles.green}{Terminal.center Ansi.Emojis.checkmark}{Ansi.Styles.reset}PROJECT {project.Directory}"
         let projectFile = FS.combinePath project.Directory "PROJECT"
         let projectContent = project |> genProject
         File.WriteAllLines(projectFile, projectContent)
@@ -248,7 +248,7 @@ let scaffold workspaceDir force =
         |> List.collect (fun p -> p.Others )
     let extensions = mainExtensions @ otherExtensions |> Set
 
-    printfn $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} WORKSPACE"
+    printfn $"{Ansi.Styles.green}{Terminal.center Ansi.Emojis.checkmark}{Ansi.Styles.reset}WORKSPACE"
     let workspaceFile = FS.combinePath workspaceDir "WORKSPACE"
     let workspaceContent = genWorkspace extensions
     File.WriteAllLines(workspaceFile, workspaceContent)
