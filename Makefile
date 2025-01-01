@@ -74,10 +74,10 @@ docs:
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net9.0/Terrabuild.Extensions.xml ../../websites/terrabuild.io/content/docs/extensions
 
 self: clean publish
-	.out/dotnet/terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --local-only
+	.out/dotnet/terrabuild run build test dist --configuration $(env) --retry --debug --logs --local-only
 
 terrabuild:
-	terrabuild run build test dist --workspace src --configuration $(env) --retry --debug --logs --local-only
+	terrabuild run build test dist --configuration $(env) --retry --debug --logs --local-only
 
 
 #
