@@ -9,8 +9,6 @@ let cursorUp (x: int) = $"{CSI}{x}A"
 let cursorDown (x: int) = $"{CSI}{x}B"
 let cursorHome = $"{CSI}1G"
 let csi (x: int) = $"{CSI}{x}m"
-let clearScreen = $"{CSI}2J"
-let clearScreen2 = $"{ESC}c"
 
 module Emojis =
     let crossmark = "✘"
