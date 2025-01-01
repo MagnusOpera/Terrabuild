@@ -5,6 +5,7 @@ open Serilog
 open Errors
 open System.Reflection
 open Collections
+open Spectre.Console
 
 
 [<RequireQualifiedAccess>]
@@ -145,9 +146,14 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         if not options.WhatIf then
             let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-
             let summary = Build.run options cache api buildNotification buildGraph
             buildNotification.WaitCompletion()
+            let color =
+                match summary.IsSuccess with
+                | true -> Color.Green
+                | false -> Color.Red
+            AnsiConsole.MarkupLine($"[bold {color}]Build completed[/]")
+
             api |> Option.iter (fun api -> api.CompleteBuild summary.IsSuccess)
 
             if options.Debug then

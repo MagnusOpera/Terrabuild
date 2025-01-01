@@ -4,6 +4,7 @@ open System.Collections.Concurrent
 open Spectre.Console
 open Spectre.Console.Rendering
 open System.Collections.Generic
+open System
 
 [<RequireQualifiedAccess>]
 type NodeStatus =
@@ -22,22 +23,19 @@ type PrinterProtocol =
     | Render
 
 
-type private NodeInfo(title: string) =
-    let nodeTitle = Markup($"[bold yellow]▶ {title}[/]")
+type private NodeInfo() =
+    let nodeTitle = Markup("")
     let tableColumn = TableColumn(nodeTitle)
-    let table = Table().AddColumn(tableColumn).NoBorder()
     let grid = Grid().AddColumn()
-
-    do
-        table.AddRow(grid) |> ignore
+    let table = Table().NoBorder().AddColumn(tableColumn).AddRow(grid)
 
     let renderable: IRenderable = table
     interface IRenderable with        
         member _.Measure(options, maxWidth) = renderable.Measure(options, maxWidth)
         member _.Render(options, maxWidth) = renderable.Render(options, maxWidth)
 
-    member _.SetTitle(newTitle: string) =
-        nodeTitle.Update(newTitle) |> ignore
+    member _.SetTitle(title: string) =
+        nodeTitle.Update(title) |> ignore
 
     member _.AddRow(row: string) =
         if row |> isNull |> not then
@@ -47,39 +45,32 @@ type private NodeInfo(title: string) =
 
 
 type BuildNotification() =
-
     let queueTrigger = new AutoResetEvent(false)
     let queue = ConcurrentQueue<PrinterProtocol>()
     let buildComplete = new ManualResetEvent(false)
 
     let handler () =
-        let table =
-            Table()
-                .AddColumn("Output")
-                .HideHeaders()
-                .Border(TableBorder.Horizontal)
-                .ShowRowSeparators()
-                .Expand()
-                // .NoBorder()
-
         let mutable nodeInfos = Map.empty
-        let updateNode node (content: string) =
-            let nodeGrid =
+        let table = Table().HideHeaders().NoBorder().AddColumn("Output")
+
+        let rec processMessages (ctx: LiveDisplayContext) =
+            let getOrCreateNode node =
                 match nodeInfos |> Map.tryFind node with
                 | Some nodeInfo -> nodeInfo
                 | _ ->
-                    let nodeInfo = NodeInfo(node)
-                    table.AddRow(nodeInfo) |> ignore
+                    let nodeInfo = NodeInfo()
                     nodeInfos <- nodeInfos |> Map.add node nodeInfo
+                    table.AddRow(nodeInfo) |> ignore
                     nodeInfo
-            nodeGrid.AddRow(content) |> ignore
 
-        let updateNodeTitle node title =
-            match nodeInfos |> Map.tryFind node with
-            | Some nodeInfo -> nodeInfo.SetTitle(title)
-            | _ -> ()
+            let updateNode node (content: string) =
+                let nodeInfo = getOrCreateNode node
+                nodeInfo.AddRow(content)
 
-        let rec processMessages (ctx: LiveDisplayContext) =
+            let updateNodeTitle node title =
+                let nodeInfo = getOrCreateNode node
+                nodeInfo.SetTitle(title)
+
             let mutable continueProcessing = true
             queueTrigger.WaitOne() |> ignore
 
@@ -87,15 +78,10 @@ type BuildNotification() =
                 match queue.TryDequeue() with
                 | true, msg ->
                     match msg with
-                    | PrinterProtocol.BuildStarted graph -> ()
+                    | PrinterProtocol.BuildStarted _ -> ()
 
-                    | PrinterProtocol.BuildCompleted summary ->
-                        let color =
-                            match summary.IsSuccess with
-                            | true -> Color.Green
-                            | false -> Color.Red
-                        AnsiConsole.MarkupLine($"[bold {color}]Build completed[/]")
-                        buildComplete.Set() |> ignore
+                    | PrinterProtocol.BuildCompleted _ ->
+                        continueProcessing <- false
 
                     | PrinterProtocol.NodeStatusChanged (node, status) ->
                         let icon =
@@ -119,15 +105,15 @@ type BuildNotification() =
                         updateNodeTitle node.Id $"{icon} [bold {color}]{node.Label} {node.Project}[/]"
 
                     | PrinterProtocol.Render -> ctx.Refresh()
-                    dequeueAll()
+                    if continueProcessing then dequeueAll()
                 | _ -> ()
 
             dequeueAll()
             ctx.Refresh()
             if continueProcessing then processMessages ctx
 
-        AnsiConsole.MarkupLine("[bold green]Build started[/]")
         AnsiConsole.Live(table).Start(processMessages)
+        buildComplete.Set() |> ignore
 
 
     do
