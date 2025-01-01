@@ -47,7 +47,7 @@
    <ProjectReference Include="../Terrabuild.Configuration/Terrabuild.Configuration.fsproj" />
    <ProjectReference Include="../Terrabuild.Extensions/Terrabuild.Extensions.fsproj" />
    <ProjectReference Include="../Terrabuild.PubSub/Terrabuild.PubSub.fsproj" />
-   <ProjectReference Include="../vendors/Spectre.Console/Spectre.Console.csproj" />
+   <ProjectReference Include="../../vendors/Spectre.Console/Spectre.Console.csproj" />
   </ItemGroup>
 
   <ItemGroup>

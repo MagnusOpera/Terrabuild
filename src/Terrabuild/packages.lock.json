@@ -1214,10 +1214,7 @@
         }
       },
       "spectre.console": {
-        "type": "Project",
-        "dependencies": {
-          "System.Text.Json": "[9.0.0, )"
-        }
+        "type": "Project"
       },
       "terrabuild.common": {
         "type": "Project",

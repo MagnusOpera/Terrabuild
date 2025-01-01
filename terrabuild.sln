@@ -39,7 +39,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Tests", "src\Ter
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vendors", "vendors", "{B53044A2-CF04-4A45-BF0C-575DE41133AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spectre.Console", "src\vendors\Spectre.Console\Spectre.Console.csproj", "{0D40DAAA-9F22-430C-A430-0A65AB00E89F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spectre.Console", "vendors\Spectre.Console\Spectre.Console.csproj", "{0D40DAAA-9F22-430C-A430-0A65AB00E89F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
