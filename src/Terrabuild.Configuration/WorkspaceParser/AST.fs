@@ -6,19 +6,28 @@ open Errors
 [<RequireQualifiedAccess>]
 type WorkspaceComponents =
     | Space of string
+    | Ignores of string list
 
 type Workspace = {
     Space: string option
+    Ignores: Set<string> option
 }
 with
     static member Build components =
         let space =
-            match components |> List.choose (function | WorkspaceComponents.Space value -> Some value) with
+            match components |> List.choose (function | WorkspaceComponents.Space value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> Some value
             | _ -> TerrabuildException.Raise("multiple space declared")
 
-        { Space = space }
+        let ignores =
+            match components |> List.choose (function | WorkspaceComponents.Ignores value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> value |> Set.ofList |> Some
+            | _ -> TerrabuildException.Raise("multiple ignores declared")
+
+        { Space = space
+          Ignores = ignores }
 
 
 [<RequireQualifiedAccess>]
