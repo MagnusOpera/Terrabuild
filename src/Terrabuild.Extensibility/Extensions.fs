@@ -2,49 +2,43 @@ module Terrabuild.Extensibility
 open System
 
 [<RequireQualifiedAccess>]
-type ExtensionContext = {
-    Debug: bool
-    Directory: string
-    CI: bool
-}
+type ExtensionContext =
+    { Debug: bool
+      Directory: string
+      CI: bool }
 
 [<RequireQualifiedAccess>]
-type ProjectInfo = {
-    Outputs: Set<string>
-    Ignores: Set<string>
-    Dependencies: Set<string>
-    Links: Set<string>
-    Includes: Set<string>
-}
+type ProjectInfo =
+    { Outputs: Set<string>
+      Ignores: Set<string>
+      Dependencies: Set<string>
+      Links: Set<string>
+      Includes: Set<string> }
 with
-    static member Default = {
-        Outputs = Set.empty
-        Ignores = Set.empty
-        Dependencies = Set.empty
-        Links = Set.empty
-        Includes = Set [ "**/*" ]
-    }
+    static member Default =
+        { Outputs = Set.empty
+          Ignores = Set.empty
+          Dependencies = Set.empty
+          Links = Set.empty
+          Includes = Set [ "**/*" ] }
 
 [<RequireQualifiedAccess>]
-type ActionContext = {
-    Debug: bool
-    CI: bool
-    Command: string
-    Hash: string
-}
+type ActionContext =
+    { Debug: bool
+      CI: bool
+      Command: string
+      Hash: string }
+
 
 [<RequireQualifiedAccess>]
-type StatusCode =
-    | SuccessUpdate
-    | Success
-    | Error of exitCode:int
+type ShellOperation =
+    { Command: string
+      Arguments: string }
 
 [<RequireQualifiedAccess>]
-type ShellOperation = {
-    Command: string
-    Arguments: string
-    ExitCodes: Map<int, StatusCode>
-}
+type Operation =
+    { Fingerprint: ShellOperation option
+      Core: ShellOperation }
 
 [<Flags>]
 type Cacheability =
@@ -52,29 +46,24 @@ type Cacheability =
     | Local = 1
     | Remote = 2
     | Always = 3 // Local + Remote
-    | External = 4 // NOTE: mutually exclusive with Local or Remote
-
-type ShellOperations = ShellOperation list
 
 [<RequireQualifiedAccess>]
-type ActionExecutionRequest = {
-    Cache: Cacheability
-    Operations: ShellOperations
-}
+type ActionExecutionRequest =
+    { Cache: Cacheability
+      Operations: Operation list }
 
 
-
-let defaultExitCodes = Map [ 0, StatusCode.SuccessUpdate ]
-
-let shellOp cmd args = 
+let shellOp cmd args =
     { ShellOperation.Command = cmd
-      ShellOperation.Arguments = args
-      ShellOperation.ExitCodes = defaultExitCodes }
+      ShellOperation.Arguments = args }
 
-let checkOp cmd args exitCodes = 
-    { ShellOperation.Command = cmd
-      ShellOperation.Arguments = args
-      ShellOperation.ExitCodes = exitCodes }
+let localOp cmd args = 
+    { Operation.Fingerprint = None
+      Operation.Core = shellOp cmd args }
+
+let externalOp fingerprint cmd args =
+    { Operation.Fingerprint = Some fingerprint
+      Operation.Core = shellOp cmd args }
 
 let execRequest cache ops =
     { ActionExecutionRequest.Cache = cache 

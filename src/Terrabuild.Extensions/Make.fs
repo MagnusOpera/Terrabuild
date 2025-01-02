@@ -13,5 +13,5 @@ type Make() =
     /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables to pass to make target.</param>
     static member __dispatch__ (context: ActionContext) (variables: Map<string, string>) =
         let args = variables |> Seq.fold (fun acc kvp -> $"{acc} {kvp.Key}=\"{kvp.Value}\"") $"{context.Command}"
-        let ops = [ shellOp "make" args ]
+        let ops = [ localOp "make" args ]
         execRequest Cacheability.Always ops

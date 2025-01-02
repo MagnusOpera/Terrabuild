@@ -34,7 +34,7 @@ type Terraform() =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
 
-        let ops = [ shellOp "terraform" arguments ]
+        let ops = [ localOp "terraform" arguments ]
         execRequest Cacheability.Always ops
 
 
@@ -42,7 +42,7 @@ type Terraform() =
     /// Init Terraform.
     /// </summary>
     static member init (context: ActionContext) =
-        let ops = [ shellOp "terraform" "init" ]
+        let ops = [ localOp "terraform" "init" ]
         execRequest Cacheability.Always ops
 
 
@@ -56,13 +56,13 @@ type Terraform() =
     /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
     static member validate (context: ActionContext) (workspace: string option) =
         let ops = [
-            shellOp "terraform" "init"
+            localOp "terraform" "init"
             
             match workspace with
-            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | Some workspace -> localOp "terraform" $"workspace select {workspace}"
             | _ -> ()
 
-            shellOp "terraform" "validate"
+            localOp "terraform" "validate"
         ]
         execRequest Cacheability.Always ops
 
@@ -79,17 +79,16 @@ type Terraform() =
         let vars = variables |> Seq.fold (fun acc (KeyValue(key, value)) -> acc + $" -var=\"{key}={value}\"") ""
 
         let ops = [
-            shellOp "terraform" "init"
+            localOp "terraform" "init"
             
             match workspace with
-            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | Some workspace -> localOp "terraform" $"workspace select {workspace}"
             | _ -> ()
 
-            let statusCode = Map [ 0, StatusCode.Success
-                                   2, StatusCode.SuccessUpdate ]
-            checkOp "terraform" $"plan -detailed-exitcode -out=terrabuild.planfile{vars}" statusCode
+            let fingerprint = shellOp "terraform" "state pull"
+            externalOp fingerprint "terraform" $"plan -detailed-exitcode -out=terrabuild.planfile{vars}"
         ]
-        execRequest Cacheability.External ops
+        execRequest Cacheability.Always ops
   
 
     /// <summary weight="4" title="Apply plan file.">
@@ -101,13 +100,13 @@ type Terraform() =
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     static member apply (context: ActionContext) (workspace: string option) =
         let ops = [
-            shellOp "terraform" "init"
+            localOp "terraform" "init"
             
             match workspace with
-            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | Some workspace -> localOp "terraform" $"workspace select {workspace}"
             | _ -> ()
 
-            shellOp "terraform" "apply -input=false terrabuild.planfile"
+            localOp "terraform" "apply -input=false terrabuild.planfile"
         ]
         execRequest Cacheability.Always ops
   

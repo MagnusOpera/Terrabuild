@@ -84,7 +84,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
 
-        let ops = [ shellOp "dotnet" arguments ]
+        let ops = [ localOp "dotnet" arguments ]
         execRequest Cacheability.Always ops
 
 
@@ -118,7 +118,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            shellOp "dotnet" $"build --no-dependencies --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
+            localOp "dotnet" $"build --no-dependencies --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
         ]
 
         buildRequest context buildOps
@@ -136,7 +136,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            shellOp "dotnet" $"pack --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
+            localOp "dotnet" $"pack --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
         ]
 
         buildRequest context buildOps
@@ -167,7 +167,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            shellOp "dotnet" $"publish --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
+            localOp "dotnet" $"publish --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
         ]
 
         buildRequest context buildOps
@@ -180,7 +180,7 @@ type Dotnet() =
     static member restore (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = [ shellOp "dotnet" $"restore {arguments}" ]
+        let ops = [ localOp "dotnet" $"restore {arguments}" ]
         execRequest Cacheability.Local ops
 
 
@@ -196,7 +196,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            shellOp "dotnet" $"test --no-build --configuration {configuration} {filter} {arguments}"
+            localOp "dotnet" $"test --no-build --configuration {configuration} {filter} {arguments}"
         ]
 
         buildRequest context buildOps
