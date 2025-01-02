@@ -435,24 +435,28 @@ let read (options: ConfigOptions.Options) =
 
 
     let projectFiles = 
-        let rec findDependencies isRoot dir =
+        let rec findDependencies isSubFolder dir =
             seq {
-                let projectFile = FS.combinePath dir "PROJECT" 
-                match projectFile with
-                | FS.File file ->
-                    file |> FS.parentDirectory |> FS.relativePath options.Workspace
-                | _ ->
-                    // ignore sub WORKSPACE files if not root workspace
-                    let workspaceFile = FS.combinePath dir "WORKSPACE"
-                    match isRoot, workspaceFile with
-                    | false, FS.File _ ->
-                        ()
+                let scanFolder =
+                    if isSubFolder then
+                        match FS.combinePath dir "WORKSPACE" with
+                        | FS.File _ -> false
+                        | _ -> true
+                    else
+                        true
+
+                // ignore sub WORKSPACE files
+                if scanFolder then
+                    let projectFile = FS.combinePath dir "PROJECT" 
+                    match projectFile with
+                    | FS.File file ->
+                        file |> FS.parentDirectory |> FS.relativePath options.Workspace
                     | _ ->
                         for subdir in dir |> IO.enumerateDirs do
-                            yield! findDependencies false subdir
+                            yield! findDependencies true subdir
             }
 
-        findDependencies true options.Workspace
+        findDependencies false options.Workspace
 
     let projects = ConcurrentDictionary<string, Project>()
     let hub = Hub.Create(options.MaxConcurrency)
