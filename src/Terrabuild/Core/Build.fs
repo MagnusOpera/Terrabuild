@@ -16,27 +16,25 @@ type TaskStatus =
     | Failure of completionDate:DateTime * message:string
 
 [<RequireQualifiedAccess>]
-type NodeInfo = {
-    Request: TaskRequest
-    Status: TaskStatus
-    Project: string
-    Target: string
-    ProjectHash: string
-    TargetHash: string
-}
+type NodeInfo =
+    { Request: TaskRequest
+      Status: TaskStatus
+      Project: string
+      Target: string
+      ProjectHash: string
+      TargetHash: string }
 
 [<RequireQualifiedAccess>]
-type Summary = {
-    Commit: string
-    BranchOrTag: string
-    StartedAt: DateTime
-    EndedAt: DateTime
-    TotalDuration: TimeSpan
-    BuildDuration: TimeSpan
-    IsSuccess: bool
-    Targets: string set
-    Nodes: Map<string, NodeInfo>
-}
+type Summary =
+    { Commit: string
+      BranchOrTag: string
+      StartedAt: DateTime
+      EndedAt: DateTime
+      TotalDuration: TimeSpan
+      BuildDuration: TimeSpan
+      IsSuccess: bool
+      Targets: string set
+      Nodes: Map<string, NodeInfo> }
 
 
 
@@ -55,57 +53,56 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let isOkish statusCode =
-    match statusCode with
-    | 0 -> true
-    | _ -> false
+
+let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) opSelector projectDirectory homeDir tmpDir =
+    node.Operations
+    |> List.map (fun operation ->
+        let metaCommand = operation.MetaCommand
+        let shellCmd, shellArgs = opSelector operation
+        match options.ContainerTool, operation.Container with
+        | Some containerTool, Some containerImage ->
+            let wsDir = Environment.CurrentDirectory
+
+            let containerHome =
+                match containerInfos.TryGetValue(containerImage) with
+                | true, containerHome ->
+                    Log.Debug("Reusing USER {containerHome} for {container}", containerHome, containerImage)
+                    containerHome
+                | _ ->
+                    // discover USER
+                    let args = $"run --rm --name {node.TargetHash} --entrypoint sh {containerImage} \"echo -n \\$HOME\""
+                    let containerHome =
+                        Log.Debug("Identifying USER for {container}", containerImage)
+                        match Exec.execCaptureOutput options.Workspace containerTool args with
+                        | Exec.Success (containerHome, 0) -> containerHome.Trim()
+                        | _ ->
+                            Log.Debug("USER identification failed for {container}: using root", containerImage)
+                            "/root"
+
+                    Log.Debug("Using USER {containerHome} for {container}", containerHome, containerImage)
+                    containerInfos.TryAdd(containerImage, containerHome) |> ignore
+                    containerHome
+
+            let envs =
+                operation.ContainerVariables
+                |> Seq.map (fun var -> $"-e {var}")
+                |> String.join " "
+            let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {shellCmd} {envs} {containerImage} {shellArgs}"
+            metaCommand, options.Workspace, containerTool, args, operation.Container
+        | _ -> metaCommand, projectDirectory, shellCmd, shellArgs, operation.Container)
 
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) projectDirectory homeDir tmpDir =
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) opSelector projectDirectory homeDir tmpDir =
     // run actions if any
-    let allCommands =
-        node.Operations
-        |> List.map (fun operation ->
-            let metaCommand = operation.MetaCommand
-            match options.ContainerTool, operation.Container with
-            | Some cmd, Some container ->
-                let wsDir = Environment.CurrentDirectory
+    let allCommands = buildCommands node options opSelector projectDirectory homeDir tmpDir
 
-                let containerHome =
-                    match containerInfos.TryGetValue(container) with
-                    | true, containerHome ->
-                        Log.Debug("Reusing USER {containerHome} for {container}", containerHome, container)
-                        containerHome
-                    | _ ->
-                        // discover USER
-                        let args = $"run --rm --name {node.TargetHash} --entrypoint sh {container} \"echo -n \\$HOME\""
-                        let containerHome =
-                            Log.Debug("Identifying USER for {container}", container)
-                            match Exec.execCaptureOutput options.Workspace cmd args with
-                            | Exec.Success (containerHome, 0) -> containerHome.Trim()
-                            | _ ->
-                                Log.Debug("USER identification failed for {container}: using root", container)
-                                "/root"
-
-                        Log.Debug("Using USER {containerHome} for {container}", containerHome, container)
-                        containerInfos.TryAdd(container, containerHome) |> ignore
-                        containerHome
-
-                let envs =
-                    operation.ContainerVariables
-                    |> Seq.map (fun var -> $"-e {var}")
-                    |> String.join " "
-                let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.ShellOp.Command} {envs} {container} {operation.ShellOp.Arguments}"
-                metaCommand, options.Workspace, cmd, args, operation.Container
-            | _ -> metaCommand, projectDirectory, operation.ShellOp.Command, operation.ShellOp.Arguments, operation.Container)
- 
     let stepLogs = List<Cache.OperationSummary>()
     let mutable lastStatusCode = 0
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
 
-    while cmdLineIndex < allCommands.Length && isOkish lastStatusCode do
+    while cmdLineIndex < allCommands.Length && lastStatusCode = 0 do
         let startedAt =
             if cmdLineIndex > 0 then DateTime.UtcNow
             else cmdFirstStartedAt
@@ -172,7 +169,6 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
     let force = options.Force
     let retry = options.Retry
-    let checkState = options.CheckState
 
     let nodeResults = Concurrent.ConcurrentDictionary<string, TaskRequest * TaskStatus>()
     let restorables = Concurrent.ConcurrentDictionary<string, Restorable>()
@@ -204,7 +200,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 else IO.createSnapshot node.Outputs projectDirectory
 
             let cacheEntry = cache.GetEntry allowUpload cacheEntryId
-            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
+            let lastStatusCode, stepLogs = execCommands node cacheEntry options (fun op -> op.ShellOp.Command, op.ShellOp.Arguments) projectDirectory homeDir tmpDir
 
             // keep only new or modified files
             let afterFiles = IO.createSnapshot node.Outputs projectDirectory
@@ -272,12 +268,17 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
 
         let buildRequest, completionDate =
+            let forceBuild() =
+                TaskRequest.Build, buildNode DateTime.MaxValue
+
             if force then
                 Log.Debug("{NodeId} must rebuild because force build requested", node.Id)
-                TaskRequest.Build, buildNode DateTime.MaxValue
+                forceBuild()
+            
             elif maxCompletionChildren = DateTime.MaxValue then
                 Log.Debug("{NodeId} must rebuild because child is rebuilding", node.Id)
-                TaskRequest.Build, buildNode DateTime.MaxValue
+                forceBuild()
+            
             elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
                 let cacheEntryId = GraphDef.buildCacheKey node
                 match tryGetSummaryOnly cacheEntryId with
@@ -286,14 +287,18 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     // task is younger than children
                     if summary.StartedAt < maxCompletionChildren then
                         Log.Debug("{NodeId} must rebuild because it is younger than child", node.Id)
-                        TaskRequest.Build, buildNode DateTime.MaxValue
+                        forceBuild()
                     // task is failed and retry requested
                     elif retry && not summary.IsSuccessful then
                         Log.Debug("{NodeId} must rebuild because node is failed and retry requested", node.Id)
-                        TaskRequest.Build, buildNode DateTime.MaxValue
-                    // state is external - it's getting complex :-(
-                    // UNDONE
-                    elif checkState then // && (node.Cache &&& Terrabuild.Extensibility.Cacheability.External) <> Terrabuild.Extensibility.Cacheability.Never then
+                        forceBuild()
+                    else
+                        // check fingerprint is matching
+
+                        // state is external - it's getting complex :-(
+                        // UNDONE
+
+                     checkState then // && (node.Cache &&& Terrabuild.Extensibility.Cacheability.External) <> Terrabuild.Extensibility.Cacheability.Never then
                         Log.Debug("{NodeId} is external, checking if state has changed", node.Id)
                         // first restore node because we want to have asset
                         // this **must** be ok since we were able to fetch metadata
@@ -326,10 +331,10 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         TaskRequest.Restore, restoreNode()
                 | _ ->
                     Log.Debug("{NodeId} must be build since no summary and required", node.Id)
-                    TaskRequest.Build, buildNode DateTime.MaxValue
+                    forceBuild()
             else
                 Log.Debug("{NodeId} is not cacheable", node.Id)
-                TaskRequest.Build, buildNode DateTime.MaxValue
+                forceBuild()
 
         buildRequest, completionDate
 

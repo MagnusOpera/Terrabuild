@@ -46,7 +46,6 @@ type RunArgs =
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
     | [<Unique; AltCommandLine("-lo")>] Local_Only
-    | [<Unique; AltCommandLine("-cs")>] Check_State
     | [<Unique; AltCommandLine("-n")>] Note of note:string
     | [<Unique; AltCommandLine("-t")>] Tag of tag:string
     | [<Unique; AltCommandLine("-ct")>] Container_Tool of tool:ContainerTool
@@ -65,7 +64,6 @@ with
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
             | Local_Only -> "Use local cache only."
-            | Check_State -> "Ensure external state is valid."
             | Note _ -> "Note for the build."
             | Logs -> "Output logs for impacted projects."
             | Tag _ -> "Tag for build."

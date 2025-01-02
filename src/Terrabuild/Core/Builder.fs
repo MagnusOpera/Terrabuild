@@ -117,25 +117,25 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                         cache, ops @ newops
                     ) (defaultCacheability, [])
 
-                let node = { Node.Id = nodeId
-                             Node.Label = $"{targetName} {project}"
-                             
-                             Node.Project = project
-                             Node.Target = targetName
-                             Node.ConfigurationTarget = target
-                             Node.Operations = ops
-                             Node.Cache = cache
+                let node =
+                    { Node.Id = nodeId
+                      Node.Label = $"{targetName} {project}"
+                      
+                      Node.Project = project
+                      Node.Target = targetName
+                      Node.ConfigurationTarget = target
+                      Node.Operations = ops
+                      Node.Cache = cache
+  
+                      Node.Dependencies = children
+                      Node.Outputs = target.Outputs
+  
+                      Node.ProjectHash = projectConfig.Hash
+                      Node.TargetHash = hash
+  
+                      Node.IsLeaf = isLeaf }
 
-                             Node.Dependencies = children
-                             Node.Outputs = target.Outputs
-
-                             Node.ProjectHash = projectConfig.Hash
-                             Node.TargetHash = hash
-
-                             Node.IsLeaf = isLeaf }
-
-                if allNodes.TryAdd(nodeId, node) |> not then
-                    TerrabuildException.Raise("Unexpected graph building race")
+                if allNodes.TryAdd(nodeId, node) |> not then TerrabuildException.Raise("Unexpected graph building race")
                 Set.singleton nodeId
             | _ ->
                 children

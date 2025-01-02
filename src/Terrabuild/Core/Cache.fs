@@ -10,36 +10,34 @@ type Origin =
     | Remote
 
 [<RequireQualifiedAccess>]
-type OperationSummary = {
-    MetaCommand: string
-    Command: string
-    Arguments: string
-    Container: string option
-    StartedAt: DateTime
-    EndedAt: DateTime
-    Duration: TimeSpan
-    Log: string
-    ExitCode: int
-}
+type OperationSummary =
+    { MetaCommand: string
+      Command: string
+      Arguments: string
+      Container: string option
+      StartedAt: DateTime
+      EndedAt: DateTime
+      Duration: TimeSpan
+      Log: string
+      ExitCode: int }
 
 [<RequireQualifiedAccess>]
-type TargetSummary = {
-    Project: string
-    Target: string
-    Operations: OperationSummary list list
-    Outputs: string option
-    IsSuccessful: bool
-    StartedAt: DateTime
-    EndedAt: DateTime
-    Duration: TimeSpan
-    Cache: Terrabuild.Extensibility.Cacheability
-}
+type TargetSummary =
+    { Project: string
+      Target: string
+      Operations: OperationSummary list list
+      Outputs: string option
+      IsSuccessful: bool
+      StartedAt: DateTime
+      EndedAt: DateTime
+      Duration: TimeSpan
+      Fingerprint: string option
+      Cache: Terrabuild.Extensibility.Cacheability }
 
 
-type ArtifactInfo = {
-    Path: string
-    Size: int
-}
+type ArtifactInfo =
+    { Path: string
+      Size: int }
 
 
 type IEntry =
