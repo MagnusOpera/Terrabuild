@@ -95,9 +95,9 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                     operation.ContainerVariables
                     |> Seq.map (fun var -> $"-e {var}")
                     |> String.join " "
-                let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
+                let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.ShellOp.Command} {envs} {container} {operation.ShellOp.Arguments}"
                 metaCommand, options.Workspace, cmd, args, operation.Container
-            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
+            | _ -> metaCommand, projectDirectory, operation.ShellOp.Command, operation.ShellOp.Arguments, operation.Container)
  
     let stepLogs = List<Cache.OperationSummary>()
     let mutable lastStatusCode = 0

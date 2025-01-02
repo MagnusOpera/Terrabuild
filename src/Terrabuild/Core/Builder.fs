@@ -110,8 +110,8 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                                 ContaineredShellOperation.Container = operation.Container
                                 ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
                                 ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
-                                ContaineredShellOperation.Command = shellOperation.Core.Command
-                                ContaineredShellOperation.Arguments = shellOperation.Core.Arguments })
+                                ContaineredShellOperation.FingerprintOp = shellOperation.Fingerprint
+                                ContaineredShellOperation.ShellOp = shellOperation.Core })
 
                         let cache = cache &&& executionRequest.Cache
                         cache, ops @ newops
