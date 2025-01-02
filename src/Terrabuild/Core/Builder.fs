@@ -110,13 +110,10 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                                 ContaineredShellOperation.Container = operation.Container
                                 ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
                                 ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
-                                ContaineredShellOperation.Command = shellOperation.Command
-                                ContaineredShellOperation.Arguments = shellOperation.Arguments
-                                ContaineredShellOperation.ExitCodes = shellOperation.ExitCodes })
+                                ContaineredShellOperation.Command = shellOperation.Core.Command
+                                ContaineredShellOperation.Arguments = shellOperation.Core.Arguments })
 
-                        let cache =
-                            cache &&& executionRequest.Cache
-                            ||| Cacheability.External &&& (cache ||| executionRequest.Cache)
+                        let cache = cache &&& executionRequest.Cache
                         cache, ops @ newops
                     ) (defaultCacheability, [])
 

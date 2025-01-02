@@ -57,8 +57,7 @@ let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
 let isOkish statusCode =
     match statusCode with
-    | Terrabuild.Extensibility.StatusCode.Success
-    | Terrabuild.Extensibility.StatusCode.SuccessUpdate -> true
+    | 0 -> true
     | _ -> false
 
 
@@ -97,11 +96,11 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                     |> Seq.map (fun var -> $"-e {var}")
                     |> String.join " "
                 let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
-                metaCommand, options.Workspace, cmd, args, operation.Container, operation.ExitCodes
-            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
+                metaCommand, options.Workspace, cmd, args, operation.Container
+            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
  
     let stepLogs = List<Cache.OperationSummary>()
-    let mutable lastStatusCode = Terrabuild.Extensibility.StatusCode.Success
+    let mutable lastStatusCode = 0
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
@@ -110,7 +109,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
         let startedAt =
             if cmdLineIndex > 0 then DateTime.UtcNow
             else cmdFirstStartedAt
-        let metaCommand, workDir, cmd, args, container, exitCodes = allCommands[cmdLineIndex]
+        let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
         cmdLineIndex <- cmdLineIndex + 1
 
         Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
@@ -134,10 +133,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                         Cache.OperationSummary.ExitCode = exitCode }
         stepLog |> stepLogs.Add
 
-        let statusCode =
-            match exitCodes |> Map.tryFind exitCode with
-            | Some statusCode -> statusCode
-            | _ -> Terrabuild.Extensibility.StatusCode.Error exitCode
+        let statusCode = exitCode
         lastStatusCode <- statusCode
         Log.Debug("{Hash}: Execution completed with exit code '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
 
@@ -235,12 +231,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             api |> Option.iter (fun api -> api.AddArtifact node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
             match lastStatusCode with
-            | Terrabuild.Extensibility.StatusCode.SuccessUpdate ->
-                TaskStatus.Success endedAt
-            | Terrabuild.Extensibility.StatusCode.Success ->
-                TaskStatus.Success currentCompletionDate
-            | Terrabuild.Extensibility.StatusCode.Error _ ->
-                TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
+            | 0 -> TaskStatus.Success endedAt
+            | _ -> TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
 
 
         let restoreNode () =
@@ -300,7 +292,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         Log.Debug("{NodeId} must rebuild because node is failed and retry requested", node.Id)
                         TaskRequest.Build, buildNode DateTime.MaxValue
                     // state is external - it's getting complex :-(
-                    elif checkState && (node.Cache &&& Terrabuild.Extensibility.Cacheability.External) <> Terrabuild.Extensibility.Cacheability.Never then
+                    // UNDONE
+                    elif checkState then // && (node.Cache &&& Terrabuild.Extensibility.Cacheability.External) <> Terrabuild.Extensibility.Cacheability.Never then
                         Log.Debug("{NodeId} is external, checking if state has changed", node.Id)
                         // first restore node because we want to have asset
                         // this **must** be ok since we were able to fetch metadata
