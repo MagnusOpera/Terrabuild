@@ -9,6 +9,7 @@ open Terrabuild.Expressions
 open Terrabuild.Configuration.Project.AST
 open Errors
 open Terrabuild.PubSub
+open Microsoft.Extensions.FileSystemGlobbing
 
 [<RequireQualifiedAccess>]
 type TargetOperation = {
@@ -435,6 +436,9 @@ let read (options: ConfigOptions.Options) =
 
 
     let projectFiles = 
+        let matcher = Matcher()
+        matcher.AddInclude("**/*").AddExcludePatterns(workspaceConfig.Workspace.Ignores)
+
         let rec findDependencies isSubFolder dir =
             seq {
                 let scanFolder =
@@ -453,10 +457,13 @@ let read (options: ConfigOptions.Options) =
                         file |> FS.parentDirectory |> FS.relativePath options.Workspace
                     | _ ->
                         for subdir in dir |> IO.enumerateDirs do
-                            yield! findDependencies true subdir
+                            let relativeDir = subdir |> FS.relativePath options.Workspace
+                            if matcher.Match(relativeDir).HasMatches then
+                                yield! findDependencies true subdir
             }
 
         findDependencies false options.Workspace
+
 
     let projects = ConcurrentDictionary<string, Project>()
     let hub = Hub.Create(options.MaxConcurrency)
@@ -503,7 +510,7 @@ let read (options: ConfigOptions.Options) =
         | _ -> projects.Keys
         |> Set
 
-    { Workspace.Space = workspaceConfig.Space
+    { Workspace.Space = workspaceConfig.Workspace.Space
       Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
       Workspace.Targets = workspaceConfig.Targets }

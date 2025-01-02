@@ -2,6 +2,7 @@
 module internal Terrabuild.Configuration.Workspace.Parser
 type token = 
   | PROJECT
+  | IGNORES
   | SPACE
   | DEPENDS_ON
   | REBUILD
@@ -56,6 +57,7 @@ type token =
   | FALSE
 type tokenId = 
     | TOKEN_PROJECT
+    | TOKEN_IGNORES
     | TOKEN_SPACE
     | TOKEN_DEPENDS_ON
     | TOKEN_REBUILD
@@ -117,6 +119,7 @@ type nonTerminalId =
     | NONTERM_Workspace
     | NONTERM_WorkspaceComponents
     | NONTERM_WorkspaceSpace
+    | NONTERM_WorkspaceIgnores
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn

@@ -2,6 +2,7 @@
 
 workspace {
     space = "magnusopera/default"
+    ignores = [ "**/node_modules" ]
 }
 
 target build { # comment at end of line
