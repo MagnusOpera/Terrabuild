@@ -435,34 +435,34 @@ let read (options: ConfigOptions.Options) =
           Project.Labels = projectDef.Labels }
 
 
-    let projectFiles =
-        // find all PROJECT and WORKSPACE files but exclude specified ignored folders
-        let projects =
-            IO.enumerateFilesBut ["**/PROJECT"; "**/WORKSPACE"] workspaceConfig.Workspace.Ignores options.Workspace
-            |> Set.ofSeq
+    let projectFiles = 
+        let matcher = Matcher()
+        matcher.AddInclude("**/*").AddExcludePatterns(workspaceConfig.Workspace.Ignores)
 
-        // isolate WORKSPACE only
-        let workspaces =
-            projects
-            |> Set.filter (fun file -> file.EndsWith("WORKSPACE"))
+        let rec findDependencies isSubFolder dir =
+            seq {
+                let scanFolder =
+                    if isSubFolder then
+                        match FS.combinePath dir "WORKSPACE" with
+                        | FS.File _ -> false
+                        | _ -> true
+                    else
+                        true
 
-        // isolate PROJECT only
-        let projects = projects - workspaces
+                // ignore sub WORKSPACE files
+                if scanFolder then
+                    let projectFile = FS.combinePath dir "PROJECT" 
+                    match projectFile with
+                    | FS.File file ->
+                        file |> FS.parentDirectory |> FS.relativePath options.Workspace
+                    | _ ->
+                        for subdir in dir |> IO.enumerateDirs do
+                            let relativeDir = subdir |> FS.relativePath options.Workspace
+                            if matcher.Match(relativeDir).HasMatches then
+                                yield! findDependencies true subdir
+            }
 
-        // get WORKSPACE folders
-        let workspaceDirs =
-            workspaces
-            |> Set.map FS.parentDirectory
-            |> Set.remove options.Workspace
-
-        let projects =
-            projects
-            |> Set.choose (fun file ->
-                let projectDir = FS.parentDirectory file
-                if workspaceDirs |> Set.exists (fun workspaceDir -> projectDir.StartsWith(workspaceDir)) then None
-                else Some projectDir)
-            |> Set.map (FS.relativePath options.Workspace)
-        projects
+        findDependencies false options.Workspace
 
 
     let projects = ConcurrentDictionary<string, Project>()
