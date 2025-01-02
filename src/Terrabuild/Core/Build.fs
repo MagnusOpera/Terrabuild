@@ -93,15 +93,12 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) opSelec
 
 
 let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) opSelector projectDirectory homeDir tmpDir =
-    // run actions if any
-    let allCommands = buildCommands node options opSelector projectDirectory homeDir tmpDir
-
     let stepLogs = List<Cache.OperationSummary>()
     let mutable lastStatusCode = 0
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
-
+    let allCommands = buildCommands node options opSelector projectDirectory homeDir tmpDir
     while cmdLineIndex < allCommands.Length && lastStatusCode = 0 do
         let startedAt =
             if cmdLineIndex > 0 then DateTime.UtcNow
@@ -112,26 +109,24 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
         Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
         let logFile = cacheEntry.NextLogFile()
         let exitCode =
-            if options.Targets |> Set.contains "serve" then
-                Exec.execConsole workDir cmd args
-            else
-                Exec.execCaptureTimestampedOutput workDir cmd args logFile
+            if options.Targets |> Set.contains "serve" then Exec.execConsole workDir cmd args
+            else Exec.execCaptureTimestampedOutput workDir cmd args logFile
         cmdLastEndedAt <- DateTime.UtcNow
         let endedAt = cmdLastEndedAt
         let duration = endedAt - startedAt
-        let stepLog = { Cache.OperationSummary.MetaCommand = metaCommand
-                        Cache.OperationSummary.Command = cmd
-                        Cache.OperationSummary.Arguments = args
-                        Cache.OperationSummary.Container = container
-                        Cache.OperationSummary.StartedAt = startedAt
-                        Cache.OperationSummary.EndedAt = endedAt
-                        Cache.OperationSummary.Duration = duration
-                        Cache.OperationSummary.Log = logFile
-                        Cache.OperationSummary.ExitCode = exitCode }
+        let stepLog =
+            { Cache.OperationSummary.MetaCommand = metaCommand
+              Cache.OperationSummary.Command = cmd
+              Cache.OperationSummary.Arguments = args
+              Cache.OperationSummary.Container = container
+              Cache.OperationSummary.StartedAt = startedAt
+              Cache.OperationSummary.EndedAt = endedAt
+              Cache.OperationSummary.Duration = duration
+              Cache.OperationSummary.Log = logFile
+              Cache.OperationSummary.ExitCode = exitCode }
         stepLog |> stepLogs.Add
 
-        let statusCode = exitCode
-        lastStatusCode <- statusCode
+        lastStatusCode <- exitCode
         Log.Debug("{Hash}: Execution completed with exit code '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
 
     lastStatusCode, stepLogs
