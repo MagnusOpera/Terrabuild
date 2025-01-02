@@ -37,7 +37,7 @@ let parseWorkspace() =
               Script = None
               Defaults = Map.empty }
 
-        { Space = Some "magnusopera/default"
+        { Workspace = { Space = Some "magnusopera/default"; Ignores = Set ["**/node_modules"] }
           Targets = Map [ "build", targetBuild
                           "dist", targetDist
                           "dummy", targetDummy ]
@@ -110,7 +110,7 @@ let parseWorkspace2() =
               Script = None
               Defaults = Map.empty }
 
-        { Space = Some "magnusopera/default"
+        { Workspace = { Space = Some "magnusopera/default"; Ignores = Set.empty }
           Targets = Map [ "build", targetBuild
                           "dist", targetDist
                           "dummy", targetDummy ]

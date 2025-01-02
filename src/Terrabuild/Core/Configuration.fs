@@ -9,6 +9,7 @@ open Terrabuild.Expressions
 open Terrabuild.Configuration.Project.AST
 open Errors
 open Terrabuild.PubSub
+open Microsoft.Extensions.FileSystemGlobbing
 
 [<RequireQualifiedAccess>]
 type TargetOperation = {
@@ -434,29 +435,35 @@ let read (options: ConfigOptions.Options) =
           Project.Labels = projectDef.Labels }
 
 
-    let projectFiles = 
-        let rec findDependencies isSubFolder dir =
-            seq {
-                let scanFolder =
-                    if isSubFolder then
-                        match FS.combinePath dir "WORKSPACE" with
-                        | FS.File _ -> false
-                        | _ -> true
-                    else
-                        true
+    let projectFiles =
+        // find all PROJECT and WORKSPACE files but exclude specified ignored folders
+        let projects =
+            IO.enumerateFilesBut ["**/PROJECT"; "**/WORKSPACE"] workspaceConfig.Workspace.Ignores options.Workspace
+            |> Set.ofSeq
 
-                // ignore sub WORKSPACE files
-                if scanFolder then
-                    let projectFile = FS.combinePath dir "PROJECT" 
-                    match projectFile with
-                    | FS.File file ->
-                        file |> FS.parentDirectory |> FS.relativePath options.Workspace
-                    | _ ->
-                        for subdir in dir |> IO.enumerateDirs do
-                            yield! findDependencies true subdir
-            }
+        // isolate WORKSPACE only
+        let workspaces =
+            projects
+            |> Set.filter (fun file -> file.EndsWith("WORKSPACE"))
 
-        findDependencies false options.Workspace
+        // isolate PROJECT only
+        let projects = projects - workspaces
+
+        // get WORKSPACE folders
+        let workspaceDirs =
+            workspaces
+            |> Set.map FS.parentDirectory
+            |> Set.remove options.Workspace
+
+        let projects =
+            projects
+            |> Set.choose (fun file ->
+                let projectDir = FS.parentDirectory file
+                if workspaceDirs |> Set.exists (fun workspaceDir -> projectDir.StartsWith(workspaceDir)) then None
+                else Some projectDir)
+            |> Set.map (FS.relativePath options.Workspace)
+        projects
+
 
     let projects = ConcurrentDictionary<string, Project>()
     let hub = Hub.Create(options.MaxConcurrency)
@@ -503,7 +510,7 @@ let read (options: ConfigOptions.Options) =
         | _ -> projects.Keys
         |> Set
 
-    { Workspace.Space = workspaceConfig.Space
+    { Workspace.Space = workspaceConfig.Workspace.Space
       Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
       Workspace.Targets = workspaceConfig.Targets }
