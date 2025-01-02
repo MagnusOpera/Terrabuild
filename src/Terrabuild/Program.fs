@@ -90,9 +90,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         Log.Debug("Changing current directory to {directory}", options.Workspace)
         Log.Debug("ProcessorCount = {procCount}", Environment.ProcessorCount)
 
-        // create temporary folder so extensions can expose files to docker containers (folder must within workspaceDir hierarchy)
-        IO.createDirectory ".terrabuild"
-
         let sourceControl = SourceControls.Factory.create()
 
         let options = {
