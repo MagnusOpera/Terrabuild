@@ -85,11 +85,9 @@ type Terraform() =
             | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
             | _ -> ()
 
-            let statusCode = Map [ 0, StatusCode.Success
-                                   2, StatusCode.SuccessUpdate ]
-            checkOp "terraform" $"plan -detailed-exitcode -out=terrabuild.planfile{vars}" statusCode
+            shellOp "terraform" $"plan -out=terrabuild.planfile{vars}"
         ]
-        execRequest Cacheability.External ops
+        execRequest Cacheability.Always ops
   
 
     /// <summary weight="4" title="Apply plan file.">
