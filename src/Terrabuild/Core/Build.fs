@@ -147,7 +147,7 @@ let fingerprintCommands (node: GraphDef.Node) (options: ConfigOptions.Options) p
             | Exec.Success (output, code) ->
                 output |> Hash.sha256 |> fingerprints.Add |> ignore
                 code
-            | Exec.Error (error, code) ->
+            | Exec.Error (_, code) ->
                 code
 
         lastStatusCode <- exitCode
