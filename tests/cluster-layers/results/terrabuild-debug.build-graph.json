@@ -68,26 +68,14 @@
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
-          "arguments": "building project",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "building project"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
-          "arguments": "build --no-dependencies --configuration Debug    ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
       "cache": 0,
@@ -161,26 +149,14 @@
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
-          "arguments": "building project",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "building project"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
-          "arguments": "build --no-dependencies --configuration Debug    ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
       "cache": 0,
@@ -247,39 +223,21 @@
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
-          "arguments": "building project",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "building project"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "ci",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "ci"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "run build -- ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "run build -- "
         }
       ],
       "cache": 0,
@@ -338,13 +296,7 @@
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
-          "arguments": "build --no-dependencies --configuration Debug    ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
       "cache": 0,
@@ -403,13 +355,7 @@
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
-          "arguments": "build --no-dependencies --configuration Debug    ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
       "cache": 0,
@@ -459,26 +405,14 @@
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "ci",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "ci"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "run build -- ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "run build -- "
         }
       ],
       "cache": 0,
@@ -527,26 +461,14 @@
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "ci",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "ci"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "run build -- ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "run build -- "
         }
       ],
       "cache": 0,

@@ -16,7 +16,6 @@ type RunTargetOptions = {
     Force: bool
     Retry: bool
     LocalOnly: bool
-    CheckState: bool
     StartedAt: DateTime
     IsLog: bool
     Targets: string set
@@ -100,7 +99,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.Force = options.Force
             ConfigOptions.Options.Retry = options.Retry
             ConfigOptions.Options.LocalOnly = options.LocalOnly
-            ConfigOptions.Options.CheckState = options.CheckState
             ConfigOptions.Options.StartedAt = options.StartedAt
             ConfigOptions.Options.Targets = options.Targets
             ConfigOptions.Options.CI = sourceControl.CI
@@ -185,7 +183,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let variables = runArgs.GetResults(RunArgs.Variable) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let localOnly = runArgs.Contains(RunArgs.Local_Only)
-        let checkState = runArgs.Contains(RunArgs.Check_State)
         let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
         let whatIf = runArgs.Contains(RunArgs.WhatIf)
@@ -206,7 +203,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.IsLog = false
                         RunTargetOptions.Targets = Set targets
                         RunTargetOptions.LocalOnly = localOnly
-                        RunTargetOptions.CheckState = checkState
                         RunTargetOptions.Configuration = configuration
                         RunTargetOptions.Note = note
                         RunTargetOptions.Tag = tag
@@ -236,7 +232,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.IsLog = false
                         RunTargetOptions.Targets = Set [ "serve" ]
                         RunTargetOptions.LocalOnly = true
-                        RunTargetOptions.CheckState = false
                         RunTargetOptions.Configuration = configuration
                         RunTargetOptions.Note = None
                         RunTargetOptions.Tag = None
@@ -268,7 +263,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.IsLog = true
                         RunTargetOptions.Targets = Set targets
                         RunTargetOptions.LocalOnly = true 
-                        RunTargetOptions.CheckState = false
                         RunTargetOptions.Configuration = configuration
                         RunTargetOptions.Note = None
                         RunTargetOptions.Tag = None

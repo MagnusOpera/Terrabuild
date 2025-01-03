@@ -55,13 +55,6 @@ type IBuildNotification =
 
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
-let isOkish statusCode =
-    match statusCode with
-    | Terrabuild.Extensibility.StatusCode.Success
-    | Terrabuild.Extensibility.StatusCode.SuccessUpdate -> true
-    | _ -> false
-
-
 let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) projectDirectory homeDir tmpDir =
     // run actions if any
     let allCommands =
@@ -97,20 +90,20 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                     |> Seq.map (fun var -> $"-e {var}")
                     |> String.join " "
                 let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
-                metaCommand, options.Workspace, cmd, args, operation.Container, operation.ExitCodes
-            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container, operation.ExitCodes)
+                metaCommand, options.Workspace, cmd, args, operation.Container
+            | _ -> metaCommand, projectDirectory, operation.Command, operation.Arguments, operation.Container)
  
     let stepLogs = List<Cache.OperationSummary>()
-    let mutable lastStatusCode = Terrabuild.Extensibility.StatusCode.Success
+    let mutable lastStatusCode = 0
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
 
-    while cmdLineIndex < allCommands.Length && isOkish lastStatusCode do
+    while cmdLineIndex < allCommands.Length && lastStatusCode = 0 do
         let startedAt =
             if cmdLineIndex > 0 then DateTime.UtcNow
             else cmdFirstStartedAt
-        let metaCommand, workDir, cmd, args, container, exitCodes = allCommands[cmdLineIndex]
+        let metaCommand, workDir, cmd, args, container = allCommands[cmdLineIndex]
         cmdLineIndex <- cmdLineIndex + 1
 
         Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
@@ -134,11 +127,7 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
                         Cache.OperationSummary.ExitCode = exitCode }
         stepLog |> stepLogs.Add
 
-        let statusCode =
-            match exitCodes |> Map.tryFind exitCode with
-            | Some statusCode -> statusCode
-            | _ -> Terrabuild.Extensibility.StatusCode.Error exitCode
-        lastStatusCode <- statusCode
+        lastStatusCode <- exitCode
         Log.Debug("{Hash}: Execution completed with exit code '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
 
     lastStatusCode, stepLogs
@@ -176,7 +165,6 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
     let force = options.Force
     let retry = options.Retry
-    let checkState = options.CheckState
 
     let nodeResults = Concurrent.ConcurrentDictionary<string, TaskRequest * TaskStatus>()
     let restorables = Concurrent.ConcurrentDictionary<string, Restorable>()
@@ -190,9 +178,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             | FS.File projectFile -> FS.parentDirectory projectFile
             | _ -> "."
 
-        let buildNode currentCompletionDate =
+        let buildNode() =
             let startedAt = DateTime.UtcNow
-            let allowUpload = retry || currentCompletionDate = DateTime.MaxValue
 
             notification.NodeBuilding node
 
@@ -207,7 +194,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 if node.IsLeaf then IO.Snapshot.Empty
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            let cacheEntry = cache.GetEntry allowUpload cacheEntryId
+            let cacheEntry = cache.GetEntry true cacheEntryId
             let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
             // keep only new or modified files
@@ -215,7 +202,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             let newFiles = afterFiles - beforeFiles
             let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
-            let successful = isOkish lastStatusCode
+            let successful = lastStatusCode = 0
             let endedAt = DateTime.UtcNow
             let summary = { Cache.TargetSummary.Project = node.Project
                             Cache.TargetSummary.Target = node.Target
@@ -235,12 +222,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             api |> Option.iter (fun api -> api.AddArtifact node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
             match lastStatusCode with
-            | Terrabuild.Extensibility.StatusCode.SuccessUpdate ->
-                TaskStatus.Success endedAt
-            | Terrabuild.Extensibility.StatusCode.Success ->
-                TaskStatus.Success currentCompletionDate
-            | Terrabuild.Extensibility.StatusCode.Error _ ->
-                TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
+            | 0 -> TaskStatus.Success endedAt
+            | _ -> TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
 
 
         let restoreNode () =
@@ -280,12 +263,20 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
 
         let buildRequest, completionDate =
+            let forceBuild() =
+                TaskRequest.Build, buildNode()
+
+            let restoreBuild() =
+                TaskRequest.Restore, restoreNode()
+
             if force then
                 Log.Debug("{NodeId} must rebuild because force build requested", node.Id)
-                TaskRequest.Build, buildNode DateTime.MaxValue
+                forceBuild()
+
             elif maxCompletionChildren = DateTime.MaxValue then
                 Log.Debug("{NodeId} must rebuild because child is rebuilding", node.Id)
-                TaskRequest.Build, buildNode DateTime.MaxValue
+                forceBuild()
+
             elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
                 let cacheEntryId = GraphDef.buildCacheKey node
                 match tryGetSummaryOnly cacheEntryId with
@@ -294,49 +285,22 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     // task is younger than children
                     if summary.StartedAt < maxCompletionChildren then
                         Log.Debug("{NodeId} must rebuild because it is younger than child", node.Id)
-                        TaskRequest.Build, buildNode DateTime.MaxValue
+                        forceBuild()
+
                     // task is failed and retry requested
                     elif retry && not summary.IsSuccessful then
                         Log.Debug("{NodeId} must rebuild because node is failed and retry requested", node.Id)
-                        TaskRequest.Build, buildNode DateTime.MaxValue
-                    // state is external - it's getting complex :-(
-                    elif checkState && (node.Cache &&& Terrabuild.Extensibility.Cacheability.External) <> Terrabuild.Extensibility.Cacheability.Never then
-                        Log.Debug("{NodeId} is external, checking if state has changed", node.Id)
-                        // first restore node because we want to have asset
-                        // this **must** be ok since we were able to fetch metadata
-                        let restoreCompletionStatus = restoreNode()
-                        match restoreCompletionStatus with
-                        | TaskStatus.Failure _ -> TaskRequest.Restore, restoreCompletionStatus
-                        | TaskStatus.Success _ ->
-                            // if retry is requested then completion date is either:
-                            // - the local build with a new completionDate on changes
-                            // - the local build with provided completionDate if no changes
-                            Log.Debug("{NodeId} checking external state by building node again", node.Id)
-                            let completionStatus = buildNode summary.EndedAt
-                            match completionStatus with
-                            | TaskStatus.Failure _ -> TaskRequest.Build, completionStatus
-                            | TaskStatus.Success completionDate when summary.EndedAt = completionDate ->
-                                // successfully validated restore so continue pretenting it's been restored
-                                Log.Debug("{NodeId} state has not changed", node.Id)
-                                TaskRequest.Restore, completionStatus
-                            | _ ->
-                                // changes have been detected so continue pretenting it's been rebuilt iif retry is requested
-                                if retry then
-                                    Log.Debug("{NodeId} state has changed, keeping changes", node.Id)
-                                    TaskRequest.Build, completionStatus
-                                else
-                                    Log.Debug("{NodeId} mark node as failed since state has changed", node.Id)
-                                    TaskRequest.Restore, TaskStatus.Failure (summary.EndedAt, "External state is no more valid. Rerun with retry.")
+                        forceBuild()
                     // task is cached
                     else
                         Log.Debug("{NodeId} is marked as used", node.Id)
-                        TaskRequest.Restore, restoreNode()
+                        restoreBuild()
                 | _ ->
                     Log.Debug("{NodeId} must be build since no summary and required", node.Id)
-                    TaskRequest.Build, buildNode DateTime.MaxValue
+                    forceBuild()
             else
                 Log.Debug("{NodeId} is not cacheable", node.Id)
-                TaskRequest.Build, buildNode DateTime.MaxValue
+                forceBuild()
 
         buildRequest, completionDate
 
