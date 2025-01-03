@@ -62,46 +62,24 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "init",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "init"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "workspace select default",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "workspace select default"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -detailed-exitcode -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=84DFD1B132F2D433231EF2345DB2CF32D7D3867BB5C1795B3DCFE0F0304A7353\u0022",
-          "exitCodes": [
-            [
-              0,
-              "success"
-            ],
-            [
-              2,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=84DFD1B132F2D433231EF2345DB2CF32D7D3867BB5C1795B3DCFE0F0304A7353\u0022"
         }
       ],
-      "cache": 4,
+      "cache": 0,
       "isLeaf": true
     },
     "libraries/dotnet-lib:build": {
@@ -160,13 +138,7 @@
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
-          "arguments": "build --no-dependencies --configuration Debug    ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
       "cache": 0,
@@ -213,26 +185,14 @@
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "ci",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "ci"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "run build -- ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "run build -- "
         }
       ],
       "cache": 0,
@@ -280,13 +240,7 @@
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
-          "arguments": "building library1",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "building library1"
         }
       ],
       "cache": 0,
@@ -350,13 +304,7 @@
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
-          "arguments": "build --no-dependencies --configuration Debug    ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
       "cache": 0,
@@ -432,26 +380,14 @@
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
-          "arguments": "building project1",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "building project1"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@make build",
           "command": "make",
-          "arguments": "build secret=\u0022tagada\u0022",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "build secret=\u0022tagada\u0022"
         }
       ],
       "cache": 0,
@@ -500,26 +436,14 @@
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "ci",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "ci"
         },
         {
           "container": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
-          "arguments": "run build -- ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "run build -- "
         }
       ],
       "cache": 0,
@@ -568,13 +492,7 @@
           "containerVariables": [],
           "metaCommand": "@cargo build",
           "command": "cargo",
-          "arguments": "build --profile dev ",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "build --profile dev "
         }
       ],
       "cache": 0,

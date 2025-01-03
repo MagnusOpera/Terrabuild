@@ -45,13 +45,7 @@
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
-          "arguments": "building A",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "building A"
         }
       ],
       "cache": 0,
@@ -101,13 +95,7 @@
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
-          "arguments": "building B",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "building B"
         }
       ],
       "cache": 0,
@@ -155,13 +143,7 @@
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
-          "arguments": "building C",
-          "exitCodes": [
-            [
-              0,
-              "successUpdate"
-            ]
-          ]
+          "arguments": "building C"
         }
       ],
       "cache": 0,
