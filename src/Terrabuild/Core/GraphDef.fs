@@ -7,7 +7,8 @@ type ContaineredShellOperation =
     { Container: string option
       ContainerVariables: string set
       MetaCommand: string
-      Operation: ShellOperation }
+      Command: string
+      Arguments: string }
 
 [<RequireQualifiedAccess>]
 type Node =
@@ -25,7 +26,7 @@ type Node =
       TargetHash: string
 
       Cache: Terrabuild.Extensibility.Cacheability
-      fingerprints: ContaineredShellOperation list
+      Fingerprints: ContaineredShellOperation list
       Operations: ContaineredShellOperation list
   
       // tell if a node is leaf (that is no dependencies in same project)

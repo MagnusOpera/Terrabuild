@@ -54,11 +54,11 @@ type IBuildNotification =
 let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
 
-let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) opSelector projectDirectory homeDir tmpDir =
-    node.Operations
+let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) (operations: GraphDef.ContaineredShellOperation list) projectDirectory homeDir tmpDir =
+    operations
     |> List.map (fun operation ->
         let metaCommand = operation.MetaCommand
-        let shellCmd, shellArgs = opSelector operation
+        let shellCmd, shellArgs = operation.Command, operation.Arguments
         match options.ContainerTool, operation.Container with
         | Some containerTool, Some containerImage ->
             let wsDir = Environment.CurrentDirectory
@@ -92,13 +92,13 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) opSelec
         | _ -> metaCommand, projectDirectory, shellCmd, shellArgs, operation.Container)
 
 
-let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) opSelector projectDirectory homeDir tmpDir =
+let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: ConfigOptions.Options) projectDirectory homeDir tmpDir =
     let stepLogs = List<Cache.OperationSummary>()
     let mutable lastStatusCode = 0
     let mutable cmdLineIndex = 0
     let cmdFirstStartedAt = DateTime.UtcNow
     let mutable cmdLastEndedAt = cmdFirstStartedAt
-    let allCommands = buildCommands node options opSelector projectDirectory homeDir tmpDir
+    let allCommands = buildCommands node options node.Operations projectDirectory homeDir tmpDir
     while cmdLineIndex < allCommands.Length && lastStatusCode = 0 do
         let startedAt =
             if cmdLineIndex > 0 then DateTime.UtcNow
@@ -130,6 +130,32 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
         Log.Debug("{Hash}: Execution completed with exit code '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
 
     lastStatusCode, stepLogs
+
+
+let fingerprintCommands (node: GraphDef.Node) (options: ConfigOptions.Options) projectDirectory homeDir tmpDir =
+    let mutable lastStatusCode = 0
+    let mutable cmdLineIndex = 0
+    let fingerprints = List<string>()
+    let allCommands = buildCommands node options node.Fingerprints projectDirectory homeDir tmpDir
+    while cmdLineIndex < allCommands.Length && lastStatusCode = 0 do
+        let _, workDir, cmd, args, _ = allCommands[cmdLineIndex]
+        cmdLineIndex <- cmdLineIndex + 1
+
+        Log.Debug("{Hash}: Running '{Command}' with '{Arguments}'", node.TargetHash, cmd, args)
+        let exitCode =
+            match Exec.execCaptureOutput workDir cmd args with
+            | Exec.Success (output, code) ->
+                output |> Hash.sha256 |> fingerprints.Add |> ignore
+                code
+            | Exec.Error (error, code) ->
+                code
+
+        lastStatusCode <- exitCode
+        Log.Debug("{Hash}: Execution completed with exit code '{Code}' ({Status})", node.TargetHash, exitCode, lastStatusCode)
+
+    let fingerprint = fingerprints |> Hash.sha256strings
+    lastStatusCode, fingerprint
+
 
 
 
@@ -191,7 +217,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 else IO.createSnapshot node.Outputs projectDirectory
 
             let cacheEntry = cache.GetEntry true cacheEntryId
-            let lastStatusCode, stepLogs = execCommands node cacheEntry options (fun op -> op.ShellOp.Command, op.ShellOp.Arguments) projectDirectory homeDir tmpDir
+            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
             // keep only new or modified files
             let afterFiles = IO.createSnapshot node.Outputs projectDirectory

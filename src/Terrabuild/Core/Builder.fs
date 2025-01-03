@@ -110,7 +110,8 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                                 ContaineredShellOperation.Container = operation.Container
                                 ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
                                 ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
-                                ContaineredShellOperation.Operation = shellOperation })
+                                ContaineredShellOperation.Command = shellOperation.Command 
+                                ContaineredShellOperation.Arguments = shellOperation.Arguments })
 
                         let newops =
                             executionRequest.Operations
@@ -118,7 +119,8 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                                 ContaineredShellOperation.Container = operation.Container
                                 ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
                                 ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
-                                ContaineredShellOperation.Operation = shellOperation })
+                                ContaineredShellOperation.Command = shellOperation.Command
+                                ContaineredShellOperation.Arguments = shellOperation.Arguments })
 
                         let cache = cache &&& executionRequest.Cache
                         cache, ops @ newops, fps @ newfps
@@ -132,7 +134,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                       Node.Target = targetName
                       Node.ConfigurationTarget = target
                       Node.Operations = ops
-                      Node.fingerprints = fps
+                      Node.Fingerprints = fps
                       Node.Cache = cache
   
                       Node.Dependencies = children
