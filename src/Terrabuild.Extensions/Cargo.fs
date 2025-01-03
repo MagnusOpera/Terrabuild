@@ -47,8 +47,8 @@ type Cargo() =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
 
-        let ops = [ localOp "cargo" arguments ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp "cargo" arguments ]
+        localRequest Cacheability.Always ops
 
 
     /// <summary title="Build project.">
@@ -60,8 +60,8 @@ type Cargo() =
         let profile = profile |> Option.defaultValue "dev"
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = [ localOp "cargo" $"build --profile {profile} {arguments}" ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp "cargo" $"build --profile {profile} {arguments}" ]
+        localRequest Cacheability.Always ops
 
 
     /// <summary>
@@ -73,5 +73,5 @@ type Cargo() =
         let profile = profile |> Option.defaultValue "dev"
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = [ localOp "cargo" $"test --profile {profile} {arguments}" ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp "cargo" $"test --profile {profile} {arguments}" ]
+        localRequest Cacheability.Always ops

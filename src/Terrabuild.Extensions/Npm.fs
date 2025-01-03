@@ -31,18 +31,18 @@ type Npm() =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            localOp "npm" "ci"
-            localOp "npm" $"run {cmd} -- {arguments}"   
+            shellOp "npm" "ci"
+            shellOp "npm" $"run {cmd} -- {arguments}"   
         ]
-        execRequest Cacheability.Always ops
+        localRequest Cacheability.Always ops
 
 
     /// <summary>
     /// Install packages using lock file.
     /// </summary>
     static member install (context: ActionContext) =
-        let ops = [ localOp "npm" "ci" ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp "npm" "ci" ]
+        localRequest Cacheability.Always ops
 
 
     /// <summary>
@@ -53,10 +53,10 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            localOp "npm" "ci"
-            localOp "npm" $"run build -- {args}"   
+            shellOp "npm" "ci"
+            shellOp "npm" $"run build -- {args}"   
         ]
-        execRequest Cacheability.Always ops
+        localRequest Cacheability.Always ops
 
 
     /// <summary>
@@ -67,10 +67,10 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            localOp "npm" "ci"
-            localOp "npm" $"run test -- {args}"   
+            shellOp "npm" "ci"
+            shellOp "npm" $"run test -- {args}"   
         ]
-        execRequest Cacheability.Always ops
+        localRequest Cacheability.Always ops
 
     /// <summary>
     /// Run `run` script.
@@ -80,6 +80,6 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            localOp "npm" $"run {command} -- {args}"
+            shellOp "npm" $"run {command} -- {args}"
         ]
-        execRequest Cacheability.Always ops
+        localRequest Cacheability.Always ops

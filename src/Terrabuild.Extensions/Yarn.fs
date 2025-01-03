@@ -32,18 +32,18 @@ type Yarn() =
         let cmd = context.Command
 
         let ops = [
-            localOp "yarn" "install --frozen-lockfile"
-            localOp "yarn" $"{cmd} -- {arguments}"   
+            shellOp "yarn" "install --frozen-lockfile"
+            shellOp "yarn" $"{cmd} -- {arguments}"   
         ]
-        execRequest Cacheability.Always ops
+        localRequest Cacheability.Always ops
 
 
     /// <summary>
     /// Install packages using lock file.
     /// </summary>
     static member install (context: ActionContext) =
-        let ops = [ localOp "yarn" "install --frozen-lockfile" ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp "yarn" "install --frozen-lockfile" ]
+        localRequest Cacheability.Always ops
 
 
     /// <summary>
@@ -54,10 +54,10 @@ type Yarn() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            localOp "yarn" "install --frozen-lockfile"
-            localOp "yarn" $"build -- {args}"   
+            shellOp "yarn" "install --frozen-lockfile"
+            shellOp "yarn" $"build -- {args}"   
         ]
-        execRequest Cacheability.Always ops
+        localRequest Cacheability.Always ops
 
 
     /// <summary>
@@ -68,10 +68,10 @@ type Yarn() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            localOp "yarn" "install --frozen-lockfile"
-            localOp "yarn" $"test -- {args}"   
+            shellOp "yarn" "install --frozen-lockfile"
+            shellOp "yarn" $"test -- {args}"   
         ]
-        execRequest Cacheability.Always ops
+        localRequest Cacheability.Always ops
 
     /// <summary>
     /// Run `run` script.
@@ -81,6 +81,6 @@ type Yarn() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            localOp "yarn" $"{command} -- {args}"
+            shellOp "yarn" $"{command} -- {args}"
         ]
-        execRequest Cacheability.Always ops
+        localRequest Cacheability.Always ops

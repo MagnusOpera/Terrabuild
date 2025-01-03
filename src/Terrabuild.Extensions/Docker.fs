@@ -16,8 +16,8 @@ type Docker() =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
 
-        let ops = [ localOp "docker" arguments ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp "docker" arguments ]
+        localRequest Cacheability.Always ops
 
 
     /// <summary>
@@ -42,15 +42,15 @@ type Docker() =
         let ops = 
             [
                 let buildArgs = $"build --file {dockerfile} --tag {image}:{context.Hash}{args}{platformArgs} ."
-                localOp "docker" buildArgs
-                if context.CI then localOp "docker" $"push {image}:{context.Hash}"
+                shellOp "docker" buildArgs
+                if context.CI then shellOp "docker" $"push {image}:{context.Hash}"
             ]
 
         let cacheability =
             if context.CI then Cacheability.Remote
             else Cacheability.Local
 
-        execRequest cacheability ops
+        localRequest cacheability ops
 
 
     /// <summary>
@@ -62,13 +62,13 @@ type Docker() =
         let ops =
             [
                 if context.CI then
-                    localOp "docker" $"buildx imagetools create -t {image}:{tag} {image}:{context.Hash}"
+                    shellOp "docker" $"buildx imagetools create -t {image}:{tag} {image}:{context.Hash}"
                 else
-                    localOp "docker" $"tag {image}:{context.Hash} {image}:{tag}"
+                    shellOp "docker" $"tag {image}:{context.Hash} {image}:{tag}"
             ]
 
         let cacheability =
             if context.CI then Cacheability.Remote
             else Cacheability.Local
 
-        execRequest cacheability ops
+        localRequest cacheability ops

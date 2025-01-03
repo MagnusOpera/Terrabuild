@@ -14,5 +14,5 @@ type Shell() =
     /// <param name="arguments" example="&quot;Hello Terrabuild&quot;">Arguments to pass to command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
-        let ops = [ localOp context.Command arguments ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp context.Command arguments ]
+        localRequest Cacheability.Always ops

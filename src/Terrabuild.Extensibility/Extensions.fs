@@ -35,11 +35,6 @@ type ShellOperation =
     { Command: string
       Arguments: string }
 
-[<RequireQualifiedAccess>]
-type Operation =
-    { Fingerprint: ShellOperation option
-      Core: ShellOperation }
-
 [<Flags>]
 type Cacheability =
     | Never = 0
@@ -50,21 +45,35 @@ type Cacheability =
 [<RequireQualifiedAccess>]
 type ActionExecutionRequest =
     { Cache: Cacheability
-      Operations: Operation list }
-
+      Fingerprints: ShellOperation list
+      Operations: ShellOperation list }
 
 let shellOp cmd args =
     { ShellOperation.Command = cmd
       ShellOperation.Arguments = args }
 
-let localOp cmd args = 
-    { Operation.Fingerprint = None
-      Operation.Core = shellOp cmd args }
 
-let externalOp fingerprint cmd args =
-    { Operation.Fingerprint = Some fingerprint
-      Operation.Core = shellOp cmd args }
+let buildCommand cache =
+    { ActionExecutionRequest.Cache = cache
+      ActionExecutionRequest.Fingerprints = [] 
+      ActionExecutionRequest.Operations = [] }
 
-let execRequest cache ops =
-    { ActionExecutionRequest.Cache = cache 
-      ActionExecutionRequest.Operations = ops }
+let withFingerprint fingerprint request =
+    { request with 
+        ActionExecutionRequest.Fingerprints = fingerprint }
+
+let withOperations operations request =
+    { request with
+        ActionExecutionRequest.Operations = operations }
+
+
+let localRequest cache ops =
+    cache
+    |> buildCommand
+    |> withOperations ops
+
+let externalRequest cache fingerprint ops =
+    cache
+    |> buildCommand
+    |> withFingerprint fingerprint
+    |> withOperations ops

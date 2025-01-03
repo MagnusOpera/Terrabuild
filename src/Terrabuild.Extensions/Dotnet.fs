@@ -55,8 +55,8 @@ module DotnetHelpers =
 /// </summary>
 type Dotnet() =
 
-    static let buildRequest (context: ActionContext) buildOps =
-        execRequest Cacheability.Always buildOps
+    // static let buildRequest (context: ActionContext) buildOps =
+    //     localRequest Cacheability.Always buildOps
 
     /// <summary>
     /// Provides default values for project.
@@ -84,8 +84,8 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
 
-        let ops = [ localOp "dotnet" arguments ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp "dotnet" arguments ]
+        localRequest Cacheability.Always ops
 
 
     /// <summary title="Build project.">
@@ -118,10 +118,10 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            localOp "dotnet" $"build --no-dependencies --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
+            shellOp "dotnet" $"build --no-dependencies --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
         ]
 
-        buildRequest context buildOps
+        localRequest Cacheability.Always buildOps
 
 
     /// <summary>
@@ -136,10 +136,10 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            localOp "dotnet" $"pack --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
+            shellOp "dotnet" $"pack --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
         ]
 
-        buildRequest context buildOps
+        localRequest Cacheability.Always buildOps
 
     /// <summary>
     /// Publish a project.
@@ -167,10 +167,10 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            localOp "dotnet" $"publish --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
+            shellOp "dotnet" $"publish --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
         ]
 
-        buildRequest context buildOps
+        localRequest Cacheability.Always buildOps
 
     /// <summary>
     /// Restore packages.
@@ -180,8 +180,8 @@ type Dotnet() =
     static member restore (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = [ localOp "dotnet" $"restore {arguments}" ]
-        execRequest Cacheability.Local ops
+        let ops = [ shellOp "dotnet" $"restore {arguments}" ]
+        localRequest Cacheability.Local ops
 
 
     /// <summary>
@@ -196,7 +196,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let buildOps = [
-            localOp "dotnet" $"test --no-build --configuration {configuration} {filter} {arguments}"
+            shellOp "dotnet" $"test --no-build --configuration {configuration} {filter} {arguments}"
         ]
 
-        buildRequest context buildOps
+        localRequest Cacheability.Always buildOps

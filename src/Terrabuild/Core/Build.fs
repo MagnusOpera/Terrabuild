@@ -162,9 +162,6 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
         let allowRemoteCache = options.LocalOnly |> not
         cache.TryGetSummaryOnly allowRemoteCache id |> Option.map (fun (_, summary) -> summary)
 
-    let force = options.Force
-    let retry = options.Retry
-
     let nodeResults = Concurrent.ConcurrentDictionary<string, TaskRequest * TaskStatus>()
     let restorables = Concurrent.ConcurrentDictionary<string, Restorable>()
 
@@ -177,9 +174,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             | FS.File projectFile -> FS.parentDirectory projectFile
             | _ -> "."
 
-        let buildNode currentCompletionDate =
+        let buildNode() =
             let startedAt = DateTime.UtcNow
-            let allowUpload = retry || currentCompletionDate = DateTime.MaxValue
 
             notification.NodeBuilding node
 
@@ -194,7 +190,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 if node.IsLeaf then IO.Snapshot.Empty
                 else IO.createSnapshot node.Outputs projectDirectory
 
-            let cacheEntry = cache.GetEntry allowUpload cacheEntryId
+            let cacheEntry = cache.GetEntry true cacheEntryId
             let lastStatusCode, stepLogs = execCommands node cacheEntry options (fun op -> op.ShellOp.Command, op.ShellOp.Arguments) projectDirectory homeDir tmpDir
 
             // keep only new or modified files
@@ -264,9 +260,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
         let buildRequest, completionDate =
             let forceBuild() =
-                TaskRequest.Build, buildNode DateTime.MaxValue
+                TaskRequest.Build, buildNode()
 
-            if force then
+            if options.Force then
                 Log.Debug("{NodeId} must rebuild because force build requested", node.Id)
                 forceBuild()
             

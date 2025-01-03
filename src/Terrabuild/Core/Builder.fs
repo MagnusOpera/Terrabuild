@@ -78,9 +78,9 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
                 Log.Debug($"Node {nodeId} has ProjectHash {projectConfig.Hash} and TargetHash {hash}")
 
-                let cache, ops =
+                let cache, ops, fps =
                     target.Operations
-                    |> List.fold (fun (cache, ops) operation ->
+                    |> List.fold (fun (cache, ops, fps) operation ->
                         let optContext = {
                             Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                             Terrabuild.Extensibility.ActionContext.CI = options.CI.IsSome
@@ -104,18 +104,25 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                             | Extensions.InvocationResult.ErrorTarget ex -> TerrabuildException.Raise($"{hash}: Failed to get shell operation (extension error)", ex)
                             | _ -> TerrabuildException.Raise($"{hash}: Failed to get shell operation (extension error)")
 
+                        let newfps =
+                            executionRequest.Fingerprints
+                            |> List.map (fun shellOperation -> {
+                                ContaineredShellOperation.Container = operation.Container
+                                ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
+                                ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
+                                ContaineredShellOperation.Operation = shellOperation })
+
                         let newops =
                             executionRequest.Operations
                             |> List.map (fun shellOperation -> {
                                 ContaineredShellOperation.Container = operation.Container
                                 ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
                                 ContaineredShellOperation.MetaCommand = $"{operation.Extension} {operation.Command}"
-                                ContaineredShellOperation.FingerprintOp = shellOperation.Fingerprint
-                                ContaineredShellOperation.ShellOp = shellOperation.Core })
+                                ContaineredShellOperation.Operation = shellOperation })
 
                         let cache = cache &&& executionRequest.Cache
-                        cache, ops @ newops
-                    ) (defaultCacheability, [])
+                        cache, ops @ newops, fps @ newfps
+                    ) (defaultCacheability, [], [])
 
                 let node =
                     { Node.Id = nodeId
@@ -125,6 +132,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                       Node.Target = targetName
                       Node.ConfigurationTarget = target
                       Node.Operations = ops
+                      Node.fingerprints = fps
                       Node.Cache = cache
   
                       Node.Dependencies = children
