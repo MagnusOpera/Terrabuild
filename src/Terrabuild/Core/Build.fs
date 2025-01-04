@@ -258,16 +258,13 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             | _ ->
                 TaskStatus.Failure (DateTime.UtcNow, $"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
-        let forceBuild() = TaskRequest.Build, buildNode()
-        let restoreBuild() = TaskRequest.Restore, restoreNode()
-
         if force then
             Log.Debug("{NodeId} must rebuild because force build requested", node.Id)
-            forceBuild()
+            TaskRequest.Build, buildNode()
 
         elif maxCompletionChildren = DateTime.MaxValue then
             Log.Debug("{NodeId} must rebuild because child is rebuilding", node.Id)
-            forceBuild()
+            TaskRequest.Build, buildNode()
 
         elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
             let cacheEntryId = GraphDef.buildCacheKey node
@@ -277,22 +274,23 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 // task is younger than children
                 if summary.StartedAt < maxCompletionChildren then
                     Log.Debug("{NodeId} must rebuild because it is younger than child", node.Id)
-                    forceBuild()
+                    TaskRequest.Build, buildNode()
 
                 // task is failed and retry requested
                 elif retry && not summary.IsSuccessful then
                     Log.Debug("{NodeId} must rebuild because node is failed and retry requested", node.Id)
-                    forceBuild()
+                    TaskRequest.Build, buildNode()
+
                 // task is cached
                 else
                     Log.Debug("{NodeId} is marked as used", node.Id)
-                    restoreBuild()
+                    TaskRequest.Restore, restoreNode()
             | _ ->
                 Log.Debug("{NodeId} must be build since no summary and required", node.Id)
-                forceBuild()
+                TaskRequest.Build, buildNode()
         else
             Log.Debug("{NodeId} is not cacheable", node.Id)
-            forceBuild()
+            TaskRequest.Build, buildNode()
 
 
     let scheduledNodes = Concurrent.ConcurrentDictionary<string, bool>()
