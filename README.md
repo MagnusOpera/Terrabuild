@@ -24,10 +24,18 @@ Terrabuild is a tool to maintain and build efficiently monorepos. Terrabuild is 
 - no lock-in: Terrabuild is not intrusive and can be used without modifying your projects
 
 # Learn more
-
 - [Documentation](https://terrabuild.io/docs/?utm_campaign=magnusopera-terrabuild-github-repo&utm_source=github.com&utm_medium=docs)
 - [Quickstart](https://terrabuild.io/docs/quick-start/?utm_campaign=magnusopera-terrabuild-github-repo&utm_source=github.com&utm_medium=quickstart)
 - [Playground](https://github.com/magnusopera/terrabuild-playground)
+
+# Open source
+This repository contains the Terrabuild software, covered under the [Functional Source License, Version 1.1, Apache 2.0 Future License](LICENSE), except where noted.
+
+Terrabuild is a product produced from this open source software, exclusively by [Magnus Opera SAS](https://magnusopera.io). It is distributed under our commercial terms.
+
+Others are allowed to make their own distribution of the software, but they cannot use any of the Terrabuild trademarks, cloud services, etc.
+
+We explicitly grant permission for you to make a build that includes our trademarks while developing the Terrabuild software itself. You may not publish or share the build, and you may not use that build to run Terrabuild software for any other purpose.
 
 # Contributing
 Visit [Contributing](CONTRIBUTING.md) for information on building Terrabuild from source or contributing improvements.

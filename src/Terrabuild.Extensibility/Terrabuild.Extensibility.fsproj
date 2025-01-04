@@ -10,7 +10,10 @@
 
   <ItemGroup>
     <None Include="NUGET.md" Pack="true" PackagePath="\" />
-    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+    <Content Include="..\..\LICENSE" Pack="true" PackagePath="\">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <PropertyGroup>
@@ -18,7 +21,7 @@
     <Authors>Pierre Chalamet</Authors>
     <Title>Extensions for Terrabuild</Title>
     <Description>Extensions for Terrabuild</Description>
-    <Copyright>Copyright 2023-2024 Magnus Opera</Copyright>
+    <Copyright>Copyright 2023-present Magnus Opera</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/magnusopera/terrabuild</PackageProjectUrl>
     <RepositoryUrl>https://github.com/magnusopera/terrabuild.git</RepositoryUrl>
