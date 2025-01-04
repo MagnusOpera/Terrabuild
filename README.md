@@ -4,7 +4,7 @@
 
 <br>
 
-[![License](https://img.shields.io/github/license/magnusopera/terrabuild)](LICENSE)
+[![License](https://img.shields.io/github/license/magnusopera/terrabuild)](LICENSE.md)
 [![NuGet version](https://badge.fury.io/nu/terrabuild.svg)](https://www.nuget.org/packages/Terrabuild)
 ![build](https://github.com/magnusopera/terrabuild/actions/workflows/on-push-branch.yml/badge.svg?branch=main)
 
@@ -29,7 +29,7 @@ Terrabuild is a tool to maintain and build efficiently monorepos. Terrabuild is 
 - [Playground](https://github.com/magnusopera/terrabuild-playground)
 
 # Open source
-This repository contains the Terrabuild software, covered under the [Functional Source License, Version 1.1, Apache 2.0 Future License](LICENSE), except where noted.
+This repository contains the Terrabuild software, covered under the [Functional Source License, Version 1.1, Apache 2.0 Future License](LICENSE.md), except where noted.
 
 Terrabuild is a product produced from this open source software, exclusively by [Magnus Opera SAS](https://magnusopera.io). It is distributed under our commercial terms.
 
