@@ -271,13 +271,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             match tryGetSummaryOnly cacheEntryId with
             | Some summary ->
                 Log.Debug("{NodeId} has existing build summary", node.Id)
-                // task is younger than children
-                if summary.StartedAt < maxCompletionChildren then
-                    Log.Debug("{NodeId} must rebuild because it is younger than child", node.Id)
-                    TaskRequest.Build, buildNode()
 
                 // task is failed and retry requested
-                elif retry && not summary.IsSuccessful then
+                if retry && not summary.IsSuccessful then
                     Log.Debug("{NodeId} must rebuild because node is failed and retry requested", node.Id)
                     TaskRequest.Build, buildNode()
 
