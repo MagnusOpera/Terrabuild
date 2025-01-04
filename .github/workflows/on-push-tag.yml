@@ -35,11 +35,11 @@ jobs:
       - name: Pack
         run: |
           (cd .out/dotnet; zip ../terrabuild-${BUILD_VERSION}-dotnet.zip ./*)
-          (cd .out/windows/x64; zip ../../terrabuild-${BUILD_VERSION}-windows-x64.zip ./terrabuild.exe)
-          (cd .out/windows/arm64; zip ../../terrabuild-${BUILD_VERSION}-windows-arm64.zip ./terrabuild.exe)
-          (cd .out/linux/x64; zip ../../terrabuild-${BUILD_VERSION}-linux-x64.zip ./terrabuild)
-          (cd .out/linux/arm64; zip ../../terrabuild-${BUILD_VERSION}-linux-arm64.zip ./terrabuild)
-          (cd .out/darwin; zip -r ../terrabuild-${BUILD_VERSION}-darwin-unsigned.zip .)
+          (cd .out/windows/x64; zip ../../terrabuild-${BUILD_VERSION}-windows-x64.zip ./*)
+          (cd .out/windows/arm64; zip ../../terrabuild-${BUILD_VERSION}-windows-arm64.zip ./*)
+          (cd .out/linux/x64; zip ../../terrabuild-${BUILD_VERSION}-linux-x64.zip ./*)
+          (cd .out/linux/arm64; zip ../../terrabuild-${BUILD_VERSION}-linux-arm64.zip ./*)
+          (cd .out/darwin; zip -r ../terrabuild-${BUILD_VERSION}-darwin-unsigned.zip ./*)
 
       - name: Archive .net Outputs
         uses: actions/upload-artifact@v4
