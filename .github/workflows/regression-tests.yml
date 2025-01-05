@@ -1,0 +1,64 @@
+name: 🦄 Regression Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Terrabuild version
+        default: latest
+      prerelease:
+        type: boolean
+        description: use Terrabuild prerelease
+        default: false
+
+jobs:
+
+  regression-test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write    
+
+    steps:
+      - name: Cloning repository
+        uses: actions/checkout@v4
+
+      - name: Install Terrabuild
+        uses: magnusopera/action-install-gh-release@feature/prerelease
+        with:
+          repo: magnusopera/terrabuild
+          tag: ${{ inputs.version }}
+          prerelease: ${{ inputs.prerelease }}
+
+      - name: Info
+        run: |
+          echo 'Regression tests for ${{ github.ref }}'
+          terrabuild version
+
+      - name: Self Integration Tests
+        run: make self-test-all terrabuild=terrabuild
+
+      - name: Include Build Logs
+        if: always()
+        run: |
+          ls -alR > terrabuild-debug.files.txt
+
+          echo "# Self Tests" >> $GITHUB_STEP_SUMMARY
+          echo "## simple" >> $GITHUB_STEP_SUMMARY
+          cat tests/simple/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
+
+          echo "## multirefs" >> $GITHUB_STEP_SUMMARY
+          cat tests/multirefs/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
+
+          echo "## cluster-layers" >> $GITHUB_STEP_SUMMARY
+          cat tests/cluster-layers/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Terrabuild Debug
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Terrabuild Debug
+          path: |
+            **/terrabuild-debug.*

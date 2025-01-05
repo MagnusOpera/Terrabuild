@@ -1,14 +1,8 @@
 
-extension @npm {
-    container = "node:20"
-#    script = "../../scripts/npm.fsx"
-}
-
-
-project @npm {
+project npmext {
     labels = [ "app" ]
 }
 
 target build {
-    @npm build { }
+    npmext build { }
 }
