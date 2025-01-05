@@ -208,7 +208,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+          "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -218,10 +218,10 @@
           ],
           "operations": [
             {
-              "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
-              "container": null,
+              "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+              "container": "node:20",
               "containerVariables": [],
-              "extension": "@npm",
+              "extension": "npmext",
               "command": "build",
               "script": {},
               "context": [
@@ -489,7 +489,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+          "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -499,10 +499,10 @@
           ],
           "operations": [
             {
-              "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
-              "container": null,
+              "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+              "container": "node:20",
               "containerVariables": [],
-              "extension": "@npm",
+              "extension": "npmext",
               "command": "build",
               "script": {},
               "context": [
