@@ -29,7 +29,8 @@ let terrabuildExtensibility =
 let lazyLoadScript (name: string) (script: string option) =
     let initScript () =
         match script with
-        | Some script -> loadScript [ terrabuildExtensibility ] script
+        | Some script ->
+            loadScript [ terrabuildExtensibility ] script
         | _ ->
             match Terrabuild.Extensions.Factory.systemScripts |> Map.tryFind name with
             | Some sysTpe -> Script(sysTpe)
@@ -38,9 +39,9 @@ let lazyLoadScript (name: string) (script: string option) =
     lazy(initScript())
 
 let getScript (extension: string) (scripts: Map<string, Lazy<Script>>) =
-    match scripts |> Map.tryFind extension with
-    | None -> None
-    | Some script -> script.Value |> Some
+    scripts
+    |> Map.tryFind extension
+    |> Option.map (fun script -> script.Value)
 
 let invokeScriptMethod<'r> (method: string) (args: Value) (script: Script option) =
     match script with
