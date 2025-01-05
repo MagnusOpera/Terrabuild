@@ -17,14 +17,14 @@ let systemExtensions =
     |> Seq.map (fun kvp -> Extension.Build kvp.Key [])
     |> Map.ofSeq
 
-// NOTE: when app in package as a single file, Terrabuild.Assembly can't be found... So instead of providing 
-//       Terrabuild.Extensibility assembly, the Terrabuild main assembly is provided instead
-//       ¯\_(ツ)_/¯
+// NOTE: when app in package as a single file, Terrabuild.Assembly can't be found...
+//       this means native deployments are not supported ¯\_(ツ)_/¯
 let terrabuildDir = Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> FS.parentDirectory
 let terrabuildExtensibility =
     let path = FS.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
     if File.Exists(path) then path
-    else Reflection.Assembly.GetExecutingAssembly().Location
+    else
+        TerrabuildException.Raise("Dynamic scripts are not supported using native deployment")
 
 let lazyLoadScript (name: string) (script: string option) =
     let initScript () =
