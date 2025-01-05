@@ -1,5 +1,6 @@
 config ?= default
 env ?= default
+terrabuild = $(current_dir)/.out/dotnet/terrabuild
 
 version ?= 0.0.0
 
@@ -10,6 +11,10 @@ else
 endif
 
 current_dir = $(shell pwd)
+
+
+
+
 
 
 #
@@ -74,7 +79,7 @@ docs:
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net9.0/Terrabuild.Extensions.xml ../../websites/terrabuild.io/content/docs/extensions
 
 self: clean publish
-	.out/dotnet/terrabuild run build test dist --configuration $(env) --retry --debug --logs --local-only
+	$(terrabuild) run build test dist --configuration $(env) --retry --debug --logs --local-only
 
 terrabuild:
 	terrabuild run build test dist --configuration $(env) --retry --debug --logs --local-only
@@ -145,8 +150,9 @@ endef
 
 define run_integration_test
 	@printf "\n*** Running integration test %s ***\n" $(1)
+	@$(terrabuild) version
 	-cd $(1); rm terrabuild-debug.*
-	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild-debug.md GITHUB_REPOSITORY=magnusopera/terrabuild GITHUB_RUN_ID=42 $(current_dir)/.out/dotnet/terrabuild $(2)
+	cd $(1); GITHUB_SHA=1234 GITHUB_REF_NAME=main GITHUB_STEP_SUMMARY=terrabuild-debug.md GITHUB_REPOSITORY=magnusopera/terrabuild GITHUB_RUN_ID=42 $(terrabuild) $(2)
 	$(call diff_results,$(1))
 endef
 
