@@ -175,14 +175,29 @@ let read (options: ConfigOptions.Options) =
         { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
 
 
-    let extensions = 
-        Extensions.systemExtensions
-        |> Map.addMap workspaceConfig.Extensions
+    let extensions, scripts =
+        // load system extensions
+        let sysScripts =
+            Extensions.systemExtensions
+            |> Map.map (fun _ _ -> None)
+            |> Map.map Extensions.lazyLoadScript
 
-    let scripts =
-        extensions
-        |> Map.map (fun _ _ -> None)
-        |> Map.map Extensions.lazyLoadScript
+        // load user extension
+        let usrScripts =
+            workspaceConfig.Extensions
+            |> Map.map (fun _ ext ->
+                match ext.Script with
+                | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
+                | _ -> None)
+            |> Map.map Extensions.lazyLoadScript
+
+        let extensions =
+            Extensions.systemExtensions
+            |> Map.addMap workspaceConfig.Extensions
+
+        let scripts = sysScripts |> Map.addMap usrScripts
+
+        extensions, scripts
 
 
     // this is the first stage: load project and mostly get dependencies references
