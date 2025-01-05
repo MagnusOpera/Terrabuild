@@ -94,6 +94,11 @@ jobs:
         with:
           repo: magnusopera/terrabuild
 
+      - name: Info
+        run: |
+          echo 'Regression tests for ${{ github.ref }}'
+          terrabuild version
+
       - name: Self Integration Tests
         run: make self-test-all terrabuild=terrabuild
 
