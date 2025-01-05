@@ -104,6 +104,7 @@ jobs:
         run: make self-test-all terrabuild=terrabuild
 
       - name: Include Build Logs
+        continue-on-error: true
         run: |
           ls -alR > terrabuild-debug.files.txt
 
@@ -118,6 +119,7 @@ jobs:
           cat tests/cluster-layers/terrabuild-debug.md >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Terrabuild Debug
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: Terrabuild Debug
