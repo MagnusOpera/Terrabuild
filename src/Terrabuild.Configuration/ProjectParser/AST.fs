@@ -3,6 +3,15 @@ open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Errors
 
+
+// NOTE: must be in sync with Terrabuild.Extensibility.Cacheability
+[<RequireQualifiedAccess>]
+type Cacheability =
+    | Never
+    | Local
+    | Remote
+    | Always
+
 [<RequireQualifiedAccess>]
 type ProjectComponents =
     | Dependencies of string list
@@ -82,12 +91,14 @@ type TargetComponents =
     | DependsOn of string list
     | Rebuild of Expr
     | Outputs of string list
+    | Cache of string
     | Step of Step
 
 type Target = {
     Rebuild: Expr option
     Outputs: Set<string> option
     DependsOn: Set<string> option
+    Cache: Cacheability option
     Steps: Step list
 }
 with
@@ -110,6 +121,19 @@ with
             | [value] -> value |> Set.ofList |> Some
             | _ -> TerrabuildException.Raise("multiple outputs declared")
 
+        let cache =
+            match components |> List.choose (function | TargetComponents.Cache value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] ->
+                // warning this is the values of Terrabuild.Extensibility.Cacheability
+                match value with
+                | "never" -> Some Cacheability.Never
+                | "local" -> Some Cacheability.Local
+                | "remote" -> Some Cacheability.Remote
+                | "always" -> Some Cacheability.Always
+                | _ -> TerrabuildException.Raise("invalid cache value")
+            | _ -> TerrabuildException.Raise("multiple cache declared")
+
         let steps =
             components
             |> List.choose (function | TargetComponents.Step step -> Some step | _ -> None)
@@ -117,6 +141,7 @@ with
         id, { DependsOn = dependsOn
               Rebuild = rebuild
               Outputs = outputs
+              Cache = cache
               Steps = steps }
 
 

@@ -28,6 +28,7 @@ type Target = {
     Rebuild: bool
     DependsOn: string set
     Outputs: string set
+    Cache: Cacheability option
     Operations: TargetOperation list
 }
 
@@ -433,6 +434,7 @@ let read (options: ConfigOptions.Options) =
                     Target.Hash = hash
                     Target.Rebuild = rebuild
                     Target.DependsOn = dependsOn
+                    Target.Cache = target.Cache
                     Target.Outputs = outputs
                     Target.Operations = targetOperations
                 }

@@ -13,6 +13,7 @@ type token =
   | SCRIPT
   | DEPENDS_ON
   | REBUILD
+  | CACHE
   | DEFAULTS
   | NAME
   | PROJECT
@@ -70,6 +71,7 @@ type tokenId =
     | TOKEN_SCRIPT
     | TOKEN_DEPENDS_ON
     | TOKEN_REBUILD
+    | TOKEN_CACHE
     | TOKEN_DEFAULTS
     | TOKEN_NAME
     | TOKEN_PROJECT
@@ -139,6 +141,7 @@ type nonTerminalId =
     | NONTERM_TargetDependsOn
     | NONTERM_TargetRebuild
     | NONTERM_TargetOutputs
+    | NONTERM_TargetCache
     | NONTERM_TargetStep
     | NONTERM_Expr
     | NONTERM_TargetIdentifier

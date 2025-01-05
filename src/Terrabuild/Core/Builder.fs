@@ -19,11 +19,6 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
 
-    let defaultCacheability = 
-        if options.Force then Cacheability.Never
-        elif options.LocalOnly then Cacheability.Local
-        else Cacheability.Always
-
     // first check all targets exist in WORKSPACE
     match options.Targets |> Seq.tryFind (fun targetName -> configuration.Targets |> Map.containsKey targetName |> not) with
     | Some undefinedTarget -> TerrabuildException.Raise($"Target {undefinedTarget} is not defined in WORKSPACE")
@@ -115,7 +110,20 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
                         let cache = cache &&& executionRequest.Cache
                         cache, ops @ newops
-                    ) (defaultCacheability, [])
+                    ) (Cacheability.Always, [])
+
+                let cache = 
+                    if options.Force then Cacheability.Never
+                    elif options.LocalOnly then Cacheability.Local
+                    else
+                        let targetCache =
+                            match target.Cache with
+                            | Some Terrabuild.Configuration.Project.AST.Cacheability.Never -> Some Cacheability.Never
+                            | Some Terrabuild.Configuration.Project.AST.Cacheability.Local -> Some Cacheability.Local
+                            | Some Terrabuild.Configuration.Project.AST.Cacheability.Remote -> Some Cacheability.Remote
+                            | Some Terrabuild.Configuration.Project.AST.Cacheability.Always -> Some Cacheability.Always
+                            | _ -> None
+                        targetCache |> Option.defaultValue cache
 
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {project}"

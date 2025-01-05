@@ -34,7 +34,7 @@ let debugPrint s = ignore s
 %token DOUBLE_QUESTION QUESTION COLON BANG AND OR
 %token EOF
 %token PROJECT EXTENSION TARGET 
-%token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD DEFAULTS NAME
+%token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD CACHE DEFAULTS NAME
 
 // associativity and precedences
 %right LSQBRACKET
@@ -113,6 +113,7 @@ TargetComponents:
     | TargetComponents TargetDependsOn { $1 @ [$2] }
     | TargetComponents TargetRebuild { $1 @ [$2] }
     | TargetComponents TargetOutputs { $1 @ [$2] }
+    | TargetComponents TargetCache { $1 @ [$2] }
     | TargetComponents TargetStep { $1 @ [$2] }
 TargetDependsOn:
     | DEPENDS_ON EQUAL ListOfTargetIdentifiers { TargetComponents.DependsOn $3 }
@@ -120,6 +121,8 @@ TargetRebuild:
     | REBUILD EQUAL Expr { TargetComponents.Rebuild $3 }
 TargetOutputs:
     | OUTPUTS EQUAL ListOfString { TargetComponents.Outputs $3 }
+TargetCache:
+    | CACHE EQUAL String { TargetComponents.Cache $3 }
 TargetStep:
     | ExtensionIdentifier IDENTIFIER { TargetComponents.Step { Extension = $1; Command = $2; Parameters = Map.empty } }
     | ExtensionIdentifier IDENTIFIER ExprMap { TargetComponents.Step { Extension = $1; Command = $2; Parameters = $3 } }

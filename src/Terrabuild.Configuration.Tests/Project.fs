@@ -43,17 +43,20 @@ let parseProject() =
             { DependsOn = Set [ "dist" ] |> Some
               Rebuild = None
               Outputs = None
+              Cache = None
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
         let targetDist =
             { DependsOn = None
               Rebuild = None
               Outputs = None
+              Cache = None
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty }
                         { Extension = "@dotnet"; Command = "publish"; Parameters = Map.empty } ] }
         let targetDocker =
             { DependsOn = None
               Rebuild = Some (Expr.Bool false)
               Outputs = None
+              Cache = Some Cacheability.Always
               Steps = [ { Extension = "@shell"; Command = "echo"
                           Parameters = Map [ "arguments", Expr.Function (Function.Trim,
                                                                          [ Expr.Function (Function.Plus,
@@ -92,6 +95,7 @@ let parseProject2() =
             { DependsOn = None
               Rebuild = Some (Expr.Bool true)
               Outputs = Set [ "*.dll" ] |> Some
+              Cache = None
               Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
         { Extensions = Map.empty

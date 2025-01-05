@@ -14,6 +14,7 @@
         "outputs": [
           "*.planfile"
         ],
+        "cache": null,
         "operations": [
           {
             "hash": "8BA1A0F5EC354F7CA3A6E46BAD0B652F6767230BC5323A1AB1841ED9EF7B0AC2",
@@ -101,6 +102,7 @@
           "obj/*.props",
           "obj/*.targets"
         ],
+        "cache": null,
         "operations": [
           {
             "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
@@ -158,6 +160,7 @@
         "outputs": [
           "dist/"
         ],
+        "cache": null,
         "operations": [
           {
             "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
@@ -210,6 +213,7 @@
           "^build"
         ],
         "outputs": [],
+        "cache": null,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -265,6 +269,7 @@
           "obj/*.props",
           "obj/*.targets"
         ],
+        "cache": null,
         "operations": [
           {
             "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
@@ -324,6 +329,7 @@
         "outputs": [
           "dist"
         ],
+        "cache": null,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -407,6 +413,7 @@
         "outputs": [
           "dist/"
         ],
+        "cache": null,
         "operations": [
           {
             "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
@@ -464,6 +471,7 @@
           "target/debug/",
           "target/release/"
         ],
+        "cache": null,
         "operations": [
           {
             "hash": "70B1806A1714857ABE6C8D946A9B08BEF1069B8BD6B3AC12AF84ABF24096A390",
