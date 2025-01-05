@@ -56,7 +56,7 @@ let parseProject() =
             { DependsOn = None
               Rebuild = Some (Expr.Bool false)
               Outputs = None
-              Cache = None
+              Cache = Some Cacheability.Always
               Steps = [ { Extension = "@shell"; Command = "echo"
                           Parameters = Map [ "arguments", Expr.Function (Function.Trim,
                                                                          [ Expr.Function (Function.Plus,

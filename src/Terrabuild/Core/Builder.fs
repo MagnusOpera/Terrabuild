@@ -115,7 +115,15 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                 let cache = 
                     if options.Force then Cacheability.Never
                     elif options.LocalOnly then Cacheability.Local
-                    else target.Cache |> Option.defaultValue cache
+                    else
+                        let targetCache =
+                            match target.Cache with
+                            | Some Terrabuild.Configuration.Project.AST.Cacheability.Never -> Some Cacheability.Never
+                            | Some Terrabuild.Configuration.Project.AST.Cacheability.Local -> Some Cacheability.Local
+                            | Some Terrabuild.Configuration.Project.AST.Cacheability.Remote -> Some Cacheability.Remote
+                            | Some Terrabuild.Configuration.Project.AST.Cacheability.Always -> Some Cacheability.Always
+                            | _ -> None
+                        targetCache |> Option.defaultValue cache
 
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {project}"

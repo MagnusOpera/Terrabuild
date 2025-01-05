@@ -434,7 +434,7 @@ let read (options: ConfigOptions.Options) =
                     Target.Hash = hash
                     Target.Rebuild = rebuild
                     Target.DependsOn = dependsOn
-                    Target.Cache = target.Cache |> Option.map (fun cache -> LanguagePrimitives.EnumOfValue<int, Cacheability>(cache))
+                    Target.Cache = target.Cache
                     Target.Outputs = outputs
                     Target.Operations = targetOperations
                 }

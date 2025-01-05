@@ -3,6 +3,15 @@ open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Errors
 
+
+// NOTE: must be in sync with Terrabuild.Extensibility.Cacheability
+[<RequireQualifiedAccess>]
+type Cacheability =
+    | Never
+    | Local
+    | Remote
+    | Always
+
 [<RequireQualifiedAccess>]
 type ProjectComponents =
     | Dependencies of string list
@@ -89,7 +98,7 @@ type Target = {
     Rebuild: Expr option
     Outputs: Set<string> option
     DependsOn: Set<string> option
-    Cache: int option
+    Cache: Cacheability option
     Steps: Step list
 }
 with
@@ -118,10 +127,10 @@ with
             | [value] ->
                 // warning this is the values of Terrabuild.Extensibility.Cacheability
                 match value with
-                | "never" -> Some 0
-                | "local" -> Some 1
-                | "remote" -> Some 2
-                | "always" -> Some 3
+                | "never" -> Some Cacheability.Never
+                | "local" -> Some Cacheability.Local
+                | "remote" -> Some Cacheability.Remote
+                | "always" -> Some Cacheability.Always
                 | _ -> TerrabuildException.Raise("invalid cache value")
             | _ -> TerrabuildException.Raise("multiple cache declared")
 
