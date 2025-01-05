@@ -53,3 +53,8 @@ extension @terraform {
 extension @cargo {
   container = "rust:1.81.0-slim"
 }
+
+extension npmext {
+    container = "node:20"
+    script = "/scripts/npm.fsx"
+}
