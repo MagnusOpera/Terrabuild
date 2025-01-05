@@ -167,4 +167,4 @@ self-test-multirefs:
 self-test-simple:
 	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs --container-tool docker)
 
-self-test-all: publish self-test-cluster-layers self-test-multirefs self-test-simple
+self-test-all: self-test-cluster-layers self-test-multirefs self-test-simple
