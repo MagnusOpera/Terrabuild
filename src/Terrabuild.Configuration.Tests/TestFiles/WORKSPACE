@@ -35,6 +35,11 @@ extension dotnet {
 
 extension docker { }
 
+extension npmext {
+    container = "node:20"
+    script = "scripts/npm.fsx"
+}
+
 # multiple comments at the end
 # multiple comments at the end
 

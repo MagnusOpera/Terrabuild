@@ -36,6 +36,11 @@ let parseWorkspace() =
               Variables = Set.empty
               Script = None
               Defaults = Map.empty }
+        let extNpm =
+            { Container = Some "node:20"
+              Variables = Set.empty
+              Script = Some "scripts/npm.fsx"
+              Defaults = Map.empty }
 
         { Workspace = { Space = Some "magnusopera/default"; Ignores = Set ["**/node_modules"] }
           Targets = Map [ "build", targetBuild
@@ -44,7 +49,8 @@ let parseWorkspace() =
           Configurations = Map [ "release", envRelease
                                  "dummy", envDummy ]
           Extensions = Map [ "dotnet", extDotnet
-                             "docker", extDocker ] }
+                             "docker", extDocker
+                             "npmext", extNpm ] }
 
 
     let content = File.ReadAllText("TestFiles/WORKSPACE")
