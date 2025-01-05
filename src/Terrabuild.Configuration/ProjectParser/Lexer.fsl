@@ -70,6 +70,7 @@ rule token = parse
     | "variables" { VARIABLES }
     | "depends_on" { DEPENDS_ON }
     | "rebuild" { REBUILD }
+    | "cache" { CACHE }
     | "defaults" { DEFAULTS }
     | "name" { NAME }
 

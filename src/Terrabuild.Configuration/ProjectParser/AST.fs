@@ -82,12 +82,14 @@ type TargetComponents =
     | DependsOn of string list
     | Rebuild of Expr
     | Outputs of string list
+    | Cache of string
     | Step of Step
 
 type Target = {
     Rebuild: Expr option
     Outputs: Set<string> option
     DependsOn: Set<string> option
+    Cache: int option
     Steps: Step list
 }
 with
@@ -110,6 +112,19 @@ with
             | [value] -> value |> Set.ofList |> Some
             | _ -> TerrabuildException.Raise("multiple outputs declared")
 
+        let cache =
+            match components |> List.choose (function | TargetComponents.Cache value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] ->
+                // warning this is the values of Terrabuild.Extensibility.Cacheability
+                match value with
+                | "never" -> Some 0
+                | "local" -> Some 1
+                | "remote" -> Some 2
+                | "always" -> Some 3
+                | _ -> TerrabuildException.Raise("invalid cache value")
+            | _ -> TerrabuildException.Raise("multiple cache declared")
+
         let steps =
             components
             |> List.choose (function | TargetComponents.Step step -> Some step | _ -> None)
@@ -117,6 +132,7 @@ with
         id, { DependsOn = dependsOn
               Rebuild = rebuild
               Outputs = outputs
+              Cache = cache
               Steps = steps }
 
 
