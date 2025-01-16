@@ -1,4 +1,494 @@
 {
-  "nodes": {},
-  "rootNodes": []
+  "nodes": {
+    "A:build": {
+      "id": "A:build",
+      "label": "build A",
+      "project": "A",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "**/*.binlog",
+          "bin/",
+          "obj/",
+          "obj/*.json",
+          "obj/*.props",
+          "obj/*.targets"
+        ],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "building project"
+                ]
+              }
+            ]
+          },
+          {
+            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@dotnet",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [],
+      "outputs": [
+        "**/*.binlog",
+        "bin/",
+        "obj/",
+        "obj/*.json",
+        "obj/*.props",
+        "obj/*.targets"
+      ],
+      "projectHash": "52081ACBA3AA68292E895F52D30A4916AE5F3742E44A04C119BE8F0A52DE570F",
+      "targetHash": "8B6A1EBD383B29E825327C536F4B0F82DB0FE2D3A6E42A2C413497001F4B3F50",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "building project"
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@dotnet build",
+          "command": "dotnet",
+          "arguments": "build --no-dependencies --configuration Debug    "
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
+    "B:build": {
+      "id": "B:build",
+      "label": "build B",
+      "project": "B",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "**/*.binlog",
+          "bin/",
+          "obj/",
+          "obj/*.json",
+          "obj/*.props",
+          "obj/*.targets"
+        ],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "building project"
+                ]
+              }
+            ]
+          },
+          {
+            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@dotnet",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [],
+      "outputs": [
+        "**/*.binlog",
+        "bin/",
+        "obj/",
+        "obj/*.json",
+        "obj/*.props",
+        "obj/*.targets"
+      ],
+      "projectHash": "C20F11FEA849AD53AA0FDD982A60BEB1143A591B8E3B0CDB16C1CE8D39392772",
+      "targetHash": "B727E5B0B25FB83A6DC4667861A728FE1C81CC9BB6F36694832E518B24D7C86A",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "building project"
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@dotnet build",
+          "command": "dotnet",
+          "arguments": "build --no-dependencies --configuration Debug    "
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
+    "C:build": {
+      "id": "C:build",
+      "label": "build C",
+      "project": "C",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "7CBFCD2D010F460CED07F894949A860B35492555250E183E1BEB1C76EFB8181B",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/"
+        ],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "building project"
+                ]
+              }
+            ]
+          },
+          {
+            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@npm",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "A:build",
+        "B:build"
+      ],
+      "outputs": [
+        "dist/"
+      ],
+      "projectHash": "3295C61A42D31221DCB491823FD21EF9A8921B5375720F3EF8DA74ED8F4BF1EC",
+      "targetHash": "CFC95976B43B2742FF6C9AAFA7D28914C773D58F6815A18DBE3E8212A419BCF0",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "building project"
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "ci"
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "run build -- "
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
+    "D:build": {
+      "id": "D:build",
+      "label": "build D",
+      "project": "D",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "**/*.binlog",
+          "bin/",
+          "obj/",
+          "obj/*.json",
+          "obj/*.props",
+          "obj/*.targets"
+        ],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@dotnet",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "C:build"
+      ],
+      "outputs": [
+        "**/*.binlog",
+        "bin/",
+        "obj/",
+        "obj/*.json",
+        "obj/*.props",
+        "obj/*.targets"
+      ],
+      "projectHash": "C61CB06CD3C39E1F35C4DC1774DE930DA6851583D98A4F13969456FB388FCD5C",
+      "targetHash": "8C82CB8976D853147EAE83624EA862924E3E826C51AEB63A750154F8C754D0B8",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@dotnet build",
+          "command": "dotnet",
+          "arguments": "build --no-dependencies --configuration Debug    "
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
+    "E:build": {
+      "id": "E:build",
+      "label": "build E",
+      "project": "E",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "**/*.binlog",
+          "bin/",
+          "obj/",
+          "obj/*.json",
+          "obj/*.props",
+          "obj/*.targets"
+        ],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@dotnet",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "C:build"
+      ],
+      "outputs": [
+        "**/*.binlog",
+        "bin/",
+        "obj/",
+        "obj/*.json",
+        "obj/*.props",
+        "obj/*.targets"
+      ],
+      "projectHash": "E1B52088E5FFFCCA0576241731FD4E4F7851EFE8522816F30BB7D8187ABF1034",
+      "targetHash": "2C8DEE9E27891C796FCF3AAC89FA92D98615542153C6C5FC441FF0AC786EC9AE",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@dotnet build",
+          "command": "dotnet",
+          "arguments": "build --no-dependencies --configuration Debug    "
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
+    "F:build": {
+      "id": "F:build",
+      "label": "build F",
+      "project": "F",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/"
+        ],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@npm",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "D:build",
+        "E:build"
+      ],
+      "outputs": [
+        "dist/"
+      ],
+      "projectHash": "7DF5934D6DBA702F44818A40C3AB95F17E489524DFD3CC6AFC9B9D0EF5C83AE0",
+      "targetHash": "F791A7A765E7EC7287131D29D0DD4322164DBCFC9CEB6C4E8C8E97114CE42326",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "ci"
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "run build -- "
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
+    "G:build": {
+      "id": "G:build",
+      "label": "build G",
+      "project": "G",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/"
+        ],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
+            "container": null,
+            "containerVariables": [],
+            "extension": "@npm",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "C:build"
+      ],
+      "outputs": [
+        "dist/"
+      ],
+      "projectHash": "FE7CDDB9279D6FFF57CCA9D71303D9D954C2B90E93EEE27097689FBF8AA676AD",
+      "targetHash": "0EA45D898012A1213D8236FED768A29C31ED745E12A0115428DA3CFE3FC00955",
+      "operations": [
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "ci"
+        },
+        {
+          "container": null,
+          "containerVariables": [],
+          "metaCommand": "@npm build",
+          "command": "npm",
+          "arguments": "run build -- "
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    }
+  },
+  "rootNodes": [
+    "A:build",
+    "B:build",
+    "C:build",
+    "D:build",
+    "E:build",
+    "F:build",
+    "G:build"
+  ]
 }
