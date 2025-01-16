@@ -218,7 +218,7 @@ let read (options: ConfigOptions.Options) =
     let loadProjectDef projectId =
         let projectDir = FS.combinePath options.Workspace projectId
         let projectFile = FS.combinePath projectDir "PROJECT"
-        let slashedProjectDir = $"{projectDir}/"
+        let slashedProjectId = $"{projectId}/"
 
         let projectContent = File.ReadAllText projectFile
         let projectConfig =
@@ -282,11 +282,11 @@ let read (options: ConfigOptions.Options) =
         let projectDependencies =
             projectInfo.Dependencies
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
-            |> Set.filter (fun dep -> dep |> String.startsWith slashedProjectDir |> not)
+            |> Set.filter (fun dep -> dep |> String.startsWith slashedProjectId |> not)
         let projectLinks =
             projectInfo.Links
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
-            |> Set.filter (fun dep -> dep |> String.startsWith slashedProjectDir |> not)
+            |> Set.filter (fun dep -> dep |> String.startsWith slashedProjectId |> not)
 
         let projectTargets = projectConfig.Targets
 
