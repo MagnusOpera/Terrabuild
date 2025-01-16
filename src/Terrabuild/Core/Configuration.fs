@@ -58,7 +58,6 @@ type Workspace = {
     Projects: Map<string, Project>
 }
 
-
 type private LazyScript = Lazy<Terrabuild.Scripting.Script>
 
 [<RequireQualifiedAccess>]
@@ -73,6 +72,21 @@ type private LoadedProject = {
     Extensions: Map<string, Extension>
     Scripts: Map<string, LazyScript>
 }
+
+
+let scanFolders root (ignores: Set<string>) =
+    let matcher = Matcher()
+    matcher.AddInclude("**/*").AddExcludePatterns(ignores)
+
+    fun dir ->
+        // exclude sub-folders with WORKSPACE
+        let relativeDir = dir |> FS.relativePath root
+        if matcher.Match(relativeDir).HasMatches then
+            match FS.combinePath dir "WORKSPACE" with
+            | FS.File _ -> false
+            | _ -> true
+        else
+            false
 
 
 let read (options: ConfigOptions.Options) =
@@ -453,33 +467,21 @@ let read (options: ConfigOptions.Options) =
 
 
     let projectFiles = 
-        let matcher = Matcher()
-        matcher.AddInclude("**/*").AddExcludePatterns(workspaceConfig.Workspace.Ignores)
+        let scanFolder = scanFolders options.Workspace workspaceConfig.Workspace.Ignores
 
-        let rec findDependencies isSubFolder dir =
+        let rec findDependencies isRoot dir =
             seq {
-                let scanFolder =
-                    if isSubFolder then
-                        match FS.combinePath dir "WORKSPACE" with
-                        | FS.File _ -> false
-                        | _ -> true
-                    else
-                        true
-
-                // ignore sub WORKSPACE files
-                if scanFolder then
+                if isRoot || scanFolder  dir then
                     let projectFile = FS.combinePath dir "PROJECT" 
                     match projectFile with
                     | FS.File file ->
                         file |> FS.parentDirectory |> FS.relativePath options.Workspace
                     | _ ->
-                        let relativeDir = dir |> FS.relativePath options.Workspace
-                        if matcher.Match(relativeDir).HasMatches || (not isSubFolder) then
-                            for subdir in dir |> IO.enumerateDirs do
-                                yield! findDependencies true subdir
+                        for subdir in dir |> IO.enumerateDirs do
+                            yield! findDependencies false subdir
             }
 
-        findDependencies false options.Workspace
+        findDependencies true options.Workspace
 
 
     let projects = ConcurrentDictionary<string, Project>()

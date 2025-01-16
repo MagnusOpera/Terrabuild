@@ -2,7 +2,6 @@ module Terrabuild.Tests.IO
 open FsUnit
 open NUnit.Framework
 open System.IO
-open Microsoft.Extensions.FileSystemGlobbing
 
 [<Test>]
 let ``Detect new files``() =
@@ -16,17 +15,3 @@ let ``Detect new files``() =
 
     diff
     |> should equal expected
-
-
-[<Test>]
-let ``Matcher``() =
-    let matcher = Matcher()
-    matcher.AddIncludePatterns(["**/*"])
-    matcher.AddExcludePatterns(["**/node_modules"; "**/.nuxt"; "**/.vscode"])
-
-    matcher.Match(".vscode").HasMatches |> should equal false
-    matcher.Match("node_modules").HasMatches |> should equal false
-    matcher.Match("toto/node_modules").HasMatches |> should equal false
-    matcher.Match("toto/.out").HasMatches |> should equal true
-    matcher.Match("toto/tagada.txt").HasMatches |> should equal true
-    matcher.Match("src").HasMatches |> should equal true
