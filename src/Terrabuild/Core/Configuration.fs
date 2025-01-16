@@ -455,7 +455,6 @@ let read (options: ConfigOptions.Options) =
     let projectFiles = 
         let matcher = Matcher()
         matcher.AddInclude("**/*").AddExcludePatterns(workspaceConfig.Workspace.Ignores)
-        printfn $"{workspaceConfig.Workspace.Ignores}"
 
         let rec findDependencies isSubFolder dir =
             seq {
