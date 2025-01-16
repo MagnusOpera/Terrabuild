@@ -281,9 +281,11 @@ let read (options: ConfigOptions.Options) =
         let projectDependencies =
             projectInfo.Dependencies
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
+            |> Set.filter (fun dep -> dep |> String.startsWith projectId |> not)
         let projectLinks =
             projectInfo.Links
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
+            |> Set.filter (fun dep -> dep |> String.startsWith projectId |> not)
 
         let projectTargets = projectConfig.Targets
 
@@ -475,7 +477,7 @@ let read (options: ConfigOptions.Options) =
                     let projectFile = FS.combinePath dir "PROJECT" 
                     match projectFile with
                     | FS.File file ->
-                        file |> FS.parentDirectory |> FS.relativePath options.Workspace
+                        yield file |> FS.parentDirectory |> FS.relativePath options.Workspace
                     | _ ->
                         for subdir in dir |> IO.enumerateDirs do
                             yield! findDependencies false subdir
