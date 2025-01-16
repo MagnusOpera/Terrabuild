@@ -455,6 +455,7 @@ let read (options: ConfigOptions.Options) =
     let projectFiles = 
         let matcher = Matcher()
         matcher.AddInclude("**/*").AddExcludePatterns(workspaceConfig.Workspace.Ignores)
+        printfn $"{workspaceConfig.Workspace.Ignores}"
 
         let rec findDependencies isSubFolder dir =
             seq {
@@ -472,11 +473,12 @@ let read (options: ConfigOptions.Options) =
                     match projectFile with
                     | FS.File file ->
                         file |> FS.parentDirectory |> FS.relativePath options.Workspace
-                    | _ ->
-                        for subdir in dir |> IO.enumerateDirs do
-                            let relativeDir = subdir |> FS.relativePath options.Workspace
-                            if matcher.Match(relativeDir).HasMatches then
+                    | FS.Directory dir ->
+                        let relativeDir = dir |> FS.relativePath options.Workspace
+                        if matcher.Match(relativeDir).HasMatches then
+                            for subdir in dir |> IO.enumerateDirs do
                                 yield! findDependencies true subdir
+                    | _ -> ()
             }
 
         findDependencies false options.Workspace
