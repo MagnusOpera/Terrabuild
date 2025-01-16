@@ -10,17 +10,16 @@ type Null() =
     /// Fake init.
     /// </summary>
     static member __defaults__ (context: ExtensionContext) =
-        if context.Debug then printfn "__defaults__ invoked"
         ProjectInfo.Default
 
     /// <summary>
     /// Fake dispatch.
     /// </summary>
     static member __dispatch__ (context: ActionContext) =
-        if context.Debug then printfn $"__dispatch__ {context} invoked"
+        ()
 
     /// <summary>
     /// Fake action.
     /// </summary>
     static member fake (context: ActionContext) =
-        if context.Debug then printfn $"fake {context} invoked"
+        ()
