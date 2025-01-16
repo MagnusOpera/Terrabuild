@@ -214,7 +214,7 @@ let writeExtension extensionDir (extension: Extension) =
                 "```"
                 $"project @{extension.Name} {{"
                 for prm in init.Parameters do
-                    $"    {prm.Name} = {prm.Example}"
+                    $"    {prm.Name}: {prm.Example}"
                 "}"
                 "```"
 
