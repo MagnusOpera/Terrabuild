@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open Errors
+open Serilog
 
 type CaptureResult =
     | Success of string*int
@@ -19,6 +20,7 @@ let private createProcess workingDir command args redirect =
     new Process(StartInfo = psi)
 
 let execCaptureOutput (workingDir: string) (command: string) (args: string) =
+    Log.Debug($"Running and capturing output of '{command}' with arguments '{args} in working dir {workingDir} (Current is {System.Environment.CurrentDirectory})")
     use proc = createProcess workingDir command args true
     proc.Start() |> ignore
     proc.WaitForExit()
