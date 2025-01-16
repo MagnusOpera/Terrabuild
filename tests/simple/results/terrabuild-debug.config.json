@@ -73,7 +73,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "FD4E492BBC14063F951BD573395F7044BB64448F0CCA60851019067618B27C70",
+          "hash": "1216AAFDF2AF5CDA8A7A23811355C1A3AE9F380BD975106E70F467F3D95AD042",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -84,8 +84,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "8BA1A0F5EC354F7CA3A6E46BAD0B652F6767230BC5323A1AB1841ED9EF7B0AC2",
-              "container": null,
+              "hash": "02AEFD983580D5A98E84575C79F813BDC5045006FCA072F75C366D468FF0E4F7",
+              "container": "hashicorp/terraform:1.10",
               "containerVariables": [],
               "extension": "@terraform",
               "command": "plan",
@@ -116,7 +116,7 @@
           ]
         },
         "deploy": {
-          "hash": "43974ADCF2902200291242CF6A7E94FC3FED2764DFC627CF410BCDA6283AD8AF",
+          "hash": "E563DB5F94E628EF6FEB90D1797E9C9B2050D053FC4588AE717EABFE94B8E5B2",
           "rebuild": false,
           "dependsOn": [
             "push"
@@ -127,8 +127,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "84DDD67346617D06E275A0B16955228851AFA5211E0262DF72EB4CD8D9917092",
-              "container": null,
+              "hash": "778E7391BB230A1E4139DE4C6EA5446FC160A6645514432B5558101CE43DCFE9",
+              "container": "hashicorp/terraform:1.10",
               "containerVariables": [],
               "extension": "@terraform",
               "command": "apply",

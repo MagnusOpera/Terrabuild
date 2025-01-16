@@ -1,7 +1,7 @@
 config ?= default
 env ?= default
-terrabuild = $(current_dir)/.out/dotnet/terrabuild
-
+terrabuild ?= $(current_dir)/.out/dotnet/terrabuild
+refresh ?= false
 version ?= 0.0.0
 
 ifeq ($(config), default)
@@ -137,7 +137,9 @@ run-test-simple:
 	dotnet run --project src/Terrabuild -- run build -w tests/simple --debug --force
 
 define diff_file
-#	cp $(1)/$(2) $(1)/results/$(2)
+	@if [ $(refresh) ]; then \
+		cp $(1)/$(2) $(1)/results/$(2); \
+	fi
 	diff $(1)/results/$(2) $(1)/$(2)
 endef
 
