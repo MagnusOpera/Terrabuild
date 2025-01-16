@@ -22,9 +22,7 @@ let systemExtensions =
 let terrabuildDir = Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> FS.parentDirectory
 let terrabuildExtensibility =
     let path = FS.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
-    if File.Exists(path) then path
-    else
-        TerrabuildException.Raise("Dynamic scripts are not supported using native deployment")
+    path
 
 let lazyLoadScript (name: string) (script: string option) =
     let initScript () =
