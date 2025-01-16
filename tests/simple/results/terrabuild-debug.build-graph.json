@@ -6,7 +6,7 @@
       "project": "deployments/terraform-deploy",
       "target": "build",
       "configurationTarget": {
-        "hash": "FD4E492BBC14063F951BD573395F7044BB64448F0CCA60851019067618B27C70",
+        "hash": "1216AAFDF2AF5CDA8A7A23811355C1A3AE9F380BD975106E70F467F3D95AD042",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -17,8 +17,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "8BA1A0F5EC354F7CA3A6E46BAD0B652F6767230BC5323A1AB1841ED9EF7B0AC2",
-            "container": null,
+            "hash": "02AEFD983580D5A98E84575C79F813BDC5045006FCA072F75C366D468FF0E4F7",
+            "container": "hashicorp/terraform:1.10",
             "containerVariables": [],
             "extension": "@terraform",
             "command": "plan",
@@ -56,24 +56,24 @@
         "*.planfile"
       ],
       "projectHash": "9FA318E272735D841D292D7D78A58E7AF5BDFAF96DDD745761807419308C8BC5",
-      "targetHash": "5FECAE3D3D34E9893748175B100279E8FDED03C090FA30A352C9A5C1CFBFBA6C",
+      "targetHash": "F6E4D9E0547331E0BFAD190777CB9FC871072E8A3036D720D22E9C67E7346D86",
       "operations": [
         {
-          "container": null,
+          "container": "hashicorp/terraform:1.10",
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
           "arguments": "init"
         },
         {
-          "container": null,
+          "container": "hashicorp/terraform:1.10",
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
           "arguments": "workspace select default"
         },
         {
-          "container": null,
+          "container": "hashicorp/terraform:1.10",
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
