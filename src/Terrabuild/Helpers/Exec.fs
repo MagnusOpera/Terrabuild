@@ -36,7 +36,7 @@ let execConsole (workingDir: string) (command: string) (args: string) =
         proc.WaitForExit()
         proc.ExitCode
     with
-        | exn -> TerrabuildException.Raise($"Process '{command} {args} in directory '{workingDir}' failed", exn)
+        | exn -> TerrabuildException.Raise($"Process '{command}' with arguments '{args}' in directory '{workingDir}' failed", exn)
 
 let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: string) (logFile: string) =
     try
@@ -56,7 +56,7 @@ let execCaptureTimestampedOutput (workingDir: string) (command: string) (args: s
         proc.WaitForExit()
         proc.ExitCode
     with
-        | exn -> TerrabuildException.Raise($"Process '{command} {args} in directory '{workingDir}' failed", exn)
+        | exn -> TerrabuildException.Raise($"Process '{command}' with arguments '{args}' in directory '{workingDir}' failed", exn)
 
 type BuildQueue(maxItems: int) =
     let completion = new System.Threading.ManualResetEvent(false)
