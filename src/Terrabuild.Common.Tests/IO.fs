@@ -21,9 +21,12 @@ let ``Detect new files``() =
 [<Test>]
 let ``Matcher``() =
     let matcher = Matcher()
-    matcher.AddInclude("**/*").AddExcludePatterns(["**/node_modules"; "**/.nuxt"; "**/.vscode"])
+    matcher.AddIncludePatterns(["**/*"])
+    matcher.AddExcludePatterns(["**/node_modules"; "**/.nuxt"; "**/.vscode"])
 
     matcher.Match(".vscode").HasMatches |> should equal false
     matcher.Match("node_modules").HasMatches |> should equal false
     matcher.Match("toto/node_modules").HasMatches |> should equal false
+    matcher.Match("toto/.out").HasMatches |> should equal true
     matcher.Match("toto/tagada.txt").HasMatches |> should equal true
+    matcher.Match("src").HasMatches |> should equal true

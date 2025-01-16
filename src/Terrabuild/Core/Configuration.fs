@@ -472,12 +472,11 @@ let read (options: ConfigOptions.Options) =
                     match projectFile with
                     | FS.File file ->
                         file |> FS.parentDirectory |> FS.relativePath options.Workspace
-                    | FS.Directory dir ->
+                    | _ ->
                         let relativeDir = dir |> FS.relativePath options.Workspace
-                        if matcher.Match(relativeDir).HasMatches then
+                        if matcher.Match(relativeDir).HasMatches || (not isSubFolder) then
                             for subdir in dir |> IO.enumerateDirs do
                                 yield! findDependencies true subdir
-                    | _ -> ()
             }
 
         findDependencies false options.Workspace
