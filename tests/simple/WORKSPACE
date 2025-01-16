@@ -45,6 +45,7 @@ extension @dotnet {
 }
 
 extension @terraform {
+  container = "hashicorp/terraform:1.10"
   defaults = {
     workspace: $workspace
   }
