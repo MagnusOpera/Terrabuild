@@ -12,15 +12,17 @@ type Npm() =
     /// <param name="ignores" example="[ &quot;node_modules/&quot; ]">Default values.</param>
     /// <param name="outputs" example="[ &quot;dist/&quot; ]">Default values.</param>
     static member __defaults__(context: ExtensionContext) =
-        let projectFile = NpmHelpers.findProjectFile context.Directory
-        let dependencies = projectFile |> NpmHelpers.findDependencies 
-        let projectInfo = 
-            { ProjectInfo.Default
-              with Ignores = Set [ "node_modules/" ]
-                   Outputs = Set [ "dist/" ]
-                   Dependencies = dependencies }
-        projectInfo
-
+        try
+            let projectFile = NpmHelpers.findProjectFile context.Directory
+            let dependencies = projectFile |> NpmHelpers.findDependencies 
+            let projectInfo = 
+                { ProjectInfo.Default
+                  with Ignores = Set [ "node_modules/" ]
+                       Outputs = Set [ "dist/" ]
+                       Dependencies = dependencies }
+            projectInfo
+        with
+            exn -> Errors.TerrabuildException.Raise($"Error while processing project {context.Directory}", exn)
 
     /// <summary>
     /// Run npm command.
@@ -40,8 +42,9 @@ type Npm() =
     /// <summary>
     /// Install packages using lock file.
     /// </summary>
-    static member install (context: ActionContext) =
-        let ops = [ shellOp "npm" "ci" ]
+    static member install (context: ActionContext) (force: bool option)=
+        let force = if force = Some true then " --force" else ""
+        let ops = [ shellOp "npm" $"ci{force}" ]
         execRequest Cacheability.Always ops
 
 
