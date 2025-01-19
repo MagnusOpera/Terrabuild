@@ -14,6 +14,7 @@ type Cacheability =
 
 [<RequireQualifiedAccess>]
 type ProjectComponents =
+    | Container of Expr
     | Dependencies of string list
     | Links of string list
     | Outputs of string list
@@ -24,6 +25,7 @@ type ProjectComponents =
 [<RequireQualifiedAccess>]
 type Project = {
     Init: string option
+    Container: Expr option
     Dependencies: Set<string>
     Links: Set<string>
     Outputs: Set<string>
@@ -33,6 +35,12 @@ type Project = {
 }
 with
     static member Build init components =
+        let container =
+            match components |> List.choose (function | ProjectComponents.Container value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> Some value
+            | _ -> TerrabuildException.Raise("multiple container declared")
+
         let dependencies =
             match components |> List.choose (function | ProjectComponents.Dependencies value -> Some value | _ -> None) with
             | [] -> None
@@ -70,6 +78,7 @@ with
             | _ -> TerrabuildException.Raise("multiple labels declared")
 
         { Init = init
+          Container = container
           Dependencies = dependencies |> Option.defaultValue Set.empty
           Links = links |> Option.defaultValue Set.empty
           Outputs = outputs |> Option.defaultValue Set.empty

@@ -71,7 +71,7 @@ ExtensionComponents:
     | ExtensionComponents ExtensionScript { $1 @ [$2] }
     | ExtensionComponents ExtensionDefaults { $1 @ [$2] }
 ExtensionContainer:
-    | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
+    | CONTAINER EQUAL Expr { ExtensionComponents.Container $3 }
 ExtensionVariables:
     | VARIABLES EQUAL ListOfString { ExtensionComponents.Variables $3 }
 ExtensionScript:
@@ -87,12 +87,15 @@ Project:
     | PROJECT ExtensionIdentifier LBRACE ProjectComponents RBRACE { Project.Build (Some $2) $4 |> ProjectFileComponents.Project }
 ProjectComponents:
     | /* empty */ { [] }
+    | ProjectComponents ProjectContainer { $1 @ [$2] }
     | ProjectComponents ProjectDependencies { $1 @ [$2] }
     | ProjectComponents ProjectLinks { $1 @ [$2] }
     | ProjectComponents ProjectOutputs { $1 @ [$2] }
     | ProjectComponents ProjectIgnores { $1 @ [$2] }
     | ProjectComponents ProjectIncludes { $1 @ [$2] }
     | ProjectComponents ProjectLabels { $1 @ [$2] }
+ProjectContainer:
+    | CONTAINER EQUAL Expr { ProjectComponents.Container $3 }
 ProjectDependencies:
     | DEPENDENCIES EQUAL ListOfString { ProjectComponents.Dependencies $3 }
 ProjectLinks:

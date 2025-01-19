@@ -72,6 +72,7 @@ type private LoadedProject = {
     Labels: string set
     Extensions: Map<string, Extension>
     Scripts: Map<string, LazyScript>
+    Container: Expr option
 }
 
 
@@ -302,6 +303,14 @@ let read (options: ConfigOptions.Options) =
             |> Set.ofSeq
             |> Set.union projectInfo.Includes
 
+        let container =
+            match projectConfig.Project.Container with
+            | Some _ -> projectConfig.Project.Container
+            | _ ->
+                match projectInfo.Container with
+                | Some container -> Some (Expr.String container)
+                | _ -> None
+
         { LoadedProject.Dependencies = projectDependencies
           LoadedProject.Links = projectLinks
           LoadedProject.Includes = includes
@@ -310,7 +319,8 @@ let read (options: ConfigOptions.Options) =
           LoadedProject.Targets = projectTargets
           LoadedProject.Labels = labels
           LoadedProject.Extensions = extensions
-          LoadedProject.Scripts = scripts }
+          LoadedProject.Scripts = scripts
+          LoadedProject.Container = container }
 
 
     // this is the final stage: create targets and create the project
@@ -400,6 +410,21 @@ let read (options: ConfigOptions.Options) =
                             | Some script -> script
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
+                        let container, usedVars =
+                            let evalContainer expr =
+                                let container, containerUsedVars = Eval.eval evaluationContext expr
+                                match container with
+                                | Value.Nothing -> None, (usedVars+containerUsedVars)
+                                | Value.String container -> Some container, (usedVars+containerUsedVars)
+                                | _ -> TerrabuildException.Raise("Container must evaluate to nothing or string")
+
+                            match extension.Container with
+                            | Some expr -> evalContainer expr
+                            | _ ->
+                                match projectDef.Container with
+                                | Some expr -> evalContainer expr
+                                | _ -> None, usedVars
+
                         let hash =
                             let usedVariables =
                                 usedVars
@@ -411,7 +436,7 @@ let read (options: ConfigOptions.Options) =
                                 |> List.ofSeq
 
                             let containerInfos = 
-                                match extension.Container with
+                                match container with
                                 | Some container -> [ container ] @ List.ofSeq extension.Variables
                                 | _ -> []
 
@@ -420,7 +445,7 @@ let read (options: ConfigOptions.Options) =
 
                         let targetContext = {
                             TargetOperation.Hash = hash
-                            TargetOperation.Container = extension.Container
+                            TargetOperation.Container = container
                             TargetOperation.ContainerVariables = extension.Variables
                             TargetOperation.Extension = step.Extension
                             TargetOperation.Command = step.Command
