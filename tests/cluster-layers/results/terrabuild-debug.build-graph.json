@@ -6,7 +6,7 @@
       "project": "A",
       "target": "build",
       "configurationTarget": {
-        "hash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+        "hash": "E3E988BB053BFAB0634785397FE9AE67A07A09C5503344D2EC495F1E97E60517",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -22,8 +22,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-            "container": null,
+            "hash": "1455335D5FAF4E7443BFC4A037D0C795CCF6C7977DE0FD74B07557934001B1E4",
+            "container": "mcr.microsoft.com/dotnet/sdk",
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -39,8 +39,8 @@
             ]
           },
           {
-            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
-            "container": null,
+            "hash": "F460D5EB926477AE760578FB44226D29CC518D48A5A42E1ED5DD01DBD0489CBC",
+            "container": "mcr.microsoft.com/dotnet/sdk",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -62,17 +62,17 @@
         "obj/*.targets"
       ],
       "projectHash": "52081ACBA3AA68292E895F52D30A4916AE5F3742E44A04C119BE8F0A52DE570F",
-      "targetHash": "8B6A1EBD383B29E825327C536F4B0F82DB0FE2D3A6E42A2C413497001F4B3F50",
+      "targetHash": "92C499E53974FFA0E75C146C82DD923127A335B8E33EE6846C8564183184D777",
       "operations": [
         {
-          "container": null,
+          "container": "mcr.microsoft.com/dotnet/sdk",
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building project"
         },
         {
-          "container": null,
+          "container": "mcr.microsoft.com/dotnet/sdk",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -88,7 +88,7 @@
       "project": "B",
       "target": "build",
       "configurationTarget": {
-        "hash": "B942B51B15FA8E4F694D5CE107303EC8D5E9EED56CFF35EBC02DC4C8C195B882",
+        "hash": "E3E988BB053BFAB0634785397FE9AE67A07A09C5503344D2EC495F1E97E60517",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -104,8 +104,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-            "container": null,
+            "hash": "1455335D5FAF4E7443BFC4A037D0C795CCF6C7977DE0FD74B07557934001B1E4",
+            "container": "mcr.microsoft.com/dotnet/sdk",
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -121,8 +121,8 @@
             ]
           },
           {
-            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
-            "container": null,
+            "hash": "F460D5EB926477AE760578FB44226D29CC518D48A5A42E1ED5DD01DBD0489CBC",
+            "container": "mcr.microsoft.com/dotnet/sdk",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -144,17 +144,17 @@
         "obj/*.targets"
       ],
       "projectHash": "C20F11FEA849AD53AA0FDD982A60BEB1143A591B8E3B0CDB16C1CE8D39392772",
-      "targetHash": "B727E5B0B25FB83A6DC4667861A728FE1C81CC9BB6F36694832E518B24D7C86A",
+      "targetHash": "C814626C34801A3649A5C5F8265E89B3142ED9A5ADFC80E0735168FEDFD64D12",
       "operations": [
         {
-          "container": null,
+          "container": "mcr.microsoft.com/dotnet/sdk",
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building project"
         },
         {
-          "container": null,
+          "container": "mcr.microsoft.com/dotnet/sdk",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -170,7 +170,7 @@
       "project": "C",
       "target": "build",
       "configurationTarget": {
-        "hash": "7CBFCD2D010F460CED07F894949A860B35492555250E183E1BEB1C76EFB8181B",
+        "hash": "27645DE0FB82DCD05AD9CDC8DABAC72543EFF3A9E049CE89B99CE93DB3515DD6",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -181,8 +181,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-            "container": null,
+            "hash": "56113EA00B120EAFA346D3D463703EE9715C56A08175C429608653F4435AE131",
+            "container": "node",
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -198,8 +198,8 @@
             ]
           },
           {
-            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
-            "container": null,
+            "hash": "7CA24FB49B18FF9F03675A0FF5732CECEFE07377BD2C3F0175B9B6EFB7E742E8",
+            "container": "node",
             "containerVariables": [],
             "extension": "@npm",
             "command": "build",
@@ -219,24 +219,24 @@
         "dist/"
       ],
       "projectHash": "3295C61A42D31221DCB491823FD21EF9A8921B5375720F3EF8DA74ED8F4BF1EC",
-      "targetHash": "CFC95976B43B2742FF6C9AAFA7D28914C773D58F6815A18DBE3E8212A419BCF0",
+      "targetHash": "700EA335DFC92C1A793ADFFC41CA903885BC7F93D35575974D256797E571AF4A",
       "operations": [
         {
-          "container": null,
+          "container": "node",
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building project"
         },
         {
-          "container": null,
+          "container": "node",
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
-          "container": null,
+          "container": "node",
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
@@ -252,7 +252,7 @@
       "project": "D",
       "target": "build",
       "configurationTarget": {
-        "hash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
+        "hash": "FA78DCD7B7D626FAE5D237483DD6CBE32DFDFDC0F94785D3DE9A8FDEDFF325FA",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -268,8 +268,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
-            "container": null,
+            "hash": "F460D5EB926477AE760578FB44226D29CC518D48A5A42E1ED5DD01DBD0489CBC",
+            "container": "mcr.microsoft.com/dotnet/sdk",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -293,10 +293,10 @@
         "obj/*.targets"
       ],
       "projectHash": "C61CB06CD3C39E1F35C4DC1774DE930DA6851583D98A4F13969456FB388FCD5C",
-      "targetHash": "8C82CB8976D853147EAE83624EA862924E3E826C51AEB63A750154F8C754D0B8",
+      "targetHash": "315F2D2CB8AF706CAE812F2FD5B3AB9821D0CE1B3DC5047B7F0D7B1C033C11DF",
       "operations": [
         {
-          "container": null,
+          "container": "mcr.microsoft.com/dotnet/sdk",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -312,7 +312,7 @@
       "project": "E",
       "target": "build",
       "configurationTarget": {
-        "hash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
+        "hash": "FA78DCD7B7D626FAE5D237483DD6CBE32DFDFDC0F94785D3DE9A8FDEDFF325FA",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -328,8 +328,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
-            "container": null,
+            "hash": "F460D5EB926477AE760578FB44226D29CC518D48A5A42E1ED5DD01DBD0489CBC",
+            "container": "mcr.microsoft.com/dotnet/sdk",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -353,10 +353,10 @@
         "obj/*.targets"
       ],
       "projectHash": "E1B52088E5FFFCCA0576241731FD4E4F7851EFE8522816F30BB7D8187ABF1034",
-      "targetHash": "2C8DEE9E27891C796FCF3AAC89FA92D98615542153C6C5FC441FF0AC786EC9AE",
+      "targetHash": "FC61A0CF4AB484984554EEDE6556E7BAB83B33D13FE64868C63F2E90133FA84A",
       "operations": [
         {
-          "container": null,
+          "container": "mcr.microsoft.com/dotnet/sdk",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -372,7 +372,7 @@
       "project": "F",
       "target": "build",
       "configurationTarget": {
-        "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+        "hash": "895CC924C62517F09BACDF570C0A6321967C1FFDCD1E569D3E8E418EC8211E10",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -383,8 +383,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
-            "container": null,
+            "hash": "7CA24FB49B18FF9F03675A0FF5732CECEFE07377BD2C3F0175B9B6EFB7E742E8",
+            "container": "node",
             "containerVariables": [],
             "extension": "@npm",
             "command": "build",
@@ -404,17 +404,17 @@
         "dist/"
       ],
       "projectHash": "7DF5934D6DBA702F44818A40C3AB95F17E489524DFD3CC6AFC9B9D0EF5C83AE0",
-      "targetHash": "F791A7A765E7EC7287131D29D0DD4322164DBCFC9CEB6C4E8C8E97114CE42326",
+      "targetHash": "3E0C829D3D6359667D55BE2D9AEBBD36BC33DA9E73116E3A3F8B12E72227C78F",
       "operations": [
         {
-          "container": null,
+          "container": "node",
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
-          "container": null,
+          "container": "node",
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
@@ -430,7 +430,7 @@
       "project": "G",
       "target": "build",
       "configurationTarget": {
-        "hash": "3E35FE4CDBC58941D9C1FD7D9ACAC561D8397441268E863F8BFDD72EC9AE1E1A",
+        "hash": "895CC924C62517F09BACDF570C0A6321967C1FFDCD1E569D3E8E418EC8211E10",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -441,8 +441,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
-            "container": null,
+            "hash": "7CA24FB49B18FF9F03675A0FF5732CECEFE07377BD2C3F0175B9B6EFB7E742E8",
+            "container": "node",
             "containerVariables": [],
             "extension": "@npm",
             "command": "build",
@@ -461,17 +461,17 @@
         "dist/"
       ],
       "projectHash": "FE7CDDB9279D6FFF57CCA9D71303D9D954C2B90E93EEE27097689FBF8AA676AD",
-      "targetHash": "0EA45D898012A1213D8236FED768A29C31ED745E12A0115428DA3CFE3FC00955",
+      "targetHash": "3BFF8BA1474F71106C89884D73A0147B610B546641D06340B421BFAFAFC433B4",
       "operations": [
         {
-          "container": null,
+          "container": "node",
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
-          "container": null,
+          "container": "node",
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",

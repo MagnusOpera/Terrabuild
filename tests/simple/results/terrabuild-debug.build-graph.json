@@ -56,7 +56,7 @@
         "*.planfile"
       ],
       "projectHash": "DA24149CF300F799A94E8A5249F7EE06AEAA2A7F02215715D452B05C0D6DD6C0",
-      "targetHash": "0A45EAC1531308D2C956668241A788AACECC9D991EC4DE2AF75FC4504CAFCDF5",
+      "targetHash": "F49E5F3BF8DA184B29928E8EFAB1AA81BE1BE4887334574B33ADC75CED5140F5",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -89,7 +89,7 @@
       "project": "libraries/dotnet-lib",
       "target": "build",
       "configurationTarget": {
-        "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
+        "hash": "5078D48C4C6484DB76087A08DE4E684FFF375660946C3990E9E0849279F48BE0",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -105,8 +105,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
-            "container": null,
+            "hash": "57F4A40A24EB97044294EB8292481A14562D644A8015F4F36857316F9CB7E50F",
+            "container": "mcr.microsoft.com/dotnet/sdk",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -133,10 +133,10 @@
         "obj/*.targets"
       ],
       "projectHash": "D40B341C32470C5A405E452ACD05D8D0F0A82650915F0DF14C697EACA0759F33",
-      "targetHash": "72A5E853C9554DDB8D62428E826D04BB30D383D78D972553C21BF667EF20C71B",
+      "targetHash": "50EFC99C8E6A3DB178045A7904E4D08681E77AA5FACE72124BD739C340AD412E",
       "operations": [
         {
-          "container": null,
+          "container": "mcr.microsoft.com/dotnet/sdk",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -256,7 +256,7 @@
       "project": "projects/dotnet-app",
       "target": "build",
       "configurationTarget": {
-        "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
+        "hash": "5078D48C4C6484DB76087A08DE4E684FFF375660946C3990E9E0849279F48BE0",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -272,8 +272,8 @@
         "cache": null,
         "operations": [
           {
-            "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
-            "container": null,
+            "hash": "57F4A40A24EB97044294EB8292481A14562D644A8015F4F36857316F9CB7E50F",
+            "container": "mcr.microsoft.com/dotnet/sdk",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -302,10 +302,10 @@
         "obj/*.targets"
       ],
       "projectHash": "7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC",
-      "targetHash": "73C1D1C43B92EA7D473975B9D91CC0F5E85ECAE3613315FF3CB7DEBE28CDE1A4",
+      "targetHash": "1C7C27E162A61132E9F91D5AFA04458A6440686E99B92775EF5247EB3EAA1545",
       "operations": [
         {
-          "container": null,
+          "container": "mcr.microsoft.com/dotnet/sdk",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -555,8 +555,8 @@
       },
       "dependencies": [],
       "outputs": [],
-      "projectHash": "BB0E3605A8C4B18B4B0C97C0191E804A2360DD055F2756DCC0FD430CAEC5A74F",
-      "targetHash": "65E2915E844953B9506EF2FCBACFEDAF8D15696316DFA10CAA5314190A2E1A26",
+      "projectHash": "9C1A46B3C04DC7310D9C438DADCE1F09FAEAC7D76D9ECA8293CA6BDB7B0A23DD",
+      "targetHash": "17C139B75CAA4EF2B29252F934A0CF3C82C6E382477F51CF4555D438B4FA4EC3",
       "operations": [
         {
           "container": "openapitools/openapi-generator-cli",
