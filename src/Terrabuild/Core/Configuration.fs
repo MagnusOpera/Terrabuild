@@ -4,9 +4,9 @@ open Collections
 open System
 open System.Collections.Concurrent
 open Terrabuild.Extensibility
-open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Terrabuild.Configuration.Project.AST
+open Terrabuild.Configuration.AST
 open Errors
 open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
