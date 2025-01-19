@@ -227,7 +227,7 @@ let read (options: ConfigOptions.Options) =
                 try Terrabuild.Configuration.FrontEnd.parseProject projectContent
                 with exn -> TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
             | _ ->
-                // provide empty PROJECT iif directory exist
+                // provide empty PROJECT iif directory exists
                 match projectDir with
                 | FS.Directory _ ->
                     { ProjectFile.Project =
