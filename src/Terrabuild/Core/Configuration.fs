@@ -72,7 +72,6 @@ type private LoadedProject = {
     Labels: string set
     Extensions: Map<string, Extension>
     Scripts: Map<string, LazyScript>
-    Container: Expr option
 }
 
 
@@ -233,18 +232,7 @@ let read (options: ConfigOptions.Options) =
             | _ ->
                 TerrabuildException.Raise($"No PROJECT found in directory '{projectFile}'")
 
-        // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
-        // Order is important as we just want to override in the project and reduce as much as possible scripts compilation
-        // In other terms: we only compile what's changed
-        let extensions = 
-            let overridenExtensions =
-                Map [
-                    for (KeyValue(extName, extension)) in projectConfig.Extensions do
-                        match extensions |> Map.tryFind extName with
-                        | Some overridenExt -> extName, { overridenExt with Defaults = overridenExt.Defaults |> Map.addMap extension.Defaults }
-                        | None -> extName, extension
-                ]
-            extensions |> Map.addMap overridenExtensions
+        let extensions = extensions |> Map.addMap projectConfig.Extensions
 
         let projectScripts =
             projectConfig.Extensions
@@ -273,6 +261,18 @@ let read (options: ConfigOptions.Options) =
                 | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
                 | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
             | _ -> ProjectInfo.Default
+
+        let extensions =
+            let initExt = projectConfig.Project.Init |> Option.bind (fun init -> extensions |> Map.tryFind init)
+            match initExt with
+            | Some ext ->
+                match ext.Container, projectInfo.Container with
+                | Some _, _ -> extensions
+                | None, Some container ->
+                    extensions
+                    |> Map.add projectConfig.Project.Init.Value { ext with Container = Some (Expr.String container) }
+                | _ -> extensions
+            | _ -> extensions
 
         let projectInfo = {
             projectInfo
@@ -303,14 +303,6 @@ let read (options: ConfigOptions.Options) =
             |> Set.ofSeq
             |> Set.union projectInfo.Includes
 
-        let container =
-            match projectConfig.Project.Container with
-            | Some _ -> projectConfig.Project.Container
-            | _ ->
-                match projectInfo.Container with
-                | Some container -> Some (Expr.String container)
-                | _ -> None
-
         { LoadedProject.Dependencies = projectDependencies
           LoadedProject.Links = projectLinks
           LoadedProject.Includes = includes
@@ -319,8 +311,7 @@ let read (options: ConfigOptions.Options) =
           LoadedProject.Targets = projectTargets
           LoadedProject.Labels = labels
           LoadedProject.Extensions = extensions
-          LoadedProject.Scripts = scripts
-          LoadedProject.Container = container }
+          LoadedProject.Scripts = scripts }
 
 
     // this is the final stage: create targets and create the project
@@ -411,19 +402,14 @@ let read (options: ConfigOptions.Options) =
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
                         let container, usedVars =
-                            let evalContainer expr =
+                            match extension.Container with
+                            | Some expr -> 
                                 let container, containerUsedVars = Eval.eval evaluationContext expr
                                 match container with
                                 | Value.Nothing -> None, (usedVars+containerUsedVars)
                                 | Value.String container -> Some container, (usedVars+containerUsedVars)
                                 | _ -> TerrabuildException.Raise("Container must evaluate to nothing or string")
-
-                            match extension.Container with
-                            | Some expr -> evalContainer expr
-                            | _ ->
-                                match projectDef.Container with
-                                | Some expr -> evalContainer expr
-                                | _ -> None, usedVars
+                            | _ -> None, usedVars
 
                         let hash =
                             let usedVariables =

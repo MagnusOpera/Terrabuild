@@ -14,8 +14,7 @@ open Terrabuild.Expressions
 let parseProject() =
     let expectedProject =
         let project =
-            { Project.Container = None
-              Project.Dependencies = Set [ "../../libraries/shell-lib" ]
+            { Project.Dependencies = Set [ "../../libraries/shell-lib" ]
               Project.Links = Set.empty
               Project.Outputs = Set [ "dist" ]
               Project.Ignores = Set.empty
@@ -84,14 +83,19 @@ let parseProject() =
 let parseProject2() =
     let expectedProject =
         let project =
-            { Project.Container = Some Expr.Nothing
-              Project.Dependencies = Set.empty
+            { Project.Dependencies = Set.empty
               Project.Links = Set.empty
               Project.Outputs = Set.empty
               Project.Ignores = Set.empty
               Project.Includes = Set.empty
               Project.Labels = Set.empty
               Project.Init = Some "@dotnet" }
+
+        let extDotnet =
+            { Container = Some Expr.Nothing
+              Variables = Set.empty
+              Script = None
+              Defaults = Map.empty }        
 
         let buildTarget = 
             { Target.DependsOn = None
@@ -100,7 +104,7 @@ let parseProject2() =
               Target.Cache = None
               Target.Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
-        { ProjectFile.Extensions = Map.empty
+        { ProjectFile.Extensions = Map [ "@dotnet", extDotnet ]
           ProjectFile.Project = project
           ProjectFile.Targets = Map [ "build", buildTarget ]  }
 

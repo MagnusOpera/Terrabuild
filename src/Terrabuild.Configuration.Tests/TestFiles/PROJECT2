@@ -1,4 +1,7 @@
 project @dotnet {
+}
+
+extension @dotnet {
     container = nothing
 }
 

@@ -31,7 +31,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "E3E988BB053BFAB0634785397FE9AE67A07A09C5503344D2EC495F1E97E60517",
+          "hash": "F5B0DCA2E5F0533A969CADC642A1B88BA9CC05D507E999D9488B8C8EDE86C2FA",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -47,8 +47,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "1455335D5FAF4E7443BFC4A037D0C795CCF6C7977DE0FD74B07557934001B1E4",
-              "container": "mcr.microsoft.com/dotnet/sdk",
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+              "container": null,
               "containerVariables": [],
               "extension": "@shell",
               "command": "echo",
@@ -90,7 +90,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "E3E988BB053BFAB0634785397FE9AE67A07A09C5503344D2EC495F1E97E60517",
+          "hash": "F5B0DCA2E5F0533A969CADC642A1B88BA9CC05D507E999D9488B8C8EDE86C2FA",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -106,8 +106,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "1455335D5FAF4E7443BFC4A037D0C795CCF6C7977DE0FD74B07557934001B1E4",
-              "container": "mcr.microsoft.com/dotnet/sdk",
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+              "container": null,
               "containerVariables": [],
               "extension": "@shell",
               "command": "echo",
@@ -152,7 +152,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "27645DE0FB82DCD05AD9CDC8DABAC72543EFF3A9E049CE89B99CE93DB3515DD6",
+          "hash": "9623630CECA8E7E089FEEC6439E7906C9ED344B38EBC946F85A6F4BD423B4E29",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -163,8 +163,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "56113EA00B120EAFA346D3D463703EE9715C56A08175C429608653F4435AE131",
-              "container": "node",
+              "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+              "container": null,
               "containerVariables": [],
               "extension": "@shell",
               "command": "echo",
