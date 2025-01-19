@@ -10,6 +10,7 @@ let systemScripts =
         "@npm", typeof<Npm>
         "@null", typeof<Null>
         "@shell", typeof<Shell>
+        "@openapi", typeof<OpenApi>
         "@terraform", typeof<Terraform>
         "@cargo", typeof<Cargo>
         "@yarn", typeof<Yarn>
