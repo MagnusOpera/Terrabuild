@@ -220,10 +220,24 @@ let read (options: ConfigOptions.Options) =
         let projectFile = FS.combinePath projectDir "PROJECT"
         let slashedProjectId = $"{projectId}/"
 
-        let projectContent = File.ReadAllText projectFile
         let projectConfig =
-            try Terrabuild.Configuration.FrontEnd.parseProject projectContent
-            with exn -> TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
+            match projectFile with
+            | FS.File projectFile ->
+                let projectContent = File.ReadAllText projectFile
+                try Terrabuild.Configuration.FrontEnd.parseProject projectContent
+                with exn -> TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
+            | _ ->
+                // PROJECT file does not exist - use empty configuration (see #90)
+                { Terrabuild.Configuration.Project.AST.Project =
+                    { Terrabuild.Configuration.Project.AST.Init = None
+                      Dependencies = Set.empty
+                      Links = Set.empty
+                      Outputs = Set.empty
+                      Ignores = Set.empty
+                      Includes = Set.empty
+                      Labels = Set.empty }
+                  Terrabuild.Configuration.Project.AST.Extensions = Map.empty
+                  Terrabuild.Configuration.Project.AST.Targets = Map.empty }
 
         // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
         // Order is important as we just want to override in the project and reduce as much as possible scripts compilation
@@ -268,11 +282,11 @@ let read (options: ConfigOptions.Options) =
 
         let projectInfo = {
             projectInfo
-            with Ignores = projectInfo.Ignores + (projectConfig.Project.Ignores |> Option.defaultValue Set.empty)
-                 Outputs = projectInfo.Outputs + (projectConfig.Project.Outputs |> Option.defaultValue Set.empty)
-                 Dependencies = projectInfo.Dependencies + (projectConfig.Project.Dependencies |> Option.defaultValue Set.empty)
-                 Links = projectInfo.Links + (projectConfig.Project.Links |> Option.defaultValue Set.empty)
-                 Includes = projectInfo.Includes + (projectConfig.Project.Includes |> Option.defaultValue Set.empty) }
+            with Ignores = projectInfo.Ignores + projectConfig.Project.Ignores
+                 Outputs = projectInfo.Outputs + projectConfig.Project.Outputs
+                 Dependencies = projectInfo.Dependencies + projectConfig.Project.Dependencies
+                 Links = projectInfo.Links + projectConfig.Project.Links
+                 Includes = projectInfo.Includes + projectConfig.Project.Includes }
 
         let labels = projectConfig.Project.Labels
 
@@ -485,6 +499,7 @@ let read (options: ConfigOptions.Options) =
             }
 
         findDependencies true options.Workspace
+        |> Set.ofSeq
 
 
     let projects = ConcurrentDictionary<string, Project>()
