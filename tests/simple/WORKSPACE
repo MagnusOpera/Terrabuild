@@ -59,7 +59,3 @@ extension npmext {
     container = "node:20"
     script = "/scripts/npm.fsx"
 }
-
-extension @openapi {
-    container = "openapitools/openapi-generator-cli"
-}
