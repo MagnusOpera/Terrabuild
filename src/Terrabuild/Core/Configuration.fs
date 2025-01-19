@@ -488,6 +488,8 @@ let read (options: ConfigOptions.Options) =
 
                 // load project and force loading all dependencies as well
                 let loadedProject = loadProjectDef projectId
+                for dependency in loadedProject.Dependencies do
+                    loadProject dependency
 
                 // parallel load of projects
                 hub.Subscribe Array.empty (fun () ->
@@ -511,10 +513,6 @@ let read (options: ConfigOptions.Options) =
                         let loadedProjectSignal = hub.GetSignal<Project> projectId
                         loadedProjectSignal.Value <- project)
                 )
-
-                for dependency in loadedProject.Dependencies do
-                    loadProject dependency
-
 
         let rec findDependencies isRoot dir =
             if isRoot || scanFolder  dir then
