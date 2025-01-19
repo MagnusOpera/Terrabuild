@@ -1,4 +1,6 @@
-project @dotnet
+project @dotnet {
+    container = nothing
+}
 
 target build {
   rebuild = true
