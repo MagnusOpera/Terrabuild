@@ -4,13 +4,13 @@ open Errors
 
 [<RequireQualifiedAccess>]
 type ExtensionComponents =
-    | Container of string
+    | Container of Expr
     | Variables of string list
     | Script of string
     | Defaults of Map<string, Expr>
 
 type Extension = {
-    Container: string option
+    Container: Expr option
     Variables: string Set
     Script: string option
     Defaults: Map<string, Expr>

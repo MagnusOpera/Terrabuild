@@ -10,6 +10,7 @@ type ExtensionContext = {
 
 [<RequireQualifiedAccess>]
 type ProjectInfo = {
+    Container: string option
     Outputs: Set<string>
     Ignores: Set<string>
     Dependencies: Set<string>
@@ -18,6 +19,7 @@ type ProjectInfo = {
 }
 with
     static member Default = {
+        Container = None
         Outputs = Set.empty
         Ignores = Set.empty
         Dependencies = Set.empty

@@ -130,6 +130,7 @@ type nonTerminalId =
     | NONTERM_ExtensionDefaults
     | NONTERM_Project
     | NONTERM_ProjectComponents
+    | NONTERM_ProjectContainer
     | NONTERM_ProjectDependencies
     | NONTERM_ProjectLinks
     | NONTERM_ProjectOutputs

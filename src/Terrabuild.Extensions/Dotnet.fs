@@ -71,7 +71,8 @@ type Dotnet() =
             { ProjectInfo.Default
               with Ignores = Set [ "**/*.binlog"; "TestResults/" ]
                    Outputs = Set [ "bin/"; "obj/"; "**/*.binlog"; "obj/*.json"; "obj/*.props"; "obj/*.targets" ]
-                   Dependencies = dependencies }
+                   Dependencies = dependencies
+                   Container = Some "mcr.microsoft.com/dotnet/sdk" }
         projectInfo
 
 
