@@ -1,0 +1,8 @@
+
+project npmext {
+    labels = [ "app" ]
+}
+
+target build {
+    npmext build { }
+}

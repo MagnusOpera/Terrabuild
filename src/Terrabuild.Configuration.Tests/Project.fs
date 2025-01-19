@@ -14,11 +14,11 @@ open Terrabuild.Expressions
 let parseProject() =
     let expectedProject =
         let project =
-            { Dependencies = Set [ "../../libraries/shell-lib" ] |> Some
-              Links = None
-              Outputs = Set [ "dist" ] |> Some
-              Ignores = None
-              Includes = None
+            { Dependencies = Set [ "../../libraries/shell-lib" ]
+              Links = Set.empty
+              Outputs = Set [ "dist" ]
+              Ignores = Set.empty
+              Includes = Set.empty
               Labels = Set [ "app"; "dotnet" ]
               Init = Some "@dotnet" }
 
@@ -83,11 +83,11 @@ let parseProject() =
 let parseProject2() =
     let expectedProject =
         let project =
-            { Dependencies = None
-              Links = None
-              Outputs = None
-              Ignores = None
-              Includes = None
+            { Dependencies = Set.empty
+              Links = Set.empty
+              Outputs = Set.empty
+              Ignores = Set.empty
+              Includes = Set.empty
               Labels = Set.empty
               Init = Some "@dotnet" }
 

@@ -10,6 +10,7 @@ open Terrabuild.Configuration.Project.AST
 open Errors
 open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
+open Serilog
 
 [<RequireQualifiedAccess>]
 type TargetOperation = {
@@ -220,10 +221,16 @@ let read (options: ConfigOptions.Options) =
         let projectFile = FS.combinePath projectDir "PROJECT"
         let slashedProjectId = $"{projectId}/"
 
-        let projectContent = File.ReadAllText projectFile
+        Log.Debug("Loading project definition {ProjectId}", projectId)
+
         let projectConfig =
-            try Terrabuild.Configuration.FrontEnd.parseProject projectContent
-            with exn -> TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
+            match projectFile with
+            | FS.File projectFile ->
+                let projectContent = File.ReadAllText projectFile
+                try Terrabuild.Configuration.FrontEnd.parseProject projectContent
+                with exn -> TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
+            | _ ->
+                TerrabuildException.Raise($"No PROJECT found in directory '{projectFile}'")
 
         // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
         // Order is important as we just want to override in the project and reduce as much as possible scripts compilation
@@ -268,11 +275,11 @@ let read (options: ConfigOptions.Options) =
 
         let projectInfo = {
             projectInfo
-            with Ignores = projectInfo.Ignores + (projectConfig.Project.Ignores |> Option.defaultValue Set.empty)
-                 Outputs = projectInfo.Outputs + (projectConfig.Project.Outputs |> Option.defaultValue Set.empty)
-                 Dependencies = projectInfo.Dependencies + (projectConfig.Project.Dependencies |> Option.defaultValue Set.empty)
-                 Links = projectInfo.Links + (projectConfig.Project.Links |> Option.defaultValue Set.empty)
-                 Includes = projectInfo.Includes + (projectConfig.Project.Includes |> Option.defaultValue Set.empty) }
+            with Ignores = projectInfo.Ignores + projectConfig.Project.Ignores
+                 Outputs = projectInfo.Outputs + projectConfig.Project.Outputs
+                 Dependencies = projectInfo.Dependencies + projectConfig.Project.Dependencies
+                 Links = projectInfo.Links + projectConfig.Project.Links
+                 Includes = projectInfo.Includes + projectConfig.Project.Includes }
 
         let labels = projectConfig.Project.Labels
 
@@ -282,7 +289,6 @@ let read (options: ConfigOptions.Options) =
         let projectDependencies =
             projectInfo.Dependencies
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
-            |> Set.filter (fun dep -> dep |> String.startsWith slashedProjectId |> not)
         let projectLinks =
             projectInfo.Links
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
@@ -469,58 +475,65 @@ let read (options: ConfigOptions.Options) =
           Project.Labels = projectDef.Labels }
 
 
-    let projectFiles = 
+
+    let searchProjectsAndApply() =
         let scanFolder = scanFolders options.Workspace workspaceConfig.Workspace.Ignores
+        let projectLoading = ConcurrentDictionary<string, bool>()
+        let projects = ConcurrentDictionary<string, Project>()
+        let hub = Hub.Create(options.MaxConcurrency)
+
+        let rec loadProject projectId =
+            if projectLoading.ContainsKey projectId |> not then
+                projectLoading.TryAdd(projectId, true) |> ignore
+
+                // load project and force loading all dependencies as well
+                let loadedProject = loadProjectDef projectId
+                for dependency in loadedProject.Dependencies do
+                    loadProject dependency
+
+                // parallel load of projects
+                hub.Subscribe Array.empty (fun () ->
+                    // await dependencies to be loaded
+                    let awaitedProjects =
+                        (loadedProject.Dependencies + loadedProject.Links)
+                        |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
+                        |> Array.ofSeq
+
+                    let awaitedSignals = awaitedProjects |> Array.map (fun entry -> entry :> ISignal)
+                    hub.Subscribe awaitedSignals (fun () ->
+                        // build task & code & notify
+                        let projectDependencies = 
+                            awaitedProjects
+                            |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value)
+                            |> Map.ofSeq
+
+                        let project = finalizeProject projectId loadedProject projectDependencies
+                        projects.TryAdd(projectId, project) |> ignore
+
+                        let loadedProjectSignal = hub.GetSignal<Project> projectId
+                        loadedProjectSignal.Value <- project)
+                )
 
         let rec findDependencies isRoot dir =
-            seq {
-                if isRoot || scanFolder  dir then
-                    let projectFile = FS.combinePath dir "PROJECT" 
-                    match projectFile with
-                    | FS.File file ->
-                        yield file |> FS.parentDirectory |> FS.relativePath options.Workspace
-                    | _ ->
-                        for subdir in dir |> IO.enumerateDirs do
-                            yield! findDependencies false subdir
-            }
+            if isRoot || scanFolder  dir then
+                let projectFile = FS.combinePath dir "PROJECT" 
+                match projectFile with
+                | FS.File file ->
+                    let projectFile = file |> FS.parentDirectory |> FS.relativePath options.Workspace
+                    loadProject projectFile
+                | _ ->
+                    for subdir in dir |> IO.enumerateDirs do
+                        findDependencies false subdir
 
         findDependencies true options.Workspace
+        let status = hub.WaitCompletion()
+        match status with
+        | Status.Ok -> projects |> Map.ofDict
+        | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Project {projectId} is unknown")
+        | Status.SubscriptionError exn -> TerrabuildException.Raise("Failed to load configuration", exn)
 
 
-    let projects = ConcurrentDictionary<string, Project>()
-    let hub = Hub.Create(options.MaxConcurrency)
-    for projectId in projectFiles do
-        // parallel load of projects
-        hub.Subscribe Array.empty (fun () ->
-            // load project
-            let loadedProject = loadProjectDef projectId
-
-            // await dependencies to be loaded
-            let awaitedProjects =
-                (loadedProject.Dependencies + loadedProject.Links)
-                |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
-                |> Array.ofSeq
-
-            let awaitedSignals = awaitedProjects |> Array.map (fun entry -> entry :> ISignal)
-            hub.Subscribe awaitedSignals (fun () ->
-                // build task & code & notify
-                let projectDependencies = 
-                    awaitedProjects
-                    |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value)
-                    |> Map.ofSeq
-
-                let project = finalizeProject projectId loadedProject projectDependencies
-                projects.TryAdd(projectId, project) |> ignore
-
-                let loadedProjectSignal = hub.GetSignal<Project> projectId
-                loadedProjectSignal.Value <- project)
-        )
-
-    let status = hub.WaitCompletion()
-    match status with
-    | Status.Ok -> ()
-    | Status.SubcriptionNotRaised projectId -> TerrabuildException.Raise($"Project {projectId} is unknown")
-    | Status.SubscriptionError exn -> TerrabuildException.Raise("Failed to load configuration", exn)
+    let projects = searchProjectsAndApply()
 
     // select dependencies with labels if any
     let selectedProjects =

@@ -23,11 +23,11 @@ type ProjectComponents =
 
 type Project = {
     Init: string option
-    Dependencies: Set<string> option
-    Links: Set<string> option
-    Outputs: Set<string> option
-    Ignores: Set<string> option
-    Includes: Set<string> option
+    Dependencies: Set<string>
+    Links: Set<string>
+    Outputs: Set<string>
+    Ignores: Set<string>
+    Includes: Set<string>
     Labels: Set<string>
 }
 with
@@ -69,11 +69,11 @@ with
             | _ -> TerrabuildException.Raise("multiple labels declared")
 
         { Init = init
-          Dependencies = dependencies
-          Links = links
-          Outputs = outputs
-          Ignores = ignores
-          Includes = includes
+          Dependencies = dependencies |> Option.defaultValue Set.empty
+          Links = links |> Option.defaultValue Set.empty
+          Outputs = outputs |> Option.defaultValue Set.empty
+          Ignores = ignores |> Option.defaultValue Set.empty
+          Includes = includes |> Option.defaultValue Set.empty
           Labels = labels }
   
 

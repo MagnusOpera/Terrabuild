@@ -35,7 +35,7 @@
                     ],
                     "npm_app_version": [
                       "string",
-                      "84DFD1B132F2D433231EF2345DB2CF32D7D3867BB5C1795B3DCFE0F0304A7353"
+                      "3D4E6AD22CC8AA6E1544C3E6FD63DB3BCFB10FF095BF099457E0E0EA66F32D7E"
                     ]
                   }
                 ],
@@ -55,8 +55,8 @@
       "outputs": [
         "*.planfile"
       ],
-      "projectHash": "9FA318E272735D841D292D7D78A58E7AF5BDFAF96DDD745761807419308C8BC5",
-      "targetHash": "F6E4D9E0547331E0BFAD190777CB9FC871072E8A3036D720D22E9C67E7346D86",
+      "projectHash": "DA24149CF300F799A94E8A5249F7EE06AEAA2A7F02215715D452B05C0D6DD6C0",
+      "targetHash": "0A45EAC1531308D2C956668241A788AACECC9D991EC4DE2AF75FC4504CAFCDF5",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -77,7 +77,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=84DFD1B132F2D433231EF2345DB2CF32D7D3867BB5C1795B3DCFE0F0304A7353\u0022"
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=3D4E6AD22CC8AA6E1544C3E6FD63DB3BCFB10FF095BF099457E0E0EA66F32D7E\u0022"
         }
       ],
       "cache": 0,
@@ -399,6 +399,61 @@
       "cache": 0,
       "isLeaf": true
     },
+    "projects/npm-app/private-npm-lib:build": {
+      "id": "projects/npm-app/private-npm-lib:build",
+      "label": "build projects/npm-app/private-npm-lib",
+      "project": "projects/npm-app/private-npm-lib",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/"
+        ],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+            "container": "node:20",
+            "containerVariables": [],
+            "extension": "npmext",
+            "command": "build",
+            "script": {},
+            "context": [
+              "map",
+              {}
+            ]
+          }
+        ]
+      },
+      "dependencies": [],
+      "outputs": [
+        "dist/"
+      ],
+      "projectHash": "F951BD1663475053E1F9C97DDA08EA553E21951BC053419D362126A2B6A4C83C",
+      "targetHash": "9B342E2BD7FC7603D5316A29808A83E9E0E67B416B2D1EA25D9626BD4D27A85E",
+      "operations": [
+        {
+          "container": "node:20",
+          "containerVariables": [],
+          "metaCommand": "npmext build",
+          "command": "npm",
+          "arguments": "ci"
+        },
+        {
+          "container": "node:20",
+          "containerVariables": [],
+          "metaCommand": "npmext build",
+          "command": "npm",
+          "arguments": "run build -- "
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
     "projects/npm-app:build": {
       "id": "projects/npm-app:build",
       "label": "build projects/npm-app",
@@ -430,13 +485,14 @@
         ]
       },
       "dependencies": [
-        "libraries/npm-lib:build"
+        "libraries/npm-lib:build",
+        "projects/npm-app/private-npm-lib:build"
       ],
       "outputs": [
         "dist/"
       ],
-      "projectHash": "84DFD1B132F2D433231EF2345DB2CF32D7D3867BB5C1795B3DCFE0F0304A7353",
-      "targetHash": "504FCB25A46AC48E00ACBCE1E7B526B375192991C331D7F898AF6AEDBB678141",
+      "projectHash": "3D4E6AD22CC8AA6E1544C3E6FD63DB3BCFB10FF095BF099457E0E0EA66F32D7E",
+      "targetHash": "62F85CB9C8E3045BE8E1EB792C499B3B8090A9D0E6E115F3EB9CB99C924FD540",
       "operations": [
         {
           "container": "node:20",
@@ -514,6 +570,7 @@
     "libraries/shell-lib:build",
     "projects/dotnet-app:build",
     "projects/make-app:build",
+    "projects/npm-app/private-npm-lib:build",
     "projects/npm-app:build",
     "projects/rust-app:build"
   ]
