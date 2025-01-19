@@ -9,7 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "npm-lib": "file:../../libraries/npm-lib"
+    "npm-lib": "file:../../libraries/npm-lib",
+    "private-npm-lib": "file:private-npm-lib"
   },
   "devDependencies": {
     "typescript": "~5.6.2",
