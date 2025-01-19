@@ -4,9 +4,9 @@ open Collections
 open System
 open System.Collections.Concurrent
 open Terrabuild.Extensibility
-open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Terrabuild.Configuration.Project.AST
+open Terrabuild.Configuration.AST
 open Errors
 open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
@@ -227,17 +227,21 @@ let read (options: ConfigOptions.Options) =
                 try Terrabuild.Configuration.FrontEnd.parseProject projectContent
                 with exn -> TerrabuildException.Raise($"Failed to read PROJECT configuration {projectFile}", exn)
             | _ ->
-                // PROJECT file does not exist - use empty configuration (see #90)
-                { Terrabuild.Configuration.Project.AST.Project =
-                    { Terrabuild.Configuration.Project.AST.Init = None
-                      Dependencies = Set.empty
-                      Links = Set.empty
-                      Outputs = Set.empty
-                      Ignores = Set.empty
-                      Includes = Set.empty
-                      Labels = Set.empty }
-                  Terrabuild.Configuration.Project.AST.Extensions = Map.empty
-                  Terrabuild.Configuration.Project.AST.Targets = Map.empty }
+                match projectDir with
+                | FS.Directory _ ->
+                    // PROJECT file does not exist - use empty configuration (see #90)
+                    { ProjectFile.Project =
+                        { Init = None
+                          Dependencies = Set.empty
+                          Links = Set.empty
+                          Outputs = Set.empty
+                          Ignores = Set.empty
+                          Includes = Set.empty
+                          Labels = Set.empty }
+                      ProjectFile.Extensions = Map.empty
+                      ProjectFile.Targets = Map.empty }
+                | _ ->
+                    TerrabuildException.Raise($"Project directory '{projectFile}' does not exist ")
 
         // NOTE: here we are tracking both extensions (that is configuration) and scripts (compiled extensions)
         // Order is important as we just want to override in the project and reduce as much as possible scripts compilation

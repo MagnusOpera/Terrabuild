@@ -21,6 +21,7 @@ type ProjectComponents =
     | Includes of string list
     | Labels of string list
 
+[<RequireQualifiedAccess>]
 type Project = {
     Init: string option
     Dependencies: Set<string>
@@ -94,6 +95,7 @@ type TargetComponents =
     | Cache of string
     | Step of Step
 
+[<RequireQualifiedAccess>]
 type Target = {
     Rebuild: Expr option
     Outputs: Set<string> option
@@ -151,6 +153,7 @@ type ProjectFileComponents =
     | Extension of string * Extension
     | Target of string * Target
 
+[<RequireQualifiedAccess>]
 type ProjectFile = {
     Project: Project
     Extensions: Map<string, Extension>

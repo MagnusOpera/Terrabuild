@@ -14,13 +14,13 @@ open Terrabuild.Expressions
 let parseProject() =
     let expectedProject =
         let project =
-            { Dependencies = Set [ "../../libraries/shell-lib" ]
-              Links = Set.empty
-              Outputs = Set [ "dist" ]
-              Ignores = Set.empty
-              Includes = Set.empty
-              Labels = Set [ "app"; "dotnet" ]
-              Init = Some "@dotnet" }
+            { Project.Dependencies = Set [ "../../libraries/shell-lib" ]
+              Project.Links = Set.empty
+              Project.Outputs = Set [ "dist" ]
+              Project.Ignores = Set.empty
+              Project.Includes = Set.empty
+              Project.Labels = Set [ "app"; "dotnet" ]
+              Project.Init = Some "@dotnet" }
 
         let extDotnet =
             { Container = None
@@ -40,38 +40,38 @@ let parseProject() =
               Defaults = Map.empty }
 
         let targetBuild = 
-            { DependsOn = Set [ "dist" ] |> Some
-              Rebuild = None
-              Outputs = None
-              Cache = None
-              Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
+            { Target.DependsOn = Set [ "dist" ] |> Some
+              Target.Rebuild = None
+              Target.Outputs = None
+              Target.Cache = None
+              Target.Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
         let targetDist =
-            { DependsOn = None
-              Rebuild = None
-              Outputs = None
-              Cache = None
-              Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty }
-                        { Extension = "@dotnet"; Command = "publish"; Parameters = Map.empty } ] }
+            { Target.DependsOn = None
+              Target.Rebuild = None
+              Target.Outputs = None
+              Target.Cache = None
+              Target.Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty }
+                               { Extension = "@dotnet"; Command = "publish"; Parameters = Map.empty } ] }
         let targetDocker =
-            { DependsOn = None
-              Rebuild = Some (Expr.Bool false)
-              Outputs = None
-              Cache = Some Cacheability.Always
-              Steps = [ { Extension = "@shell"; Command = "echo"
-                          Parameters = Map [ "arguments", Expr.Function (Function.Trim,
-                                                                         [ Expr.Function (Function.Plus,
-                                                                                          [ Expr.String "building project1 "
-                                                                                            Expr.Variable "configuration" ]) ]) ] }
-                        { Extension = "@docker"; Command = "build"
-                          Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "Release"]) ] } ] }
+            { Target.DependsOn = None
+              Target.Rebuild = Some (Expr.Bool false)
+              Target.Outputs = None
+              Target.Cache = Some Cacheability.Always
+              Target.Steps = [ { Extension = "@shell"; Command = "echo"
+                                 Parameters = Map [ "arguments", Expr.Function (Function.Trim,
+                                                                                [ Expr.Function (Function.Plus,
+                                                                                                 [ Expr.String "building project1 "
+                                                                                                   Expr.Variable "configuration" ]) ]) ] }
+                               { Extension = "@docker"; Command = "build"
+                                 Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "Release"]) ] } ] }
 
-        { Extensions = Map [ "@dotnet", extDotnet
-                             "@docker", extDocker
-                             "dummy", extDummy ]
-          Project = project
-          Targets = Map [ "build", targetBuild
-                          "dist", targetDist
-                          "docker", targetDocker ] }
+        { ProjectFile.Extensions = Map [ "@dotnet", extDotnet
+                                         "@docker", extDocker
+                                         "dummy", extDummy ]
+          ProjectFile.Project = project
+          ProjectFile.Targets = Map [ "build", targetBuild
+                                      "dist", targetDist
+                                      "docker", targetDocker ] }
 
     let content = File.ReadAllText("TestFiles/PROJECT")
     let project = FrontEnd.parseProject content
@@ -83,24 +83,24 @@ let parseProject() =
 let parseProject2() =
     let expectedProject =
         let project =
-            { Dependencies = Set.empty
-              Links = Set.empty
-              Outputs = Set.empty
-              Ignores = Set.empty
-              Includes = Set.empty
-              Labels = Set.empty
-              Init = Some "@dotnet" }
+            { Project.Dependencies = Set.empty
+              Project.Links = Set.empty
+              Project.Outputs = Set.empty
+              Project.Ignores = Set.empty
+              Project.Includes = Set.empty
+              Project.Labels = Set.empty
+              Project.Init = Some "@dotnet" }
 
         let buildTarget = 
-            { DependsOn = None
-              Rebuild = Some (Expr.Bool true)
-              Outputs = Set [ "*.dll" ] |> Some
-              Cache = None
-              Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
+            { Target.DependsOn = None
+              Target.Rebuild = Some (Expr.Bool true)
+              Target.Outputs = Set [ "*.dll" ] |> Some
+              Target.Cache = None
+              Target.Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
-        { Extensions = Map.empty
-          Project = project
-          Targets = Map [ "build", buildTarget ]  }
+        { ProjectFile.Extensions = Map.empty
+          ProjectFile.Project = project
+          ProjectFile.Targets = Map [ "build", buildTarget ]  }
 
     let content = File.ReadAllText("TestFiles/PROJECT2")
     let project = FrontEnd.parseProject content

@@ -8,6 +8,7 @@ type WorkspaceComponents =
     | Space of string
     | Ignores of string list
 
+[<RequireQualifiedAccess>]
 type Workspace = {
     Space: string option
     Ignores: Set<string>
@@ -26,8 +27,8 @@ with
             | [value] -> value |> Set.ofList |> Some
             | _ -> TerrabuildException.Raise("multiple ignores declared")
 
-        { Space = space
-          Ignores = ignores |> Option.defaultValue Set.empty }
+        { Workspace.Space = space
+          Workspace.Ignores = ignores |> Option.defaultValue Set.empty }
 
 
 [<RequireQualifiedAccess>]
@@ -35,6 +36,7 @@ type TargetComponents =
     | DependsOn of string list
     | Rebuild of Expr
 
+[<RequireQualifiedAccess>]
 type Target = {
     DependsOn: Set<string>
     Rebuild: Expr
@@ -61,6 +63,7 @@ with
 type ConfigurationComponents =
     | Variables of Map<string, Expr>
 
+[<RequireQualifiedAccess>]
 type Configuration = {
     Variables: Map<string, Expr>
 }
@@ -81,6 +84,7 @@ type WorkspaceFileComponents =
     | Configuration of string * Configuration
     | Extension of string * Extension
 
+[<RequireQualifiedAccess>]
 type WorkspaceFile = {
     Workspace: Workspace
     Targets: Map<string, Target>
@@ -91,7 +95,9 @@ with
     static member Build components =
         let workspace =
             match components |> List.choose (function | WorkspaceFileComponents.Workspace value -> Some value | _ -> None) with
-            | [] -> { Space = None; Ignores = Set.empty }
+            | [] ->
+                { Workspace.Space = None
+                  Workspace.Ignores = Set.empty }
             | [value] -> value
             | _ -> TerrabuildException.Raise("multiple workspace declared")
 
