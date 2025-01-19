@@ -9,6 +9,7 @@
     "projects/make-app",
     "projects/npm-app",
     "projects/npm-app/private-npm-lib",
+    "projects/open-api",
     "projects/rust-app"
   ],
   "targets": {
@@ -716,6 +717,65 @@
       "labels": [
         "app"
       ]
+    },
+    "projects/open-api": {
+      "id": "projects/open-api",
+      "hash": "BB0E3605A8C4B18B4B0C97C0191E804A2360DD055F2756DCC0FD430CAEC5A74F",
+      "dependencies": [],
+      "files": [
+        ".gitignore",
+        "api.json",
+        "src/.gitignore",
+        "src/.npmignore",
+        "src/.openapi-generator-ignore",
+        "src/.openapi-generator/FILES",
+        "src/.openapi-generator/VERSION",
+        "src/api.ts",
+        "src/base.ts",
+        "src/common.ts",
+        "src/configuration.ts",
+        "src/git_push.sh",
+        "src/index.ts"
+      ],
+      "targets": {
+        "build": {
+          "hash": "38ED1022C7BD9FB1B271C7A3B6BA2BA2F24916429F2315CC786606A888A32701",
+          "rebuild": false,
+          "dependsOn": [
+            "^build"
+          ],
+          "outputs": [],
+          "cache": null,
+          "operations": [
+            {
+              "hash": "CD7EFDC715A8197A91861F8D15BBD8011681E58697649FC112E76DD8581E52EF",
+              "container": "openapitools/openapi-generator-cli",
+              "containerVariables": [],
+              "extension": "@openapi",
+              "command": "generate",
+              "script": {},
+              "context": [
+                "map",
+                {
+                  "generator": [
+                    "string",
+                    "typescript-axios"
+                  ],
+                  "input": [
+                    "string",
+                    "api.json"
+                  ],
+                  "output": [
+                    "string",
+                    "src"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "labels": []
     },
     "projects/rust-app": {
       "id": "projects/rust-app",

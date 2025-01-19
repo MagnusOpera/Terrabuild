@@ -512,6 +512,63 @@
       "cache": 0,
       "isLeaf": true
     },
+    "projects/open-api:build": {
+      "id": "projects/open-api:build",
+      "label": "build projects/open-api",
+      "project": "projects/open-api",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "38ED1022C7BD9FB1B271C7A3B6BA2BA2F24916429F2315CC786606A888A32701",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [],
+        "cache": null,
+        "operations": [
+          {
+            "hash": "CD7EFDC715A8197A91861F8D15BBD8011681E58697649FC112E76DD8581E52EF",
+            "container": "openapitools/openapi-generator-cli",
+            "containerVariables": [],
+            "extension": "@openapi",
+            "command": "generate",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "generator": [
+                  "string",
+                  "typescript-axios"
+                ],
+                "input": [
+                  "string",
+                  "api.json"
+                ],
+                "output": [
+                  "string",
+                  "src"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "dependencies": [],
+      "outputs": [],
+      "projectHash": "BB0E3605A8C4B18B4B0C97C0191E804A2360DD055F2756DCC0FD430CAEC5A74F",
+      "targetHash": "65E2915E844953B9506EF2FCBACFEDAF8D15696316DFA10CAA5314190A2E1A26",
+      "operations": [
+        {
+          "container": "openapitools/openapi-generator-cli",
+          "containerVariables": [],
+          "metaCommand": "@openapi generate",
+          "command": "docker-entrypoint.sh",
+          "arguments": "generate -i api.json -g typescript-axios -o src"
+        }
+      ],
+      "cache": 0,
+      "isLeaf": true
+    },
     "projects/rust-app:build": {
       "id": "projects/rust-app:build",
       "label": "build projects/rust-app",
@@ -572,6 +629,7 @@
     "projects/make-app:build",
     "projects/npm-app/private-npm-lib:build",
     "projects/npm-app:build",
+    "projects/open-api:build",
     "projects/rust-app:build"
   ]
 }

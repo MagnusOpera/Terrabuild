@@ -1,0 +1,9 @@
+
+project @openapi {
+}
+
+target build {
+    @openapi generate { generator: "typescript-axios"
+                        input: "api.json"
+                        output: "src" }
+}
