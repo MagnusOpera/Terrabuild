@@ -162,7 +162,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "5078D48C4C6484DB76087A08DE4E684FFF375660946C3990E9E0849279F48BE0",
+          "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -178,8 +178,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "57F4A40A24EB97044294EB8292481A14562D644A8015F4F36857316F9CB7E50F",
-              "container": "mcr.microsoft.com/dotnet/sdk",
+              "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
+              "container": null,
               "containerVariables": [],
               "extension": "@dotnet",
               "command": "build",
@@ -293,7 +293,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "5078D48C4C6484DB76087A08DE4E684FFF375660946C3990E9E0849279F48BE0",
+          "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -309,8 +309,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "57F4A40A24EB97044294EB8292481A14562D644A8015F4F36857316F9CB7E50F",
-              "container": "mcr.microsoft.com/dotnet/sdk",
+              "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
+              "container": null,
               "containerVariables": [],
               "extension": "@dotnet",
               "command": "build",
@@ -328,7 +328,7 @@
           ]
         },
         "dist": {
-          "hash": "DD2297184D77E1DFBE26BDB21E3ED546FE72D96FC08A80880F88F8B1D42E32B7",
+          "hash": "1C058F7AEE7F28E71B314DFF9426988F723EC1420B6EC2E39F5320CABC15CAB4",
           "rebuild": false,
           "dependsOn": [
             "build"
@@ -344,8 +344,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "5383C1617FF5C22386E3D66B0EC019B1114A61A7D657BCAD83E538619C40788E",
-              "container": "mcr.microsoft.com/dotnet/sdk",
+              "hash": "1311F62C9C27453F0B03B878877FCB24E63B6EB246A8B3696689DB068197846E",
+              "container": null,
               "containerVariables": [],
               "extension": "@dotnet",
               "command": "publish",
