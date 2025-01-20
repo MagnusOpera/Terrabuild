@@ -728,7 +728,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "38ED1022C7BD9FB1B271C7A3B6BA2BA2F24916429F2315CC786606A888A32701",
+          "hash": "452C3BECEF820BD9F5351618E31CF2E62C7D5D3179166501BC7BE624F6C69299",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -737,8 +737,8 @@
           "cache": null,
           "operations": [
             {
-              "hash": "CD7EFDC715A8197A91861F8D15BBD8011681E58697649FC112E76DD8581E52EF",
-              "container": "openapitools/openapi-generator-cli",
+              "hash": "4A8E18C26FBA6F585C31836EE5AA86F094F58C9AAE622079FD2825E9EFD83114",
+              "container": "openapitools/openapi-generator-cli:v7.10.0",
               "containerVariables": [],
               "extension": "@openapi",
               "command": "generate",

@@ -92,7 +92,7 @@ let parseProject2() =
               Project.Init = Some "@dotnet" }
 
         let extDotnet =
-            { Container = Some Expr.Nothing
+            { Container = None
               Variables = Set.empty
               Script = None
               Defaults = Map.empty }        

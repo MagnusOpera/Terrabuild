@@ -2,7 +2,6 @@ project @dotnet {
 }
 
 extension @dotnet {
-    container = nothing
 }
 
 target build {
