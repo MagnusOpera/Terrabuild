@@ -384,6 +384,15 @@ let read (options: ConfigOptions.Options) =
                             |> Expr.Map
                             |> Eval.eval evaluationContext
 
+                        let container, usedVars =
+                            match extension.Container with
+                            | Some container ->
+                                match Eval.eval evaluationContext container with
+                                | Value.String container, containerUsedVars -> Some container, usedVars+containerUsedVars
+                                | Value.Nothing, containerUsedVars -> None, usedVars+containerUsedVars
+                                | _ -> TerrabuildException.Raise("container must evaluate to a string")
+                            | _ -> None, usedVars
+
                         let script =
                             match Extensions.getScript step.Extension projectDef.Scripts with
                             | Some script -> script
@@ -400,7 +409,7 @@ let read (options: ConfigOptions.Options) =
                                 |> List.ofSeq
 
                             let containerInfos = 
-                                match extension.Container with
+                                match container with
                                 | Some container -> [ container ] @ List.ofSeq extension.Variables
                                 | _ -> []
 
@@ -409,7 +418,7 @@ let read (options: ConfigOptions.Options) =
 
                         let targetContext = {
                             TargetOperation.Hash = hash
-                            TargetOperation.Container = extension.Container
+                            TargetOperation.Container = container
                             TargetOperation.ContainerVariables = extension.Variables
                             TargetOperation.Extension = step.Extension
                             TargetOperation.Command = step.Command
