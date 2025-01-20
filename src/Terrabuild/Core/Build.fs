@@ -254,7 +254,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
                 let restorable = Restorable(callback, dependencies)
                 restorables.TryAdd(node.Id, restorable) |> ignore
-                TaskStatus.Success summary.EndedAt
+                if summary.IsSuccessful then TaskStatus.Success summary.EndedAt
+                else TaskStatus.Failure (summary.EndedAt, $"Restored node {node.Id} with a build in failure state")
             | _ ->
                 TaskStatus.Failure (DateTime.UtcNow, $"Unable to download build output for {cacheEntryId} for node {node.Id}")
 
