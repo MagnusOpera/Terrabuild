@@ -19,8 +19,7 @@ type Yarn() =
             { ProjectInfo.Default
               with Ignores = Set [ "node_modules/" ]
                    Outputs = Set [ "dist/" ]
-                   Dependencies = dependencies
-                   Container = Some "node" }
+                   Dependencies = dependencies }
         projectInfo
 
 

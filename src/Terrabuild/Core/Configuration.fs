@@ -262,18 +262,6 @@ let read (options: ConfigOptions.Options) =
                 | Extensions.ErrorTarget exn -> TerrabuildException.Raise($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
             | _ -> ProjectInfo.Default
 
-        let extensions =
-            let initExt = projectConfig.Project.Init |> Option.bind (fun init -> extensions |> Map.tryFind init)
-            match initExt with
-            | Some ext ->
-                match ext.Container, projectInfo.Container with
-                | Some _, _ -> extensions
-                | None, Some container ->
-                    extensions
-                    |> Map.add projectConfig.Project.Init.Value { ext with Container = Some (Expr.String container) }
-                | _ -> extensions
-            | _ -> extensions
-
         let projectInfo = {
             projectInfo
             with Ignores = projectInfo.Ignores + projectConfig.Project.Ignores

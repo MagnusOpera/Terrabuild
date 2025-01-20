@@ -21,8 +21,7 @@ type Terraform() =
         let projectInfo = 
             { ProjectInfo.Default
               with Ignores = Set [ ".terraform/"; "*.tfstate/" ]
-                   Outputs = Set [ "*.planfile" ]
-                   Container = Some "hashicorp/terraform" }
+                   Outputs = Set [ "*.planfile" ] }
         projectInfo
 
 

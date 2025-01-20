@@ -4,14 +4,15 @@ module Terrabuild.Extensions.Factory
 // do not forget to add reference when adding new implementation
 let systemScripts =
     Map [
-        "@docker", typeof<Docker>
-        "@dotnet", typeof<Dotnet>
-        "@make", typeof<Make>
-        "@npm", typeof<Npm>
-        "@null", typeof<Null>
-        "@shell", typeof<Shell>
-        "@openapi", typeof<OpenApi>
-        "@terraform", typeof<Terraform>
-        "@cargo", typeof<Cargo>
-        "@yarn", typeof<Yarn>
+        "@cargo", (typeof<Cargo>, Some "rust")
+        "@docker", (typeof<Docker>, None)
+        "@dotnet", (typeof<Dotnet>, Some "mcr.microsoft.com/dotnet/sdk")
+        "@gradle", (typeof<Gradle>, Some "gradle")
+        "@make", (typeof<Make>, None)
+        "@npm", (typeof<Npm>, Some "node")
+        "@null", (typeof<Null>, None)
+        "@shell", (typeof<Shell>, None)
+        "@openapi", (typeof<OpenApi>, Some "openapitools/openapi-generator-cli")
+        "@terraform", (typeof<Terraform>, Some "hashicorp/terraform") 
+        "@yarn", (typeof<Yarn>, Some "nonde")
     ]

@@ -34,8 +34,7 @@ type Cargo() =
             { ProjectInfo.Default
               with Ignores = Set [ "target/*" ]
                    Outputs = Set [ "target/debug/"; "target/release/" ]
-                   Dependencies = dependencies
-                   Container = Some "rust" }
+                   Dependencies = dependencies }
         projectInfo
 
 

@@ -19,8 +19,7 @@ type Npm() =
                 { ProjectInfo.Default
                   with Ignores = Set [ "node_modules/" ]
                        Outputs = Set [ "dist/" ]
-                       Dependencies = dependencies
-                       Container = Some "node" }
+                       Dependencies = dependencies }
             projectInfo
         with
             exn -> Errors.TerrabuildException.Raise($"Error while processing project {context.Directory}", exn)
