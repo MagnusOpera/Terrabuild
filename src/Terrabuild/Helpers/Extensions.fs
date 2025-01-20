@@ -14,10 +14,7 @@ type InvocationResult<'t> =
 
 let systemExtensions =
     Terrabuild.Extensions.Factory.systemScripts
-    |> Seq.map (fun (KeyValue(name, (tpe, container))) ->
-        Extension.Build name [
-            if container <> None then ExtensionComponents.Container (Expr.String container.Value)
-        ])
+    |> Seq.map (fun kvp -> Extension.Build kvp.Key [])
     |> Map.ofSeq
 
 // NOTE: when app in package as a single file, Terrabuild.Assembly can't be found...
@@ -34,7 +31,7 @@ let lazyLoadScript (name: string) (script: string option) =
             loadScript [ terrabuildExtensibility ] script
         | _ ->
             match Terrabuild.Extensions.Factory.systemScripts |> Map.tryFind name with
-            | Some (sysTpe, _) -> Script(sysTpe)
+            | Some sysTpe -> Script(sysTpe)
             | _ -> TerrabuildException.Raise($"Script is not defined for extension '{name}'")
 
     lazy(initScript())

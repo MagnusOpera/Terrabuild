@@ -389,16 +389,6 @@ let read (options: ConfigOptions.Options) =
                             | Some script -> script
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                        let container, usedVars =
-                            match extension.Container with
-                            | Some expr -> 
-                                let container, containerUsedVars = Eval.eval evaluationContext expr
-                                match container with
-                                | Value.Nothing -> None, (usedVars+containerUsedVars)
-                                | Value.String container -> Some container, (usedVars+containerUsedVars)
-                                | _ -> TerrabuildException.Raise("Container must evaluate to nothing or string")
-                            | _ -> None, usedVars
-
                         let hash =
                             let usedVariables =
                                 usedVars
@@ -410,7 +400,7 @@ let read (options: ConfigOptions.Options) =
                                 |> List.ofSeq
 
                             let containerInfos = 
-                                match container with
+                                match extension.Container with
                                 | Some container -> [ container ] @ List.ofSeq extension.Variables
                                 | _ -> []
 
@@ -419,7 +409,7 @@ let read (options: ConfigOptions.Options) =
 
                         let targetContext = {
                             TargetOperation.Hash = hash
-                            TargetOperation.Container = container
+                            TargetOperation.Container = extension.Container
                             TargetOperation.ContainerVariables = extension.Variables
                             TargetOperation.Extension = step.Extension
                             TargetOperation.Command = step.Command

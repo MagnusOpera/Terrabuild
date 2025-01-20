@@ -71,7 +71,7 @@ ExtensionComponents:
     | ExtensionComponents ExtensionScript { $1 @ [$2] }
     | ExtensionComponents ExtensionDefaults { $1 @ [$2] }
 ExtensionContainer:
-    | CONTAINER EQUAL Expr { ExtensionComponents.Container $3 }
+    | CONTAINER EQUAL String { ExtensionComponents.Container $3 }
 ExtensionVariables:
     | VARIABLES EQUAL ListOfString { ExtensionComponents.Variables $3 }
 ExtensionScript:

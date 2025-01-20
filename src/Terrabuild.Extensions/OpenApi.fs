@@ -3,6 +3,8 @@ open Terrabuild.Extensibility
 
 /// <summary>
 /// Provides support for `OpenAPI Generator`.
+/// 
+/// You must use container `openapitools/openapi-generator-cli` in the extension configuration.
 /// </summary>
 type OpenApi() =
 
