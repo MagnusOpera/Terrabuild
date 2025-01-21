@@ -113,17 +113,17 @@ let read (options: ConfigOptions.Options) =
             TerrabuildException.Raise("Failed to read WORKSPACE configuration file", exn)
 
     let evaluationContext =
-        let convertToVarType (key: string) ((existingValue, existingDeps): Value*Set<string>) (value: string) =
+        let convertToVarType (key: string) (existingValue: Value) (value: string) =
             match existingValue with
             | Value.String _ ->
-                Value.String value, existingDeps
+                Value.String value
             | Value.Number _ ->
                 match value |> Int32.TryParse with
-                | true, value -> Value.Number value, existingDeps
+                | true, value -> Value.Number value
                 | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to number variable {key}")
             | Value.Bool _ ->
                 match value |> Boolean.TryParse with
-                | true, value -> Value.Bool value, existingDeps
+                | true, value -> Value.Bool value
                 | _ -> TerrabuildException.Raise($"Value '{value}' can't be converted to boolean variable {key}")
             | _ -> TerrabuildException.Raise($"Value 'value' can't be converted to variable {key}")
 
@@ -151,7 +151,6 @@ let read (options: ConfigOptions.Options) =
                 "terrabuild_debug", Value.Bool options.Debug 
                 "terrabuild_tag", tagValue 
                 "terrabuild_note", noteValue ]
-            |> Map.map (fun _ value -> (value, Set.empty))
         }
 
         // variables = default configuration vars + configuration vars + env vars + args vars
@@ -346,7 +345,6 @@ let read (options: ConfigOptions.Options) =
                         Map [ "terrabuild_project", Value.String projectId
                               "terrabuild_target" , Value.String targetName
                               "terrabuild_hash", Value.String projectHash ]
-                        |> Map.map (fun _ value -> (value, Set.empty))
 
                     { evaluationContext with
                         Eval.ProjectDir = Some projectDir
@@ -356,7 +354,7 @@ let read (options: ConfigOptions.Options) =
                 // use value from project target
                 // otherwise use workspace target
                 // defaults to allow caching
-                let rebuild, _ =
+                let rebuild =
                     let rebuild =
                         target.Rebuild
                         |> Option.defaultWith (fun () ->
@@ -378,20 +376,20 @@ let read (options: ConfigOptions.Options) =
                             | Some extension -> extension
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
-                        let context, usedVars =
+                        let context =
                             extension.Defaults
                             |> Map.addMap step.Parameters
                             |> Expr.Map
                             |> Eval.eval evaluationContext
 
-                        let container, usedVars =
+                        let container =
                             match extension.Container with
                             | Some container ->
                                 match Eval.eval evaluationContext container with
-                                | Value.String container, containerUsedVars -> Some container, usedVars+containerUsedVars
-                                | Value.Nothing, containerUsedVars -> None, usedVars+containerUsedVars
+                                | Value.String container -> Some container
+                                | Value.Nothing -> None
                                 | _ -> TerrabuildException.Raise("container must evaluate to a string")
-                            | _ -> None, usedVars
+                            | _ -> None
 
                         let script =
                             match Extensions.getScript step.Extension projectDef.Scripts with
@@ -399,21 +397,12 @@ let read (options: ConfigOptions.Options) =
                             | _ -> TerrabuildException.Raise($"Extension {step.Extension} is not defined")
 
                         let hash =
-                            let usedVariables =
-                                usedVars
-                                |> Seq.sort
-                                |> Seq.choose (fun key ->
-                                    match evaluationContext.Variables |> Map.tryFind key with
-                                    | Some (value, _) -> Some $"{key} = {value}"
-                                    | _ -> None)
-                                |> List.ofSeq
-
                             let containerInfos = 
                                 match container with
                                 | Some container -> [ container ] @ List.ofSeq extension.Variables
                                 | _ -> []
 
-                            [ step.Extension; step.Command ] @ usedVariables @ containerInfos
+                            [ step.Extension; step.Command ] @ containerInfos
                             |> Hash.sha256strings
 
                         let targetContext = {

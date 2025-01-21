@@ -63,16 +63,6 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
             // barrier nodes are just discarded and dependencies lift level up
             match projectConfig.Targets |> Map.tryFind targetName with
             | Some target ->
-                let hashContent = [
-                    yield projectConfig.Hash
-                    yield target.Hash
-                    yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].TargetHash)
-                ]
-
-                let hash = hashContent |> Hash.sha256strings
-
-                Log.Debug($"Node {nodeId} has ProjectHash {projectConfig.Hash} and TargetHash {hash}")
-
                 let cache, ops =
                     target.Operations
                     |> List.fold (fun (cache, ops) operation ->
@@ -111,6 +101,20 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                         let cache = cache &&& executionRequest.Cache
                         cache, ops @ newops
                     ) (Cacheability.Always, [])
+
+                let opsCmds =
+                    ops
+                    |> List.map Json.Serialize
+
+                let hashContent = opsCmds @ [
+                    yield projectConfig.Hash
+                    yield target.Hash
+                    yield! children |> Seq.map (fun nodeId -> allNodes[nodeId].TargetHash)
+                ]
+
+                let hash = hashContent |> Hash.sha256strings
+
+                Log.Debug($"Node {nodeId} has ProjectHash {projectConfig.Hash} and TargetHash {hash}")
 
                 let cache = 
                     if options.Force then Cacheability.Never

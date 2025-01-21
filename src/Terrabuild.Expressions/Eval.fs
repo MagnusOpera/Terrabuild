@@ -7,7 +7,7 @@ type EvaluationContext = {
     WorkspaceDir: string
     ProjectDir: string option
     Versions: Map<string, string>
-    Variables: Map<string, Value * Set<string>>
+    Variables: Map<string, Value>
 }
 
 let rec eval (context: EvaluationContext) (expr: Expr) =
@@ -21,30 +21,30 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
 
     let rec eval (expr: Expr) =
         match expr with
-        | Expr.Nothing -> Value.Nothing, Set.empty
-        | Expr.Bool bool -> Value.Bool bool, Set.empty
-        | Expr.String str -> Value.String str, Set.empty
-        | Expr.Number num -> Value.Number num, Set.empty
-        | Expr.Object obj -> Value.Object obj, Set.empty
+        | Expr.Nothing -> Value.Nothing
+        | Expr.Bool bool -> Value.Bool bool
+        | Expr.String str -> Value.String str
+        | Expr.Number num -> Value.Number num
+        | Expr.Object obj -> Value.Object obj
         | Expr.Variable var ->
             // if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
             match context.Variables |> Map.tryFind var with
+            | Some value -> value
             | None -> TerrabuildException.Raise($"Variable '{var}' is not defined")
-            | Some (value, varUsed) -> value, (varUsed |> Set.add var)
         | Expr.Map map ->
-            let values, varUsed = map |> Map.fold (fun (map, varUsed) k v ->
-                let mv, mvu = eval v
-                map |> Map.add k mv, varUsed+mvu) (Map.empty, Set.empty)
-            Value.Map values, varUsed
+            let values = map |> Map.fold (fun map k v ->
+                let mv = eval v
+                map |> Map.add k mv) Map.empty
+            Value.Map values
         | Expr.List list ->
-            let values, varUsed = list |> List.fold (fun (list, varUsed) v ->
-                let mv, mvu = eval v
-                list @ [mv], varUsed+mvu) ([], Set.empty)
-            Value.List values, varUsed
+            let values = list |> List.fold (fun list v ->
+                let mv = eval v
+                list @ [mv]) []
+            Value.List values
         | Expr.Function (f, exprs) ->
-            let values, varUsed = exprs |> List.fold (fun (exprs, varUsed) expr ->
-                let e, vu = eval expr
-                (exprs @ [e], varUsed+vu)) ([], Set.empty)
+            let values = exprs |> List.fold (fun exprs expr ->
+                let e = eval expr
+                exprs @ [e]) []
             let res =
                 match f, values with
                 | Function.Plus, [Value.String left; Value.String right] -> Value.String (left + right)
@@ -164,6 +164,6 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
 
                     let prms = prms |> List.map (getParamType) |> String.join "*"
                     TerrabuildException.Raise($"Invalid arguments for function {f} with parameters ({prms})")
-            res, varUsed
+            res
 
     eval expr
