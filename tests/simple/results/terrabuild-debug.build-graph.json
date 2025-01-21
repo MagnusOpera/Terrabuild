@@ -6,7 +6,7 @@
       "project": "deployments/terraform-deploy",
       "target": "build",
       "configurationTarget": {
-        "hash": "1216AAFDF2AF5CDA8A7A23811355C1A3AE9F380BD975106E70F467F3D95AD042",
+        "hash": "CF1155E2D7628995F5CEE4500803C28355A7287CF9184B39CD4C01F64B344899",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -17,7 +17,7 @@
         "cache": null,
         "operations": [
           {
-            "hash": "02AEFD983580D5A98E84575C79F813BDC5045006FCA072F75C366D468FF0E4F7",
+            "hash": "EB059C317B64D7D2F91175C6BC0243CB5DFA7BD393337A4808AB170AA3852746",
             "container": "hashicorp/terraform:1.10",
             "containerVariables": [],
             "extension": "@terraform",
@@ -56,7 +56,7 @@
         "*.planfile"
       ],
       "projectHash": "DA24149CF300F799A94E8A5249F7EE06AEAA2A7F02215715D452B05C0D6DD6C0",
-      "targetHash": "0A45EAC1531308D2C956668241A788AACECC9D991EC4DE2AF75FC4504CAFCDF5",
+      "targetHash": "B9D2724200B2FD784D053D3C3CB55C522FCA04B605B42C68BCF99D4D309EE776",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -89,7 +89,7 @@
       "project": "libraries/dotnet-lib",
       "target": "build",
       "configurationTarget": {
-        "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
+        "hash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -105,7 +105,7 @@
         "cache": null,
         "operations": [
           {
-            "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
+            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
             "container": null,
             "containerVariables": [],
             "extension": "@dotnet",
@@ -133,7 +133,7 @@
         "obj/*.targets"
       ],
       "projectHash": "D40B341C32470C5A405E452ACD05D8D0F0A82650915F0DF14C697EACA0759F33",
-      "targetHash": "72A5E853C9554DDB8D62428E826D04BB30D383D78D972553C21BF667EF20C71B",
+      "targetHash": "00106123F686E26C0F077E5B18BD8A1487AF7184157A3F4983DF916DD4740C42",
       "operations": [
         {
           "container": null,
@@ -256,7 +256,7 @@
       "project": "projects/dotnet-app",
       "target": "build",
       "configurationTarget": {
-        "hash": "A649F97242CEFE0737701431018990998E0849E9CB990AB8B9C0B1CA39FD9C6F",
+        "hash": "6E8C12A2191A68C0FB487801C6B0DE041AE5E838E618AC904F835885E713C1D6",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -272,7 +272,7 @@
         "cache": null,
         "operations": [
           {
-            "hash": "F3D3F187F94C685E6C8F336F181B75DAE61F04FFE23AF4E7F5B858CAA1D5DFC6",
+            "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
             "container": null,
             "containerVariables": [],
             "extension": "@dotnet",
@@ -302,7 +302,7 @@
         "obj/*.targets"
       ],
       "projectHash": "7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC",
-      "targetHash": "73C1D1C43B92EA7D473975B9D91CC0F5E85ECAE3613315FF3CB7DEBE28CDE1A4",
+      "targetHash": "2434A9A95F36DD31A3D6B04D23FDADBA535F9C925D0653AFF90CB630F100A9D8",
       "operations": [
         {
           "container": null,
@@ -321,7 +321,7 @@
       "project": "projects/make-app",
       "target": "build",
       "configurationTarget": {
-        "hash": "D75E1B5F09A68010CF5A342EF04AB73E0FDE53F31E8A83B5DF5FF248DE965D24",
+        "hash": "C6337486788B3103E3C2737C5C465A151569678B0F79EDBAF65D6409D1FDDCB4",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -349,7 +349,7 @@
             ]
           },
           {
-            "hash": "60078A7AEF8007B4B5DC060CE7889241884A0FDE6A440EB5732A3FD31ED2D857",
+            "hash": "9133AD23EB6E7EFB4A73F5C8A7084C6A815C421C8F44401D46F00CF291D0B491",
             "container": null,
             "containerVariables": [],
             "extension": "@make",
@@ -379,7 +379,7 @@
         "dist"
       ],
       "projectHash": "A5BD059BA569E96AFE6AEC3BA05C405B454A3483F1A702D11CA978F318516307",
-      "targetHash": "37FDB0C457BA2EDD198F090B99C96A27040E39C8AD8CBBD50739E271D1BC05F0",
+      "targetHash": "9E42D535303C9DC5EC1ECA7A72E5BEBEB6B5B7F818DFEDCCAEFA0D5F1B3010CA",
       "operations": [
         {
           "container": null,
