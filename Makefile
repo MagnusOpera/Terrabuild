@@ -1,6 +1,8 @@
+ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+
 config ?= default
 env ?= default
-terrabuild ?= $(current_dir)/.out/dotnet/terrabuild
+terrabuild ?= dotnet run --project $(ROOT_DIR)src/Terrabuild -c $(buildconfig) --
 refresh ?= false
 version ?= 0.0.0
 
@@ -43,10 +45,10 @@ upgrade:
 	dotnet restore --force-evaluate
 
 usage:
-	dotnet run --project src/Terrabuild -- --help
-	dotnet run --project src/Terrabuild -- run --help
-	dotnet run --project src/Terrabuild -- clear --help
-	dotnet run --project src/Terrabuild -- login --help
+	$(terrabuild) --help
+	$(terrabuild) run --help
+	$(terrabuild) clear --help
+	$(terrabuild) login --help
 
 #
 # .______       _______  __       _______     ___           _______. _______
@@ -95,46 +97,46 @@ terrabuild:
 #
 
 run-build-circular:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/circular --debug --logs
+	$(terrabuild) run build --workspace tests/circular --debug --logs
 
 run-scaffold:
-	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --debug --logs
+	$(terrabuild) scaffold --workspace tests/scaffold --debug --logs
 
 run-rescaffold:
-	dotnet run --project src/Terrabuild -- scaffold --workspace tests/scaffold --debug --force --logs
+	$(terrabuild) scaffold --workspace tests/scaffold --debug --force --logs
 
 run-build-scaffold:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/scaffold --debug --retry --logs
+	$(terrabuild) run build --workspace tests/scaffold --debug --retry --logs
 
 run-build-simple:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --debug --retry --logs
+	$(terrabuild) run build --workspace tests/simple --debug --retry --logs
 
 run-rebuild-simple:
-	dotnet run --project src/Terrabuild -- run build --workspace tests/simple --debug --retry --logs
+	$(terrabuild) run build --workspace tests/simple --debug --retry --logs
 
 run-deploy-simple:
-	dotnet run --project src/Terrabuild -- run deploy --workspace tests/simple --debug --retry --logs
+	$(terrabuild) run deploy --workspace tests/simple --debug --retry --logs
 
 run-build-playground:
-	dotnet run --project src/Terrabuild -- run build --workspace ../playground --retry --debug
+	$(terrabuild) run build --workspace ../playground --retry --debug
 
 run-dist-playground:
-	dotnet run --project src/Terrabuild -- run dist --workspace ../playground --retry --debug
+	$(terrabuild) run dist --workspace ../playground --retry --debug
 
 run-deploy-playground:
-	dotnet run --project src/Terrabuild -- run deploy --workspace ../playground --retry --debug
+	$(terrabuild) run deploy --workspace ../playground --retry --debug
 
 run-test-insights:
-	dotnet run --project src/Terrabuild -- run build test apply plan -w ../../insights --debug --force --local-only --whatif
+	$(terrabuild) run build test apply plan -w ../../insights --debug --force --local-only --whatif
 
 run-test-terrabuild:
-	dotnet run --project src/Terrabuild -- run build test publish -w src --debug --force --local-only
+	$(terrabuild) run build test publish -w src --debug --force --local-only
 
 run-test-cluster-layers:
-	dotnet run --project src/Terrabuild -- run build -w tests/cluster-layers --debug --force
+	$(terrabuild) run build -w tests/cluster-layers --debug --force
 
 run-test-simple:
-	dotnet run --project src/Terrabuild -- run build -w tests/simple --debug --force
+	$(terrabuild) run build -w tests/simple --debug --force
 
 define diff_file
 	@if [ $(refresh) ]; then \
@@ -160,13 +162,13 @@ endef
 
 # $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
 
-self-test-cluster-layers:
+smoke-test-cluster-layers:
 	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs --container-tool docker)
 
-self-test-multirefs:
+smoke-test-multirefs:
 	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --logs --container-tool docker)
 
-self-test-simple:
+smoke-test-simple:
 	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs --container-tool docker)
 
-self-test-all: self-test-cluster-layers self-test-multirefs self-test-simple
+run-smoke-tests: smoke-test-cluster-layers smoke-test-multirefs smoke-test-simple
