@@ -14,7 +14,7 @@ Terrabuild is a tool to maintain and build efficiently monorepos. Terrabuild is 
 - describe a workspace (collection of several projects) using a familiar syntax (HCL-like)
 - focus on how to build a project and its dependencies: Terrabuild will optimize and run concurrent builds whenever possible
 - Terrabuild ships with default extensions but you can implement your own as well
-- Terrabuild use heavy caching and several graph optimizations to make build fast both on CI and dev environment
+- Terrabuild uses heavy caching and several graph optimizations to make build fast both on CI and dev environment
 
 # Benefits
 - focus on project and the big picture, not the nitty-gritty details

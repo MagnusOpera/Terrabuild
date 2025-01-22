@@ -38,7 +38,7 @@ jobs:
           terrabuild version
 
       - name: Self Integration Tests
-        run: make self-test-all terrabuild=terrabuild
+        run: make run-smoke-tests terrabuild=terrabuild
 
       - name: Include Build Logs
         if: always()

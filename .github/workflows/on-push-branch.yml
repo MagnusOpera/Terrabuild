@@ -42,7 +42,7 @@ jobs:
           make self env=dev
 
       - name: Self Integration Tests
-        run: make self-test-all
+        run: make run-smoke-tests
 
       - name: Include Build Logs
         if: always()
