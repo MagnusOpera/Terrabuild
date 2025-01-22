@@ -9,7 +9,7 @@ module private Http =
     open System.Net
     open Errors
     let apiUrl =
-        let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.terrabuild.io")
+        let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.prod.magnusopera.io")
         Uri(baseUrl)
 
     let private request<'req, 'resp> method headers (path: string) (request: 'req): 'resp =
