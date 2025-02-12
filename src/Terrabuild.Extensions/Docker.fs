@@ -11,7 +11,7 @@ type Docker() =
     /// Run a docker `command`.
     /// </summary>
     /// <param name="__dispatch__" example="image">Example.</param>
-    /// <param name="arguments" example="prune -f">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;prune -f&quot;">Arguments for command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"

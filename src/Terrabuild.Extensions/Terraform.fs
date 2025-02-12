@@ -29,7 +29,7 @@ type Terraform() =
     /// Run a terraform `command`.
     /// </summary>
     /// <param name="__dispatch__" example="fmt">Example.</param>
-    /// <param name="arguments" example="-write=false">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;-write=false&quot;">Arguments for command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"

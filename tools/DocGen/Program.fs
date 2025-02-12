@@ -96,7 +96,6 @@ let buildExtensions (members: Documentation.Member seq) =
 let writeCommand extensionDir (command: Command) (batchCommand: Command option) (extension: Extension) =
     match command.Name with
     | "__defaults__" -> ()
-    | name when name.StartsWith("__") -> ()
     | _ ->
         let commandFile = Path.Combine(extensionDir, $"{command.Name}.md")
         let commandContent = [
@@ -126,7 +125,9 @@ let writeCommand extensionDir (command: Command) (batchCommand: Command option) 
                 for prm in prms do
                     match prm.Name with
                     | "context" -> ()
-                    | _ -> $"    {prm.Name}: {prm.Example}"
+                    | _ ->
+                        if prm.Name <> "__dispatch__" then
+                            $"    {prm.Name}: {prm.Example}"
                 "}"
             "```"
 
@@ -139,8 +140,9 @@ let writeCommand extensionDir (command: Command) (batchCommand: Command option) 
                     match prm.Name with
                     | "context" -> ()
                     | _ ->
+                        let prmName = if prm.Name = "__dispatch__" then "command" else prm.Name
                         let required = if prm.Required then "Required" else "Optional"
-                        $"* `{prm.Name}` - ({required}) {prm.Summary}"
+                        $"* `{prmName}` - ({required}) {prm.Summary}"
 
             match batchCommand with
             | Some batchCommand ->

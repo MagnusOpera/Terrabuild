@@ -25,7 +25,7 @@ type Gradle() =
     /// Run a gradle `command`.
     /// </summary>
     /// <param name="__dispatch__" example="clean">Example.</param>
-    /// <param name="arguments" example="">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;&quot;">Arguments for command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"

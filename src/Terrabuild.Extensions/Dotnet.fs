@@ -79,7 +79,7 @@ type Dotnet() =
     /// Run a dotnet `command`.
     /// </summary>
     /// <param name="__dispatch__" example="run">Example.</param>
-    /// <param name="arguments" example="-v">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;-v&quot;">Arguments for command.</param>
     static member __dispatch__ (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
