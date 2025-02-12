@@ -42,6 +42,7 @@ configuration {
         secret4: format("1", 2, $toto, true, nothing)
         secret5: tostring(40 + 1 + 2)
         secret6: true & false | true
+        my-variable: 42
     }
 }
 
