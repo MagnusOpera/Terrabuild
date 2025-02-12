@@ -38,7 +38,7 @@ target publish {
 }
 
 extension @dotnet {
-    container = "mcr.microsoft.com/dotnet/sdk:9.0.102"
+    container = "mcr.microsoft.com/dotnet/sdk:9.0.200"
     variables = [
         "DOTNET_SKIP_FIRST_TIME_EXPERIENCE"
         "DOTNET_NOLOGO"
