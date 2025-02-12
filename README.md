@@ -25,7 +25,7 @@ Terrabuild is a tool to maintain and build efficiently monorepos. Terrabuild is 
 
 # Learn more
 - [Documentation](https://terrabuild.io/docs/?utm_campaign=magnusopera-terrabuild-github-repo&utm_source=github.com&utm_medium=docs)
-- [Quickstart](https://terrabuild.io/docs/quick-start/?utm_campaign=magnusopera-terrabuild-github-repo&utm_source=github.com&utm_medium=quickstart)
+- [Quickstart](https://terrabuild.io/docs/getting-started/quick-start/?utm_campaign=magnusopera-terrabuild-github-repo&utm_source=github.com&utm_medium=quickstart)
 - [Playground](https://github.com/magnusopera/terrabuild-playground)
 
 # Open source
