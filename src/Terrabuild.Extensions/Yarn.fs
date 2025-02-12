@@ -32,7 +32,6 @@ type Yarn() =
         let cmd = context.Command
 
         let ops = [
-            shellOp "yarn" "install --frozen-lockfile"
             shellOp "yarn" $"{cmd} -- {arguments}"   
         ]
         execRequest Cacheability.Always ops
@@ -41,8 +40,14 @@ type Yarn() =
     /// <summary>
     /// Install packages using lock file.
     /// </summary>
-    static member install (context: ActionContext) =
-        let ops = [ shellOp "yarn" "install --frozen-lockfile" ]
+    /// <param name="ignoreEngines" example="true">Ignore engines on install.</param> 
+    static member install (context: ActionContext) (``ignore-engines``: bool option) =
+        let ignoreEngines =
+            match ``ignore-engines`` with
+            | Some true -> " --ignore-engines"
+            | _ -> ""
+
+        let ops = [ shellOp "yarn" $"install --frozen-lockfile{ignoreEngines}" ]
         execRequest Cacheability.Always ops
 
 
@@ -50,11 +55,15 @@ type Yarn() =
     /// Run `build` script.
     /// </summary>
     /// <param name="arguments" example="&quot;--port=1337&quot;">Arguments to pass to target.</param> 
-    static member build (context: ActionContext) (arguments: string option) =
+    static member build (context: ActionContext) (arguments: string option) (``ignore-engines``: bool option) =
         let args = arguments |> Option.defaultValue ""
+        let ignoreEngines =
+            match ``ignore-engines`` with
+            | Some true -> " --ignore-engines"
+            | _ -> ""
 
         let ops = [
-            shellOp "yarn" "install --frozen-lockfile"
+            shellOp "yarn" $"install --frozen-lockfile{ignoreEngines}"
             shellOp "yarn" $"build -- {args}"   
         ]
         execRequest Cacheability.Always ops
@@ -64,11 +73,15 @@ type Yarn() =
     /// Run `test` script.
     /// </summary>
     /// <param name="arguments" example="&quot;--port=1337&quot;">Arguments to pass to target.</param> 
-    static member test (context: ActionContext) (arguments: string option) =
+    static member test (context: ActionContext) (arguments: string option) (``ignore-engines``: bool option) =
         let args = arguments |> Option.defaultValue ""
+        let ignoreEngines =
+            match ``ignore-engines`` with
+            | Some true -> " --ignore-engines"
+            | _ -> ""
 
         let ops = [
-            shellOp "yarn" "install --frozen-lockfile"
+            shellOp "yarn" $"install --frozen-lockfile{ignoreEngines}"
             shellOp "yarn" $"test -- {args}"   
         ]
         execRequest Cacheability.Always ops
