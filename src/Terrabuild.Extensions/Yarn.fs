@@ -40,7 +40,7 @@ type Yarn() =
     /// <summary>
     /// Install packages using lock file.
     /// </summary>
-    /// <param name="ignoreEngines" example="true">Ignore engines on install.</param> 
+    /// <param name="ignore-engines" example="true">Ignore engines on install.</param> 
     static member install (context: ActionContext) (``ignore-engines``: bool option) =
         let ignoreEngines =
             match ``ignore-engines`` with
@@ -55,6 +55,7 @@ type Yarn() =
     /// Run `build` script.
     /// </summary>
     /// <param name="arguments" example="&quot;--port=1337&quot;">Arguments to pass to target.</param> 
+    /// <param name="ignore-engines" example="true">Ignore engines on install.</param> 
     static member build (context: ActionContext) (arguments: string option) (``ignore-engines``: bool option) =
         let args = arguments |> Option.defaultValue ""
         let ignoreEngines =
@@ -73,6 +74,7 @@ type Yarn() =
     /// Run `test` script.
     /// </summary>
     /// <param name="arguments" example="&quot;--port=1337&quot;">Arguments to pass to target.</param> 
+    /// <param name="ignore-engines" example="true">Ignore engines on install.</param> 
     static member test (context: ActionContext) (arguments: string option) (``ignore-engines``: bool option) =
         let args = arguments |> Option.defaultValue ""
         let ignoreEngines =
