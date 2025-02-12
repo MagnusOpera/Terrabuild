@@ -41,8 +41,14 @@ type Yarn() =
     /// <summary>
     /// Install packages using lock file.
     /// </summary>
-    static member install (context: ActionContext) =
-        let ops = [ shellOp "yarn" "install --frozen-lockfile" ]
+    /// <param name="ignoreEngines" example="true">Ignore engines on install.</param> 
+    static member install (context: ActionContext) (ignoreEngines: bool option)=
+        let ignoreEngines =
+            match ignoreEngines with
+            | Some true -> " --ignore-engines"
+            | _ -> ""
+
+        let ops = [ shellOp "yarn" $"install --frozen-lockfile{ignoreEngines}" ]
         execRequest Cacheability.Always ops
 
 
