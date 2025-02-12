@@ -43,7 +43,7 @@ target docker {
   rebuild = false
   cache = "always"
   @shell echo { arguments: trim("building project1 " + $configuration) }
-  @docker build { arguments: { config: "Release" } }
+  @docker build { arguments: { config: "Release" my-variable: 42 } }
 }
 
 
