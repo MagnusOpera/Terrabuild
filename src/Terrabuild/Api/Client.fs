@@ -64,19 +64,33 @@ module private Auth =
 
 
 module private Build =
-    [<RequireQualifiedAccess>]
-    type StartBuildInput = {
+
+    type CIInfoInput = {
+        Name: string
+        Metadata: string
+    }
+
+    type BuildSourceInput = {
         BranchOrTag: string
         Commit: string
+        Message: string option
+        Author: string option
+    }
+
+    type BuildContextInput = {
         Configuration: string
         Note: string option
         Tag: string option
         Targets: string seq
         Force: bool
         Retry: bool
-        CI: bool
-        CIName: string option
-        CIMetadata: string option
+    }
+
+    [<RequireQualifiedAccess>]
+    type StartBuildInput = {
+        CI: CIInfoInput option
+        Source: BuildSourceInput
+        Context: BuildContextInput
     }
 
     [<RequireQualifiedAccess>]
@@ -105,19 +119,30 @@ module private Build =
         TargetHash: string
     }
 
-    let startBuild headers branchOrTag commit configuration note tag targets force retry ci ciname cimetadata: StartBuildOutput =
-        { StartBuildInput.BranchOrTag = branchOrTag
-          StartBuildInput.Commit = commit
-          StartBuildInput.Configuration = configuration
-          StartBuildInput.Note = note
-          StartBuildInput.Tag = tag
-          StartBuildInput.Targets = targets 
-          StartBuildInput.Force = force
-          StartBuildInput.Retry = retry
-          StartBuildInput.CI = ci
-          StartBuildInput.CIName = ciname
-          StartBuildInput.CIMetadata = cimetadata }
-          |> Http.post headers "/builds"
+    let startBuild headers branchOrTag commit configuration note tag targets force retry ciname cimetadata: StartBuildOutput =
+        let ci = 
+            match ciname, cimetadata with
+            | Some name, Some metadata ->
+                Some { Name = name
+                       Metadata = metadata }
+            | _ -> None
+        let source = 
+            { BranchOrTag = branchOrTag
+              Commit = commit
+              Message = None
+              Author = None }
+        let context =
+            {  Configuration = configuration
+               Note = note
+               Tag = tag
+               Targets = targets
+               Force = force
+               Retry = retry }
+
+        { StartBuildInput.CI = ci
+          StartBuildInput.Source = source
+          StartBuildInput.Context = context }
+        |> Http.post headers "/builds"
 
 
     let addArtifact headers buildId project target projectHash targetHash files success: Unit =
@@ -175,7 +200,6 @@ type Client(space: string, token: string, options: ConfigOptions.Options) =
                                         options.Targets
                                         options.Force
                                         options.Retry
-                                        options.CI.IsSome
                                         options.CI
                                         options.Metadata
             resp.BuildId)
