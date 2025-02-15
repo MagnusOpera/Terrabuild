@@ -6,20 +6,24 @@ type GitHub() =
     static let stepSummary = System.Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY")
     static let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
     static let runId = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ID")
+    static let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
+    static let runAttempt = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT") |> int
 
 
     static member Detect() =
         [ sha; refName; stepSummary; repository; runId ] |> List.forall (not << isNull)
 
     interface Contracts.ISourceControl with
-        override _.HeadCommit = sha
-
         override _.BranchOrTag = refName
+        override _.HeadCommit = sha
+        override _.Run = 
+            Some { Name = "GitHub"
+                   Message = System.Environment.CurrentDirectory |> Git.getHeadCommitMessage
+                   Author = System.Environment.CurrentDirectory |> Git.getHeadCommitAuthor
+                   LogUrl = $"https://github.com/{repository}/commit/{sha}/checks/{runId}"
+                   Repository = repository
+                   RunAttempt = runAttempt }
 
         override _.LogType = Contracts.LogType.Markdown stepSummary
 
         override _.LogError msg = $"::error::{msg}" |> Terminal.writeLine
-
-        override _.CI = Some "GitHub"
-
-        override _.Metadata = Some $"https://github.com/{repository}/commit/{sha}/checks/{runId}"

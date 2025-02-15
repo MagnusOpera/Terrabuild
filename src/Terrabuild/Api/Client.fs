@@ -65,18 +65,17 @@ module private Auth =
 
 module private Build =
 
-    type CIInfoInput = {
+    [<RequireQualifiedAccess>]
+    type RunInfoInput = {
         Name: string
-        Metadata: string
+        Repository: string
+        LogUrl: string
+        Message: string
+        Author: string
+        RunAttempt: int
     }
 
-    type BuildSourceInput = {
-        BranchOrTag: string
-        Commit: string
-        Message: string option
-        Author: string option
-    }
-
+    [<RequireQualifiedAccess>]
     type BuildContextInput = {
         Configuration: string
         Note: string option
@@ -88,8 +87,9 @@ module private Build =
 
     [<RequireQualifiedAccess>]
     type StartBuildInput = {
-        CI: CIInfoInput option
-        Source: BuildSourceInput
+        BranchOrTag: string
+        Commit: string
+        Run: RunInfoInput option
         Context: BuildContextInput
     }
 
@@ -119,28 +119,10 @@ module private Build =
         TargetHash: string
     }
 
-    let startBuild headers branchOrTag commit configuration note tag targets force retry ciname cimetadata: StartBuildOutput =
-        let ci = 
-            match ciname, cimetadata with
-            | Some name, Some metadata ->
-                Some { Name = name
-                       Metadata = metadata }
-            | _ -> None
-        let source = 
-            { BranchOrTag = branchOrTag
-              Commit = commit
-              Message = None
-              Author = None }
-        let context =
-            {  Configuration = configuration
-               Note = note
-               Tag = tag
-               Targets = targets
-               Force = force
-               Retry = retry }
-
-        { StartBuildInput.CI = ci
-          StartBuildInput.Source = source
+    let startBuild headers branchOrTag headCommit run context : StartBuildOutput =
+        { StartBuildInput.BranchOrTag = branchOrTag
+          StartBuildInput.Commit = headCommit
+          StartBuildInput.Run = run
           StartBuildInput.Context = context }
         |> Http.post headers "/builds"
 
@@ -191,17 +173,28 @@ type Client(space: string, token: string, options: ConfigOptions.Options) =
 
     let buildId =
         lazy(
+            let run = options.Run |> Option.map (fun run -> {
+                Build.RunInfoInput.Name = run.Name
+                Build.RunInfoInput.Repository = run.Repository
+                Build.RunInfoInput.LogUrl = run.LogUrl
+                Build.RunInfoInput.Message = run.Message
+                Build.RunInfoInput.Author = run.Author
+                Build.RunInfoInput.RunAttempt = run.RunAttempt
+            })
+
+            let context = {
+                Build.BuildContextInput.Configuration = options.Configuration
+                Build.BuildContextInput.Note = options.Note
+                Build.BuildContextInput.Tag = options.Tag
+                Build.BuildContextInput.Targets = options.Targets
+                Build.BuildContextInput.Force = options.Force
+                Build.BuildContextInput.Retry = options.Retry }
+
             let resp = Build.startBuild headers
                                         options.BranchOrTag
                                         options.HeadCommit
-                                        options.Configuration
-                                        options.Note
-                                        options.Tag
-                                        options.Targets
-                                        options.Force
-                                        options.Retry
-                                        options.CI
-                                        options.Metadata
+                                        run
+                                        context
             resp.BuildId)
 
     interface Contracts.IApiClient with

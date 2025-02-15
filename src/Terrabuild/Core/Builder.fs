@@ -68,7 +68,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                     |> List.fold (fun (cache, ops) operation ->
                         let optContext = {
                             Terrabuild.Extensibility.ActionContext.Debug = options.Debug
-                            Terrabuild.Extensibility.ActionContext.CI = options.CI.IsSome
+                            Terrabuild.Extensibility.ActionContext.CI = options.Run.IsSome
                             Terrabuild.Extensibility.ActionContext.Command = operation.Command
                             Terrabuild.Extensibility.ActionContext.Hash = projectConfig.Hash
                         }

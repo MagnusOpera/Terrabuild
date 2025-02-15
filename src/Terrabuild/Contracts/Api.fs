@@ -1,7 +1,6 @@
 namespace Contracts
 open System
 
-
 type IApiClient =
     abstract StartBuild: Unit -> Unit
     abstract CompleteBuild: success:bool -> Unit

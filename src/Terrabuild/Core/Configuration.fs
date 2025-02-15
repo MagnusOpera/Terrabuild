@@ -102,8 +102,8 @@ let read (options: ConfigOptions.Options) =
     if options.WhatIf then
         $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} whatif mode requested" |> Terminal.writeLine
 
-    options.CI
-    |> Option.iter (fun ci -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {ci}" |> Terminal.writeLine)
+    options.Run
+    |> Option.iter (fun run -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {run.Name}" |> Terminal.writeLine)
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
@@ -147,7 +147,7 @@ let read (options: ConfigOptions.Options) =
                 "terrabuild_head_commit", Value.String options.HeadCommit 
                 "terrabuild_retry", Value.Bool options.Retry 
                 "terrabuild_force", Value.Bool options.Force 
-                "terrabuild_ci", Value.Bool options.CI.IsSome 
+                "terrabuild_ci", Value.Bool options.Run.IsSome 
                 "terrabuild_debug", Value.Bool options.Debug 
                 "terrabuild_tag", tagValue 
                 "terrabuild_note", noteValue ]
@@ -247,7 +247,7 @@ let read (options: ConfigOptions.Options) =
                 let parseContext = 
                     let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
                                     Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
-                                    Terrabuild.Extensibility.ExtensionContext.CI = options.CI.IsSome }
+                                    Terrabuild.Extensibility.ExtensionContext.CI = options.Run.IsSome }
                     Value.Map (Map [ "context", Value.Object context ])
 
                 let result =

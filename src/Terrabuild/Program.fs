@@ -101,10 +101,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.LocalOnly = options.LocalOnly
             ConfigOptions.Options.StartedAt = options.StartedAt
             ConfigOptions.Options.Targets = options.Targets
-            ConfigOptions.Options.CI = sourceControl.CI
-            ConfigOptions.Options.BranchOrTag = sourceControl.BranchOrTag
-            ConfigOptions.Options.HeadCommit = sourceControl.HeadCommit
-            ConfigOptions.Options.Metadata = sourceControl.Metadata
             ConfigOptions.Options.LogType = sourceControl.LogType
             ConfigOptions.Options.Configuration = options.Configuration
             ConfigOptions.Options.Note = options.Note
@@ -112,6 +108,9 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.Labels = options.Labels
             ConfigOptions.Options.Variables = options.Variables
             ConfigOptions.Options.ContainerTool = options.ContainerTool
+            ConfigOptions.Options.HeadCommit = sourceControl.HeadCommit
+            ConfigOptions.Options.BranchOrTag = sourceControl.BranchOrTag
+            ConfigOptions.Options.Run = sourceControl.Run
         }
 
         if options.Debug then

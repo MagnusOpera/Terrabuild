@@ -152,7 +152,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     notification.BuildStarted graph
     api |> Option.iter (fun api -> api.StartBuild())
 
-    let allowRemoteCache = options.CI.IsSome
+    let allowRemoteCache = options.Run.IsSome
 
     let homeDir = cache.CreateHomeDir "containers"
     let tmpDir = cache.CreateHomeDir "tmp"
