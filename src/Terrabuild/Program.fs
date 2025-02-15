@@ -5,6 +5,7 @@ open Serilog
 open Errors
 open System.Reflection
 open Collections
+open Environment
 
 
 [<RequireQualifiedAccess>]
@@ -51,7 +52,7 @@ type TerrabuildExiter() =
 
             exit (int errorCode)
 
-let launchDir = Environment.CurrentDirectory
+let launchDir = currentDir()
 
 let rec findWorkspace dir =
     if FS.combinePath dir "WORKSPACE" |> IO.exists then
@@ -85,7 +86,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             |> String.join "\n"
             |> IO.writeTextFile (logFile $"{name}-graph.mermaid")
 
-        Environment.CurrentDirectory <- options.Workspace
+        System.Environment.CurrentDirectory <- options.Workspace
         Log.Debug("Changing current directory to {directory}", options.Workspace)
         Log.Debug("ProcessorCount = {procCount}", Environment.ProcessorCount)
 
@@ -173,7 +174,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             match runArgs.TryGetResult(RunArgs.Workspace) with
             | Some ws -> ws
             | _ ->
-                match Environment.CurrentDirectory |> findWorkspace with
+                match currentDir() |> findWorkspace with
                 | Some ws -> ws
                 | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let targets = runArgs.GetResult(RunArgs.Target) |> Seq.map String.toLower
@@ -216,7 +217,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             match serveArgs.TryGetResult(ServeArgs.Workspace) with
             | Some ws -> ws
             | _ ->
-                match Environment.CurrentDirectory |> findWorkspace with
+                match currentDir() |> findWorkspace with
                 | Some ws -> ws
                 | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let configuration = serveArgs.TryGetResult(ServeArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
@@ -246,7 +247,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             match logsArgs.TryGetResult(LogsArgs.Workspace) with
             | Some ws -> ws
             | _ ->
-                match Environment.CurrentDirectory |> findWorkspace with
+                match currentDir() |> findWorkspace with
                 | Some ws -> ws
                 | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
@@ -335,7 +336,7 @@ let main _ =
                 $"{Ansi.Emojis.explosion} {ex}" |> Terminal.writeLine
                 5
 
-    Environment.CurrentDirectory <- launchDir
+    System.Environment.CurrentDirectory <- launchDir
     Terminal.showCursor()
     Log.Debug("===== [Execution End] =====")
     retCode

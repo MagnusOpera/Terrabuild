@@ -1,17 +1,19 @@
 namespace SourceControls
+open Environment
+open Environment
 
 type GitHub() =
-    let sha = System.Environment.GetEnvironmentVariable("GITHUB_SHA")
-    let refName = System.Environment.GetEnvironmentVariable("GITHUB_REF_NAME")
-    let stepSummary = System.Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY")
-    let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
-    let runId = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ID")
-    let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
-    let runAttempt = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT") |> int
-    let author = System.Environment.CurrentDirectory |> Git.getHeadCommitAuthor
+    let sha = "GITHUB_SHA" |> envVar
+    let refName = "GITHUB_REF_NAME" |> envVar
+    let stepSummary = "GITHUB_STEP_SUMMARY" |> envVar
+    let repository = "GITHUB_REPOSITORY" |> envVar
+    let runId = "GITHUB_RUN_ID" |> envVar
+    let repository = "GITHUB_REPOSITORY" |> envVar
+    let runAttempt = "GITHUB_RUN_ATTEMPT" |> envVar |> int
+    let author = currentDir() |> Git.getHeadCommitAuthor
 
     static member Detect() =
-        System.Environment.GetEnvironmentVariable("GITHUB_ACTION") |> isNull |> not
+        "GITHUB_ACTION" |> envVar |> isNull |> not
 
     interface Contracts.ISourceControl with
         override _.BranchOrTag = refName
@@ -19,8 +21,8 @@ type GitHub() =
         override _.User = author
         override _.Run = 
             Some { Name = "GitHub"
-                   Message = System.Environment.CurrentDirectory |> Git.getHeadCommitMessage
-                   Author = System.Environment.CurrentDirectory |> Git.getHeadCommitAuthor
+                   Message = currentDir() |> Git.getHeadCommitMessage
+                   Author = currentDir() |> Git.getHeadCommitAuthor
                    LogUrl = $"https://github.com/{repository}/commit/{sha}/checks/{runId}"
                    Repository = repository
                    RunAttempt = runAttempt }
