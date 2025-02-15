@@ -16,6 +16,7 @@ type RunInfo = {
 type ISourceControl =
     abstract BranchOrTag: string
     abstract HeadCommit: string
+    abstract User: string
     abstract Run: RunInfo option
     abstract LogType: LogType
     abstract LogError: string -> unit

@@ -8,7 +8,7 @@ type GitHub() =
     static let runId = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ID")
     static let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
     static let runAttempt = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT") |> int
-
+    static let author = System.Environment.CurrentDirectory |> Git.getHeadCommitAuthor
 
     static member Detect() =
         [ sha; refName; stepSummary; repository; runId ] |> List.forall (not << isNull)
@@ -16,6 +16,7 @@ type GitHub() =
     interface Contracts.ISourceControl with
         override _.BranchOrTag = refName
         override _.HeadCommit = sha
+        override _.User = author
         override _.Run = 
             Some { Name = "GitHub"
                    Message = System.Environment.CurrentDirectory |> Git.getHeadCommitMessage

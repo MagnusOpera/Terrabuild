@@ -89,6 +89,7 @@ module private Build =
     type StartBuildInput = {
         BranchOrTag: string
         Commit: string
+        User: string
         Run: RunInfoInput option
         Context: BuildContextInput
     }
@@ -119,9 +120,10 @@ module private Build =
         TargetHash: string
     }
 
-    let startBuild headers branchOrTag headCommit run context : StartBuildOutput =
+    let startBuild headers branchOrTag headCommit user run context : StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = headCommit
+          StartBuildInput.User = user
           StartBuildInput.Run = run
           StartBuildInput.Context = context }
         |> Http.post headers "/builds"
@@ -193,6 +195,7 @@ type Client(space: string, token: string, options: ConfigOptions.Options) =
             let resp = Build.startBuild headers
                                         options.BranchOrTag
                                         options.HeadCommit
+                                        options.User
                                         run
                                         context
             resp.BuildId)
