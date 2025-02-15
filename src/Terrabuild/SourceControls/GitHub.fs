@@ -1,17 +1,17 @@
 namespace SourceControls
 
 type GitHub() =
-    static let sha = System.Environment.GetEnvironmentVariable("GITHUB_SHA")
-    static let refName = System.Environment.GetEnvironmentVariable("GITHUB_REF_NAME")
-    static let stepSummary = System.Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY")
-    static let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
-    static let runId = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ID")
-    static let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
-    static let runAttempt = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT") |> int
-    static let author = System.Environment.CurrentDirectory |> Git.getHeadCommitAuthor
+    let sha = System.Environment.GetEnvironmentVariable("GITHUB_SHA")
+    let refName = System.Environment.GetEnvironmentVariable("GITHUB_REF_NAME")
+    let stepSummary = System.Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY")
+    let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
+    let runId = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ID")
+    let repository = System.Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
+    let runAttempt = System.Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT") |> int
+    let author = System.Environment.CurrentDirectory |> Git.getHeadCommitAuthor
 
     static member Detect() =
-        [ sha; refName; stepSummary; repository; runId ] |> List.forall (not << isNull)
+        System.Environment.GetEnvironmentVariable("GITHUB_ACTION") |> isNull |> not
 
     interface Contracts.ISourceControl with
         override _.BranchOrTag = refName
