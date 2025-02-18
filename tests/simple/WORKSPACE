@@ -3,10 +3,11 @@ workspace {
     // space = "magnusopera/default"
 }
 
-configuration default {
+configuration {
   variables = {
     configuration: "Debug"
     secret_message: "tagada"
+    npm_version: "1.0.0"
     workspace: "default"
   }
 }

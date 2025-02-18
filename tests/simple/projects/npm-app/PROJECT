@@ -4,5 +4,6 @@ project @npm {
 }
 
 target build {
+    @npm `version` { arguments: $npm_version }
     @npm build { }
 }

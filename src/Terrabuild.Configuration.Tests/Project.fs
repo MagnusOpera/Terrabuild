@@ -63,8 +63,10 @@ let parseProject() =
                                                                                                  [ Expr.String "building project1 "
                                                                                                    Expr.Variable "configuration" ]) ]) ] }
                                { Extension = "@docker"; Command = "build"
-                                 Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "$npm.version"
-                                                                                 "my-variable", Expr.Number 42 ]) ] } ] }
+                                 Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "Release"
+                                                                                 "my-variable", Expr.Number 42 ]) ] }
+                               { Extension = "@npm"; Command = "version"
+                                 Parameters = Map [ "arguments", Expr.Variable "npm_version"] } ] }
 
         { ProjectFile.Extensions = Map [ "@dotnet", extDotnet
                                          "@docker", extDocker
