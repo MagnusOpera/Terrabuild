@@ -62,7 +62,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "id": "deployments/terraform-deploy",
-      "hash": "DA24149CF300F799A94E8A5249F7EE06AEAA2A7F02215715D452B05C0D6DD6C0",
+      "hash": "A076DFCB961F0FDF4AE3F8C98D3099BB85C412EB1D15AA963E249438C55CD634",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
@@ -104,7 +104,7 @@
                       ],
                       "npm_app_version": [
                         "string",
-                        "3D4E6AD22CC8AA6E1544C3E6FD63DB3BCFB10FF095BF099457E0E0EA66F32D7E"
+                        "DE29629FF322ED361E462E00D3F9EBDBF4432CA34F84020217492FD512A4E27F"
                       ]
                     }
                   ],
@@ -213,7 +213,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
+          "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -224,10 +224,10 @@
           "cache": null,
           "operations": [
             {
-              "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+              "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
               "container": "node:20",
               "containerVariables": [],
-              "extension": "npmext",
+              "extension": "@npm",
               "command": "build",
               "script": {},
               "context": [
@@ -481,7 +481,7 @@
     },
     "projects/npm-app": {
       "id": "projects/npm-app",
-      "hash": "3D4E6AD22CC8AA6E1544C3E6FD63DB3BCFB10FF095BF099457E0E0EA66F32D7E",
+      "hash": "DE29629FF322ED361E462E00D3F9EBDBF4432CA34F84020217492FD512A4E27F",
       "dependencies": [
         "libraries/npm-lib",
         "projects/npm-app/private-npm-lib"
@@ -646,7 +646,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
+          "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -657,10 +657,10 @@
           "cache": null,
           "operations": [
             {
-              "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+              "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
               "container": "node:20",
               "containerVariables": [],
-              "extension": "npmext",
+              "extension": "@npm",
               "command": "build",
               "script": {},
               "context": [
@@ -689,7 +689,7 @@
       ],
       "targets": {
         "build": {
-          "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
+          "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
           "rebuild": false,
           "dependsOn": [
             "^build"
@@ -700,10 +700,10 @@
           "cache": null,
           "operations": [
             {
-              "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+              "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
               "container": "node:20",
               "containerVariables": [],
-              "extension": "npmext",
+              "extension": "@npm",
               "command": "build",
               "script": {},
               "context": [

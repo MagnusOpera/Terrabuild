@@ -1,8 +1,8 @@
 
-project npmext {
+project @npm {
     labels = [ "app" ]
 }
 
 target build {
-    npmext build { }
+    @npm build { }
 }
