@@ -109,7 +109,7 @@ run-build-scaffold:
 	$(terrabuild) run build --workspace tests/scaffold --debug --retry --logs
 
 run-build-simple:
-	$(terrabuild) run build --workspace tests/simple --debug --retry --logs
+	$(terrabuild) run build --workspace tests/simple --debug --retry --logs --variable secret_message=tralala
 
 run-rebuild-simple:
 	$(terrabuild) run build --workspace tests/simple --debug --retry --logs
