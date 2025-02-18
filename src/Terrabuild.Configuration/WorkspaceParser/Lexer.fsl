@@ -71,13 +71,13 @@ rule token = parse
     | "defaults" { DEFAULTS }
     | "name" { NAME }
 
-    | identifier { IDENTIFIER (lexeme lexbuf |> string) }
-    | extensionIdentifier { EXTENSION_IDENTIFIER (lexeme lexbuf |> string) }
-    | targetIdentifier { TARGET_IDENTIFIER (lexeme lexbuf |> string) }
-
     | quotedString { 
         let s = lexeme lexbuf |> string
         STRING (s.Substring(1, s.Length-2)) }
+
+    | identifier { IDENTIFIER (lexeme lexbuf |> string) }
+    | extensionIdentifier { EXTENSION_IDENTIFIER (lexeme lexbuf |> string) }
+    | targetIdentifier { TARGET_IDENTIFIER (lexeme lexbuf |> string) }
 
     | key {
         let s = lexeme lexbuf |> string
