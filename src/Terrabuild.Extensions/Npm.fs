@@ -33,7 +33,6 @@ type Npm() =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "npm" "ci"
             shellOp "npm" $"run {cmd} -- {arguments}"   
         ]
         execRequest Cacheability.Always ops
