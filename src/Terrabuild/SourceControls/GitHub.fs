@@ -6,7 +6,6 @@ type GitHub() =
     let sha = "GITHUB_SHA" |> envVar
     let refName = "GITHUB_REF_NAME" |> envVar
     let stepSummary = "GITHUB_STEP_SUMMARY" |> envVar
-    let repository = "GITHUB_REPOSITORY" |> envVar
     let runId = "GITHUB_RUN_ID" |> envVar
     let repository = "GITHUB_REPOSITORY" |> envVar
     let runAttempt = "GITHUB_RUN_ATTEMPT" |> envVar |> int
@@ -23,7 +22,7 @@ type GitHub() =
             Some { Name = "GitHub"
                    Message = currentDir() |> Git.getHeadCommitMessage
                    Author = currentDir() |> Git.getHeadCommitAuthor
-                   LogUrl = $"https://github.com/{repository}/commit/{sha}/checks/{runId}"
+                   RunId = runId
                    Repository = repository
                    RunAttempt = runAttempt }
 

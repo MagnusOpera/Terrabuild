@@ -7,7 +7,7 @@ type LogType =
 type RunInfo = {
     Name: string
     Repository: string
-    LogUrl: string
+    RunId: string
     Message: string
     Author: string
     RunAttempt: int

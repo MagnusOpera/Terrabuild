@@ -69,10 +69,10 @@ module private Build =
     type RunInfoInput = {
         Name: string
         Repository: string
-        LogUrl: string
         Message: string
         Author: string
         RunAttempt: int
+        RunId: string
     }
 
     [<RequireQualifiedAccess>]
@@ -178,7 +178,7 @@ type Client(space: string, token: string, options: ConfigOptions.Options) =
             let run = options.Run |> Option.map (fun run -> {
                 Build.RunInfoInput.Name = run.Name
                 Build.RunInfoInput.Repository = run.Repository
-                Build.RunInfoInput.LogUrl = run.LogUrl
+                Build.RunInfoInput.RunId = run.RunId
                 Build.RunInfoInput.Message = run.Message
                 Build.RunInfoInput.Author = run.Author
                 Build.RunInfoInput.RunAttempt = run.RunAttempt
