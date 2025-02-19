@@ -12,7 +12,6 @@ permissions:
 
 env:
   BUILD_VERSION: ${{ github.ref_name }}
-  MSBUILDDISABLENODEREUSE: 1
 
 jobs:
   build:
