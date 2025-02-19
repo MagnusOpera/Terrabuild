@@ -5,16 +5,23 @@ open Terrabuild.Configuration.Project.Parser  // we need the terminal tokens fro
 open FSharp.Text.Lexing
 
 let lexeme = LexBuffer<_>.LexemeString
+
+let mkIdentifier lexbuf =
+    let s = lexbuf |> lexeme  |> string
+    s.Replace("`", "").Replace(" ", "").Replace(":", "").Replace("$", "")
+
 }
 
-let doubleQuote = '\"'
-let identifier = ['a'-'z'] (['_' '-']? ['a'-'z' '0'-'9']+)*
+let regularIdentifier = ['a'-'z'] (['_' '-']? ['a'-'z' '0'-'9']+)*
+let backquotedIdentifier = '`' regularIdentifier '`'
+let identifier = regularIdentifier | backquotedIdentifier
+
 let extensionIdentifier = '@'? identifier
 let targetIdentifier = '^'? identifier
-let key = identifier ' '* ':'
-let variable = '$' identifier
+let keyIdentifier = identifier ' '* ':'
+let variableIdentifier = '$' identifier
+
 let quotedString = '\"' [^'\"']+ '\"'
-let backquotedIdentifier = '`' identifier '`'
 
 let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
 let whitespace = ' ' | '\t'
@@ -75,24 +82,15 @@ rule token = parse
     | "defaults" { DEFAULTS }
     | "name" { NAME }
 
-    | identifier { IDENTIFIER (lexeme lexbuf |> string) }
-    | backquotedIdentifier { 
-        let s = lexeme lexbuf |> string
-        IDENTIFIER (s.Substring(1, s.Length-2)) }
-    | extensionIdentifier { EXTENSION_IDENTIFIER (lexeme lexbuf |> string) }
-    | targetIdentifier { TARGET_IDENTIFIER (lexeme lexbuf |> string) }
+    | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
+    | extensionIdentifier { lexbuf |> mkIdentifier |> EXTENSION_IDENTIFIER }
+    | targetIdentifier { lexbuf |> mkIdentifier |> TARGET_IDENTIFIER }
+    | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
+    | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
     | quotedString { 
         let s = lexeme lexbuf |> string
         STRING (s.Substring(1, s.Length-2)) }
-
-    | key {
-        let s = lexeme lexbuf |> string
-        KEY (s.Substring(0, s.Length-1).TrimEnd()) }
-
-    | variable {
-        let s = lexeme lexbuf |> string
-        VARIABLE (s.Substring(1, s.Length-1)) }
 
     | number {
         let s = lexeme lexbuf |> int

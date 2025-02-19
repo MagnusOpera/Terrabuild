@@ -44,7 +44,8 @@ target docker {
   cache = "always"
   @shell echo { arguments: trim("building project1 " + $configuration) }
   @docker build { arguments: { config: "Release" my-variable: 42 } }
-  @npm `version` { arguments: $npm_version }
+  @npm `version` { arguments: $npm_version
+                   `version` : "1.0.0" }
 }
 
 
