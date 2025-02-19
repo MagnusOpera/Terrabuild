@@ -14,6 +14,7 @@ on:
 
 env:
   TERRABUILD_API_URL: https://api.dev.magnusopera.io
+  MSBUILDDISABLENODEREUSE: 1
 
 permissions:
   contents: read
