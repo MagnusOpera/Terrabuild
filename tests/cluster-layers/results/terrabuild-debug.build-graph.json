@@ -184,7 +184,7 @@
           "^build"
         ],
         "outputs": [
-          "dist/"
+          "**/dist/"
         ],
         "cache": null,
         "operations": [
@@ -226,7 +226,7 @@
         "B:build"
       ],
       "outputs": [
-        "dist/"
+        "**/dist/"
       ],
       "projectHash": "3295C61A42D31221DCB491823FD21EF9A8921B5375720F3EF8DA74ED8F4BF1EC",
       "targetHash": "2C7E3A9589405FD90EACE543F4D0C0969F2A670F990DA806CE3575A801B5C109",
@@ -395,7 +395,7 @@
           "^build"
         ],
         "outputs": [
-          "dist/"
+          "**/dist/"
         ],
         "cache": null,
         "operations": [
@@ -419,7 +419,7 @@
         "E:build"
       ],
       "outputs": [
-        "dist/"
+        "**/dist/"
       ],
       "projectHash": "7DF5934D6DBA702F44818A40C3AB95F17E489524DFD3CC6AFC9B9D0EF5C83AE0",
       "targetHash": "936DE72B18698FFC91741F8CD33B2061D5A10FF15AF67C5CF84F6C79EB2B7C4F",
@@ -456,7 +456,7 @@
           "^build"
         ],
         "outputs": [
-          "dist/"
+          "**/dist/"
         ],
         "cache": null,
         "operations": [
@@ -479,7 +479,7 @@
         "C:build"
       ],
       "outputs": [
-        "dist/"
+        "**/dist/"
       ],
       "projectHash": "FE7CDDB9279D6FFF57CCA9D71303D9D954C2B90E93EEE27097689FBF8AA676AD",
       "targetHash": "9078946692E0BCAF8DD8485E46926BF38D92CEC6D0B5BA4512AEDFCE996312E8",
