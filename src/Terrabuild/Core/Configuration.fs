@@ -16,6 +16,7 @@ open Serilog
 type TargetOperation = {
     Hash: string
     Container: string option
+    Platform: string option
     ContainerVariables: string set
     Extension: string
     Command: string
@@ -392,6 +393,15 @@ let read (options: ConfigOptions.Options) =
                                 | _ -> TerrabuildException.Raise("container must evaluate to a string")
                             | _ -> None
 
+                        let platform =
+                            match extension.Platform with
+                            | Some platform ->
+                                match Eval.eval evaluationContext platform with
+                                | Value.String platform -> Some platform
+                                | Value.Nothing -> None
+                                | _ -> TerrabuildException.Raise("container must evaluate to a string")
+                            | _ -> None
+
                         let script =
                             match Extensions.getScript step.Extension projectDef.Scripts with
                             | Some script -> script
@@ -403,12 +413,18 @@ let read (options: ConfigOptions.Options) =
                                 | Some container -> [ container ] @ List.ofSeq extension.Variables
                                 | _ -> []
 
-                            [ step.Extension; step.Command ] @ containerInfos
+                            let platformInfos = 
+                                match platform with
+                                | Some platform -> [ platform ] @ List.ofSeq extension.Variables
+                                | _ -> []
+
+                            [ step.Extension; step.Command ] @ containerInfos @ platformInfos
                             |> Hash.sha256strings
 
                         let targetContext = {
                             TargetOperation.Hash = hash
                             TargetOperation.Container = container
+                            TargetOperation.Platform = platform
                             TargetOperation.ContainerVariables = extension.Variables
                             TargetOperation.Extension = step.Extension
                             TargetOperation.Command = step.Command

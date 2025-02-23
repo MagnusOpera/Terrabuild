@@ -34,7 +34,7 @@ let debugPrint s = ignore s
 %token DOUBLE_QUESTION QUESTION COLON BANG AND OR
 %token EOF
 %token PROJECT EXTENSION TARGET 
-%token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER INIT SCRIPT DEPENDS_ON REBUILD CACHE DEFAULTS NAME
+%token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER PLATFORM INIT SCRIPT DEPENDS_ON REBUILD CACHE DEFAULTS NAME
 
 // associativity and precedences
 %right LSQBRACKET
@@ -67,11 +67,14 @@ Extension:
 ExtensionComponents:
     | /* empty */ { [] }
     | ExtensionComponents ExtensionContainer { $1 @ [$2] }
+    | ExtensionComponents ExtensionPlaform { $1 @ [$2] }
     | ExtensionComponents ExtensionVariables { $1 @ [$2] }
     | ExtensionComponents ExtensionScript { $1 @ [$2] }
     | ExtensionComponents ExtensionDefaults { $1 @ [$2] }
 ExtensionContainer:
     | CONTAINER EQUAL Expr { ExtensionComponents.Container $3 }
+ExtensionPlaform:
+    | PLATFORM EQUAL Expr { ExtensionComponents.Platform $3 }
 ExtensionVariables:
     | VARIABLES EQUAL ListOfString { ExtensionComponents.Variables $3 }
 ExtensionScript:

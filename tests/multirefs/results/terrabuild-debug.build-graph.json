@@ -17,6 +17,7 @@
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -39,10 +40,11 @@
       ],
       "outputs": [],
       "projectHash": "765E269DCF725F998FEAF36185644037E2620A1D99ED0634F9D88098FD046B54",
-      "targetHash": "163E0B0C20765C593DAAA06B1C40E5497A8952B943CBCA775B9815C6C8B1FCCA",
+      "targetHash": "DD807955871623D227C6B7D5B418BC790FF2ADFCCE3618B44B7EE67DD7B195EC",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
@@ -69,6 +71,7 @@
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -90,10 +93,11 @@
       ],
       "outputs": [],
       "projectHash": "4B3D703A03868D9124E4DF7F60CA5BE420D0A4C0188A9FE46C87F8A8C4E077DC",
-      "targetHash": "C72D1C5D7D121086C6CD809CE2EB2E265D3863DD16EC7B1E5A50F0E8F3392CC2",
+      "targetHash": "97B693032A478063E1CC3258F8F18495990FBFB8FE6DABD2BB0E702F3897FAE3",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
@@ -120,6 +124,7 @@
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -139,10 +144,11 @@
       "dependencies": [],
       "outputs": [],
       "projectHash": "286D4F1687911376819B5BF9CB07BD4B7DCF72844399A26EB2235596F5D65ABB",
-      "targetHash": "A00376DED1A50BC3605C4DE09316CD6937B101559BCA1C7741F57AD13AA23804",
+      "targetHash": "56CB6BB662353F46E83C99D431AB748FE3D21A41BFD3B4B9FD5D228C04E379AB",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",

@@ -75,6 +75,7 @@ rule token = parse
     | "script" { SCRIPT }
     | "extension" { EXTENSION }
     | "container" { CONTAINER }
+    | "platform" { PLATFORM }
     | "variables" { VARIABLES }
     | "depends_on" { DEPENDS_ON }
     | "rebuild" { REBUILD }

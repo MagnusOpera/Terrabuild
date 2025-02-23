@@ -75,6 +75,7 @@ rule token = parse
     | "rebuild" { REBUILD }
     | "variables" { VARIABLES }
     | "container" { CONTAINER }
+    | "platform" { PLATFORM }
     | "script" { SCRIPT }
     | "defaults" { DEFAULTS }
     | "name" { NAME }

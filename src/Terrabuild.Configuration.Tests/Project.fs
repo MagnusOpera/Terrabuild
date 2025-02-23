@@ -24,17 +24,20 @@ let parseProject() =
 
         let extDotnet =
             { Container = None
+              Platform = None
               Variables = Set.empty
               Script = None
               Defaults = Map [ "configuration", Expr.Variable "configuration" ] }        
         let extDocker =
             { Container = None
+              Platform = None
               Variables = Set [ "ARM_TENANT_ID" ]
               Script = None
               Defaults = Map [ "configuration", Expr.Variable "configuration"
                                "image", Expr.String "ghcr.io/magnusopera/dotnet-app" ] }
         let extDummy =
             { Container = None
+              Platform = None
               Variables = Set.empty
               Script = Some "dummy.fsx"
               Defaults = Map.empty }
@@ -97,6 +100,7 @@ let parseProject2() =
 
         let extDotnet =
             { Container = None
+              Platform = None
               Variables = Set.empty
               Script = None
               Defaults = Map.empty }        

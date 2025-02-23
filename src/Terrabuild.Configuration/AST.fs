@@ -5,12 +5,14 @@ open Errors
 [<RequireQualifiedAccess>]
 type ExtensionComponents =
     | Container of Expr
+    | Platform of Expr
     | Variables of string list
     | Script of string
     | Defaults of Map<string, Expr>
 
 type Extension = {
     Container: Expr option
+    Platform: Expr option
     Variables: string Set
     Script: string option
     Defaults: Map<string, Expr>
@@ -22,6 +24,12 @@ with
             | [] -> None
             | [value] -> Some value
             | _ -> TerrabuildException.Raise("multiple container declared")
+
+        let platform =
+            match components |> List.choose (function | ExtensionComponents.Platform value -> Some value | _ -> None) with
+            | [] -> None
+            | [value] -> Some value
+            | _ -> TerrabuildException.Raise("multiple platform declared")
 
         let variables =
             match components |> List.choose (function | ExtensionComponents.Variables value -> Some value | _ -> None) with
@@ -42,6 +50,7 @@ with
             | _ -> TerrabuildException.Raise("multiple defaults declared")
 
         name, { Container = container
+                Platform = platform
                 Variables = variables
                 Script = script
                 Defaults = defaults }
