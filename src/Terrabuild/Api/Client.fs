@@ -13,7 +13,7 @@ module private Http =
         Uri(baseUrl)
 
     let private request<'req, 'resp> method headers (path: string) (request: 'req): 'resp =
-        let url = Uri(apiUrl, path).ToString()
+        let url = Uri($"{apiUrl}{path}").ToString()
         let body =
             if typeof<'req> <> typeof<Unit> then request |> Json.Serialize |> TextRequest |> Some
             else None
@@ -60,7 +60,7 @@ module private Auth =
     let loginSpace headers workspaceId token: LoginSpaceOutput =
         { LoginSpaceInput.Id = workspaceId
           LoginSpaceInput.Token = token }
-        |> Http.post headers "/auth/loginspace"
+        |> Http.post headers "/auth/login"
 
 
 module private Build =
