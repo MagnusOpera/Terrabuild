@@ -24,6 +24,7 @@
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -41,6 +42,7 @@
           {
             "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -62,10 +64,11 @@
         "obj/*.targets"
       ],
       "projectHash": "52081ACBA3AA68292E895F52D30A4916AE5F3742E44A04C119BE8F0A52DE570F",
-      "targetHash": "E46A491A2A094BFD146BB46F27B356A7EA261D3DB206EAC4CC35523F67DC4D91",
+      "targetHash": "C23296995161E01E6EC9C36D79018E473368CB99E1FD1A3B8027344DD10701D6",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
@@ -73,6 +76,7 @@
         },
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -106,6 +110,7 @@
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -123,6 +128,7 @@
           {
             "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -144,10 +150,11 @@
         "obj/*.targets"
       ],
       "projectHash": "C20F11FEA849AD53AA0FDD982A60BEB1143A591B8E3B0CDB16C1CE8D39392772",
-      "targetHash": "0791C372599365FA0A8B957ABC672DE2B683F1E97195F7767447A8C688DF206F",
+      "targetHash": "2191B4E5A9A8DEF18576E45C91FF4C544A5C7B1EFC124A9D2F3A7828194FB127",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
@@ -155,6 +162,7 @@
         },
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -183,6 +191,7 @@
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -200,6 +209,7 @@
           {
             "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@npm",
             "command": "build",
@@ -219,10 +229,11 @@
         "dist/"
       ],
       "projectHash": "3295C61A42D31221DCB491823FD21EF9A8921B5375720F3EF8DA74ED8F4BF1EC",
-      "targetHash": "0A0CAE85612DFB12B5A80B28F53C428D3613D42064229216B922CE665461689F",
+      "targetHash": "2C7E3A9589405FD90EACE543F4D0C0969F2A670F990DA806CE3575A801B5C109",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
@@ -230,6 +241,7 @@
         },
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
@@ -237,6 +249,7 @@
         },
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
@@ -270,6 +283,7 @@
           {
             "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -293,10 +307,11 @@
         "obj/*.targets"
       ],
       "projectHash": "C61CB06CD3C39E1F35C4DC1774DE930DA6851583D98A4F13969456FB388FCD5C",
-      "targetHash": "7508FE5FCC03926CB876645313C27037352E9E35FC161F2F454113F8D378BCE2",
+      "targetHash": "CE6E84A47E9164E2AB35E64DE1C8E3E4F2DEB27612C79B65581BD86FC608D0D5",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -330,6 +345,7 @@
           {
             "hash": "49C77F0CC375A791BF822BAA5F2D11EA68FC0FE0C628ACD1863BAF7ED6649BEC",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -353,10 +369,11 @@
         "obj/*.targets"
       ],
       "projectHash": "E1B52088E5FFFCCA0576241731FD4E4F7851EFE8522816F30BB7D8187ABF1034",
-      "targetHash": "0BC0CFFB07E751ECCB7700B1243B9B49AFD5E09A508CD111CB5991E6EF8D887E",
+      "targetHash": "02E9505EEA23665731F62CAB22A563100062EA3965F6E7DDB3360509D39D8D9C",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -385,6 +402,7 @@
           {
             "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@npm",
             "command": "build",
@@ -404,10 +422,11 @@
         "dist/"
       ],
       "projectHash": "7DF5934D6DBA702F44818A40C3AB95F17E489524DFD3CC6AFC9B9D0EF5C83AE0",
-      "targetHash": "F0FE8AC75045D28FDEEF28CC9D32F2D06C242CA50659449FFDF5EEE8444970CE",
+      "targetHash": "936DE72B18698FFC91741F8CD33B2061D5A10FF15AF67C5CF84F6C79EB2B7C4F",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
@@ -415,6 +434,7 @@
         },
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
@@ -443,6 +463,7 @@
           {
             "hash": "8020766CA6489DE8B88803B5BE7CBC336B9BB27FEE455F2AA4A96306A85EB557",
             "container": null,
+            "platform": null,
             "containerVariables": [],
             "extension": "@npm",
             "command": "build",
@@ -461,10 +482,11 @@
         "dist/"
       ],
       "projectHash": "FE7CDDB9279D6FFF57CCA9D71303D9D954C2B90E93EEE27097689FBF8AA676AD",
-      "targetHash": "69A547E8A00AB876311FF13C9FB1670B92E8ACC37C3EC6F38B2A8A062CA07234",
+      "targetHash": "9078946692E0BCAF8DD8485E46926BF38D92CEC6D0B5BA4512AEDFCE996312E8",
       "operations": [
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
@@ -472,6 +494,7 @@
         },
         {
           "container": null,
+          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@npm build",
           "command": "npm",
