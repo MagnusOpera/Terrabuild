@@ -158,7 +158,7 @@
             "^build"
           ],
           "outputs": [
-            "dist/"
+            "**/dist/"
           ],
           "cache": null,
           "operations": [
@@ -303,7 +303,7 @@
             "^build"
           ],
           "outputs": [
-            "dist/"
+            "**/dist/"
           ],
           "cache": null,
           "operations": [
@@ -342,7 +342,7 @@
             "^build"
           ],
           "outputs": [
-            "dist/"
+            "**/dist/"
           ],
           "cache": null,
           "operations": [
