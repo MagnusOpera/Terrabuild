@@ -35,7 +35,7 @@
                     ],
                     "npm_app_version": [
                       "string",
-                      "DE29629FF322ED361E462E00D3F9EBDBF4432CA34F84020217492FD512A4E27F"
+                      "88876399DBE671EF9A0044C0456ECCAE8F243F46241F5991CAE0EAF23ECDCC13"
                     ]
                   }
                 ],
@@ -55,8 +55,8 @@
       "outputs": [
         "*.planfile"
       ],
-      "projectHash": "A076DFCB961F0FDF4AE3F8C98D3099BB85C412EB1D15AA963E249438C55CD634",
-      "targetHash": "FACCA5FF6F8841B80E0F24E57BAC3F6152E5D26348AE16C00906577C03728AF4",
+      "projectHash": "BBCA71B7D02BECD8CC7A4482C6D36E700FA3C15FD43C26F773D1000B9F7F08C1",
+      "targetHash": "6E199E6F8FA01FBAA734DFB67CE363CCBD0DDA2DAF741F77521C03EF2BBFE182",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -77,7 +77,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=DE29629FF322ED361E462E00D3F9EBDBF4432CA34F84020217492FD512A4E27F\u0022"
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=88876399DBE671EF9A0044C0456ECCAE8F243F46241F5991CAE0EAF23ECDCC13\u0022"
         }
       ],
       "cache": 0,
@@ -491,8 +491,8 @@
       "outputs": [
         "dist/"
       ],
-      "projectHash": "DE29629FF322ED361E462E00D3F9EBDBF4432CA34F84020217492FD512A4E27F",
-      "targetHash": "B80D239E88F69D8B2DBE594DB413176688BDEB444BC336F0739197255EFB7979",
+      "projectHash": "88876399DBE671EF9A0044C0456ECCAE8F243F46241F5991CAE0EAF23ECDCC13",
+      "targetHash": "4C1CBF08B01BE7D5645625255A23F52BB2DEB37BCA4EB93853E11D818D429AFA",
       "operations": [
         {
           "container": "node:20",
