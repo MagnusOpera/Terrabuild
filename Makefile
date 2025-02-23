@@ -139,7 +139,7 @@ run-test-simple:
 	$(terrabuild) run build -w tests/simple --debug --force
 
 define diff_file
-	@if [ $(refresh) ]; then \
+	@if [ "$(refresh)" = "true" ]; then \
 		cp $(1)/$(2) $(1)/results/$(2); \
 	fi
 	diff $(1)/results/$(2) $(1)/$(2)
