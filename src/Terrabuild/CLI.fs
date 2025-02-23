@@ -103,13 +103,13 @@ with
 
 [<RequireQualifiedAccess>]
 type LoginArgs =
-    | [<ExactlyOnce>] Space of space:string
+    | [<ExactlyOnce>] Workspace of id:string
     | [<ExactlyOnce>] Token of token:string
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
-            | Space _ -> "Slug of space to connect to"
+            | Workspace _ -> "Slug of space to connect to"
             | Token _ -> "Token to connect to space"
 
 [<RequireQualifiedAccess>]

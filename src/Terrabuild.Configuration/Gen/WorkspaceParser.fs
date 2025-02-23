@@ -22,7 +22,7 @@ let debugPrint s = ignore s
 type token = 
   | PROJECT
   | IGNORES
-  | SPACE
+  | ID
   | DEPENDS_ON
   | REBUILD
   | VARIABLES
@@ -78,7 +78,7 @@ type token =
 type tokenId = 
     | TOKEN_PROJECT
     | TOKEN_IGNORES
-    | TOKEN_SPACE
+    | TOKEN_ID
     | TOKEN_DEPENDS_ON
     | TOKEN_REBUILD
     | TOKEN_VARIABLES
@@ -176,7 +176,7 @@ let tagOfToken (t:token) =
   match t with
   | PROJECT  -> 0 
   | IGNORES  -> 1 
-  | SPACE  -> 2 
+  | ID  -> 2 
   | DEPENDS_ON  -> 3 
   | REBUILD  -> 4 
   | VARIABLES  -> 5 
@@ -234,7 +234,7 @@ let tokenTagToTokenId (tokenIdx:int) =
   match tokenIdx with
   | 0 -> TOKEN_PROJECT 
   | 1 -> TOKEN_IGNORES 
-  | 2 -> TOKEN_SPACE 
+  | 2 -> TOKEN_ID 
   | 3 -> TOKEN_DEPENDS_ON 
   | 4 -> TOKEN_REBUILD 
   | 5 -> TOKEN_VARIABLES 
@@ -391,7 +391,7 @@ let token_to_string (t:token) =
   match t with 
   | PROJECT  -> "PROJECT" 
   | IGNORES  -> "IGNORES" 
-  | SPACE  -> "SPACE" 
+  | ID  -> "ID" 
   | DEPENDS_ON  -> "DEPENDS_ON" 
   | REBUILD  -> "REBUILD" 
   | VARIABLES  -> "VARIABLES" 
@@ -449,7 +449,7 @@ let _fsyacc_dataOfToken (t:token) =
   match t with 
   | PROJECT  -> (null : System.Object) 
   | IGNORES  -> (null : System.Object) 
-  | SPACE  -> (null : System.Object) 
+  | ID  -> (null : System.Object) 
   | DEPENDS_ON  -> (null : System.Object) 
   | REBUILD  -> (null : System.Object) 
   | VARIABLES  -> (null : System.Object) 
@@ -642,7 +642,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 72 "WorkspaceParser/Parser.fsy"
-                                                WorkspaceComponents.Space _3 
+                                             WorkspaceComponents.Id _3 
                    )
 # 72 "WorkspaceParser/Parser.fsy"
                  : 'gentype_WorkspaceSpace));

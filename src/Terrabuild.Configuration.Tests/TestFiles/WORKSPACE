@@ -1,7 +1,7 @@
 # comment at top of file
 
 workspace {
-    space = "magnusopera/default"
+    id = "d7528db2-83e0-4164-8c8e-1e0d6d6357ca"
     ignores = [ "**/node_modules" ]
 }
 

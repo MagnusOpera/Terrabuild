@@ -123,8 +123,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
         let token =
             if options.LocalOnly then None
-            else config.Space |> Option.bind Auth.readAuthToken
-        let api = Api.Factory.create config.Space token options
+            else config.Id |> Option.bind Auth.readAuthToken
+        let api = Api.Factory.create config.Id token options
         if api |> Option.isSome then
             Log.Debug("Connected to API")
             $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} Connected to Insights" |> Terminal.writeLine
@@ -278,14 +278,25 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         0
 
     let login (loginArgs: ParseResults<LoginArgs>) =
-        let space = loginArgs.GetResult(LoginArgs.Space)
+        let space = loginArgs.GetResult(LoginArgs.Workspace)
         let token = loginArgs.GetResult(LoginArgs.Token)
-        Auth.login space token
+
+        let workspaceId =
+            match space |> Guid.TryParse with
+            | true, guid -> guid
+            | _ -> TerrabuildException.Raise("Invalid workspaceId")
+
+        Auth.login workspaceId token
         0
 
     let logout (logoutArgs: ParseResults<LogoutArgs>) =
         let space = logoutArgs.GetResult(LogoutArgs.Space)
-        Auth.logout space
+        let workspaceId =
+            match space |> Guid.TryParse with
+            | true, guid -> guid
+            | _ -> TerrabuildException.Raise("Invalid workspaceId")
+
+        Auth.logout workspaceId
         0
 
     let version () =

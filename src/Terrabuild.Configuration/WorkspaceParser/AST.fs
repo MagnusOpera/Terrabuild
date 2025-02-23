@@ -2,23 +2,27 @@ namespace Terrabuild.Configuration.Workspace.AST
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Errors
+open System
 
 [<RequireQualifiedAccess>]
 type WorkspaceComponents =
-    | Space of string
+    | Id of string
     | Ignores of string list
 
 [<RequireQualifiedAccess>]
 type Workspace = {
-    Space: string option
+    Id: Guid option
     Ignores: Set<string>
 }
 with
     static member Build components =
-        let space =
-            match components |> List.choose (function | WorkspaceComponents.Space value -> Some value | _ -> None) with
+        let id =
+            match components |> List.choose (function | WorkspaceComponents.Id value -> Some value | _ -> None) with
             | [] -> None
-            | [value] -> Some value
+            | [value] ->
+                match value |> Guid.TryParse with
+                | true, guid -> Some guid
+                | _ -> TerrabuildException.Raise("id is malformed")
             | _ -> TerrabuildException.Raise("multiple space declared")
 
         let ignores =
@@ -27,7 +31,7 @@ with
             | [value] -> value |> Set.ofList |> Some
             | _ -> TerrabuildException.Raise("multiple ignores declared")
 
-        { Workspace.Space = space
+        { Workspace.Id = id
           Workspace.Ignores = ignores |> Option.defaultValue Set.empty }
 
 
@@ -96,7 +100,7 @@ with
         let workspace =
             match components |> List.choose (function | WorkspaceFileComponents.Workspace value -> Some value | _ -> None) with
             | [] ->
-                { Workspace.Space = None
+                { Workspace.Id = None
                   Workspace.Ignores = Set.empty }
             | [value] -> value
             | _ -> TerrabuildException.Raise("multiple workspace declared")

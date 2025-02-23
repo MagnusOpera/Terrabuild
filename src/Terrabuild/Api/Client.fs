@@ -48,7 +48,7 @@ module private Http =
 module private Auth =
     [<RequireQualifiedAccess>]
     type LoginSpaceInput = {
-        Space: string
+        Id: Guid
         Token: string
     }
 
@@ -57,8 +57,8 @@ module private Auth =
         AccessToken: string
     }
 
-    let loginSpace headers space token: LoginSpaceOutput =
-        { LoginSpaceInput.Space = space
+    let loginSpace headers workspaceId token: LoginSpaceOutput =
+        { LoginSpaceInput.Id = workspaceId
           LoginSpaceInput.Token = token }
         |> Http.post headers "/auth/loginspace"
 
@@ -159,13 +159,13 @@ module private Artifact =
         Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts?path={path}" ()
 
 
-type Client(space: string, token: string, options: ConfigOptions.Options) =
+type Client(workspaceId: Guid, token: string, options: ConfigOptions.Options) =
     let accesstoken =
         let headers = [
             HttpRequestHeaders.Accept HttpContentTypes.Json
             HttpRequestHeaders.ContentType HttpContentTypes.Json
         ]
-        let resp = Auth.loginSpace headers space token
+        let resp = Auth.loginSpace headers workspaceId token
         resp.AccessToken
 
     let headers = [

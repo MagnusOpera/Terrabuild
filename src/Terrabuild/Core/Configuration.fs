@@ -47,7 +47,7 @@ type Project = {
 [<RequireQualifiedAccess>]
 type Workspace = {
     // Space to use
-    Space: string option
+    Id: Guid option
 
     // Computed projects selection (derived from user inputs)
     SelectedProjects: string set
@@ -532,7 +532,7 @@ let read (options: ConfigOptions.Options) =
         | _ -> projects.Keys
         |> Set
 
-    { Workspace.Space = workspaceConfig.Workspace.Space
+    { Workspace.Id = workspaceConfig.Workspace.Id
       Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
       Workspace.Targets = workspaceConfig.Targets }
