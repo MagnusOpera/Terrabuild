@@ -39,10 +39,10 @@ jobs:
       - name: Build Self
         run: |
           echo "# Self Build" >> $GITHUB_STEP_SUMMARY
-          make self env=dev
+          make self env=dev terrabuild=$PWD/.out/dotnet/terrabuild
 
       - name: Self Integration Tests
-        run: make run-smoke-tests
+        run: make run-smoke-tests terrabuild=$PWD/.out/dotnet/terrabuild
 
       - name: Include Build Logs
         if: always()
