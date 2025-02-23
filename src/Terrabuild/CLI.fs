@@ -109,7 +109,7 @@ with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
-            | Workspace _ -> "Slug of space to connect to"
+            | Workspace _ -> "Workspace Id to connect to"
             | Token _ -> "Token to connect to space"
 
 [<RequireQualifiedAccess>]
