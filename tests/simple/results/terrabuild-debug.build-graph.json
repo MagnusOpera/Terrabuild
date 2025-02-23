@@ -35,7 +35,7 @@
                     ],
                     "npm_app_version": [
                       "string",
-                      "3D4E6AD22CC8AA6E1544C3E6FD63DB3BCFB10FF095BF099457E0E0EA66F32D7E"
+                      "DE29629FF322ED361E462E00D3F9EBDBF4432CA34F84020217492FD512A4E27F"
                     ]
                   }
                 ],
@@ -55,8 +55,8 @@
       "outputs": [
         "*.planfile"
       ],
-      "projectHash": "DA24149CF300F799A94E8A5249F7EE06AEAA2A7F02215715D452B05C0D6DD6C0",
-      "targetHash": "FCA474A255E14E016A56FDE2D22731B8CB7C2BEFBC0657A445C0085ECC669456",
+      "projectHash": "A076DFCB961F0FDF4AE3F8C98D3099BB85C412EB1D15AA963E249438C55CD634",
+      "targetHash": "FACCA5FF6F8841B80E0F24E57BAC3F6152E5D26348AE16C00906577C03728AF4",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -77,7 +77,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=3D4E6AD22CC8AA6E1544C3E6FD63DB3BCFB10FF095BF099457E0E0EA66F32D7E\u0022"
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=7AFACF3AFB85FF8AD7433C5AA8FFAD5C4BF62333D184CD03DE62984692F3BBCC\u0022 -var=\u0022npm_app_version=DE29629FF322ED361E462E00D3F9EBDBF4432CA34F84020217492FD512A4E27F\u0022"
         }
       ],
       "cache": 0,
@@ -152,7 +152,7 @@
       "project": "libraries/npm-lib",
       "target": "build",
       "configurationTarget": {
-        "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
+        "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -163,10 +163,10 @@
         "cache": null,
         "operations": [
           {
-            "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+            "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
             "container": "node:20",
             "containerVariables": [],
-            "extension": "npmext",
+            "extension": "@npm",
             "command": "build",
             "script": {},
             "context": [
@@ -181,19 +181,19 @@
         "dist/"
       ],
       "projectHash": "813635EFA9D98FB042EF8A761A4433B34B95BA40E1D1231B79CBDC4D29E21AF6",
-      "targetHash": "F855EC8FCAA0D3700A512C4ACFD471D00298B76CB671E42FA378FA082255A065",
+      "targetHash": "029F11449ABC6DE5182751B06441DE248CDD99E16786577DAB6087A3C1213D77",
       "operations": [
         {
           "container": "node:20",
           "containerVariables": [],
-          "metaCommand": "npmext build",
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
           "container": "node:20",
           "containerVariables": [],
-          "metaCommand": "npmext build",
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "run build -- "
         }
@@ -405,7 +405,7 @@
       "project": "projects/npm-app/private-npm-lib",
       "target": "build",
       "configurationTarget": {
-        "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
+        "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -416,10 +416,10 @@
         "cache": null,
         "operations": [
           {
-            "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+            "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
             "container": "node:20",
             "containerVariables": [],
-            "extension": "npmext",
+            "extension": "@npm",
             "command": "build",
             "script": {},
             "context": [
@@ -434,19 +434,19 @@
         "dist/"
       ],
       "projectHash": "F951BD1663475053E1F9C97DDA08EA553E21951BC053419D362126A2B6A4C83C",
-      "targetHash": "D4D07C26DAFCC452CEB66033890D8ED0D9A17F5BC4B3B613FACA0362E6B82300",
+      "targetHash": "51E34CFBBE71501C35B2FC4C3D83C86F6B8431C460BFAC16D25C9F5873ABA234",
       "operations": [
         {
           "container": "node:20",
           "containerVariables": [],
-          "metaCommand": "npmext build",
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
           "container": "node:20",
           "containerVariables": [],
-          "metaCommand": "npmext build",
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "run build -- "
         }
@@ -460,7 +460,7 @@
       "project": "projects/npm-app",
       "target": "build",
       "configurationTarget": {
-        "hash": "6FF9DA1627A7C747024ACB388F9EDE0C888DB6279C1741C21CE10925AC7B8271",
+        "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -471,10 +471,10 @@
         "cache": null,
         "operations": [
           {
-            "hash": "D9D320BB6A8CAFCC2A18FEC98A30C89D0D1526D887C5A7626CBF0E8E066A4AE0",
+            "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
             "container": "node:20",
             "containerVariables": [],
-            "extension": "npmext",
+            "extension": "@npm",
             "command": "build",
             "script": {},
             "context": [
@@ -491,20 +491,20 @@
       "outputs": [
         "dist/"
       ],
-      "projectHash": "3D4E6AD22CC8AA6E1544C3E6FD63DB3BCFB10FF095BF099457E0E0EA66F32D7E",
-      "targetHash": "CC632473AD5930731FFEF7159B60D64DFC8EDEA7AA16E7564C1678B326261E85",
+      "projectHash": "DE29629FF322ED361E462E00D3F9EBDBF4432CA34F84020217492FD512A4E27F",
+      "targetHash": "B80D239E88F69D8B2DBE594DB413176688BDEB444BC336F0739197255EFB7979",
       "operations": [
         {
           "container": "node:20",
           "containerVariables": [],
-          "metaCommand": "npmext build",
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "ci"
         },
         {
           "container": "node:20",
           "containerVariables": [],
-          "metaCommand": "npmext build",
+          "metaCommand": "@npm build",
           "command": "npm",
           "arguments": "run build -- "
         }

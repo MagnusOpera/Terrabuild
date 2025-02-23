@@ -162,6 +162,17 @@ let read (options: ConfigOptions.Options) =
             | _ -> Map.empty
 
         let evaluationContext = { defaultEvaluationContext with Eval.Variables = defaultEvaluationContext.Variables |> Map.addMap defaultVariables }
+        let configVariables =
+            match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
+            | Some variables ->
+                variables.Variables
+                |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
+            | _ ->
+                match options.Configuration with
+                | "default" -> Map.empty
+                | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
+
+        let evaluationContext = { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
         let buildVariables =
             defaultVariables
             // override variable with configuration variable if any
@@ -176,17 +187,7 @@ let read (options: ConfigOptions.Options) =
                 | _ -> expr)
 
         let evaluationContext = { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap buildVariables }
-        let configVariables =
-            match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
-            | Some variables ->
-                variables.Variables
-                |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
-            | _ ->
-                match options.Configuration with
-                | "default" -> Map.empty
-                | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
-
-        { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
+        { evaluationContext with Eval.Variables = evaluationContext.Variables }
 
 
     let extensions, scripts =

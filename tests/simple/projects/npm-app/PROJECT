@@ -1,8 +1,9 @@
 
-project npmext {
+project @npm {
     labels = [ "app" ]
 }
 
 target build {
-    npmext build { }
+    @npm `version` { arguments: $npm_version }
+    @npm build { }
 }
