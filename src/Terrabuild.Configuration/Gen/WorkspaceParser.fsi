@@ -3,7 +3,7 @@ module internal Terrabuild.Configuration.Workspace.Parser
 type token = 
   | PROJECT
   | IGNORES
-  | SPACE
+  | ID
   | DEPENDS_ON
   | REBUILD
   | VARIABLES
@@ -58,7 +58,7 @@ type token =
 type tokenId = 
     | TOKEN_PROJECT
     | TOKEN_IGNORES
-    | TOKEN_SPACE
+    | TOKEN_ID
     | TOKEN_DEPENDS_ON
     | TOKEN_REBUILD
     | TOKEN_VARIABLES

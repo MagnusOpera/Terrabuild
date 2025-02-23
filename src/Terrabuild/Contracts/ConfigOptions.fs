@@ -13,10 +13,6 @@ type Options = {
     LocalOnly: bool
     StartedAt: DateTime
     Targets: string set
-    CI: string option
-    Metadata: string option
-    BranchOrTag: string
-    HeadCommit: string
     Configuration: string
     LogType: Contracts.LogType
     Note: string option
@@ -24,4 +20,10 @@ type Options = {
     Labels: string set option
     Variables: Map<string, string>
     ContainerTool: string option
+
+    // from SourceControl
+    BranchOrTag: string
+    HeadCommit: string
+    User: string
+    Run: Contracts.RunInfo option
 }

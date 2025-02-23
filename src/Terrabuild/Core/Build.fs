@@ -4,6 +4,7 @@ open System.Collections.Generic
 open Collections
 open Serilog
 open Terrabuild.PubSub
+open Environment
 
 [<RequireQualifiedAccess>]
 type TaskRequest =
@@ -62,7 +63,7 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) project
         let metaCommand = operation.MetaCommand
         match options.ContainerTool, operation.Container with
         | Some cmd, Some container ->
-            let wsDir = Environment.CurrentDirectory
+            let wsDir = currentDir()
 
             let containerHome =
                 match containerInfos.TryGetValue(container) with
@@ -152,7 +153,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     notification.BuildStarted graph
     api |> Option.iter (fun api -> api.StartBuild())
 
-    let allowRemoteCache = options.CI.IsSome
+    let allowRemoteCache = options.Run.IsSome
 
     let homeDir = cache.CreateHomeDir "containers"
     let tmpDir = cache.CreateHomeDir "tmp"

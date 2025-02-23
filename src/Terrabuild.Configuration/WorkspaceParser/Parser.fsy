@@ -34,7 +34,7 @@ let debugPrint s = ignore s
 %token DOUBLE_QUESTION QUESTION COLON BANG AND OR
 %token EOF
 %token WORKSPACE TARGET CONFIGURATION EXTENSION
-%token PROJECT IGNORES SPACE DEPENDS_ON REBUILD VARIABLES CONTAINER INIT SCRIPT DEFAULTS NAME
+%token PROJECT IGNORES ID DEPENDS_ON REBUILD VARIABLES CONTAINER INIT SCRIPT DEFAULTS NAME
 
 // associativity and precedences
 %right LSQBRACKET
@@ -69,7 +69,7 @@ WorkspaceComponents:
     | WorkspaceComponents WorkspaceSpace { $1 @ [$2] }
     | WorkspaceComponents WorkspaceIgnores { $1 @ [$2] }
 WorkspaceSpace:
-    | SPACE EQUAL String { WorkspaceComponents.Space $3 }
+    | ID EQUAL String { WorkspaceComponents.Id $3 }
 WorkspaceIgnores:
     | IGNORES EQUAL ListOfString { WorkspaceComponents.Ignores $3 }
 

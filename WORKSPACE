@@ -1,6 +1,6 @@
 
 workspace {
-    space = "magnusopera/terrabuild"
+    id = "c91ea014-00c7-8bd1-1c05-656a6d327ce7"
 }
 
 configuration {

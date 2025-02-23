@@ -12,6 +12,7 @@
     <Compile Include="Contracts/Storage.fs" />
     <Compile Include="Contracts/SourceControl.fs" />
     <Compile Include="Contracts/ConfigOptions.fs" />
+    <Compile Include="Helpers/Environment.fs" />
     <Compile Include="Helpers/Threading.fs" />
     <Compile Include="Helpers/Exec.fs" />
     <Compile Include="Helpers/Git.fs" />

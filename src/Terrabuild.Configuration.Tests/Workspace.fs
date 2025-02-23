@@ -7,6 +7,7 @@ open Terrabuild.Configuration
 open Terrabuild.Configuration.AST
 open Terrabuild.Configuration.Workspace.AST
 open Terrabuild.Expressions
+open System
 
 [<Test>]
 let parseWorkspace() =
@@ -42,7 +43,7 @@ let parseWorkspace() =
               Script = Some "scripts/npm.fsx"
               Defaults = Map.empty }
 
-        { WorkspaceFile.Workspace = { Space = Some "magnusopera/default"; Ignores = Set ["**/node_modules"] }
+        { WorkspaceFile.Workspace = { Id = "d7528db2-83e0-4164-8c8e-1e0d6d6357ca" |> Guid.Parse |> Some; Ignores = Set ["**/node_modules"] }
           WorkspaceFile.Targets = Map [ "build", targetBuild
                                         "dist", targetDist
                                         "dummy", targetDummy ]
@@ -117,7 +118,7 @@ let parseWorkspace2() =
               Script = None
               Defaults = Map.empty }
 
-        { WorkspaceFile.Workspace = { Space = Some "magnusopera/default"; Ignores = Set.empty }
+        { WorkspaceFile.Workspace = { Id = None; Ignores = Set.empty }
           WorkspaceFile.Targets = Map [ "build", targetBuild
                                         "dist", targetDist
                                         "dummy", targetDummy ]

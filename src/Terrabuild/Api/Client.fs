@@ -48,7 +48,7 @@ module private Http =
 module private Auth =
     [<RequireQualifiedAccess>]
     type LoginSpaceInput = {
-        Space: string
+        Id: Guid
         Token: string
     }
 
@@ -57,26 +57,41 @@ module private Auth =
         AccessToken: string
     }
 
-    let loginSpace headers space token: LoginSpaceOutput =
-        { LoginSpaceInput.Space = space
+    let loginSpace headers workspaceId token: LoginSpaceOutput =
+        { LoginSpaceInput.Id = workspaceId
           LoginSpaceInput.Token = token }
         |> Http.post headers "/auth/loginspace"
 
 
 module private Build =
+
     [<RequireQualifiedAccess>]
-    type StartBuildInput = {
-        BranchOrTag: string
-        Commit: string
+    type RunInfoInput = {
+        Name: string
+        Repository: string
+        Message: string
+        Author: string
+        RunAttempt: int
+        RunId: string
+    }
+
+    [<RequireQualifiedAccess>]
+    type BuildContextInput = {
         Configuration: string
         Note: string option
         Tag: string option
         Targets: string seq
         Force: bool
         Retry: bool
-        CI: bool
-        CIName: string option
-        CIMetadata: string option
+    }
+
+    [<RequireQualifiedAccess>]
+    type StartBuildInput = {
+        BranchOrTag: string
+        Commit: string
+        User: string
+        Run: RunInfoInput option
+        Context: BuildContextInput
     }
 
     [<RequireQualifiedAccess>]
@@ -105,19 +120,13 @@ module private Build =
         TargetHash: string
     }
 
-    let startBuild headers branchOrTag commit configuration note tag targets force retry ci ciname cimetadata: StartBuildOutput =
+    let startBuild headers branchOrTag headCommit user run context : StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
-          StartBuildInput.Commit = commit
-          StartBuildInput.Configuration = configuration
-          StartBuildInput.Note = note
-          StartBuildInput.Tag = tag
-          StartBuildInput.Targets = targets 
-          StartBuildInput.Force = force
-          StartBuildInput.Retry = retry
-          StartBuildInput.CI = ci
-          StartBuildInput.CIName = ciname
-          StartBuildInput.CIMetadata = cimetadata }
-          |> Http.post headers "/builds"
+          StartBuildInput.Commit = headCommit
+          StartBuildInput.User = user
+          StartBuildInput.Run = run
+          StartBuildInput.Context = context }
+        |> Http.post headers "/builds"
 
 
     let addArtifact headers buildId project target projectHash targetHash files success: Unit =
@@ -150,13 +159,13 @@ module private Artifact =
         Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts?path={path}" ()
 
 
-type Client(space: string, token: string, options: ConfigOptions.Options) =
+type Client(workspaceId: Guid, token: string, options: ConfigOptions.Options) =
     let accesstoken =
         let headers = [
             HttpRequestHeaders.Accept HttpContentTypes.Json
             HttpRequestHeaders.ContentType HttpContentTypes.Json
         ]
-        let resp = Auth.loginSpace headers space token
+        let resp = Auth.loginSpace headers workspaceId token
         resp.AccessToken
 
     let headers = [
@@ -166,18 +175,29 @@ type Client(space: string, token: string, options: ConfigOptions.Options) =
 
     let buildId =
         lazy(
+            let run = options.Run |> Option.map (fun run -> {
+                Build.RunInfoInput.Name = run.Name
+                Build.RunInfoInput.Repository = run.Repository
+                Build.RunInfoInput.RunId = run.RunId
+                Build.RunInfoInput.Message = run.Message
+                Build.RunInfoInput.Author = run.Author
+                Build.RunInfoInput.RunAttempt = run.RunAttempt
+            })
+
+            let context = {
+                Build.BuildContextInput.Configuration = options.Configuration
+                Build.BuildContextInput.Note = options.Note
+                Build.BuildContextInput.Tag = options.Tag
+                Build.BuildContextInput.Targets = options.Targets
+                Build.BuildContextInput.Force = options.Force
+                Build.BuildContextInput.Retry = options.Retry }
+
             let resp = Build.startBuild headers
                                         options.BranchOrTag
                                         options.HeadCommit
-                                        options.Configuration
-                                        options.Note
-                                        options.Tag
-                                        options.Targets
-                                        options.Force
-                                        options.Retry
-                                        options.CI.IsSome
-                                        options.CI
-                                        options.Metadata
+                                        options.User
+                                        run
+                                        context
             resp.BuildId)
 
     interface Contracts.IApiClient with

@@ -70,7 +70,7 @@ rule token = parse
     | "extension" { EXTENSION }
 
     | "ignores" { IGNORES }
-    | "space" { SPACE }
+    | "id" { ID }
     | "depends_on" { DEPENDS_ON }
     | "rebuild" { REBUILD }
     | "variables" { VARIABLES }
