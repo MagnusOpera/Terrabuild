@@ -138,7 +138,7 @@ let read (options: ConfigOptions.Options) =
             | Some note -> Value.String note
             | _ -> Value.Nothing
 
-        let defaultEvaluationContext = {
+        let evaluationContext = {
             Eval.EvaluationContext.WorkspaceDir = options.Workspace
             Eval.EvaluationContext.ProjectDir = None
             Eval.EvaluationContext.Versions = Map.empty
@@ -155,40 +155,44 @@ let read (options: ConfigOptions.Options) =
         }
 
         // variables = default configuration vars + configuration vars + env vars + args vars
-        let defaultVariables =
-            match workspaceConfig.Configurations |> Map.tryFind "default" with
-            | Some config ->
-                config.Variables
-                |> Map.map (fun _ expr -> Eval.eval defaultEvaluationContext expr)
-            | _ -> Map.empty
+        let evaluationContext =
+            let defaultVariables =
+                match workspaceConfig.Configurations |> Map.tryFind "default" with
+                | Some config ->
+                    config.Variables
+                    |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
+                | _ -> Map.empty
 
-        let evaluationContext = { defaultEvaluationContext with Eval.Variables = defaultEvaluationContext.Variables |> Map.addMap defaultVariables }
-        let configVariables =
-            match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
-            | Some variables ->
-                variables.Variables
-                |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
-            | _ ->
-                match options.Configuration with
-                | "default" -> Map.empty
-                | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
+            let buildVariables =
+                defaultVariables
+                // override variable with configuration variable if any
+                |> Map.map (fun key expr ->
+                    match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
+                    | null -> expr
+                    | value -> convertToVarType key expr value)
+                // override variable with provided ones on command line if any
+                |> Map.map (fun key expr ->
+                    match options.Variables |> Map.tryFind (key |> String.toLower) with
+                    | Some value -> convertToVarType key expr value
+                    | _ -> expr)
 
-        let evaluationContext = { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
-        let buildVariables =
-            defaultVariables
-            // override variable with configuration variable if any
-            |> Map.map (fun key expr ->
-                match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
-                | null -> expr
-                | value -> convertToVarType key expr value)
-            // override variable with provided ones on command line if any
-            |> Map.map (fun key expr ->
-                match options.Variables |> Map.tryFind (key |> String.toLower) with
-                | Some value -> convertToVarType key expr value
-                | _ -> expr)
+            let evaluationContext = { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap buildVariables }
+            evaluationContext
 
-        let evaluationContext = { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap buildVariables }
-        { evaluationContext with Eval.Variables = evaluationContext.Variables }
+        let evaluationContext =
+            let configVariables =
+                match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
+                | Some variables ->
+                    variables.Variables
+                    |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
+                | _ ->
+                    match options.Configuration with
+                    | "default" -> Map.empty
+                    | _ -> TerrabuildException.Raise($"Configuration '{options.Configuration}' not found")
+            let evaluationContext = { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
+            evaluationContext
+
+        evaluationContext
 
 
     let extensions, scripts =
