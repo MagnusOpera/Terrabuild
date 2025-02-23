@@ -65,6 +65,12 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) project
         | Some cmd, Some container ->
             let wsDir = currentDir()
 
+            // add platform
+            let container =
+                match operation.ContainerPlatform with
+                | Some platform -> $"--platform={platform} {container}"
+                | _ -> container
+
             let containerHome =
                 match containerInfos.TryGetValue(container) with
                 | true, containerHome ->

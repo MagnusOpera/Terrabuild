@@ -9,6 +9,7 @@ type token =
   | LABELS
   | VARIABLES
   | CONTAINER
+  | PLATFORM
   | INIT
   | SCRIPT
   | DEPENDS_ON
@@ -67,6 +68,7 @@ type tokenId =
     | TOKEN_LABELS
     | TOKEN_VARIABLES
     | TOKEN_CONTAINER
+    | TOKEN_PLATFORM
     | TOKEN_INIT
     | TOKEN_SCRIPT
     | TOKEN_DEPENDS_ON
@@ -125,6 +127,7 @@ type nonTerminalId =
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_ExtensionContainer
+    | NONTERM_ExtensionPlaform
     | NONTERM_ExtensionVariables
     | NONTERM_ExtensionScript
     | NONTERM_ExtensionDefaults

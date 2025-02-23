@@ -29,16 +29,19 @@ let parseWorkspace() =
 
         let extDotnet =
             { Container = Some (Expr.String "mcr.microsoft.com/dotnet/sdk:8.0.101")
+              Platform = None
               Variables = Set.empty
               Script = None
               Defaults = Map [ "configuration", Expr.Variable "configuration" ] }
         let extDocker =
             { Container = None
+              Platform = None
               Variables = Set.empty
               Script = None
               Defaults = Map.empty }
         let extNpm =
             { Container = Some (Expr.String "node:20")
+              Platform = None
               Variables = Set.empty
               Script = Some "scripts/npm.fsx"
               Defaults = Map.empty }
@@ -107,6 +110,7 @@ let parseWorkspace2() =
 
         let extDotnet =
             { Container = Some (Expr.String "mcr.microsoft.com/dotnet/sdk:8.0.101")
+              Platform = None
               Variables = Set.empty
               Script = None
               Defaults = Map [ "configuration1", Expr.Function (Function.Item, [Expr.Variable "map"; Expr.String "toto"])
@@ -114,6 +118,7 @@ let parseWorkspace2() =
                                "configuration3", Expr.Function (Function.Replace, [Expr.String "toto titi"; Expr.String "toto"; Expr.String "titi"]) ] }
         let extDocker =
             { Container = None
+              Platform = None
               Variables = Set.empty
               Script = None
               Defaults = Map.empty }
