@@ -47,7 +47,7 @@ type Terraform() =
             match config with
             | Some config -> $" -backend-config={config}"
             | _ -> ""
-        let ops = [ shellOp "terraform" $"init {config}" ]
+        let ops = [ shellOp "terraform" $"init{config}" ]
         execRequest Cacheability.Always ops
 
 
