@@ -40,8 +40,8 @@ type Terraform() =
 
     /// <summary weight="1">
     /// Init Terraform.
-    /// <param name="config" example="backend.prod.config">Set configuration for init.</param>
     /// </summary>
+    /// <param name="config" example="backend.prod.config">Set configuration for init.</param>
     static member init (context: ActionContext) (config: string option) =
         let config =
             match config with
