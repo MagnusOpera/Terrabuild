@@ -52,25 +52,29 @@ type ICache =
     abstract TryGetSummaryOnly: useRemote:bool -> id:string -> (Origin * TargetSummary) option
     abstract TryGetSummary: useRemote:bool -> id:string -> TargetSummary option
     abstract GetEntry: useRemote:bool -> id:string -> IEntry
-    abstract CreateHomeDir: nodeHash:string -> string
 
 
 let private summaryFilename = "summary.json"
 
 let private originFilename = "origin"
 
-let terrabuildHome =
+let createTerrabuildProfile() =
     let tbDir = FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
     IO.createDirectory tbDir
     tbDir
 
-let private buildCacheDirectory =
-    let cacheDir = FS.combinePath terrabuildHome "buildcache"
+let createCache() =
+    let cacheDir = FS.combinePath (createTerrabuildProfile()) "cache"
     IO.createDirectory cacheDir
     cacheDir
 
-let private homeDirectory =
-    let cacheDir = FS.combinePath terrabuildHome "home"
+let createHome() =
+    let cacheDir = FS.combinePath (createTerrabuildProfile()) "home"
+    IO.createDirectory cacheDir
+    cacheDir
+
+let createTmp() =
+    let cacheDir = FS.combinePath (createTerrabuildProfile()) "tmp"
     IO.createDirectory cacheDir
     cacheDir
 
@@ -82,12 +86,18 @@ let private getOrigin entryDir =
     let originFile = FS.combinePath entryDir originFilename
     originFile |> IO.readTextFile |> Json.Deserialize<Origin>
 
-let clearBuildCache () =
-    IO.deleteAny buildCacheDirectory
+let clearCache () =
+    IO.deleteAny (createCache())
+    IO.deleteAny (createTmp())
 
 let clearHomeCache () =
-    IO.deleteAny homeDirectory
+    IO.deleteAny (createHome())
 
+let createDirectories() =
+    createTerrabuildProfile() |> ignore
+    createCache() |> ignore
+    createHome() |> ignore
+    createTmp() |> ignore
 
 
 type NewEntry(entryDir: string, useRemote: bool, id: string, storage: Contracts.IStorage) =
@@ -228,7 +238,7 @@ type Cache(storage: Contracts.IStorage) =
             match cachedSummaries.TryGetValue(id) with
             | true, originSummary -> originSummary
             | false, _ ->
-                let entryDir = FS.combinePath buildCacheDirectory id
+                let entryDir = FS.combinePath (createCache()) id
                 let logsDir = FS.combinePath entryDir "logs"
                 let outputsDir = FS.combinePath entryDir "outputs"
                 let summaryFile = FS.combinePath logsDir summaryFilename
@@ -258,7 +268,7 @@ type Cache(storage: Contracts.IStorage) =
                         None
 
         member _.TryGetSummary useRemote id : TargetSummary option =
-            let entryDir = FS.combinePath buildCacheDirectory id
+            let entryDir = FS.combinePath (createCache()) id
             let logsDir = FS.combinePath entryDir "logs"
             let outputsDir = FS.combinePath entryDir "outputs"
             let summaryFile = FS.combinePath logsDir summaryFilename
@@ -291,10 +301,5 @@ type Cache(storage: Contracts.IStorage) =
         member _.GetEntry useRemote id : IEntry =
             // invalidate cache as we are creating a new entry
             cachedSummaries.TryRemove(id) |> ignore
-            let entryDir = FS.combinePath buildCacheDirectory id
+            let entryDir = FS.combinePath (createCache()) id
             NewEntry(entryDir, useRemote, id, storage)
-
-        member _.CreateHomeDir nodeHash: string =
-            let homeDir = FS.combinePath homeDirectory nodeHash
-            IO.createDirectory homeDir
-            homeDir

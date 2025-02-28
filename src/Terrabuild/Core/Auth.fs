@@ -14,7 +14,7 @@ type Configuration = {
 
 
 let private removeAuthToken (workspaceId: Guid) =
-    let configFile = FS.combinePath Cache.terrabuildHome "config.json"
+    let configFile = FS.combinePath (Cache.createTerrabuildProfile()) "config.json"
     let config =
         if configFile |> FS.fileExists then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
         else { Configuration.SpaceAuths = List.empty }
@@ -27,7 +27,7 @@ let private removeAuthToken (workspaceId: Guid) =
 
 
 let private addAuthToken (workspaceId: Guid) (token: string) =
-    let configFile = FS.combinePath Cache.terrabuildHome "config.json"
+    let configFile = FS.combinePath (Cache.createTerrabuildProfile()) "config.json"
     let config =
         if configFile |> FS.fileExists then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
         else { SpaceAuths = [] }
@@ -40,7 +40,7 @@ let private addAuthToken (workspaceId: Guid) (token: string) =
 
 
 let readAuthToken (workspaceId: Guid) =
-    let configFile = FS.combinePath Cache.terrabuildHome "config.json"
+    let configFile = FS.combinePath (Cache.createTerrabuildProfile()) "config.json"
     let config =
         if configFile |> FS.fileExists then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
         else { Configuration.SpaceAuths = List.empty }
