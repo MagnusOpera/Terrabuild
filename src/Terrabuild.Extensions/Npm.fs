@@ -60,6 +60,17 @@ type Npm() =
         ]
         execRequest Cacheability.Always ops
 
+    /// <summary>
+    /// Run `login` script. Writes to the .npmrc file to log the user.
+    /// </summary>
+    /// <param name="npmrcContent" example="&quot;//registry.npmjs.org/:_authToken={YOUR_TOKEN}&quot;">The content of the .npmrc file.</param> 
+    static member login (context: ActionContext) (npmrcContent: string) =
+        let ops = [
+            shellOp "npm" "ci"
+            shellOp "echo" $"\"{npmrcContent}\" > ~/.npmrc"
+        ]
+        execRequest Cacheability.Always ops
+
 
     /// <summary>
     /// Run `test` script.
