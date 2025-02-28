@@ -161,8 +161,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
     let allowRemoteCache = options.Run.IsSome
 
-    let homeDir = cache.CreateHomeDir "containers"
-    let tmpDir = cache.CreateHomeDir "tmp"
+    let homeDir = Cache.createHome()
+    let tmpDir = Cache.createTmp()
 
     let tryGetSummaryOnly id =
         let allowRemoteCache = options.LocalOnly |> not

@@ -53,6 +53,7 @@ type TerrabuildExiter() =
             exit (int errorCode)
 
 let launchDir = currentDir()
+Cache.createDirectories()
 
 let rec findWorkspace dir =
     if FS.combinePath dir "WORKSPACE" |> IO.exists then
@@ -273,7 +274,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         runTarget true options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
-        if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearBuildCache()
+        if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearCache()
         if clearArgs.Contains(ClearArgs.Home) || clearArgs.Contains(ClearArgs.All) then Cache.clearHomeCache()
         0
 
