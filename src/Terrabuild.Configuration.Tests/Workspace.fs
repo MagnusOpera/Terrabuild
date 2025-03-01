@@ -46,7 +46,7 @@ let parseWorkspace() =
               Script = Some "scripts/npm.fsx"
               Defaults = Map.empty }
 
-        { WorkspaceFile.Workspace = { Id = "d7528db2-83e0-4164-8c8e-1e0d6d6357ca" |> Guid.Parse |> Some; Ignores = Set ["**/node_modules"] }
+        { WorkspaceFile.Workspace = { Id = "d7528db2-83e0-4164-8c8e-1e0d6d6357ca" |> Some; Ignores = Set ["**/node_modules"] }
           WorkspaceFile.Targets = Map [ "build", targetBuild
                                         "dist", targetDist
                                         "dummy", targetDummy ]

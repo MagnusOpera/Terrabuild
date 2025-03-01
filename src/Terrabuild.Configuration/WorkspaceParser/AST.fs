@@ -11,7 +11,7 @@ type WorkspaceComponents =
 
 [<RequireQualifiedAccess>]
 type Workspace = {
-    Id: Guid option
+    Id: string option
     Ignores: Set<string>
 }
 with
@@ -19,10 +19,7 @@ with
         let id =
             match components |> List.choose (function | WorkspaceComponents.Id value -> Some value | _ -> None) with
             | [] -> None
-            | [value] ->
-                match value |> Guid.TryParse with
-                | true, guid -> Some guid
-                | _ -> TerrabuildException.Raise("id is malformed")
+            | [value] -> Some value
             | _ -> TerrabuildException.Raise("multiple space declared")
 
         let ignores =

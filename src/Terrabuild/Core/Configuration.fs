@@ -48,7 +48,7 @@ type Project = {
 [<RequireQualifiedAccess>]
 type Workspace = {
     // Space to use
-    Id: Guid option
+    Id: string option
 
     // Computed projects selection (derived from user inputs)
     SelectedProjects: string set

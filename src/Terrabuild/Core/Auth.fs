@@ -3,7 +3,7 @@ open System
 
 
 type SpaceAuth = {
-    Id: Guid
+    Id: string
     Token: string
 }
 
@@ -13,7 +13,7 @@ type Configuration = {
 }
 
 
-let private removeAuthToken (workspaceId: Guid) =
+let private removeAuthToken (workspaceId: string) =
     let configFile = FS.combinePath (Cache.createTerrabuildProfile()) "config.json"
     let config =
         if configFile |> FS.fileExists then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
@@ -26,7 +26,7 @@ let private removeAuthToken (workspaceId: Guid) =
     |> IO.writeTextFile configFile
 
 
-let private addAuthToken (workspaceId: Guid) (token: string) =
+let private addAuthToken (workspaceId: string) (token: string) =
     let configFile = FS.combinePath (Cache.createTerrabuildProfile()) "config.json"
     let config =
         if configFile |> FS.fileExists then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
@@ -39,7 +39,7 @@ let private addAuthToken (workspaceId: Guid) (token: string) =
     |> IO.writeTextFile configFile
 
 
-let readAuthToken (workspaceId: Guid) =
+let readAuthToken (workspaceId: string) =
     let configFile = FS.combinePath (Cache.createTerrabuildProfile()) "config.json"
     let config =
         if configFile |> FS.fileExists then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
