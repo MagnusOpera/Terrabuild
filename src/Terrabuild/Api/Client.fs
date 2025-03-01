@@ -48,7 +48,7 @@ module private Http =
 module private Auth =
     [<RequireQualifiedAccess>]
     type LoginSpaceInput = {
-        Id: Guid
+        Id: string
         Token: string
     }
 
@@ -159,7 +159,7 @@ module private Artifact =
         Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts?path={path}" ()
 
 
-type Client(workspaceId: Guid, token: string, options: ConfigOptions.Options) =
+type Client(workspaceId: string, token: string, options: ConfigOptions.Options) =
     let accesstoken =
         let headers = [
             HttpRequestHeaders.Accept HttpContentTypes.Json

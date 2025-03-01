@@ -279,24 +279,14 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         0
 
     let login (loginArgs: ParseResults<LoginArgs>) =
-        let space = loginArgs.GetResult(LoginArgs.Workspace)
+        let workspaceId = loginArgs.GetResult(LoginArgs.Workspace)
         let token = loginArgs.GetResult(LoginArgs.Token)
-
-        let workspaceId =
-            match space |> Guid.TryParse with
-            | true, guid -> guid
-            | _ -> TerrabuildException.Raise("Invalid workspaceId")
 
         Auth.login workspaceId token
         0
 
     let logout (logoutArgs: ParseResults<LogoutArgs>) =
-        let space = logoutArgs.GetResult(LogoutArgs.Space)
-        let workspaceId =
-            match space |> Guid.TryParse with
-            | true, guid -> guid
-            | _ -> TerrabuildException.Raise("Invalid workspaceId")
-
+        let workspaceId = logoutArgs.GetResult(LogoutArgs.Space)
         Auth.logout workspaceId
         0
 
