@@ -29,3 +29,8 @@ let getHeadCommitAuthor (dir: string) =
     match Exec.execCaptureOutput dir "git" "log -1 --pretty=%an" with
     | Exec.Success (output, _) -> output |> String.firstLine
     | _ -> TerrabuildException.Raise("Failed to get head commit")
+
+let getCommitLog (dir: string) =
+    match Exec.execCaptureOutput dir "git" "log -n 10 --pretty=%H" with
+    | Exec.Success (output, _) -> output |> String.getLines |> List.ofArray
+    | _ -> TerrabuildException.Raise("Failed to get commit log")

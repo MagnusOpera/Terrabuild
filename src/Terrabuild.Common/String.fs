@@ -12,8 +12,10 @@ let join (separator : string) (strings : string seq) =
     String.Join(separator, strings)
 
 let firstLine (input: string) =
-    use reader = new StringReader(input)
-    reader.ReadLine()
+    input.Split([| "\r\n"; "\n" |], StringSplitOptions.RemoveEmptyEntries)[0]
+
+let getLines (input: string) =
+    input.Split([| "\r\n"; "\n" |], StringSplitOptions.RemoveEmptyEntries)
 
 let (|Regex|_|) pattern input =
     let m = Regex.Match(input, pattern)

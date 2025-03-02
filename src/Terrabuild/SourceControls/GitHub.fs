@@ -10,6 +10,7 @@ type GitHub() =
     let repository = "GITHUB_REPOSITORY" |> envVar
     let runAttempt = "GITHUB_RUN_ATTEMPT" |> envVar |> int
     let author = currentDir() |> Git.getHeadCommitAuthor
+    let commitLog = currentDir() |> Git.getCommitLog
 
     static member Detect() =
         "GITHUB_ACTION" |> envVar |> isNull |> not
@@ -17,6 +18,7 @@ type GitHub() =
     interface Contracts.ISourceControl with
         override _.BranchOrTag = refName
         override _.HeadCommit = sha
+        override _.CommitLog = commitLog
         override _.User = author
         override _.Run = 
             Some { Name = "GitHub"

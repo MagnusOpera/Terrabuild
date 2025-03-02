@@ -89,6 +89,7 @@ module private Build =
     type StartBuildInput = {
         BranchOrTag: string
         Commit: string
+        CommitLog: string seq
         User: string
         Run: RunInfoInput option
         Context: BuildContextInput
@@ -120,9 +121,10 @@ module private Build =
         TargetHash: string
     }
 
-    let startBuild headers branchOrTag headCommit user run context : StartBuildOutput =
+    let startBuild headers branchOrTag headCommit commitLog user run context : StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = headCommit
+          StartBuildInput.CommitLog = commitLog
           StartBuildInput.User = user
           StartBuildInput.Run = run
           StartBuildInput.Context = context }
@@ -195,6 +197,7 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
             let resp = Build.startBuild headers
                                         options.BranchOrTag
                                         options.HeadCommit
+                                        options.CommitLog
                                         options.User
                                         run
                                         context

@@ -24,6 +24,7 @@ type Options = {
     // from SourceControl
     BranchOrTag: string
     HeadCommit: string
+    CommitLog: string list
     User: string
     Run: Contracts.RunInfo option
 }
