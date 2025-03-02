@@ -9,7 +9,6 @@ type RunInfo = {
     Repository: string
     RunId: string
     Message: string
-    TargetBranch: string option
     Author: string
     RunAttempt: int
 }

@@ -70,7 +70,6 @@ module private Build =
         Name: string
         Repository: string
         Message: string
-        TargetBranch: string option
         Author: string
         Id: string
         Attempt: int
@@ -185,7 +184,6 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
                 Build.RunInfoInput.Repository = run.Repository
                 Build.RunInfoInput.Id = run.RunId
                 Build.RunInfoInput.Message = run.Message
-                Build.RunInfoInput.TargetBranch = run.TargetBranch
                 Build.RunInfoInput.Author = run.Author
                 Build.RunInfoInput.Attempt = run.RunAttempt
             })
