@@ -69,12 +69,19 @@ module private Build =
     type RunInfoInput = {
         Name: string
         Repository: string
-        Message: string
         IsTag: bool
-        Author: string
         Id: string
         Attempt: int
     }
+
+    [<RequireQualifiedAccess>]
+    type CommitInput = {
+        Sha: string
+        Subject: string
+        Author: string
+        Email: string
+    }
+
 
     [<RequireQualifiedAccess>]
     type BuildContextInput = {
@@ -89,9 +96,8 @@ module private Build =
     [<RequireQualifiedAccess>]
     type StartBuildInput = {
         BranchOrTag: string
-        Commit: string
-        CommitLog: string seq
-        User: string
+        Commit: CommitInput
+        CommitLog: CommitInput seq
         Run: RunInfoInput option
         Context: BuildContextInput
     }
@@ -122,11 +128,10 @@ module private Build =
         TargetHash: string
     }
 
-    let startBuild headers branchOrTag headCommit commitLog user run context : StartBuildOutput =
+    let startBuild headers branchOrTag headCommit commitLog run context : StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
           StartBuildInput.Commit = headCommit
           StartBuildInput.CommitLog = commitLog
-          StartBuildInput.User = user
           StartBuildInput.Run = run
           StartBuildInput.Context = context }
         |> Http.post headers "/builds"
@@ -182,9 +187,7 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
                 Build.RunInfoInput.Name = run.Name
                 Build.RunInfoInput.Repository = run.Repository
                 Build.RunInfoInput.Id = run.RunId
-                Build.RunInfoInput.Message = run.Message
                 Build.RunInfoInput.IsTag = run.IsTag
-                Build.RunInfoInput.Author = run.Author
                 Build.RunInfoInput.Attempt = run.RunAttempt
             })
 
@@ -196,11 +199,16 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
                 Build.BuildContextInput.Force = options.Force
                 Build.BuildContextInput.Retry = options.Retry }
 
+            let mapCommit (x: Contracts.Commit) =
+                { Build.CommitInput.Sha = x.Sha
+                  Build.CommitInput.Subject = x.Subject
+                  Build.CommitInput.Author = x.Author
+                  Build.CommitInput.Email = x.Author }
+
             let resp = Build.startBuild headers
                                         options.BranchOrTag
-                                        options.HeadCommit
-                                        options.CommitLog
-                                        options.User
+                                        (options.HeadCommit |> mapCommit)
+                                        (options.CommitLog |> Seq.map mapCommit)
                                         run
                                         context
             resp.BuildId)

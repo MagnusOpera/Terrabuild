@@ -113,7 +113,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.HeadCommit = sourceControl.HeadCommit
             ConfigOptions.Options.CommitLog = sourceControl.CommitLog
             ConfigOptions.Options.BranchOrTag = sourceControl.BranchOrTag
-            ConfigOptions.Options.User = sourceControl.User
             ConfigOptions.Options.Run = sourceControl.Run
         }
 

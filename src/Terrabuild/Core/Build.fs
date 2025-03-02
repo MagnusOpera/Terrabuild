@@ -376,7 +376,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
         graph.Nodes.Count = nodeStatus.Count
         && nodeStatus |> Map.forall (fun _ nodeInfo -> match nodeInfo.Status with | TaskStatus.Success _ -> true | _ -> false)
 
-    let buildInfo = { Summary.Commit = headCommit
+    let buildInfo = { Summary.Commit = headCommit.Sha
                       Summary.BranchOrTag = branchOrTag
                       Summary.StartedAt = startedAt
                       Summary.EndedAt = endedAt

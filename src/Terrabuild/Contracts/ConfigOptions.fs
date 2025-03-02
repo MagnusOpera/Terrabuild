@@ -1,6 +1,7 @@
 module ConfigOptions
 open System
 open Collections
+open Contracts
 
 [<RequireQualifiedAccess>]
 type Options = {
@@ -23,8 +24,7 @@ type Options = {
 
     // from SourceControl
     BranchOrTag: string
-    HeadCommit: string
-    CommitLog: string list
-    User: string
+    HeadCommit: Commit
+    CommitLog: Commit list
     Run: Contracts.RunInfo option
 }

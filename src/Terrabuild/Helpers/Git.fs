@@ -1,11 +1,6 @@
 module Git
 open Errors
 
-let getHeadCommit (dir: string) =
-    match Exec.execCaptureOutput dir "git" "rev-parse HEAD" with
-    | Exec.Success (output, _) -> output |> String.firstLine
-    | _ -> TerrabuildException.Raise("Failed to get head commit")
-
 let getBranchOrTag (dir: string) =
     // https://stackoverflow.com/questions/18659425/get-git-current-branch-tag-name
     match Exec.execCaptureOutput dir "git" "symbolic-ref -q --short HEAD" with
@@ -25,12 +20,11 @@ let getCurrentUser (dir: string) =
     | Exec.Success (output, _) -> output |> String.firstLine
     | _ -> TerrabuildException.Raise("Failed to get head commit")
 
-let getHeadCommitAuthor (dir: string) =
-    match Exec.execCaptureOutput dir "git" "log -1 --pretty=%an" with
-    | Exec.Success (output, _) -> output |> String.firstLine
-    | _ -> TerrabuildException.Raise("Failed to get head commit")
-
 let getCommitLog (dir: string) =
-    match Exec.execCaptureOutput dir "git" "log -n 10 --pretty=%H" with
-    | Exec.Success (output, _) -> output |> String.getLines |> List.ofArray
+    match Exec.execCaptureOutput dir "git" "log -n 10 --pretty=%H%n%s%n%an%n%ae" with
+    | Exec.Success (output, _) ->
+        output |> String.getLines
+        |> Seq.chunkBySize 4
+        |> Seq.map (fun arr -> {| Sha = arr[0]; Subject = arr[1]; Author = arr[2]; Email = arr[3] |})
+        |> List.ofSeq
     | _ -> TerrabuildException.Raise("Failed to get commit log")
