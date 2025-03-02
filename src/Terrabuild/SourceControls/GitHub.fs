@@ -1,6 +1,5 @@
 namespace SourceControls
 open Environment
-open Environment
 
 type GitHub() =
     let sha = "GITHUB_SHA" |> envVar
@@ -18,13 +17,13 @@ type GitHub() =
 
     interface Contracts.ISourceControl with
         override _.BranchOrTag = refName
-        override _.IsTag = refType = "tag"
         override _.HeadCommit = sha
         override _.CommitLog = commitLog
         override _.User = author
         override _.Run = 
             Some { Name = "GitHub"
                    Message = currentDir() |> Git.getHeadCommitMessage
+                   IsTag = refType = "tag"
                    Author = currentDir() |> Git.getHeadCommitAuthor
                    RunId = runId
                    Repository = repository

@@ -9,13 +9,13 @@ type RunInfo = {
     Repository: string
     RunId: string
     Message: string
+    IsTag: bool
     Author: string
     RunAttempt: int
 }
 
 type ISourceControl =
     abstract BranchOrTag: string
-    abstract IsTag: bool
     abstract HeadCommit: string
     abstract CommitLog: string list
     abstract User: string
