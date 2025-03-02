@@ -5,6 +5,7 @@ open Environment
 type GitHub() =
     let sha = "GITHUB_SHA" |> envVar
     let refName = "GITHUB_REF_NAME" |> envVar
+    let refType = "GITHUB_REF_TYPE" |> envVar
     let stepSummary = "GITHUB_STEP_SUMMARY" |> envVar
     let runId = "GITHUB_RUN_ID" |> envVar
     let repository = "GITHUB_REPOSITORY" |> envVar
@@ -17,6 +18,7 @@ type GitHub() =
 
     interface Contracts.ISourceControl with
         override _.BranchOrTag = refName
+        override _.IsTag = refType = "tag"
         override _.HeadCommit = sha
         override _.CommitLog = commitLog
         override _.User = author

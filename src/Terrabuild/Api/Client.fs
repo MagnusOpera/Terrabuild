@@ -88,6 +88,7 @@ module private Build =
     [<RequireQualifiedAccess>]
     type StartBuildInput = {
         BranchOrTag: string
+        IsTag: bool
         Commit: string
         CommitLog: string seq
         User: string
@@ -121,8 +122,9 @@ module private Build =
         TargetHash: string
     }
 
-    let startBuild headers branchOrTag headCommit commitLog user run context : StartBuildOutput =
+    let startBuild headers branchOrTag isTag headCommit commitLog user run context : StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
+          StartBuildInput.IsTag = isTag
           StartBuildInput.Commit = headCommit
           StartBuildInput.CommitLog = commitLog
           StartBuildInput.User = user
@@ -196,6 +198,7 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
 
             let resp = Build.startBuild headers
                                         options.BranchOrTag
+                                        options.IsTag
                                         options.HeadCommit
                                         options.CommitLog
                                         options.User

@@ -15,6 +15,7 @@ type RunInfo = {
 
 type ISourceControl =
     abstract BranchOrTag: string
+    abstract IsTag: bool
     abstract HeadCommit: string
     abstract CommitLog: string list
     abstract User: string

@@ -23,6 +23,7 @@ type Options = {
 
     // from SourceControl
     BranchOrTag: string
+    IsTag: bool
     HeadCommit: string
     CommitLog: string list
     User: string
