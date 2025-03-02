@@ -203,7 +203,7 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
                 { Build.CommitInput.Sha = x.Sha
                   Build.CommitInput.Subject = x.Subject
                   Build.CommitInput.Author = x.Author
-                  Build.CommitInput.Email = x.Author }
+                  Build.CommitInput.Email = x.Email }
 
             let resp = Build.startBuild headers
                                         options.BranchOrTag

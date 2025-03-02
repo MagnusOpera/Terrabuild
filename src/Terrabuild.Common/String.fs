@@ -12,7 +12,7 @@ let join (separator : string) (strings : string seq) =
     String.Join(separator, strings)
 
 let firstLine (input: string) =
-    input.Split([| "\r\n"; "\n" |], StringSplitOptions.RemoveEmptyEntries)[0]
+    input.Split([| "\r\n"; "\n" |], StringSplitOptions.None)[0]
 
 let getLines (input: string) =
     input.Split([| "\r\n"; "\n" |], StringSplitOptions.RemoveEmptyEntries)
