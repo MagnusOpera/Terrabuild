@@ -145,7 +145,7 @@ let read (options: ConfigOptions.Options) =
             Eval.EvaluationContext.Variables = Map [
                 "terrabuild_configuration", Value.String options.Configuration
                 "terrabuild_branch_or_tag", Value.String options.BranchOrTag 
-                "terrabuild_head_commit", Value.String options.HeadCommit 
+                "terrabuild_head_commit", Value.String options.HeadCommit.Sha
                 "terrabuild_retry", Value.Bool options.Retry 
                 "terrabuild_force", Value.Bool options.Force 
                 "terrabuild_ci", Value.Bool options.Run.IsSome 
