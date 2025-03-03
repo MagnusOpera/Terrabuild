@@ -1,6 +1,30 @@
 namespace SourceControls
 open Environment
 
+module GitHubEventReader =
+
+    type GitHubAuthor = {
+        Email: string
+        Name: string
+    }
+
+    type GitHubCommit = {
+        Author: GitHubAuthor
+        Id: string
+        Message: string
+    }
+
+    type GitHubEvent = {
+        After: string
+        Before: string
+        Commits: GitHubCommit[]
+    }
+
+    let read (filename: string) =
+        let json = filename |> IO.readTextFile
+        Json.Deserialize<GitHubEvent> json
+
+
 type GitHub() =
     let refName = "GITHUB_REF_NAME" |> envVar
     let refType = "GITHUB_REF_TYPE" |> envVar
