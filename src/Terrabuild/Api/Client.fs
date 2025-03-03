@@ -69,6 +69,7 @@ module private Build =
     type RunInfoInput = {
         Name: string
         Repository: string
+        ParentCommits: string seq
         IsTag: bool
         Id: string
         Attempt: int
@@ -189,6 +190,7 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
                 Build.RunInfoInput.Id = run.RunId
                 Build.RunInfoInput.IsTag = run.IsTag
                 Build.RunInfoInput.Attempt = run.RunAttempt
+                Build.RunInfoInput.ParentCommits = run.ParentCommits
             })
 
             let context = {

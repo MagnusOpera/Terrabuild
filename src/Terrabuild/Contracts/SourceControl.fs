@@ -7,6 +7,7 @@ type LogType =
 type RunInfo = {
     Name: string
     Repository: string
+    ParentCommits: string list
     RunId: string
     IsTag: bool
     RunAttempt: int

@@ -33,6 +33,8 @@ module GitHubEventReader =
         knowParents
 
 
+
+
 type GitHub() =
     let refName = "GITHUB_REF_NAME" |> envVar
     let refType = "GITHUB_REF_TYPE" |> envVar
@@ -42,20 +44,25 @@ type GitHub() =
     let runAttempt = "GITHUB_RUN_ATTEMPT" |> envVar |> int
     let commitLog = currentDir() |> Git.getCommitLog
     let commit = commitLog.Head
+    let parentCommits = "GITHUB_EVENT_PATH" |> envVar |> GitHubEventReader.findParentCommits |> List.ofSeq
 
     static member Detect() =
         "GITHUB_ACTION" |> envVar |> isNull |> not
 
     interface Contracts.ISourceControl with
         override _.BranchOrTag = refName
+        
         override _.HeadCommit =
             { Sha = commit.Sha; Subject = commit.Subject; Author = commit.Author; Email = commit.Email }
+        
         override _.CommitLog = commitLog.Tail |> List.map (fun commit -> 
             { Sha = commit.Sha; Subject = commit.Subject; Author = commit.Author; Email = commit.Email })
+
         override _.Run = 
             Some { Name = "GitHub"
                    IsTag = refType = "tag"
                    RunId = runId
+                   ParentCommits = parentCommits
                    Repository = repository
                    RunAttempt = runAttempt }
 
