@@ -17,12 +17,20 @@ module GitHubEventReader =
     type GitHubEvent = {
         After: string
         Before: string
-        Commits: GitHubCommit[]
+        Commits: GitHubCommit list
     }
 
     let read (filename: string) =
         let json = filename |> IO.readTextFile
         Json.Deserialize<GitHubEvent> json
+
+    let findParentCommits (filename: string) =
+        let event = read filename
+        let commitIds = event.Commits |> Seq.map (fun commit -> commit.Id) |> Set.ofSeq
+        let knowParents =
+            Set [ event.After; event.Before ] + commitIds
+            |> Set.remove "0000000000000000000000000000000000000000"
+        knowParents
 
 
 type GitHub() =
