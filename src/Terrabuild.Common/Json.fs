@@ -9,6 +9,8 @@ let private settings =
     JsonFSharpOptions.ThothLike()
                         .WithUnwrapOption()
                         .WithUnionTagNamingPolicy(JsonNamingPolicy.CamelCase)
+                        .WithSkippableOptionFields()
+                        .WithAllowNullFields()
                         .AddToJsonSerializerOptions(options)
     options
 

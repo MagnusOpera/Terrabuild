@@ -13,9 +13,9 @@ module GitHubEventReader =
           Message: string }
 
     type GitHubEvent =
-        { After: string
-          Before: string
-          Commits: GitHubCommit list }
+        { After: string option
+          Before: string option
+          Commits: GitHubCommit list option }
 
     let read (filename: string) =
         let json = filename |> IO.readTextFile
@@ -23,12 +23,15 @@ module GitHubEventReader =
 
     let findOtherCommits (filename: string) =
         let event = read filename
-        event.Commits
-        |> List.map (fun commit -> 
-            { Contracts.Commit.Sha = commit.Id
-              Contracts.Commit.Message = commit.Message
-              Contracts.Commit.Author = commit.Author.Name
-              Contracts.Commit.Email = commit.Author.Email })
+        match event.Commits with
+        | Some commits ->
+            commits
+            |> List.map (fun commit -> 
+                { Contracts.Commit.Sha = commit.Id
+                  Contracts.Commit.Message = commit.Message
+                  Contracts.Commit.Author = commit.Author.Name
+                  Contracts.Commit.Email = commit.Author.Email })
+        | _ -> []
 
 
 type GitHub() =
