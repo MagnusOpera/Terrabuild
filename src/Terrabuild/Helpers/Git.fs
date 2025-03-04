@@ -1,5 +1,6 @@
 module Git
 open Errors
+open System
 
 let getBranchOrTag (dir: string) =
     // https://stackoverflow.com/questions/18659425/get-git-current-branch-tag-name
@@ -21,10 +22,10 @@ let getCurrentUser (dir: string) =
     | _ -> TerrabuildException.Raise("Failed to get head commit")
 
 let getCommitLog (dir: string) =
-    match Exec.execCaptureOutput dir "git" "log -n 10 --pretty=%H%n%s%n%an%n%ae" with
+    match Exec.execCaptureOutput dir "git" "log -n 10 --pretty=%H%n%s%n%an%n%ae%n%aI" with
     | Exec.Success (output, _) ->
         output |> String.getLines
-        |> Seq.chunkBySize 4
-        |> Seq.map (fun arr -> {| Sha = arr[0]; Subject = arr[1]; Author = arr[2]; Email = arr[3] |})
+        |> Seq.chunkBySize 5
+        |> Seq.map (fun arr -> {| Sha = arr[0]; Subject = arr[1]; Author = arr[2]; Email = arr[3]; Timestamp = DateTime.Parse(arr[4]) |})
         |> List.ofSeq
     | _ -> TerrabuildException.Raise("Failed to get commit log")

@@ -2,6 +2,7 @@ module Terrabuild.Tests.SourceControls
 open NUnit.Framework
 open SourceControls.GitHubEventReader
 open FsUnit
+open System
 
 [<Test>]
 let ``Load Push Main``() =
@@ -14,6 +15,7 @@ let ``Load Push Main``() =
                          Name = "Pierre Chalamet"}
               Id = "422506d9f6e2ba9e0f0f0b5a58400d40050ff460"
               Message = "push event"
+              Timestamp = DateTime.Parse("2025-03-03T14:37:17+01:00")
             }
         ]
     }
@@ -31,6 +33,7 @@ let ``Load Push Branch``() =
                          Name = "Pierre Chalamet"}
               Id = "d13520514796c02715becdc28910ac2a50407813"
               Message = "push in branch"
+              Timestamp = DateTime.Parse("2025-03-03T14:38:49+01:00")
             }
         ]
     }
@@ -49,11 +52,13 @@ let ``Load Merge``() =
                          Name = "Pierre Chalamet"}
               Id = "d13520514796c02715becdc28910ac2a50407813"
               Message = "push in branch"
+              Timestamp = DateTime.Parse("2025-03-03T14:38:49+01:00")
             }
             { Author = { Email = "pierre@magnusopera.io"
                          Name = "Pierre Chalamet"}
               Id = "8aeab5f8ceb43063b00e03d835c2e2c57dac9615"
               Message = "Merge pull request #3 from MagnusOpera/feature/merge\n\npush in branch"
+              Timestamp = DateTime.Parse("2025-03-03T14:40:03+01:00")
             }            
         ]
     }
@@ -71,6 +76,7 @@ let ``Load Squash``() =
                          Name = "Pierre Chalamet"}
               Id = "053792c34bdcc1747818789f6619f4d7675f79bc"
               Message = "squash (#4)"
+              Timestamp = DateTime.Parse("2025-03-03T14:42:54+01:00")
             }
         ]
     }
