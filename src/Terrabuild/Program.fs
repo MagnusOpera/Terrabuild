@@ -12,18 +12,11 @@ open System.Runtime.InteropServices
 
 
 
-let version =
-    Assembly.GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            .InformationalVersion
-
-
 #if RELEASE
 let sentry = SentrySdk.Init(fun options ->
     options.Dsn <- "https://9d7ab9713b1dfca7abe4437bcd73718a@o4508921459834880.ingest.de.sentry.io/4508921463898192"
     options.AutoSessionTracking <- true
     options.TracesSampleRate <- 1.0
-    options.Release <- version
 )
 #endif
 
@@ -314,6 +307,10 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         0
 
     let version () =
+        let version =
+            Assembly.GetExecutingAssembly()
+                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                    .InformationalVersion
         printfn $"Terrabuild v{version}"
         0
  
