@@ -14,7 +14,6 @@
         "outputs": [
           "*.planfile"
         ],
-        "cache": null,
         "operations": [
           {
             "hash": "A2ECFE80BD8663195DB0A044359ADE6D9F4E08C3831CED6767F4B2BF676A20DE",
@@ -106,7 +105,6 @@
           "obj/*.props",
           "obj/*.targets"
         ],
-        "cache": null,
         "operations": [
           {
             "hash": "894AACA604A83C3AC2D719548F4D8A7D7EAD8046AAF35C9E85E9C26460E84203",
@@ -166,7 +164,6 @@
         "outputs": [
           "**/dist/"
         ],
-        "cache": null,
         "operations": [
           {
             "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -222,12 +219,9 @@
           "^build"
         ],
         "outputs": [],
-        "cache": null,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-            "container": null,
-            "platform": null,
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -247,11 +241,9 @@
       "dependencies": [],
       "outputs": [],
       "projectHash": "90DBBB67F0EB0EEBCC7BEB1929682796805120FF8AE0C26C7FF742190F9A469A",
-      "targetHash": "C2D589FA0CD8F4DC28BB0F359ABAC05B84A9BF4F9F6DE6C481CEBF484C618438",
+      "targetHash": "C02659124F9334746951572EFC57F1DBC0DF7B973B0AC436FAD6A9BAA401A6F3",
       "operations": [
         {
-          "container": null,
-          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
@@ -280,7 +272,6 @@
           "obj/*.props",
           "obj/*.targets"
         ],
-        "cache": null,
         "operations": [
           {
             "hash": "894AACA604A83C3AC2D719548F4D8A7D7EAD8046AAF35C9E85E9C26460E84203",
@@ -342,12 +333,9 @@
         "outputs": [
           "dist"
         ],
-        "cache": null,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-            "container": null,
-            "platform": null,
             "containerVariables": [],
             "extension": "@shell",
             "command": "echo",
@@ -364,8 +352,6 @@
           },
           {
             "hash": "9133AD23EB6E7EFB4A73F5C8A7084C6A815C421C8F44401D46F00CF291D0B491",
-            "container": null,
-            "platform": null,
             "containerVariables": [],
             "extension": "@make",
             "command": "build",
@@ -394,19 +380,15 @@
         "dist"
       ],
       "projectHash": "A5BD059BA569E96AFE6AEC3BA05C405B454A3483F1A702D11CA978F318516307",
-      "targetHash": "6D16280BE1D11E765F15E6B3A7F5F6A6317BAA03B8AFF950BAD2661F8EC3E494",
+      "targetHash": "5D691E5C2590242CE47093D6396E43698757F2FD1357722400EFD784A78C5365",
       "operations": [
         {
-          "container": null,
-          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@shell echo",
           "command": "echo",
           "arguments": "building project1"
         },
         {
-          "container": null,
-          "containerPlatform": null,
           "containerVariables": [],
           "metaCommand": "@make build",
           "command": "make",
@@ -430,7 +412,6 @@
         "outputs": [
           "**/dist/"
         ],
-        "cache": null,
         "operations": [
           {
             "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -488,7 +469,6 @@
         "outputs": [
           "**/dist/"
         ],
-        "cache": null,
         "operations": [
           {
             "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -547,7 +527,6 @@
           "^build"
         ],
         "outputs": [],
-        "cache": null,
         "operations": [
           {
             "hash": "50D55A43B040D7588938348660FCC1E7DC7DE5F6B1BA6BBD75E552060D6FB2AC",
@@ -609,7 +588,6 @@
           "target/debug/",
           "target/release/"
         ],
-        "cache": null,
         "operations": [
           {
             "hash": "72FA6B2BF806E80FDF3BFC4BFCC4CF397C740DCC43ACBD7CD4D0DABE6F22C85A",
