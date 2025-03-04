@@ -68,7 +68,7 @@ module private Build =
     [<RequireQualifiedAccess>]
     type CommitInput =
         { Sha: string
-          Subject: string
+          Message: string
           Author: string
           Email: string }
 
@@ -175,7 +175,7 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
         lazy(
             let mapCommit (x: Contracts.Commit) =
                 { Build.CommitInput.Sha = x.Sha
-                  Build.CommitInput.Subject = x.Message
+                  Build.CommitInput.Message = x.Message
                   Build.CommitInput.Author = x.Author
                   Build.CommitInput.Email = x.Email }
 
