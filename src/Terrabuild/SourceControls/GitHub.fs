@@ -3,22 +3,19 @@ open Environment
 
 module GitHubEventReader =
 
-    type GitHubAuthor = {
-        Email: string
-        Name: string
-    }
+    type GitHubAuthor =
+        { Email: string
+          Name: string }
 
-    type GitHubCommit = {
-        Author: GitHubAuthor
-        Id: string
-        Message: string
-    }
+    type GitHubCommit =
+        { Author: GitHubAuthor
+          Id: string
+          Message: string }
 
-    type GitHubEvent = {
-        After: string
-        Before: string
-        Commits: GitHubCommit list
-    }
+    type GitHubEvent =
+        { After: string
+          Before: string
+          Commits: GitHubCommit list }
 
     let read (filename: string) =
         let json = filename |> IO.readTextFile
@@ -52,11 +49,19 @@ type GitHub() =
         override _.BranchOrTag = refName
         
         override _.HeadCommit =
-            { Sha = commit.Sha; Message = commit.Subject; Author = commit.Author; Email = commit.Email }
+            { Sha = commit.Sha
+              Message = commit.Subject
+              Author = commit.Author
+              Email = commit.Email }
         
-        override _.CommitLog = commitLog.Tail |> List.map (fun commit -> 
-            { Sha = commit.Sha; Message = commit.Subject; Author = commit.Author; Email = commit.Email })
-
+        override _.CommitLog =
+            commitLog.Tail 
+            |> List.map (fun commit -> 
+                { Sha = commit.Sha
+                  Message = commit.Subject
+                  Author = commit.Author
+                  Email = commit.Email })
+  
         override _.Run = 
             Some { Name = "GitHub"
                    IsTag = refType = "tag"
