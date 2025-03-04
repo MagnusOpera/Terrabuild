@@ -1,5 +1,4 @@
 {
-  "id": null,
   "selectedProjects": [
     "deployments/terraform-deploy",
     "libraries/dotnet-lib",
@@ -83,7 +82,6 @@
           "outputs": [
             "*.planfile"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "A2ECFE80BD8663195DB0A044359ADE6D9F4E08C3831CED6767F4B2BF676A20DE",
@@ -127,7 +125,6 @@
           "outputs": [
             "*.planfile"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "1AE28706B2980A4E84699A2D289D729BE4C880376A9313AFA12C32E1520F3B20",
@@ -177,7 +174,6 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "894AACA604A83C3AC2D719548F4D8A7D7EAD8046AAF35C9E85E9C26460E84203",
@@ -224,7 +220,6 @@
           "outputs": [
             "**/dist/"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -259,12 +254,9 @@
             "^build"
           ],
           "outputs": [],
-          "cache": null,
           "operations": [
             {
               "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-              "container": null,
-              "platform": null,
               "containerVariables": [],
               "extension": "@shell",
               "command": "echo",
@@ -311,7 +303,6 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "894AACA604A83C3AC2D719548F4D8A7D7EAD8046AAF35C9E85E9C26460E84203",
@@ -347,7 +338,6 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "DB910E008ADBF75F60D75BD0F5AC2D0F5EAAAFF0897D3E1DEAB2C1034046A82F",
@@ -383,12 +373,9 @@
             "obj/*.props",
             "obj/*.targets"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "4B539A162AEBDF8CE4C2958540E8E7E98D6678F81185F0EB540485EF7D38FD97",
-              "container": null,
-              "platform": null,
               "containerVariables": [],
               "extension": "@docker",
               "command": "build",
@@ -439,12 +426,9 @@
           "outputs": [
             "dist"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
-              "container": null,
-              "platform": null,
               "containerVariables": [],
               "extension": "@shell",
               "command": "echo",
@@ -461,8 +445,6 @@
             },
             {
               "hash": "9133AD23EB6E7EFB4A73F5C8A7084C6A815C421C8F44401D46F00CF291D0B491",
-              "container": null,
-              "platform": null,
               "containerVariables": [],
               "extension": "@make",
               "command": "build",
@@ -526,7 +508,6 @@
           "outputs": [
             "**/dist/"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -570,7 +551,6 @@
           "outputs": [
             "**/dist/"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -608,7 +588,6 @@
             "^build"
           ],
           "outputs": [],
-          "cache": null,
           "operations": [
             {
               "hash": "50D55A43B040D7588938348660FCC1E7DC7DE5F6B1BA6BBD75E552060D6FB2AC",
@@ -661,7 +640,6 @@
             "target/debug/",
             "target/release/"
           ],
-          "cache": null,
           "operations": [
             {
               "hash": "72FA6B2BF806E80FDF3BFC4BFCC4CF397C740DCC43ACBD7CD4D0DABE6F22C85A",

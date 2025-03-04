@@ -4,19 +4,20 @@ type LogType =
     | Terminal
     | Markdown of file:string
 
+type Commit = {
+    Sha: string
+    Message: string
+    Author: string
+    Email: string
+}
+
 type RunInfo = {
     Name: string
     Repository: string
+    OtherCommits: Commit list
     RunId: string
     IsTag: bool
     RunAttempt: int
-}
-
-type Commit = {
-    Sha: string
-    Subject: string
-    Author: string
-    Email: string
 }
 
 type ISourceControl =

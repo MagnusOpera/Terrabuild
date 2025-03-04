@@ -66,67 +66,59 @@ module private Auth =
 module private Build =
 
     [<RequireQualifiedAccess>]
-    type RunInfoInput = {
-        Name: string
-        Repository: string
-        IsTag: bool
-        Id: string
-        Attempt: int
-    }
+    type CommitInput =
+        { Sha: string
+          Subject: string
+          Author: string
+          Email: string }
 
     [<RequireQualifiedAccess>]
-    type CommitInput = {
-        Sha: string
-        Subject: string
-        Author: string
-        Email: string
-    }
-
-
-    [<RequireQualifiedAccess>]
-    type BuildContextInput = {
-        Configuration: string
-        Note: string option
-        Tag: string option
-        Targets: string seq
-        Force: bool
-        Retry: bool
-    }
+    type RunInfoInput =
+        { Name: string
+          Repository: string
+          OtherCommits: CommitInput seq
+          IsTag: bool
+          Id: string
+          Attempt: int }
 
     [<RequireQualifiedAccess>]
-    type StartBuildInput = {
-        BranchOrTag: string
-        Commit: CommitInput
-        CommitLog: CommitInput seq
-        Run: RunInfoInput option
-        Context: BuildContextInput
-    }
+    type BuildContextInput =
+        { Configuration: string
+          Note: string option
+          Tag: string option
+          Targets: string seq
+          Force: bool
+          Retry: bool }
 
     [<RequireQualifiedAccess>]
-    type StartBuildOutput = {
-        BuildId: string
-    }
+    type StartBuildInput =
+        { BranchOrTag: string
+          Commit: CommitInput
+          CommitLog: CommitInput seq
+          Run: RunInfoInput option
+          Context: BuildContextInput }
 
     [<RequireQualifiedAccess>]
-    type CompleteBuildInput = {
-        Success: bool
-    }
+    type StartBuildOutput =
+        { BuildId: string }
 
     [<RequireQualifiedAccess>]
-    type AddArtifactInput = {
-        Project: string
-        Target: string
-        ProjectHash: string
-        TargetHash: string
-        Files: string list
-        Success: bool
-    }
+    type CompleteBuildInput =
+        { Success: bool }
 
     [<RequireQualifiedAccess>]
-    type UseArtifactInput = {
-        ProjectHash: string
-        TargetHash: string
-    }
+    type AddArtifactInput =
+        { Project: string
+          Target: string
+          ProjectHash: string
+          TargetHash: string
+          Files: string list
+          Success: bool }
+
+    [<RequireQualifiedAccess>]
+    type UseArtifactInput =
+        { ProjectHash: string
+          TargetHash: string }
 
     let startBuild headers branchOrTag headCommit commitLog run context : StartBuildOutput =
         { StartBuildInput.BranchOrTag = branchOrTag
@@ -159,9 +151,8 @@ module private Build =
 
 module private Artifact =
     [<RequireQualifiedAccess>]
-    type AzureArtifactLocationOutput = {
-        Uri: string
-    }
+    type AzureArtifactLocationOutput =
+        { Uri: string }
 
     let getArtifact headers path: AzureArtifactLocationOutput =
         Http.get<Unit, AzureArtifactLocationOutput> headers $"/artifacts?path={path}" ()
@@ -169,27 +160,35 @@ module private Artifact =
 
 type Client(workspaceId: string, token: string, options: ConfigOptions.Options) =
     let accesstoken =
-        let headers = [
-            HttpRequestHeaders.Accept HttpContentTypes.Json
-            HttpRequestHeaders.ContentType HttpContentTypes.Json
-        ]
+        let headers =
+            [ HttpRequestHeaders.Accept HttpContentTypes.Json
+              HttpRequestHeaders.ContentType HttpContentTypes.Json ]
         let resp = Auth.loginSpace headers workspaceId token
         resp.AccessToken
 
-    let headers = [
-        HttpRequestHeaders.Accept HttpContentTypes.Json
-        HttpRequestHeaders.ContentType HttpContentTypes.Json
-        HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
+    let headers =
+        [ HttpRequestHeaders.Accept HttpContentTypes.Json
+          HttpRequestHeaders.ContentType HttpContentTypes.Json
+          HttpRequestHeaders.Authorization $"Bearer {accesstoken}" ]
 
     let buildId =
         lazy(
-            let run = options.Run |> Option.map (fun run -> {
-                Build.RunInfoInput.Name = run.Name
-                Build.RunInfoInput.Repository = run.Repository
-                Build.RunInfoInput.Id = run.RunId
-                Build.RunInfoInput.IsTag = run.IsTag
-                Build.RunInfoInput.Attempt = run.RunAttempt
-            })
+            let mapCommit (x: Contracts.Commit) =
+                { Build.CommitInput.Sha = x.Sha
+                  Build.CommitInput.Subject = x.Message
+                  Build.CommitInput.Author = x.Author
+                  Build.CommitInput.Email = x.Email }
+
+            let run =
+                options.Run 
+                |> Option.map (fun run -> {
+                    Build.RunInfoInput.Name = run.Name
+                    Build.RunInfoInput.Repository = run.Repository
+                    Build.RunInfoInput.Id = run.RunId
+                    Build.RunInfoInput.IsTag = run.IsTag
+                    Build.RunInfoInput.Attempt = run.RunAttempt
+                    Build.RunInfoInput.OtherCommits = run.OtherCommits |> List.map mapCommit
+                })
 
             let context = {
                 Build.BuildContextInput.Configuration = options.Configuration
@@ -198,12 +197,6 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
                 Build.BuildContextInput.Targets = options.Targets
                 Build.BuildContextInput.Force = options.Force
                 Build.BuildContextInput.Retry = options.Retry }
-
-            let mapCommit (x: Contracts.Commit) =
-                { Build.CommitInput.Sha = x.Sha
-                  Build.CommitInput.Subject = x.Subject
-                  Build.CommitInput.Author = x.Author
-                  Build.CommitInput.Email = x.Email }
 
             let resp = Build.startBuild headers
                                         options.BranchOrTag
