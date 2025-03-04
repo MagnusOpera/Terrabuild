@@ -6,6 +6,29 @@ open Errors
 open System.Reflection
 open Collections
 open Environment
+open Sentry
+open System.Runtime.InteropServices
+
+
+
+
+let version =
+    Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            .InformationalVersion
+
+
+#if RELEASE
+let sentry = SentrySdk.Init(fun options ->
+    options.Dsn <- "https://9d7ab9713b1dfca7abe4437bcd73718a@o4508921459834880.ingest.de.sentry.io/4508921463898192"
+    options.AutoSessionTracking <- true
+    options.TracesSampleRate <- 1.0
+    options.Release <- version
+    options.Environment <- $"{RuntimeInformation.OSDescription}, {RuntimeInformation.OSArchitecture}, {Environment.Version}"
+)
+#endif
+
+
 
 
 [<RequireQualifiedAccess>]
@@ -76,6 +99,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 .WriteTo.File(logFile "log")
                 .CreateLogger()
         Log.Debug("===== [Execution Start] =====")
+        Log.Debug($"Environment: {RuntimeInformation.OSDescription}, {RuntimeInformation.OSArchitecture}, {Environment.Version}")
 
     let runTarget logs (options: RunTargetOptions) =
         let logGraph graph name =
@@ -291,10 +315,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         0
 
     let version () =
-        let version =
-            Assembly.GetExecutingAssembly()
-                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                    .InformationalVersion
         printfn $"Terrabuild v{version}"
         0
  
@@ -327,6 +347,7 @@ let main _ =
             processCommandLine parser result
         with
             | :? TerrabuildException as ex ->
+                SentrySdk.CaptureException(ex) |> ignore
                 Log.Fatal("Failed with {Exception}", ex.ToString())
                 let reason =
                     if debug then ex.ToString()
@@ -334,6 +355,7 @@ let main _ =
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
             | ex ->
+                SentrySdk.CaptureException(ex) |> ignore
                 Log.Fatal("Failed with {Exception}", ex)
                 $"{Ansi.Emojis.explosion} {ex}" |> Terminal.writeLine
                 5
