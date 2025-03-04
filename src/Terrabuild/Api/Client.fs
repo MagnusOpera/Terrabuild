@@ -70,7 +70,8 @@ module private Build =
         { Sha: string
           Message: string
           Author: string
-          Email: string }
+          Email: string
+          Timestamp: DateTime }
 
     [<RequireQualifiedAccess>]
     type RunInfoInput =
@@ -177,7 +178,8 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
                 { Build.CommitInput.Sha = x.Sha
                   Build.CommitInput.Message = x.Message
                   Build.CommitInput.Author = x.Author
-                  Build.CommitInput.Email = x.Email }
+                  Build.CommitInput.Email = x.Email
+                  Build.CommitInput.Timestamp = x.Timestamp }
 
             let run =
                 options.Run 

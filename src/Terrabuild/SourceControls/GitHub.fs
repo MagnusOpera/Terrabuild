@@ -2,6 +2,7 @@ namespace SourceControls
 open Environment
 
 module GitHubEventReader =
+    open System
 
     type GitHubAuthor =
         { Email: string
@@ -10,7 +11,8 @@ module GitHubEventReader =
     type GitHubCommit =
         { Author: GitHubAuthor
           Id: string
-          Message: string }
+          Message: string
+          Timestamp: DateTime }
 
     type GitHubEvent =
         { After: string option
@@ -30,7 +32,8 @@ module GitHubEventReader =
                 { Contracts.Commit.Sha = commit.Id
                   Contracts.Commit.Message = commit.Message
                   Contracts.Commit.Author = commit.Author.Name
-                  Contracts.Commit.Email = commit.Author.Email })
+                  Contracts.Commit.Email = commit.Author.Email
+                  Contracts.Commit.Timestamp = commit.Timestamp })
         | _ -> []
 
 
@@ -55,7 +58,8 @@ type GitHub() =
             { Sha = commit.Sha
               Message = commit.Subject
               Author = commit.Author
-              Email = commit.Email }
+              Email = commit.Email
+              Timestamp = commit.Timestamp }
         
         override _.CommitLog =
             commitLog.Tail 
@@ -63,7 +67,8 @@ type GitHub() =
                 { Sha = commit.Sha
                   Message = commit.Subject
                   Author = commit.Author
-                  Email = commit.Email })
+                  Email = commit.Email
+                  Timestamp = commit.Timestamp })
   
         override _.Run = 
             Some { Name = "GitHub"

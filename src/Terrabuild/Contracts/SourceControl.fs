@@ -1,4 +1,5 @@
 namespace Contracts
+open System
 
 type LogType =
     | Terminal
@@ -9,6 +10,7 @@ type Commit = {
     Message: string
     Author: string
     Email: string
+    Timestamp: DateTime
 }
 
 type RunInfo = {
