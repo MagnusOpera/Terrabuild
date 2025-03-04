@@ -9,10 +9,10 @@ type Local() =
         override _.BranchOrTag = currentDir() |> Git.getBranchOrTag
         
         override _.HeadCommit =
-            { Sha = commit.Sha; Subject = commit.Subject; Author = commit.Author; Email = commit.Email }
+            { Sha = commit.Sha; Message = commit.Subject; Author = commit.Author; Email = commit.Email }
         
         override _.CommitLog = commitLog.Tail |> List.map (fun commit -> 
-            { Sha = commit.Sha; Subject = commit.Subject; Author = commit.Author; Email = commit.Email })
+            { Sha = commit.Sha; Message = commit.Subject; Author = commit.Author; Email = commit.Email })
 
         override _.Run = None
 

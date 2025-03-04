@@ -24,15 +24,14 @@ module GitHubEventReader =
         let json = filename |> IO.readTextFile
         Json.Deserialize<GitHubEvent> json
 
-    let findParentCommits (filename: string) =
+    let findOtherCommits (filename: string) =
         let event = read filename
-        let commitIds = event.Commits |> Seq.map (fun commit -> commit.Id) |> Set.ofSeq
-        let knowParents =
-            Set [ event.After; event.Before ] + commitIds
-            |> Set.remove "0000000000000000000000000000000000000000"
-        knowParents
-
-
+        event.Commits
+        |> List.map (fun commit -> 
+            { Contracts.Commit.Sha = commit.Id
+              Contracts.Commit.Message = commit.Message
+              Contracts.Commit.Author = commit.Author.Name
+              Contracts.Commit.Email = commit.Author.Email })
 
 
 type GitHub() =
@@ -44,7 +43,7 @@ type GitHub() =
     let runAttempt = "GITHUB_RUN_ATTEMPT" |> envVar |> int
     let commitLog = currentDir() |> Git.getCommitLog
     let commit = commitLog.Head
-    let parentCommits = "GITHUB_EVENT_PATH" |> envVar |> GitHubEventReader.findParentCommits |> List.ofSeq
+    let otherCommits = "GITHUB_EVENT_PATH" |> envVar |> GitHubEventReader.findOtherCommits |> List.ofSeq
 
     static member Detect() =
         "GITHUB_ACTION" |> envVar |> isNull |> not
@@ -53,16 +52,16 @@ type GitHub() =
         override _.BranchOrTag = refName
         
         override _.HeadCommit =
-            { Sha = commit.Sha; Subject = commit.Subject; Author = commit.Author; Email = commit.Email }
+            { Sha = commit.Sha; Message = commit.Subject; Author = commit.Author; Email = commit.Email }
         
         override _.CommitLog = commitLog.Tail |> List.map (fun commit -> 
-            { Sha = commit.Sha; Subject = commit.Subject; Author = commit.Author; Email = commit.Email })
+            { Sha = commit.Sha; Message = commit.Subject; Author = commit.Author; Email = commit.Email })
 
         override _.Run = 
             Some { Name = "GitHub"
                    IsTag = refType = "tag"
                    RunId = runId
-                   ParentCommits = parentCommits
+                   OtherCommits = otherCommits
                    Repository = repository
                    RunAttempt = runAttempt }
 
