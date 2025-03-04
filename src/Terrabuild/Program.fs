@@ -24,7 +24,6 @@ let sentry = SentrySdk.Init(fun options ->
     options.AutoSessionTracking <- true
     options.TracesSampleRate <- 1.0
     options.Release <- version
-    options.Environment <- $"{RuntimeInformation.OSDescription}, {RuntimeInformation.OSArchitecture}, {Environment.Version}"
 )
 #endif
 
