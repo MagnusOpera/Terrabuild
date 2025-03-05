@@ -327,6 +327,8 @@ let main _ =
         options.Dsn <- "https://9d7ab9713b1dfca7abe4437bcd73718a@o4508921459834880.ingest.de.sentry.io/4508921463898192"
         options.AutoSessionTracking <- true
         options.TracesSampleRate <- 1.0
+        options.StackTraceMode <- StackTraceMode.Enhanced
+        options.CaptureFailedRequests <- true
     )
 #endif
 
