@@ -177,7 +177,7 @@
           "operations": [
             {
               "hash": "894AACA604A83C3AC2D719548F4D8A7D7EAD8046AAF35C9E85E9C26460E84203",
-              "container": "mcr.microsoft.com/dotnet/sdk:9.0.200",
+              "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
               "platform": "linux/amd64",
               "containerVariables": [],
               "extension": "@dotnet",
@@ -306,7 +306,7 @@
           "operations": [
             {
               "hash": "894AACA604A83C3AC2D719548F4D8A7D7EAD8046AAF35C9E85E9C26460E84203",
-              "container": "mcr.microsoft.com/dotnet/sdk:9.0.200",
+              "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
               "platform": "linux/amd64",
               "containerVariables": [],
               "extension": "@dotnet",
@@ -341,7 +341,7 @@
           "operations": [
             {
               "hash": "DB910E008ADBF75F60D75BD0F5AC2D0F5EAAAFF0897D3E1DEAB2C1034046A82F",
-              "container": "mcr.microsoft.com/dotnet/sdk:9.0.200",
+              "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
               "platform": "linux/amd64",
               "containerVariables": [],
               "extension": "@dotnet",

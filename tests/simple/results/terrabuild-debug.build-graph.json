@@ -108,7 +108,7 @@
         "operations": [
           {
             "hash": "894AACA604A83C3AC2D719548F4D8A7D7EAD8046AAF35C9E85E9C26460E84203",
-            "container": "mcr.microsoft.com/dotnet/sdk:9.0.200",
+            "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
             "platform": "linux/amd64",
             "containerVariables": [],
             "extension": "@dotnet",
@@ -139,7 +139,7 @@
       "targetHash": "46BD448B8AE55C0BF00F1A1EDBBB1A72350222F6DCED7FFEF1EBDD2D5872D9F6",
       "operations": [
         {
-          "container": "mcr.microsoft.com/dotnet/sdk:9.0.200",
+          "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
           "containerPlatform": "linux/amd64",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
@@ -275,7 +275,7 @@
         "operations": [
           {
             "hash": "894AACA604A83C3AC2D719548F4D8A7D7EAD8046AAF35C9E85E9C26460E84203",
-            "container": "mcr.microsoft.com/dotnet/sdk:9.0.200",
+            "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
             "platform": "linux/amd64",
             "containerVariables": [],
             "extension": "@dotnet",
@@ -308,7 +308,7 @@
       "targetHash": "A2F180CD8F5812298BB07D0B3BE0B347020D6310A6732E35D513C2E02FF994CF",
       "operations": [
         {
-          "container": "mcr.microsoft.com/dotnet/sdk:9.0.200",
+          "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
           "containerPlatform": "linux/amd64",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
