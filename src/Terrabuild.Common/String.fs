@@ -8,6 +8,9 @@ open System.Text.RegularExpressions
 let toLower (s : string) =
     s.ToLowerInvariant()
 
+let toUpper (s : string) =
+    s.ToUpperInvariant()
+
 let join (separator : string) (strings : string seq) =
     String.Join(separator, strings)
 

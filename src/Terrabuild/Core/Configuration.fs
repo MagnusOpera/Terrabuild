@@ -310,8 +310,8 @@ let read (options: ConfigOptions.Options) =
 
 
     // this is the final stage: create targets and create the project
-    let finalizeProject projectId (projectDef: LoadedProject) (projectReferences: Map<string, Project>) =
-        let projectDir = projectId
+    let finalizeProject projectDir (projectDef: LoadedProject) (projectReferences: Map<string, Project>) =
+        let projectId = projectDir |> String.toUpper
         let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
         // get dependencies on files
@@ -477,9 +477,11 @@ let read (options: ConfigOptions.Options) =
 
         let files = files |> Set.map (FS.relativePath projectDir)
 
-        { Project.Id = projectId
+        let projectDependencies = projectDef.Dependencies |> Set.map String.toUpper
+
+        { Project.Id = projectDir
           Project.Hash = projectHash
-          Project.Dependencies = projectDef.Dependencies
+          Project.Dependencies = projectDependencies
           Project.Files = files
           Project.Targets = projectSteps
           Project.Labels = projectDef.Labels }
@@ -492,12 +494,13 @@ let read (options: ConfigOptions.Options) =
         let projects = ConcurrentDictionary<string, Project>()
         let hub = Hub.Create(options.MaxConcurrency)
 
-        let rec loadProject projectId =
+        let rec loadProject projectDir =
+            let projectId = projectDir |> String.toUpper
             if projectLoading.ContainsKey projectId |> not then
                 projectLoading.TryAdd(projectId, true) |> ignore
 
                 // load project and force loading all dependencies as well
-                let loadedProject = loadProjectDef projectId
+                let loadedProject = loadProjectDef projectDir
                 for dependency in loadedProject.Dependencies do
                     loadProject dependency
 
@@ -506,6 +509,7 @@ let read (options: ConfigOptions.Options) =
                     // await dependencies to be loaded
                     let awaitedProjects =
                         (loadedProject.Dependencies + loadedProject.Links)
+                        |> Set.map String.toUpper
                         |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
                         |> Array.ofSeq
 
@@ -517,7 +521,7 @@ let read (options: ConfigOptions.Options) =
                             |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value)
                             |> Map.ofSeq
 
-                        let project = finalizeProject projectId loadedProject projectDependencies
+                        let project = finalizeProject projectDir loadedProject projectDependencies
                         projects.TryAdd(projectId, project) |> ignore
 
                         let loadedProjectSignal = hub.GetSignal<Project> projectId

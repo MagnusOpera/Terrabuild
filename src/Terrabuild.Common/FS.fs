@@ -26,5 +26,5 @@ let (|File|Directory|None|) entry =
 
 let workspaceRelative (workspaceDir: string) (currentDir: string) (relativeOrAbsolute: string) =
     match relativeOrAbsolute with
-    | String.Regex "^/(.*)$" [ absolute ] -> absolute
+    | String.Regex "^/(.*)$" [ absolute ] ->absolute
     | relative -> combinePath currentDir relative |> relativePath workspaceDir

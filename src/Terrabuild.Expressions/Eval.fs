@@ -75,7 +75,9 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                         | Some projectDir -> projectDir
                         | _ -> TerrabuildException.Raise($"Project dir not available in this context.")
 
-                    let projectName = FS.workspaceRelative context.WorkspaceDir projectDir str
+                    let projectName =
+                        FS.workspaceRelative context.WorkspaceDir projectDir str
+                        |> String.toUpper
                     match context.Versions |> Map.tryFind projectName with
                     | Some version -> Value.String version
                     | _ -> TerrabuildException.Raise($"Unknown project reference '{str}'")
