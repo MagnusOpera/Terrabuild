@@ -1,7 +1,7 @@
 {
   "nodes": {
-    "deployments/terraform-deploy:build": {
-      "id": "deployments/terraform-deploy:build",
+    "DEPLOYMENTS/TERRAFORM-DEPLOY:build": {
+      "id": "DEPLOYMENTS/TERRAFORM-DEPLOY:build",
       "label": "build deployments/terraform-deploy",
       "project": "deployments/terraform-deploy",
       "target": "build",
@@ -31,11 +31,11 @@
                   {
                     "dotnet_app_version": [
                       "string",
-                      "B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA"
+                      "CA867B371D864086BCC266C5186F00A45412A15D2F95ABF3046FDA371A851B45"
                     ],
                     "npm_app_version": [
                       "string",
-                      "667E311D2450BE32EBDB6730784CBE9EFBF715D2B3248F6304645236D2F0F520"
+                      "D5C34CD09DE457A98F7F7486D177587753CECB9C1CF351EF857B0A7B6ACBA459"
                     ]
                   }
                 ],
@@ -49,14 +49,14 @@
         ]
       },
       "dependencies": [
-        "projects/dotnet-app:build",
-        "projects/npm-app:build"
+        "PROJECTS/DOTNET-APP:build",
+        "PROJECTS/NPM-APP:build"
       ],
       "outputs": [
         "*.planfile"
       ],
-      "projectHash": "7E76E02B5FB7018D6E167C095476E54192546AEEDEEB3D0A8621C781728FA738",
-      "targetHash": "9DA4C690E559C0C7D72FCF2968C128EFBB37FB9015182C4C3A5C5565539A3BE8",
+      "projectHash": "9EC6C3232028C098085052766313F5789DE2A40C2EF98A2D15E86D8F9615CFF2",
+      "targetHash": "CF54EFFC1383A18BAB9F422989D8C15AA2771C3CE9F8030322EBBEBFB4E7A720",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -80,14 +80,14 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA\u0022 -var=\u0022npm_app_version=667E311D2450BE32EBDB6730784CBE9EFBF715D2B3248F6304645236D2F0F520\u0022"
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=CA867B371D864086BCC266C5186F00A45412A15D2F95ABF3046FDA371A851B45\u0022 -var=\u0022npm_app_version=D5C34CD09DE457A98F7F7486D177587753CECB9C1CF351EF857B0A7B6ACBA459\u0022"
         }
       ],
       "cache": 0,
       "isLeaf": true
     },
-    "libraries/dotnet-lib:build": {
-      "id": "libraries/dotnet-lib:build",
+    "LIBRARIES/DOTNET-LIB:build": {
+      "id": "LIBRARIES/DOTNET-LIB:build",
       "label": "build libraries/dotnet-lib",
       "project": "libraries/dotnet-lib",
       "target": "build",
@@ -135,8 +135,8 @@
         "obj/*.props",
         "obj/*.targets"
       ],
-      "projectHash": "4E90121393E74B43D6B727A9F23E3AE10385E7E39F1FBD240CE10180651F6851",
-      "targetHash": "A2F255CF5DAC994C7A9E0EEA752178802A87FB473EA13D002DB64D845DE66FE3",
+      "projectHash": "2800DCFECE6D1228816991BD3A72E919256ADAF59789989677863C86E447334F",
+      "targetHash": "BEC698429B2232A480596C768281D0B59206C3A2085FEB4E99C6EE1BB8D1568A",
       "operations": [
         {
           "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
@@ -150,8 +150,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "libraries/npm-lib:build": {
-      "id": "libraries/npm-lib:build",
+    "LIBRARIES/NPM-LIB:build": {
+      "id": "LIBRARIES/NPM-LIB:build",
       "label": "build libraries/npm-lib",
       "project": "libraries/npm-lib",
       "target": "build",
@@ -184,8 +184,8 @@
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "813635EFA9D98FB042EF8A761A4433B34B95BA40E1D1231B79CBDC4D29E21AF6",
-      "targetHash": "AAD43B3A0C8662FDF31611BC799DF8489DBFFAB6C533DF315660F452428F6CC7",
+      "projectHash": "8175042D97F5AE6113CBFEFC25D7DEEE3022320ABDF6F48A63CAB4B90811796B",
+      "targetHash": "5FE597649129B381AC30145322693B123902505541847C7022A0FE57EF229D5A",
       "operations": [
         {
           "container": "node:20",
@@ -207,8 +207,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "libraries/shell-lib:build": {
-      "id": "libraries/shell-lib:build",
+    "LIBRARIES/SHELL-LIB:build": {
+      "id": "LIBRARIES/SHELL-LIB:build",
       "label": "build libraries/shell-lib",
       "project": "libraries/shell-lib",
       "target": "build",
@@ -240,8 +240,8 @@
       },
       "dependencies": [],
       "outputs": [],
-      "projectHash": "90DBBB67F0EB0EEBCC7BEB1929682796805120FF8AE0C26C7FF742190F9A469A",
-      "targetHash": "C02659124F9334746951572EFC57F1DBC0DF7B973B0AC436FAD6A9BAA401A6F3",
+      "projectHash": "46479653782CE6E0A5C1667D8637D99EE9FFAB226FD0BB4496ED01CCF1037C8E",
+      "targetHash": "80DA2B24C46FA3630291F7F69D25D33DD11F9A0E016DF756EEC9E9931C6A3D10",
       "operations": [
         {
           "containerVariables": [],
@@ -253,8 +253,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "projects/dotnet-app:build": {
-      "id": "projects/dotnet-app:build",
+    "PROJECTS/DOTNET-APP:build": {
+      "id": "PROJECTS/DOTNET-APP:build",
       "label": "build projects/dotnet-app",
       "project": "projects/dotnet-app",
       "target": "build",
@@ -294,7 +294,7 @@
         ]
       },
       "dependencies": [
-        "libraries/dotnet-lib:build"
+        "LIBRARIES/DOTNET-LIB:build"
       ],
       "outputs": [
         "**/*.binlog",
@@ -304,8 +304,8 @@
         "obj/*.props",
         "obj/*.targets"
       ],
-      "projectHash": "B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA",
-      "targetHash": "A1D2FB0FCA0988AABE66E3CCC2F697BEC5D530DC8CBAC79CF1706D36E718469C",
+      "projectHash": "CA867B371D864086BCC266C5186F00A45412A15D2F95ABF3046FDA371A851B45",
+      "targetHash": "20813210889E8F5C28AEB06C066445F5EA814AC8D311B40F93524B9FB3884E48",
       "operations": [
         {
           "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
@@ -319,8 +319,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "projects/make-app:build": {
-      "id": "projects/make-app:build",
+    "PROJECTS/MAKE-APP:build": {
+      "id": "PROJECTS/MAKE-APP:build",
       "label": "build projects/make-app",
       "project": "projects/make-app",
       "target": "build",
@@ -374,13 +374,13 @@
         ]
       },
       "dependencies": [
-        "libraries/shell-lib:build"
+        "LIBRARIES/SHELL-LIB:build"
       ],
       "outputs": [
         "dist"
       ],
-      "projectHash": "A5BD059BA569E96AFE6AEC3BA05C405B454A3483F1A702D11CA978F318516307",
-      "targetHash": "5D691E5C2590242CE47093D6396E43698757F2FD1357722400EFD784A78C5365",
+      "projectHash": "F5FA23FEA48BD50A8F9C28F899E35EC01A87ECA33637953DAE5E2FDDF2F17314",
+      "targetHash": "6230F7A971DD0050B858067AF3FD259737D81D9075A3CA97AC87278C67BA032F",
       "operations": [
         {
           "containerVariables": [],
@@ -398,8 +398,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "projects/npm-app/private-npm-lib:build": {
-      "id": "projects/npm-app/private-npm-lib:build",
+    "PROJECTS/NPM-APP/PRIVATE-NPM-LIB:build": {
+      "id": "PROJECTS/NPM-APP/PRIVATE-NPM-LIB:build",
       "label": "build projects/npm-app/private-npm-lib",
       "project": "projects/npm-app/private-npm-lib",
       "target": "build",
@@ -432,8 +432,8 @@
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "F951BD1663475053E1F9C97DDA08EA553E21951BC053419D362126A2B6A4C83C",
-      "targetHash": "9253BBB223D3C6C83E7A9F4570EE523469161AF85DC76A80BC18562B22458024",
+      "projectHash": "EC303FCA7CCFE2DAC334A7C1D898BF3162FE50AC8C536BBB3F10DB8E9DF14A0D",
+      "targetHash": "38BCE4755189AA44DEF2C48D80AD8C9C38AFCA97C7C1377DD2DED1D5E287E95B",
       "operations": [
         {
           "container": "node:20",
@@ -455,8 +455,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "projects/npm-app:build": {
-      "id": "projects/npm-app:build",
+    "PROJECTS/NPM-APP:build": {
+      "id": "PROJECTS/NPM-APP:build",
       "label": "build projects/npm-app",
       "project": "projects/npm-app",
       "target": "build",
@@ -486,14 +486,14 @@
         ]
       },
       "dependencies": [
-        "libraries/npm-lib:build",
-        "projects/npm-app/private-npm-lib:build"
+        "LIBRARIES/NPM-LIB:build",
+        "PROJECTS/NPM-APP/PRIVATE-NPM-LIB:build"
       ],
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "667E311D2450BE32EBDB6730784CBE9EFBF715D2B3248F6304645236D2F0F520",
-      "targetHash": "2EE4BC698765C0B3D47800ED9896248727243C2FCA36E8A4F855EF3B8B776525",
+      "projectHash": "D5C34CD09DE457A98F7F7486D177587753CECB9C1CF351EF857B0A7B6ACBA459",
+      "targetHash": "BF8CCDC9DBF10235455D36E30FF81B4E1464639259C991ADFECE94EB9ACB0121",
       "operations": [
         {
           "container": "node:20",
@@ -515,8 +515,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "projects/open-api:build": {
-      "id": "projects/open-api:build",
+    "PROJECTS/OPEN-API:build": {
+      "id": "PROJECTS/OPEN-API:build",
       "label": "build projects/open-api",
       "project": "projects/open-api",
       "target": "build",
@@ -558,8 +558,8 @@
       },
       "dependencies": [],
       "outputs": [],
-      "projectHash": "B638983BF2E75B9D5787C0082FE7E5BFA726B4B4815F48EE7482E1051275209A",
-      "targetHash": "BBA8F064B500E57822B9C1A2F98FE77710DB517940ABDF59E2C33B0C245058D1",
+      "projectHash": "14C9C4FCBD2D336C3747CD8EA1219DC39F8D79A3372DDFD536464C2C4B7BB4B3",
+      "targetHash": "5BD945554005536C17037AAE23D75E93B92BF65EC81B0F7F19E459879B7D1A56",
       "operations": [
         {
           "container": "openapitools/openapi-generator-cli:v7.10.0",
@@ -573,8 +573,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "projects/rust-app:build": {
-      "id": "projects/rust-app:build",
+    "PROJECTS/RUST-APP:build": {
+      "id": "PROJECTS/RUST-APP:build",
       "label": "build projects/rust-app",
       "project": "projects/rust-app",
       "target": "build",
@@ -609,8 +609,8 @@
         "target/debug/",
         "target/release/"
       ],
-      "projectHash": "ABBB61CBAB614EB12FDCBC22A5549A851128357CCA09CB57D74A2D2390E4A043",
-      "targetHash": "7A87C367FB6FFA09E192B5AF4FA046679F64875033DE5BF343004C24252D8D1B",
+      "projectHash": "2FE82A1BC72FCD0EC967432A46CBB5F19F3FEFF4A4E725E170FAD4BB16336C30",
+      "targetHash": "8976026DECCBADDAED7DCA16776965F6393755198A79F865D5E896B19A125B9D",
       "operations": [
         {
           "container": "rust:1.81.0-slim",
@@ -626,15 +626,15 @@
     }
   },
   "rootNodes": [
-    "deployments/terraform-deploy:build",
-    "libraries/dotnet-lib:build",
-    "libraries/npm-lib:build",
-    "libraries/shell-lib:build",
-    "projects/dotnet-app:build",
-    "projects/make-app:build",
-    "projects/npm-app/private-npm-lib:build",
-    "projects/npm-app:build",
-    "projects/open-api:build",
-    "projects/rust-app:build"
+    "DEPLOYMENTS/TERRAFORM-DEPLOY:build",
+    "LIBRARIES/DOTNET-LIB:build",
+    "LIBRARIES/NPM-LIB:build",
+    "LIBRARIES/SHELL-LIB:build",
+    "PROJECTS/DOTNET-APP:build",
+    "PROJECTS/MAKE-APP:build",
+    "PROJECTS/NPM-APP/PRIVATE-NPM-LIB:build",
+    "PROJECTS/NPM-APP:build",
+    "PROJECTS/OPEN-API:build",
+    "PROJECTS/RUST-APP:build"
   ]
 }

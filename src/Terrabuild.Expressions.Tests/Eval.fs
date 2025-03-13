@@ -116,8 +116,8 @@ let version() =
     let expected = Value.String "1234"
 
     let context = { evaluationContext
-                    with Versions = Map [ "toto", "1234"
-                                          "titi", "56789A" ] }
+                    with Versions = Map [ "TOTO", "1234"
+                                          "TITI", "56789A" ] }
 
     printfn $"{context.ProjectDir}"
 

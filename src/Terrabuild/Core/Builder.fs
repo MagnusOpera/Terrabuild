@@ -26,11 +26,10 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
 
     let rec buildTarget targetName project =
+        let projectConfig = configuration.Projects[project]
         let nodeId = $"{project}:{targetName}"
 
         let processNode () =
-            let projectConfig = configuration.Projects[project]
-
             // merge targets requirements
             let buildDependsOn =
                 configuration.Targets
@@ -131,9 +130,9 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                         targetCache |> Option.defaultValue cache
 
                 let node = { Node.Id = nodeId
-                             Node.Label = $"{targetName} {project}"
+                             Node.Label = $"{targetName} {projectConfig.Name}"
                              
-                             Node.Project = project
+                             Node.Project = projectConfig.Name
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
                              Node.Operations = ops
@@ -162,7 +161,8 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
     let rootNodes =
         configuration.SelectedProjects
         |> Seq.collect (fun dependency -> options.Targets
-                                          |> Seq.collect (fun target -> buildTarget target dependency))
+                                          |> Seq.collect (fun target ->
+                                            buildTarget target dependency))
         |> Set
 
     let endedAt = DateTime.UtcNow
