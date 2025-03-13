@@ -130,9 +130,9 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                         targetCache |> Option.defaultValue cache
 
                 let node = { Node.Id = nodeId
-                             Node.Label = $"{targetName} {projectConfig.Id}"
+                             Node.Label = $"{targetName} {projectConfig.Name}"
                              
-                             Node.Project = project
+                             Node.Project = projectConfig.Name
                              Node.Target = targetName
                              Node.ConfigurationTarget = target
                              Node.Operations = ops

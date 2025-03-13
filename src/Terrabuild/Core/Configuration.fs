@@ -37,7 +37,7 @@ type Target = {
 
 [<RequireQualifiedAccess>]
 type Project = {
-    Id: string
+    Name: string
     Hash: string
     Dependencies: string set
     Files: string set
@@ -479,7 +479,7 @@ let read (options: ConfigOptions.Options) =
 
         let projectDependencies = projectDef.Dependencies |> Set.map String.toUpper
 
-        { Project.Id = projectDir
+        { Project.Name = projectDir
           Project.Hash = projectHash
           Project.Dependencies = projectDependencies
           Project.Files = files

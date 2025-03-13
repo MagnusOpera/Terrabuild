@@ -2,39 +2,39 @@ flowchart TD
 classDef build stroke:red,stroke-width:3px
 classDef restore stroke:orange,stroke-width:3px
 classDef ignore stroke:black,stroke-width:3px
-deployments/terraform-deploy:build("deployments/terraform-deploy
+DEPLOYMENTS/TERRAFORM-DEPLOY:build("deployments/terraform-deploy
 build ")
-libraries/dotnet-lib:build("libraries/dotnet-lib
+LIBRARIES/DOTNET-LIB:build("libraries/dotnet-lib
 build ")
-libraries/npm-lib:build("libraries/npm-lib
+LIBRARIES/NPM-LIB:build("libraries/npm-lib
 build ")
-libraries/shell-lib:build("libraries/shell-lib
+LIBRARIES/SHELL-LIB:build("libraries/shell-lib
 build ")
-projects/dotnet-app:build("projects/dotnet-app
+PROJECTS/DOTNET-APP:build("projects/dotnet-app
 build ")
-projects/make-app:build("projects/make-app
+PROJECTS/MAKE-APP:build("projects/make-app
 build ")
-projects/npm-app/private-npm-lib:build("projects/npm-app/private-npm-lib
+PROJECTS/NPM-APP/PRIVATE-NPM-LIB:build("projects/npm-app/private-npm-lib
 build ")
-projects/npm-app:build("projects/npm-app
+PROJECTS/NPM-APP:build("projects/npm-app
 build ")
-projects/open-api:build("projects/open-api
+PROJECTS/OPEN-API:build("projects/open-api
 build ")
-projects/rust-app:build("projects/rust-app
+PROJECTS/RUST-APP:build("projects/rust-app
 build ")
-deployments/terraform-deploy:build --> projects/dotnet-app:build
-deployments/terraform-deploy:build --> projects/npm-app:build
-class deployments/terraform-deploy:build ignore
-class libraries/dotnet-lib:build ignore
-class libraries/npm-lib:build ignore
-class libraries/shell-lib:build ignore
-projects/dotnet-app:build --> libraries/dotnet-lib:build
-class projects/dotnet-app:build ignore
-projects/make-app:build --> libraries/shell-lib:build
-class projects/make-app:build ignore
-class projects/npm-app/private-npm-lib:build ignore
-projects/npm-app:build --> libraries/npm-lib:build
-projects/npm-app:build --> projects/npm-app/private-npm-lib:build
-class projects/npm-app:build ignore
-class projects/open-api:build ignore
-class projects/rust-app:build ignore
+DEPLOYMENTS/TERRAFORM-DEPLOY:build --> PROJECTS/DOTNET-APP:build
+DEPLOYMENTS/TERRAFORM-DEPLOY:build --> PROJECTS/NPM-APP:build
+class DEPLOYMENTS/TERRAFORM-DEPLOY:build ignore
+class LIBRARIES/DOTNET-LIB:build ignore
+class LIBRARIES/NPM-LIB:build ignore
+class LIBRARIES/SHELL-LIB:build ignore
+PROJECTS/DOTNET-APP:build --> LIBRARIES/DOTNET-LIB:build
+class PROJECTS/DOTNET-APP:build ignore
+PROJECTS/MAKE-APP:build --> LIBRARIES/SHELL-LIB:build
+class PROJECTS/MAKE-APP:build ignore
+class PROJECTS/NPM-APP/PRIVATE-NPM-LIB:build ignore
+PROJECTS/NPM-APP:build --> LIBRARIES/NPM-LIB:build
+PROJECTS/NPM-APP:build --> PROJECTS/NPM-APP/PRIVATE-NPM-LIB:build
+class PROJECTS/NPM-APP:build ignore
+class PROJECTS/OPEN-API:build ignore
+class PROJECTS/RUST-APP:build ignore
