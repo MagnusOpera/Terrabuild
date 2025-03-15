@@ -4,6 +4,7 @@ open System
 type LogType =
     | Terminal
     | Markdown of file:string
+    | GitHubActions
 
 type Commit = {
     Sha: string
@@ -27,5 +28,5 @@ type ISourceControl =
     abstract HeadCommit: Commit
     abstract CommitLog: Commit list
     abstract Run: RunInfo option
-    abstract LogType: LogType
+    abstract LogTypes: LogType list
     abstract LogError: string -> unit

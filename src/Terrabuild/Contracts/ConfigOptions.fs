@@ -15,7 +15,7 @@ type Options = {
     StartedAt: DateTime
     Targets: string set
     Configuration: string
-    LogType: Contracts.LogType
+    LogTypes: Contracts.LogType list
     Note: string option
     Tag: string option
     Labels: string set option

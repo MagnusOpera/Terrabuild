@@ -174,10 +174,41 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
         |> Seq.filter (fun node -> summary.Nodes |> Map.containsKey node.Id)
         |> Seq.iter dumpTerminal
 
+
+    let dumpGitHubActions (nodes: GraphDef.Node seq) =
+        let dumpTerminal (node: GraphDef.Node) =
+            let cacheEntryId = GraphDef.buildCacheKey node
+            let summary = cache.TryGetSummaryOnly false cacheEntryId
+
+            match summary with
+            | Some (_, summary) ->
+                if summary.IsSuccessful |> not then
+                    $"::error title=build failed::{node.Label}" |> Terminal.writeLine
+                    match summary.Operations |> List.tryLast with
+                    | Some command ->
+                        match command |> List.tryLast with
+                        | Some operation ->
+                            $"::group::{operation.MetaCommand}" |> Terminal.writeLine
+                            operation.Log |> IO.readTextFile |> Terminal.write
+                            $"::endgroup::" |> Terminal.writeLine
+                        | _ -> ()
+                    | _ -> ()
+            | None ->
+                $"::warning title=no logs::{node.Label}" |> Terminal.writeLine
+
+        nodes
+        |> Seq.filter (fun node -> summary.Nodes |> Map.containsKey node.Id)
+        |> Seq.iter dumpTerminal
+
+
+
     let logger =
-        match options.LogType with
-        | Contracts.Markdown filename -> dumpMarkdown filename
-        | _ -> dumpTerminal
+        let dump nodes logType =
+            match logType with
+            | Contracts.Markdown filename -> dumpMarkdown filename nodes
+            | Contracts.Terminal -> dumpTerminal nodes
+            | Contracts.GitHubActions -> dumpGitHubActions nodes
+        fun nodes -> options.LogTypes |> List.iter (dump nodes)
 
     let sortedNodes =
         graph.Nodes
