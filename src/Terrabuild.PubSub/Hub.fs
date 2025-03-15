@@ -109,12 +109,18 @@ type private Signal<'T>(name, eventQueue: IEventQueue) as this =
                     notify())
 
 
-type private Subscription(signal: ISignal<Unit>, signals: ISignal array) as this =
+type private Subscription(label:string, signal: ISignal<Unit>, signals: ISignal array) as this =
     let mutable count = signals.Length
 
     do
         if count = 0 then signal.Value <- ()
         else signals |> Seq.iter (fun signal -> signal.Subscribe(this.Callback))
+
+    member _.Label = label
+
+    member _.Signal = signal
+
+    member _.AwaitedSignals = signals
 
     member private _.Callback() =
         let count = lock this (fun () -> count <- count - 1; count)
@@ -126,19 +132,19 @@ type private Subscription(signal: ISignal<Unit>, signals: ISignal array) as this
 [<RequireQualifiedAccess>]
 type Status =
     | Ok
-    | SubcriptionNotRaised of string
-    | SubscriptionError of Exception
+    | UnfulfilledSubscription of subscription:string * awaitedSignals:Set<string>
+    | SubscriptionError of exn:Exception
 
 type IHub =
     abstract GetSignal<'T>: name:string -> ISignal<'T>
-    abstract Subscribe: signals:ISignal array -> handler:SignalCompleted -> unit
+    abstract Subscribe: label:string -> signals:ISignal array -> handler:SignalCompleted -> unit
     abstract WaitCompletion: unit -> Status
 
 
 type Hub(maxConcurrency) =
     let eventQueue = EventQueue(maxConcurrency)
     let signals = ConcurrentDictionary<string, ISignal>()
-    let subscriptions = ConcurrentDictionary<string, ISignal>()
+    let subscriptions = ConcurrentDictionary<string, Subscription>()
 
     interface IHub with
         member _.GetSignal<'T> name =
@@ -148,24 +154,24 @@ type Hub(maxConcurrency) =
             | :? Signal<'T> as signal -> signal
             | _ -> failwith "Unexpected Signal type"
 
-        member _.Subscribe signals handler =
-            let name =
-                match signals with
-                | [| |] -> Guid.NewGuid().ToString()
-                | signals ->
-                    let names = signals |> Array.map (fun signal -> signal.Name)
-                    String.Join(",", names)
+        member _.Subscribe label signals handler =
+            let name = Guid.NewGuid().ToString()
             let signal = Signal<Unit>(name, eventQueue)
-            let subscription = Subscription(signal, signals)
-            subscriptions.TryAdd(name, signal) |> ignore
+            let subscription = Subscription(label, signal, signals)
+            subscriptions.TryAdd(name, subscription) |> ignore
             (signal :> ISignal).Subscribe(handler)
 
         member _.WaitCompletion() =
             match eventQueue.WaitCompletion() with
             | Some exn -> Status.SubscriptionError exn
             | _ ->
-                match subscriptions |> Seq.tryFind (fun kvp -> kvp.Value.IsRaised() |> not) with
-                | Some notRaised -> Status.SubcriptionNotRaised notRaised.Value.Name
+                match subscriptions.Values |> Seq.tryFind (fun subscription -> subscription.Signal.IsRaised() |> not) with
+                | Some subscription ->
+                    let unraisedSignals =
+                        subscription.AwaitedSignals |> Seq.filter (fun signal -> signal.IsRaised() |> not)
+                        |> Seq.map (fun signal -> signal.Name)
+                        |> Set.ofSeq
+                    Status.UnfulfilledSubscription (subscription.Label, unraisedSignals)
                 | _ -> Status.Ok
 
 with

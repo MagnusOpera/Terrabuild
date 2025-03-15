@@ -505,7 +505,7 @@ let read (options: ConfigOptions.Options) =
                     loadProject dependency
 
                 // parallel load of projects
-                hub.Subscribe Array.empty (fun () ->
+                hub.Subscribe projectDir Array.empty (fun () ->
                     // await dependencies to be loaded
                     let awaitedProjects =
                         (loadedProject.Dependencies + loadedProject.Links)
@@ -514,7 +514,7 @@ let read (options: ConfigOptions.Options) =
                         |> Array.ofSeq
 
                     let awaitedSignals = awaitedProjects |> Array.map (fun entry -> entry :> ISignal)
-                    hub.Subscribe awaitedSignals (fun () ->
+                    hub.Subscribe projectDir awaitedSignals (fun () ->
                         // build task & code & notify
                         let projectDependencies = 
                             awaitedProjects
@@ -542,9 +542,13 @@ let read (options: ConfigOptions.Options) =
         findDependencies true options.Workspace
         let status = hub.WaitCompletion()
         match status with
-        | Status.Ok -> projects |> Map.ofDict
-        | Status.SubcriptionNotRaised projectId -> raiseSymbolError $"Project {projectId} is unknown"
-        | Status.SubscriptionError exn -> forwardExternalError "Failed to load configuration" exn
+        | Status.Ok ->
+            projects |> Map.ofDict
+        | Status.UnfulfilledSubscription (subscription, signals) ->
+            let unraisedSignals = signals |> String.join ","
+            raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check for circular dependencies."
+        | Status.SubscriptionError exn ->
+            forwardExternalError "Failed to load configuration" exn
 
 
     let projects = searchProjectsAndApply()
