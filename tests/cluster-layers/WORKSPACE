@@ -1,3 +1,11 @@
 target build {
     depends_on = [ ^build ]
 }
+
+extension @dotnet {
+  container = "mcr.microsoft.com/dotnet/sdk:9.0.201"
+}
+
+extension @npm {
+  container = "node:20"
+}
