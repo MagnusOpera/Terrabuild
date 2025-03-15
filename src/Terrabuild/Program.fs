@@ -317,13 +317,15 @@ let main _ =
             | null -> "https://9d7ab9713b1dfca7abe4437bcd73718a@o4508921459834880.ingest.de.sentry.io/4508921463898192"
             | dsn -> dsn
 
-        Sentry.SentrySdk.Init(fun options ->
-            options.Dsn <- dsn
-            options.AutoSessionTracking <- true
-            options.TracesSampleRate <- 1.0
-            options.StackTraceMode <- Sentry.StackTraceMode.Enhanced
-            options.CaptureFailedRequests <- true
-        )
+        // Sentry can be disabled (empty DSN)
+        if String.IsNullOrWhiteSpace(dsn) |> not then
+            Sentry.SentrySdk.Init(fun options ->
+                options.Dsn <- dsn
+                options.AutoSessionTracking <- true
+                options.TracesSampleRate <- 1.0
+                options.StackTraceMode <- Sentry.StackTraceMode.Enhanced
+                options.CaptureFailedRequests <- true
+            )
 #endif
 
     let mutable debug = false
