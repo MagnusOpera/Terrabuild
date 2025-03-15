@@ -1,46 +1,36 @@
 module Errors
 open System
 
+[<RequireQualifiedAccess>]
+type ErrorArea =
+    | Parse
+    | Type
+    | Symbol
+    | Usage
+    | InvalidArg
 
-// Generic exception
-type TerrabuildException(msg, ?innerException: Exception) =
+type TerrabuildException(msg, area, ?innerException: Exception) =
     inherit Exception(msg, innerException |> Option.defaultValue null)
+    member _.Area: ErrorArea = area
 
-// parser exception
-type ParseException(msg) =
-    inherit TerrabuildException(msg)
-
-type TypeException(msg) =
-    inherit TerrabuildException(msg)
-
-type SymbolException(msg) =
-    inherit TerrabuildException(msg)
-
-// CLI exception
-type UsageException(msg) =
-    inherit TerrabuildException(msg)
-
-// Invalid argument
-type InvalidArgumentException(msg) =
-    inherit TerrabuildException(msg)
 
 let raiseInvalidArg msg =
-    InvalidArgumentException(msg) |> raise
+    TerrabuildException(msg, ErrorArea.InvalidArg) |> raise
 
 let raiseUsage msg =
-    UsageException(msg) |> raise
+    TerrabuildException(msg, ErrorArea.Usage) |> raise
 
 let raiseParseError msg =
-    ParseException(msg) |> raise
+    TerrabuildException(msg, ErrorArea.Parse) |> raise
 
 let raiseTypeError msg =
-    TypeException(msg) |> raise
+    TerrabuildException(msg, ErrorArea.Type) |> raise
 
 let raiseSymbolError msg =
-    SymbolException(msg) |> raise
+    TerrabuildException(msg, ErrorArea.Symbol) |> raise
 
 let raiseGenericError msg =
     failwith msg
 
 let forwardError msg innerException =
-    TerrabuildException(msg, innerException) |> raise
+    Exception(msg, innerException) |> raise
