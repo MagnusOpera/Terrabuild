@@ -61,7 +61,7 @@ jobs:
           echo 'Building ${{ github.ref }}'
           terrabuild version
           terrabuild run build test \
-            --logs --debug \
+            --log --debug \
             -w src \
             -c "dev" \
             ${{ github.event.inputs.force == 'true' && '--force' || '' }} \

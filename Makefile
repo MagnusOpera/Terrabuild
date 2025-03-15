@@ -79,10 +79,10 @@ docs:
 	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net9.0/Terrabuild.Extensions.xml ../../websites/terrabuild.io/content/docs/extensions
 
 self: clean publish
-	$(terrabuild) run build test dist --configuration $(env) --retry --debug --logs --local-only
+	$(terrabuild) run build test dist --configuration $(env) --retry --debug --log --local-only
 
 terrabuild:
-	terrabuild run build test dist --configuration $(env) --retry --debug --logs --local-only
+	terrabuild run build test dist --configuration $(env) --retry --debug --log --local-only
 
 
 #
@@ -95,22 +95,22 @@ terrabuild:
 #
 
 test-scaffold:
-	$(terrabuild) scaffold --workspace tests/scaffold --debug --logs
+	$(terrabuild) scaffold --workspace tests/scaffold --debug --log
 
 test-rescaffold:
-	$(terrabuild) scaffold --workspace tests/scaffold --debug --force --logs
+	$(terrabuild) scaffold --workspace tests/scaffold --debug --force --log
 
 test-build-scaffold:
-	$(terrabuild) run build --workspace tests/scaffold --debug --retry --logs
+	$(terrabuild) run build --workspace tests/scaffold --debug --retry --log
 
 test-build-simple:
-	$(terrabuild) run build --workspace tests/simple --debug --retry --logs --variable secret_message=tralala
+	$(terrabuild) run build --workspace tests/simple --debug --retry --log --variable secret_message=tralala
 
 test-rebuild-simple:
-	$(terrabuild) run build --workspace tests/simple --debug --retry --logs
+	$(terrabuild) run build --workspace tests/simple --debug --retry --log
 
 test-deploy-simple:
-	$(terrabuild) run deploy --workspace tests/simple --debug --retry --logs
+	$(terrabuild) run deploy --workspace tests/simple --debug --retry --log
 
 test-build-playground:
 	$(terrabuild) run build --workspace ../playground --retry --debug
@@ -122,7 +122,7 @@ test-deploy-playground:
 	$(terrabuild) run deploy --workspace ../playground --retry --debug
 
 test-circular:
-	$(terrabuild) run build --workspace tests/circular --debug --logs
+	$(terrabuild) run build --workspace tests/circular --debug --log
 
 test-cluster-layers:
 	$(terrabuild) run build -w tests/cluster-layers --debug --force
@@ -159,15 +159,15 @@ define run_integration_test
 	$(call diff_results,$(1))
 endef
 
-# $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs)
+# $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --log)
 
 smoke-test-cluster-layers:
-	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --logs --container-tool docker)
+	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --log --container-tool docker)
 
 smoke-test-multirefs:
-	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --logs --container-tool docker)
+	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --log --container-tool docker)
 
 smoke-test-simple:
-	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --logs --container-tool docker)
+	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --log --container-tool docker)
 
 smoke-tests: smoke-test-cluster-layers smoke-test-multirefs smoke-test-simple

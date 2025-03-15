@@ -49,7 +49,6 @@ type RunArgs =
     | [<Unique; AltCommandLine("-n")>] Note of note:string
     | [<Unique; AltCommandLine("-t")>] Tag of tag:string
     | [<Unique; AltCommandLine("-ct")>] Container_Tool of tool:ContainerTool
-    | [<Unique>] Logs
     | [<Unique; Inherit>] WhatIf
 with
     interface IArgParserTemplate with
@@ -65,7 +64,6 @@ with
             | Retry -> "Retry failed task."
             | Local_Only -> "Use local cache only."
             | Note _ -> "Note for the build."
-            | Logs -> "Output logs for impacted projects."
             | Tag _ -> "Tag for build."
             | Container_Tool _ -> "Container Tool to use (docker or podman)."
             | WhatIf -> "Prepare the action but do not apply."
@@ -76,7 +74,6 @@ type ServeArgs =
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
-    | [<Unique>] Logs
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -85,7 +82,6 @@ with
             | Configuration _ -> "Configuration to use."
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
-            | Logs -> "Output logs for impacted projects."
 
 
 [<RequireQualifiedAccess>]
@@ -131,6 +127,7 @@ type TerrabuildArgs =
     | [<CliPrefix(CliPrefix.None)>] Login of ParseResults<LoginArgs>
     | [<CliPrefix(CliPrefix.None)>] Logout of ParseResults<LogoutArgs>
     | [<CliPrefix(CliPrefix.None)>] Version
+    | [<Hidden; Unique; Inherit>] Log
     | [<Hidden; Unique; Inherit>] Debug
 with
     interface IArgParserTemplate with
@@ -144,4 +141,5 @@ with
             | Login _ -> "Connect to backend."
             | Logout _ -> "Disconnect from backend."
             | Version -> "Show current Terrabuild version."
-            | Debug -> "Enable logging and debug dumps."
+            | Log -> "Enable logging."
+            | Debug -> "Enable debug logs."
