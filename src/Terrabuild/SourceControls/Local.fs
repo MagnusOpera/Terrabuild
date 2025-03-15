@@ -26,5 +26,5 @@ type Local() =
 
         override _.Run = None
 
-        override _.LogType = Contracts.LogType.Terminal
+        override _.LogTypes = [ Contracts.LogType.Terminal ]
         override _.LogError _ = ()

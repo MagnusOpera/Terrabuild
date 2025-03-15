@@ -89,7 +89,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.LocalOnly = options.LocalOnly
             ConfigOptions.Options.StartedAt = options.StartedAt
             ConfigOptions.Options.Targets = options.Targets
-            ConfigOptions.Options.LogType = sourceControl.LogType
+            ConfigOptions.Options.LogTypes = sourceControl.LogTypes
             ConfigOptions.Options.Configuration = options.Configuration
             ConfigOptions.Options.Note = options.Note
             ConfigOptions.Options.Tag = options.Tag

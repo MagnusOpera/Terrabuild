@@ -78,6 +78,6 @@ type GitHub() =
                    Repository = repository
                    RunAttempt = runAttempt }
 
-        override _.LogType = Contracts.LogType.Markdown stepSummary
+        override _.LogTypes = [ Contracts.LogType.Markdown stepSummary; Contracts.LogType.GitHubActions ]
 
         override _.LogError msg = $"::error::{msg}" |> Terminal.writeLine
