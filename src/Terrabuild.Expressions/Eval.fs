@@ -17,7 +17,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
         | Value.Bool b -> if b then "true" else "false"
         | Value.Number n -> $"{n}"
         | Value.String s -> s
-        | _ -> Errors.raiseTypeError $"Unsupported type for format {v}"
+        | _ -> Errors.raiseTypeError $"Unsupported type for format {v}" (v.ToString())
 
     let rec eval (expr: Expr) =
         match expr with
@@ -30,7 +30,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
             // if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
             match context.Variables |> Map.tryFind var with
             | Some value -> value
-            | None -> Errors.raiseSymbolError $"Variable '{var}' is not defined"
+            | None -> Errors.raiseSymbolError $"Variable '{var}' is not defined" var
         | Expr.Map map ->
             let values = map |> Map.fold (fun map k v ->
                 let mv = eval v
@@ -73,14 +73,14 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     let projectDir =
                         match context.ProjectDir with
                         | Some projectDir -> projectDir
-                        | _ -> Errors.raiseSymbolError $"Project dir not available in this context."
+                        | _ -> Errors.raiseUsage $"Project dir not available in this context."
 
                     let projectName =
                         FS.workspaceRelative context.WorkspaceDir projectDir str
                         |> String.toUpper
                     match context.Versions |> Map.tryFind projectName with
                     | Some version -> Value.String version
-                    | _ -> Errors.raiseSymbolError $"Unknown project reference '{str}'"
+                    | _ -> Errors.raiseSymbolError $"Unknown project reference '{str}'" projectName
 
                 | Function.ToString, [value] -> valueToString value |> Value.String
 
@@ -91,7 +91,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                             let value =
                                 match values |> Map.tryFind name with
                                 | Some value -> valueToString value
-                                | _ -> Errors.raiseSymbolError $"Field {name} does not exist"
+                                | _ -> Errors.raiseSymbolError $"Field {name} does not exist" name
                             template
                             |> String.replace $"{{{name}}}" value
                             |> replaceAll
@@ -110,7 +110,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                                 | (true, index) -> 
                                     if 0 <= index && index < values.Length then values[index]
                                     else Errors.raiseInvalidArg $"Format index is out of range"
-                                | _ -> Errors.raiseTypeError $"Format index is not a number"
+                                | _ -> Errors.raiseTypeError $"Format index is not a number" index
                             template
                             |> String.replace $"{{{index}}}" value
                             |> replaceAll
@@ -121,7 +121,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Item, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with
                     | Some value -> value
-                    | _ -> Errors.raiseSymbolError $"Unknown key {key}"
+                    | _ -> Errors.raiseSymbolError $"Unknown key {key}" key
 
                 | Function.Item, [Value.List list; Value.Number index] ->
                     match list |> List.tryItem index with

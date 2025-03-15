@@ -5,7 +5,7 @@ open System
 type ErrorArea =
     | Parse
     | Type
-    | Symbol
+    | Symbol of symbol:string
     | Usage
     | InvalidArg
 
@@ -26,8 +26,8 @@ let raiseParseError msg =
 let raiseTypeError msg =
     TerrabuildException(msg, ErrorArea.Type) |> raise
 
-let raiseSymbolError msg =
-    TerrabuildException(msg, ErrorArea.Symbol) |> raise
+let raiseSymbolError msg symbol =
+    TerrabuildException(msg, ErrorArea.Symbol symbol) |> raise
 
 let raiseGenericError msg =
     failwith msg

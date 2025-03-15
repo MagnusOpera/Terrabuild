@@ -39,6 +39,9 @@ let rec dumpKnownException (ex: Exception) =
     seq {
         match ex with
         | :? TerrabuildException as ex ->
+            // match ex.Area with
+            // | ErrorArea.InvalidArg -> 
+
             yield ex.Message
             yield! ex.InnerException |> dumpKnownException
         | null -> ()

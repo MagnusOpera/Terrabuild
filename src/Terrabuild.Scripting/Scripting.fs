@@ -64,7 +64,7 @@ type Invocable(method: MethodInfo) =
                 let fieldValues = Array.create (fields.Length) (false, null)
                 for (KeyValue (key, value)) in map do
                     match fieldIndices |> Map.tryFind key with
-                    | None -> Errors.raiseSymbolError $"Property {key} does not exists"
+                    | None -> Errors.raiseSymbolError $"Property {key} does not exists" key
                     | Some idx -> 
                         let field = fields[idx]
                         let value = mapParameter value field.Name field.PropertyType

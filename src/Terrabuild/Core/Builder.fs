@@ -21,7 +21,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
     // first check all targets exist in WORKSPACE
     match options.Targets |> Seq.tryFind (fun targetName -> configuration.Targets |> Map.containsKey targetName |> not) with
-    | Some undefinedTarget -> Errors.raiseSymbolError $"Target {undefinedTarget} is not defined in WORKSPACE"
+    | Some undefinedTarget -> Errors.raiseSymbolError $"Target {undefinedTarget} is not defined in WORKSPACE" undefinedTarget
     | _ -> ()
 
 

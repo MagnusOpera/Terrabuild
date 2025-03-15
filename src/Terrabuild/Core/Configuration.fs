@@ -174,7 +174,7 @@ let read (options: ConfigOptions.Options) =
                 | _ ->
                     match options.Configuration with
                     | "default" -> Map.empty
-                    | _ -> Errors.raiseSymbolError $"Configuration '{options.Configuration}' not found"
+                    | _ -> Errors.raiseSymbolError $"Configuration '{options.Configuration}' not found" options.Configuration
 
             { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
         
@@ -264,7 +264,7 @@ let read (options: ConfigOptions.Options) =
 
                 match result with
                 | Extensions.Success result -> result
-                | Extensions.ScriptNotFound -> Errors.raiseSymbolError $"Script {init} was not found"
+                | Extensions.ScriptNotFound -> Errors.raiseSymbolError $"Script {init} was not found" init
                 | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
                 | Extensions.ErrorTarget exn -> Errors.forwardError $"Invocation failure of command '__defaults__' for extension '{init}'" exn
             | _ -> ProjectInfo.Default
@@ -382,7 +382,7 @@ let read (options: ConfigOptions.Options) =
                         let extension = 
                             match projectDef.Extensions |> Map.tryFind step.Extension with
                             | Some extension -> extension
-                            | _ -> Errors.raiseSymbolError $"Extension {step.Extension} is not defined"
+                            | _ -> Errors.raiseSymbolError $"Extension {step.Extension} is not defined" step.Extension
 
                         let context =
                             extension.Defaults
@@ -411,7 +411,7 @@ let read (options: ConfigOptions.Options) =
                         let script =
                             match Extensions.getScript step.Extension projectDef.Scripts with
                             | Some script -> script
-                            | _ -> Errors.raiseSymbolError $"Extension {step.Extension} is not defined"
+                            | _ -> Errors.raiseSymbolError $"Extension {step.Extension} is not defined" step.Extension
 
                         let hash =
                             let containerInfos = 
@@ -543,7 +543,7 @@ let read (options: ConfigOptions.Options) =
         let status = hub.WaitCompletion()
         match status with
         | Status.Ok -> projects |> Map.ofDict
-        | Status.SubcriptionNotRaised projectId -> Errors.raiseSymbolError $"Project {projectId} is unknown"
+        | Status.SubcriptionNotRaised projectId -> Errors.raiseSymbolError $"Project {projectId} is unknown" projectId
         | Status.SubscriptionError exn -> Errors.forwardError "Failed to load configuration" exn
 
 
