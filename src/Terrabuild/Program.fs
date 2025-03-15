@@ -50,20 +50,21 @@ let rec findWorkspace dir =
 
 let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseResults<TerrabuildArgs>) =
     let debug = result.Contains(TerrabuildArgs.Debug)
+    let log = result.Contains(TerrabuildArgs.Log)
     let runId = Guid.NewGuid()
 
     let logFile name = FS.combinePath launchDir $"terrabuild-debug.{name}"
 
-    if debug then
-        Log.Logger <-
-            LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.File(logFile "log")
-                .CreateLogger()
+    if log then
+        let loggerBuilder = LoggerConfiguration().WriteTo.File(logFile "log")
+        let loggerBuilder =
+            if debug then loggerBuilder.MinimumLevel.Debug()
+            else loggerBuilder
+        Log.Logger <- loggerBuilder.CreateLogger()
         Log.Debug("===== [Execution Start] =====")
         Log.Debug($"Environment: {RuntimeInformation.OSDescription}, {RuntimeInformation.OSArchitecture}, {Environment.Version}")
 
-    let runTarget logs (options: RunTargetOptions) =
+    let runTarget (options: RunTargetOptions) =
         let logGraph graph name =
             graph
             |> Json.Serialize
@@ -137,7 +138,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 let jsonBuild = Json.Serialize summary
                 jsonBuild |> IO.writeTextFile (logFile "build-result.json")
 
-            if logs || not summary.IsSuccess then
+            if log || not summary.IsSuccess then
                 Logs.dumpLogs runId options cache buildGraph summary
 
             let result =
@@ -171,7 +172,6 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let variables = runArgs.GetResults(RunArgs.Variable) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let localOnly = runArgs.Contains(RunArgs.Local_Only)
-        let logs = runArgs.Contains(RunArgs.Logs)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
         let whatIf = runArgs.Contains(RunArgs.WhatIf)
         let containerTool =
@@ -197,7 +197,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Labels = labels
                         RunTargetOptions.Variables = variables
                         RunTargetOptions.ContainerTool = containerTool }
-        runTarget logs options
+        runTarget options
 
     let serve (serveArgs: ParseResults<ServeArgs>) =
         let wsDir =
@@ -226,7 +226,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Labels = labels
                         RunTargetOptions.Variables = variables
                         RunTargetOptions.ContainerTool = None }
-        runTarget true options
+        runTarget options
 
     let logs (logsArgs: ParseResults<LogsArgs>) =
         let targets = logsArgs.GetResult(LogsArgs.Target) |> Seq.map String.toLower
@@ -257,7 +257,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Labels = labels
                         RunTargetOptions.Variables = variables
                         RunTargetOptions.ContainerTool = None }
-        runTarget true options
+        runTarget options
 
     let clear (clearArgs: ParseResults<ClearArgs>) =
         if clearArgs.Contains(ClearArgs.Cache) || clearArgs.Contains(ClearArgs.All) then Cache.clearCache()
