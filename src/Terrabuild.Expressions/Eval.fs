@@ -17,7 +17,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
         | Value.Bool b -> if b then "true" else "false"
         | Value.Number n -> $"{n}"
         | Value.String s -> s
-        | _ -> TerrabuildException.Raise($"Unsupported type for format {v}")
+        | _ -> Errors.raiseTypeError $"Unsupported type for format {v}"
 
     let rec eval (expr: Expr) =
         match expr with
@@ -30,7 +30,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
             // if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
             match context.Variables |> Map.tryFind var with
             | Some value -> value
-            | None -> TerrabuildException.Raise($"Variable '{var}' is not defined")
+            | None -> Errors.raiseSymbolError $"Variable '{var}' is not defined"
         | Expr.Map map ->
             let values = map |> Map.fold (fun map k v ->
                 let mv = eval v
@@ -73,14 +73,14 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     let projectDir =
                         match context.ProjectDir with
                         | Some projectDir -> projectDir
-                        | _ -> TerrabuildException.Raise($"Project dir not available in this context.")
+                        | _ -> Errors.raiseSymbolError $"Project dir not available in this context."
 
                     let projectName =
                         FS.workspaceRelative context.WorkspaceDir projectDir str
                         |> String.toUpper
                     match context.Versions |> Map.tryFind projectName with
                     | Some version -> Value.String version
-                    | _ -> TerrabuildException.Raise($"Unknown project reference '{str}'")
+                    | _ -> Errors.raiseSymbolError $"Unknown project reference '{str}'"
 
                 | Function.ToString, [value] -> valueToString value |> Value.String
 
@@ -91,7 +91,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                             let value =
                                 match values |> Map.tryFind name with
                                 | Some value -> valueToString value
-                                | _ -> TerrabuildException.Raise($"Field {name} does not exist")
+                                | _ -> Errors.raiseSymbolError $"Field {name} does not exist"
                             template
                             |> String.replace $"{{{name}}}" value
                             |> replaceAll
@@ -109,8 +109,8 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                                 match System.Int32.TryParse index with
                                 | (true, index) -> 
                                     if 0 <= index && index < values.Length then values[index]
-                                    else TerrabuildException.Raise($"Format index is out of range")
-                                | _ -> TerrabuildException.Raise($"Format index is not a number")
+                                    else Errors.raiseInvalidArg $"Format index is out of range"
+                                | _ -> Errors.raiseTypeError $"Format index is not a number"
                             template
                             |> String.replace $"{{{index}}}" value
                             |> replaceAll
@@ -121,12 +121,12 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Item, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with
                     | Some value -> value
-                    | _ -> TerrabuildException.Raise($"Unknown key {key}")
+                    | _ -> Errors.raiseSymbolError $"Unknown key {key}"
 
                 | Function.Item, [Value.List list; Value.Number index] ->
                     match list |> List.tryItem index with
                     | Some value -> value
-                    | _ -> TerrabuildException.Raise($"Out of range index {index}")
+                    | _ -> Errors.raiseInvalidArg $"Out of range index {index}"
 
                 | Function.TryItem, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with
@@ -141,7 +141,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Coalesce, list ->
                     match list |> List.tryFind (fun i -> i <> Value.Nothing) with
                     | Some value -> value
-                    | _ -> TerrabuildException.Raise($"Failed to find value")
+                    | _ -> Errors.raiseInvalidArg $"Failed to find value"
                 
                 | Function.Ternary, [Value.Bool condition; trueValue; falseValue] ->
                     if condition then trueValue
@@ -165,7 +165,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                         | Value.String _ -> "string"
 
                     let prms = prms |> List.map (getParamType) |> String.join "*"
-                    TerrabuildException.Raise($"Invalid arguments for function {f} with parameters ({prms})")
+                    Errors.raiseInvalidArg $"Invalid arguments for function {f} with parameters ({prms})"
             res
 
     eval expr

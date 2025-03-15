@@ -22,7 +22,7 @@ type Npm() =
                        Dependencies = dependencies }
             projectInfo
         with
-            exn -> Errors.TerrabuildException.Raise($"Error while processing project {context.Directory}", exn)
+            exn -> Errors.forwardError $"Error while processing project {context.Directory}" exn
 
     /// <summary>
     /// Run npm command.

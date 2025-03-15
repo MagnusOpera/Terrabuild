@@ -23,31 +23,31 @@ with
             match components |> List.choose (function | ExtensionComponents.Container value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> Some value
-            | _ -> TerrabuildException.Raise("multiple container declared")
+            | _ -> Errors.raiseParseError "multiple container declared"
 
         let platform =
             match components |> List.choose (function | ExtensionComponents.Platform value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> Some value
-            | _ -> TerrabuildException.Raise("multiple platform declared")
+            | _ -> Errors.raiseParseError "multiple platform declared"
 
         let variables =
             match components |> List.choose (function | ExtensionComponents.Variables value -> Some value | _ -> None) with
             | [] -> Set.empty
             | [value] -> value |> Set.ofList
-            | _ -> TerrabuildException.Raise("multiple variables declared")
+            | _ -> Errors.raiseParseError "multiple variables declared"
 
         let script =
             match components |> List.choose (function | ExtensionComponents.Script value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> Some value
-            | _ -> TerrabuildException.Raise("multiple script declared")
+            | _ -> Errors.raiseParseError "multiple script declared"
 
         let defaults =
             match components |> List.choose (function | ExtensionComponents.Defaults value -> Some value | _ -> None) with
             | [] -> Map.empty
             | [value] -> value
-            | _ -> TerrabuildException.Raise("multiple defaults declared")
+            | _ -> Errors.raiseParseError "multiple defaults declared"
 
         name, { Container = container
                 Platform = platform

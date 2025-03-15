@@ -257,7 +257,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         notification.NodeCompleted node TaskRequest.Restore true
                     | _ ->
                         notification.NodeCompleted node TaskRequest.Restore false
-                        Errors.TerrabuildException.Raise($"Unable to download build output for {cacheEntryId} for node {node.Id}")
+                        Errors.raiseGenericError $"Unable to download build output for {cacheEntryId} for node {node.Id}"
 
                 let restorable = Restorable(callback, dependencies)
                 restorables.TryAdd(node.Id, restorable) |> ignore

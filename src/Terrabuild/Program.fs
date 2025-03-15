@@ -184,7 +184,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             | _ ->
                 match currentDir() |> findWorkspace with
                 | Some ws -> ws
-                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+                | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let targets = runArgs.GetResult(RunArgs.Target) |> Seq.map String.toLower
         let configuration = runArgs.TryGetResult(RunArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let note = runArgs.TryGetResult(RunArgs.Note)
@@ -227,7 +227,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             | _ ->
                 match currentDir() |> findWorkspace with
                 | Some ws -> ws
-                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+                | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let configuration = serveArgs.TryGetResult(ServeArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let labels = serveArgs.TryGetResult(ServeArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = serveArgs.GetResults(ServeArgs.Variable) |> Map
@@ -257,7 +257,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             | _ ->
                 match currentDir() |> findWorkspace with
                 | Some ws -> ws
-                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+                | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Map
