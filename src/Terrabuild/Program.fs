@@ -35,20 +35,6 @@ type RunTargetOptions = {
 }
 
 
-let rec dumpKnownException (ex: Exception) =
-    seq {
-        match ex with
-        | :? TerrabuildException as ex ->
-            // match ex.Area with
-            // | ErrorArea.InvalidArg -> 
-
-            yield ex.Message
-            yield! ex.InnerException |> dumpKnownException
-        | null -> ()
-        | _ -> ()
-    }
-
-
 type TerrabuildExiter() =
     interface IExiter with
         member _.Name: string = "Process Exiter"
@@ -348,12 +334,22 @@ let main _ =
             processCommandLine parser result
         with
             | :? TerrabuildException as ex ->
+                let area = getErrorArea ex
 #if RELEASE
-                SentrySdk.CaptureException(ex) |> ignore
+                let captureException =
+                    match area with
+                    | ErrorArea.Parse -> false
+                    | ErrorArea.Type -> false
+                    | ErrorArea.Symbol _ -> false
+                    | ErrorArea.Usage -> false
+                    | ErrorArea.InvalidArg -> false
+                    | ErrorArea.External -> true
+                    | ErrorArea.Bug -> true
+                if captureException then SentrySdk.CaptureException(ex) |> ignore
 #endif
-                Log.Fatal("Failed with {Exception}", ex.ToString())
+                Log.Fatal("Failed in area {Area} with {Exception}", area, ex.ToString())
                 let reason =
-                    if debug then ex.ToString()
+                    if debug then $"[{area}] {ex}"
                     else dumpKnownException ex |> String.join "\n   "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5

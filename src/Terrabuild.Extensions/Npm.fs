@@ -1,5 +1,6 @@
 namespace Terrabuild.Extensions
 open Terrabuild.Extensibility
+open Errors
 
 /// <summary>
 /// Provides support for `npm`.
@@ -22,7 +23,7 @@ type Npm() =
                        Dependencies = dependencies }
             projectInfo
         with
-            exn -> Errors.forwardError $"Error while processing project {context.Directory}" exn
+            exn -> forwardExternalError $"Error while processing project {context.Directory}" exn
 
     /// <summary>
     /// Run npm command.

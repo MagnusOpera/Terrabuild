@@ -31,8 +31,8 @@ module DotnetHelpers =
             |> List.ofSeq
         match projects with
         | [ project ] -> project
-        | [] -> Errors.raiseInvalidArg "No project found"
-        | _ -> Errors.raiseInvalidArg "Multiple projects found"
+        | [] -> raiseInvalidArg "No project found"
+        | _ -> raiseInvalidArg "Multiple projects found"
 
     let findDependencies (projectFile: string) =
         let xdoc = XDocument.Load (projectFile)

@@ -9,17 +9,17 @@ let getBranchOrTag (dir: string) =
     | _ -> 
         match Exec.execCaptureOutput dir "git" "describe --tags --exact-match" with
         | Exec.Success (output, _) -> output |> String.firstLine
-        | _ -> Errors.raiseGenericError "Failed to get branch or tag"
+        | _ -> raiseExternalError "Failed to get branch or tag"
 
 let getHeadCommitMessage (dir: string) =
     match Exec.execCaptureOutput dir "git" "log -1 --pretty=%B" with
     | Exec.Success (output, _) -> output
-    | _ -> Errors.raiseGenericError "Failed to get head commit message"
+    | _ -> raiseExternalError "Failed to get head commit message"
 
 let getCurrentUser (dir: string) =
     match Exec.execCaptureOutput dir "git" "config user.name" with
     | Exec.Success (output, _) -> output |> String.firstLine
-    | _ -> Errors.raiseGenericError "Failed to get head commit"
+    | _ -> raiseExternalError "Failed to get head commit"
 
 let getCommitLog (dir: string) =
     match Exec.execCaptureOutput dir "git" "log -n 10 --pretty=%H%n%s%n%an%n%ae%n%aI" with
@@ -28,4 +28,4 @@ let getCommitLog (dir: string) =
         |> Seq.chunkBySize 5
         |> Seq.map (fun arr -> {| Sha = arr[0]; Subject = arr[1]; Author = arr[2]; Email = arr[3]; Timestamp = DateTime.Parse(arr[4]) |})
         |> List.ofSeq
-    | _ -> Errors.raiseGenericError "Failed to get commit log"
+    | _ -> raiseExternalError "Failed to get commit log"

@@ -37,37 +37,37 @@ with
             match components |> List.choose (function | ProjectComponents.Dependencies value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> Errors.raiseParseError "multiple dependencies declared"
+            | _ -> raiseParseError "multiple dependencies declared"
 
         let links =
             match components |> List.choose (function | ProjectComponents.Links value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> Errors.raiseParseError "multiple links declared"
+            | _ -> raiseParseError "multiple links declared"
 
         let outputs =
             match components |> List.choose (function | ProjectComponents.Outputs value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> Errors.raiseParseError "multiple outputs declared"
+            | _ -> raiseParseError "multiple outputs declared"
 
         let ignores =
             match components |> List.choose (function | ProjectComponents.Ignores value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> Errors.raiseParseError "multiple ignores declared"
+            | _ -> raiseParseError "multiple ignores declared"
 
         let includes =
             match components |> List.choose (function | ProjectComponents.Includes value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> Errors.raiseParseError "multiple files declared"
+            | _ -> raiseParseError "multiple files declared"
 
         let labels =
             match components |> List.choose (function | ProjectComponents.Labels value -> Some value | _ -> None) with
             | [] -> Set.empty
             | [value] -> value |> Set.ofList
-            | _ -> Errors.raiseParseError "multiple labels declared"
+            | _ -> raiseParseError "multiple labels declared"
 
         { Init = init
           Dependencies = dependencies |> Option.defaultValue Set.empty
@@ -109,19 +109,19 @@ with
             match components |> List.choose (function | TargetComponents.DependsOn value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> Errors.raiseParseError "multiple depends_on declared"
+            | _ -> raiseParseError "multiple depends_on declared"
 
         let rebuild =
             match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> Some value
-            | _ -> Errors.raiseParseError "multiple rebuild declared"
+            | _ -> raiseParseError "multiple rebuild declared"
 
         let outputs =
             match components |> List.choose (function | TargetComponents.Outputs value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> Errors.raiseParseError "multiple outputs declared"
+            | _ -> raiseParseError "multiple outputs declared"
 
         let cache =
             match components |> List.choose (function | TargetComponents.Cache value -> Some value | _ -> None) with
@@ -133,8 +133,8 @@ with
                 | "local" -> Some Cacheability.Local
                 | "remote" -> Some Cacheability.Remote
                 | "always" -> Some Cacheability.Always
-                | _ -> Errors.raiseParseError "invalid cache value"
-            | _ -> Errors.raiseParseError "multiple cache declared"
+                | _ -> raiseParseError "invalid cache value"
+            | _ -> raiseParseError "multiple cache declared"
 
         let steps =
             components
@@ -165,7 +165,7 @@ with
             match components |> List.choose (function | ProjectFileComponents.Project value -> Some value | _ -> None) with
             | [] -> Project.Build None []
             | [value] -> value
-            | _ -> Errors.raiseParseError "multiple project declared"
+            | _ -> raiseParseError "multiple project declared"
 
         let extensions =
             components

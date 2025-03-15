@@ -111,7 +111,7 @@ let read (options: ConfigOptions.Options) =
         try
             Terrabuild.Configuration.FrontEnd.parseWorkspace workspaceContent
         with exn ->
-            Errors.raiseParseError "Failed to read WORKSPACE configuration file" exn
+            raiseParseError "Failed to read WORKSPACE configuration file" exn
 
     let evaluationContext =
         let convertToVarType (key: string) (existingValue: Value) (value: string) =
@@ -121,12 +121,12 @@ let read (options: ConfigOptions.Options) =
             | Value.Number _ ->
                 match value |> Int32.TryParse with
                 | true, value -> Value.Number value
-                | _ -> Errors.raiseTypeError $"Value '{value}' can't be converted to number variable {key}"
+                | _ -> raiseTypeError $"Value '{value}' can't be converted to number variable {key}"
             | Value.Bool _ ->
                 match value |> Boolean.TryParse with
                 | true, value -> Value.Bool value
-                | _ -> Errors.raiseTypeError $"Value '{value}' can't be converted to boolean variable {key}"
-            | _ -> Errors.raiseTypeError $"Value 'value' can't be converted to variable {key}"
+                | _ -> raiseTypeError $"Value '{value}' can't be converted to boolean variable {key}"
+            | _ -> raiseTypeError $"Value 'value' can't be converted to variable {key}"
 
         let tagValue = 
             match options.Tag with
@@ -174,7 +174,7 @@ let read (options: ConfigOptions.Options) =
                 | _ ->
                     match options.Configuration with
                     | "default" -> Map.empty
-                    | _ -> Errors.raiseSymbolError $"Configuration '{options.Configuration}' not found" options.Configuration
+                    | _ -> raiseSymbolError $"Configuration '{options.Configuration}' not found"
 
             { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.addMap configVariables }
         
@@ -235,9 +235,9 @@ let read (options: ConfigOptions.Options) =
             | FS.File projectFile ->
                 let projectContent = File.ReadAllText projectFile
                 try Terrabuild.Configuration.FrontEnd.parseProject projectContent
-                with exn -> Errors.forwardError $"Failed to read PROJECT configuration {projectFile}" exn
+                with exn -> forwardExternalError $"Failed to read PROJECT configuration '{projectId}'" exn
             | _ ->
-                Errors.raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
+                raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 
         let extensions = extensions |> Map.addMap projectConfig.Extensions
 
@@ -264,9 +264,9 @@ let read (options: ConfigOptions.Options) =
 
                 match result with
                 | Extensions.Success result -> result
-                | Extensions.ScriptNotFound -> Errors.raiseSymbolError $"Script {init} was not found" init
+                | Extensions.ScriptNotFound -> raiseSymbolError $"Script {init} was not found"
                 | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-                | Extensions.ErrorTarget exn -> Errors.forwardError $"Invocation failure of command '__defaults__' for extension '{init}'" exn
+                | Extensions.ErrorTarget exn -> forwardExternalError $"Invocation failure of command '__defaults__' for extension '{init}'" exn
             | _ -> ProjectInfo.Default
 
         let projectInfo = {
@@ -374,7 +374,7 @@ let read (options: ConfigOptions.Options) =
                 let rebuild =
                     match rebuild with
                     | Value.Bool rebuild -> rebuild
-                    | _ -> Errors.raiseTypeError "rebuild must evaluate to a bool"
+                    | _ -> raiseTypeError "rebuild must evaluate to a bool"
 
                 let targetOperations =
                     target.Steps
@@ -382,7 +382,7 @@ let read (options: ConfigOptions.Options) =
                         let extension = 
                             match projectDef.Extensions |> Map.tryFind step.Extension with
                             | Some extension -> extension
-                            | _ -> Errors.raiseSymbolError $"Extension {step.Extension} is not defined" step.Extension
+                            | _ -> raiseSymbolError $"Extension {step.Extension} is not defined"
 
                         let context =
                             extension.Defaults
@@ -396,7 +396,7 @@ let read (options: ConfigOptions.Options) =
                                 match Eval.eval evaluationContext container with
                                 | Value.String container -> Some container
                                 | Value.Nothing -> None
-                                | _ -> Errors.raiseTypeError "container must evaluate to a string"
+                                | _ -> raiseTypeError "container must evaluate to a string"
                             | _ -> None
 
                         let platform =
@@ -405,13 +405,13 @@ let read (options: ConfigOptions.Options) =
                                 match Eval.eval evaluationContext platform with
                                 | Value.String platform -> Some platform
                                 | Value.Nothing -> None
-                                | _ -> Errors.raiseTypeError "container must evaluate to a string"
+                                | _ -> raiseTypeError "container must evaluate to a string"
                             | _ -> None
 
                         let script =
                             match Extensions.getScript step.Extension projectDef.Scripts with
                             | Some script -> script
-                            | _ -> Errors.raiseSymbolError $"Extension {step.Extension} is not defined" step.Extension
+                            | _ -> raiseSymbolError $"Extension {step.Extension} is not defined"
 
                         let hash =
                             let containerInfos = 
@@ -543,8 +543,8 @@ let read (options: ConfigOptions.Options) =
         let status = hub.WaitCompletion()
         match status with
         | Status.Ok -> projects |> Map.ofDict
-        | Status.SubcriptionNotRaised projectId -> Errors.raiseSymbolError $"Project {projectId} is unknown" projectId
-        | Status.SubscriptionError exn -> Errors.forwardError "Failed to load configuration" exn
+        | Status.SubcriptionNotRaised projectId -> raiseSymbolError $"Project {projectId} is unknown"
+        | Status.SubscriptionError exn -> forwardExternalError "Failed to load configuration" exn
 
 
     let projects = searchProjectsAndApply()

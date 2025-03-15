@@ -20,8 +20,8 @@ let findProjectFile (directory: string) =
         |> List.ofSeq
     match projects with
     | [ project ] -> project
-    | [] -> Errors.raiseInvalidArg "No project found"
-    | _ -> Errors.raiseInvalidArg "Multiple projects found"
+    | [] -> raiseInvalidArg "No project found"
+    | _ -> raiseInvalidArg "Multiple projects found"
 
 let findDependencies (projectFile: string) =
     let json = IO.readTextFile projectFile

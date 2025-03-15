@@ -20,13 +20,13 @@ with
             match components |> List.choose (function | WorkspaceComponents.Id value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> Some value
-            | _ -> Errors.raiseParseError "multiple space declared"
+            | _ -> raiseParseError "multiple space declared"
 
         let ignores =
             match components |> List.choose (function | WorkspaceComponents.Ignores value -> Some value | _ -> None) with
             | [] -> None
             | [value] -> value |> Set.ofList |> Some
-            | _ -> Errors.raiseParseError "multiple ignores declared"
+            | _ -> raiseParseError "multiple ignores declared"
 
         { Workspace.Id = id
           Workspace.Ignores = ignores |> Option.defaultValue Set.empty }
@@ -48,13 +48,13 @@ with
             match components |> List.choose (function | TargetComponents.DependsOn value -> Some value | _ -> None) with
             | [] -> Set.empty
             | [value] -> value |> Set.ofList
-            | _ -> Errors.raiseParseError "multiple depends_on declared"
+            | _ -> raiseParseError "multiple depends_on declared"
 
         let rebuild =
             match components |> List.choose (function | TargetComponents.Rebuild value -> Some value | _ -> None) with
             | [] -> Expr.Bool false
             | [value] -> value
-            | _ -> Errors.raiseParseError "multiple rebuild declared"
+            | _ -> raiseParseError "multiple rebuild declared"
 
         id, { DependsOn = dependsOn
               Rebuild = rebuild }
@@ -74,7 +74,7 @@ with
             match components |> List.choose (function | ConfigurationComponents.Variables value -> Some value) with
             | [] -> Map.empty
             | [value] -> value
-            | _ -> Errors.raiseParseError "multiple variables declared"
+            | _ -> raiseParseError "multiple variables declared"
 
         id, { Variables = variables }
 
@@ -100,7 +100,7 @@ with
                 { Workspace.Id = None
                   Workspace.Ignores = Set.empty }
             | [value] -> value
-            | _ -> Errors.raiseParseError "multiple workspace declared"
+            | _ -> raiseParseError "multiple workspace declared"
 
         let targets =
             components
