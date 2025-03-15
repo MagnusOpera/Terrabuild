@@ -34,17 +34,6 @@ type RunTargetOptions = {
 }
 
 
-type TerrabuildExiter() =
-    interface IExiter with
-        member _.Name: string = "Process Exiter"
-
-        member _.Exit(msg: string, errorCode: ErrorCode) =
-            do
-                Log.Fatal("Failed with {Message} and {ErrorCode}", msg, errorCode)
-                msg |> Terminal.writeLine
-                Terminal.showCursor()
-
-            exit (int errorCode)
 
 let launchDir = currentDir()
 Cache.createDirectories()
@@ -333,14 +322,21 @@ let main _ =
             DotNetEnv.Env.TraversePath().Load() |> ignore
             Terminal.hideCursor()
             Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
-            let errorHandler = TerrabuildExiter()
-            let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
-            let result = parser.ParseCommandLine()
+            let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild")
+            let result =
+                try
+                    parser.ParseCommandLine(raiseOnUsage = false)
+                with
+                    | :? ArguParseException as exn ->
+                        Log.Fatal(exn, "ArgumentParser failed")
+                        raiseUsage exn.Message
+
             debug <- result.Contains(TerrabuildArgs.Debug)
             processCommandLine parser result
         with
             | :? TerrabuildException as ex ->
                 let area = getErrorArea ex
+                ex.AddSentryTag("area", $"{area}")
 #if RELEASE
                 let captureException =
                     match area with
