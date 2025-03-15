@@ -17,8 +17,6 @@ current_dir = $(shell pwd)
 
 
 
-
-
 #
 #  _______   ___________    ____
 # |       \ |   ____\   \  /   /
@@ -96,47 +94,46 @@ terrabuild:
 #     |__|     |_______|_______/       |__|    |_______/
 #
 
-run-build-circular:
-	$(terrabuild) run build --workspace tests/circular --debug --logs
-
-run-scaffold:
+test-scaffold:
 	$(terrabuild) scaffold --workspace tests/scaffold --debug --logs
 
-run-rescaffold:
+test-rescaffold:
 	$(terrabuild) scaffold --workspace tests/scaffold --debug --force --logs
 
-run-build-scaffold:
+test-build-scaffold:
 	$(terrabuild) run build --workspace tests/scaffold --debug --retry --logs
 
-run-build-simple:
+test-build-simple:
 	$(terrabuild) run build --workspace tests/simple --debug --retry --logs --variable secret_message=tralala
 
-run-rebuild-simple:
+test-rebuild-simple:
 	$(terrabuild) run build --workspace tests/simple --debug --retry --logs
 
-run-deploy-simple:
+test-deploy-simple:
 	$(terrabuild) run deploy --workspace tests/simple --debug --retry --logs
 
-run-build-playground:
+test-build-playground:
 	$(terrabuild) run build --workspace ../playground --retry --debug
 
-run-dist-playground:
+test-dist-playground:
 	$(terrabuild) run dist --workspace ../playground --retry --debug
 
-run-deploy-playground:
+test-deploy-playground:
 	$(terrabuild) run deploy --workspace ../playground --retry --debug
 
-run-test-insights:
-	$(terrabuild) run build test apply plan -w ../../insights --debug --force --local-only --whatif
+test-circular:
+	$(terrabuild) run build --workspace tests/circular --debug --logs
 
-run-test-terrabuild:
-	$(terrabuild) run build test publish -w src --debug --force --local-only
-
-run-test-cluster-layers:
+test-cluster-layers:
 	$(terrabuild) run build -w tests/cluster-layers --debug --force
 
-run-test-simple:
-	$(terrabuild) run build -w tests/simple --debug --force
+
+#      _______..___  ___.   ______    __  ___  _______    .___________. _______     _______.___________.    _______.
+#     /       ||   \/   |  /  __  \  |  |/  / |   ____|   |           ||   ____|   /       |           |   /       |
+#    |   (----`|  \  /  | |  |  |  | |  '  /  |  |__      `---|  |----`|  |__     |   (----`---|  |----`  |   (----`
+#     \   \    |  |\/|  | |  |  |  | |    <   |   __|         |  |     |   __|     \   \       |  |        \   \
+# .----)   |   |  |  |  | |  `--'  | |  .  \  |  |____        |  |     |  |____.----)   |      |  |    .----)   |
+# |_______/    |__|  |__|  \______/  |__|\__\ |_______|       |__|     |_______|_______/       |__|    |_______/
 
 define diff_file
 	@if [ "$(refresh)" = "true" ]; then \
