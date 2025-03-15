@@ -73,7 +73,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     let projectDir =
                         match context.ProjectDir with
                         | Some projectDir -> projectDir
-                        | _ -> raiseUsage $"'version' function can only be used in the context of a project."
+                        | _ -> raiseInvalidArg $"'version' function can only be used in the context of a project."
 
                     let projectId =
                         FS.workspaceRelative context.WorkspaceDir projectDir projectPath

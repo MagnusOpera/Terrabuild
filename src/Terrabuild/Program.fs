@@ -34,20 +34,11 @@ type RunTargetOptions = {
 }
 
 
-type TerrabuildExiter() =
-    interface IExiter with
-        member _.Name: string = "Process Exiter"
-
-        member _.Exit(msg: string, errorCode: ErrorCode) =
-            do
-                Log.Fatal("Failed with {Message} and {ErrorCode}", msg, errorCode)
-                msg |> Terminal.writeLine
-                Terminal.showCursor()
-
-            exit (int errorCode)
 
 let launchDir = currentDir()
 Cache.createDirectories()
+
+
 
 let rec findWorkspace dir =
     if FS.combinePath dir "WORKSPACE" |> IO.exists then
@@ -333,14 +324,20 @@ let main _ =
             DotNetEnv.Env.TraversePath().Load() |> ignore
             Terminal.hideCursor()
             Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
-            let errorHandler = TerrabuildExiter()
-            let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild", errorHandler = errorHandler)
+            let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild")
             let result = parser.ParseCommandLine()
             debug <- result.Contains(TerrabuildArgs.Debug)
             processCommandLine parser result
         with
+            | :? ArguParseException as exn ->
+                Log.Fatal(exn, "ArgumentParser error with {Exception}")
+                exn.Message |> Terminal.writeLine
+                if exn.ErrorCode = ErrorCode.HelpText then 0
+                else 5
+
             | :? TerrabuildException as ex ->
                 let area = getErrorArea ex
+                ex.AddSentryTag("area", $"{area}")
 #if RELEASE
                 let captureException =
                     match area with
@@ -355,6 +352,7 @@ let main _ =
                     else dumpKnownException ex |> String.join "\n   "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
+
             | ex ->
 #if RELEASE
                 Sentry.SentrySdk.CaptureException(ex) |> ignore

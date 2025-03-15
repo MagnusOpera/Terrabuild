@@ -127,6 +127,8 @@ test-circular:
 test-cluster-layers:
 	$(terrabuild) run build -w tests/cluster-layers --debug --force
 
+test-invalid-args:
+	$(terrabuild) run build -w tests/cluster-layers --force --qewdiqoudhqioeudhqi
 
 #      _______..___  ___.   ______    __  ___  _______    .___________. _______     _______.___________.    _______.
 #     /       ||   \/   |  /  __  \  |  |/  / |   ____|   |           ||   ____|   /       |           |   /       |
