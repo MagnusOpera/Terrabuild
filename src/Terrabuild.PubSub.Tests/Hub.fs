@@ -40,12 +40,12 @@ let successful() =
             hub.GetSignal<int>("computed1").Value |> should equal 42
             triggered3 <- true
 
-        hub.Subscribe [| value1; value2 |] callback3
+        hub.Subscribe "subscription3" [| value1; value2 |] callback3
 
 
-    hub.Subscribe [| |] callback0
-    hub.Subscribe [| value1 |] callback1
-    hub.Subscribe [| value1; value2 |] callback2
+    hub.Subscribe "callback0" [| |] callback0
+    hub.Subscribe "callback1" [| value1 |] callback1
+    hub.Subscribe "callback2" [| value1; value2 |] callback2
 
     computed1.Value <- 42
 
@@ -84,8 +84,8 @@ let exception_in_callback_is_error() =
         triggered2 <- true
         failwith "Callback shall never be called"
 
-    hub.Subscribe [| value1; value2 |] callback
-    hub.Subscribe [| value3 |] neverCallback
+    hub.Subscribe "subscription1" [| value1; value2 |] callback
+    hub.Subscribe "subscription2" [| value3 |] neverCallback
 
     computed1.Value <- 42
     computed2.Value <- "tralala"
@@ -125,8 +125,8 @@ let unsignaled_subscription1_is_error() =
         triggered2 <- true
         failwith "Callback shall never be called"
 
-    hub.Subscribe [| value1; value2 |] callback
-    hub.Subscribe [| value3 |] neverCallback
+    hub.Subscribe "subscription1" [| value1; value2 |] callback
+    hub.Subscribe "subscription2" [| value3 |] neverCallback
 
     computed1.Value <- 42
     computed2.Value <- "tralala"
@@ -135,7 +135,9 @@ let unsignaled_subscription1_is_error() =
     let status = hub.WaitCompletion()
 
     match status with
-    | Status.SubcriptionNotRaised name -> name |> should equal "computed3"
+    | Status.UnfulfilledSubscription (subscription, signals) ->
+        subscription |> should equal "subscription2"
+        signals |> should equal (Set ["computed3"])
     | _ -> Assert.Fail()
     triggered1 |> should equal true
     triggered2 |> should equal false
@@ -166,8 +168,8 @@ let unsignaled_subscription2_is_error() =
         triggered2 <- true
         failwith "Callback shall never be called"
 
-    hub.Subscribe [| value1 |] callback
-    hub.Subscribe [| value2; value3 |] neverCallback
+    hub.Subscribe "subscription1" [| value1 |] callback
+    hub.Subscribe "subscription2" [| value2; value3 |] neverCallback
 
     computed1.Value <- 42
 
@@ -175,7 +177,9 @@ let unsignaled_subscription2_is_error() =
     let status = hub.WaitCompletion()
 
     match status with
-    | Status.SubcriptionNotRaised name -> name |> should equal "computed2,computed3"
+    | Status.UnfulfilledSubscription (subscription, signals) ->
+        subscription |> should equal "subscription2"
+        signals |> should equal (Set ["computed2"; "computed3"])
     | _ -> Assert.Fail()
     triggered1 |> should equal true
     triggered2 |> should equal false

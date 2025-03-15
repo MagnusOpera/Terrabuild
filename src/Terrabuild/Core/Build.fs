@@ -340,15 +340,19 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         reraise()
 
             let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
-            hub.Subscribe awaitedSignals onAllSignaled
+            hub.Subscribe nodeId awaitedSignals onAllSignaled
 
     graph.RootNodes |> Seq.iter schedule
 
     let status = hub.WaitCompletion()
     match status with
-    | Status.Ok -> Log.Debug("Build successful")
-    | Status.SubcriptionNotRaised projectId -> Log.Debug("Build failed: project {projectId} is not processed", projectId)
-    | Status.SubscriptionError exn -> Log.Fatal(exn, "Build failed with exception")
+    | Status.Ok ->
+        Log.Debug("Build successful")
+    | Status.UnfulfilledSubscription (subscription, signals) ->
+        let unraisedSignals = signals |> String.join ","
+        raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check logs."
+    | Status.SubscriptionError exn ->
+        Log.Fatal(exn, "Build failed with exception")
 
     let headCommit = options.HeadCommit
     let branchOrTag = options.BranchOrTag
