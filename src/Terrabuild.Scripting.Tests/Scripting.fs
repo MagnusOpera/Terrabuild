@@ -4,6 +4,7 @@ open NUnit.Framework
 open FsUnit
 open Terrabuild.Extensibility
 open Terrabuild.Expressions
+open Errors
 
 
 [<Test>]
@@ -18,7 +19,7 @@ let loadScript() =
 [<Test>]
 let loadScriptWithError() =
     (fun () -> Terrabuild.Scripting.loadScript [ "Terrabuild.Extensibility.dll" ] "TestFiles/Failure.fsx" |> ignore)
-    |> should (throwWithMessage "Failed to identify function scope (either module or root class 'Failure')") typeof<Errors.TerrabuildException>
+    |> should (throwWithMessage "Failed to identify function scope (either module or root class 'Failure')") typeof<TerrabuildException>
 
 [<Test>]
 let loadVSSolution() =

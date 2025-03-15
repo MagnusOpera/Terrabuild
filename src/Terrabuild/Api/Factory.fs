@@ -15,7 +15,7 @@ let checkAuthError msg f  =
                     | _ -> ex.Message
                 | _ -> ex.Message
 
-            TerrabuildException.Raise($"{errorCode}: {msg}.", ex)
+            forwardExternalError $"{errorCode}: {msg}." ex
 
 
 let create workspaceId token options =

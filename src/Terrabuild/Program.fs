@@ -35,17 +35,6 @@ type RunTargetOptions = {
 }
 
 
-let rec dumpKnownException (ex: Exception) =
-    seq {
-        match ex with
-        | :? TerrabuildException as ex ->
-            yield ex.Message
-            yield! ex.InnerException |> dumpKnownException
-        | null -> ()
-        | _ -> ()
-    }
-
-
 type TerrabuildExiter() =
     interface IExiter with
         member _.Name: string = "Process Exiter"
@@ -184,7 +173,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             | _ ->
                 match currentDir() |> findWorkspace with
                 | Some ws -> ws
-                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+                | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let targets = runArgs.GetResult(RunArgs.Target) |> Seq.map String.toLower
         let configuration = runArgs.TryGetResult(RunArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let note = runArgs.TryGetResult(RunArgs.Note)
@@ -227,7 +216,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             | _ ->
                 match currentDir() |> findWorkspace with
                 | Some ws -> ws
-                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+                | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let configuration = serveArgs.TryGetResult(ServeArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let labels = serveArgs.TryGetResult(ServeArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = serveArgs.GetResults(ServeArgs.Variable) |> Map
@@ -257,7 +246,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             | _ ->
                 match currentDir() |> findWorkspace with
                 | Some ws -> ws
-                | _ -> TerrabuildException.Raise("Can't find workspace root directory. Check you are in a workspace.")
+                | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Map
@@ -345,12 +334,22 @@ let main _ =
             processCommandLine parser result
         with
             | :? TerrabuildException as ex ->
+                let area = getErrorArea ex
 #if RELEASE
-                SentrySdk.CaptureException(ex) |> ignore
+                let captureException =
+                    match area with
+                    | ErrorArea.Parse -> false
+                    | ErrorArea.Type -> false
+                    | ErrorArea.Symbol _ -> false
+                    | ErrorArea.Usage -> false
+                    | ErrorArea.InvalidArg -> false
+                    | ErrorArea.External -> true
+                    | ErrorArea.Bug -> true
+                if captureException then SentrySdk.CaptureException(ex) |> ignore
 #endif
-                Log.Fatal("Failed with {Exception}", ex.ToString())
+                Log.Fatal("Failed in area {Area} with {Exception}", area, ex.ToString())
                 let reason =
-                    if debug then ex.ToString()
+                    if debug then $"[{area}] {ex}"
                     else dumpKnownException ex |> String.join "\n   "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5

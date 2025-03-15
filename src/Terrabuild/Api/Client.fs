@@ -37,9 +37,9 @@ module private Http =
                 | _ -> exn.Message
 
             if errorCode = "422" then
-                TerrabuildException.Raise($"Storage limit exceeded, please check your subscription.", exn)
+                forwardExternalError $"Storage limit exceeded, please check your subscription." exn
             else
-                TerrabuildException.Raise($"Api failed with error {errorCode}.", exn)
+                forwardExternalError $"Api failed with error {errorCode}." exn
 
     let get<'req, 'resp> = request<'req, 'resp> HttpMethod.Get
     let post<'req, 'resp> = request<'req, 'resp> HttpMethod.Post

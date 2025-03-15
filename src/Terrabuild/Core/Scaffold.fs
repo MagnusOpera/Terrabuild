@@ -226,8 +226,8 @@ let scaffold workspaceDir force =
         let projectExists = workspaceDir |> findProject |> Seq.tryHead
 
         match workspaceExists, projectExists with
-        | Some file, _ -> TerrabuildException.Raise($"WORKSPACE file found '{file}'")
-        | _, Some file -> TerrabuildException.Raise($"PROJECT file found '{file}'")
+        | Some file, _ -> raiseInvalidArg $"WORKSPACE file found '{file}'"
+        | _, Some file -> raiseInvalidArg $"PROJECT file found '{file}'"
         | _ -> ()
 
     let projects = findProjectInDir workspaceDir |> List.ofSeq

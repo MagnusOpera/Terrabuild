@@ -31,8 +31,8 @@ module DotnetHelpers =
             |> List.ofSeq
         match projects with
         | [ project ] -> project
-        | [] -> TerrabuildException.Raise("No project found")
-        | _ -> TerrabuildException.Raise("Multiple projects found")
+        | [] -> raiseInvalidArg "No project found"
+        | _ -> raiseInvalidArg "Multiple projects found"
 
     let findDependencies (projectFile: string) =
         let xdoc = XDocument.Load (projectFile)

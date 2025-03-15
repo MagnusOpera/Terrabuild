@@ -21,7 +21,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
     // first check all targets exist in WORKSPACE
     match options.Targets |> Seq.tryFind (fun targetName -> configuration.Targets |> Map.containsKey targetName |> not) with
-    | Some undefinedTarget -> TerrabuildException.Raise($"Target {undefinedTarget} is not defined in WORKSPACE")
+    | Some undefinedTarget -> raiseSymbolError $"Target {undefinedTarget} is not defined in WORKSPACE"
     | _ -> ()
 
 
@@ -78,15 +78,15 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                                 map
                                 |> Map.add "context" (Terrabuild.Expressions.Value.Object optContext)
                                 |> Terrabuild.Expressions.Value.Map
-                            | _ -> TerrabuildException.Raise("Failed to get context (internal error)")
+                            | _ -> raiseBugError "Failed to get context (internal error)"
 
                         Log.Debug($"{hash}: Invoking extension '{operation.Extension}::{operation.Command}' with args {parameters}")
 
                         let executionRequest =
                             match Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionExecutionRequest> optContext.Command parameters (Some operation.Script) with
                             | Extensions.InvocationResult.Success executionRequest -> executionRequest
-                            | Extensions.InvocationResult.ErrorTarget ex -> TerrabuildException.Raise($"{hash}: Failed to get shell operation (extension error)", ex)
-                            | _ -> TerrabuildException.Raise($"{hash}: Failed to get shell operation (extension error)")
+                            | Extensions.InvocationResult.ErrorTarget ex -> forwardExternalError $"{hash}: Failed to get shell operation (extension error)" ex
+                            | _ -> raiseExternalError $"{hash}: Failed to get shell operation (extension error)"
 
                         let newops =
                             executionRequest.Operations
@@ -146,8 +146,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
                              Node.IsLeaf = isLeaf }
 
-                if allNodes.TryAdd(nodeId, node) |> not then
-                    TerrabuildException.Raise("Unexpected graph building race")
+                if allNodes.TryAdd(nodeId, node) |> not then raiseBugError "Unexpected graph building race"
                 Set.singleton nodeId
             | _ ->
                 children
