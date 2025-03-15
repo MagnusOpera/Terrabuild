@@ -350,7 +350,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
         Log.Debug("Build successful")
     | Status.UnfulfilledSubscription (subscription, signals) ->
         let unraisedSignals = signals |> String.join ","
-        raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check logs."
+        raiseInvalidArg $"Task '{subscription}' has pending operations on '{unraisedSignals}'. Check logs."
     | Status.SubscriptionError exn ->
         Log.Fatal(exn, "Build failed with exception")
 
