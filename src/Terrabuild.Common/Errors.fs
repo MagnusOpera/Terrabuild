@@ -6,7 +6,6 @@ type ErrorArea =
     | Parse
     | Type
     | Symbol
-    | Usage
     | InvalidArg
     | External
     | Bug
@@ -18,9 +17,6 @@ type TerrabuildException(msg, area, ?innerException: Exception) =
 
 let raiseInvalidArg msg =
     TerrabuildException(msg, ErrorArea.InvalidArg) |> raise
-
-let raiseUsage msg =
-    TerrabuildException(msg, ErrorArea.Usage) |> raise
 
 let raiseParseError msg =
     TerrabuildException(msg, ErrorArea.Parse) |> raise

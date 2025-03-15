@@ -38,6 +38,8 @@ type RunTargetOptions = {
 let launchDir = currentDir()
 Cache.createDirectories()
 
+
+
 let rec findWorkspace dir =
     if FS.combinePath dir "WORKSPACE" |> IO.exists then
         Some dir
@@ -323,17 +325,16 @@ let main _ =
             Terminal.hideCursor()
             Console.CancelKeyPress.Add (fun _ -> $"{Ansi.Emojis.bolt} Aborted{Ansi.Styles.cursorShow}" |> Terminal.writeLine)
             let parser = ArgumentParser.Create<CLI.TerrabuildArgs>(programName = "terrabuild")
-            let result =
-                try
-                    parser.ParseCommandLine(raiseOnUsage = false)
-                with
-                    | :? ArguParseException as exn ->
-                        Log.Fatal(exn, "ArgumentParser failed")
-                        raiseUsage exn.Message
-
+            let result = parser.ParseCommandLine()
             debug <- result.Contains(TerrabuildArgs.Debug)
             processCommandLine parser result
         with
+            | :? ArguParseException as exn ->
+                Log.Fatal(exn, "ArgumentParser error with {Exception}")
+                exn.Message |> Terminal.writeLine
+                if exn.ErrorCode = ErrorCode.HelpText then 0
+                else 5
+
             | :? TerrabuildException as ex ->
                 let area = getErrorArea ex
                 ex.AddSentryTag("area", $"{area}")
@@ -351,6 +352,7 @@ let main _ =
                     else dumpKnownException ex |> String.join "\n   "
                 $"{Ansi.Emojis.explosion} {reason}" |> Terminal.writeLine
                 5
+
             | ex ->
 #if RELEASE
                 Sentry.SentrySdk.CaptureException(ex) |> ignore
