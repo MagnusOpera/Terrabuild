@@ -6,7 +6,6 @@ open Errors
 open System.Reflection
 open Collections
 open Environment
-open Sentry
 open System.Runtime.InteropServices
 
 
@@ -312,13 +311,20 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 let main _ =
 
 #if RELEASE
-    use sentry = SentrySdk.Init(fun options ->
-        options.Dsn <- "https://9d7ab9713b1dfca7abe4437bcd73718a@o4508921459834880.ingest.de.sentry.io/4508921463898192"
-        options.AutoSessionTracking <- true
-        options.TracesSampleRate <- 1.0
-        options.StackTraceMode <- StackTraceMode.Enhanced
-        options.CaptureFailedRequests <- true
-    )
+    let sentryDsn =
+        match "TERRABUILD_SENTRY_DSN" |> envVar with
+        | null -> "https://9d7ab9713b1dfca7abe4437bcd73718a@o4508921459834880.ingest.de.sentry.io/4508921463898192"
+        | dsn -> dsn
+
+    // Sentry can be disabled (empty DSN)
+    if String.IsNullOrWhiteSpace(sentryDsn) |> not then
+        Sentry.SentrySdk.Init(fun options ->
+            options.Dsn <- sentryDsn
+            options.AutoSessionTracking <- true
+            options.TracesSampleRate <- 1.0
+            options.StackTraceMode <- Sentry.StackTraceMode.Enhanced
+            options.CaptureFailedRequests <- true
+        ) |> ignore
 #endif
 
     let mutable debug = false
@@ -338,14 +344,10 @@ let main _ =
 #if RELEASE
                 let captureException =
                     match area with
-                    | ErrorArea.Parse -> false
-                    | ErrorArea.Type -> false
-                    | ErrorArea.Symbol _ -> false
-                    | ErrorArea.Usage -> false
-                    | ErrorArea.InvalidArg -> false
-                    | ErrorArea.External -> true
+                    | ErrorArea.External
                     | ErrorArea.Bug -> true
-                if captureException then SentrySdk.CaptureException(ex) |> ignore
+                    | _ -> false
+                if captureException then Sentry.SentrySdk.CaptureException(ex) |> ignore
 #endif
                 Log.Fatal("Failed in area {Area} with {Exception}", area, ex.ToString())
                 let reason =
@@ -355,7 +357,7 @@ let main _ =
                 5
             | ex ->
 #if RELEASE
-                SentrySdk.CaptureException(ex) |> ignore
+                Sentry.SentrySdk.CaptureException(ex) |> ignore
 #endif
                 Log.Fatal("Failed with {Exception}", ex)
                 $"{Ansi.Emojis.explosion} {ex}" |> Terminal.writeLine
