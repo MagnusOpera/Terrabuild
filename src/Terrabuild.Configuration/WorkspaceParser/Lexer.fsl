@@ -62,7 +62,6 @@ rule token = parse
     | "|" { OR }
 
     | "#" { singleLineComment lexbuf }
-    | "//" { singleLineComment lexbuf }
 
     | "workspace" { WORKSPACE }
     | "target" { TARGET }
