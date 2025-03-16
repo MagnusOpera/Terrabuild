@@ -31,129 +31,129 @@ let whitespace = ' ' | '\t'
 let newline = '\n' | '\r' '\n'
 
 rule token = parse
-| "nothing" { NOTHING }
-| "true" { TRUE }
-| "false" { FALSE }
-| "trim" { TRIM }
-| "upper" { UPPER }
-| "lower" { LOWER }
-| "replace" { REPLACE }
-| "count" { COUNT }
-| "version" { VERSION }
-| "format" { FORMAT }
-| "tostring" { TOSTRING }
-| "??" { DOUBLE_QUESTION }
-| "?" { QUESTION }
-| ".?" { DOT_QUESTION }
-| "." { DOT }
-| ":" { COLON }
+    | "nothing" { NOTHING }
+    | "true" { TRUE }
+    | "false" { FALSE }
+    | "trim" { TRIM }
+    | "upper" { UPPER }
+    | "lower" { LOWER }
+    | "replace" { REPLACE }
+    | "count" { COUNT }
+    | "version" { VERSION }
+    | "format" { FORMAT }
+    | "tostring" { TOSTRING }
+    | "??" { DOUBLE_QUESTION }
+    | "?" { QUESTION }
+    | ".?" { DOT_QUESTION }
+    | "." { DOT }
+    | ":" { COLON }
 
-| "{" { LBRACE }
-| "}" { RBRACE }
-| "[" { LSQBRACKET }
-| "]" { RSQBRACKET }
-| "(" { LPAREN }
-| ")" { RPAREN }
-| "==" { DOUBLE_EQUAL }
-| "=" { EQUAL }
-| "!=" { NOT_EQUAL }
-| "," { COMMA }
-| "-" { MINUS }
-| "+" { PLUS }
-| "!" { BANG }
-| "&" { AND }
-| "|" { OR }
+    | "{" { LBRACE }
+    | "}" { RBRACE }
+    | "[" { LSQBRACKET }
+    | "]" { RSQBRACKET }
+    | "(" { LPAREN }
+    | ")" { RPAREN }
+    | "==" { DOUBLE_EQUAL }
+    | "=" { EQUAL }
+    | "!=" { NOT_EQUAL }
+    | "," { COMMA }
+    | "-" { MINUS }
+    | "+" { PLUS }
+    | "!" { BANG }
+    | "&" { AND }
+    | "|" { OR }
 
-| "#" { singleLineComment lexbuf }
+    | "#" { singleLineComment lexbuf }
 
-| "project" { PROJECT }
-| "target" { TARGET }
-| "dependencies" { DEPENDENCIES }
-| "links" { LINKS }
-| "outputs" { OUTPUTS }
-| "ignores" { IGNORES }
-| "includes" { INCLUDES }
-| "labels" { LABELS }
-| "script" { SCRIPT }
-| "extension" { EXTENSION }
-| "container" { CONTAINER }
-| "platform" { PLATFORM }
-| "variables" { VARIABLES }
-| "depends_on" { DEPENDS_ON }
-| "rebuild" { REBUILD }
-| "cache" { CACHE }
-| "defaults" { DEFAULTS }
-| "name" { NAME }
+    | "project" { PROJECT }
+    | "target" { TARGET }
+    | "dependencies" { DEPENDENCIES }
+    | "links" { LINKS }
+    | "outputs" { OUTPUTS }
+    | "ignores" { IGNORES }
+    | "includes" { INCLUDES }
+    | "labels" { LABELS }
+    | "script" { SCRIPT }
+    | "extension" { EXTENSION }
+    | "container" { CONTAINER }
+    | "platform" { PLATFORM }
+    | "variables" { VARIABLES }
+    | "depends_on" { DEPENDS_ON }
+    | "rebuild" { REBUILD }
+    | "cache" { CACHE }
+    | "defaults" { DEFAULTS }
+    | "name" { NAME }
 
-| identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
-| extensionIdentifier { lexbuf |> mkIdentifier |> EXTENSION_IDENTIFIER }
-| targetIdentifier { lexbuf |> mkIdentifier |> TARGET_IDENTIFIER }
-| keyIdentifier { lexbuf |> mkIdentifier |> KEY }
-| variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
+    | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
+    | extensionIdentifier { lexbuf |> mkIdentifier |> EXTENSION_IDENTIFIER }
+    | targetIdentifier { lexbuf |> mkIdentifier |> TARGET_IDENTIFIER }
+    | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
+    | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
-| '"' { interpolatedString (StringBuilder()) lexbuf }
+    | '"' { interpolatedString (StringBuilder()) lexbuf }
 
-| number {
-    let s = lexeme lexbuf |> int
-    NUMBER (s)
-}
+    | number {
+        let s = lexeme lexbuf |> int
+        NUMBER (s)
+    }
 
-| whitespace { token lexbuf }
-| newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
-| eof { EOF }
-| _ { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
+    | whitespace { token lexbuf }
+    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | eof { EOF }
+    | _ { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
 
 and singleLineComment = parse
-| newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
-| eof { EOF }
-| _ { singleLineComment lexbuf }
+    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | eof { EOF }
+    | _ { singleLineComment lexbuf }
 
 and interpolatedString acc = parse
-| "${" { interpolatedExpression lexbuf }
-| '"' { STRING (acc.ToString()) }
-| interpolatedStringContent {
-    lexbuf |> lexeme |> acc.Append |> ignore
-    interpolatedString acc lexbuf
-}
+    | "${" { interpolatedExpression lexbuf }
+    | '"' { STRING (acc.ToString()) }
+    | interpolatedStringContent {
+        lexbuf |> lexeme |> acc.Append |> ignore
+        interpolatedString acc lexbuf
+    }
 
 and interpolatedExpression = parse
-| "nothing" { NOTHING }
-| "true" { TRUE }
-| "false" { FALSE }
-| "trim" { TRIM }
-| "upper" { UPPER }
-| "lower" { LOWER }
-| "replace" { REPLACE }
-| "count" { COUNT }
-| "version" { VERSION }
-| "format" { FORMAT }
-| "tostring" { TOSTRING }
-| "??" { DOUBLE_QUESTION }
-| "?" { QUESTION }
-| ".?" { DOT_QUESTION }
-| "." { DOT }
-| ":" { COLON }
+    | "nothing" { NOTHING }
+    | "true" { TRUE }
+    | "false" { FALSE }
+    | "trim" { TRIM }
+    | "upper" { UPPER }
+    | "lower" { LOWER }
+    | "replace" { REPLACE }
+    | "count" { COUNT }
+    | "version" { VERSION }
+    | "format" { FORMAT }
+    | "tostring" { TOSTRING }
+    | "??" { DOUBLE_QUESTION }
+    | "?" { QUESTION }
+    | ".?" { DOT_QUESTION }
+    | "." { DOT }
+    | ":" { COLON }
 
-| "[" { LSQBRACKET }
-| "]" { RSQBRACKET }
-| "(" { LPAREN }
-| ")" { RPAREN }
-| "==" { DOUBLE_EQUAL }
-| "=" { EQUAL }
-| "!=" { NOT_EQUAL }
-| "-" { MINUS }
-| "+" { PLUS }
-| "!" { BANG }
-| "&" { AND }
-| "|" { OR }
+    | "[" { LSQBRACKET }
+    | "]" { RSQBRACKET }
+    | "(" { LPAREN }
+    | ")" { RPAREN }
+    | "==" { DOUBLE_EQUAL }
+    | "=" { EQUAL }
+    | "!=" { NOT_EQUAL }
+    | "-" { MINUS }
+    | "+" { PLUS }
+    | "!" { BANG }
+    | "&" { AND }
+    | "|" { OR }
 
-| variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
+    | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
-| number {
-    let s = lexeme lexbuf |> int
-    NUMBER (s)
-}
+    | number {
+        let s = lexeme lexbuf |> int
+        NUMBER (s)
+    }
 
-| whitespace { token lexbuf }
+    | whitespace { token lexbuf }
 
-| "}" { interpolatedString (StringBuilder()) lexbuf }
+    | "}" { interpolatedString (StringBuilder()) lexbuf }
