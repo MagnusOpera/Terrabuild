@@ -109,7 +109,7 @@ let read (options: ConfigOptions.Options) =
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
-            Terrabuild.Configuration.Workspace.FrontEnd.parseWorkspace workspaceContent
+            Terrabuild.Configuration.Workspace.FrontEnd.parse workspaceContent
         with exn ->
             raiseParseError "Failed to read WORKSPACE configuration file" exn
 
@@ -234,7 +234,7 @@ let read (options: ConfigOptions.Options) =
             match projectFile with
             | FS.File projectFile ->
                 let projectContent = File.ReadAllText projectFile
-                try Terrabuild.Configuration.Project.FrontEnd.parseProject projectContent
+                try Terrabuild.Configuration.Project.FrontEnd.parse projectContent
                 with exn -> forwardExternalError $"Failed to read PROJECT configuration '{projectId}'" exn
             | _ ->
                 raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
