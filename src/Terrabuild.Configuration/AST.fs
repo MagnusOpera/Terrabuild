@@ -6,15 +6,15 @@ open Errors
 type ExtensionComponents =
     | Container of Expr
     | Platform of Expr
-    | Variables of string list
-    | Script of string
+    | Variables of Expr list
+    | Script of Expr
     | Defaults of Map<string, Expr>
 
 type Extension = {
     Container: Expr option
     Platform: Expr option
-    Variables: string Set
-    Script: string option
+    Variables: Expr Set
+    Script: Expr option
     Defaults: Map<string, Expr>
 }
 with

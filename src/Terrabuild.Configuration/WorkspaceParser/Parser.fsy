@@ -17,6 +17,10 @@ let debugPrint s = ignore s
 // terminal tokens
 %token NOTHING TRUE FALSE
 %token <string> STRING
+%token STRING_START
+%token <string> STRING_END
+%token <string> EXPRESSION_START
+%token EXPRESSION_END
 %token <string> IDENTIFIER
 %token <string> EXTENSION_IDENTIFIER
 %token <string> TARGET_IDENTIFIER
@@ -116,16 +120,16 @@ ExtensionDefaults:
     | DEFAULTS EQUAL ExprMap { ExtensionComponents.Defaults $3 }
 
 Expr:
+    /* structures */
+    | ExprList { Expr.List $1 }
+    | ExprMap { Expr.Map $1 }
     /* scalars */
     | NOTHING { Expr.Nothing }
     | TRUE { Expr.Bool true }
     | FALSE { Expr.Bool false }
-    | STRING { Expr.String $1 }
     | NUMBER { Expr.Number $1 }
     | VARIABLE { Expr.Variable $1 }
-    /* structures */
-    | ExprList { Expr.List $1 }
-    | ExprMap { Expr.Map $1 }
+    | String { $1 }
     /* functions */
     | Expr DOT ExprIndex { Expr.Function (Function.Item, [$1;  $3]) }
     | Expr DOT_QUESTION ExprIndex { Expr.Function (Function.TryItem, [$1; $3]) }
@@ -147,6 +151,34 @@ Expr:
     | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
     | BANG Expr { Expr.Function (Function.Not, [$2]) }
 
+InterpolatedExpr:
+    /* scalars */
+    | NOTHING { Expr.Nothing }
+    | TRUE { Expr.Bool true }
+    | FALSE { Expr.Bool false }
+    | NUMBER { Expr.Number $1 }
+    | VARIABLE { Expr.Variable $1 }
+    /* functions */
+    | InterpolatedExpr DOT ExprIndex { Expr.Function (Function.Item, [$1;  $3]) }
+    | InterpolatedExpr DOT_QUESTION ExprIndex { Expr.Function (Function.TryItem, [$1; $3]) }
+    | InterpolatedExpr DOUBLE_EQUAL InterpolatedExpr { Expr.Function (Function.Equal, [$1; $3]) }
+    | InterpolatedExpr NOT_EQUAL InterpolatedExpr { Expr.Function (Function.NotEqual, [$1; $3]) }
+    | InterpolatedExpr PLUS InterpolatedExpr { Expr.Function (Function.Plus, [$1; $3]) }
+    | InterpolatedExpr MINUS InterpolatedExpr { Expr.Function (Function.Minus, [$1; $3]) }
+    | InterpolatedExpr AND InterpolatedExpr { Expr.Function (Function.And, [$1; $3]) }
+    | InterpolatedExpr OR InterpolatedExpr { Expr.Function (Function.Or, [$1; $3]) }
+    | TRIM InterpolatedExprTuple { Expr.Function (Function.Trim, $2) }
+    | UPPER InterpolatedExprTuple { Expr.Function (Function.Upper, $2) }
+    | LOWER InterpolatedExprTuple { Expr.Function (Function.Lower, $2) }
+    | REPLACE InterpolatedExprTuple { Expr.Function (Function.Replace, $2) }
+    | COUNT InterpolatedExprTuple { Expr.Function (Function.Count, $2)}
+    | VERSION InterpolatedExprTuple { Expr.Function (Function.Version, $2) }
+    | FORMAT InterpolatedExprTuple { Expr.Function (Function.Format, $2) }
+    | TOSTRING InterpolatedExprTuple { Expr.Function (Function.ToString, $2) }
+    | InterpolatedExpr DOUBLE_QUESTION InterpolatedExpr { Expr.Function (Function.Coalesce, [$1; $3]) }
+    | InterpolatedExpr QUESTION InterpolatedExpr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
+    | BANG InterpolatedExpr { Expr.Function (Function.Not, [$2]) }
+
 TargetIdentifier:
     | TARGET_IDENTIFIER { $1 }
     | IDENTIFIER { $1 }
@@ -164,7 +196,12 @@ Bool:
     | FALSE { false }
 
 String:
-    | STRING { $1 }
+    | STRING_START InterpolatedString STRING_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) }
+
+InterpolatedString:
+    | /* empty */ { Expr.String "" }
+    | STRING { Expr.String $1 }
+    | EXPRESSION_START Expr EXPRESSION_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2]) }
 
 ExprTuple:
     | LPAREN ExprTupleContent RPAREN { $2 }
@@ -172,6 +209,13 @@ ExprTupleContent:
     | /* empty */ { [] }
     | Expr { [$1] }
     | ExprTupleContent COMMA Expr { $1 @ [$3] }
+
+InterpolatedExprTuple:
+    | LPAREN InterpolatedExprTupleContent RPAREN { $2 }
+InterpolatedExprTupleContent:
+    | /* empty */ { [] }
+    | InterpolatedExpr { [$1] }
+    | InterpolatedExprTupleContent COMMA InterpolatedExpr { $1 @ [$3] }
 
 ExprList:
     | LSQBRACKET ExprListContent RSQBRACKET { $2 }

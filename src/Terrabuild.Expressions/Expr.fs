@@ -1,4 +1,5 @@
 namespace Terrabuild.Expressions
+open System
 
 [<RequireQualifiedAccessAttribute>]
 type Function =
@@ -30,7 +31,7 @@ type Expr =
     | Number of value:int
     | Map of Map<string, Expr>
     | List of Expr list
-    | Object of obj
+    | Object of IComparable
     | Variable of name:string
     | Function of Function * Expr list
 

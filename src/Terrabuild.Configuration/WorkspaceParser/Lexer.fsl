@@ -3,6 +3,7 @@
 
 open Terrabuild.Configuration.Workspace.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
+open System.Text
 
 let lexeme = LexBuffer<_>.LexemeString
 
@@ -20,6 +21,8 @@ let extensionIdentifier = '@'? identifier
 let targetIdentifier = '^'? identifier
 let keyIdentifier = identifier ' '* ':'
 let variableIdentifier = '$' identifier
+
+let interpolatedStringContent = [^ '\"' '$'] | '$'[^ '{' '}'] | '\\' '\"'
 
 let quotedString = '\"' [^'\"']+ '\"'
 
@@ -85,9 +88,7 @@ rule token = parse
     | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
     | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
-    | quotedString { 
-        let s = lexeme lexbuf |> string
-        STRING (s.Substring(1, s.Length-2)) }
+    | '"' { STRING_START }
 
     | number {
         let s = lexeme lexbuf |> int
@@ -103,3 +104,53 @@ and singleLineComment = parse
     | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
     | eof { EOF }
     | _ { singleLineComment lexbuf }
+
+and interpolatedString (acc: StringBuilder) = parse
+    | '"' { STRING_END (acc.ToString()) }
+    | "${" { EXPRESSION_START (acc.ToString())}
+    | interpolatedStringContent {
+        lexbuf |> lexeme |> acc.Append |> ignore
+        interpolatedString acc lexbuf
+    }
+
+and interpolatedExpression = parse
+    | "nothing" { NOTHING }
+    | "true" { TRUE }
+    | "false" { FALSE }
+    | "trim" { TRIM }
+    | "upper" { UPPER }
+    | "lower" { LOWER }
+    | "replace" { REPLACE }
+    | "count" { COUNT }
+    | "version" { VERSION }
+    | "format" { FORMAT }
+    | "tostring" { TOSTRING }
+    | "??" { DOUBLE_QUESTION }
+    | "?" { QUESTION }
+    | ".?" { DOT_QUESTION }
+    | "." { DOT }
+    | ":" { COLON }
+
+    | "[" { LSQBRACKET }
+    | "]" { RSQBRACKET }
+    | "(" { LPAREN }
+    | ")" { RPAREN }
+    | "==" { DOUBLE_EQUAL }
+    | "=" { EQUAL }
+    | "!=" { NOT_EQUAL }
+    | "-" { MINUS }
+    | "+" { PLUS }
+    | "!" { BANG }
+    | "&" { AND }
+    | "|" { OR }
+
+    | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
+
+    | number {
+        let s = lexeme lexbuf |> int
+        NUMBER (s)
+    }
+
+    | whitespace { token lexbuf }
+
+    | "}" { EXPRESSION_END }

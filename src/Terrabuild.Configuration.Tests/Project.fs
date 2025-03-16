@@ -81,7 +81,7 @@ let parseProject() =
                                       "docker", targetDocker ] }
 
     let content = File.ReadAllText("TestFiles/PROJECT")
-    let project = FrontEnd.parseProject content
+    let project = Project.FrontEnd.parseProject content
 
     project
     |> should equal expectedProject
@@ -117,7 +117,7 @@ let parseProject2() =
           ProjectFile.Targets = Map [ "build", buildTarget ]  }
 
     let content = File.ReadAllText("TestFiles/PROJECT2")
-    let project = FrontEnd.parseProject content
+    let project = Project.FrontEnd.parseProject content
 
     project
     |> should equal expectedProject

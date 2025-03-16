@@ -35,7 +35,8 @@
     <Compile Include="Gen/ProjectParser.fsi" />
     <Compile Include="Gen/ProjectParser.fs" />
     <Compile Include="Gen/ProjectLexer.fs" />
-    <Compile Include="FrontEnd.fs" />
+    <Compile Include="WorkspaceParser/FrontEnd.fs" />
+    <Compile Include="ProjectParser/FrontEnd.fs" />
   </ItemGroup>
 
   <ItemGroup>

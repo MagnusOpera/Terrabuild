@@ -14,22 +14,22 @@ type Cacheability =
 
 [<RequireQualifiedAccess>]
 type ProjectComponents =
-    | Dependencies of string list
-    | Links of string list
-    | Outputs of string list
-    | Ignores of string list
-    | Includes of string list
-    | Labels of string list
+    | Dependencies of Expr list
+    | Links of Expr list
+    | Outputs of Expr list
+    | Ignores of Expr list
+    | Includes of Expr list
+    | Labels of Expr list
 
 [<RequireQualifiedAccess>]
 type Project = {
     Init: string option
-    Dependencies: Set<string>
-    Links: Set<string>
-    Outputs: Set<string>
-    Ignores: Set<string>
-    Includes: Set<string>
-    Labels: Set<string>
+    Dependencies: Set<Expr>
+    Links: Set<Expr>
+    Outputs: Set<Expr>
+    Ignores: Set<Expr>
+    Includes: Set<Expr>
+    Labels: Set<Expr>
 }
 with
     static member Build init components =
@@ -76,7 +76,7 @@ with
           Ignores = ignores |> Option.defaultValue Set.empty
           Includes = includes |> Option.defaultValue Set.empty
           Labels = labels }
-  
+
 
 
 
@@ -91,16 +91,16 @@ type Step = {
 type TargetComponents =
     | DependsOn of string list
     | Rebuild of Expr
-    | Outputs of string list
-    | Cache of string
+    | Outputs of Expr list
+    | Cache of Expr
     | Step of Step
 
 [<RequireQualifiedAccess>]
 type Target = {
     Rebuild: Expr option
-    Outputs: Set<string> option
+    Outputs: Set<Expr> option
     DependsOn: Set<string> option
-    Cache: Cacheability option
+    Cache: Expr option
     Steps: Step list
 }
 with
@@ -126,14 +126,7 @@ with
         let cache =
             match components |> List.choose (function | TargetComponents.Cache value -> Some value | _ -> None) with
             | [] -> None
-            | [value] ->
-                // warning this is the values of Terrabuild.Extensibility.Cacheability
-                match value with
-                | "never" -> Some Cacheability.Never
-                | "local" -> Some Cacheability.Local
-                | "remote" -> Some Cacheability.Remote
-                | "always" -> Some Cacheability.Always
-                | _ -> raiseParseError "invalid cache value"
+            | [value] -> Some value
             | _ -> raiseParseError "multiple cache declared"
 
         let steps =

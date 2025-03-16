@@ -6,13 +6,13 @@ open System
 
 [<RequireQualifiedAccess>]
 type WorkspaceComponents =
-    | Id of string
-    | Ignores of string list
+    | Id of Expr
+    | Ignores of Expr list
 
 [<RequireQualifiedAccess>]
 type Workspace = {
-    Id: string option
-    Ignores: Set<string>
+    Id: Expr option
+    Ignores: Set<Expr>
 }
 with
     static member Build components =

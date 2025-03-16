@@ -91,7 +91,7 @@ rule token = parse
     | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
     | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
-    | '"' { interpolatedString (StringBuilder()) lexbuf }
+    | '"' { STRING_START }
 
     | number {
         let s = lexeme lexbuf |> int
@@ -108,9 +108,9 @@ and singleLineComment = parse
     | eof { EOF }
     | _ { singleLineComment lexbuf }
 
-and interpolatedString acc = parse
-    | "${" { interpolatedExpression lexbuf }
-    | '"' { STRING (acc.ToString()) }
+and interpolatedString (acc: StringBuilder) = parse
+    | '"' { STRING_END (acc.ToString()) }
+    | "${" { EXPRESSION_START (acc.ToString())}
     | interpolatedStringContent {
         lexbuf |> lexeme |> acc.Append |> ignore
         interpolatedString acc lexbuf
@@ -156,4 +156,4 @@ and interpolatedExpression = parse
 
     | whitespace { token lexbuf }
 
-    | "}" { interpolatedString (StringBuilder()) lexbuf }
+    | "}" { EXPRESSION_END }

@@ -58,7 +58,7 @@ let parseWorkspace() =
 
 
     let content = File.ReadAllText("TestFiles/WORKSPACE")
-    let workspace = FrontEnd.parseWorkspace content
+    let workspace = Workspace.FrontEnd.parseWorkspace content
 
     workspace
     |> should equal expectedWorkspace
@@ -135,7 +135,7 @@ let parseWorkspace2() =
 
 
     let content = File.ReadAllText("TestFiles/WORKSPACE2")
-    let workspace = FrontEnd.parseWorkspace content
+    let workspace = Workspace.FrontEnd.parseWorkspace content
 
     workspace
     |> should equal expectedWorkspace
