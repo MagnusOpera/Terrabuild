@@ -4,27 +4,6 @@ open Errors
 open System.Text
 
 
-
-let inline private dumpLexer lexer (lexbuff: LexBuffer<char>) =
-    let token = lexer lexbuff
-    // printfn $"TOKEN = {token}"
-    token
-
-
-
-
-let private parse parser lexer txt =
-    let lexbuf = LexBuffer<_>.FromString txt
-    try
-        parser (dumpLexer lexer) lexbuf
-    with
-    | exn ->
-        let err = sprintf "Unexpected token '%s' at (%d,%d)"
-                          (LexBuffer<_>.LexemeString lexbuf |> string) 
-                          (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
-        raiseParseError err
-        // TerrabuildException.Raise(err, exn)
-
 [<RequireQualifiedAccess>]
 type LexerMode =
     | Default
@@ -32,7 +11,7 @@ type LexerMode =
     | InterpolatedExpression
 
 
-let parseProject txt = 
+let parse txt = 
     let mutable lexerMode = LexerMode.Default
     let switchableLexer (lexbuff: LexBuffer<char>) =
         let lexer =

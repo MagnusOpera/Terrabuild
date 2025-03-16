@@ -22,9 +22,14 @@ let targetIdentifier = '^'? identifier
 let keyIdentifier = identifier ' '* ':'
 let variableIdentifier = '$' identifier
 
-let interpolatedStringContent = [^ '\"' '$'] | '$'[^ '{' '}'] | '\\' '\"'
+// quoted string are just simple string:
+// - no interpolation
+let quotedString = '\"' [^ '\"' '{']+ '\"'
 
-let quotedString = '\"' [^'\"']+ '\"'
+// interpolation string contains at least:
+// - interpolated expression
+let interpolatedString = '\"' [^ '\"' '{']+
+let interpolatedStringContent = [^ '\"' '{']+
 
 let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
 let whitespace = ' ' | '\t'
@@ -91,7 +96,13 @@ rule token = parse
     | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
     | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
-    | '"' { STRING_START }
+    | quotedString { 
+        let s = lexbuf |> lexeme
+        let s = s.Substring(1, s.Length-2)
+        STRING s
+    }
+
+    | '\"' { STRING_START }
 
     | number {
         let s = lexeme lexbuf |> int
@@ -110,7 +121,7 @@ and singleLineComment = parse
 
 and interpolatedString (acc: StringBuilder) = parse
     | '"' { STRING_END (acc.ToString()) }
-    | "${" { EXPRESSION_START (acc.ToString())}
+    | "{" { EXPRESSION_START (acc.ToString()) }
     | interpolatedStringContent {
         lexbuf |> lexeme |> acc.Append |> ignore
         interpolatedString acc lexbuf
@@ -149,11 +160,17 @@ and interpolatedExpression = parse
 
     | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
+    | quotedString { 
+        let s = lexbuf |> lexeme
+        let s = s.Substring(1, s.Length-2)
+        STRING s
+    }
+
     | number {
         let s = lexeme lexbuf |> int
         NUMBER (s)
     }
 
-    | whitespace { token lexbuf }
+    | whitespace { interpolatedExpression lexbuf }
 
     | "}" { EXPRESSION_END }

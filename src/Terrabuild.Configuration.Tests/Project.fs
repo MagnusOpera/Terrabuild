@@ -14,12 +14,12 @@ open Terrabuild.Expressions
 let parseProject() =
     let expectedProject =
         let project =
-            { Project.Dependencies = Set [ "../../libraries/shell-lib" ]
+            { Project.Dependencies = Set [ Expr.String "../../libraries/shell-lib" ]
               Project.Links = Set.empty
-              Project.Outputs = Set [ "dist" ]
+              Project.Outputs = Set [ Expr.String "dist" ]
               Project.Ignores = Set.empty
               Project.Includes = Set.empty
-              Project.Labels = Set [ "app"; "dotnet" ]
+              Project.Labels = Set [ Expr.String "app"; Expr.String "dotnet" ]
               Project.Init = Some "@dotnet" }
 
         let extDotnet =
@@ -31,7 +31,7 @@ let parseProject() =
         let extDocker =
             { Container = None
               Platform = None
-              Variables = Set [ "ARM_TENANT_ID" ]
+              Variables = Set [ Expr.String "ARM_TENANT_ID" ]
               Script = None
               Defaults = Map [ "configuration", Expr.Variable "configuration"
                                "image", Expr.String "ghcr.io/magnusopera/dotnet-app" ] }
@@ -39,7 +39,7 @@ let parseProject() =
             { Container = None
               Platform = None
               Variables = Set.empty
-              Script = Some "dummy.fsx"
+              Script = "dummy.fsx" |> Expr.String |> Some
               Defaults = Map.empty }
 
         let targetBuild = 
@@ -59,7 +59,7 @@ let parseProject() =
             { Target.DependsOn = None
               Target.Rebuild = Some (Expr.Bool false)
               Target.Outputs = None
-              Target.Cache = Some Cacheability.Always
+              Target.Cache = "always" |> Expr.String |> Some
               Target.Steps = [ { Extension = "@shell"; Command = "echo"
                                  Parameters = Map [ "arguments", Expr.Function (Function.Trim,
                                                                                 [ Expr.Function (Function.Plus,
@@ -81,7 +81,7 @@ let parseProject() =
                                       "docker", targetDocker ] }
 
     let content = File.ReadAllText("TestFiles/PROJECT")
-    let project = Project.FrontEnd.parseProject content
+    let project = Project.FrontEnd.parse content
 
     project
     |> should equal expectedProject
@@ -108,7 +108,7 @@ let parseProject2() =
         let buildTarget = 
             { Target.DependsOn = None
               Target.Rebuild = Some (Expr.Bool true)
-              Target.Outputs = Set [ "*.dll" ] |> Some
+              Target.Outputs = Set [ Expr.String "*.dll" ] |> Some
               Target.Cache = None
               Target.Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
@@ -117,7 +117,7 @@ let parseProject2() =
           ProjectFile.Targets = Map [ "build", buildTarget ]  }
 
     let content = File.ReadAllText("TestFiles/PROJECT2")
-    let project = Project.FrontEnd.parseProject content
+    let project = Project.FrontEnd.parse content
 
     project
     |> should equal expectedProject

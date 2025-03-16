@@ -196,12 +196,12 @@ Bool:
     | FALSE { false }
 
 String:
-    | STRING_START InterpolatedString STRING_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) }
+    | STRING { Expr.String $1 }
+    | STRING_START InterpolatedString STRING_END { $2 }
 
 InterpolatedString:
-    | /* empty */ { Expr.String "" }
-    | STRING { Expr.String $1 }
     | EXPRESSION_START Expr EXPRESSION_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2]) }
+    | InterpolatedString EXPRESSION_START Expr EXPRESSION_END { Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; $1; Expr.String $2; $3]) }
 
 ExprTuple:
     | LPAREN ExprTupleContent RPAREN { $2 }

@@ -43,10 +43,11 @@ let parseWorkspace() =
             { Container = Some (Expr.String "node:20")
               Platform = None
               Variables = Set.empty
-              Script = Some "scripts/npm.fsx"
+              Script = "scripts/npm.fsx" |> Expr.String |> Some
               Defaults = Map.empty }
 
-        { WorkspaceFile.Workspace = { Id = "d7528db2-83e0-4164-8c8e-1e0d6d6357ca" |> Some; Ignores = Set ["**/node_modules"] }
+        { WorkspaceFile.Workspace = { Id = "d7528db2-83e0-4164-8c8e-1e0d6d6357ca" |> Expr.String |> Some
+                                      Ignores = Set [ Expr.String "**/node_modules" ] }
           WorkspaceFile.Targets = Map [ "build", targetBuild
                                         "dist", targetDist
                                         "dummy", targetDummy ]
@@ -58,7 +59,7 @@ let parseWorkspace() =
 
 
     let content = File.ReadAllText("TestFiles/WORKSPACE")
-    let workspace = Workspace.FrontEnd.parseWorkspace content
+    let workspace = Workspace.FrontEnd.parse content
 
     workspace
     |> should equal expectedWorkspace
@@ -105,6 +106,13 @@ let parseWorkspace2() =
                                               "secret5", Expr.Function (Function.ToString, [Expr.Function (Function.Plus, [Expr.Function (Function.Plus, [Expr.Number 40; Expr.Number 1]); Expr.Number 2])])
                                               "secret6", Expr.Function (Function.Or, [ Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false])
                                                                                        Expr.Bool true ])
+                                              "secret7", Expr.Function (Function.Format, [ Expr.String "{0}{1}{2}"
+                                                                                           Expr.Function (Function.Format, [ Expr.String "{0}{1}"
+                                                                                                                             Expr.String "hello "
+                                                                                                                             Expr.Function (Function.Plus, [ Expr.Variable "name"
+                                                                                                                                                             Expr.String "toto" ]) ])
+                                                                                           Expr.String " x "
+                                                                                           Expr.Number 42 ])
                                               "my-variable", Expr.Number 42
                                             ] }
 
@@ -135,7 +143,7 @@ let parseWorkspace2() =
 
 
     let content = File.ReadAllText("TestFiles/WORKSPACE2")
-    let workspace = Workspace.FrontEnd.parseWorkspace content
+    let workspace = Workspace.FrontEnd.parse content
 
     workspace
     |> should equal expectedWorkspace
