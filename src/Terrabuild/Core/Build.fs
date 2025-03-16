@@ -160,15 +160,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     notification.BuildStarted graph
     api |> Option.iter (fun api -> api.StartBuild())
 
-    let allowRemoteCache = options.Run.IsSome
-
+    let allowRemoteCache = options.LocalOnly |> not
     let homeDir = Cache.createHome()
     let tmpDir = Cache.createTmp()
-
-    let tryGetSummaryOnly id =
-        let allowRemoteCache = options.LocalOnly |> not
-        cache.TryGetSummaryOnly allowRemoteCache id |> Option.map (fun (_, summary) -> summary)
-
     let force = options.Force
     let retry = options.Retry
 
@@ -234,8 +228,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
         let restoreNode () =
             notification.NodeScheduled node
             let cacheEntryId = GraphDef.buildCacheKey node
-            match tryGetSummaryOnly cacheEntryId with
-            | Some summary -> 
+            match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
+            | Some (_, summary) ->
                 let dependencies =
                     node.Dependencies
                     |> Seq.choose (fun nodeId -> 
@@ -277,8 +271,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
         elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
             let cacheEntryId = GraphDef.buildCacheKey node
-            match tryGetSummaryOnly cacheEntryId with
-            | Some summary ->
+            match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
+            | Some (_, summary) ->
                 Log.Debug("{NodeId} has existing build summary", node.Id)
 
                 // task is failed and retry requested
@@ -392,5 +386,58 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                       Summary.Nodes = nodeStatus }
 
     notification.BuildCompleted buildInfo
+    api |> Option.iter (fun api -> api.CompleteBuild buildInfo.IsSuccess)
 
     buildInfo
+
+
+
+
+
+let loadSummary (options: ConfigOptions.Options) (cache: Cache.ICache) (graph: GraphDef.Graph) =
+    let allowRemoteCache = options.LocalOnly |> not
+
+    let nodeStatus =
+        let getDependencyStatus _ (node: GraphDef.Node) =
+            let cacheEntryId = GraphDef.buildCacheKey node
+            match cache.TryGetSummary allowRemoteCache cacheEntryId with
+            | Some summary ->
+                let status =
+                    if summary.IsSuccessful then TaskStatus.Success summary.EndedAt
+                    else TaskStatus.Failure (summary.EndedAt, "logs")
+
+                { NodeInfo.Request = TaskRequest.Restore
+                  NodeInfo.Status = status
+                  NodeInfo.Project = node.Project
+                  NodeInfo.Target = node.Target
+                  NodeInfo.ProjectHash = node.ProjectHash
+                  NodeInfo.TargetHash = node.TargetHash } |> Some
+            | _ -> None
+
+
+        graph.Nodes
+        |> Map.choose getDependencyStatus
+
+    let isSuccess =
+        graph.Nodes.Count = nodeStatus.Count
+        && nodeStatus |> Map.forall (fun _ nodeInfo -> match nodeInfo.Status with | TaskStatus.Success _ -> true | _ -> false)
+
+    let headCommit = options.HeadCommit
+    let branchOrTag = options.BranchOrTag
+
+    let startedAt = options.StartedAt
+    let endedAt = DateTime.UtcNow
+    let buildDuration = endedAt - startedAt
+    let totalDuration = endedAt - startedAt
+
+    let buildInfo = { Summary.Commit = headCommit.Sha
+                      Summary.BranchOrTag = branchOrTag
+                      Summary.StartedAt = startedAt
+                      Summary.EndedAt = endedAt
+                      Summary.BuildDuration = buildDuration
+                      Summary.TotalDuration = totalDuration
+                      Summary.IsSuccess = isSuccess
+                      Summary.Targets = options.Targets
+                      Summary.Nodes = nodeStatus }
+    buildInfo
+

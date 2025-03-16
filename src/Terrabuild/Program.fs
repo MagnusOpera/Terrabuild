@@ -127,29 +127,30 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let buildGraph = GraphBuilder.build options config
         if options.Debug then logGraph buildGraph "build"
 
+        let summary = 
+            if options.WhatIf then
+                Build.loadSummary options cache buildGraph
+            else
+                let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification            
+                let summary = Build.run options cache api buildNotification buildGraph
+                buildNotification.WaitCompletion()
+                summary
+
+        if options.Debug then
+            let jsonBuild = Json.Serialize summary
+            jsonBuild |> IO.writeTextFile (logFile "build-result.json")
+
+        if log || not summary.IsSuccess then
+            Logs.dumpLogs runId options cache buildGraph summary
+
         if not options.WhatIf then
-            let buildNotification = Notification.BuildNotification() :> Build.IBuildNotification
-
-            let summary = Build.run options cache api buildNotification buildGraph
-            buildNotification.WaitCompletion()
-            api |> Option.iter (fun api -> api.CompleteBuild summary.IsSuccess)
-
-            if options.Debug then
-                let jsonBuild = Json.Serialize summary
-                jsonBuild |> IO.writeTextFile (logFile "build-result.json")
-
-            if log || not summary.IsSuccess then
-                Logs.dumpLogs runId options cache buildGraph summary
-
             let result =
                 if summary.IsSuccess then Ansi.Emojis.happy
                 else Ansi.Emojis.sad
-
             $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
-            if summary.IsSuccess then 0
-            else 5
-        else
-            0
+
+        if summary.IsSuccess then 0
+        else 5
 
     let scaffold (scaffoldArgs: ParseResults<ScaffoldArgs>) =
         let wsDir = scaffoldArgs.GetResult(ScaffoldArgs.Workspace, defaultValue = ".")
