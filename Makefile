@@ -81,6 +81,9 @@ docs:
 self: clean publish
 	$(terrabuild) run build test dist --configuration $(env) --retry --debug --log --local-only
 
+logs:
+	$(terrabuild) logs build test dist --configuration $(env) --debug --log --local-only
+
 terrabuild:
 	terrabuild run build test dist --configuration $(env) --retry --debug --log --local-only
 
