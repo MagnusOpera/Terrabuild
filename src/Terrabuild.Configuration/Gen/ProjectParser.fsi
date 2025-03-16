@@ -55,6 +55,8 @@ type token =
   | TARGET_IDENTIFIER of (string)
   | EXTENSION_IDENTIFIER of (string)
   | IDENTIFIER of (string)
+  | STRING_END
+  | STRING_START
   | STRING of (string)
   | NOTHING
   | TRUE
@@ -114,6 +116,8 @@ type tokenId =
     | TOKEN_TARGET_IDENTIFIER
     | TOKEN_EXTENSION_IDENTIFIER
     | TOKEN_IDENTIFIER
+    | TOKEN_STRING_END
+    | TOKEN_STRING_START
     | TOKEN_STRING
     | TOKEN_NOTHING
     | TOKEN_TRUE
@@ -152,6 +156,11 @@ type nonTerminalId =
     | NONTERM_ExprIndex
     | NONTERM_Bool
     | NONTERM_String
+    | NONTERM_InterpolatedString
+    | NONTERM_InterpolatedStringContent
+    | NONTERM_InterpolatedExpr
+    | NONTERM_InterpolatedExprTuple
+    | NONTERM_InterpolatedExprTupleContent
     | NONTERM_ExprTuple
     | NONTERM_ExprTupleContent
     | NONTERM_ExprList
