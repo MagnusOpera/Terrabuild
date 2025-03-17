@@ -4,14 +4,6 @@ open Terrabuild.Expressions
 open Errors
 
 
-// NOTE: must be in sync with Terrabuild.Extensibility.Cacheability
-[<RequireQualifiedAccess>]
-type Cacheability =
-    | Never
-    | Local
-    | Remote
-    | Always
-
 [<RequireQualifiedAccess>]
 type ProjectComponents =
     | Dependencies of Expr list

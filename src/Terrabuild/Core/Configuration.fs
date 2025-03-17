@@ -12,6 +12,15 @@ open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
 open Serilog
 
+// // NOTE: must be in sync with Terrabuild.Extensibility.Cacheability
+// [<RequireQualifiedAccess>]
+// type Cacheability =
+//     | Never
+//     | Local
+//     | Remote
+//     | Always
+
+
 [<RequireQualifiedAccess>]
 type TargetOperation = {
     Hash: string
@@ -208,7 +217,10 @@ let read (options: ConfigOptions.Options) =
         let usrScripts =
             workspaceConfig.Extensions
             |> Map.map (fun _ ext ->
-                match ext.Script with
+                let script =
+                    ext.Script
+                    |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                match script with
                 | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
                 | _ -> None)
             |> Map.map Extensions.lazyLoadScript
@@ -243,7 +255,10 @@ let read (options: ConfigOptions.Options) =
 
         let projectScripts =
             projectConfig.Extensions
-            |> Map.map (fun _ ext -> ext.Script |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+            |> Map.map (fun _ ext ->
+                ext.Script
+                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                |> Option.map (FS.workspaceRelative options.Workspace projectDir))
 
         let scripts =
             scripts
@@ -269,15 +284,20 @@ let read (options: ConfigOptions.Options) =
                 | Extensions.ErrorTarget exn -> forwardExternalError $"Invocation failure of command '__defaults__' for extension '{init}'" exn
             | _ -> ProjectInfo.Default
 
+        let projectIgnores = Eval.evalAsStringSet evaluationContext projectConfig.Project.Ignores
+        let projectOutputs = Eval.evalAsStringSet evaluationContext projectConfig.Project.Outputs
+        let projectDependencies = Eval.evalAsStringSet evaluationContext projectConfig.Project.Dependencies
+        let projectLinks = Eval.evalAsStringSet evaluationContext projectConfig.Project.Links
+        let projectIncludes = Eval.evalAsStringSet evaluationContext projectConfig.Project.Includes
+        let labels = Eval.evalAsStringSet evaluationContext projectConfig.Project.Labels
+
         let projectInfo = {
             projectInfo
-            with Ignores = projectInfo.Ignores + projectConfig.Project.Ignores
-                 Outputs = projectInfo.Outputs + projectConfig.Project.Outputs
-                 Dependencies = projectInfo.Dependencies + projectConfig.Project.Dependencies
-                 Links = projectInfo.Links + projectConfig.Project.Links
-                 Includes = projectInfo.Includes + projectConfig.Project.Includes }
-
-        let labels = projectConfig.Project.Labels
+            with Ignores = projectInfo.Ignores + projectIgnores
+                 Outputs = projectInfo.Outputs + projectOutputs
+                 Dependencies = projectInfo.Dependencies + projectDependencies
+                 Links = projectInfo.Links + projectLinks
+                 Includes = projectInfo.Includes + projectIncludes }
 
         let projectOutputs = projectInfo.Outputs
         let projectIgnores = projectInfo.Ignores
@@ -413,15 +433,20 @@ let read (options: ConfigOptions.Options) =
                             | Some script -> script
                             | _ -> raiseSymbolError $"Extension {step.Extension} is not defined"
 
+                        let extVariables =
+                            extension.Variables
+                            |> Eval.evalAsStringSet evaluationContext
+
                         let hash =
                             let containerInfos = 
                                 match container with
-                                | Some container -> [ container ] @ List.ofSeq extension.Variables
+                                | Some container -> [ container ] @ List.ofSeq extVariables
                                 | _ -> []
 
                             let platformInfos = 
                                 match platform with
-                                | Some platform -> [ platform ] @ List.ofSeq extension.Variables
+                                // TODO: why extVariables ??? seems useless
+                                | Some platform -> [ platform ] @ List.ofSeq extVariables
                                 | _ -> []
 
                             [ step.Extension; step.Command ] @ containerInfos @ platformInfos
@@ -431,7 +456,7 @@ let read (options: ConfigOptions.Options) =
                             TargetOperation.Hash = hash
                             TargetOperation.Container = container
                             TargetOperation.Platform = platform
-                            TargetOperation.ContainerVariables = extension.Variables
+                            TargetOperation.ContainerVariables = extVariables
                             TargetOperation.Extension = step.Extension
                             TargetOperation.Command = step.Command
                             TargetOperation.Script = script
@@ -454,7 +479,10 @@ let read (options: ConfigOptions.Options) =
                         |> Option.defaultValue Set.empty)
 
                 let outputs =
-                    match target.Outputs with
+                    let targetOutputs =
+                        target.Outputs
+                        |> Option.map (Eval.evalAsStringSet evaluationContext)
+                    match targetOutputs with
                     | Some outputs -> outputs
                     | _ -> projectDef.Outputs
 
@@ -463,11 +491,22 @@ let read (options: ConfigOptions.Options) =
                     |> List.map (fun ope -> ope.Hash)
                     |> Hash.sha256strings
 
+                let targetCache =
+                    let targetCache =
+                        target.Cache
+                        |> Option.map (Eval.asString << Eval.eval evaluationContext)
+                    match targetCache with
+                    | Some "never" -> Some Cacheability.Never
+                    | Some "local" -> Some Cacheability.Local
+                    | Some "remote" -> Some Cacheability.Remote
+                    | Some "always" -> Some Cacheability.Always
+                    | _ -> raiseParseError "invalid cache value"
+
                 let target = {
                     Target.Hash = hash
                     Target.Rebuild = rebuild
                     Target.DependsOn = dependsOn
-                    Target.Cache = target.Cache
+                    Target.Cache = targetCache
                     Target.Outputs = outputs
                     Target.Operations = targetOperations
                 }
@@ -489,7 +528,8 @@ let read (options: ConfigOptions.Options) =
 
 
     let searchProjectsAndApply() =
-        let scanFolder = scanFolders options.Workspace workspaceConfig.Workspace.Ignores
+        let workspaceIgnores = Eval.evalAsStringSet evaluationContext workspaceConfig.Workspace.Ignores
+        let scanFolder = scanFolders options.Workspace workspaceIgnores
         let projectLoading = ConcurrentDictionary<string, bool>()
         let projects = ConcurrentDictionary<string, Project>()
         let hub = Hub.Create(options.MaxConcurrency)
@@ -563,7 +603,11 @@ let read (options: ConfigOptions.Options) =
         | _ -> projects.Keys
         |> Set
 
-    { Workspace.Id = workspaceConfig.Workspace.Id
+    let workspaceId =
+        workspaceConfig.Workspace.Id
+        |> Option.map (Eval.asString << Eval.eval evaluationContext)
+
+    { Workspace.Id = workspaceId
       Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
       Workspace.Targets = workspaceConfig.Targets }

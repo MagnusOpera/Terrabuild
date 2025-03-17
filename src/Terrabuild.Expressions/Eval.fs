@@ -25,7 +25,6 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
         | Expr.Bool bool -> Value.Bool bool
         | Expr.String str -> Value.String str
         | Expr.Number num -> Value.Number num
-        | Expr.Object obj -> Value.Object obj
         | Expr.Variable var ->
             // if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
             match context.Variables |> Map.tryFind var with
@@ -169,3 +168,51 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
             res
 
     eval expr
+
+
+let asString = function
+    | Value.String s -> s
+    | _ -> raiseTypeError "Failed to convert"
+
+let asStringOption = function
+    | Value.String s -> s |> Some
+    | Value.Nothing -> None
+    | _ -> raiseTypeError "Failed to convert"
+
+let asBool = function
+    | Value.Bool b -> b
+    | _ -> raiseTypeError "Failed to convert"
+
+let asBoolOption = function
+    | Value.Bool b -> b |> Some
+    | Value.Nothing -> None
+    | _ -> raiseTypeError "Failed to convert"
+
+let asStringList = function
+    | Value.List l ->
+        l
+        |> List.map (fun v ->
+            match v with
+            | Value.String s -> s
+            | _ -> raiseTypeError "Failed to convert")
+    | _ -> raiseTypeError "Failed to convert"
+
+let asStringListOption = function
+    | Value.List l ->
+        l
+        |> List.map (fun v ->
+            match v with
+            | Value.String s -> s
+            | _ -> raiseTypeError "Failed to convert")
+        |> Some
+    | Value.Nothing -> None
+    | _ -> raiseTypeError "Failed to convert"
+
+
+let evalAsStringSet (context: EvaluationContext) (exprs: Expr seq) =
+    exprs
+    |> Seq.map (fun expr -> eval context expr)
+    |> List.ofSeq
+    |> Value.List
+    |> asStringList
+    |> Set.ofList
