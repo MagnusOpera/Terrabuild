@@ -20,7 +20,7 @@ let parse txt =
             | LexerMode.InterpolatedExpression -> Lexer.interpolatedExpression
 
         let token = lexer lexbuff
-        printfn $"### SwitchableLexer  mode: {lexerMode}  token: {token}"
+        // printfn $"### SwitchableLexer  mode: {lexerMode}  token: {token}"
 
         match token with
         | Parser.STRING_START -> lexerMode <- LexerMode.InterpolatedString
