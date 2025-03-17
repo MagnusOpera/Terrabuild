@@ -1,6 +1,6 @@
 %{ 
-open AST
-open AST.Project
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.Project
 open Terrabuild.Expressions
 open System
 
@@ -54,7 +54,7 @@ let debugPrint s = ignore s
 %right BANG
 %left COMMA
 
-%type <AST.Project.ProjectFile> ProjectFile
+%type <Terrabuild.Configuration.AST.Project.ProjectFile> ProjectFile
 %% 
 
 ProjectFile:

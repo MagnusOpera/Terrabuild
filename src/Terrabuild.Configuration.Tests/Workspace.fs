@@ -3,8 +3,8 @@ open System.IO
 open NUnit.Framework
 open FsUnit
 
-open AST
-open AST.Workspace
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.Workspace
 open Terrabuild.Expressions
 
 

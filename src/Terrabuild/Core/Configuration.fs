@@ -9,14 +9,7 @@ open Errors
 open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
 open Serilog
-
-// // NOTE: must be in sync with Terrabuild.Extensibility.Cacheability
-// [<RequireQualifiedAccess>]
-// type Cacheability =
-//     | Never
-//     | Local
-//     | Remote
-//     | Always
+open Terrabuild.Configuration
 
 
 [<RequireQualifiedAccess>]

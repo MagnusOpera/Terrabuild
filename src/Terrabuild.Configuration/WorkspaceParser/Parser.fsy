@@ -1,6 +1,6 @@
 %{ 
-open AST
-open AST.Workspace
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.Workspace
 open Terrabuild.Expressions
 open System
 
@@ -54,7 +54,7 @@ let debugPrint s = ignore s
 %right BANG
 %left COMMA
 
-%type <AST.Workspace.WorkspaceFile> WorkspaceFile
+%type <Terrabuild.Configuration.AST.Workspace.WorkspaceFile> WorkspaceFile
 %% 
 
 WorkspaceFile:

@@ -5,8 +5,8 @@ open FSharp.Text.Lexing
 open FSharp.Text.Parsing.ParseHelpers
 # 1 "WorkspaceParser/Parser.fsy"
  
-open AST
-open AST.Workspace
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.Workspace
 open Terrabuild.Expressions
 open System
 
@@ -583,7 +583,7 @@ let _fsyacc_immediateActions = [|65535us;49152us;65535us;16385us;16387us;16388us
 let _fsyacc_reductions = lazy [|
 # 584 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> AST.Workspace.WorkspaceFile in
+            let _1 = parseState.GetInput(1) :?> Terrabuild.Configuration.AST.Workspace.WorkspaceFile in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
@@ -600,7 +600,7 @@ let _fsyacc_reductions = lazy [|
                                                          WorkspaceFile.Build _1 
                    )
 # 61 "WorkspaceParser/Parser.fsy"
-                 : AST.Workspace.WorkspaceFile));
+                 : Terrabuild.Configuration.AST.Workspace.WorkspaceFile));
 # 604 "Gen/WorkspaceParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
@@ -1973,5 +1973,5 @@ let tables : FSharp.Text.Parsing.Tables<_> =
     numTerminals = 62;
     productionToNonTerminalTable = _fsyacc_productionToNonTerminalTable  }
 let engine lexer lexbuf startState = tables.Interpret(lexer, lexbuf, startState)
-let WorkspaceFile lexer lexbuf : AST.Workspace.WorkspaceFile =
+let WorkspaceFile lexer lexbuf : Terrabuild.Configuration.AST.Workspace.WorkspaceFile =
     engine lexer lexbuf 0 :?> _

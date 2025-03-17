@@ -1,4 +1,4 @@
-namespace AST
+namespace Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Errors
 

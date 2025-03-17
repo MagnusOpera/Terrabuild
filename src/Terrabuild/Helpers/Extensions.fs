@@ -3,7 +3,7 @@ open System
 open System.IO
 open Terrabuild.Scripting
 open Terrabuild.Expressions
-open AST
+open Terrabuild.Configuration.AST
 open Errors
 
 type InvocationResult<'t> =

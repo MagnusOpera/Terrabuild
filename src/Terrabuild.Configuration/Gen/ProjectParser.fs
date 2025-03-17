@@ -5,8 +5,8 @@ open FSharp.Text.Lexing
 open FSharp.Text.Parsing.ParseHelpers
 # 1 "ProjectParser/Parser.fsy"
  
-open AST
-open AST.Project
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.Project
 open Terrabuild.Expressions
 open System
 
@@ -621,7 +621,7 @@ let _fsyacc_immediateActions = [|65535us;49152us;65535us;16385us;16387us;16388us
 let _fsyacc_reductions = lazy [|
 # 622 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> AST.Project.ProjectFile in
+            let _1 = parseState.GetInput(1) :?> Terrabuild.Configuration.AST.Project.ProjectFile in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
@@ -638,7 +638,7 @@ let _fsyacc_reductions = lazy [|
                                                        ProjectFile.Build _1 
                    )
 # 61 "ProjectParser/Parser.fsy"
-                 : AST.Project.ProjectFile));
+                 : Terrabuild.Configuration.AST.Project.ProjectFile));
 # 642 "Gen/ProjectParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
@@ -2173,5 +2173,5 @@ let tables : FSharp.Text.Parsing.Tables<_> =
     numTerminals = 65;
     productionToNonTerminalTable = _fsyacc_productionToNonTerminalTable  }
 let engine lexer lexbuf startState = tables.Interpret(lexer, lexbuf, startState)
-let ProjectFile lexer lexbuf : AST.Project.ProjectFile =
+let ProjectFile lexer lexbuf : Terrabuild.Configuration.AST.Project.ProjectFile =
     engine lexer lexbuf 0 :?> _

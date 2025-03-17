@@ -4,8 +4,8 @@ open System.IO
 open NUnit.Framework
 open FsUnit
 
-open AST
-open AST.Project
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.Project
 
 open Terrabuild.Expressions
 

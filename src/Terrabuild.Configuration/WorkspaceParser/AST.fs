@@ -1,5 +1,5 @@
-namespace AST.Workspace
-open AST
+namespace Terrabuild.Configuration.AST.Workspace
+open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Errors
 
