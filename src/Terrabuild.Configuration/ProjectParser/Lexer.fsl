@@ -24,12 +24,9 @@ let variableIdentifier = '$' identifier
 
 // quoted string are just simple string:
 // - no interpolation
-let quotedString = '\"' [^ '\"' '{']+ '\"'
-
-// interpolation string contains at least:
-// - interpolated expression
-let interpolatedString = '\"' [^ '\"' '{']+
-let interpolatedStringContent = [^ '\"' '{']+
+// - no escaped chars
+let quotedString = '\"' [^ '\"' '{' '}']+ '\"'
+let interpolatedStringContent = [^ '\"' '{' '}']+
 
 let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
 let whitespace = ' ' | '\t'
@@ -121,6 +118,14 @@ and singleLineComment = parse
 
 and interpolatedString (acc: StringBuilder) = parse
     | '"' { STRING_END (acc.ToString()) }
+    | "{{" {
+        acc.Append("{") |> ignore
+        interpolatedString acc lexbuf
+    }
+    | "}}" {
+        acc.Append("}") |> ignore
+        interpolatedString acc lexbuf
+    }
     | "{" { EXPRESSION_START (acc.ToString()) }
     | interpolatedStringContent {
         lexbuf |> lexeme |> acc.Append |> ignore

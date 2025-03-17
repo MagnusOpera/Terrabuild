@@ -117,7 +117,7 @@ let parseWorkspace2() =
                                                                                                                                   Expr.String "toto"])])
                                                                                                 Expr.String " x "
                                                                                                 Expr.Number 42 ])
-                                                                               Expr.String " !" ])
+                                                                               Expr.String " {^}" ])
                                                    "my-variable", Expr.Number 42
                                                  ] }
 
