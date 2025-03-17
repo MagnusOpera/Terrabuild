@@ -494,7 +494,7 @@ let read (options: ConfigOptions.Options) =
                 let targetCache =
                     let targetCache =
                         target.Cache
-                        |> Option.map (Eval.asString << Eval.eval evaluationContext)
+                        |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
                     match targetCache with
                     | Some "never" -> Some Cacheability.Never
                     | Some "local" -> Some Cacheability.Local
@@ -606,7 +606,7 @@ let read (options: ConfigOptions.Options) =
 
     let workspaceId =
         workspaceConfig.Workspace.Id
-        |> Option.map (Eval.asString << Eval.eval evaluationContext)
+        |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
 
     { Workspace.Id = workspaceId
       Workspace.SelectedProjects = selectedProjects

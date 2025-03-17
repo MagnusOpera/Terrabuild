@@ -169,18 +169,9 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
 
     eval expr
 
-
-let asString = function
-    | Value.String s -> s
-    | _ -> raiseTypeError "Failed to convert"
-
 let asStringOption = function
     | Value.String s -> s |> Some
     | Value.Nothing -> None
-    | _ -> raiseTypeError "Failed to convert"
-
-let asBool = function
-    | Value.Bool b -> b
     | _ -> raiseTypeError "Failed to convert"
 
 let asBoolOption = function
@@ -188,31 +179,11 @@ let asBoolOption = function
     | Value.Nothing -> None
     | _ -> raiseTypeError "Failed to convert"
 
-let asStringList = function
-    | Value.List l ->
-        l
-        |> List.map (fun v ->
-            match v with
-            | Value.String s -> s
-            | _ -> raiseTypeError "Failed to convert")
-    | _ -> raiseTypeError "Failed to convert"
-
-let asStringListOption = function
-    | Value.List l ->
-        l
-        |> List.map (fun v ->
-            match v with
-            | Value.String s -> s
-            | _ -> raiseTypeError "Failed to convert")
-        |> Some
-    | Value.Nothing -> None
-    | _ -> raiseTypeError "Failed to convert"
-
-
 let evalAsStringSet (context: EvaluationContext) (exprs: Expr seq) =
     exprs
     |> Seq.map (fun expr -> eval context expr)
-    |> List.ofSeq
-    |> Value.List
-    |> asStringList
-    |> Set.ofList
+    |> Seq.map (fun value ->
+        match value with
+        | Value.String s -> s
+        | _ -> raiseTypeError "Failed to convert")
+    |> Set.ofSeq
