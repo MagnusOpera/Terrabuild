@@ -1,7 +1,8 @@
 %{ 
-open Terrabuild.Configuration.AST
-open Terrabuild.Configuration.Project.AST
+open AST
+open AST.Project
 open Terrabuild.Expressions
+open System
 
 
 #if DEBUG
@@ -53,7 +54,7 @@ let debugPrint s = ignore s
 %right BANG
 %left COMMA
 
-%type <Terrabuild.Configuration.Project.AST.ProjectFile> ProjectFile
+%type <AST.Project.ProjectFile> ProjectFile
 %% 
 
 ProjectFile:
@@ -67,7 +68,7 @@ ProjectFileComponents:
 
 
 Extension:
-    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { Extension.Build $2 $4 |> ProjectFileComponents.Extension }
+    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { ExtensionBlock.Build $2 $4 |> ProjectFileComponents.Extension }
 ExtensionComponents:
     | /* empty */ { [] }
     | ExtensionComponents ExtensionContainer { $1 @ [$2] }
@@ -88,10 +89,10 @@ ExtensionDefaults:
 
 
 Project:
-    | PROJECT { Project.Build None [] |> ProjectFileComponents.Project }
-    | PROJECT LBRACE ProjectComponents RBRACE { Project.Build None $3 |> ProjectFileComponents.Project }
-    | PROJECT ExtensionIdentifier { Project.Build (Some $2) [] |> ProjectFileComponents.Project }
-    | PROJECT ExtensionIdentifier LBRACE ProjectComponents RBRACE { Project.Build (Some $2) $4 |> ProjectFileComponents.Project }
+    | PROJECT { ProjectBlock.Build None [] |> ProjectFileComponents.Project }
+    | PROJECT LBRACE ProjectComponents RBRACE { ProjectBlock.Build None $3 |> ProjectFileComponents.Project }
+    | PROJECT ExtensionIdentifier { ProjectBlock.Build (Some $2) [] |> ProjectFileComponents.Project }
+    | PROJECT ExtensionIdentifier LBRACE ProjectComponents RBRACE { ProjectBlock.Build (Some $2) $4 |> ProjectFileComponents.Project }
 ProjectComponents:
     | /* empty */ { [] }
     | ProjectComponents ProjectDependencies { $1 @ [$2] }
@@ -114,7 +115,7 @@ ProjectLabels:
     | LABELS EQUAL ListOfString { ProjectComponents.Labels $3 }
 
 Target:
-    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { Target.Build $2 $4 |> ProjectFileComponents.Target }
+    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { TargetBlock.Build $2 $4 |> ProjectFileComponents.Target }
 TargetComponents:
     | /* empty */ { [] }
     | TargetComponents TargetDependsOn { $1 @ [$2] }
@@ -213,11 +214,20 @@ Bool:
 
 String:
     | STRING { Expr.String $1 }
-    | STRING_START InterpolatedString STRING_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) }
+    | STRING_START InterpolatedString STRING_END { 
+        if $3 |> String.IsNullOrEmpty then Expr.Function (Function.ToString, [$2])
+        else Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) 
+    }
 
 InterpolatedString:
-    | EXPRESSION_START Expr EXPRESSION_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2]) }
-    | InterpolatedString EXPRESSION_START Expr EXPRESSION_END { Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; $1; Expr.String $2; $3]) }
+    | EXPRESSION_START Expr EXPRESSION_END { 
+        if $1 |> String.IsNullOrEmpty then $2
+        else Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2])
+    }
+    | InterpolatedString EXPRESSION_START Expr EXPRESSION_END {
+        if $2 |> String.IsNullOrEmpty then Expr.Function (Function.Format, [Expr.String "{0}{1}"; $1; $3])
+        else Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; $1; Expr.String $2; $3])
+    }
 
 ExprTuple:
     | LPAREN ExprTupleContent RPAREN { $2 }

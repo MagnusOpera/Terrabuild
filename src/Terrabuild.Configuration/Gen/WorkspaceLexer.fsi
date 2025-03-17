@@ -1,6 +1,6 @@
-module internal Terrabuild.Configuration.Workspace.Lexer
+module internal Lexer.Workspace
 
-open Terrabuild.Configuration.Workspace.Parser  // we need the terminal tokens from the Parser
+open Parser.Workspace  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 open System.Text/// Rule token
 val token: lexbuf: LexBuffer<char> -> token

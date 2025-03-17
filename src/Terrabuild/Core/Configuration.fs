@@ -5,8 +5,6 @@ open System
 open System.Collections.Concurrent
 open Terrabuild.Extensibility
 open Terrabuild.Expressions
-open Terrabuild.Configuration.Project.AST
-open Terrabuild.Configuration.AST
 open Errors
 open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
@@ -63,7 +61,7 @@ type Workspace = {
     SelectedProjects: string set
 
     // All targets at workspace level
-    Targets: Map<string, Terrabuild.Configuration.Workspace.AST.Target>
+    Targets: Map<string, AST.Workspace.TargetBlock>
 
     // All discovered projects in workspace
     Projects: Map<string, Project>
@@ -78,9 +76,9 @@ type private LoadedProject = {
     Includes: string set
     Ignores: string set
     Outputs: string set
-    Targets: Map<string, Terrabuild.Configuration.Project.AST.Target>
+    Targets: Map<string, AST.Project.TargetBlock>
     Labels: string set
-    Extensions: Map<string, Extension>
+    Extensions: Map<string, AST.ExtensionBlock>
     Scripts: Map<string, LazyScript>
 }
 
@@ -118,7 +116,7 @@ let read (options: ConfigOptions.Options) =
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
-            Terrabuild.Configuration.Workspace.FrontEnd.parse workspaceContent
+            FrontEnd.Workspace.parse workspaceContent
         with exn ->
             raiseParseError "Failed to read WORKSPACE configuration file" exn
 
@@ -246,7 +244,7 @@ let read (options: ConfigOptions.Options) =
             match projectFile with
             | FS.File projectFile ->
                 let projectContent = File.ReadAllText projectFile
-                try Terrabuild.Configuration.Project.FrontEnd.parse projectContent
+                try FrontEnd.Project.parse projectContent
                 with exn -> forwardExternalError $"Failed to read PROJECT configuration '{projectId}'" exn
             | _ ->
                 raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"

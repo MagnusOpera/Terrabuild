@@ -1,5 +1,5 @@
-module Terrabuild.Configuration.Project.AST
-open Terrabuild.Configuration.AST
+namespace AST.Project
+open AST
 open Terrabuild.Expressions
 open Errors
 
@@ -14,15 +14,14 @@ type ProjectComponents =
     | Labels of Expr list
 
 [<RequireQualifiedAccess>]
-type Project = {
-    Init: string option
-    Dependencies: Set<Expr>
-    Links: Set<Expr>
-    Outputs: Set<Expr>
-    Ignores: Set<Expr>
-    Includes: Set<Expr>
-    Labels: Set<Expr>
-}
+type ProjectBlock =
+    { Init: string option
+      Dependencies: Set<Expr>
+      Links: Set<Expr>
+      Outputs: Set<Expr>
+      Ignores: Set<Expr>
+      Includes: Set<Expr>
+      Labels: Set<Expr> }
 with
     static member Build init components =
         let dependencies =
@@ -73,11 +72,10 @@ with
 
 
 
-type Step = {
-    Extension: string
-    Command: string
-    Parameters: Map<string, Expr>
-}
+type Step =
+    { Extension: string
+      Command: string
+      Parameters: Map<string, Expr> }
 
 [<RequireQualifiedAccess>]
 type TargetComponents =
@@ -88,13 +86,12 @@ type TargetComponents =
     | Step of Step
 
 [<RequireQualifiedAccess>]
-type Target = {
-    Rebuild: Expr option
-    Outputs: Set<Expr> option
-    DependsOn: Set<string> option
-    Cache: Expr option
-    Steps: Step list
-}
+type TargetBlock =
+    { Rebuild: Expr option
+      Outputs: Set<Expr> option
+      DependsOn: Set<string> option
+      Cache: Expr option
+      Steps: Step list }
 with
     static member Build id components =
         let dependsOn =
@@ -134,21 +131,20 @@ with
 
 [<RequireQualifiedAccess>]
 type ProjectFileComponents =
-    | Project of Project
-    | Extension of string * Extension
-    | Target of string * Target
+    | Project of ProjectBlock
+    | Extension of string * ExtensionBlock
+    | Target of string * TargetBlock
 
 [<RequireQualifiedAccess>]
-type ProjectFile = {
-    Project: Project
-    Extensions: Map<string, Extension>
-    Targets: Map<string, Target>
-}
+type ProjectFile =
+    { Project: ProjectBlock
+      Extensions: Map<string, ExtensionBlock>
+      Targets: Map<string, TargetBlock> }
 with
     static member Build components =
         let project =
             match components |> List.choose (function | ProjectFileComponents.Project value -> Some value | _ -> None) with
-            | [] -> Project.Build None []
+            | [] -> ProjectBlock.Build None []
             | [value] -> value
             | _ -> raiseParseError "multiple project declared"
 

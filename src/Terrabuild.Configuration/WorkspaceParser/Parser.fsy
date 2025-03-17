@@ -1,7 +1,8 @@
 %{ 
-open Terrabuild.Configuration.AST
-open Terrabuild.Configuration.Workspace.AST
+open AST
+open AST.Workspace
 open Terrabuild.Expressions
+open System
 
 
 #if DEBUG
@@ -53,7 +54,7 @@ let debugPrint s = ignore s
 %right BANG
 %left COMMA
 
-%type <Terrabuild.Configuration.Workspace.AST.WorkspaceFile> WorkspaceFile
+%type <AST.Workspace.WorkspaceFile> WorkspaceFile
 %% 
 
 WorkspaceFile:
@@ -67,7 +68,7 @@ WorkspaceFileComponents:
     | WorkspaceFileComponents Extension { $1 @ [$2] }
 
 Workspace:
-    | WORKSPACE LBRACE WorkspaceComponents RBRACE { Workspace.Build $3 |> WorkspaceFileComponents.Workspace }
+    | WORKSPACE LBRACE WorkspaceComponents RBRACE { WorkspaceBlock.Build $3 |> WorkspaceFileComponents.Workspace }
 WorkspaceComponents:
     | /* empty */ { [] }
     | WorkspaceComponents WorkspaceSpace { $1 @ [$2] }
@@ -78,8 +79,8 @@ WorkspaceIgnores:
     | IGNORES EQUAL ListOfString { WorkspaceComponents.Ignores $3 }
 
 Target:
-    | TARGET IDENTIFIER { Target.Build $2 [] |> WorkspaceFileComponents.Target }
-    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { Target.Build $2 $4 |>  WorkspaceFileComponents.Target }
+    | TARGET IDENTIFIER { TargetBlock.Build $2 [] |> WorkspaceFileComponents.Target }
+    | TARGET IDENTIFIER LBRACE TargetComponents RBRACE { TargetBlock.Build $2 $4 |>  WorkspaceFileComponents.Target }
 TargetComponents:
     | /* empty */ { [] }
     | TargetComponents TargetDependsOn { $1 @ [$2] }
@@ -90,9 +91,9 @@ TargetRebuild:
     | REBUILD EQUAL Expr { TargetComponents.Rebuild $3 }
 
 Configuration:
-    | CONFIGURATION IDENTIFIER { Configuration.Build $2 [] |> WorkspaceFileComponents.Configuration }
-    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { Configuration.Build "default" $3 |> WorkspaceFileComponents.Configuration }
-    | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { Configuration.Build $2 $4 |> WorkspaceFileComponents.Configuration }
+    | CONFIGURATION IDENTIFIER { ConfigurationBlock.Build $2 [] |> WorkspaceFileComponents.Configuration }
+    | CONFIGURATION LBRACE ConfigurationComponents RBRACE { ConfigurationBlock.Build "default" $3 |> WorkspaceFileComponents.Configuration }
+    | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { ConfigurationBlock.Build $2 $4 |> WorkspaceFileComponents.Configuration }
 ConfigurationComponents:
     | /* empty */ { [] }
     | ConfigurationComponents ConfigurationVariables { $1 @ [$2] }
@@ -100,7 +101,7 @@ ConfigurationVariables:
     | VARIABLES EQUAL ExprMap { ConfigurationComponents.Variables $3 }
 
 Extension:
-    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { Extension.Build $2 $4 |> WorkspaceFileComponents.Extension }
+    | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { ExtensionBlock.Build $2 $4 |> WorkspaceFileComponents.Extension }
 ExtensionComponents:
     | /* empty */ { [] }
     | ExtensionComponents ExtensionContainer { $1 @ [$2] }
@@ -197,11 +198,20 @@ Bool:
 
 String:
     | STRING { Expr.String $1 }
-    | STRING_START InterpolatedString STRING_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) }
+    | STRING_START InterpolatedString STRING_END { 
+        if $3 |> String.IsNullOrEmpty then Expr.Function (Function.ToString, [$2])
+        else Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) 
+    }
 
 InterpolatedString:
-    | EXPRESSION_START Expr EXPRESSION_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2]) }
-    | InterpolatedString EXPRESSION_START Expr EXPRESSION_END { Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; $1; Expr.String $2; $3]) }
+    | EXPRESSION_START Expr EXPRESSION_END { 
+        if $1 |> String.IsNullOrEmpty then $2
+        else Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2])
+    }
+    | InterpolatedString EXPRESSION_START Expr EXPRESSION_END {
+        if $2 |> String.IsNullOrEmpty then Expr.Function (Function.Format, [Expr.String "{0}{1}"; $1; $3])
+        else Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; $1; Expr.String $2; $3])
+    }
 
 ExprTuple:
     | LPAREN ExprTupleContent RPAREN { $2 }

@@ -1,4 +1,4 @@
-namespace Terrabuild.Configuration.AST
+namespace AST
 open Terrabuild.Expressions
 open Errors
 
@@ -10,13 +10,12 @@ type ExtensionComponents =
     | Script of Expr
     | Defaults of Map<string, Expr>
 
-type Extension = {
-    Container: Expr option
-    Platform: Expr option
-    Variables: Expr Set
-    Script: Expr option
-    Defaults: Map<string, Expr>
-}
+type ExtensionBlock =
+    { Container: Expr option
+      Platform: Expr option
+      Variables: Expr Set
+      Script: Expr option
+      Defaults: Map<string, Expr> }
 with
     static member Build name components =
         let container =

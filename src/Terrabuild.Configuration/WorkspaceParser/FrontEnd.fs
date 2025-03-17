@@ -1,4 +1,4 @@
-module Terrabuild.Configuration.Workspace.FrontEnd
+module FrontEnd.Workspace
 open FSharp.Text.Lexing
 open Errors
 open System.Text
@@ -16,24 +16,24 @@ let parse txt =
     let switchableLexer (lexbuff: LexBuffer<char>) =
         let lexer =
             match lexerMode with
-            | LexerMode.Default -> Lexer.token
-            | LexerMode.InterpolatedString -> Lexer.interpolatedString (StringBuilder())
-            | LexerMode.InterpolatedExpression -> Lexer.interpolatedExpression
+            | LexerMode.Default -> Lexer.Workspace.token
+            | LexerMode.InterpolatedString -> Lexer.Workspace.interpolatedString (StringBuilder())
+            | LexerMode.InterpolatedExpression -> Lexer.Workspace.interpolatedExpression
 
         let token = lexer lexbuff
         // printfn $"### SwitchableLexer  mode: {lexerMode}  token: {token}"
 
         match token with
-        | Parser.STRING_START -> lexerMode <- LexerMode.InterpolatedString
-        | Parser.STRING_END _ -> lexerMode <- LexerMode.Default
-        | Parser.EXPRESSION_START _ -> lexerMode <- LexerMode.InterpolatedExpression
-        | Parser.EXPRESSION_END -> lexerMode <- LexerMode.InterpolatedString
+        | Parser.Workspace.STRING_START -> lexerMode <- LexerMode.InterpolatedString
+        | Parser.Workspace.STRING_END _ -> lexerMode <- LexerMode.Default
+        | Parser.Workspace.EXPRESSION_START _ -> lexerMode <- LexerMode.InterpolatedExpression
+        | Parser.Workspace.EXPRESSION_END -> lexerMode <- LexerMode.InterpolatedString
         | _ -> ()
         token
 
     let lexbuf = LexBuffer<_>.FromString txt
     try
-        Parser.WorkspaceFile switchableLexer lexbuf
+        Parser.Workspace.WorkspaceFile switchableLexer lexbuf
     with
     | exn ->
         let err = sprintf "Unexpected token '%s' at (%d,%d)"
