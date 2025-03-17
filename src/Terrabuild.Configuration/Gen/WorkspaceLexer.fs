@@ -979,7 +979,7 @@ and token  lexbuf =
 # 979 "Gen/WorkspaceLexer.fs"
           )
   | 51 -> ( 
-# 93 "WorkspaceParser/Lexer.fsl"
+# 94 "WorkspaceParser/Lexer.fsl"
                                     
                        let s = lexbuf |> lexeme
                        let s = s.Substring(1, s.Length-2)
@@ -988,12 +988,12 @@ and token  lexbuf =
 # 988 "Gen/WorkspaceLexer.fs"
           )
   | 52 -> ( 
-# 99 "WorkspaceParser/Lexer.fsl"
+# 101 "WorkspaceParser/Lexer.fsl"
                             STRING_START 
 # 993 "Gen/WorkspaceLexer.fs"
           )
   | 53 -> ( 
-# 101 "WorkspaceParser/Lexer.fsl"
+# 103 "WorkspaceParser/Lexer.fsl"
                              
                        let s = lexeme lexbuf |> int
                        NUMBER (s)
@@ -1001,22 +1001,22 @@ and token  lexbuf =
 # 1001 "Gen/WorkspaceLexer.fs"
           )
   | 54 -> ( 
-# 106 "WorkspaceParser/Lexer.fsl"
+# 108 "WorkspaceParser/Lexer.fsl"
                                   token lexbuf 
 # 1006 "Gen/WorkspaceLexer.fs"
           )
   | 55 -> ( 
-# 107 "WorkspaceParser/Lexer.fsl"
+# 109 "WorkspaceParser/Lexer.fsl"
                                lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
 # 1011 "Gen/WorkspaceLexer.fs"
           )
   | 56 -> ( 
-# 108 "WorkspaceParser/Lexer.fsl"
+# 110 "WorkspaceParser/Lexer.fsl"
                            EOF 
 # 1016 "Gen/WorkspaceLexer.fs"
           )
   | 57 -> ( 
-# 109 "WorkspaceParser/Lexer.fsl"
+# 111 "WorkspaceParser/Lexer.fsl"
                          failwithf "unrecognized input: '%s'" <| lexeme lexbuf 
 # 1021 "Gen/WorkspaceLexer.fs"
           )
@@ -1025,17 +1025,17 @@ and token  lexbuf =
 and singleLineComment  lexbuf =
   match _fslex_tables.Interpret(107,lexbuf) with
   | 0 -> ( 
-# 112 "WorkspaceParser/Lexer.fsl"
+# 114 "WorkspaceParser/Lexer.fsl"
                                lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
 # 1030 "Gen/WorkspaceLexer.fs"
           )
   | 1 -> ( 
-# 113 "WorkspaceParser/Lexer.fsl"
+# 115 "WorkspaceParser/Lexer.fsl"
                            EOF 
 # 1035 "Gen/WorkspaceLexer.fs"
           )
   | 2 -> ( 
-# 114 "WorkspaceParser/Lexer.fsl"
+# 116 "WorkspaceParser/Lexer.fsl"
                          singleLineComment lexbuf 
 # 1040 "Gen/WorkspaceLexer.fs"
           )
@@ -1044,12 +1044,12 @@ and singleLineComment  lexbuf =
 and interpolatedString (acc: StringBuilder) lexbuf =
   match _fslex_tables.Interpret(99,lexbuf) with
   | 0 -> ( 
-# 117 "WorkspaceParser/Lexer.fsl"
+# 119 "WorkspaceParser/Lexer.fsl"
                            STRING_END (acc.ToString()) 
 # 1049 "Gen/WorkspaceLexer.fs"
           )
   | 1 -> ( 
-# 118 "WorkspaceParser/Lexer.fsl"
+# 120 "WorkspaceParser/Lexer.fsl"
                            
                        acc.Append("{") |> ignore
                        interpolatedString acc lexbuf
@@ -1057,7 +1057,7 @@ and interpolatedString (acc: StringBuilder) lexbuf =
 # 1057 "Gen/WorkspaceLexer.fs"
           )
   | 2 -> ( 
-# 122 "WorkspaceParser/Lexer.fsl"
+# 124 "WorkspaceParser/Lexer.fsl"
                            
                        acc.Append("}") |> ignore
                        interpolatedString acc lexbuf
@@ -1065,12 +1065,12 @@ and interpolatedString (acc: StringBuilder) lexbuf =
 # 1065 "Gen/WorkspaceLexer.fs"
           )
   | 3 -> ( 
-# 126 "WorkspaceParser/Lexer.fsl"
+# 128 "WorkspaceParser/Lexer.fsl"
                            EXPRESSION_START (acc.ToString()) 
 # 1070 "Gen/WorkspaceLexer.fs"
           )
   | 4 -> ( 
-# 127 "WorkspaceParser/Lexer.fsl"
+# 129 "WorkspaceParser/Lexer.fsl"
                                                 
                        lexbuf |> lexeme |> acc.Append |> ignore
                        interpolatedString acc lexbuf
@@ -1082,152 +1082,152 @@ and interpolatedString (acc: StringBuilder) lexbuf =
 and interpolatedExpression  lexbuf =
   match _fslex_tables.Interpret(0,lexbuf) with
   | 0 -> ( 
-# 133 "WorkspaceParser/Lexer.fsl"
+# 135 "WorkspaceParser/Lexer.fsl"
                                  NOTHING 
 # 1087 "Gen/WorkspaceLexer.fs"
           )
   | 1 -> ( 
-# 134 "WorkspaceParser/Lexer.fsl"
+# 136 "WorkspaceParser/Lexer.fsl"
                               TRUE 
 # 1092 "Gen/WorkspaceLexer.fs"
           )
   | 2 -> ( 
-# 135 "WorkspaceParser/Lexer.fsl"
+# 137 "WorkspaceParser/Lexer.fsl"
                                FALSE 
 # 1097 "Gen/WorkspaceLexer.fs"
           )
   | 3 -> ( 
-# 136 "WorkspaceParser/Lexer.fsl"
+# 138 "WorkspaceParser/Lexer.fsl"
                               TRIM 
 # 1102 "Gen/WorkspaceLexer.fs"
           )
   | 4 -> ( 
-# 137 "WorkspaceParser/Lexer.fsl"
+# 139 "WorkspaceParser/Lexer.fsl"
                                UPPER 
 # 1107 "Gen/WorkspaceLexer.fs"
           )
   | 5 -> ( 
-# 138 "WorkspaceParser/Lexer.fsl"
+# 140 "WorkspaceParser/Lexer.fsl"
                                LOWER 
 # 1112 "Gen/WorkspaceLexer.fs"
           )
   | 6 -> ( 
-# 139 "WorkspaceParser/Lexer.fsl"
+# 141 "WorkspaceParser/Lexer.fsl"
                                  REPLACE 
 # 1117 "Gen/WorkspaceLexer.fs"
           )
   | 7 -> ( 
-# 140 "WorkspaceParser/Lexer.fsl"
+# 142 "WorkspaceParser/Lexer.fsl"
                                COUNT 
 # 1122 "Gen/WorkspaceLexer.fs"
           )
   | 8 -> ( 
-# 141 "WorkspaceParser/Lexer.fsl"
+# 143 "WorkspaceParser/Lexer.fsl"
                                  VERSION 
 # 1127 "Gen/WorkspaceLexer.fs"
           )
   | 9 -> ( 
-# 142 "WorkspaceParser/Lexer.fsl"
+# 144 "WorkspaceParser/Lexer.fsl"
                                 FORMAT 
 # 1132 "Gen/WorkspaceLexer.fs"
           )
   | 10 -> ( 
-# 143 "WorkspaceParser/Lexer.fsl"
+# 145 "WorkspaceParser/Lexer.fsl"
                                   TOSTRING 
 # 1137 "Gen/WorkspaceLexer.fs"
           )
   | 11 -> ( 
-# 144 "WorkspaceParser/Lexer.fsl"
+# 146 "WorkspaceParser/Lexer.fsl"
                             DOUBLE_QUESTION 
 # 1142 "Gen/WorkspaceLexer.fs"
           )
   | 12 -> ( 
-# 145 "WorkspaceParser/Lexer.fsl"
+# 147 "WorkspaceParser/Lexer.fsl"
                            QUESTION 
 # 1147 "Gen/WorkspaceLexer.fs"
           )
   | 13 -> ( 
-# 146 "WorkspaceParser/Lexer.fsl"
+# 148 "WorkspaceParser/Lexer.fsl"
                             DOT_QUESTION 
 # 1152 "Gen/WorkspaceLexer.fs"
           )
   | 14 -> ( 
-# 147 "WorkspaceParser/Lexer.fsl"
+# 149 "WorkspaceParser/Lexer.fsl"
                            DOT 
 # 1157 "Gen/WorkspaceLexer.fs"
           )
   | 15 -> ( 
-# 148 "WorkspaceParser/Lexer.fsl"
+# 150 "WorkspaceParser/Lexer.fsl"
                            COLON 
 # 1162 "Gen/WorkspaceLexer.fs"
           )
   | 16 -> ( 
-# 150 "WorkspaceParser/Lexer.fsl"
+# 152 "WorkspaceParser/Lexer.fsl"
                            LSQBRACKET 
 # 1167 "Gen/WorkspaceLexer.fs"
           )
   | 17 -> ( 
-# 151 "WorkspaceParser/Lexer.fsl"
+# 153 "WorkspaceParser/Lexer.fsl"
                            RSQBRACKET 
 # 1172 "Gen/WorkspaceLexer.fs"
           )
   | 18 -> ( 
-# 152 "WorkspaceParser/Lexer.fsl"
+# 154 "WorkspaceParser/Lexer.fsl"
                            LPAREN 
 # 1177 "Gen/WorkspaceLexer.fs"
           )
   | 19 -> ( 
-# 153 "WorkspaceParser/Lexer.fsl"
+# 155 "WorkspaceParser/Lexer.fsl"
                            RPAREN 
 # 1182 "Gen/WorkspaceLexer.fs"
           )
   | 20 -> ( 
-# 154 "WorkspaceParser/Lexer.fsl"
+# 156 "WorkspaceParser/Lexer.fsl"
                             DOUBLE_EQUAL 
 # 1187 "Gen/WorkspaceLexer.fs"
           )
   | 21 -> ( 
-# 155 "WorkspaceParser/Lexer.fsl"
+# 157 "WorkspaceParser/Lexer.fsl"
                            EQUAL 
 # 1192 "Gen/WorkspaceLexer.fs"
           )
   | 22 -> ( 
-# 156 "WorkspaceParser/Lexer.fsl"
+# 158 "WorkspaceParser/Lexer.fsl"
                             NOT_EQUAL 
 # 1197 "Gen/WorkspaceLexer.fs"
           )
   | 23 -> ( 
-# 157 "WorkspaceParser/Lexer.fsl"
+# 159 "WorkspaceParser/Lexer.fsl"
                            MINUS 
 # 1202 "Gen/WorkspaceLexer.fs"
           )
   | 24 -> ( 
-# 158 "WorkspaceParser/Lexer.fsl"
+# 160 "WorkspaceParser/Lexer.fsl"
                            PLUS 
 # 1207 "Gen/WorkspaceLexer.fs"
           )
   | 25 -> ( 
-# 159 "WorkspaceParser/Lexer.fsl"
+# 161 "WorkspaceParser/Lexer.fsl"
                            BANG 
 # 1212 "Gen/WorkspaceLexer.fs"
           )
   | 26 -> ( 
-# 160 "WorkspaceParser/Lexer.fsl"
+# 162 "WorkspaceParser/Lexer.fsl"
                            AND 
 # 1217 "Gen/WorkspaceLexer.fs"
           )
   | 27 -> ( 
-# 161 "WorkspaceParser/Lexer.fsl"
+# 163 "WorkspaceParser/Lexer.fsl"
                            OR 
 # 1222 "Gen/WorkspaceLexer.fs"
           )
   | 28 -> ( 
-# 163 "WorkspaceParser/Lexer.fsl"
+# 165 "WorkspaceParser/Lexer.fsl"
                                           lexbuf |> mkIdentifier |> VARIABLE 
 # 1227 "Gen/WorkspaceLexer.fs"
           )
   | 29 -> ( 
-# 165 "WorkspaceParser/Lexer.fsl"
+# 167 "WorkspaceParser/Lexer.fsl"
                                     
                        let s = lexbuf |> lexeme
                        let s = s.Substring(1, s.Length-2)
@@ -1236,7 +1236,7 @@ and interpolatedExpression  lexbuf =
 # 1236 "Gen/WorkspaceLexer.fs"
           )
   | 30 -> ( 
-# 171 "WorkspaceParser/Lexer.fsl"
+# 173 "WorkspaceParser/Lexer.fsl"
                              
                        let s = lexeme lexbuf |> int
                        NUMBER (s)
@@ -1244,12 +1244,12 @@ and interpolatedExpression  lexbuf =
 # 1244 "Gen/WorkspaceLexer.fs"
           )
   | 31 -> ( 
-# 176 "WorkspaceParser/Lexer.fsl"
+# 178 "WorkspaceParser/Lexer.fsl"
                                   interpolatedExpression lexbuf 
 # 1249 "Gen/WorkspaceLexer.fs"
           )
   | 32 -> ( 
-# 178 "WorkspaceParser/Lexer.fsl"
+# 180 "WorkspaceParser/Lexer.fsl"
                            EXPRESSION_END 
 # 1254 "Gen/WorkspaceLexer.fs"
           )

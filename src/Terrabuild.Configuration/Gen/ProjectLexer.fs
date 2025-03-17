@@ -1037,7 +1037,7 @@ and token  lexbuf =
 # 1037 "Gen/ProjectLexer.fs"
           )
   | 55 -> ( 
-# 96 "ProjectParser/Lexer.fsl"
+# 97 "ProjectParser/Lexer.fsl"
                                     
                        let s = lexbuf |> lexeme
                        let s = s.Substring(1, s.Length-2)
@@ -1046,12 +1046,12 @@ and token  lexbuf =
 # 1046 "Gen/ProjectLexer.fs"
           )
   | 56 -> ( 
-# 102 "ProjectParser/Lexer.fsl"
+# 104 "ProjectParser/Lexer.fsl"
                             STRING_START 
 # 1051 "Gen/ProjectLexer.fs"
           )
   | 57 -> ( 
-# 104 "ProjectParser/Lexer.fsl"
+# 106 "ProjectParser/Lexer.fsl"
                              
                        let s = lexeme lexbuf |> int
                        NUMBER (s)
@@ -1059,22 +1059,22 @@ and token  lexbuf =
 # 1059 "Gen/ProjectLexer.fs"
           )
   | 58 -> ( 
-# 109 "ProjectParser/Lexer.fsl"
+# 111 "ProjectParser/Lexer.fsl"
                                   token lexbuf 
 # 1064 "Gen/ProjectLexer.fs"
           )
   | 59 -> ( 
-# 110 "ProjectParser/Lexer.fsl"
+# 112 "ProjectParser/Lexer.fsl"
                                lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
 # 1069 "Gen/ProjectLexer.fs"
           )
   | 60 -> ( 
-# 111 "ProjectParser/Lexer.fsl"
+# 113 "ProjectParser/Lexer.fsl"
                            EOF 
 # 1074 "Gen/ProjectLexer.fs"
           )
   | 61 -> ( 
-# 112 "ProjectParser/Lexer.fsl"
+# 114 "ProjectParser/Lexer.fsl"
                          failwithf "unrecognized input: '%s'" <| lexeme lexbuf 
 # 1079 "Gen/ProjectLexer.fs"
           )
@@ -1083,17 +1083,17 @@ and token  lexbuf =
 and singleLineComment  lexbuf =
   match _fslex_tables.Interpret(107,lexbuf) with
   | 0 -> ( 
-# 115 "ProjectParser/Lexer.fsl"
+# 117 "ProjectParser/Lexer.fsl"
                                lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf 
 # 1088 "Gen/ProjectLexer.fs"
           )
   | 1 -> ( 
-# 116 "ProjectParser/Lexer.fsl"
+# 118 "ProjectParser/Lexer.fsl"
                            EOF 
 # 1093 "Gen/ProjectLexer.fs"
           )
   | 2 -> ( 
-# 117 "ProjectParser/Lexer.fsl"
+# 119 "ProjectParser/Lexer.fsl"
                          singleLineComment lexbuf 
 # 1098 "Gen/ProjectLexer.fs"
           )
@@ -1102,12 +1102,12 @@ and singleLineComment  lexbuf =
 and interpolatedString (acc: StringBuilder) lexbuf =
   match _fslex_tables.Interpret(99,lexbuf) with
   | 0 -> ( 
-# 120 "ProjectParser/Lexer.fsl"
+# 122 "ProjectParser/Lexer.fsl"
                            STRING_END (acc.ToString()) 
 # 1107 "Gen/ProjectLexer.fs"
           )
   | 1 -> ( 
-# 121 "ProjectParser/Lexer.fsl"
+# 123 "ProjectParser/Lexer.fsl"
                            
                        acc.Append("{") |> ignore
                        interpolatedString acc lexbuf
@@ -1115,7 +1115,7 @@ and interpolatedString (acc: StringBuilder) lexbuf =
 # 1115 "Gen/ProjectLexer.fs"
           )
   | 2 -> ( 
-# 125 "ProjectParser/Lexer.fsl"
+# 127 "ProjectParser/Lexer.fsl"
                            
                        acc.Append("}") |> ignore
                        interpolatedString acc lexbuf
@@ -1123,12 +1123,12 @@ and interpolatedString (acc: StringBuilder) lexbuf =
 # 1123 "Gen/ProjectLexer.fs"
           )
   | 3 -> ( 
-# 129 "ProjectParser/Lexer.fsl"
+# 131 "ProjectParser/Lexer.fsl"
                            EXPRESSION_START (acc.ToString()) 
 # 1128 "Gen/ProjectLexer.fs"
           )
   | 4 -> ( 
-# 130 "ProjectParser/Lexer.fsl"
+# 132 "ProjectParser/Lexer.fsl"
                                                 
                        lexbuf |> lexeme |> acc.Append |> ignore
                        interpolatedString acc lexbuf
@@ -1140,152 +1140,152 @@ and interpolatedString (acc: StringBuilder) lexbuf =
 and interpolatedExpression  lexbuf =
   match _fslex_tables.Interpret(0,lexbuf) with
   | 0 -> ( 
-# 136 "ProjectParser/Lexer.fsl"
+# 138 "ProjectParser/Lexer.fsl"
                                  NOTHING 
 # 1145 "Gen/ProjectLexer.fs"
           )
   | 1 -> ( 
-# 137 "ProjectParser/Lexer.fsl"
+# 139 "ProjectParser/Lexer.fsl"
                               TRUE 
 # 1150 "Gen/ProjectLexer.fs"
           )
   | 2 -> ( 
-# 138 "ProjectParser/Lexer.fsl"
+# 140 "ProjectParser/Lexer.fsl"
                                FALSE 
 # 1155 "Gen/ProjectLexer.fs"
           )
   | 3 -> ( 
-# 139 "ProjectParser/Lexer.fsl"
+# 141 "ProjectParser/Lexer.fsl"
                               TRIM 
 # 1160 "Gen/ProjectLexer.fs"
           )
   | 4 -> ( 
-# 140 "ProjectParser/Lexer.fsl"
+# 142 "ProjectParser/Lexer.fsl"
                                UPPER 
 # 1165 "Gen/ProjectLexer.fs"
           )
   | 5 -> ( 
-# 141 "ProjectParser/Lexer.fsl"
+# 143 "ProjectParser/Lexer.fsl"
                                LOWER 
 # 1170 "Gen/ProjectLexer.fs"
           )
   | 6 -> ( 
-# 142 "ProjectParser/Lexer.fsl"
+# 144 "ProjectParser/Lexer.fsl"
                                  REPLACE 
 # 1175 "Gen/ProjectLexer.fs"
           )
   | 7 -> ( 
-# 143 "ProjectParser/Lexer.fsl"
+# 145 "ProjectParser/Lexer.fsl"
                                COUNT 
 # 1180 "Gen/ProjectLexer.fs"
           )
   | 8 -> ( 
-# 144 "ProjectParser/Lexer.fsl"
+# 146 "ProjectParser/Lexer.fsl"
                                  VERSION 
 # 1185 "Gen/ProjectLexer.fs"
           )
   | 9 -> ( 
-# 145 "ProjectParser/Lexer.fsl"
+# 147 "ProjectParser/Lexer.fsl"
                                 FORMAT 
 # 1190 "Gen/ProjectLexer.fs"
           )
   | 10 -> ( 
-# 146 "ProjectParser/Lexer.fsl"
+# 148 "ProjectParser/Lexer.fsl"
                                   TOSTRING 
 # 1195 "Gen/ProjectLexer.fs"
           )
   | 11 -> ( 
-# 147 "ProjectParser/Lexer.fsl"
+# 149 "ProjectParser/Lexer.fsl"
                             DOUBLE_QUESTION 
 # 1200 "Gen/ProjectLexer.fs"
           )
   | 12 -> ( 
-# 148 "ProjectParser/Lexer.fsl"
+# 150 "ProjectParser/Lexer.fsl"
                            QUESTION 
 # 1205 "Gen/ProjectLexer.fs"
           )
   | 13 -> ( 
-# 149 "ProjectParser/Lexer.fsl"
+# 151 "ProjectParser/Lexer.fsl"
                             DOT_QUESTION 
 # 1210 "Gen/ProjectLexer.fs"
           )
   | 14 -> ( 
-# 150 "ProjectParser/Lexer.fsl"
+# 152 "ProjectParser/Lexer.fsl"
                            DOT 
 # 1215 "Gen/ProjectLexer.fs"
           )
   | 15 -> ( 
-# 151 "ProjectParser/Lexer.fsl"
+# 153 "ProjectParser/Lexer.fsl"
                            COLON 
 # 1220 "Gen/ProjectLexer.fs"
           )
   | 16 -> ( 
-# 153 "ProjectParser/Lexer.fsl"
+# 155 "ProjectParser/Lexer.fsl"
                            LSQBRACKET 
 # 1225 "Gen/ProjectLexer.fs"
           )
   | 17 -> ( 
-# 154 "ProjectParser/Lexer.fsl"
+# 156 "ProjectParser/Lexer.fsl"
                            RSQBRACKET 
 # 1230 "Gen/ProjectLexer.fs"
           )
   | 18 -> ( 
-# 155 "ProjectParser/Lexer.fsl"
+# 157 "ProjectParser/Lexer.fsl"
                            LPAREN 
 # 1235 "Gen/ProjectLexer.fs"
           )
   | 19 -> ( 
-# 156 "ProjectParser/Lexer.fsl"
+# 158 "ProjectParser/Lexer.fsl"
                            RPAREN 
 # 1240 "Gen/ProjectLexer.fs"
           )
   | 20 -> ( 
-# 157 "ProjectParser/Lexer.fsl"
+# 159 "ProjectParser/Lexer.fsl"
                             DOUBLE_EQUAL 
 # 1245 "Gen/ProjectLexer.fs"
           )
   | 21 -> ( 
-# 158 "ProjectParser/Lexer.fsl"
+# 160 "ProjectParser/Lexer.fsl"
                            EQUAL 
 # 1250 "Gen/ProjectLexer.fs"
           )
   | 22 -> ( 
-# 159 "ProjectParser/Lexer.fsl"
+# 161 "ProjectParser/Lexer.fsl"
                             NOT_EQUAL 
 # 1255 "Gen/ProjectLexer.fs"
           )
   | 23 -> ( 
-# 160 "ProjectParser/Lexer.fsl"
+# 162 "ProjectParser/Lexer.fsl"
                            MINUS 
 # 1260 "Gen/ProjectLexer.fs"
           )
   | 24 -> ( 
-# 161 "ProjectParser/Lexer.fsl"
+# 163 "ProjectParser/Lexer.fsl"
                            PLUS 
 # 1265 "Gen/ProjectLexer.fs"
           )
   | 25 -> ( 
-# 162 "ProjectParser/Lexer.fsl"
+# 164 "ProjectParser/Lexer.fsl"
                            BANG 
 # 1270 "Gen/ProjectLexer.fs"
           )
   | 26 -> ( 
-# 163 "ProjectParser/Lexer.fsl"
+# 165 "ProjectParser/Lexer.fsl"
                            AND 
 # 1275 "Gen/ProjectLexer.fs"
           )
   | 27 -> ( 
-# 164 "ProjectParser/Lexer.fsl"
+# 166 "ProjectParser/Lexer.fsl"
                            OR 
 # 1280 "Gen/ProjectLexer.fs"
           )
   | 28 -> ( 
-# 166 "ProjectParser/Lexer.fsl"
+# 168 "ProjectParser/Lexer.fsl"
                                           lexbuf |> mkIdentifier |> VARIABLE 
 # 1285 "Gen/ProjectLexer.fs"
           )
   | 29 -> ( 
-# 168 "ProjectParser/Lexer.fsl"
+# 170 "ProjectParser/Lexer.fsl"
                                     
                        let s = lexbuf |> lexeme
                        let s = s.Substring(1, s.Length-2)
@@ -1294,7 +1294,7 @@ and interpolatedExpression  lexbuf =
 # 1294 "Gen/ProjectLexer.fs"
           )
   | 30 -> ( 
-# 174 "ProjectParser/Lexer.fsl"
+# 176 "ProjectParser/Lexer.fsl"
                              
                        let s = lexeme lexbuf |> int
                        NUMBER (s)
@@ -1302,12 +1302,12 @@ and interpolatedExpression  lexbuf =
 # 1302 "Gen/ProjectLexer.fs"
           )
   | 31 -> ( 
-# 179 "ProjectParser/Lexer.fsl"
+# 181 "ProjectParser/Lexer.fsl"
                                   interpolatedExpression lexbuf 
 # 1307 "Gen/ProjectLexer.fs"
           )
   | 32 -> ( 
-# 181 "ProjectParser/Lexer.fsl"
+# 183 "ProjectParser/Lexer.fsl"
                            EXPRESSION_END 
 # 1312 "Gen/ProjectLexer.fs"
           )

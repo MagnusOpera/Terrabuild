@@ -93,12 +93,14 @@ rule token = parse
     | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
     | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
+    // simple string
     | quotedString { 
         let s = lexbuf |> lexeme
         let s = s.Substring(1, s.Length-2)
         STRING s
     }
 
+    // interpolated string
     | '\"' { STRING_START }
 
     | number {
