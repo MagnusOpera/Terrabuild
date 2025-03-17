@@ -35,10 +35,12 @@ let parse txt =
     try
         Parser.Workspace.WorkspaceFile switchableLexer lexbuf
     with
+    | :? TerrabuildException as exn ->
+        let err = sprintf "Parse error at (%d,%d)"
+                          (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
+        raiseParserError err exn
     | exn ->
         let err = sprintf "Unexpected token '%s' at (%d,%d)"
                           (LexBuffer<_>.LexemeString lexbuf |> string) 
                           (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
-        raiseParseError err
-
-
+        raiseParserError err exn

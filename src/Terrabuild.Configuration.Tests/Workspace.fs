@@ -118,6 +118,7 @@ let parseWorkspace2() =
                                                                                                 Expr.String " x "
                                                                                                 Expr.Number 42 ])
                                                                                Expr.String " {^}" ])
+                                                   "secret8", Expr.String "{ Hello \"!\" }"
                                                    "my-variable", Expr.Number 42
                                                  ] }
 

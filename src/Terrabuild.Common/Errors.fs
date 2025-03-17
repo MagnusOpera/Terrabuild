@@ -21,6 +21,9 @@ let raiseInvalidArg msg =
 let raiseParseError msg =
     TerrabuildException(msg, ErrorArea.Parse) |> raise
 
+let raiseParserError msg innerException =
+    TerrabuildException(msg, ErrorArea.Parse, innerException) |> raise
+
 let raiseTypeError msg =
     TerrabuildException(msg, ErrorArea.Type) |> raise
 
