@@ -108,7 +108,13 @@ let parseProject2() =
         let buildTarget = 
             { Target.DependsOn = None
               Target.Rebuild = Some (Expr.Bool true)
-              Target.Outputs = Set [ Expr.String "*.dll" ] |> Some
+              Target.Outputs = Set [ Expr.Function (Function.Format,
+                                                    [ Expr.String "{0}{1}"
+                                                      Expr.Function (Function.Format, 
+                                                                     [ Expr.String "{0}{1}"
+                                                                       Expr.String ""
+                                                                       Expr.Variable "wildcard" ])
+                                                      Expr.String ".dll"])] |> Some
               Target.Cache = None
               Target.Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 

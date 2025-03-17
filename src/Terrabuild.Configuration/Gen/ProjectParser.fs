@@ -1857,7 +1857,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 216 "ProjectParser/Parser.fsy"
-                                                                        _2 
+                                                                        Expr.Function (Function.Format, [Expr.String "{0}{1}"; _2; Expr.String _3]) 
                    )
 # 216 "ProjectParser/Parser.fsy"
                  : 'gentype_String));

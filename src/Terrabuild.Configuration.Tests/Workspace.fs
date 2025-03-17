@@ -106,13 +106,19 @@ let parseWorkspace2() =
                                               "secret5", Expr.Function (Function.ToString, [Expr.Function (Function.Plus, [Expr.Function (Function.Plus, [Expr.Number 40; Expr.Number 1]); Expr.Number 2])])
                                               "secret6", Expr.Function (Function.Or, [ Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false])
                                                                                        Expr.Bool true ])
-                                              "secret7", Expr.Function (Function.Format, [ Expr.String "{0}{1}{2}"
-                                                                                           Expr.Function (Function.Format, [ Expr.String "{0}{1}"
-                                                                                                                             Expr.String "hello "
-                                                                                                                             Expr.Function (Function.Plus, [ Expr.Variable "name"
-                                                                                                                                                             Expr.String "toto" ]) ])
+                                              "secret7", Expr.Function (Function.Format,
+                                                                        [ Expr.String "{0}{1}";
+                                                                          Expr.Function (Function.Format,
+                                                                                         [ Expr.String "{0}{1}{2}"
+                                                                                           Expr.Function (Function.Format,
+                                                                                                          [ Expr.String "{0}{1}"
+                                                                                                            Expr.String "hello "
+                                                                                                            Expr.Function (Function.Plus,
+                                                                                                                           [ Expr.Variable "name"
+                                                                                                                             Expr.String "toto"])])
                                                                                            Expr.String " x "
                                                                                            Expr.Number 42 ])
+                                                                          Expr.String " !" ])
                                               "my-variable", Expr.Number 42
                                             ] }
 

@@ -197,7 +197,7 @@ Bool:
 
 String:
     | STRING { Expr.String $1 }
-    | STRING_START InterpolatedString STRING_END { $2 }
+    | STRING_START InterpolatedString STRING_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) }
 
 InterpolatedString:
     | EXPRESSION_START Expr EXPRESSION_END { Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2]) }

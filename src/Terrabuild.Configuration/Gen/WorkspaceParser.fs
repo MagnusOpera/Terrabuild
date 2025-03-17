@@ -1690,7 +1690,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 200 "WorkspaceParser/Parser.fsy"
-                                                                        _2 
+                                                                        Expr.Function (Function.Format, [Expr.String "{0}{1}"; _2; Expr.String _3]) 
                    )
 # 200 "WorkspaceParser/Parser.fsy"
                  : 'gentype_String));
