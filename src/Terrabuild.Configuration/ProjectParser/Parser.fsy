@@ -214,6 +214,7 @@ Bool:
 
 String:
     | STRING { Expr.String $1 }
+    | STRING_START STRING_END { Expr.String $2 }
     | STRING_START InterpolatedString STRING_END { 
         if $3 |> String.IsNullOrEmpty then Expr.Function (Function.ToString, [$2])
         else Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) 
