@@ -173,6 +173,7 @@ and interpolatedExpression = parse
     | "&" { AND }
     | "|" { OR }
 
+    | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
     | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
     | '\"' { string (StringBuilder()) lexbuf } 
