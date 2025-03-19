@@ -12,6 +12,7 @@ type ProjectComponents =
     | Ignores of Expr list
     | Includes of Expr list
     | Labels of Expr list
+    | Locals of Map<string, Expr>
 
 [<RequireQualifiedAccess>]
 type ProjectBlock =
@@ -21,7 +22,8 @@ type ProjectBlock =
       Outputs: Set<Expr>
       Ignores: Set<Expr>
       Includes: Set<Expr>
-      Labels: Set<Expr> }
+      Labels: Set<Expr>
+      Locals: Map<string, Expr> }
 with
     static member Build init components =
         let dependencies =
@@ -60,13 +62,20 @@ with
             | [value] -> value |> Set.ofList
             | _ -> raiseParseError "multiple labels declared"
 
+        let local =
+            match components |> List.choose (function | ProjectComponents.Locals value -> Some value | _ -> None) with
+            | [] -> Map.empty
+            | [value] -> value
+            | _ -> raiseParseError "multiple locals declared"
+
         { Init = init
           Dependencies = dependencies |> Option.defaultValue Set.empty
           Links = links |> Option.defaultValue Set.empty
           Outputs = outputs |> Option.defaultValue Set.empty
           Ignores = ignores |> Option.defaultValue Set.empty
           Includes = includes |> Option.defaultValue Set.empty
-          Labels = labels }
+          Labels = labels
+          Locals = local }
 
 
 

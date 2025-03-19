@@ -81,6 +81,7 @@ rule token = parse
     | "cache" { CACHE }
     | "defaults" { DEFAULTS }
     | "name" { NAME }
+    | "locals" { LOCALS }
 
     // simple string
     | '\"' { string (StringBuilder()) lexbuf } 

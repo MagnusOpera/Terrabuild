@@ -19,7 +19,8 @@ let parseProject() =
               ProjectBlock.Ignores = Set.empty
               ProjectBlock.Includes = Set.empty
               ProjectBlock.Labels = Set [ Expr.String "app"; Expr.String "dotnet" ]
-              ProjectBlock.Init = Some "@dotnet" }
+              ProjectBlock.Init = Some "@dotnet"
+              ProjectBlock.Locals = Map.empty }
 
         let extDotnet =
             { Container = None
@@ -95,7 +96,8 @@ let parseProject2() =
               ProjectBlock.Ignores = Set.empty
               ProjectBlock.Includes = Set.empty
               ProjectBlock.Labels = Set.empty
-              ProjectBlock.Init = Some "@dotnet" }
+              ProjectBlock.Init = Some "@dotnet"
+              ProjectBlock.Locals = Map.empty }
 
         let extDotnet =
             { Container = None

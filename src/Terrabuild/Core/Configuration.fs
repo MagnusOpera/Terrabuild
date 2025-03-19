@@ -73,6 +73,7 @@ type private LoadedProject = {
     Labels: string set
     Extensions: Map<string, AST.ExtensionBlock>
     Scripts: Map<string, LazyScript>
+    Locals: Map<string, Expr>
 }
 
 
@@ -311,6 +312,8 @@ let read (options: ConfigOptions.Options) =
             |> Set.ofSeq
             |> Set.union projectInfo.Includes
 
+        let locals = projectConfig.Project.Locals
+
         { LoadedProject.Dependencies = projectDependencies
           LoadedProject.Links = projectLinks
           LoadedProject.Includes = includes
@@ -319,7 +322,8 @@ let read (options: ConfigOptions.Options) =
           LoadedProject.Targets = projectTargets
           LoadedProject.Labels = labels
           LoadedProject.Extensions = extensions
-          LoadedProject.Scripts = scripts }
+          LoadedProject.Scripts = scripts
+          LoadedProject.Locals = locals }
 
 
     // this is the final stage: create targets and create the project
@@ -399,6 +403,7 @@ let read (options: ConfigOptions.Options) =
 
                         let context =
                             extension.Defaults
+                            |> Map.addMap projectDef.Locals
                             |> Map.addMap step.Parameters
                             |> Expr.Map
                             |> Eval.eval evaluationContext
