@@ -15,25 +15,28 @@ type TerrabuildException(msg, area, ?innerException: Exception) =
     member _.Area: ErrorArea = area
 
 
-let raiseInvalidArg msg =
+let raiseInvalidArg(msg) =
     TerrabuildException(msg, ErrorArea.InvalidArg) |> raise
 
-let raiseParseError msg =
+let raiseParseError(msg) =
     TerrabuildException(msg, ErrorArea.Parse) |> raise
 
-let raiseTypeError msg =
+let raiseParserError(msg, innerException) =
+    TerrabuildException(msg, ErrorArea.Parse, innerException) |> raise
+
+let raiseTypeError(msg) =
     TerrabuildException(msg, ErrorArea.Type) |> raise
 
-let raiseSymbolError msg =
+let raiseSymbolError(msg) =
     TerrabuildException(msg, ErrorArea.Symbol) |> raise
 
-let raiseBugError msg =
+let raiseBugError(msg) =
     TerrabuildException(msg, ErrorArea.Bug) |> raise
 
-let raiseExternalError msg =
+let raiseExternalError(msg) =
     TerrabuildException(msg, ErrorArea.External) |> raise
 
-let forwardExternalError msg innerException =
+let forwardExternalError(msg, innerException) =
     TerrabuildException(msg, ErrorArea.External, innerException) |> raise
 
 

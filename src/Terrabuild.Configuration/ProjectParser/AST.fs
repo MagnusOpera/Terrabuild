@@ -1,36 +1,27 @@
-module Terrabuild.Configuration.Project.AST
+namespace Terrabuild.Configuration.AST.Project
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Errors
 
 
-// NOTE: must be in sync with Terrabuild.Extensibility.Cacheability
-[<RequireQualifiedAccess>]
-type Cacheability =
-    | Never
-    | Local
-    | Remote
-    | Always
-
 [<RequireQualifiedAccess>]
 type ProjectComponents =
-    | Dependencies of string list
-    | Links of string list
-    | Outputs of string list
-    | Ignores of string list
-    | Includes of string list
-    | Labels of string list
+    | Dependencies of Expr list
+    | Links of Expr list
+    | Outputs of Expr list
+    | Ignores of Expr list
+    | Includes of Expr list
+    | Labels of Expr list
 
 [<RequireQualifiedAccess>]
-type Project = {
-    Init: string option
-    Dependencies: Set<string>
-    Links: Set<string>
-    Outputs: Set<string>
-    Ignores: Set<string>
-    Includes: Set<string>
-    Labels: Set<string>
-}
+type ProjectBlock =
+    { Init: string option
+      Dependencies: Set<Expr>
+      Links: Set<Expr>
+      Outputs: Set<Expr>
+      Ignores: Set<Expr>
+      Includes: Set<Expr>
+      Labels: Set<Expr> }
 with
     static member Build init components =
         let dependencies =
@@ -76,33 +67,31 @@ with
           Ignores = ignores |> Option.defaultValue Set.empty
           Includes = includes |> Option.defaultValue Set.empty
           Labels = labels }
-  
 
 
 
 
-type Step = {
-    Extension: string
-    Command: string
-    Parameters: Map<string, Expr>
-}
+
+type Step =
+    { Extension: string
+      Command: string
+      Parameters: Map<string, Expr> }
 
 [<RequireQualifiedAccess>]
 type TargetComponents =
     | DependsOn of string list
     | Rebuild of Expr
-    | Outputs of string list
-    | Cache of string
+    | Outputs of Expr list
+    | Cache of Expr
     | Step of Step
 
 [<RequireQualifiedAccess>]
-type Target = {
-    Rebuild: Expr option
-    Outputs: Set<string> option
-    DependsOn: Set<string> option
-    Cache: Cacheability option
-    Steps: Step list
-}
+type TargetBlock =
+    { Rebuild: Expr option
+      Outputs: Set<Expr> option
+      DependsOn: Set<string> option
+      Cache: Expr option
+      Steps: Step list }
 with
     static member Build id components =
         let dependsOn =
@@ -126,14 +115,7 @@ with
         let cache =
             match components |> List.choose (function | TargetComponents.Cache value -> Some value | _ -> None) with
             | [] -> None
-            | [value] ->
-                // warning this is the values of Terrabuild.Extensibility.Cacheability
-                match value with
-                | "never" -> Some Cacheability.Never
-                | "local" -> Some Cacheability.Local
-                | "remote" -> Some Cacheability.Remote
-                | "always" -> Some Cacheability.Always
-                | _ -> raiseParseError "invalid cache value"
+            | [value] -> Some value
             | _ -> raiseParseError "multiple cache declared"
 
         let steps =
@@ -149,21 +131,20 @@ with
 
 [<RequireQualifiedAccess>]
 type ProjectFileComponents =
-    | Project of Project
-    | Extension of string * Extension
-    | Target of string * Target
+    | Project of ProjectBlock
+    | Extension of string * ExtensionBlock
+    | Target of string * TargetBlock
 
 [<RequireQualifiedAccess>]
-type ProjectFile = {
-    Project: Project
-    Extensions: Map<string, Extension>
-    Targets: Map<string, Target>
-}
+type ProjectFile =
+    { Project: ProjectBlock
+      Extensions: Map<string, ExtensionBlock>
+      Targets: Map<string, TargetBlock> }
 with
     static member Build components =
         let project =
             match components |> List.choose (function | ProjectFileComponents.Project value -> Some value | _ -> None) with
-            | [] -> Project.Build None []
+            | [] -> ProjectBlock.Build None []
             | [value] -> value
             | _ -> raiseParseError "multiple project declared"
 

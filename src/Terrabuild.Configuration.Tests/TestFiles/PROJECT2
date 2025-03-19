@@ -6,6 +6,6 @@ extension @dotnet {
 
 target build {
   rebuild = true
-  outputs = [ "*.dll" ]
+  outputs = [ $"{ $wildcard }.dll" ]
   @dotnet build
 }

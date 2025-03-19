@@ -6,17 +6,16 @@ open Errors
 type ExtensionComponents =
     | Container of Expr
     | Platform of Expr
-    | Variables of string list
-    | Script of string
+    | Variables of Expr list
+    | Script of Expr
     | Defaults of Map<string, Expr>
 
-type Extension = {
-    Container: Expr option
-    Platform: Expr option
-    Variables: string Set
-    Script: string option
-    Defaults: Map<string, Expr>
-}
+type ExtensionBlock =
+    { Container: Expr option
+      Platform: Expr option
+      Variables: Expr Set
+      Script: Expr option
+      Defaults: Map<string, Expr> }
 with
     static member Build name components =
         let container =

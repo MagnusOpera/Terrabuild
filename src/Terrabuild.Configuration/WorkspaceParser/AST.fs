@@ -1,19 +1,17 @@
-namespace Terrabuild.Configuration.Workspace.AST
+namespace Terrabuild.Configuration.AST.Workspace
 open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 open Errors
-open System
 
 [<RequireQualifiedAccess>]
 type WorkspaceComponents =
-    | Id of string
-    | Ignores of string list
+    | Id of Expr
+    | Ignores of Expr list
 
 [<RequireQualifiedAccess>]
-type Workspace = {
-    Id: string option
-    Ignores: Set<string>
-}
+type WorkspaceBlock =
+    { Id: Expr option
+      Ignores: Set<Expr> }
 with
     static member Build components =
         let id =
@@ -28,8 +26,8 @@ with
             | [value] -> value |> Set.ofList |> Some
             | _ -> raiseParseError "multiple ignores declared"
 
-        { Workspace.Id = id
-          Workspace.Ignores = ignores |> Option.defaultValue Set.empty }
+        { WorkspaceBlock.Id = id
+          WorkspaceBlock.Ignores = ignores |> Option.defaultValue Set.empty }
 
 
 [<RequireQualifiedAccess>]
@@ -38,10 +36,9 @@ type TargetComponents =
     | Rebuild of Expr
 
 [<RequireQualifiedAccess>]
-type Target = {
-    DependsOn: Set<string>
-    Rebuild: Expr
-}
+type TargetBlock =
+    { DependsOn: Set<string>
+      Rebuild: Expr }
 with
     static member Build id components =
         let dependsOn =
@@ -65,9 +62,8 @@ type ConfigurationComponents =
     | Variables of Map<string, Expr>
 
 [<RequireQualifiedAccess>]
-type Configuration = {
-    Variables: Map<string, Expr>
-}
+type ConfigurationBlock =
+    { Variables: Map<string, Expr> }
 with
     static member Build id components =
         let variables =
@@ -80,25 +76,24 @@ with
 
 [<RequireQualifiedAccess>]
 type WorkspaceFileComponents =
-    | Workspace of Workspace
-    | Target of string * Target
-    | Configuration of string * Configuration
-    | Extension of string * Extension
+    | Workspace of WorkspaceBlock
+    | Target of string * TargetBlock
+    | Configuration of string * ConfigurationBlock
+    | Extension of string * ExtensionBlock
 
 [<RequireQualifiedAccess>]
-type WorkspaceFile = {
-    Workspace: Workspace
-    Targets: Map<string, Target>
-    Configurations: Map<string, Configuration>
-    Extensions: Map<string, Extension>
-}
+type WorkspaceFile =
+    { Workspace: WorkspaceBlock
+      Targets: Map<string, TargetBlock>
+      Configurations: Map<string, ConfigurationBlock>
+      Extensions: Map<string, ExtensionBlock> }
 with
     static member Build components =
         let workspace =
             match components |> List.choose (function | WorkspaceFileComponents.Workspace value -> Some value | _ -> None) with
             | [] ->
-                { Workspace.Id = None
-                  Workspace.Ignores = Set.empty }
+                { WorkspaceBlock.Id = None
+                  WorkspaceBlock.Ignores = Set.empty }
             | [value] -> value
             | _ -> raiseParseError "multiple workspace declared"
 

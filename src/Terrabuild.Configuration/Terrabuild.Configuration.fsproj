@@ -9,17 +9,17 @@
                          $(DefineConstants), '^(.*;)*GENERATE_PARSER(;.*)*$'))">
             <ItemGroup>
                 <FsYacc Include="WorkspaceParser/Parser.fsy">
-                    <OtherFlags>--internal --module Terrabuild.Configuration.Workspace.Parser -o Gen/WorkspaceParser.fs</OtherFlags>
+                    <OtherFlags>--internal --module Parser.Workspace -o Gen/WorkspaceParser.fs</OtherFlags>
                 </FsYacc>
                 <FsLex Include="WorkspaceParser/Lexer.fsl">
-                    <OtherFlags>--internal --module Terrabuild.Configuration.Workspace.Lexer --unicode -o Gen/WorkspaceLexer.fs</OtherFlags>
+                    <OtherFlags>--internal --module Lexer.Workspace --unicode -o Gen/WorkspaceLexer.fs</OtherFlags>
                 </FsLex>
 
                 <FsYacc Include="ProjectParser/Parser.fsy">
-                    <OtherFlags>--internal --module Terrabuild.Configuration.Project.Parser -o Gen/ProjectParser.fs</OtherFlags>
+                    <OtherFlags>--internal --module Parser.Project -o Gen/ProjectParser.fs</OtherFlags>
                 </FsYacc>
                 <FsLex Include="ProjectParser/Lexer.fsl">
-                    <OtherFlags>--internal --module Terrabuild.Configuration.Project.Lexer --unicode -o Gen/ProjectLexer.fs</OtherFlags>
+                    <OtherFlags>--internal --module Lexer.Project --unicode -o Gen/ProjectLexer.fs</OtherFlags>
                 </FsLex>
             </ItemGroup>
         </When>
@@ -35,7 +35,8 @@
     <Compile Include="Gen/ProjectParser.fsi" />
     <Compile Include="Gen/ProjectParser.fs" />
     <Compile Include="Gen/ProjectLexer.fs" />
-    <Compile Include="FrontEnd.fs" />
+    <Compile Include="WorkspaceParser/FrontEnd.fs" />
+    <Compile Include="ProjectParser/FrontEnd.fs" />
   </ItemGroup>
 
   <ItemGroup>
