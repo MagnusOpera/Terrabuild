@@ -12,22 +12,23 @@ type LexerMode =
 
 
 let parse txt = 
-    let mutable lexerMode = LexerMode.Default
+    let lexerMode = System.Collections.Generic.Stack([LexerMode.Default])
     let switchableLexer (lexbuff: LexBuffer<char>) =
+        let mode = lexerMode.Peek()
         let lexer =
-            match lexerMode with
+            match mode with
             | LexerMode.Default -> Lexer.Workspace.token
             | LexerMode.InterpolatedString -> Lexer.Workspace.interpolatedString (StringBuilder())
             | LexerMode.InterpolatedExpression -> Lexer.Workspace.interpolatedExpression
 
         let token = lexer lexbuff
-        // printfn $"### SwitchableLexer  mode: {lexerMode}  token: {token}"
+        // printfn $"### SwitchableLexer  mode: {mode}  token: {token}"
 
         match token with
-        | Parser.Workspace.STRING_START -> lexerMode <- LexerMode.InterpolatedString
-        | Parser.Workspace.STRING_END _ -> lexerMode <- LexerMode.Default
-        | Parser.Workspace.EXPRESSION_START _ -> lexerMode <- LexerMode.InterpolatedExpression
-        | Parser.Workspace.EXPRESSION_END -> lexerMode <- LexerMode.InterpolatedString
+        | Parser.Workspace.STRING_START -> lexerMode.Push(LexerMode.InterpolatedString)
+        | Parser.Workspace.STRING_END _ -> lexerMode.Pop() |> ignore
+        | Parser.Workspace.EXPRESSION_START _ -> lexerMode.Push(LexerMode.InterpolatedExpression)
+        | Parser.Workspace.EXPRESSION_END -> lexerMode.Pop() |> ignore
         | _ -> ()
         token
 
@@ -38,9 +39,9 @@ let parse txt =
     | :? TerrabuildException as exn ->
         let err = sprintf "Parse error at (%d,%d)"
                           (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
-        raiseParserError err exn
+        raiseParserError(err, exn)
     | exn ->
         let err = sprintf "Unexpected token '%s' at (%d,%d)"
                           (LexBuffer<_>.LexemeString lexbuf |> string) 
                           (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
-        raiseParserError err exn
+        raiseParserError(err, exn)

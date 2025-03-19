@@ -129,7 +129,6 @@ let version() =
 [<Test>]
 let formatList() =
     let expected = Value.String "\\o/THIS42ISAtrueTEMPLATEtiti"
-    let expectedUsedVars = Set [ "toto" ]
 
     let context = { evaluationContext
                     with Variables = Map ["toto", Value.String "\\o/"] }
@@ -148,7 +147,6 @@ let formatList() =
 [<Test>]
 let formatMap() =
     let expected = Value.String "THIS\\o/IS42ATEMPLATEtrue"
-    let expectedUsedVars = Set [ "args" ]
 
     let context = { evaluationContext
                     with Variables = Map ["args", Value.Map (Map [ "string", Value.String "\\o/"
@@ -167,7 +165,6 @@ let formatMap() =
 [<Test>]
 let listItem() =
     let expected = Value.Number 42
-    let expectedUsedVars = Set ["tagada"]
 
     let context = { evaluationContext
                     with Variables = Map [ 
@@ -181,7 +178,6 @@ let listItem() =
 [<Test>]
 let listTryItem() =
     let expected = Value.Nothing
-    let expectedUsedVars = Set ["tagada"]
 
     let context = { evaluationContext
                     with Variables = Map [ 
@@ -195,7 +191,6 @@ let listTryItem() =
 [<Test>]
 let mapItem() =
     let expected = Value.Number 42
-    let expectedUsedVars = Set ["tagada"]
 
     let context = { evaluationContext
                     with Variables = Map [ 
@@ -209,7 +204,6 @@ let mapItem() =
 [<Test>]
 let mapTryItem() =
     let expected = Value.Nothing
-    let expectedUsedVars = Set ["tagada"]
 
     let context = { evaluationContext
                     with Variables = Map [ 

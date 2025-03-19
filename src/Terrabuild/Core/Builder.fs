@@ -85,7 +85,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                         let executionRequest =
                             match Extensions.invokeScriptMethod<Terrabuild.Extensibility.ActionExecutionRequest> optContext.Command parameters (Some operation.Script) with
                             | Extensions.InvocationResult.Success executionRequest -> executionRequest
-                            | Extensions.InvocationResult.ErrorTarget ex -> forwardExternalError $"{hash}: Failed to get shell operation (extension error)" ex
+                            | Extensions.InvocationResult.ErrorTarget ex -> forwardExternalError($"{hash}: Failed to get shell operation (extension error)", ex)
                             | _ -> raiseExternalError $"{hash}: Failed to get shell operation (extension error)"
 
                         let newops =

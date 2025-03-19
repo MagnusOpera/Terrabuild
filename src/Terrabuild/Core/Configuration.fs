@@ -111,7 +111,7 @@ let read (options: ConfigOptions.Options) =
         try
             FrontEnd.Workspace.parse workspaceContent
         with exn ->
-            raiseParseError "Failed to read WORKSPACE configuration file" exn
+            raiseParserError("Failed to read WORKSPACE configuration file", exn)
 
     let evaluationContext =
         let convertToVarType (key: string) (existingValue: Value) (value: string) =
@@ -237,8 +237,10 @@ let read (options: ConfigOptions.Options) =
             match projectFile with
             | FS.File projectFile ->
                 let projectContent = File.ReadAllText projectFile
-                try FrontEnd.Project.parse projectContent
-                with exn -> forwardExternalError $"Failed to read PROJECT configuration '{projectId}'" exn
+                try
+                    FrontEnd.Project.parse projectContent
+                with exn ->
+                    raiseParseError $"Failed to read PROJECT configuration '{projectId}'" exn
             | _ ->
                 raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 
@@ -272,7 +274,7 @@ let read (options: ConfigOptions.Options) =
                 | Extensions.Success result -> result
                 | Extensions.ScriptNotFound -> raiseSymbolError $"Script {init} was not found"
                 | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-                | Extensions.ErrorTarget exn -> forwardExternalError $"Invocation failure of command '__defaults__' for extension '{init}'" exn
+                | Extensions.ErrorTarget exn -> forwardExternalError($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
             | _ -> ProjectInfo.Default
 
         let projectIgnores = Eval.evalAsStringSet evaluationContext projectConfig.Project.Ignores
@@ -580,7 +582,7 @@ let read (options: ConfigOptions.Options) =
             let unraisedSignals = signals |> String.join ","
             raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check for circular dependencies."
         | Status.SubscriptionError exn ->
-            forwardExternalError "Failed to load configuration" exn
+            forwardExternalError("Failed to load configuration", exn)
 
 
     let projects = searchProjectsAndApply()
