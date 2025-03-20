@@ -134,6 +134,9 @@ type nonTerminalId =
     | NONTERM__startProjectFile
     | NONTERM_ProjectFile
     | NONTERM_ProjectFileComponents
+    | NONTERM_Locals
+    | NONTERM_LocalsComponents
+    | NONTERM_Local
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_ExtensionContainer
@@ -149,7 +152,6 @@ type nonTerminalId =
     | NONTERM_ProjectIgnores
     | NONTERM_ProjectIncludes
     | NONTERM_ProjectLabels
-    | NONTERM_ProjectLocals
     | NONTERM_Target
     | NONTERM_TargetComponents
     | NONTERM_TargetDependsOn

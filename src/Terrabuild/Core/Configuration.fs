@@ -312,7 +312,7 @@ let read (options: ConfigOptions.Options) =
             |> Set.ofSeq
             |> Set.union projectInfo.Includes
 
-        let locals = projectConfig.Project.Locals
+        let locals = projectConfig.Locals
 
         { LoadedProject.Dependencies = projectDependencies
           LoadedProject.Links = projectLinks
@@ -376,6 +376,13 @@ let read (options: ConfigOptions.Options) =
                         Eval.Versions = versions
                         Eval.Variables = evaluationContext.Variables |> Map.addMap actionVariables }
 
+                let evaluationContext =
+                    let localsVariables =
+                        projectDef.Locals
+                        |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
+                    { evaluationContext with
+                        Eval.Variables = evaluationContext.Variables |> Map.addMap localsVariables }    
+
                 // use value from project target
                 // otherwise use workspace target
                 // defaults to allow caching
@@ -403,7 +410,6 @@ let read (options: ConfigOptions.Options) =
 
                         let context =
                             extension.Defaults
-                            |> Map.addMap projectDef.Locals
                             |> Map.addMap step.Parameters
                             |> Expr.Map
                             |> Eval.eval evaluationContext

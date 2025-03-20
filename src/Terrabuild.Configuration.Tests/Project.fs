@@ -19,8 +19,7 @@ let parseProject() =
               ProjectBlock.Ignores = Set.empty
               ProjectBlock.Includes = Set.empty
               ProjectBlock.Labels = Set [ Expr.String "app"; Expr.String "dotnet" ]
-              ProjectBlock.Init = Some "@dotnet"
-              ProjectBlock.Locals = Map.empty }
+              ProjectBlock.Init = Some "@dotnet" }
 
         let extDotnet =
             { Container = None
@@ -78,7 +77,8 @@ let parseProject() =
           ProjectFile.Project = project
           ProjectFile.Targets = Map [ "build", targetBuild
                                       "dist", targetDist
-                                      "docker", targetDocker ] }
+                                      "docker", targetDocker ]
+          ProjectFile.Locals = Map.empty }
 
     let content = File.ReadAllText("TestFiles/PROJECT")
     let project = FrontEnd.Project.parse content
@@ -96,8 +96,7 @@ let parseProject2() =
               ProjectBlock.Ignores = Set.empty
               ProjectBlock.Includes = Set.empty
               ProjectBlock.Labels = Set.empty
-              ProjectBlock.Init = Some "@dotnet"
-              ProjectBlock.Locals = Map.empty }
+              ProjectBlock.Init = Some "@dotnet" }
 
         let extDotnet =
             { Container = None
@@ -118,7 +117,8 @@ let parseProject2() =
 
         { ProjectFile.Extensions = Map [ "@dotnet", extDotnet ]
           ProjectFile.Project = project
-          ProjectFile.Targets = Map [ "build", buildTarget ]  }
+          ProjectFile.Targets = Map [ "build", buildTarget ]
+          ProjectFile.Locals = Map.empty }
 
     let content = File.ReadAllText("TestFiles/PROJECT2")
     let project = FrontEnd.Project.parse content
