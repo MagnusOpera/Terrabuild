@@ -94,7 +94,12 @@ ExtensionVariables:
 ExtensionScript:
     | SCRIPT EQUAL String { ExtensionComponents.Script $3 }
 ExtensionDefaults:
-    | DEFAULTS EQUAL ExprMap { ExtensionComponents.Defaults $3 }
+    | DEFAULTS LBRACE ExtensionDefaultsComponents RBRACE { ExtensionComponents.Defaults $3 }
+ExtensionDefaultsComponents:
+    | /* empty */ { [] }
+    | ExtensionDefaultsComponents ExtensionDefaultsComponentsVariable { $1 @ [$2] }
+ExtensionDefaultsComponentsVariable:
+    | IDENTIFIER EQUAL Expr { ($1, $3) }
 
 
 Project:

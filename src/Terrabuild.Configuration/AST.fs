@@ -8,7 +8,7 @@ type ExtensionComponents =
     | Platform of Expr
     | Variables of Expr list
     | Script of Expr
-    | Defaults of Map<string, Expr>
+    | Defaults of (string * Expr) list
 
 type ExtensionBlock =
     { Container: Expr option
@@ -43,9 +43,9 @@ with
             | _ -> raiseParseError "multiple script declared"
 
         let defaults =
-            match components |> List.choose (function | ExtensionComponents.Defaults value -> Some value | _ -> None) with
+            match  components |> List.choose (function | ExtensionComponents.Defaults values -> Some values | _ -> None) with
             | [] -> Map.empty
-            | [value] -> value
+            | [values] -> values |> Map.ofList
             | _ -> raiseParseError "multiple defaults declared"
 
         name, { Container = container

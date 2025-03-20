@@ -37,16 +37,16 @@ target deploy {
 extension @dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:9.0.202"
   platform = "linux/amd64"
-  defaults = {
-    configuration: $configuration
+  defaults {
+    `configuration` = $configuration
   }
 }
 
 extension @terraform {
   container = "hashicorp/terraform:1.10"
   platform = "linux/amd64"
-  defaults = {
-    workspace: $workspace
+  defaults {
+    `workspace` = $workspace
   }
 }
 

@@ -26,8 +26,8 @@ configuration dummy
 
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
-  defaults = {
-    configuration: $configuration
+  defaults {
+    `configuration` = $configuration
   }
 }
 

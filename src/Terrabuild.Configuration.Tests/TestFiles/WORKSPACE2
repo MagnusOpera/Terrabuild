@@ -47,10 +47,10 @@ configuration {
 
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
-  defaults = {
-    configuration1: $map.toto
-    configuration2: $map.?titi
-    configuration3: replace("toto titi", "toto", "titi")
+  defaults {
+    configuration1 = $map.toto
+    configuration2 = $map.?titi
+    configuration3 = replace("toto titi", "toto", "titi")
   }
 }
 

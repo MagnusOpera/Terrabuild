@@ -53,7 +53,7 @@ extension @dotnet {
         "TEAMCITY_VERSION"
         "JB_SPACE_API_URL"
     ]
-    defaults = {
-        configuration: $configuration
+    defaults {
+        `configuration` = $configuration
     }
 }
