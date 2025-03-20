@@ -1,6 +1,10 @@
 project @dotnet {
 }
 
+locals {
+    app_name = "terrabuild" + $terrabuild_project
+}
+
 extension @dotnet {
 }
 
