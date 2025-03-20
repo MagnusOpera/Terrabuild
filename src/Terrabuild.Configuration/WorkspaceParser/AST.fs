@@ -59,7 +59,7 @@ with
 
 [<RequireQualifiedAccess>]
 type ConfigurationComponents =
-    | Variables of Map<string, Expr>
+    | Variable of string * Expr
 
 [<RequireQualifiedAccess>]
 type ConfigurationBlock =
@@ -67,10 +67,9 @@ type ConfigurationBlock =
 with
     static member Build id components =
         let variables =
-            match components |> List.choose (function | ConfigurationComponents.Variables value -> Some value) with
-            | [] -> Map.empty
-            | [value] -> value
-            | _ -> raiseParseError "multiple variables declared"
+            components
+            |> List.choose (function | ConfigurationComponents.Variable (name, value) -> Some (name, value))
+            |> Map.ofList
 
         id, { Variables = variables }
 

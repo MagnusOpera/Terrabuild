@@ -96,9 +96,10 @@ Configuration:
     | CONFIGURATION IDENTIFIER LBRACE ConfigurationComponents RBRACE { ConfigurationBlock.Build $2 $4 |> WorkspaceFileComponents.Configuration }
 ConfigurationComponents:
     | /* empty */ { [] }
-    | ConfigurationComponents ConfigurationVariables { $1 @ [$2] }
-ConfigurationVariables:
-    | VARIABLES EQUAL ExprMap { ConfigurationComponents.Variables $3 }
+    | ConfigurationComponents ConfigurationVariable { $1 @ [$2] }
+ConfigurationVariable:
+    | IDENTIFIER EQUAL Expr { ConfigurationComponents.Variable ($1, $3) }
+
 
 Extension:
     | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { ExtensionBlock.Build $2 $4 |> WorkspaceFileComponents.Extension }
