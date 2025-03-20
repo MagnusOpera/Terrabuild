@@ -39,7 +39,8 @@ let debugPrint s = ignore s
 %token DOUBLE_QUESTION QUESTION COLON BANG AND OR
 %token EOF
 %token PROJECT EXTENSION TARGET 
-%token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES CONTAINER PLATFORM INIT SCRIPT DEPENDS_ON REBUILD CACHE DEFAULTS NAME
+%token DEPENDENCIES LINKS OUTPUTS IGNORES INCLUDES LABELS VARIABLES
+%token CONTAINER PLATFORM INIT SCRIPT DEPENDS_ON REBUILD CACHE DEFAULTS NAME LOCALS
 
 // associativity and precedences
 %right LSQBRACKET
@@ -62,10 +63,18 @@ ProjectFile:
 
 ProjectFileComponents:
     | /* empty */ { [] }
+    | ProjectFileComponents Locals { $1 @ [$2] }
     | ProjectFileComponents Project { $1 @ [$2] }
     | ProjectFileComponents Extension { $1 @ [$2] }
     | ProjectFileComponents Target { $1 @ [$2] }
 
+Locals:
+    | LOCALS LBRACE LocalsComponents RBRACE { LocalsBlock.Build $3 |> ProjectFileComponents.Locals }
+LocalsComponents:
+    | /* empty */ { [] }
+    | LocalsComponents Local { $1 @ [$2] }
+Local:
+    | IDENTIFIER EQUAL Expr { LocalsComponents.Local ($1, $3) }
 
 Extension:
     | EXTENSION ExtensionIdentifier LBRACE ExtensionComponents RBRACE { ExtensionBlock.Build $2 $4 |> ProjectFileComponents.Extension }

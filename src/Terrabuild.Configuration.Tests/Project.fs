@@ -77,7 +77,8 @@ let parseProject() =
           ProjectFile.Project = project
           ProjectFile.Targets = Map [ "build", targetBuild
                                       "dist", targetDist
-                                      "docker", targetDocker ] }
+                                      "docker", targetDocker ]
+          ProjectFile.Locals = Map.empty }
 
     let content = File.ReadAllText("TestFiles/PROJECT")
     let project = FrontEnd.Project.parse content
@@ -114,9 +115,15 @@ let parseProject2() =
               TargetBlock.Cache = None
               TargetBlock.Steps = [ { Extension = "@dotnet"; Command = "build"; Parameters = Map.empty } ] }
 
+        let locals = 
+            Map [ "app_name", Expr.Function (Function.Plus, 
+                                             [ Expr.String "terrabuild"
+                                               Expr.Variable "terrabuild_project" ]) ]
+
         { ProjectFile.Extensions = Map [ "@dotnet", extDotnet ]
           ProjectFile.Project = project
-          ProjectFile.Targets = Map [ "build", buildTarget ]  }
+          ProjectFile.Targets = Map [ "build", buildTarget ]
+          ProjectFile.Locals = locals }
 
     let content = File.ReadAllText("TestFiles/PROJECT2")
     let project = FrontEnd.Project.parse content

@@ -129,17 +129,34 @@ with
               Steps = steps }
 
 
+type LocalsComponents =
+    | Local of string * Expr
+
+[<RequireQualifiedAccess>]
+type LocalsBlock =
+    { Locals: Map<string, Expr> }
+with
+    static member Build components =
+        let locals =
+            components
+            |> List.choose (function | LocalsComponents.Local (name, value) -> Some (name, value))
+            |> Map.ofList
+
+        { Locals = locals }
+
 [<RequireQualifiedAccess>]
 type ProjectFileComponents =
     | Project of ProjectBlock
     | Extension of string * ExtensionBlock
     | Target of string * TargetBlock
+    | Locals of LocalsBlock
 
 [<RequireQualifiedAccess>]
 type ProjectFile =
     { Project: ProjectBlock
       Extensions: Map<string, ExtensionBlock>
-      Targets: Map<string, TargetBlock> }
+      Targets: Map<string, TargetBlock>
+      Locals: Map<string, Expr> }
 with
     static member Build components =
         let project =
@@ -158,6 +175,13 @@ with
             |> List.choose (function | ProjectFileComponents.Target (name, target) -> Some (name, target) | _ -> None)
             |> Map.ofList
 
+        let locals =
+            match components |> List.choose (function | ProjectFileComponents.Locals value -> Some value | _ -> None) with
+            | [] -> Map.empty
+            | [value] -> value.Locals
+            | _ -> raiseParseError "multiple locals declared"
+
         { Project = project
           Extensions = extensions
-          Targets = targets }
+          Targets = targets
+          Locals = locals }
