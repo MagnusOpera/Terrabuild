@@ -136,7 +136,7 @@ type nonTerminalId =
     | NONTERM_TargetRebuild
     | NONTERM_Configuration
     | NONTERM_ConfigurationComponents
-    | NONTERM_ConfigurationVariables
+    | NONTERM_ConfigurationVariable
     | NONTERM_Extension
     | NONTERM_ExtensionComponents
     | NONTERM_ExtensionContainer

@@ -19,9 +19,7 @@ target dist {
 target dummy
 
 configuration release {
-  variables = {
-    configuration: "Release"
-  }
+  `configuration` = "Release"
 }
 
 configuration dummy
