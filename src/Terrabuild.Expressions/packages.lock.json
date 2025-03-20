@@ -25,15 +25,15 @@
       },
       "Microsoft.Extensions.FileSystemGlobbing": {
         "type": "Transitive",
-        "resolved": "9.0.2",
-        "contentHash": "wAjk+6rvvU4WesskJ6rJX1FYL/S9zvnpqMai/pXb07+gtXpO7DhFfuKzYHwkKN3HAUq2W4CD+YLYenHwAS3DCA=="
+        "resolved": "9.0.3",
+        "contentHash": "Rec77KHk4iNpFznHi5/6wF3MlUDcKqg26t8gRYbUm1PSukZ4B6mrXpZsJSNOiwyhhQVkjYbaoZxi5XJgRQ5lFg=="
       },
       "terrabuild.common": {
         "type": "Project",
         "dependencies": {
           "FSharp.Core": "[9.0.201, )",
           "FSharp.SystemTextJson": "[1.3.13, )",
-          "Microsoft.Extensions.FileSystemGlobbing": "[9.0.2, )",
+          "Microsoft.Extensions.FileSystemGlobbing": "[9.0.3, )",
           "System.Text.Json": "[9.0.0, )"
         }
       }

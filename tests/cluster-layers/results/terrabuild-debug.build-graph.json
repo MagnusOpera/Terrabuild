@@ -6,7 +6,7 @@
       "project": "A",
       "target": "build",
       "configurationTarget": {
-        "hash": "64E21188860C5E19240D836C81299D409C14C4D0F5CD45AEB1C557DD8A2ECE1A",
+        "hash": "34215119A4D68DB3B1137C90704FFA326799B219AE86B2DE93A123F6FEDCF68B",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -37,8 +37,8 @@
             ]
           },
           {
-            "hash": "D185B073E1C9E7A2220A6C13E56C9809806DEA9179DE8A5F8B6C39183B3453BB",
-            "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
+            "hash": "FD3560333C686B049DD524191E409F2B96EE93A6A0E1BA65FF540BE80CE66074",
+            "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -60,7 +60,7 @@
         "obj/*.targets"
       ],
       "projectHash": "52081ACBA3AA68292E895F52D30A4916AE5F3742E44A04C119BE8F0A52DE570F",
-      "targetHash": "A958BA3BDAE652C2DCEDBCC69FB7578BF8F8A559E96A57E67ABCA0F936E6ECE7",
+      "targetHash": "D8DEC18750F10925D4195A45D6C525B81CCB0FA24FAA34C110C81CC4F8C69A93",
       "operations": [
         {
           "containerVariables": [],
@@ -69,7 +69,7 @@
           "arguments": "building project"
         },
         {
-          "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
+          "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -85,7 +85,7 @@
       "project": "B",
       "target": "build",
       "configurationTarget": {
-        "hash": "64E21188860C5E19240D836C81299D409C14C4D0F5CD45AEB1C557DD8A2ECE1A",
+        "hash": "34215119A4D68DB3B1137C90704FFA326799B219AE86B2DE93A123F6FEDCF68B",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -116,8 +116,8 @@
             ]
           },
           {
-            "hash": "D185B073E1C9E7A2220A6C13E56C9809806DEA9179DE8A5F8B6C39183B3453BB",
-            "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
+            "hash": "FD3560333C686B049DD524191E409F2B96EE93A6A0E1BA65FF540BE80CE66074",
+            "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -139,7 +139,7 @@
         "obj/*.targets"
       ],
       "projectHash": "C20F11FEA849AD53AA0FDD982A60BEB1143A591B8E3B0CDB16C1CE8D39392772",
-      "targetHash": "82227AF824F6575630A19EE5BB38814B2742503CBFC68ADE9CFB2537DDE52817",
+      "targetHash": "4D1493F16D06B75B8B09E8971E4E841E3FEA3B9130002AF7AFDCAF75F7104D72",
       "operations": [
         {
           "containerVariables": [],
@@ -148,7 +148,7 @@
           "arguments": "building project"
         },
         {
-          "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
+          "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -211,7 +211,7 @@
         "**/dist/"
       ],
       "projectHash": "3295C61A42D31221DCB491823FD21EF9A8921B5375720F3EF8DA74ED8F4BF1EC",
-      "targetHash": "5AF1655C63157F33085227AFF733D8912DB452E58F7F77CBCF077B65634C0314",
+      "targetHash": "62BB93F413DDB58C1A1FDAF5D7EFC3BDE3DE063BB5031BE0B3B61B5F73AA2110",
       "operations": [
         {
           "containerVariables": [],
@@ -243,7 +243,7 @@
       "project": "D",
       "target": "build",
       "configurationTarget": {
-        "hash": "37B3E7B249E16E95DBD1730ADD1D15E769C9DE71BFDABD6CBF497E70AEE3E29E",
+        "hash": "F9B0B5708DFC227889BB22353D3EC4D1C1A57C07439470229E286568F031D11A",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -258,8 +258,8 @@
         ],
         "operations": [
           {
-            "hash": "D185B073E1C9E7A2220A6C13E56C9809806DEA9179DE8A5F8B6C39183B3453BB",
-            "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
+            "hash": "FD3560333C686B049DD524191E409F2B96EE93A6A0E1BA65FF540BE80CE66074",
+            "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -283,10 +283,10 @@
         "obj/*.targets"
       ],
       "projectHash": "C61CB06CD3C39E1F35C4DC1774DE930DA6851583D98A4F13969456FB388FCD5C",
-      "targetHash": "D17FA69FE68FA48DC21A7CB930DAF32ADBA867199E00EDA900E9AEC799419092",
+      "targetHash": "3F90179516FA77F8FECF93EFDA21E26FD955622A200380867F51FFA6E3CE2AB8",
       "operations": [
         {
-          "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
+          "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -302,7 +302,7 @@
       "project": "E",
       "target": "build",
       "configurationTarget": {
-        "hash": "37B3E7B249E16E95DBD1730ADD1D15E769C9DE71BFDABD6CBF497E70AEE3E29E",
+        "hash": "F9B0B5708DFC227889BB22353D3EC4D1C1A57C07439470229E286568F031D11A",
         "rebuild": false,
         "dependsOn": [
           "^build"
@@ -317,8 +317,8 @@
         ],
         "operations": [
           {
-            "hash": "D185B073E1C9E7A2220A6C13E56C9809806DEA9179DE8A5F8B6C39183B3453BB",
-            "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
+            "hash": "FD3560333C686B049DD524191E409F2B96EE93A6A0E1BA65FF540BE80CE66074",
+            "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
             "containerVariables": [],
             "extension": "@dotnet",
             "command": "build",
@@ -342,10 +342,10 @@
         "obj/*.targets"
       ],
       "projectHash": "E1B52088E5FFFCCA0576241731FD4E4F7851EFE8522816F30BB7D8187ABF1034",
-      "targetHash": "FB9F7BD239B5805213322839CB8956B42F9454D2567EA0CCB4D49D26D7C7E37F",
+      "targetHash": "ADC07397B1FF458DD75BD92006AB4ED259973098C4D113EDA1F1D467738B2585",
       "operations": [
         {
-          "container": "mcr.microsoft.com/dotnet/sdk:9.0.201",
+          "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
           "containerVariables": [],
           "metaCommand": "@dotnet build",
           "command": "dotnet",
@@ -392,7 +392,7 @@
         "**/dist/"
       ],
       "projectHash": "7DF5934D6DBA702F44818A40C3AB95F17E489524DFD3CC6AFC9B9D0EF5C83AE0",
-      "targetHash": "FDF566EC63E45688EC6883AE7DB00F55988BABF50DF718E86676876903BB8672",
+      "targetHash": "33FAFE091FF06A8483852F07AA7569EADFDB8CAEB537FC2EAA18D6510C0751C7",
       "operations": [
         {
           "container": "node:20",
@@ -448,7 +448,7 @@
         "**/dist/"
       ],
       "projectHash": "FE7CDDB9279D6FFF57CCA9D71303D9D954C2B90E93EEE27097689FBF8AA676AD",
-      "targetHash": "1AAD9F9F7F5B2BB5A45AE59997F11DAC929F9C79701C68A9A286A7151AFC9A52",
+      "targetHash": "5C293E557BC3A8CD4CE168D76ACCB2BDF16C72C9CAC2D04438E921C3445DADAA",
       "operations": [
         {
           "container": "node:20",

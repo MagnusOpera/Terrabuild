@@ -39,7 +39,7 @@ target deploy {
 }
 
 extension @dotnet {
-  container = "mcr.microsoft.com/dotnet/sdk:9.0.201"
+  container = "mcr.microsoft.com/dotnet/sdk:9.0.202"
   platform = "linux/amd64"
   defaults = {
     configuration: $configuration
