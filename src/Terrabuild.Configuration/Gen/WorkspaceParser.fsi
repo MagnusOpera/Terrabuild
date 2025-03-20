@@ -144,6 +144,8 @@ type nonTerminalId =
     | NONTERM_ExtensionVariables
     | NONTERM_ExtensionScript
     | NONTERM_ExtensionDefaults
+    | NONTERM_ExtensionDefaultsComponents
+    | NONTERM_ExtensionDefaultsComponentsVariable
     | NONTERM_Expr
     | NONTERM_InterpolatedExpr
     | NONTERM_TargetIdentifier

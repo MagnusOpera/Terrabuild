@@ -1,15 +1,15 @@
 # comment at top of file
 
 extension @dotnet {
-  defaults = { # comment at end of line
-    configuration : $configuration
+  defaults { # comment at end of line
+    `configuration` = $configuration
   }
 }
 
 extension @docker {
-  defaults = {
-    configuration: $configuration
-    image : "ghcr.io/magnusopera/dotnet-app"
+  defaults {
+    `configuration` = $configuration
+    `image` = "ghcr.io/magnusopera/dotnet-app"
   }
 
   variables = [ "ARM_TENANT_ID" ]

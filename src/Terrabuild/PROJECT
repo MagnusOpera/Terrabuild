@@ -5,8 +5,8 @@ project @dotnet {
 }
 
 extension @docker {
-  defaults = {
-    image: "ghcr.io/magnusopera/terrabuild"
+  defaults {
+    `image` = "ghcr.io/magnusopera/terrabuild"
   }
 }
 
