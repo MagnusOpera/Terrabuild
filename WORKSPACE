@@ -4,21 +4,15 @@ workspace {
 }
 
 configuration {
-    variables = {
-        configuration: "Debug"
-    }
+    `configuration` = "Debug"
 }
 
 configuration dev {
-    variables = {
-        configuration: "Release"
-    }
+    `configuration` = "Release"
 }
 
 configuration prod {
-    variables = {
-        configuration: "Release"
-    }
+    `configuration` = "Release"
 }
 
 target build {

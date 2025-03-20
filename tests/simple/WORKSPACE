@@ -3,19 +3,15 @@ workspace {
 }
 
 configuration {
-  variables = {
-    configuration: "Debug"
-    secret_message: "tagada"
-    npm_version: "1.0.0"
-    workspace: "default"
-  }
+    `configuration` = "Debug"
+    secret_message = "tagada"
+    npm_version = "1.0.0"
+    `workspace` = "default"
 }
 
 configuration release {
-  variables = {
-    configuration: "Release"
-    workspace: "default"
-  }
+    `configuration` = "Release"
+    `workspace` = "default"
 }
 
 target build {
