@@ -12,6 +12,15 @@ let mkIdentifier lexbuf =
     let s = lexbuf |> lexeme  |> string
     s.Replace("`", "").Replace(" ", "").Replace(":", "").Replace("$", "")
 
+[<RequireQualifiedAccess>]
+type LexerMode =
+    | Default
+    | InterpolatedString
+    | InterpolatedExpression
+
+let lexerMode = System.Collections.Generic.Stack([LexerMode.Default])
+
+
 }
 
 let regularIdentifier = ['a'-'z'] (['_' '-']? ['a'-'z' '0'-'9']+)*
@@ -25,14 +34,28 @@ let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
 let whitespace = ' ' | '\t'
 let newline = '\n' | '\r' '\n'
 
+
+
+
+
 rule token = parse
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }
     | ".?" { DOT_QUESTION }
     | "." { DOT }
     | ":" { COLON }
-    | "{" { LBRACE }
-    | "}" { RBRACE }
+    | "{" {
+        let mode = lexerMode.Peek()
+        lexerMode.Push(LexerMode.Default)
+        match mode with
+        | LexerMode.InterpolatedString -> STRING_START
+        | _ -> LBRACE
+    }
+    | "}" {
+        match lexerMode.Pop() with
+        | LexerMode.Default -> RBRACE
+        | _ -> EXPRESSION_END
+    }
     | "[" { LSQBRACKET }
     | "]" { RSQBRACKET }
     | "(" { LPAREN }
@@ -47,7 +70,10 @@ rule token = parse
     | "&" { AND }
     | "|" { OR }
     | "#" { singleLineComment lexbuf }
-    | '"' { STRING_START }
+    | '"' {
+        lexerMode.Push(LexerMode.InterpolatedString)
+        STRING_START
+    }
 
     | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
     | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
@@ -81,47 +107,15 @@ and interpolatedString (acc: StringBuilder) = parse
         acc.Append("}") |> ignore
         interpolatedString acc lexbuf
     }
-    | '"' { STRING_END (acc.ToString()) }
-    | '{' { EXPRESSION_START (acc.ToString()) }
+    | '"' {
+        lexerMode.Pop() |> ignore
+        STRING_END (acc.ToString())
+    }
+    | '{' {
+        lexerMode.Push(LexerMode.InterpolatedExpression)
+        EXPRESSION_START (acc.ToString())
+    }
     | _ {
         lexbuf |> lexeme |> acc.Append |> ignore
         interpolatedString acc lexbuf
     }
-
-and expression = parse
-    | "??" { DOUBLE_QUESTION }
-    | "?" { QUESTION }
-    | ".?" { DOT_QUESTION }
-    | "." { DOT }
-    | ":" { COLON }
-    | "{" { LBRACE }
-    | "}" { RBRACE }
-    | "[" { LSQBRACKET }
-    | "]" { RSQBRACKET }
-    | "(" { LPAREN }
-    | ")" { RPAREN }
-    | "==" { DOUBLE_EQUAL }
-    | "=" { EQUAL }
-    | "!=" { NOT_EQUAL }
-    | "," { COMMA }
-    | "-" { MINUS }
-    | "+" { PLUS }
-    | "!" { BANG }
-    | "&" { AND }
-    | "|" { OR }
-    | "#" { singleLineComment lexbuf }
-    | '"' { STRING_START }
-
-    | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
-
-    | number {
-        let s = lexeme lexbuf |> int
-        NUMBER (s)
-    }
-
-    | whitespace { interpolatedExpression lexbuf }
-    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
-
-
-
-    | "}" { EXPRESSION_END }

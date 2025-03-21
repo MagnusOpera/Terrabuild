@@ -3,32 +3,19 @@ open FSharp.Text.Lexing
 open Errors
 open System.Text
 
-[<RequireQualifiedAccess>]
-type LexerMode =
-    | Default
-    | InterpolatedString
-    | InterpolatedExpression
 
 
 let parse txt = 
-    let lexerMode = System.Collections.Generic.Stack([LexerMode.Default])
     let switchableLexer (lexbuff: LexBuffer<char>) =
-        let mode = lexerMode.Peek()
-        let lexer =
+        let mode = Lexer.HCL.lexerMode.Peek()
+        let lexer = 
             match mode with
-            | LexerMode.Default -> Lexer.HCL.token
-            | LexerMode.InterpolatedString -> Lexer.HCL.interpolatedString (StringBuilder())
-            | LexerMode.InterpolatedExpression -> Lexer.HCL.interpolatedExpression
+            | Lexer.HCL.LexerMode.Default -> Lexer.HCL.token
+            | Lexer.HCL.LexerMode.InterpolatedString -> Lexer.HCL.interpolatedString (StringBuilder())
+            | Lexer.HCL.LexerMode.InterpolatedExpression -> Lexer.HCL.token
 
         let token = lexer lexbuff
         printfn $"### SwitchableLexer  mode: {mode}  token: {token}"
-
-        match token with
-        | Parser.HCL.STRING_START -> lexerMode.Push(LexerMode.InterpolatedString)
-        | Parser.HCL.STRING_END _ -> lexerMode.Pop() |> ignore
-        | Parser.HCL.EXPRESSION_START _ -> lexerMode.Push(LexerMode.InterpolatedExpression)
-        | Parser.HCL.EXPRESSION_END -> lexerMode.Pop() |> ignore
-        | _ -> ()
         token
 
     let lexbuf = LexBuffer<_>.FromString txt

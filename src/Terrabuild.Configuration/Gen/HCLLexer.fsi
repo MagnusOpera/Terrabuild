@@ -9,5 +9,3 @@ val token: lexbuf: LexBuffer<char> -> token
 val singleLineComment: lexbuf: LexBuffer<char> -> token
 /// Rule interpolatedString
 val interpolatedString: acc: StringBuilder -> lexbuf: LexBuffer<char> -> token
-/// Rule interpolatedExpression
-val interpolatedExpression: lexbuf: LexBuffer<char> -> token
