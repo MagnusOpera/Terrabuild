@@ -8,14 +8,6 @@ type token =
   | BANG
   | AND
   | OR
-  | TRIM
-  | UPPER
-  | LOWER
-  | REPLACE
-  | COUNT
-  | VERSION
-  | FORMAT
-  | TOSTRING
   | MINUS
   | PLUS
   | COMMA
@@ -46,14 +38,6 @@ type tokenId =
     | TOKEN_BANG
     | TOKEN_AND
     | TOKEN_OR
-    | TOKEN_TRIM
-    | TOKEN_UPPER
-    | TOKEN_LOWER
-    | TOKEN_REPLACE
-    | TOKEN_COUNT
-    | TOKEN_VERSION
-    | TOKEN_FORMAT
-    | TOKEN_TOSTRING
     | TOKEN_MINUS
     | TOKEN_PLUS
     | TOKEN_COMMA
@@ -86,9 +70,11 @@ type nonTerminalId =
     | NONTERM_BlockComponents
     | NONTERM_BlockComponent
     | NONTERM_Expr
+    | NONTERM_Function
     | NONTERM_ExprIndex
     | NONTERM_ExprIdentifier
     | NONTERM_String
+    | NONTERM_InterpolatedString
     | NONTERM_ExprTuple
     | NONTERM_ExprTupleContent
     | NONTERM_ExprList

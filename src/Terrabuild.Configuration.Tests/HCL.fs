@@ -9,11 +9,12 @@ let parseProject() =
     let file = FrontEnd.HCL.parse content
     printfn $"{file}"
 
-// [<Test>]
-// let parseProject2() =
-//     let content = File.ReadAllText("TestFiles/PROJECT2")
-//     let file = FrontEnd.Project.parse content
-//     printfn $"{file}"
+[<Test>]
+let parseProject2() =
+    let content = File.ReadAllText("TestFiles/PROJECT2")
+    let file = FrontEnd.HCL.parse content
+    printfn $"{file}"
+    Assert.Fail()
 
 // [<Test>]
 // let parseWorkspace() =

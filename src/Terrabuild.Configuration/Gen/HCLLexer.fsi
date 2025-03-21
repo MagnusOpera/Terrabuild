@@ -7,8 +7,6 @@ open Errors/// Rule token
 val token: lexbuf: LexBuffer<char> -> token
 /// Rule singleLineComment
 val singleLineComment: lexbuf: LexBuffer<char> -> token
-/// Rule string
-val string: acc: StringBuilder -> lexbuf: LexBuffer<char> -> token
 /// Rule interpolatedString
 val interpolatedString: acc: StringBuilder -> lexbuf: LexBuffer<char> -> token
 /// Rule interpolatedExpression

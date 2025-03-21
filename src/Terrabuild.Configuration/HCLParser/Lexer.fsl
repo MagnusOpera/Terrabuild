@@ -47,12 +47,7 @@ rule token = parse
     | "&" { AND }
     | "|" { OR }
     | "#" { singleLineComment lexbuf }
-
-    // simple string
-    | '\"' { string (StringBuilder()) lexbuf } 
-
-    // interpolated string
-    | "$\"" { STRING_START }
+    | '"' { STRING_START }
 
     | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
     | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
@@ -71,18 +66,6 @@ and singleLineComment = parse
     | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
     | eof { EOF }
     | _ { singleLineComment lexbuf }
-
-and string (acc: StringBuilder) = parse
-    | newline { raiseParseError "newline encountered in string" }
-    | "\"\"" {
-        acc.Append("\"") |> ignore
-        string acc lexbuf
-    }
-    | '"' { STRING (acc.ToString()) }
-    | _ {
-        lexbuf |> lexeme |> acc.Append |> ignore
-        string acc lexbuf
-    }
 
 and interpolatedString (acc: StringBuilder) = parse
     | newline { raiseParseError "newline encountered in string" }
@@ -105,7 +88,7 @@ and interpolatedString (acc: StringBuilder) = parse
         interpolatedString acc lexbuf
     }
 
-and interpolatedExpression = parse
+and expression = parse
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }
     | ".?" { DOT_QUESTION }
@@ -127,10 +110,9 @@ and interpolatedExpression = parse
     | "&" { AND }
     | "|" { OR }
     | "#" { singleLineComment lexbuf }
+    | '"' { STRING_START }
 
     | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
-
-    | '\"' { string (StringBuilder()) lexbuf } 
 
     | number {
         let s = lexeme lexbuf |> int
@@ -139,5 +121,7 @@ and interpolatedExpression = parse
 
     | whitespace { interpolatedExpression lexbuf }
     | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+
+
 
     | "}" { EXPRESSION_END }
