@@ -4,6 +4,22 @@ open Terrabuild.Expressions
 open Errors
 
 
+type HCLAttribute = {
+    Name: string
+    Value: Expr
+}
+
+type HCLBlock = {
+    Name: string option
+    Attributes: HCLAttribute list
+}
+
+
+
+
+
+
+
 [<RequireQualifiedAccess>]
 type ProjectComponents =
     | Dependencies of Expr list
