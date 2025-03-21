@@ -15,36 +15,22 @@ let mkIdentifier lexbuf =
 }
 
 let regularIdentifier = ['a'-'z'] (['_' '-']? ['a'-'z' '0'-'9']+)*
-let backquotedIdentifier = '`' regularIdentifier '`'
-let identifier = regularIdentifier | backquotedIdentifier
+let extensionIdentifier = '@' regularIdentifier
+let targetIdentifier = '^' regularIdentifier
 
-let extensionIdentifier = '@'? identifier
-let targetIdentifier = '^'? identifier
-let keyIdentifier = identifier ' '* ':'
-let variableIdentifier = '$' identifier
+let identifier = regularIdentifier | extensionIdentifier | targetIdentifier
+let keyIdentifier = regularIdentifier ':'
 
 let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
 let whitespace = ' ' | '\t'
 let newline = '\n' | '\r' '\n'
 
 rule token = parse
-    | "nothing" { NOTHING }
-    | "true" { TRUE }
-    | "false" { FALSE }
-    | "trim" { TRIM }
-    | "upper" { UPPER }
-    | "lower" { LOWER }
-    | "replace" { REPLACE }
-    | "count" { COUNT }
-    | "version" { VERSION }
-    | "format" { FORMAT }
-    | "tostring" { TOSTRING }
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }
     | ".?" { DOT_QUESTION }
     | "." { DOT }
     | ":" { COLON }
-
     | "{" { LBRACE }
     | "}" { RBRACE }
     | "[" { LSQBRACKET }
@@ -60,28 +46,7 @@ rule token = parse
     | "!" { BANG }
     | "&" { AND }
     | "|" { OR }
-
     | "#" { singleLineComment lexbuf }
-
-    | "project" { PROJECT }
-    | "target" { TARGET }
-    | "dependencies" { DEPENDENCIES }
-    | "links" { LINKS }
-    | "outputs" { OUTPUTS }
-    | "ignores" { IGNORES }
-    | "includes" { INCLUDES }
-    | "labels" { LABELS }
-    | "script" { SCRIPT }
-    | "extension" { EXTENSION }
-    | "container" { CONTAINER }
-    | "platform" { PLATFORM }
-    | "variables" { VARIABLES }
-    | "depends_on" { DEPENDS_ON }
-    | "rebuild" { REBUILD }
-    | "cache" { CACHE }
-    | "defaults" { DEFAULTS }
-    | "name" { NAME }
-    | "locals" { LOCALS }
 
     // simple string
     | '\"' { string (StringBuilder()) lexbuf } 
@@ -90,10 +55,7 @@ rule token = parse
     | "$\"" { STRING_START }
 
     | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
-    | extensionIdentifier { lexbuf |> mkIdentifier |> EXTENSION_IDENTIFIER }
-    | targetIdentifier { lexbuf |> mkIdentifier |> TARGET_IDENTIFIER }
     | keyIdentifier { lexbuf |> mkIdentifier |> KEY }
-    | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
     | number {
         let s = lexeme lexbuf |> int
@@ -144,23 +106,13 @@ and interpolatedString (acc: StringBuilder) = parse
     }
 
 and interpolatedExpression = parse
-    | "nothing" { NOTHING }
-    | "true" { TRUE }
-    | "false" { FALSE }
-    | "trim" { TRIM }
-    | "upper" { UPPER }
-    | "lower" { LOWER }
-    | "replace" { REPLACE }
-    | "count" { COUNT }
-    | "version" { VERSION }
-    | "format" { FORMAT }
-    | "tostring" { TOSTRING }
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }
     | ".?" { DOT_QUESTION }
     | "." { DOT }
     | ":" { COLON }
-
+    | "{" { LBRACE }
+    | "}" { RBRACE }
     | "[" { LSQBRACKET }
     | "]" { RSQBRACKET }
     | "(" { LPAREN }
@@ -168,14 +120,15 @@ and interpolatedExpression = parse
     | "==" { DOUBLE_EQUAL }
     | "=" { EQUAL }
     | "!=" { NOT_EQUAL }
+    | "," { COMMA }
     | "-" { MINUS }
     | "+" { PLUS }
     | "!" { BANG }
     | "&" { AND }
     | "|" { OR }
+    | "#" { singleLineComment lexbuf }
 
     | identifier { lexbuf |> mkIdentifier |> IDENTIFIER }
-    | variableIdentifier { lexbuf |> mkIdentifier |> VARIABLE }
 
     | '\"' { string (StringBuilder()) lexbuf } 
 

@@ -1,0 +1,142 @@
+%{ 
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.HCL
+open Terrabuild.Expressions
+open System
+
+
+#if DEBUG
+let debugPrint s = printfn "### %s" s
+#else
+let debugPrint s = ignore s
+#endif
+
+%}
+ 
+%start File
+ 
+// terminal tokens
+%token <string> STRING
+%token STRING_START
+%token <string> STRING_END
+%token <string> EXPRESSION_START
+%token EXPRESSION_END
+%token <string> IDENTIFIER
+%token <string> KEY
+%token <int> NUMBER
+
+%token LBRACE RBRACE
+%token DOT DOT_QUESTION LSQBRACKET RSQBRACKET
+%token LPAREN RPAREN
+%token EQUAL DOUBLE_EQUAL NOT_EQUAL
+%token COMMA
+%token MINUS PLUS
+%token TRIM UPPER LOWER REPLACE COUNT VERSION FORMAT TOSTRING
+%token DOUBLE_QUESTION QUESTION COLON BANG AND OR
+%token EOF
+
+// associativity and precedences
+%right LSQBRACKET
+%left RSQBRACKET
+%left COLON
+%right QUESTION
+%left DOUBLE_QUESTION
+%left DOUBLE_EQUAL NOT_EQUAL
+%left MINUS PLUS
+%left OR AND
+%left DOT DOT_QUESTION
+%right BANG
+%left COMMA
+
+%type <Terrabuild.Configuration.AST.HCL.File> File
+%% 
+
+File:
+    | Blocks EOF { File.Build $1 }
+
+Blocks:
+    | /* empty */ { [] }
+    | Blocks Block { $1 @ [$2] }
+
+Block:
+    | IDENTIFIER LBRACE BlockComponents RBRACE { Block.Build $1 None $3 }
+    | IDENTIFIER IDENTIFIER LBRACE BlockComponents RBRACE { Block.Build $1 (Some $2) $4 }
+
+BlockComponents:
+    | /* empty */ { [] }
+    | BlockComponents BlockComponent { $1 @ [$2] }
+
+BlockComponent:
+    | IDENTIFIER EQUAL Expr { Attribute.Build $1 $3 |> BlockComponents.Attribute }
+    | Block { $1 |> BlockComponents.Block }
+
+Expr:
+    /* structures */
+    | ExprList { Expr.List $1 }
+    | ExprMap { Expr.Map $1 }
+    /* scalars */
+    | NUMBER { Expr.Number $1 }
+    | ExprIdentifier { $1 }
+    | String { $1 }
+    /* functions */
+    | Expr DOT ExprIndex { Expr.Function (Function.Item, [$1;  $3]) }
+    | Expr DOT_QUESTION ExprIndex { Expr.Function (Function.TryItem, [$1; $3]) }
+    | Expr DOUBLE_EQUAL Expr { Expr.Function (Function.Equal, [$1; $3]) }
+    | Expr NOT_EQUAL Expr { Expr.Function (Function.NotEqual, [$1; $3]) }
+    | Expr PLUS Expr { Expr.Function (Function.Plus, [$1; $3]) }
+    | Expr MINUS Expr { Expr.Function (Function.Minus, [$1; $3]) }
+    | Expr AND Expr { Expr.Function (Function.And, [$1; $3]) }
+    | Expr OR Expr { Expr.Function (Function.Or, [$1; $3]) }
+    | TRIM ExprTuple { Expr.Function (Function.Trim, $2) }
+    | UPPER ExprTuple { Expr.Function (Function.Upper, $2) }
+    | LOWER ExprTuple { Expr.Function (Function.Lower, $2) }
+    | REPLACE ExprTuple { Expr.Function (Function.Replace, $2) }
+    | COUNT ExprTuple { Expr.Function (Function.Count, $2)}
+    | VERSION ExprTuple { Expr.Function (Function.Version, $2) }
+    | FORMAT ExprTuple { Expr.Function (Function.Format, $2) }
+    | TOSTRING ExprTuple { Expr.Function (Function.ToString, $2) }
+    | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }
+    | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
+    | BANG Expr { Expr.Function (Function.Not, [$2]) }
+
+ExprIndex:
+    | NUMBER { Expr.Number $1 }
+    | IDENTIFIER { Expr.String $1 }
+
+ExprIdentifier:
+    | IDENTIFIER { 
+        match $1 with
+        | "true" -> Expr.Bool true
+        | "false" -> Expr.Bool false
+        | "nothing" -> Expr.Nothing
+        | _ -> Expr.Variable $1
+    }
+
+String:
+    | EXPRESSION_START Expr EXPRESSION_END { 
+        if $1 |> String.IsNullOrEmpty then $2
+        else Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2])
+    }
+    | String EXPRESSION_START Expr EXPRESSION_END {
+        if $2 |> String.IsNullOrEmpty then Expr.Function (Function.Format, [Expr.String "{0}{1}"; $1; $3])
+        else Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; $1; Expr.String $2; $3])
+    }
+
+ExprTuple:
+    | LPAREN ExprTupleContent RPAREN { $2 }
+ExprTupleContent:
+    | /* empty */ { [] }
+    | Expr { [$1] }
+    | ExprTupleContent COMMA Expr { $1 @ [$3] }
+
+ExprList:
+    | LSQBRACKET ExprListContent RSQBRACKET { $2 }
+ExprListContent:
+    | /* empty */ { [] }
+    | ExprListContent Expr { $1 @ [$2] }
+
+ExprMap:
+    | LBRACE ExprMapContent RBRACE { $2 }
+ExprMapContent:
+    | /* empty */ { Map.empty }
+    | ExprMapContent KEY Expr { $1.Add ($2, $3) }

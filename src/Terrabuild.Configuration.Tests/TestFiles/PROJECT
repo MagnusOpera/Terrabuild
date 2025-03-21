@@ -2,14 +2,14 @@
 
 extension @dotnet {
   defaults { # comment at end of line
-    `configuration` = $configuration
+    configuration = $configuration
   }
 }
 
 extension @docker {
   defaults {
-    `configuration` = $configuration
-    `image` = "ghcr.io/magnusopera/dotnet-app"
+    configuration = $configuration
+    image = "ghcr.io/magnusopera/dotnet-app"
   }
 
   variables = [ "ARM_TENANT_ID" ]
@@ -44,8 +44,8 @@ target docker {
   cache = "always"
   @shell echo { arguments: trim("building project1 " + $configuration) }
   @docker build { arguments: { config: "Release" my-variable: 42 } }
-  @npm `version` { arguments: $npm_version
-                   `version` : "1.0.0" }
+  @npm version { arguments: $npm_version
+                   version : "1.0.0" }
 }
 
 

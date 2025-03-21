@@ -16,24 +16,24 @@ let parse txt =
         let mode = lexerMode.Peek()
         let lexer =
             match mode with
-            | LexerMode.Default -> Lexer.Project.token
-            | LexerMode.InterpolatedString -> Lexer.Project.interpolatedString (StringBuilder())
-            | LexerMode.InterpolatedExpression -> Lexer.Project.interpolatedExpression
+            | LexerMode.Default -> Lexer.HCL.token
+            | LexerMode.InterpolatedString -> Lexer.HCL.interpolatedString (StringBuilder())
+            | LexerMode.InterpolatedExpression -> Lexer.HCL.interpolatedExpression
 
         let token = lexer lexbuff
-        // printfn $"### SwitchableLexer  mode: {mode}  token: {token}"
+        printfn $"### SwitchableLexer  mode: {mode}  token: {token}"
 
         match token with
-        | Parser.Project.STRING_START -> lexerMode.Push(LexerMode.InterpolatedString)
-        | Parser.Project.STRING_END _ -> lexerMode.Pop() |> ignore
-        | Parser.Project.EXPRESSION_START _ -> lexerMode.Push(LexerMode.InterpolatedExpression)
-        | Parser.Project.EXPRESSION_END -> lexerMode.Pop() |> ignore
+        | Parser.HCL.STRING_START -> lexerMode.Push(LexerMode.InterpolatedString)
+        | Parser.HCL.STRING_END _ -> lexerMode.Pop() |> ignore
+        | Parser.HCL.EXPRESSION_START _ -> lexerMode.Push(LexerMode.InterpolatedExpression)
+        | Parser.HCL.EXPRESSION_END -> lexerMode.Pop() |> ignore
         | _ -> ()
         token
 
     let lexbuf = LexBuffer<_>.FromString txt
     try
-        Parser.Project.ProjectFile switchableLexer lexbuf
+        Parser.HCL.File switchableLexer lexbuf
     with
     | :? TerrabuildException as exn ->
         let err = sprintf "Parse error at (%d,%d)"
