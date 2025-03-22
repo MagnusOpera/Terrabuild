@@ -3,32 +3,32 @@ workspace {
     id = "c91ea014-00c7-8bd1-1c05-656a6d327ce7"
 }
 
-configuration {
-    `configuration` = "Debug"
+configuration default {
+    configuration = "Debug"
 }
 
 configuration dev {
-    `configuration` = "Release"
+    configuration = "Release"
 }
 
 configuration prod {
-    `configuration` = "Release"
+    configuration = "Release"
 }
 
 target build {
-    depends_on = [^build]
+    depends_on = [ "^build" ]
 }
 
 target test {
-    depends_on = [build]
+    depends_on = [ "build" ]
 }
 
 target dist {
-    depends_on = [build]
+    depends_on = [ "build" ]
 }
 
 target publish {
-    depends_on = [dist]
+    depends_on = [ "dist" ]
 }
 
 extension @dotnet {
@@ -54,6 +54,6 @@ extension @dotnet {
         "JB_SPACE_API_URL"
     ]
     defaults {
-        `configuration` = $configuration
+        configuration = configuration
     }
 }

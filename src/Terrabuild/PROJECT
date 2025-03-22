@@ -6,15 +6,16 @@ project @dotnet {
 
 extension @docker {
   defaults {
-    `image` = "ghcr.io/magnusopera/terrabuild"
+    image = "ghcr.io/magnusopera/terrabuild"
   }
 }
 
 target build {
-    @dotnet build { version: $terrabuild_tag }
+    @dotnet build { version = terrabuild_tag }
 }
 
 target dist {
     outputs = []
-    @dotnet pack
+
+    @dotnet pack { }
 }
