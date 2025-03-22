@@ -9,21 +9,21 @@
                          $(DefineConstants), '^(.*;)*GENERATE_PARSER(;.*)*$'))">
             <ItemGroup>
                 <FsYacc Include="HCLParser/Parser.fsy">
-                    <OtherFlags>--internal --module Parser.HCL -o Gen/HCLParser.fs</OtherFlags>
+                    <OtherFlags>-v --internal --module Parser.HCL -o Gen/HCLParser.fs</OtherFlags>
                 </FsYacc>
                 <FsLex Include="HCLParser/Lexer.fsl">
                     <OtherFlags>--internal --module Lexer.HCL --unicode -o Gen/HCLLexer.fs</OtherFlags>
                 </FsLex>
 
                 <FsYacc Include="WorkspaceParser/Parser.fsy">
-                    <OtherFlags>--internal --module Parser.Workspace -o Gen/WorkspaceParser.fs</OtherFlags>
+                    <OtherFlags>-v --internal --module Parser.Workspace -o Gen/WorkspaceParser.fs</OtherFlags>
                 </FsYacc>
                 <FsLex Include="WorkspaceParser/Lexer.fsl">
                     <OtherFlags>--internal --module Lexer.Workspace --unicode -o Gen/WorkspaceLexer.fs</OtherFlags>
                 </FsLex>
 
                 <FsYacc Include="ProjectParser/Parser.fsy">
-                    <OtherFlags>--internal --module Parser.Project -o Gen/ProjectParser.fs</OtherFlags>
+                    <OtherFlags>-v --internal --module Parser.Project -o Gen/ProjectParser.fs</OtherFlags>
                 </FsYacc>
                 <FsLex Include="ProjectParser/Lexer.fsl">
                     <OtherFlags>--internal --module Lexer.Project --unicode -o Gen/ProjectLexer.fs</OtherFlags>

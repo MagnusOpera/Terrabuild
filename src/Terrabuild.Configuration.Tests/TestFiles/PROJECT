@@ -2,17 +2,17 @@
 
 extension @dotnet {
   defaults { # comment at end of line
-    configuration = configuration
+    configuration = var.configuration
   }
 }
 
 extension @docker {
+  variables = [ "ARM_TENANT_ID" ]
+
   defaults {
     configuration = configuration
     image = "ghcr.io/magnusopera/dotnet-app"
   }
-
-  variables = [ "ARM_TENANT_ID" ]
 }
 
 extension dummy {
@@ -42,6 +42,7 @@ target dist {
 target docker {
   rebuild = false
   cache = "always"
+
   @shell echo { arguments = trim("building project1 " + configuration) }
   @docker build { arguments = { config: "Release" my-variable: 42 } }
   @npm version { arguments = npm_version

@@ -15,8 +15,7 @@ let mkIdentifier lexbuf =
 [<RequireQualifiedAccess>]
 type LexerMode =
     | Default
-    | InterpolatedString
-    | InterpolatedExpression
+    | String
 
 let lexerMode = System.Collections.Generic.Stack([LexerMode.Default])
 
@@ -48,11 +47,12 @@ rule token = parse
         let mode = lexerMode.Peek()
         lexerMode.Push(LexerMode.Default)
         match mode with
-        | LexerMode.InterpolatedString -> STRING_START
+        | LexerMode.String -> STRING_START
         | _ -> LBRACE
     }
     | "}" {
-        match lexerMode.Pop() with
+        lexerMode.Pop() |> ignore
+        match lexerMode.Peek() with
         | LexerMode.Default -> RBRACE
         | _ -> EXPRESSION_END
     }
@@ -71,7 +71,7 @@ rule token = parse
     | "|" { OR }
     | "#" { singleLineComment lexbuf }
     | '"' {
-        lexerMode.Push(LexerMode.InterpolatedString)
+        lexerMode.Push(LexerMode.String)
         STRING_START
     }
 
@@ -112,7 +112,7 @@ and interpolatedString (acc: StringBuilder) = parse
         STRING_END (acc.ToString())
     }
     | '{' {
-        lexerMode.Push(LexerMode.InterpolatedExpression)
+        lexerMode.Push(LexerMode.Default)
         EXPRESSION_START (acc.ToString())
     }
     | _ {

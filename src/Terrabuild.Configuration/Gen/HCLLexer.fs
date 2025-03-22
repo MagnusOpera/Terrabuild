@@ -18,14 +18,13 @@ let mkIdentifier lexbuf =
 [<RequireQualifiedAccess>]
 type LexerMode =
     | Default
-    | InterpolatedString
-    | InterpolatedExpression
+    | String
 
 let lexerMode = System.Collections.Generic.Stack([LexerMode.Default])
 
 
 
-# 28 "Gen/HCLLexer.fs"
+# 27 "Gen/HCLLexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -170,45 +169,46 @@ let rec _fslex_dummy () = _fslex_dummy()
 and token  lexbuf =
   match _fslex_tables.Interpret(17,lexbuf) with
   | 0 -> ( 
-# 42 "HCLParser/Lexer.fsl"
+# 41 "HCLParser/Lexer.fsl"
                             DOUBLE_QUESTION 
-# 175 "Gen/HCLLexer.fs"
+# 174 "Gen/HCLLexer.fs"
           )
   | 1 -> ( 
-# 43 "HCLParser/Lexer.fsl"
+# 42 "HCLParser/Lexer.fsl"
                            QUESTION 
-# 180 "Gen/HCLLexer.fs"
+# 179 "Gen/HCLLexer.fs"
           )
   | 2 -> ( 
-# 44 "HCLParser/Lexer.fsl"
+# 43 "HCLParser/Lexer.fsl"
                             DOT_QUESTION 
-# 185 "Gen/HCLLexer.fs"
+# 184 "Gen/HCLLexer.fs"
           )
   | 3 -> ( 
-# 45 "HCLParser/Lexer.fsl"
+# 44 "HCLParser/Lexer.fsl"
                            DOT 
-# 190 "Gen/HCLLexer.fs"
+# 189 "Gen/HCLLexer.fs"
           )
   | 4 -> ( 
-# 46 "HCLParser/Lexer.fsl"
+# 45 "HCLParser/Lexer.fsl"
                            COLON 
-# 195 "Gen/HCLLexer.fs"
+# 194 "Gen/HCLLexer.fs"
           )
   | 5 -> ( 
-# 47 "HCLParser/Lexer.fsl"
+# 46 "HCLParser/Lexer.fsl"
                           
                        let mode = lexerMode.Peek()
                        lexerMode.Push(LexerMode.Default)
                        match mode with
-                       | LexerMode.InterpolatedString -> STRING_START
+                       | LexerMode.String -> STRING_START
                        | _ -> LBRACE
                    
-# 206 "Gen/HCLLexer.fs"
+# 205 "Gen/HCLLexer.fs"
           )
   | 6 -> ( 
-# 54 "HCLParser/Lexer.fsl"
+# 53 "HCLParser/Lexer.fsl"
                           
-                       match lexerMode.Pop() with
+                       lexerMode.Pop() |> ignore
+                       match lexerMode.Peek() with
                        | LexerMode.Default -> RBRACE
                        | _ -> EXPRESSION_END
                    
@@ -287,7 +287,7 @@ and token  lexbuf =
   | 21 -> ( 
 # 73 "HCLParser/Lexer.fsl"
                           
-                       lexerMode.Push(LexerMode.InterpolatedString)
+                       lexerMode.Push(LexerMode.String)
                        STRING_START
                    
 # 293 "Gen/HCLLexer.fs"
@@ -393,7 +393,7 @@ and interpolatedString (acc: StringBuilder) lexbuf =
   | 5 -> ( 
 # 114 "HCLParser/Lexer.fsl"
                           
-                       lexerMode.Push(LexerMode.InterpolatedExpression)
+                       lexerMode.Push(LexerMode.Default)
                        EXPRESSION_START (acc.ToString())
                    
 # 399 "Gen/HCLLexer.fs"

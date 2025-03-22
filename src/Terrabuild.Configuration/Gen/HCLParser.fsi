@@ -65,10 +65,11 @@ type tokenId =
 type nonTerminalId = 
     | NONTERM__startFile
     | NONTERM_File
+    | NONTERM_Attributes
+    | NONTERM_Attribute
     | NONTERM_Blocks
     | NONTERM_Block
-    | NONTERM_BlockComponents
-    | NONTERM_BlockComponent
+    | NONTERM_BlockContent
     | NONTERM_Expr
     | NONTERM_Function
     | NONTERM_ExprIndex

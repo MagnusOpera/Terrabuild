@@ -11,8 +11,7 @@ let parse txt =
         let lexer = 
             match mode with
             | Lexer.HCL.LexerMode.Default -> Lexer.HCL.token
-            | Lexer.HCL.LexerMode.InterpolatedString -> Lexer.HCL.interpolatedString (StringBuilder())
-            | Lexer.HCL.LexerMode.InterpolatedExpression -> Lexer.HCL.token
+            | Lexer.HCL.LexerMode.String -> Lexer.HCL.interpolatedString (StringBuilder())
 
         let token = lexer lexbuff
         printfn $"### SwitchableLexer  mode: {mode}  token: {token}"

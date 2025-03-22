@@ -51,23 +51,29 @@ let debugPrint s = ignore s
 %% 
 
 File:
+    | EOF { File.Build [] }
     | Blocks EOF { File.Build $1 }
 
+Attributes:
+    | Attribute { [$1] }
+    | Attributes Attribute { $1 @ [$2] }
+
+Attribute:
+    | IDENTIFIER EQUAL Expr { Attribute.Build $1 $3 }
+
 Blocks:
-    | /* empty */ { [] }
+    | Block { [$1] }
     | Blocks Block { $1 @ [$2] }
 
 Block:
-    | IDENTIFIER LBRACE BlockComponents RBRACE { Block.Build $1 None $3 }
-    | IDENTIFIER IDENTIFIER LBRACE BlockComponents RBRACE { Block.Build $1 (Some $2) $4 }
+    | IDENTIFIER LBRACE BlockContent RBRACE { Block.Build $1 None $3 }
+    | IDENTIFIER IDENTIFIER LBRACE BlockContent RBRACE { Block.Build $1 (Some $2) $4 }
 
-BlockComponents:
-    | /* empty */ { [] }
-    | BlockComponents BlockComponent { $1 @ [$2] }
-
-BlockComponent:
-    | IDENTIFIER EQUAL Expr { Attribute.Build $1 $3 |> BlockComponents.Attribute }
-    | Block { $1 |> BlockComponents.Block }
+BlockContent:
+    | /* empty */ { ([], []) }
+    | Attributes { ($1, []) }
+    | Blocks { ([], $1) }
+    | Attributes Blocks { ($1, $2) }
 
 Expr:
     /* structures */
@@ -130,7 +136,7 @@ InterpolatedString:
         if $1 |> String.IsNullOrEmpty then $2
         else Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2])
     }
-    | String EXPRESSION_START Expr EXPRESSION_END {
+    | InterpolatedString EXPRESSION_START Expr EXPRESSION_END {
         if $2 |> String.IsNullOrEmpty then Expr.Function (Function.Format, [Expr.String "{0}{1}"; $1; $3])
         else Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; $1; Expr.String $2; $3])
     }
