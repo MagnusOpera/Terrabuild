@@ -12,51 +12,21 @@
     "PROJECTS/RUST-APP"
   ],
   "targets": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "deploy": {
-      "dependsOn": [
-        "push"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "dist": {
-      "dependsOn": [
-        "build"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "docker": {
-      "dependsOn": [
-        "dist"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "push": {
-      "dependsOn": [
-        "docker"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    }
+    "build": [
+      "^build"
+    ],
+    "deploy": [
+      "push"
+    ],
+    "dist": [
+      "build"
+    ],
+    "docker": [
+      "dist"
+    ],
+    "push": [
+      "docker"
+    ]
   },
   "projects": {
     "DEPLOYMENTS/TERRAFORM-DEPLOY": {

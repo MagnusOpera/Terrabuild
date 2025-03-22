@@ -15,23 +15,23 @@ configuration release {
 }
 
 target build {
-  depends_on = [ ^build ]
+  depends_on = [ "^build" ]
 }
 
 target dist {
-  depends_on = [ build ]
+  depends_on = [ "build" ]
 }
 
 target docker {
-  depends_on = [ dist ]
+  depends_on = [ "dist" ]
 }
 
 target push {
-  depends_on = [ docker ]
+  depends_on = [ "docker" ]
 }
 
 target deploy {
-  depends_on = [ push ]
+  depends_on = [ "push" ]
 }
 
 extension @dotnet {
