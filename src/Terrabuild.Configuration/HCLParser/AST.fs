@@ -1,9 +1,5 @@
 namespace Terrabuild.Configuration.AST.HCL
-open Terrabuild.Configuration.AST
 open Terrabuild.Expressions
-open Errors
-
-
 
 
 type [<RequireQualifiedAccess>] Attribute =
@@ -13,6 +9,13 @@ with
     static member Build name value =
         { Attribute.Name = name
           Attribute.Value = value }
+
+    static member Append (attributes: Attribute list) (attribute: Attribute) =
+        if attributes |> List.exists (fun a -> a.Name = attribute.Name) then
+            Errors.raiseParseError $"Duplicate attribute: {attribute.Name}"
+        else
+            attributes @ [attribute]
+
 
 type [<RequireQualifiedAccess>] Block =
     { Resource: string

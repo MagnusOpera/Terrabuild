@@ -56,7 +56,7 @@ File:
 
 Attributes:
     | Attribute { [$1] }
-    | Attributes Attribute { $1 @ [$2] }
+    | Attributes Attribute { Attribute.Append $1 $2 }
 
 Attribute:
     | IDENTIFIER EQUAL Expr { Attribute.Build $1 $3 }

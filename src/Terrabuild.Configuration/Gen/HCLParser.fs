@@ -356,7 +356,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 59 "HCLParser/Parser.fsy"
-                                                  _1 @ [_2] 
+                                                  Attribute.Append _1 _2 
                    )
 # 59 "HCLParser/Parser.fsy"
                  : 'gentype_Attributes));
