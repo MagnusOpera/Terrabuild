@@ -33,7 +33,11 @@ type Expr =
     | List of Expr list
     | Variable of name:string
     | Function of Function * Expr list
-
+with
+    static member EmptyList = List []
+    static member EmptyMap = Map Map.empty
+    static member False = Bool false
+    static member True = Bool true
 
 [<RequireQualifiedAccess>]
 type Value =

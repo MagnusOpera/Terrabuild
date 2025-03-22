@@ -1,4 +1,4 @@
-namespace Terrabuild.Configuration.AST.HCL
+module Terrabuild.Configuration.HCL
 open Terrabuild.Expressions
 
 
@@ -35,3 +35,4 @@ type File =
 with
     static member Build blocks =
         { File.Blocks = blocks }
+

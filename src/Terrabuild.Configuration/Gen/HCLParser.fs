@@ -5,8 +5,7 @@ open FSharp.Text.Lexing
 open FSharp.Text.Parsing.ParseHelpers
 # 1 "HCLParser/Parser.fsy"
  
-open Terrabuild.Configuration.AST
-open Terrabuild.Configuration.AST.HCL
+open Terrabuild.Configuration.HCL
 open Terrabuild.Expressions
 open System
 
@@ -18,7 +17,7 @@ let debugPrint s = ignore s
 #endif
 
 
-# 21 "Gen/HCLParser.fs"
+# 20 "Gen/HCLParser.fs"
 // This type is the type of tokens accepted by the parser
 type token = 
   | EOF
@@ -307,107 +306,107 @@ let _fsyacc_reductionSymbolCounts = [|1us;1us;2us;1us;2us;3us;1us;2us;4us;5us;0u
 let _fsyacc_productionToNonTerminalTable = [|0us;1us;1us;2us;2us;3us;4us;4us;5us;5us;6us;6us;6us;6us;7us;7us;7us;7us;7us;7us;7us;7us;7us;7us;7us;7us;7us;7us;7us;7us;7us;8us;9us;9us;10us;11us;11us;12us;12us;13us;14us;14us;14us;15us;16us;16us;17us;18us;18us;|]
 let _fsyacc_immediateActions = [|65535us;49152us;16385us;65535us;16386us;16387us;65535us;16388us;65535us;65535us;65535us;16390us;65535us;65535us;16391us;65535us;65535us;65535us;16392us;65535us;65535us;65535us;16393us;16398us;16399us;16400us;16401us;16402us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;16403us;65535us;16404us;65535us;65535us;65535us;65535us;65535us;65535us;16411us;65535us;65535us;65535us;65535us;65535us;16415us;16416us;16417us;65535us;16419us;65535us;16420us;65535us;16421us;65535us;16422us;65535us;65535us;16423us;65535us;65535us;65535us;16427us;65535us;65535us;16430us;65535us;|]
 let _fsyacc_reductions = lazy [|
-# 310 "Gen/HCLParser.fs"
+# 309 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> Terrabuild.Configuration.AST.HCL.File in
+            let _1 = parseState.GetInput(1) :?> Terrabuild.Configuration.HCL.File in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
                       raise (FSharp.Text.Parsing.Accept(Microsoft.FSharp.Core.Operators.box _1))
                    )
                  : 'gentype__startFile));
-# 319 "Gen/HCLParser.fs"
+# 318 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 54 "HCLParser/Parser.fsy"
+# 53 "HCLParser/Parser.fsy"
                                  File.Build [] 
                    )
-# 54 "HCLParser/Parser.fsy"
-                 : Terrabuild.Configuration.AST.HCL.File));
-# 329 "Gen/HCLParser.fs"
+# 53 "HCLParser/Parser.fsy"
+                 : Terrabuild.Configuration.HCL.File));
+# 328 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Blocks in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 55 "HCLParser/Parser.fsy"
+# 54 "HCLParser/Parser.fsy"
                                         File.Build _1 
                    )
-# 55 "HCLParser/Parser.fsy"
-                 : Terrabuild.Configuration.AST.HCL.File));
-# 340 "Gen/HCLParser.fs"
+# 54 "HCLParser/Parser.fsy"
+                 : Terrabuild.Configuration.HCL.File));
+# 339 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Attribute in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 58 "HCLParser/Parser.fsy"
+# 57 "HCLParser/Parser.fsy"
                                        [_1] 
                    )
-# 58 "HCLParser/Parser.fsy"
+# 57 "HCLParser/Parser.fsy"
                  : 'gentype_Attributes));
-# 351 "Gen/HCLParser.fs"
+# 350 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Attributes in
             let _2 = parseState.GetInput(2) :?> 'gentype_Attribute in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 59 "HCLParser/Parser.fsy"
+# 58 "HCLParser/Parser.fsy"
                                                   Attribute.Append _1 _2 
                    )
-# 59 "HCLParser/Parser.fsy"
+# 58 "HCLParser/Parser.fsy"
                  : 'gentype_Attributes));
-# 363 "Gen/HCLParser.fs"
+# 362 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 62 "HCLParser/Parser.fsy"
+# 61 "HCLParser/Parser.fsy"
                                                    Attribute.Build _1 _3 
                    )
-# 62 "HCLParser/Parser.fsy"
+# 61 "HCLParser/Parser.fsy"
                  : 'gentype_Attribute));
-# 375 "Gen/HCLParser.fs"
+# 374 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Block in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 65 "HCLParser/Parser.fsy"
+# 64 "HCLParser/Parser.fsy"
                                    [_1] 
                    )
-# 65 "HCLParser/Parser.fsy"
+# 64 "HCLParser/Parser.fsy"
                  : 'gentype_Blocks));
-# 386 "Gen/HCLParser.fs"
+# 385 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Blocks in
             let _2 = parseState.GetInput(2) :?> 'gentype_Block in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 66 "HCLParser/Parser.fsy"
+# 65 "HCLParser/Parser.fsy"
                                           _1 @ [_2] 
                    )
-# 66 "HCLParser/Parser.fsy"
+# 65 "HCLParser/Parser.fsy"
                  : 'gentype_Blocks));
-# 398 "Gen/HCLParser.fs"
+# 397 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             let _3 = parseState.GetInput(3) :?> 'gentype_BlockContent in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 69 "HCLParser/Parser.fsy"
+# 68 "HCLParser/Parser.fsy"
                                                                    Block.Build _1 None _3 
                    )
-# 69 "HCLParser/Parser.fsy"
+# 68 "HCLParser/Parser.fsy"
                  : 'gentype_Block));
-# 410 "Gen/HCLParser.fs"
+# 409 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             let _2 = parseState.GetInput(2) :?> string in
@@ -415,230 +414,230 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 70 "HCLParser/Parser.fsy"
+# 69 "HCLParser/Parser.fsy"
                                                                               Block.Build _1 (Some _2) _4 
                    )
-# 70 "HCLParser/Parser.fsy"
+# 69 "HCLParser/Parser.fsy"
                  : 'gentype_Block));
-# 423 "Gen/HCLParser.fs"
+# 422 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 73 "HCLParser/Parser.fsy"
+# 72 "HCLParser/Parser.fsy"
                                          ([], []) 
                    )
-# 73 "HCLParser/Parser.fsy"
+# 72 "HCLParser/Parser.fsy"
                  : 'gentype_BlockContent));
-# 433 "Gen/HCLParser.fs"
+# 432 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Attributes in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 74 "HCLParser/Parser.fsy"
+# 73 "HCLParser/Parser.fsy"
                                         (_1, []) 
                    )
-# 74 "HCLParser/Parser.fsy"
+# 73 "HCLParser/Parser.fsy"
                  : 'gentype_BlockContent));
-# 444 "Gen/HCLParser.fs"
+# 443 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Blocks in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 75 "HCLParser/Parser.fsy"
+# 74 "HCLParser/Parser.fsy"
                                     ([], _1) 
                    )
-# 75 "HCLParser/Parser.fsy"
+# 74 "HCLParser/Parser.fsy"
                  : 'gentype_BlockContent));
-# 455 "Gen/HCLParser.fs"
+# 454 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Attributes in
             let _2 = parseState.GetInput(2) :?> 'gentype_Blocks in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 76 "HCLParser/Parser.fsy"
+# 75 "HCLParser/Parser.fsy"
                                                (_1, _2) 
                    )
-# 76 "HCLParser/Parser.fsy"
+# 75 "HCLParser/Parser.fsy"
                  : 'gentype_BlockContent));
-# 467 "Gen/HCLParser.fs"
+# 466 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExprList in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 80 "HCLParser/Parser.fsy"
+# 79 "HCLParser/Parser.fsy"
                                       Expr.List _1 
                    )
-# 80 "HCLParser/Parser.fsy"
+# 79 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 478 "Gen/HCLParser.fs"
+# 477 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExprMap in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 81 "HCLParser/Parser.fsy"
+# 80 "HCLParser/Parser.fsy"
                                      Expr.Map _1 
                    )
-# 81 "HCLParser/Parser.fsy"
+# 80 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 489 "Gen/HCLParser.fs"
+# 488 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> int in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 83 "HCLParser/Parser.fsy"
+# 82 "HCLParser/Parser.fsy"
                                     Expr.Number _1 
                    )
-# 83 "HCLParser/Parser.fsy"
+# 82 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 500 "Gen/HCLParser.fs"
+# 499 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExprIdentifier in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 84 "HCLParser/Parser.fsy"
+# 83 "HCLParser/Parser.fsy"
                                             _1 
                    )
-# 84 "HCLParser/Parser.fsy"
+# 83 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 511 "Gen/HCLParser.fs"
+# 510 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_String in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 85 "HCLParser/Parser.fsy"
+# 84 "HCLParser/Parser.fsy"
                                     _1 
                    )
-# 85 "HCLParser/Parser.fsy"
+# 84 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 522 "Gen/HCLParser.fs"
+# 521 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_ExprIndex in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 87 "HCLParser/Parser.fsy"
+# 86 "HCLParser/Parser.fsy"
                                                 Expr.Function (Function.Item, [_1;  _3]) 
                    )
-# 87 "HCLParser/Parser.fsy"
+# 86 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 534 "Gen/HCLParser.fs"
+# 533 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_ExprIndex in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 88 "HCLParser/Parser.fsy"
+# 87 "HCLParser/Parser.fsy"
                                                          Expr.Function (Function.TryItem, [_1; _3]) 
                    )
-# 88 "HCLParser/Parser.fsy"
+# 87 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 546 "Gen/HCLParser.fs"
+# 545 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 89 "HCLParser/Parser.fsy"
+# 88 "HCLParser/Parser.fsy"
                                                     Expr.Function (Function.Equal, [_1; _3]) 
                    )
-# 89 "HCLParser/Parser.fsy"
+# 88 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 558 "Gen/HCLParser.fs"
+# 557 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 90 "HCLParser/Parser.fsy"
+# 89 "HCLParser/Parser.fsy"
                                                  Expr.Function (Function.NotEqual, [_1; _3]) 
                    )
-# 90 "HCLParser/Parser.fsy"
+# 89 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 570 "Gen/HCLParser.fs"
+# 569 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 91 "HCLParser/Parser.fsy"
+# 90 "HCLParser/Parser.fsy"
                                             Expr.Function (Function.Plus, [_1; _3]) 
                    )
-# 91 "HCLParser/Parser.fsy"
+# 90 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 582 "Gen/HCLParser.fs"
+# 581 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 92 "HCLParser/Parser.fsy"
+# 91 "HCLParser/Parser.fsy"
                                              Expr.Function (Function.Minus, [_1; _3]) 
                    )
-# 92 "HCLParser/Parser.fsy"
+# 91 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 594 "Gen/HCLParser.fs"
+# 593 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 93 "HCLParser/Parser.fsy"
+# 92 "HCLParser/Parser.fsy"
                                            Expr.Function (Function.And, [_1; _3]) 
                    )
-# 93 "HCLParser/Parser.fsy"
+# 92 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 606 "Gen/HCLParser.fs"
+# 605 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 94 "HCLParser/Parser.fsy"
+# 93 "HCLParser/Parser.fsy"
                                           Expr.Function (Function.Or, [_1; _3]) 
                    )
-# 94 "HCLParser/Parser.fsy"
+# 93 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 618 "Gen/HCLParser.fs"
+# 617 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Function in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 95 "HCLParser/Parser.fsy"
+# 94 "HCLParser/Parser.fsy"
                                       _1 
                    )
-# 95 "HCLParser/Parser.fsy"
+# 94 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 629 "Gen/HCLParser.fs"
+# 628 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 96 "HCLParser/Parser.fsy"
+# 95 "HCLParser/Parser.fsy"
                                                        Expr.Function (Function.Coalesce, [_1; _3]) 
                    )
-# 96 "HCLParser/Parser.fsy"
+# 95 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 641 "Gen/HCLParser.fs"
+# 640 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
@@ -646,30 +645,30 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 97 "HCLParser/Parser.fsy"
+# 96 "HCLParser/Parser.fsy"
                                                            Expr.Function (Function.Ternary, [_1; _3; _5] ) 
                    )
-# 97 "HCLParser/Parser.fsy"
+# 96 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 654 "Gen/HCLParser.fs"
+# 653 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 98 "HCLParser/Parser.fsy"
+# 97 "HCLParser/Parser.fsy"
                                        Expr.Function (Function.Not, [_2]) 
                    )
-# 98 "HCLParser/Parser.fsy"
+# 97 "HCLParser/Parser.fsy"
                  : 'gentype_Expr));
-# 665 "Gen/HCLParser.fs"
+# 664 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             let _2 = parseState.GetInput(2) :?> 'gentype_ExprTuple in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 101 "HCLParser/Parser.fsy"
+# 100 "HCLParser/Parser.fsy"
                                                 
                              match _1 with
                              | "trim" -> Expr.Function (Function.Trim, _2)
@@ -683,37 +682,37 @@ let _fsyacc_reductions = lazy [|
                              | _ -> Errors.raiseParseError $"Unknown function: {_1}"
                          
                    )
-# 101 "HCLParser/Parser.fsy"
+# 100 "HCLParser/Parser.fsy"
                  : 'gentype_Function));
-# 688 "Gen/HCLParser.fs"
+# 687 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> int in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 115 "HCLParser/Parser.fsy"
+# 114 "HCLParser/Parser.fsy"
                                     Expr.Number _1 
                    )
-# 115 "HCLParser/Parser.fsy"
+# 114 "HCLParser/Parser.fsy"
                  : 'gentype_ExprIndex));
-# 699 "Gen/HCLParser.fs"
+# 698 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 116 "HCLParser/Parser.fsy"
+# 115 "HCLParser/Parser.fsy"
                                         Expr.String _1 
                    )
-# 116 "HCLParser/Parser.fsy"
+# 115 "HCLParser/Parser.fsy"
                  : 'gentype_ExprIndex));
-# 710 "Gen/HCLParser.fs"
+# 709 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 119 "HCLParser/Parser.fsy"
+# 118 "HCLParser/Parser.fsy"
                                         
                              match _1 with
                              | "true" -> Expr.Bool true
@@ -722,50 +721,50 @@ let _fsyacc_reductions = lazy [|
                              | _ -> Expr.Variable _1
                          
                    )
-# 119 "HCLParser/Parser.fsy"
+# 118 "HCLParser/Parser.fsy"
                  : 'gentype_ExprIdentifier));
-# 727 "Gen/HCLParser.fs"
+# 726 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 128 "HCLParser/Parser.fsy"
+# 127 "HCLParser/Parser.fsy"
                                                      Expr.String _2 
                    )
-# 128 "HCLParser/Parser.fsy"
+# 127 "HCLParser/Parser.fsy"
                  : 'gentype_String));
-# 738 "Gen/HCLParser.fs"
+# 737 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_InterpolatedString in
             let _3 = parseState.GetInput(3) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 129 "HCLParser/Parser.fsy"
+# 128 "HCLParser/Parser.fsy"
                                                                         
                              if _3 |> String.IsNullOrEmpty then Expr.Function (Function.ToString, [_2])
                              else Expr.Function (Function.Format, [Expr.String "{0}{1}"; _2; Expr.String _3]) 
                          
                    )
-# 129 "HCLParser/Parser.fsy"
+# 128 "HCLParser/Parser.fsy"
                  : 'gentype_String));
-# 753 "Gen/HCLParser.fs"
+# 752 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             let _2 = parseState.GetInput(2) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 135 "HCLParser/Parser.fsy"
+# 134 "HCLParser/Parser.fsy"
                                                                   
                              if _1 |> String.IsNullOrEmpty then _2
                              else Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String _1; _2])
                          
                    )
-# 135 "HCLParser/Parser.fsy"
+# 134 "HCLParser/Parser.fsy"
                  : 'gentype_InterpolatedString));
-# 768 "Gen/HCLParser.fs"
+# 767 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_InterpolatedString in
             let _2 = parseState.GetInput(2) :?> string in
@@ -773,113 +772,113 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 139 "HCLParser/Parser.fsy"
+# 138 "HCLParser/Parser.fsy"
                                                                                     
                              if _2 |> String.IsNullOrEmpty then Expr.Function (Function.Format, [Expr.String "{0}{1}"; _1; _3])
                              else Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; _1; Expr.String _2; _3])
                          
                    )
-# 139 "HCLParser/Parser.fsy"
+# 138 "HCLParser/Parser.fsy"
                  : 'gentype_InterpolatedString));
-# 784 "Gen/HCLParser.fs"
+# 783 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_ExprTupleContent in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 145 "HCLParser/Parser.fsy"
+# 144 "HCLParser/Parser.fsy"
                                                             _2 
                    )
-# 145 "HCLParser/Parser.fsy"
+# 144 "HCLParser/Parser.fsy"
                  : 'gentype_ExprTuple));
-# 795 "Gen/HCLParser.fs"
+# 794 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 147 "HCLParser/Parser.fsy"
+# 146 "HCLParser/Parser.fsy"
                                          [] 
                    )
-# 147 "HCLParser/Parser.fsy"
+# 146 "HCLParser/Parser.fsy"
                  : 'gentype_ExprTupleContent));
-# 805 "Gen/HCLParser.fs"
+# 804 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 148 "HCLParser/Parser.fsy"
+# 147 "HCLParser/Parser.fsy"
                                   [_1] 
                    )
-# 148 "HCLParser/Parser.fsy"
+# 147 "HCLParser/Parser.fsy"
                  : 'gentype_ExprTupleContent));
-# 816 "Gen/HCLParser.fs"
+# 815 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExprTupleContent in
             let _3 = parseState.GetInput(3) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 149 "HCLParser/Parser.fsy"
+# 148 "HCLParser/Parser.fsy"
                                                          _1 @ [_3] 
                    )
-# 149 "HCLParser/Parser.fsy"
+# 148 "HCLParser/Parser.fsy"
                  : 'gentype_ExprTupleContent));
-# 828 "Gen/HCLParser.fs"
+# 827 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_ExprListContent in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 152 "HCLParser/Parser.fsy"
+# 151 "HCLParser/Parser.fsy"
                                                                    _2 
                    )
-# 152 "HCLParser/Parser.fsy"
+# 151 "HCLParser/Parser.fsy"
                  : 'gentype_ExprList));
-# 839 "Gen/HCLParser.fs"
+# 838 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 154 "HCLParser/Parser.fsy"
+# 153 "HCLParser/Parser.fsy"
                                          [] 
                    )
-# 154 "HCLParser/Parser.fsy"
+# 153 "HCLParser/Parser.fsy"
                  : 'gentype_ExprListContent));
-# 849 "Gen/HCLParser.fs"
+# 848 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExprListContent in
             let _2 = parseState.GetInput(2) :?> 'gentype_Expr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 155 "HCLParser/Parser.fsy"
+# 154 "HCLParser/Parser.fsy"
                                                   _1 @ [_2] 
                    )
-# 155 "HCLParser/Parser.fsy"
+# 154 "HCLParser/Parser.fsy"
                  : 'gentype_ExprListContent));
-# 861 "Gen/HCLParser.fs"
+# 860 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> 'gentype_ExprMapContent in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 158 "HCLParser/Parser.fsy"
+# 157 "HCLParser/Parser.fsy"
                                                           _2 
                    )
-# 158 "HCLParser/Parser.fsy"
+# 157 "HCLParser/Parser.fsy"
                  : 'gentype_ExprMap));
-# 872 "Gen/HCLParser.fs"
+# 871 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 160 "HCLParser/Parser.fsy"
+# 159 "HCLParser/Parser.fsy"
                                          Map.empty 
                    )
-# 160 "HCLParser/Parser.fsy"
+# 159 "HCLParser/Parser.fsy"
                  : 'gentype_ExprMapContent));
-# 882 "Gen/HCLParser.fs"
+# 881 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_ExprMapContent in
             let _2 = parseState.GetInput(2) :?> string in
@@ -887,13 +886,13 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 161 "HCLParser/Parser.fsy"
+# 160 "HCLParser/Parser.fsy"
                                                      _1.Add (_2, _3) 
                    )
-# 161 "HCLParser/Parser.fsy"
+# 160 "HCLParser/Parser.fsy"
                  : 'gentype_ExprMapContent));
 |]
-# 896 "Gen/HCLParser.fs"
+# 895 "Gen/HCLParser.fs"
 let tables : FSharp.Text.Parsing.Tables<_> = 
   { reductions = _fsyacc_reductions.Value;
     endOfInputTag = _fsyacc_endOfInputTag;
@@ -915,5 +914,5 @@ let tables : FSharp.Text.Parsing.Tables<_> =
     numTerminals = 32;
     productionToNonTerminalTable = _fsyacc_productionToNonTerminalTable  }
 let engine lexer lexbuf startState = tables.Interpret(lexer, lexbuf, startState)
-let File lexer lexbuf : Terrabuild.Configuration.AST.HCL.File =
+let File lexer lexbuf : Terrabuild.Configuration.HCL.File =
     engine lexer lexbuf 0 :?> _

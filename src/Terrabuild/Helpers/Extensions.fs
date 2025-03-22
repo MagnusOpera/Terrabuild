@@ -3,8 +3,8 @@ open System
 open System.IO
 open Terrabuild.Scripting
 open Terrabuild.Expressions
-open Terrabuild.Configuration.AST
 open Errors
+open Terrabuild.Configuration
 
 type InvocationResult<'t> =
     | Success of 't
@@ -14,7 +14,12 @@ type InvocationResult<'t> =
 
 let systemExtensions =
     Terrabuild.Extensions.Factory.systemScripts
-    |> Seq.map (fun kvp -> ExtensionBlock.Build kvp.Key [])
+    |> Seq.map (fun kvp ->
+        { ExtensionBlock.Container = Expr.Nothing
+          Platform = Expr.Nothing
+          Variables = Expr.Nothing
+          Script = Expr.Nothing
+          Defaults = Map.empty })
     |> Map.ofSeq
 
 // NOTE: when app in package as a single file, Terrabuild.Assembly can't be found...

@@ -14,41 +14,20 @@
                 <FsLex Include="HCLParser/Lexer.fsl">
                     <OtherFlags>--internal --module Lexer.HCL --unicode -o Gen/HCLLexer.fs</OtherFlags>
                 </FsLex>
-
-                <FsYacc Include="WorkspaceParser/Parser.fsy">
-                    <OtherFlags>-v --internal --module Parser.Workspace -o Gen/WorkspaceParser.fs</OtherFlags>
-                </FsYacc>
-                <FsLex Include="WorkspaceParser/Lexer.fsl">
-                    <OtherFlags>--internal --module Lexer.Workspace --unicode -o Gen/WorkspaceLexer.fs</OtherFlags>
-                </FsLex>
-
-                <FsYacc Include="ProjectParser/Parser.fsy">
-                    <OtherFlags>-v --internal --module Parser.Project -o Gen/ProjectParser.fs</OtherFlags>
-                </FsYacc>
-                <FsLex Include="ProjectParser/Lexer.fsl">
-                    <OtherFlags>--internal --module Lexer.Project --unicode -o Gen/ProjectLexer.fs</OtherFlags>
-                </FsLex>
             </ItemGroup>
         </When>
     </Choose>
 
   <ItemGroup>
-    <Compile Include="AST.fs" />
-    <Compile Include="HCLParser/AST.fs" />
-    <Compile Include="WorkspaceParser/AST.fs" />
-    <Compile Include="ProjectParser/AST.fs" />
+    <Compile Include="HCL.fs" />
     <Compile Include="Gen/HCLParser.fsi" />
     <Compile Include="Gen/HCLParser.fs" />
     <Compile Include="Gen/HCLLexer.fs" />
-    <Compile Include="Gen/WorkspaceParser.fsi" />
-    <Compile Include="Gen/WorkspaceParser.fs" />
-    <Compile Include="Gen/WorkspaceLexer.fs" />
-    <Compile Include="Gen/ProjectParser.fsi" />
-    <Compile Include="Gen/ProjectParser.fs" />
-    <Compile Include="Gen/ProjectLexer.fs" />
-    <Compile Include="HCLParser/FrontEnd.fs" />
-    <Compile Include="WorkspaceParser/FrontEnd.fs" />
-    <Compile Include="ProjectParser/FrontEnd.fs" />
+
+    <Compile Include="FrontEnd.fs" />
+    <Compile Include="Common.fs" />
+    <Compile Include="Workspace.fs" />
+    <Compile Include="Project.fs" />
   </ItemGroup>
 
   <ItemGroup>
