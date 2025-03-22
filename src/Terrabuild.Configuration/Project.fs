@@ -144,7 +144,7 @@ let private map (blocks: Block list) =
                 let rebuild = block |> tryFindAttribute "rebuild"
                 let outputs = block |> tryFindAttribute "outputs"
                 let dependsOn =
-                    block |> tryFindAttribute "dependsOn"
+                    block |> tryFindAttribute "depends_on"
                     |> Option.bind (Eval.asStringSetOption << simpleEval)
                 let cache = block |> tryFindAttribute "cache"
                 let steps =

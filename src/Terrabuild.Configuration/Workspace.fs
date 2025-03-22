@@ -77,7 +77,7 @@ let private map (blocks: Block list) =
                 |> ignore
 
                 let dependsOn =
-                    block |> tryFindAttribute "dependsOn" 
+                    block |> tryFindAttribute "depends_on" 
                     |> Option.bind (Eval.asStringSetOption << simpleEval)
                     |> Option.defaultValue Set.empty
                 let rebuild = block |> tryFindAttribute "rebuild"

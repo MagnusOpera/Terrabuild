@@ -12,10 +12,6 @@
     "build": {
       "dependsOn": [
         "^build"
-      ],
-      "rebuild": [
-        "bool",
-        false
       ]
     }
   },
