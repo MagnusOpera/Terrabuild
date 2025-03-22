@@ -51,7 +51,13 @@ let private map (blocks: Block list) =
         | [] ->
             let project =
                 match project with
-                | None -> raiseParseError "project not declared"
+                | None -> { ProjectBlock.Init = None
+                            ProjectBlock.Dependencies = None
+                            ProjectBlock.Links = None
+                            ProjectBlock.Outputs = None
+                            ProjectBlock.Ignores = None
+                            ProjectBlock.Includes = None
+                            ProjectBlock.Labels = Set.empty }
                 | Some workspace -> workspace
 
             let locals =

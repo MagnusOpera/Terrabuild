@@ -3,5 +3,5 @@ project @npm {
 }
 
 target build {
-    @npm build
+    @npm build { }
 }

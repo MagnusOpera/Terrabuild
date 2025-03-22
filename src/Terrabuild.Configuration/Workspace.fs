@@ -39,7 +39,8 @@ let private map (blocks: Block list) =
         | [] ->
             let workspace =
                 match workspace with
-                | None -> raiseParseError "workspace not declared"
+                | None -> { WorkspaceBlock.Id = None
+                            WorkspaceBlock.Ignores = None }
                 | Some workspace -> workspace
 
             { WorkspaceFile.Workspace = workspace
