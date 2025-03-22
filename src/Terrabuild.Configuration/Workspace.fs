@@ -71,7 +71,7 @@ let private map (blocks: Block list) =
             // =============================================================================================
             | "target", Some name ->
                 block
-                |> checkAllowedAttributes ["dependsOn"; "rebuild"]
+                |> checkAllowedAttributes ["depends_on"; "rebuild"]
                 |> checkNoNestedBlocks
                 |> ignore
 

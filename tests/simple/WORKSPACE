@@ -2,16 +2,16 @@
 workspace {
 }
 
-configuration {
-    `configuration` = "Debug"
+configuration default {
+    configuration = "Debug"
     secret_message = "tagada"
     npm_version = "1.0.0"
-    `workspace` = "default"
+    workspace = "default"
 }
 
 configuration release {
-    `configuration` = "Release"
-    `workspace` = "default"
+    configuration = "Release"
+    workspace = "default"
 }
 
 target build {
@@ -38,7 +38,7 @@ extension @dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:9.0.202"
   platform = "linux/amd64"
   defaults {
-    `configuration` = $configuration
+    configuration = configuration
   }
 }
 
@@ -46,7 +46,7 @@ extension @terraform {
   container = "hashicorp/terraform:1.10"
   platform = "linux/amd64"
   defaults {
-    `workspace` = $workspace
+    workspace = workspace
   }
 }
 

@@ -14,7 +14,7 @@ let parse txt =
             | Lexer.HCL.LexerMode.String -> Lexer.HCL.interpolatedString (StringBuilder())
 
         let token = lexer lexbuff
-        printfn $"### SwitchableLexer  mode: {mode}  token: {token}"
+        // printfn $"### SwitchableLexer  mode: {mode}  token: {token}"
         token
 
     let lexbuf = LexBuffer<_>.FromString txt

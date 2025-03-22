@@ -239,7 +239,7 @@ let read (options: ConfigOptions.Options) =
                 try
                     AST.Project.parse projectContent
                 with exn ->
-                    raiseParseError $"Failed to read PROJECT configuration '{projectId}'" exn
+                    raiseParserError($"Failed to read PROJECT configuration '{projectId}'", exn)
             | _ ->
                 raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 

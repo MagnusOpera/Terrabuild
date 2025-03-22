@@ -130,8 +130,7 @@ let private map (blocks: Block list) =
             // =============================================================================================
             | "target", Some name ->
                 block
-                |> checkAllowedAttributes ["rebuild"; "outputs"; "dependsOn"; "cache"]
-                |> checkAllowedNestedBlocks ["step"]
+                |> checkAllowedAttributes ["rebuild"; "outputs"; "depends_on"; "cache"]
                 |> ignore
 
                 if targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"

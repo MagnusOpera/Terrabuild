@@ -5,5 +5,5 @@ project @cargo {
 }
 
 target build {
-    @cargo build
+    @cargo build { }
 }

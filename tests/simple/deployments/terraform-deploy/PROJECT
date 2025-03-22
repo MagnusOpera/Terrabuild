@@ -8,7 +8,7 @@ project @terraform {
 
 target build {
     @terraform plan { 
-        variables: { dotnet_app_version: version("/projects/dotnet-app")
+        variables = { dotnet_app_version: version("/projects/dotnet-app")
                      npm_app_version: version("../../projects/npm-app") }
     }
 }
