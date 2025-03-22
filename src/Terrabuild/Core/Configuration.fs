@@ -10,8 +10,6 @@ open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
 open Serilog
 open Terrabuild.Configuration
-open Terrabuild.Configuration.Workspace
-open Terrabuild.Configuration.Project
 
 
 [<RequireQualifiedAccess>]
@@ -56,7 +54,7 @@ type Workspace = {
     SelectedProjects: string set
 
     // All targets at workspace level
-    Targets: Map<string, TargetBlock>
+    Targets: Map<string, Workspace.TargetBlock>
 
     // All discovered projects in workspace
     Projects: Map<string, Project>
@@ -71,7 +69,7 @@ type private LoadedProject = {
     Includes: string set
     Ignores: string set
     Outputs: string set
-    Targets: Map<string, TargetBlock>
+    Targets: Map<string, Project.TargetBlock>
     Labels: string set
     Extensions: Map<string, ExtensionBlock>
     Scripts: Map<string, LazyScript>
@@ -241,7 +239,7 @@ let read (options: ConfigOptions.Options) =
             | FS.File projectFile ->
                 let projectContent = File.ReadAllText projectFile
                 try
-                    FrontEnd.Project.parse projectContent
+                    Project.parse projectContent
                 with exn ->
                     raiseParseError $"Failed to read PROJECT configuration '{projectId}'" exn
             | _ ->

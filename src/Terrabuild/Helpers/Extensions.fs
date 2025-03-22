@@ -15,11 +15,11 @@ type InvocationResult<'t> =
 let systemExtensions =
     Terrabuild.Extensions.Factory.systemScripts
     |> Seq.map (fun kvp ->
-        { ExtensionBlock.Container = Expr.Nothing
-          Platform = Expr.Nothing
-          Variables = Expr.Nothing
-          Script = Expr.Nothing
-          Defaults = Map.empty })
+        kvp.Key, { ExtensionBlock.Container = Expr.Nothing
+                   Platform = Expr.Nothing
+                   Variables = Expr.Nothing
+                   Script = Expr.Nothing
+                   Defaults = Map.empty })
     |> Map.ofSeq
 
 // NOTE: when app in package as a single file, Terrabuild.Assembly can't be found...
