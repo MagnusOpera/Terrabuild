@@ -9,8 +9,6 @@ open Errors
 open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
 open Serilog
-open Terrabuild.Configuration
-
 
 [<RequireQualifiedAccess>]
 type TargetOperation = {
@@ -54,7 +52,7 @@ type Workspace = {
     SelectedProjects: string set
 
     // All targets at workspace level
-    Targets: Map<string, Workspace.TargetBlock>
+    Targets: Map<string, AST.Workspace.TargetBlock>
 
     // All discovered projects in workspace
     Projects: Map<string, Project>
@@ -69,9 +67,9 @@ type private LoadedProject = {
     Includes: string set
     Ignores: string set
     Outputs: string set
-    Targets: Map<string, Project.TargetBlock>
+    Targets: Map<string, AST.Project.TargetBlock>
     Labels: string set
-    Extensions: Map<string, ExtensionBlock>
+    Extensions: Map<string, AST.Common.ExtensionBlock>
     Scripts: Map<string, LazyScript>
     Locals: Map<string, Expr>
 }
@@ -110,7 +108,7 @@ let read (options: ConfigOptions.Options) =
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
-            Workspace.parse workspaceContent
+            AST.Workspace.parse workspaceContent
         with exn ->
             raiseParserError("Failed to read WORKSPACE configuration file", exn)
 
@@ -140,7 +138,7 @@ let read (options: ConfigOptions.Options) =
             | _ -> Value.Nothing
 
         let defaultEvaluationContext = {
-            Eval.EvaluationContext.WorkspaceDir = options.Workspace
+            Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
             Eval.EvaluationContext.ProjectDir = None
             Eval.EvaluationContext.Versions = Map.empty
             Eval.EvaluationContext.Variables = Map [
@@ -239,7 +237,7 @@ let read (options: ConfigOptions.Options) =
             | FS.File projectFile ->
                 let projectContent = File.ReadAllText projectFile
                 try
-                    Project.parse projectContent
+                    AST.Project.parse projectContent
                 with exn ->
                     raiseParseError $"Failed to read PROJECT configuration '{projectId}'" exn
             | _ ->
@@ -278,12 +276,17 @@ let read (options: ConfigOptions.Options) =
                 | Extensions.ErrorTarget exn -> forwardExternalError($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
             | _ -> ProjectInfo.Default
 
-        let projectIgnores = Eval.evalAsStringSet evaluationContext projectConfig.Project.Ignores
-        let projectOutputs = Eval.evalAsStringSet evaluationContext projectConfig.Project.Outputs
-        let projectDependencies = Eval.evalAsStringSet evaluationContext projectConfig.Project.Dependencies
-        let projectLinks = Eval.evalAsStringSet evaluationContext projectConfig.Project.Links
-        let projectIncludes = Eval.evalAsStringSet evaluationContext projectConfig.Project.Includes
-        let labels = Eval.evalAsStringSet evaluationContext projectConfig.Project.Labels
+        let evalAsStringSet expr =
+            expr
+            |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+            |> Option.defaultValue Set.empty
+
+        let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
+        let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
+        let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
+        let projectLinks = projectConfig.Project.Links |> evalAsStringSet
+        let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
+        let labels = projectConfig.Project.Labels
 
         let projectInfo = {
             projectInfo
@@ -388,17 +391,15 @@ let read (options: ConfigOptions.Options) =
                 // defaults to allow caching
                 let rebuild =
                     let rebuild =
-                        target.Rebuild
-                        |> Option.defaultWith (fun () ->
+                        match target.Rebuild with
+                        | Some rebuild -> Some rebuild
+                        | _ ->
                             workspaceConfig.Targets
                             |> Map.tryFind targetName
-                            |> Option.map (fun target -> target.Rebuild)
-                            |> Option.defaultValue (Expr.Bool false))
-                    Eval.eval evaluationContext rebuild
-                let rebuild =
-                    match rebuild with
-                    | Value.Bool rebuild -> rebuild
-                    | _ -> raiseTypeError "rebuild must evaluate to a bool"
+                            |> Option.bind _.Rebuild
+                    rebuild
+                    |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
+                    |> Option.defaultValue false
 
                 let targetOperations =
                     target.Steps
@@ -409,7 +410,7 @@ let read (options: ConfigOptions.Options) =
                             | _ -> raiseSymbolError $"Extension {step.Extension} is not defined"
 
                         let context =
-                            extension.Defaults
+                            extension.Defaults |> Option.defaultValue Map.empty
                             |> Map.addMap step.Parameters
                             |> Expr.Map
                             |> Eval.eval evaluationContext
@@ -439,7 +440,8 @@ let read (options: ConfigOptions.Options) =
 
                         let extVariables =
                             extension.Variables
-                            |> Eval.evalAsStringSet evaluationContext
+                            |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+                            |> Option.defaultValue Set.empty
 
                         let hash =
                             let containerInfos = 
@@ -485,7 +487,7 @@ let read (options: ConfigOptions.Options) =
                 let outputs =
                     let targetOutputs =
                         target.Outputs
-                        |> Option.map (Eval.evalAsStringSet evaluationContext)
+                        |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
                     match targetOutputs with
                     | Some outputs -> outputs
                     | _ -> projectDef.Outputs
@@ -533,7 +535,7 @@ let read (options: ConfigOptions.Options) =
 
 
     let searchProjectsAndApply() =
-        let workspaceIgnores = Eval.evalAsStringSet evaluationContext workspaceConfig.Workspace.Ignores
+        let workspaceIgnores = workspaceConfig.Workspace.Ignores |> Option.defaultValue Set.empty
         let scanFolder = scanFolders options.Workspace workspaceIgnores
         let projectLoading = ConcurrentDictionary<string, bool>()
         let projects = ConcurrentDictionary<string, Project>()
@@ -608,9 +610,7 @@ let read (options: ConfigOptions.Options) =
         | _ -> projects.Keys
         |> Set
 
-    let workspaceId =
-        workspaceConfig.Workspace.Id
-        |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+    let workspaceId = workspaceConfig.Workspace.Id
 
     { Workspace.Id = workspaceId
       Workspace.SelectedProjects = selectedProjects

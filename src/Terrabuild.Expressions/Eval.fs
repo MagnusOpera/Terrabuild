@@ -3,12 +3,17 @@ open Terrabuild.Expressions
 open Errors
 open Collections
 
-type EvaluationContext = {
-    WorkspaceDir: string
-    ProjectDir: string option
-    Versions: Map<string, string>
-    Variables: Map<string, Value>
-}
+type EvaluationContext =
+    { WorkspaceDir: string option
+      ProjectDir: string option
+      Versions: Map<string, string>
+      Variables: Map<string, Value> }
+with
+    static member Empty =
+        { WorkspaceDir = None
+          ProjectDir = None
+          Versions = Map.empty
+          Variables = Map.empty }
 
 let rec eval (context: EvaluationContext) (expr: Expr) =
     let valueToString v =
@@ -74,8 +79,13 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                         | Some projectDir -> projectDir
                         | _ -> raiseInvalidArg $"'version' function can only be used in the context of a project."
 
+                    let workspaceDir =
+                        match context.WorkspaceDir with
+                        | Some workspaceDir -> workspaceDir
+                        | _ -> raiseInvalidArg $"'version' function can only be used in the context of a project."
+
                     let projectId =
-                        FS.workspaceRelative context.WorkspaceDir projectDir projectPath
+                        FS.workspaceRelative workspaceDir projectDir projectPath
                         |> String.toUpper
                     match context.Versions |> Map.tryFind projectId with
                     | Some version -> Value.String version
@@ -179,11 +189,13 @@ let asBoolOption = function
     | Value.Nothing -> None
     | _ -> raiseTypeError "Failed to convert"
 
-let evalAsStringSet (context: EvaluationContext) (exprs: Expr seq) =
-    exprs
-    |> Seq.map (fun expr -> eval context expr)
-    |> Seq.map (fun value ->
-        match value with
-        | Value.String s -> s
-        | _ -> raiseTypeError "Failed to convert")
-    |> Set.ofSeq
+let asStringSetOption = function
+    | Value.List list ->
+        list
+        |> List.map (fun value ->
+            match value with
+            | Value.String s -> s
+            | _ -> raiseTypeError "Failed to convert")
+        |> Set.ofList
+        |> Some
+    | _ -> raiseTypeError "Failed to convert"

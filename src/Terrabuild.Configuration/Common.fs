@@ -1,15 +1,15 @@
-module Terrabuild.Configuration
-open Terrabuild.Configuration.HCL
+module AST.Common
 open Terrabuild.Expressions
 open Errors
+open HCL
 
 
 type ExtensionBlock =
-    { Container: Expr
-      Platform: Expr
-      Variables: Expr
-      Script: Expr
-      Defaults: Map<string, Expr> }
+    { Container: Expr option
+      Platform: Expr option
+      Variables: Expr option
+      Script: Expr option
+      Defaults: Map<string, Expr> option }
 
 
 let checkNoAttributes (block: Block) =
@@ -32,9 +32,10 @@ let checkAllowedNestedBlocks (allowed: string list) (block: Block) =
         if not (allowed |> List.contains b.Resource) then raiseParseError $"Unexpected block: {b.Resource}")
     block
 
-let tryFindAttribute (name: string) (attributes: Attribute list) =
-    attributes
+let tryFindAttribute (name: string) (block: Block) =
+    block.Attributes
     |> List.tryFind (fun a -> a.Name = name)
+    |> Option.map (fun a -> a.Value)
 
 let tryFindBlock (resource: string) (block: Block) =
     let candidates = 
@@ -50,3 +51,4 @@ let valueOrDefault (defaultValue: Expr) (attribute: Attribute option) =
     | Some attribute -> attribute.Value
     | None -> defaultValue
 
+let simpleEval = Eval.eval Eval.EvaluationContext.Empty

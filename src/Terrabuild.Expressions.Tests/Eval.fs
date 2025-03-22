@@ -5,7 +5,7 @@ open FsUnit
 open Eval
 
 let private evaluationContext = {
-    Eval.EvaluationContext.WorkspaceDir = TestContext.CurrentContext.WorkDirectory
+    Eval.EvaluationContext.WorkspaceDir = Some TestContext.CurrentContext.WorkDirectory
     Eval.EvaluationContext.ProjectDir = FS.combinePath TestContext.CurrentContext.WorkDirectory "project-path" |> Some
     Eval.EvaluationContext.Variables = Map.empty
     Eval.EvaluationContext.Versions = Map.empty

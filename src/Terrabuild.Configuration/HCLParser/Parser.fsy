@@ -1,5 +1,5 @@
 %{ 
-open Terrabuild.Configuration.HCL
+open AST.HCL
 open Terrabuild.Expressions
 open System
 
@@ -46,7 +46,7 @@ let debugPrint s = ignore s
 %right BANG
 %left COMMA
 
-%type <Terrabuild.Configuration.HCL.File> File
+%type <AST.HCL.File> File
 %% 
 
 File:

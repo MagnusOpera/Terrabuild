@@ -1,18 +1,19 @@
-module Terrabuild.Configuration.Project
+module AST.Project
 open Terrabuild.Expressions
-open HCL
 open Errors
+open HCL
+open Common
 
 
 [<RequireQualifiedAccess>]
 type ProjectBlock =
     { Init: string option
-      Dependencies: Expr
-      Links: Expr
-      Outputs: Expr
-      Ignores: Expr
-      Includes: Expr
-      Labels: Expr }
+      Dependencies: Expr option
+      Links: Expr option
+      Outputs: Expr option
+      Ignores: Expr option
+      Includes: Expr option
+      Labels: Set<string> }
 
 
 type Step =
@@ -22,10 +23,10 @@ type Step =
 
 [<RequireQualifiedAccess>]
 type TargetBlock =
-    { Rebuild: Expr
-      Outputs: Expr
-      DependsOn: Expr
-      Cache: Expr
+    { Rebuild: Expr option
+      Outputs: Expr option
+      DependsOn: Set<string> option
+      Cache: Expr option
       Steps: Step list }
 
 [<RequireQualifiedAccess>]
@@ -38,8 +39,6 @@ type ProjectFile =
       Extensions: Map<string, ExtensionBlock>
       Targets: Map<string, TargetBlock>
       Locals: Map<string, Expr> }
-
-
 
 
 let private map (blocks: Block list) =
@@ -76,12 +75,15 @@ let private map (blocks: Block list) =
                 |> checkNoNestedBlocks
                 |> ignore
 
-                let dependencies = block.Attributes |> tryFindAttribute "dependencies" |> valueOrDefault Expr.EmptyList
-                let links = block.Attributes |> tryFindAttribute "links" |> valueOrDefault Expr.EmptyList
-                let outputs = block.Attributes |> tryFindAttribute "outputs" |> valueOrDefault Expr.EmptyList
-                let ignores = block.Attributes |> tryFindAttribute "ignores" |> valueOrDefault Expr.EmptyList
-                let includes = block.Attributes |> tryFindAttribute "includes" |> valueOrDefault Expr.EmptyList
-                let labels = block.Attributes |> tryFindAttribute "labels" |> valueOrDefault Expr.EmptyList
+                let dependencies = block |> tryFindAttribute "dependencies"
+                let links = block |> tryFindAttribute "links"
+                let outputs = block |> tryFindAttribute "outputs"
+                let ignores = block |> tryFindAttribute "ignores"
+                let includes = block |> tryFindAttribute "includes"
+                let labels =
+                    block |> tryFindAttribute "labels"
+                    |> Option.bind (Eval.asStringSetOption << simpleEval)
+                    |> Option.defaultValue Set.empty
 
                 let project = { ProjectBlock.Init = init
                                 ProjectBlock.Dependencies = dependencies
@@ -100,21 +102,21 @@ let private map (blocks: Block list) =
                 |> checkAllowedNestedBlocks ["defaults"]
                 |> ignore
 
-                let container = block.Attributes |> tryFindAttribute "container" |> valueOrDefault Expr.Nothing
-                let platform = block.Attributes |> tryFindAttribute "platform" |> valueOrDefault Expr.Nothing
-                let variables = block.Attributes |> tryFindAttribute "variables" |> valueOrDefault Expr.EmptyList
-                let script = block.Attributes |> tryFindAttribute "script" |> valueOrDefault Expr.Nothing
+                let container = block |> tryFindAttribute "container"
+                let platform = block |> tryFindAttribute "platform"
+                let variables = block |> tryFindAttribute "variables"
+                let script = block |> tryFindAttribute "script"
                 let defaults =
-                    match block |> tryFindBlock "defaults" with
-                    | Some defaults ->
+                    block
+                    |> tryFindBlock "defaults"
+                    |> Option.map (fun defaults ->
                         defaults
                         |> checkNoNestedBlocks
                         |> ignore
 
                         defaults.Attributes
                         |> List.map (fun a -> (a.Name, a.Value))
-                        |> Map.ofList
-                    | None -> Map.empty
+                        |> Map.ofList)
 
                 let extension = { ExtensionBlock.Container = container
                                   ExtensionBlock.Platform = platform
@@ -134,10 +136,12 @@ let private map (blocks: Block list) =
 
                 if targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
 
-                let rebuild = block.Attributes |> tryFindAttribute "rebuild" |> valueOrDefault Expr.False
-                let outputs = block.Attributes |> tryFindAttribute "outputs" |> valueOrDefault Expr.EmptyList
-                let dependsOn = block.Attributes |> tryFindAttribute "dependsOn" |> valueOrDefault Expr.EmptyList
-                let cache = block.Attributes |> tryFindAttribute "cache" |> valueOrDefault Expr.EmptyList
+                let rebuild = block |> tryFindAttribute "rebuild"
+                let outputs = block |> tryFindAttribute "outputs"
+                let dependsOn =
+                    block |> tryFindAttribute "dependsOn"
+                    |> Option.bind (Eval.asStringSetOption << simpleEval)
+                let cache = block |> tryFindAttribute "cache"
                 let steps =
                     block.Blocks
                     |> List.map (fun step ->

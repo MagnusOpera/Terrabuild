@@ -1,19 +1,20 @@
-module Terrabuild.Configuration.Workspace
+module AST.Workspace
 open Errors
 open Terrabuild.Expressions
+open Common
 open HCL
 
 
 
 [<RequireQualifiedAccess>]
 type WorkspaceBlock =
-    { Id: Expr
-      Ignores: Expr }
+    { Id: string option
+      Ignores: Set<string> option }
 
 [<RequireQualifiedAccess>]
 type TargetBlock =
-    { DependsOn: Expr
-      Rebuild: Expr }
+    { DependsOn: Set<string>
+      Rebuild: Expr option }
 
 [<RequireQualifiedAccess>]
 type ConfigurationBlock =
@@ -57,8 +58,12 @@ let private map (blocks: Block list) =
                 |> checkNoNestedBlocks
                 |> ignore
 
-                let id = block.Attributes  |> tryFindAttribute "id" |> valueOrDefault Expr.Nothing
-                let ignores = block.Attributes |> tryFindAttribute "ignores" |> valueOrDefault Expr.EmptyMap
+                let id =
+                    block |> tryFindAttribute "id"
+                    |> Option.bind (Eval.asStringOption << simpleEval)
+                let ignores =
+                    block |> tryFindAttribute "ignores"
+                    |> Option.bind (Eval.asStringSetOption << simpleEval)
                 let workspace = { WorkspaceBlock.Id = id
                                   WorkspaceBlock.Ignores = ignores }
                 buildWorkspace blocks (Some workspace) targets configurations extensions
@@ -70,8 +75,11 @@ let private map (blocks: Block list) =
                 |> checkNoNestedBlocks
                 |> ignore
 
-                let dependsOn = block.Attributes |> tryFindAttribute "dependsOn" |> valueOrDefault Expr.EmptyList
-                let rebuild = block.Attributes |> tryFindAttribute "rebuild" |> valueOrDefault Expr.False
+                let dependsOn =
+                    block |> tryFindAttribute "dependsOn" 
+                    |> Option.bind (Eval.asStringSetOption << simpleEval)
+                    |> Option.defaultValue Set.empty
+                let rebuild = block |> tryFindAttribute "rebuild"
                 if targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
 
                 let target = { TargetBlock.DependsOn = dependsOn
@@ -97,21 +105,21 @@ let private map (blocks: Block list) =
                 |> checkAllowedNestedBlocks ["defaults"]
                 |> ignore
 
-                let container = block.Attributes |> tryFindAttribute "container" |> valueOrDefault Expr.Nothing
-                let platform = block.Attributes |> tryFindAttribute "platform" |> valueOrDefault Expr.Nothing
-                let variables = block.Attributes |> tryFindAttribute "variables" |> valueOrDefault Expr.EmptyList
-                let script = block.Attributes |> tryFindAttribute "script" |> valueOrDefault Expr.Nothing
+                let container = block |> tryFindAttribute "container"
+                let platform = block |> tryFindAttribute "platform"
+                let variables = block |> tryFindAttribute "variables"
+                let script = block |> tryFindAttribute "script"
                 let defaults =
-                    match block |> tryFindBlock "defaults" with
-                    | Some defaults ->
+                    block
+                    |> tryFindBlock "defaults"
+                    |> Option.map (fun defaults ->
                         defaults
                         |> checkNoNestedBlocks
                         |> ignore
 
                         defaults.Attributes
                         |> List.map (fun a -> (a.Name, a.Value))
-                        |> Map.ofList
-                    | None -> Map.empty
+                        |> Map.ofList)
 
                 let extension = { ExtensionBlock.Container = container
                                   ExtensionBlock.Platform = platform

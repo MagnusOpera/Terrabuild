@@ -5,7 +5,7 @@ open FSharp.Text.Lexing
 open FSharp.Text.Parsing.ParseHelpers
 # 1 "HCLParser/Parser.fsy"
  
-open Terrabuild.Configuration.HCL
+open AST.HCL
 open Terrabuild.Expressions
 open System
 
@@ -308,7 +308,7 @@ let _fsyacc_immediateActions = [|65535us;49152us;16385us;65535us;16386us;16387us
 let _fsyacc_reductions = lazy [|
 # 309 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> Terrabuild.Configuration.HCL.File in
+            let _1 = parseState.GetInput(1) :?> AST.HCL.File in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
@@ -324,7 +324,7 @@ let _fsyacc_reductions = lazy [|
                                  File.Build [] 
                    )
 # 53 "HCLParser/Parser.fsy"
-                 : Terrabuild.Configuration.HCL.File));
+                 : AST.HCL.File));
 # 328 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Blocks in
@@ -335,7 +335,7 @@ let _fsyacc_reductions = lazy [|
                                         File.Build _1 
                    )
 # 54 "HCLParser/Parser.fsy"
-                 : Terrabuild.Configuration.HCL.File));
+                 : AST.HCL.File));
 # 339 "Gen/HCLParser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_Attribute in
@@ -914,5 +914,5 @@ let tables : FSharp.Text.Parsing.Tables<_> =
     numTerminals = 32;
     productionToNonTerminalTable = _fsyacc_productionToNonTerminalTable  }
 let engine lexer lexbuf startState = tables.Interpret(lexer, lexbuf, startState)
-let File lexer lexbuf : Terrabuild.Configuration.HCL.File =
+let File lexer lexbuf : AST.HCL.File =
     engine lexer lexbuf 0 :?> _

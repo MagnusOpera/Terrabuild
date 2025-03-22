@@ -1,4 +1,4 @@
-module Terrabuild.Configuration.HCL
+module AST.HCL
 open Terrabuild.Expressions
 
 
