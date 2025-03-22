@@ -34,7 +34,6 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
             let buildDependsOn =
                 configuration.Targets
                 |> Map.tryFind targetName
-                |> Option.map (fun ct -> ct.DependsOn)
                 |> Option.defaultValue Set.empty
             let projDependsOn =
                 projectConfig.Targets

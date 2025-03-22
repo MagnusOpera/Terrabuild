@@ -52,7 +52,7 @@ type Workspace = {
     SelectedProjects: string set
 
     // All targets at workspace level
-    Targets: Map<string, AST.Workspace.TargetBlock>
+    Targets: Map<string, Set<string>>
 
     // All discovered projects in workspace
     Projects: Map<string, Project>
@@ -612,7 +612,11 @@ let read (options: ConfigOptions.Options) =
 
     let workspaceId = workspaceConfig.Workspace.Id
 
+    let targets =
+        workspaceConfig.Targets
+        |> Map.map (fun _ target -> target.DependsOn)
+
     { Workspace.Id = workspaceId
       Workspace.SelectedProjects = selectedProjects
       Workspace.Projects = projects |> Map.ofDict
-      Workspace.Targets = workspaceConfig.Targets }
+      Workspace.Targets = targets }
