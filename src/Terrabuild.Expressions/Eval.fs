@@ -199,3 +199,13 @@ let asStringSetOption = function
         |> Set.ofList
         |> Some
     | _ -> raiseTypeError "Failed to convert"
+
+let mapAdd newMap oldMap =
+    match oldMap, newMap with
+    | Value.Map oldMap, Value.Map newMap ->
+        oldMap |> Map.addMap newMap |> Value.Map
+    | _ -> raiseTypeError "Failed to add map: invalid types"
+
+let asMap = function
+    | Value.Map map -> map
+    | _ -> raiseTypeError "Failed to convert"

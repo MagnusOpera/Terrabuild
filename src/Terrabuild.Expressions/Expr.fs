@@ -48,3 +48,8 @@ type Value =
     | Map of Map<string, Value>
     | List of Value list
     | Object of obj
+with
+    static member EmptyList = List []
+    static member EmptyMap = Map Map.empty
+    static member False = Bool false
+    static member True = Bool true

@@ -38,7 +38,7 @@ extension @dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:9.0.202"
   platform = "linux/amd64"
   defaults {
-    configuration = configuration
+    configuration = var.configuration
   }
 }
 
@@ -46,7 +46,7 @@ extension @terraform {
   container = "hashicorp/terraform:1.10"
   platform = "linux/amd64"
   defaults {
-    workspace = workspace
+    workspace = var.workspace
   }
 }
 
