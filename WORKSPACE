@@ -54,6 +54,6 @@ extension @dotnet {
         "JB_SPACE_API_URL"
     ]
     defaults {
-        configuration = configuration
+        configuration = var.configuration
     }
 }
