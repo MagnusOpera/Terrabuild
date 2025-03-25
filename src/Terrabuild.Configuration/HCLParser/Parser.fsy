@@ -58,15 +58,15 @@ Attributes:
     | Attributes Attribute { Attribute.Append $1 $2 }
 
 Attribute:
-    | IDENTIFIER EQUAL Expr { Attribute.Build $1 $3 }
+    | AttributeName EQUAL Expr { Attribute.Build $1 $3 }
 
 Blocks:
     | Block { [$1] }
     | Blocks Block { $1 @ [$2] }
 
 Block:
-    | IDENTIFIER LBRACE BlockContent RBRACE { Block.Build $1 None $3 }
-    | IDENTIFIER IDENTIFIER LBRACE BlockContent RBRACE { Block.Build $1 (Some $2) $4 }
+    | ResourceName LBRACE BlockContent RBRACE { Block.Build $1 None $3 }
+    | ResourceName ResourceIdentifier LBRACE BlockContent RBRACE { Block.Build $1 (Some $2) $4 }
 
 BlockContent:
     | /* empty */ { ([], []) }
@@ -81,7 +81,7 @@ Expr:
     /* scalars */
     | NUMBER { Expr.Number $1 }
     | ExprIdentifier { $1 }
-    | String { $1 }
+    | InterpolatedString { $1 }
     /* functions */
     | Expr DOT ExprIndex { Expr.Function (Function.Item, [$1;  $3]) }
     | Expr DOT_QUESTION ExprIndex { Expr.Function (Function.TryItem, [$1; $3]) }
@@ -110,6 +110,27 @@ Function:
         | _ -> Errors.raiseParseError $"Unknown function: {$1}"
     }
 
+ResourceName:
+    | IDENTIFIER {
+        match $1 with
+        | String.Regex "(@?[a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
+        | _ -> Errors.raiseParseError $"Invalid resource name: {$1}"
+    }
+
+ResourceIdentifier:
+    | IDENTIFIER {
+        match $1 with
+        | String.Regex "([a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
+        | _ -> Errors.raiseParseError $"Invalid resource identifier: {$1}"
+    }
+
+AttributeName:
+    | IDENTIFIER {
+        match $1 with
+        | String.Regex "([a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
+        | _ -> Errors.raiseParseError "Invalid attribute name: {$1}"
+    }
+
 ExprIndex:
     | NUMBER { Expr.Number $1 }
     | IDENTIFIER { Expr.String $1 }
@@ -124,18 +145,21 @@ ExprIdentifier:
     }
 
 String:
-    | STRING_START STRING_END { Expr.String $2 }
-    | STRING_START InterpolatedString STRING_END { 
+    | STRING_START STRING_END { $2 }
+
+InterpolatedString:
+    | String { Expr.String $1 }
+    | STRING_START InterpolatedStringExpression STRING_END { 
         if $3 |> String.IsNullOrEmpty then Expr.Function (Function.ToString, [$2])
         else Expr.Function (Function.Format, [Expr.String "{0}{1}"; $2; Expr.String $3]) 
     }
 
-InterpolatedString:
+InterpolatedStringExpression:
     | EXPRESSION_START Expr EXPRESSION_END { 
         if $1 |> String.IsNullOrEmpty then $2
         else Expr.Function (Function.Format, [Expr.String "{0}{1}"; Expr.String $1; $2])
     }
-    | InterpolatedString EXPRESSION_START Expr EXPRESSION_END {
+    | InterpolatedStringExpression EXPRESSION_START Expr EXPRESSION_END {
         if $2 |> String.IsNullOrEmpty then Expr.Function (Function.Format, [Expr.String "{0}{1}"; $1; $3])
         else Expr.Function (Function.Format, [Expr.String "{0}{1}{2}"; $1; Expr.String $2; $3])
     }

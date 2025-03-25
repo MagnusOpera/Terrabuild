@@ -10,6 +10,7 @@
     <Compile Include="FS.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="Hash.fs" />
+    <Compile Include="String.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

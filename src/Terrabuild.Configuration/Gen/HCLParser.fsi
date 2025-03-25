@@ -72,10 +72,14 @@ type nonTerminalId =
     | NONTERM_BlockContent
     | NONTERM_Expr
     | NONTERM_Function
+    | NONTERM_ResourceName
+    | NONTERM_ResourceIdentifier
+    | NONTERM_AttributeName
     | NONTERM_ExprIndex
     | NONTERM_ExprIdentifier
     | NONTERM_String
     | NONTERM_InterpolatedString
+    | NONTERM_InterpolatedStringExpression
     | NONTERM_ExprTuple
     | NONTERM_ExprTupleContent
     | NONTERM_ExprList
