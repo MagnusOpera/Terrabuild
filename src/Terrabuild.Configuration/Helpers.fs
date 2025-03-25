@@ -24,7 +24,7 @@ let parseResourceName = function
     | s -> raiseParseError $"Invalid resource name: {s}"
 
 let parseResourceIdentifier = function
-    | String.Regex "([a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
+    | String.Regex "(@?[a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
     | s -> raiseParseError $"Invalid resource identifier: {s}"
 
 let parseAttributeName = function
