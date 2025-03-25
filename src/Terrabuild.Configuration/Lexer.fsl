@@ -111,7 +111,7 @@ and interpolatedString (acc: StringBuilder) = parse
         lexerMode.Pop() |> ignore
         STRING_END (acc.ToString())
     }
-    | '{' {
+    | "${" {
         lexerMode.Push(LexerMode.Default)
         EXPRESSION_START (acc.ToString())
     }
