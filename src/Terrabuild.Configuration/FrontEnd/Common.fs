@@ -1,15 +1,7 @@
-module AST.Common
+module FrontEnd.Common
 open Terrabuild.Expressions
 open Errors
-open HCL
-
-
-type ExtensionBlock =
-    { Container: Expr option
-      Platform: Expr option
-      Variables: Expr option
-      Script: Expr option
-      Defaults: Map<string, Expr> option }
+open AST.HCL
 
 
 let checkNoAttributes (block: Block) =

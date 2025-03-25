@@ -8,10 +8,10 @@
         <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch(
                          $(DefineConstants), '^(.*;)*GENERATE_PARSER(;.*)*$'))">
             <ItemGroup>
-                <FsYacc Include="HCLParser/Parser.fsy">
+                <FsYacc Include="Parser.fsy">
                     <OtherFlags>-v --internal --module Parser.HCL -o Gen/HCLParser.fs</OtherFlags>
                 </FsYacc>
-                <FsLex Include="HCLParser/Lexer.fsl">
+                <FsLex Include="Lexer.fsl">
                     <OtherFlags>--internal --module Lexer.HCL --unicode -o Gen/HCLLexer.fs</OtherFlags>
                 </FsLex>
             </ItemGroup>
@@ -19,15 +19,21 @@
     </Choose>
 
   <ItemGroup>
-    <Compile Include="HCL.fs" />
+    <Compile Include="AST/HCL.fs" />
+    <Compile Include="AST/Common.fs" />
+    <Compile Include="AST/Project.fs" />
+    <Compile Include="AST/Workspace.fs" />
+
+    <Compile Include="Helpers.fs" />
+
     <Compile Include="Gen/HCLParser.fsi" />
     <Compile Include="Gen/HCLParser.fs" />
     <Compile Include="Gen/HCLLexer.fs" />
 
-    <Compile Include="FrontEnd.fs" />
-    <Compile Include="Common.fs" />
-    <Compile Include="Workspace.fs" />
-    <Compile Include="Project.fs" />
+    <Compile Include="FrontEnd/HCL.fs" />
+    <Compile Include="FrontEnd/Common.fs" />
+    <Compile Include="FrontEnd/Workspace.fs" />
+    <Compile Include="FrontEnd/Project.fs" />
   </ItemGroup>
 
   <ItemGroup>

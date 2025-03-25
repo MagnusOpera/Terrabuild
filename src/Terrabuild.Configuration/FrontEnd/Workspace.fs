@@ -1,8 +1,9 @@
-module AST.Workspace
+module FrontEnd.Workspace
 open Errors
 open Terrabuild.Expressions
 open Common
-open HCL
+open AST.HCL
+open AST.Common
 
 
 
@@ -137,5 +138,5 @@ let private map (blocks: Block list) =
 
 
 let parse txt =
-    let hcl = FrontEnd.HCL.parse txt
+    let hcl = HCL.parse txt
     map hcl.Blocks

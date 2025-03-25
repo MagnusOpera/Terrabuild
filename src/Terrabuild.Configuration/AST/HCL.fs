@@ -1,4 +1,4 @@
-module AST.HCL
+namespace AST.HCL
 open Terrabuild.Expressions
 
 

@@ -108,7 +108,7 @@ let read (options: ConfigOptions.Options) =
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
-            AST.Workspace.parse workspaceContent
+            FrontEnd.Workspace.parse workspaceContent
         with exn ->
             raiseParserError("Failed to read WORKSPACE configuration file", exn)
 
@@ -243,7 +243,7 @@ let read (options: ConfigOptions.Options) =
             | FS.File projectFile ->
                 let projectContent = File.ReadAllText projectFile
                 try
-                    AST.Project.parse projectContent
+                    FrontEnd.Project.parse projectContent
                 with exn ->
                     raiseParserError($"Failed to read PROJECT configuration '{projectId}'", exn)
             | _ ->

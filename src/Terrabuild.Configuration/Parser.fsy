@@ -97,39 +97,16 @@ Expr:
     | BANG Expr { Expr.Function (Function.Not, [$2]) }
 
 Function:
-    IDENTIFIER ExprTuple { 
-        match $1 with
-        | "trim" -> Expr.Function (Function.Trim, $2)
-        | "upper" -> Expr.Function (Function.Upper, $2)
-        | "lower" -> Expr.Function (Function.Lower, $2)
-        | "replace" -> Expr.Function (Function.Replace, $2)
-        | "count" -> Expr.Function (Function.Count, $2)
-        | "version" -> Expr.Function (Function.Version, $2)
-        | "format" -> Expr.Function (Function.Format, $2)
-        | "tostring" -> Expr.Function (Function.ToString, $2)
-        | _ -> Errors.raiseParseError $"Unknown function: {$1}"
-    }
+    | IDENTIFIER ExprTuple { Helpers.parseFunction $2 $1 }
 
 ResourceName:
-    | IDENTIFIER {
-        match $1 with
-        | String.Regex "(@?[a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
-        | _ -> Errors.raiseParseError $"Invalid resource name: {$1}"
-    }
-
+    | IDENTIFIER { Helpers.parseResourceName $1 }
+ 
 ResourceIdentifier:
-    | IDENTIFIER {
-        match $1 with
-        | String.Regex "([a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
-        | _ -> Errors.raiseParseError $"Invalid resource identifier: {$1}"
-    }
+    | IDENTIFIER { Helpers.parseResourceIdentifier $1 }
 
 AttributeName:
-    | IDENTIFIER {
-        match $1 with
-        | String.Regex "([a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
-        | _ -> Errors.raiseParseError "Invalid attribute name: {$1}"
-    }
+    | IDENTIFIER { Helpers.parseAttributeName $1 }
 
 ExprIndex:
     | NUMBER { Expr.Number $1 }
