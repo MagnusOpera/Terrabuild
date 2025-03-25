@@ -13,6 +13,12 @@ let parseFunction expr = function
     | "tostring" -> Expr.Function (Function.ToString, expr)
     | s -> raiseParseError $"Unknown function: {s}"
 
+let parseExpressionIdentifier = function
+    | "true" -> Expr.Bool true
+    | "false" -> Expr.Bool false
+    | "nothing" -> Expr.Nothing
+    | s -> Expr.Variable s
+
 let parseResourceName = function
     | String.Regex "(@?[a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
     | s -> raiseParseError $"Invalid resource name: {s}"
