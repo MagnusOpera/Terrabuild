@@ -139,13 +139,9 @@ let transpile (blocks: Block list) =
 
             | Locals ->
                 let locals = toLocals block
-                let builderKeys = builder.Locals.Keys |> Set.ofSeq
-                let localKeys = locals.Keys |> Set.ofSeq
-                let commonKeys = Set.intersect builderKeys localKeys
-                if commonKeys <> Set.empty then
-                    let commonKeys = commonKeys |> String.join ", "
-                    raiseParseError $"Duplicate local: {commonKeys}"
-
+                locals
+                |> Map.iter (fun name _ ->
+                    if builder.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
                 buildProject blocks { builder with Locals = builder.Locals |> Map.addMap locals }
 
             | UnknownBlock -> raiseParseError $"unexpected block: {block.Resource}"
