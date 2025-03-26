@@ -28,10 +28,6 @@ type TargetBlock =
       Steps: Step list }
 
 [<RequireQualifiedAccess>]
-type LocalsBlock =
-    { Locals: Map<string, Expr> }
-
-[<RequireQualifiedAccess>]
 type ProjectFile =
     { Project: ProjectBlock
       Extensions: Map<string, ExtensionBlock>

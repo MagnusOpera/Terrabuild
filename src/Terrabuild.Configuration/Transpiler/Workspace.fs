@@ -22,6 +22,51 @@ let (|Workspace|Target|Configuration|Extension|UnknownBlock|) (block: Block) =
     | _ -> UnknownBlock
 
 
+let toWorkspace (block: Block) =
+    block
+    |> checkAllowedAttributes ["id"; "ignores"]
+    |> checkNoNestedBlocks
+    |> ignore
+
+    let id =
+        block |> tryFindAttribute "id"
+        |> Option.bind (Eval.asStringOption << simpleEval)
+    let ignores =
+        block |> tryFindAttribute "ignores"
+        |> Option.bind (Eval.asStringSetOption << simpleEval)
+
+    { WorkspaceBlock.Id = id
+      WorkspaceBlock.Ignores = ignores }
+
+
+let toTarget (block: Block) =
+    block
+    |> checkAllowedAttributes ["depends_on"; "rebuild"]
+    |> checkNoNestedBlocks
+    |> ignore
+
+    let dependsOn =
+        block |> tryFindAttribute "depends_on" 
+        |> Option.bind (Eval.asStringSetOption << simpleEval)
+        |> Option.defaultValue Set.empty
+    let rebuild = block |> tryFindAttribute "rebuild"
+
+    { TargetBlock.DependsOn = dependsOn
+      TargetBlock.Rebuild = rebuild }
+
+    
+let toConfiguration (block: Block) =
+    block
+    |> checkNoNestedBlocks
+    |> ignore
+
+    let variables = block.Attributes
+                    |> List.map (fun a -> (a.Name, a.Value))
+                    |> Map.ofList
+    
+    { ConfigurationBlock.Variables = variables }
+
+
 let transpile (blocks: Block list) =
     let rec buildWorkspace (blocks: Block list) (builder: WorkspaceBuilder) =
         match blocks with
@@ -39,87 +84,27 @@ let transpile (blocks: Block list) =
 
         | block::blocks ->
             match block with
-            // =============================================================================================
             | Workspace ->
                 if builder.Workspace <> None then raiseParseError "multiple workspace declared"
-
-                block
-                |> checkAllowedAttributes ["id"; "ignores"]
-                |> checkNoNestedBlocks
-                |> ignore
-
-                let id =
-                    block |> tryFindAttribute "id"
-                    |> Option.bind (Eval.asStringOption << simpleEval)
-                let ignores =
-                    block |> tryFindAttribute "ignores"
-                    |> Option.bind (Eval.asStringSetOption << simpleEval)
-                let workspace = { WorkspaceBlock.Id = id
-                                  WorkspaceBlock.Ignores = ignores }
+                let workspace = toWorkspace block
                 buildWorkspace blocks { builder with Workspace = Some workspace }
 
-            // =============================================================================================
             | Target name ->
-                block
-                |> checkAllowedAttributes ["depends_on"; "rebuild"]
-                |> checkNoNestedBlocks
-                |> ignore
-
-                let dependsOn =
-                    block |> tryFindAttribute "depends_on" 
-                    |> Option.bind (Eval.asStringSetOption << simpleEval)
-                    |> Option.defaultValue Set.empty
-                let rebuild = block |> tryFindAttribute "rebuild"
                 if builder.Targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
-
-                let target = { TargetBlock.DependsOn = dependsOn
-                               TargetBlock.Rebuild = rebuild }
+                let target = toTarget block
                 buildWorkspace blocks { builder with Targets = builder.Targets |> Map.add name target }
 
-            // =============================================================================================
             | Configuration name ->
-                block
-                |> checkNoNestedBlocks
-                |> ignore
-
-                let variables = block.Attributes
-                                |> List.map (fun a -> (a.Name, a.Value))
-                                |> Map.ofList
-                let configuration = { ConfigurationBlock.Variables = variables }
+                if builder.Configurations.ContainsKey name then raiseParseError $"Duplicate configuration: {name}"
+                let configuration = toConfiguration block
                 buildWorkspace blocks { builder with Configurations = builder.Configurations |> Map.add name configuration }
 
-            // =============================================================================================
             | Extension name ->
-                block
-                |> checkAllowedAttributes ["container"; "platform"; "variables"; "script"; "defaults"]
-                |> checkAllowedNestedBlocks ["defaults"]
-                |> ignore
-
-                let container = block |> tryFindAttribute "container"
-                let platform = block |> tryFindAttribute "platform"
-                let variables = block |> tryFindAttribute "variables"
-                let script = block |> tryFindAttribute "script"
-                let defaults =
-                    block
-                    |> tryFindBlock "defaults"
-                    |> Option.map (fun defaults ->
-                        defaults
-                        |> checkNoNestedBlocks
-                        |> ignore
-
-                        defaults.Attributes
-                        |> List.map (fun a -> (a.Name, a.Value))
-                        |> Map.ofList)
-
-                let extension = { ExtensionBlock.Container = container
-                                  ExtensionBlock.Platform = platform
-                                  ExtensionBlock.Variables = variables
-                                  ExtensionBlock.Script = script
-                                  ExtensionBlock.Defaults = defaults } 
+                if builder.Extensions.ContainsKey name then raiseParseError $"Duplicate extension: {name}"
+                let extension = toExtension block
                 buildWorkspace blocks { builder with Extensions = builder.Extensions |> Map.add name extension }
 
-            // =============================================================================================
-            | _ -> raiseParseError $"unexpected block: {block.Resource}"
+            | UnknownBlock -> raiseParseError $"unexpected block: {block.Resource}"
 
     let builder =
         { Workspace = None
