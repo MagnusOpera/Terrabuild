@@ -12,6 +12,16 @@ type WorkspaceBuilder =
       Configurations: Map<string, ConfigurationBlock>
       Extensions: Map<string, ExtensionBlock> }
 
+
+let (|Workspace|Target|Configuration|Extension|UnknownBlock|) (block: Block) =
+    match block.Resource, block.Name with
+    | "workspace", None -> Workspace
+    | "target", Some name -> Target name
+    | "configuration", Some name -> Configuration name
+    | "extension", Some name -> Extension name
+    | _ -> UnknownBlock
+
+
 let transpile (blocks: Block list) =
     let rec buildWorkspace (blocks: Block list) (builder: WorkspaceBuilder) =
         match blocks with
@@ -28,9 +38,9 @@ let transpile (blocks: Block list) =
               WorkspaceFile.Extensions = builder.Extensions }
 
         | block::blocks ->
-            match block.Resource, block.Name with
+            match block with
             // =============================================================================================
-            | "workspace", None ->
+            | Workspace ->
                 if builder.Workspace <> None then raiseParseError "multiple workspace declared"
 
                 block
@@ -49,7 +59,7 @@ let transpile (blocks: Block list) =
                 buildWorkspace blocks { builder with Workspace = Some workspace }
 
             // =============================================================================================
-            | "target", Some name ->
+            | Target name ->
                 block
                 |> checkAllowedAttributes ["depends_on"; "rebuild"]
                 |> checkNoNestedBlocks
@@ -67,7 +77,7 @@ let transpile (blocks: Block list) =
                 buildWorkspace blocks { builder with Targets = builder.Targets |> Map.add name target }
 
             // =============================================================================================
-            | "configuration", Some name ->
+            | Configuration name ->
                 block
                 |> checkNoNestedBlocks
                 |> ignore
@@ -79,7 +89,7 @@ let transpile (blocks: Block list) =
                 buildWorkspace blocks { builder with Configurations = builder.Configurations |> Map.add name configuration }
 
             // =============================================================================================
-            | "extension", Some name ->
+            | Extension name ->
                 block
                 |> checkAllowedAttributes ["container"; "platform"; "variables"; "script"; "defaults"]
                 |> checkAllowedNestedBlocks ["defaults"]
@@ -109,7 +119,7 @@ let transpile (blocks: Block list) =
                 buildWorkspace blocks { builder with Extensions = builder.Extensions |> Map.add name extension }
 
             // =============================================================================================
-            | resource, _ -> raiseParseError $"unexpected block: {resource}"
+            | _ -> raiseParseError $"unexpected block: {block.Resource}"
 
     let builder =
         { Workspace = None

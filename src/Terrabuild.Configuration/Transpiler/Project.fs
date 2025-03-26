@@ -13,6 +13,16 @@ type ProjectBuilder =
       Targets: Map<string, TargetBlock>
       Locals: LocalsBlock option }
 
+
+let (|Project|Extension|Target|Locals|UnknownBlock|) (block: Block) =
+    match block.Resource, block.Name with
+    | "project", init -> Project init
+    | "extension", Some name -> Extension name
+    | "target", Some name -> Target name
+    | "locals", None -> Locals
+    | _ -> UnknownBlock
+
+
 let transpile (blocks: Block list) =
     let rec buildProject (blocks: Block list) (builder: ProjectBuilder) =
         match blocks with
@@ -39,9 +49,9 @@ let transpile (blocks: Block list) =
               ProjectFile.Locals = locals }
 
         | block::blocks ->
-            match block.Resource, block.Name with
+            match block with
             // =============================================================================================
-            | "project", init ->
+            | Project init ->
                 if builder.Project <> None then raiseParseError "multiple project declared"
 
                 block
@@ -70,7 +80,7 @@ let transpile (blocks: Block list) =
                 buildProject blocks { builder with Project = Some project }
 
             // =============================================================================================
-            | "extension", Some name ->
+            | Extension name ->
                 block
                 |> checkAllowedAttributes ["container"; "platform"; "variables"; "script"; "defaults"]
                 |> checkAllowedNestedBlocks ["defaults"]
@@ -102,7 +112,7 @@ let transpile (blocks: Block list) =
 
 
             // =============================================================================================
-            | "target", Some name ->
+            | Target name ->
                 block
                 |> checkAllowedAttributes ["rebuild"; "outputs"; "depends_on"; "cache"]
                 |> ignore
@@ -145,7 +155,7 @@ let transpile (blocks: Block list) =
                 buildProject blocks { builder with Targets = builder.Targets |> Map.add name target }
 
             // =============================================================================================
-            | "locals", None ->
+            | Locals ->
                 block
                 |> checkNoNestedBlocks
                 |> ignore
@@ -158,7 +168,7 @@ let transpile (blocks: Block list) =
                 buildProject blocks { builder with Locals = Some locals }
 
             // =============================================================================================
-            | resource, _ -> raiseParseError $"unexpected block: {resource}"
+            | UnknownBlock -> raiseParseError $"unexpected block: {block.Resource}"
 
     let builder =
         { Project = None
