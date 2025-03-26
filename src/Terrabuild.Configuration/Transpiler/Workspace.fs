@@ -6,30 +6,32 @@ open AST.HCL
 open AST.Common
 open AST.Workspace
 
+type WorkspaceBuilder =
+    { Workspace: WorkspaceBlock option
+      Targets: Map<string, TargetBlock>
+      Configurations: Map<string, ConfigurationBlock>
+      Extensions: Map<string, ExtensionBlock> }
+
 let transpile (blocks: Block list) =
-    let rec buildWorkspace (blocks: Block list)
-                           (workspace: WorkspaceBlock option)
-                           (targets: Map<string, TargetBlock>)
-                           (configurations: Map<string, ConfigurationBlock>)
-                           (extensions: Map<string, ExtensionBlock>) =
+    let rec buildWorkspace (blocks: Block list) (builder: WorkspaceBuilder) =
         match blocks with
         | [] ->
             let workspace =
-                match workspace with
+                match builder.Workspace with
                 | None -> { WorkspaceBlock.Id = None
                             WorkspaceBlock.Ignores = None }
                 | Some workspace -> workspace
 
             { WorkspaceFile.Workspace = workspace
-              WorkspaceFile.Targets = targets
-              WorkspaceFile.Configurations = configurations
-              WorkspaceFile.Extensions = extensions }
+              WorkspaceFile.Targets = builder.Targets
+              WorkspaceFile.Configurations = builder.Configurations
+              WorkspaceFile.Extensions = builder.Extensions }
 
         | block::blocks ->
             match block.Resource, block.Name with
             // =============================================================================================
             | "workspace", None ->
-                if workspace <> None then raiseParseError "multiple workspace declared"
+                if builder.Workspace <> None then raiseParseError "multiple workspace declared"
 
                 block
                 |> checkAllowedAttributes ["id"; "ignores"]
@@ -44,7 +46,7 @@ let transpile (blocks: Block list) =
                     |> Option.bind (Eval.asStringSetOption << simpleEval)
                 let workspace = { WorkspaceBlock.Id = id
                                   WorkspaceBlock.Ignores = ignores }
-                buildWorkspace blocks (Some workspace) targets configurations extensions
+                buildWorkspace blocks { builder with Workspace = Some workspace }
 
             // =============================================================================================
             | "target", Some name ->
@@ -58,11 +60,11 @@ let transpile (blocks: Block list) =
                     |> Option.bind (Eval.asStringSetOption << simpleEval)
                     |> Option.defaultValue Set.empty
                 let rebuild = block |> tryFindAttribute "rebuild"
-                if targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
+                if builder.Targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
 
                 let target = { TargetBlock.DependsOn = dependsOn
                                TargetBlock.Rebuild = rebuild }
-                buildWorkspace blocks workspace (Map.add name target targets) configurations extensions
+                buildWorkspace blocks { builder with Targets = builder.Targets |> Map.add name target }
 
             // =============================================================================================
             | "configuration", Some name ->
@@ -74,7 +76,7 @@ let transpile (blocks: Block list) =
                                 |> List.map (fun a -> (a.Name, a.Value))
                                 |> Map.ofList
                 let configuration = { ConfigurationBlock.Variables = variables }
-                buildWorkspace blocks workspace targets (Map.add name configuration configurations) extensions
+                buildWorkspace blocks { builder with Configurations = builder.Configurations |> Map.add name configuration }
 
             // =============================================================================================
             | "extension", Some name ->
@@ -104,11 +106,15 @@ let transpile (blocks: Block list) =
                                   ExtensionBlock.Variables = variables
                                   ExtensionBlock.Script = script
                                   ExtensionBlock.Defaults = defaults } 
-                buildWorkspace blocks workspace targets configurations (Map.add name extension extensions)
+                buildWorkspace blocks { builder with Extensions = builder.Extensions |> Map.add name extension }
 
             // =============================================================================================
             | resource, _ -> raiseParseError $"unexpected block: {resource}"
 
-    buildWorkspace blocks None Map.empty Map.empty Map.empty
-
+    let builder =
+        { Workspace = None
+          Targets = Map.empty
+          Configurations = Map.empty
+          Extensions = Map.empty }
+    buildWorkspace blocks builder
 

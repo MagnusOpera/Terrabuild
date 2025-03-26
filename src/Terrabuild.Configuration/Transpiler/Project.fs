@@ -6,16 +6,19 @@ open Errors
 open Terrabuild.Expressions
 open Common
 
+
+type ProjectBuilder =
+    { Project: ProjectBlock option
+      Extensions: Map<string, ExtensionBlock>
+      Targets: Map<string, TargetBlock>
+      Locals: LocalsBlock option }
+
 let transpile (blocks: Block list) =
-    let rec buildProject (blocks: Block list)
-                         (project: ProjectBlock option)
-                         (extensions: Map<string, ExtensionBlock>)
-                         (targets: Map<string, TargetBlock>)
-                         (locals: LocalsBlock option) =
+    let rec buildProject (blocks: Block list) (builder: ProjectBuilder) =
         match blocks with
         | [] ->
             let project =
-                match project with
+                match builder.Project with
                 | None -> { ProjectBlock.Init = None
                             ProjectBlock.Dependencies = None
                             ProjectBlock.Links = None
@@ -26,20 +29,20 @@ let transpile (blocks: Block list) =
                 | Some workspace -> workspace
 
             let locals =
-                match locals with
+                match builder.Locals with
                 | None -> Map.empty
                 | Some locals -> locals.Locals
 
             { ProjectFile.Project = project
-              ProjectFile.Extensions = extensions
-              ProjectFile.Targets = targets
+              ProjectFile.Extensions = builder.Extensions
+              ProjectFile.Targets = builder.Targets
               ProjectFile.Locals = locals }
 
         | block::blocks ->
             match block.Resource, block.Name with
             // =============================================================================================
             | "project", init ->
-                if project <> None then raiseParseError "multiple project declared"
+                if builder.Project <> None then raiseParseError "multiple project declared"
 
                 block
                 |> checkAllowedAttributes ["dependencies"; "links"; "outputs"; "ignores"; "includes"; "labels"]
@@ -64,7 +67,7 @@ let transpile (blocks: Block list) =
                                 ProjectBlock.Includes = includes
                                 ProjectBlock.Labels = labels }
 
-                buildProject blocks (Some project) extensions targets locals
+                buildProject blocks { builder with Project = Some project }
 
             // =============================================================================================
             | "extension", Some name ->
@@ -95,7 +98,7 @@ let transpile (blocks: Block list) =
                                   ExtensionBlock.Script = script
                                   ExtensionBlock.Defaults = defaults } 
 
-                buildProject blocks project (Map.add name extension extensions) targets locals
+                buildProject blocks { builder with Extensions = builder.Extensions |> Map.add name extension }
 
 
             // =============================================================================================
@@ -104,7 +107,7 @@ let transpile (blocks: Block list) =
                 |> checkAllowedAttributes ["rebuild"; "outputs"; "depends_on"; "cache"]
                 |> ignore
 
-                if targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
+                if builder.Targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
 
                 let rebuild = block |> tryFindAttribute "rebuild"
                 let outputs = block |> tryFindAttribute "outputs"
@@ -139,7 +142,7 @@ let transpile (blocks: Block list) =
                                TargetBlock.Cache = cache
                                TargetBlock.Steps = steps }
 
-                buildProject blocks project extensions (Map.add name target targets) locals
+                buildProject blocks { builder with Targets = builder.Targets |> Map.add name target }
 
             // =============================================================================================
             | "locals", None ->
@@ -152,10 +155,15 @@ let transpile (blocks: Block list) =
                                 |> Map.ofList
 
                 let locals = { LocalsBlock.Locals = variables }
-                buildProject blocks project extensions targets (Some locals)
+                buildProject blocks { builder with Locals = Some locals }
 
             // =============================================================================================
             | resource, _ -> raiseParseError $"unexpected block: {resource}"
 
-    buildProject blocks None Map.empty Map.empty None
+    let builder =
+        { Project = None
+          Extensions = Map.empty
+          Targets = Map.empty 
+          Locals = None }
+    buildProject blocks builder
 
