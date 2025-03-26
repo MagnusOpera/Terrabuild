@@ -1,4 +1,4 @@
-module FrontEnd.Common
+module Transpiler.Common
 open Terrabuild.Expressions
 open Errors
 open AST.HCL

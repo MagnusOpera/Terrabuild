@@ -1,9 +1,8 @@
 module FrontEnd.HCL
+
 open FSharp.Text.Lexing
 open Errors
 open System.Text
-
-
 
 let parse txt = 
     let switchableLexer (lexbuff: LexBuffer<char>) =
@@ -23,10 +22,11 @@ let parse txt =
     with
     | :? TerrabuildException as exn ->
         let err = sprintf "Parse error at (%d,%d)"
-                          (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
+                        (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
         raiseParserError(err, exn)
     | exn ->
         let err = sprintf "Unexpected token '%s' at (%d,%d)"
-                          (LexBuffer<_>.LexemeString lexbuf |> string) 
-                          (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
+                        (LexBuffer<_>.LexemeString lexbuf |> string) 
+                        (lexbuf.StartPos.Line + 1) (lexbuf.StartPos.Column + 1)
         raiseParserError(err, exn)
+

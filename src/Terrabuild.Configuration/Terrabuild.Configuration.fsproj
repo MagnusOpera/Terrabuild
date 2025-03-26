@@ -30,10 +30,13 @@
     <Compile Include="Gen/HCLParser.fs" />
     <Compile Include="Gen/HCLLexer.fs" />
 
+    <Compile Include="Transpiler/Common.fs" />
+    <Compile Include="Transpiler/Workspace.fs" />
+    <Compile Include="Transpiler/Project.fs" />
+
     <Compile Include="FrontEnd/HCL.fs" />
-    <Compile Include="FrontEnd/Common.fs" />
-    <Compile Include="FrontEnd/Workspace.fs" />
     <Compile Include="FrontEnd/Project.fs" />
+    <Compile Include="FrontEnd/Workspace.fs" />
   </ItemGroup>
 
   <ItemGroup>
