@@ -83,6 +83,8 @@ Expr:
     | ExprIdentifier { $1 }
     | InterpolatedString { $1 }
     /* functions */
+    | Function { $1 }
+    /* operators */
     | Expr DOT ExprIndex { Expr.Function (Function.Item, [$1;  $3]) }
     | Expr DOT_QUESTION ExprIndex { Expr.Function (Function.TryItem, [$1; $3]) }
     | Expr DOUBLE_EQUAL Expr { Expr.Function (Function.Equal, [$1; $3]) }
@@ -91,7 +93,6 @@ Expr:
     | Expr MINUS Expr { Expr.Function (Function.Minus, [$1; $3]) }
     | Expr AND Expr { Expr.Function (Function.And, [$1; $3]) }
     | Expr OR Expr { Expr.Function (Function.Or, [$1; $3]) }
-    | Function { $1 }
     | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }
     | Expr QUESTION Expr COLON Expr { Expr.Function (Function.Ternary, [$1; $3; $5] ) }
     | BANG Expr { Expr.Function (Function.Not, [$2]) }
@@ -113,7 +114,7 @@ ExprIndex:
     | IDENTIFIER { Expr.String $1 }
 
 ExprIdentifier:
-    | IDENTIFIER {  Helpers.parseExpressionIdentifier $1 }
+    | IDENTIFIER { Helpers.parseExpressionIdentifier $1 }
 
 String:
     | STRING_START STRING_END { $2 }
