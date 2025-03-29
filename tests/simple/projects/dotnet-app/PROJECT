@@ -2,7 +2,7 @@
 extension @docker {
     defaults {
         image = "ghcr.io/magnusopera/dotnet-app"
-        arguments = { configuration: var.configuration }
+        arguments = { configuration: local.configuration }
     }
 }
 

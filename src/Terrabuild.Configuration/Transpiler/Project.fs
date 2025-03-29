@@ -88,17 +88,6 @@ let toTarget (block: Block) =
       TargetBlock.Steps = steps }
 
 
-let toLocals (block: Block) =
-    block
-    |> checkNoNestedBlocks
-    |> ignore
-
-    let variables = block.Attributes
-                    |> List.map (fun a -> (a.Name, a.Value))
-                    |> Map.ofList
-    variables
-
-
 
 let transpile (blocks: Block list) =
     let rec buildProject (blocks: Block list) (builder: ProjectBuilder) =

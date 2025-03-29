@@ -4,6 +4,6 @@ project @npm {
 }
 
 target build {
-#    @npm version { arguments = var.npm_version }
+#    @npm version { arguments = local.npm_version }
     @npm build { }
 }

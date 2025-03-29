@@ -15,12 +15,9 @@ type TargetBlock =
       Rebuild: Expr option }
 
 [<RequireQualifiedAccess>]
-type ConfigurationBlock =
-    { Variables: Map<string, Expr> }
-
-[<RequireQualifiedAccess>]
 type WorkspaceFile =
     { Workspace: WorkspaceBlock
       Targets: Map<string, TargetBlock>
-      Configurations: Map<string, ConfigurationBlock>
+      Variables: Map<string, Expr option>
+      Locals: Map<string, Expr>
       Extensions: Map<string, ExtensionBlock> }

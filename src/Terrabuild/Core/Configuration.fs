@@ -90,6 +90,15 @@ let scanFolders root (ignores: Set<string>) =
             false
 
 
+let (|Bool|Number|String|) (value: string) = 
+    match value |> Boolean.TryParse with
+    | true, value -> Bool value
+    | _ ->
+        match value |> Int32.TryParse with
+        | true, value -> Number value
+        | _ -> String value
+
+
 let read (options: ConfigOptions.Options) =
     $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
 
@@ -112,94 +121,75 @@ let read (options: ConfigOptions.Options) =
         with exn ->
             raiseParserError("Failed to read WORKSPACE configuration file", exn)
 
+
+
+
+    let tagValue = 
+        match options.Tag with
+        | Some tag -> Value.String tag
+        | _ -> Value.Nothing
+
+    let noteValue =
+        match options.Note with
+        | Some note -> Value.String note
+        | _ -> Value.Nothing
+
+    let terrabuildVars =
+        [ "configuration", Value.String options.Configuration
+          "branch_or_tag", Value.String options.BranchOrTag 
+          "head_commit", Value.String options.HeadCommit.Sha
+          "retry", Value.Bool options.Retry 
+          "force", Value.Bool options.Force 
+          "ci", Value.Bool options.Run.IsSome 
+          "debug", Value.Bool options.Debug 
+          "tag", tagValue 
+          "note", noteValue ]
+        |> Map  
+
+
     let evaluationContext =
-        let convertToVarType (key: string) (existingValue: Value) (value: string) =
-            match existingValue with
-            | Value.String _ ->
-                Value.String value
-            | Value.Number _ ->
-                match value |> Int32.TryParse with
-                | true, value -> Value.Number value
-                | _ -> raiseTypeError $"Value '{value}' can't be converted to number variable {key}"
-            | Value.Bool _ ->
-                match value |> Boolean.TryParse with
-                | true, value -> Value.Bool value
-                | _ -> raiseTypeError $"Value '{value}' can't be converted to boolean variable {key}"
-            | _ -> raiseTypeError $"Value 'value' can't be converted to variable {key}"
+        { Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
+          Eval.EvaluationContext.ProjectDir = None
+          Eval.EvaluationContext.Versions = Map.empty
+          Eval.EvaluationContext.Data = Map [ "terrabuild", Value.Map terrabuildVars ] }
 
-        let evaluationContext =
-            let tagValue = 
-                match options.Tag with
-                | Some tag -> Value.String tag
-                | _ -> Value.Nothing
 
-            let noteValue =
-                match options.Note with
-                | Some note -> Value.String note
-                | _ -> Value.Nothing
+    // bind variables
+    let variables =
+        let convertToVarType (name: string) (defaultValue: Value option) (value: string) =
+            match value, defaultValue with
+            | Bool value, Some (Value.Bool _) -> Value.Bool value
+            | Bool value, None -> Value.Bool value
+            | Number value, Some (Value.Number _) -> Value.Number value
+            | Number value, None -> Value.Number value
+            | String value, _ -> Value.String value
+            | _ -> raiseTypeError $"Value '{value}' can't be converted to variable {name}"
 
-            let terrabuildVars =
-                [ "configuration", Value.String options.Configuration
-                  "branch_or_tag", Value.String options.BranchOrTag 
-                  "head_commit", Value.String options.HeadCommit.Sha
-                  "retry", Value.Bool options.Retry 
-                  "force", Value.Bool options.Force 
-                  "ci", Value.Bool options.Run.IsSome 
-                  "debug", Value.Bool options.Debug 
-                  "tag", tagValue 
-                  "note", noteValue ]
-                  |> Map  
-  
-            { Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
-              Eval.EvaluationContext.ProjectDir = None
-              Eval.EvaluationContext.Versions = Map.empty
-              Eval.EvaluationContext.Variables = Map [ "terrabuild", Value.Map terrabuildVars ] }
+        workspaceConfig.Variables
+        |> Map.map (fun name expr ->
+            // find dependencies for expression - it must have *no* dependencies for evaluation
+            let defaultValue =
+                match expr with
+                | None -> None
+                | Some expr ->
+                    let deps = Dependencies.find expr
+                    if deps <> Set.empty then raiseInvalidArg "Default value for variable {name} must have no dependencies"
+                    expr |> Eval.eval evaluationContext |> Some
 
-        // variables = default configuration vars + configuration vars + env vars + args vars
-        let evaluationContext =
-            let defaultVariables =
-                match workspaceConfig.Configurations |> Map.tryFind "default" with
-                | Some config ->
-                    config.Variables
-                    |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
-                    |> Value.Map
-                | _ -> Value.EmptyMap
+            let value =
+                match $"TB_VAR_{name}" |> Environment.GetEnvironmentVariable with
+                | null ->
+                    match options.Variables |> Map.tryFind name with
+                    | None -> defaultValue
+                    | Some value -> convertToVarType name defaultValue value |> Some
+                | value -> convertToVarType name defaultValue value |> Some
 
-            { evaluationContext
-              with Eval.Variables = evaluationContext.Variables |> Map.add "var" defaultVariables }
+            match value with
+            | Some expr -> expr
+            | _ -> raiseInvalidArg $"Variable {name} is not initialized")
 
-        let evaluationContext =
-            let configVariables =
-                match workspaceConfig.Configurations |> Map.tryFind options.Configuration with
-                | Some variables ->
-                    variables.Variables
-                    |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
-                    |> Value.Map
-                | _ ->
-                    match options.Configuration with
-                    | "default" -> Value.EmptyMap
-                    | _ -> raiseSymbolError $"Configuration '{options.Configuration}' not found"
-            let configVariables =
-                evaluationContext.Variables["var"] |> Eval.mapAdd configVariables
-            { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.add "var" configVariables }
-        
-        let evaluationContext =
-            let buildVariables =
-                evaluationContext.Variables["var"] |> Eval.asMap
-                // override variable with configuration variable if any
-                |> Map.map (fun key expr ->
-                    match $"TB_VAR_{key |> String.toLower}" |> Environment.GetEnvironmentVariable with
-                    | null -> expr
-                    | value -> convertToVarType key expr value)
-                // override variable with provided ones on command line if any
-                |> Map.map (fun key expr ->
-                    match options.Variables |> Map.tryFind (key |> String.toLower) with
-                    | Some value -> convertToVarType key expr value
-                    | _ -> expr)
-                |> Value.Map
-            { evaluationContext with Eval.Variables = evaluationContext.Variables |> Map.add "var" buildVariables }
+    let evaluationContext = { evaluationContext with Data = evaluationContext.Data |> Map.add "var" (Value.Map variables) }
 
-        evaluationContext
 
 
     let extensions, scripts =
@@ -321,7 +311,11 @@ let read (options: ConfigOptions.Options) =
             |> Set.ofSeq
             |> Set.union projectInfo.Includes
 
-        let locals = projectConfig.Locals
+        let locals =
+            workspaceConfig.Locals
+            |> Map.iter (fun name _ ->
+                if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+            workspaceConfig.Locals |> Map.addMap projectConfig.Locals
 
         { LoadedProject.Dependencies = projectDependencies
           LoadedProject.Links = projectLinks
@@ -374,27 +368,61 @@ let read (options: ConfigOptions.Options) =
             projectDef.Targets
             |> Map.map (fun targetName target ->
 
-                let evaluationContext =
+                let mutable evaluationContext =
                     let actionVariables =
                         Map [ "project", Value.String projectId
                               "target" , Value.String targetName
                               "hash", Value.String projectHash ]
                     let actionVariables =
-                        evaluationContext.Variables["terrabuild"] |> Eval.asMap
+                        evaluationContext.Data["terrabuild"] |> Eval.asMap
                         |> Map.addMap actionVariables
                         |>  Value.Map
 
                     { evaluationContext with
                         Eval.ProjectDir = Some projectDir
                         Eval.Versions = versions
-                        Eval.Variables = evaluationContext.Variables |> Map.add "terrabuild" actionVariables }
+                        Eval.Data = evaluationContext.Data |> Map.add "terrabuild" actionVariables |> Map.add "local" Value.EmptyMap }
 
-                let evaluationContext =
-                    let localsVariables =
-                        projectDef.Locals
-                        |> Map.map (fun _ expr -> Eval.eval evaluationContext expr)
-                    { evaluationContext with
-                        Eval.Variables = evaluationContext.Variables |> Map.add "local" (Value.Map localsVariables) }    
+                // build the values
+                let localsHub = Hub.Create(1)
+
+                // bootstrap
+                for (KeyValue(scopeName, scopeValue)) in evaluationContext.Data do
+                    match scopeValue with
+                    | Value.Map map ->
+                        for (KeyValue(name, value)) in map do
+                            let varName = $"{scopeName}.{name}"
+                            localsHub.Subscribe varName Array.empty (fun () ->
+                                let varSignal = localsHub.GetSignal<Value> varName
+                                varSignal.Value <- value)
+                    | _ -> raiseBugError "Unexpected scope content"
+
+                for (KeyValue(name, localExpr)) in projectDef.Locals do
+                    let localName = $"local.{name}"
+                    let deps =
+                        Dependencies.find localExpr
+                        |> Seq.map (fun dep -> localsHub.GetSignal<Value> dep :> ISignal)
+                        |> Array.ofSeq
+                    localsHub.Subscribe localName deps (fun () ->
+                        let value = Eval.eval evaluationContext localExpr
+                        let localMap =
+                            match evaluationContext.Data["local"] with
+                            | Value.Map map ->
+                                map |> Map.add name value
+                            | _ -> raiseBugError "Unexpected scope content"
+
+                        evaluationContext <- { evaluationContext with Data = evaluationContext.Data |> Map.add "local" (Value.Map localMap) }
+
+                        let localSignal = localsHub.GetSignal<Value> localName
+                        localSignal.Value <- value)
+
+                match localsHub.WaitCompletion() with
+                | Status.Ok -> ()
+                | Status.UnfulfilledSubscription (subscription, signals) ->
+                    let unraisedSignals = signals |> String.join ","
+                    raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check for circular dependencies on locals."
+                | Status.SubscriptionError exn ->
+                    forwardExternalError("Failed to evaluate locals", exn)
 
                 // use value from project target
                 // otherwise use workspace target

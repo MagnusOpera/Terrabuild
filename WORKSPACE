@@ -3,32 +3,26 @@ workspace {
     id = "c91ea014-00c7-8bd1-1c05-656a6d327ce7"
 }
 
-configuration default {
-    configuration = "Debug"
-}
 
-configuration dev {
-    configuration = "Release"
-}
-
-configuration prod {
-    configuration = "Release"
+locals {
+    isProd = terrabuild.configuration == "prod"
+    configuration = local.isProd ? "Release" : "Debug"
 }
 
 target build {
-    depends_on = [ target.^build ]
+    depends_on = [ "^build" ]
 }
 
 target test {
-    depends_on = [ target.build ]
+    depends_on = [ "build" ]
 }
 
 target dist {
-    depends_on = [ target.build ]
+    depends_on = [ "build" ]
 }
 
 target publish {
-    depends_on = [ target.dist ]
+    depends_on = [ "dist" ]
 }
 
 extension dotnet {
@@ -54,6 +48,6 @@ extension dotnet {
         "JB_SPACE_API_URL"
     ]
     defaults {
-        configuration = var.configuration
+        configuration = local.configuration
     }
 }

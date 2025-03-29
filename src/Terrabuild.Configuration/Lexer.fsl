@@ -22,7 +22,7 @@ let lexerMode = System.Collections.Generic.Stack([LexerMode.Default])
 
 }
 
-let regularIdentifier = ['a'-'z'] (['_' '-']? ['a'-'z' '0'-'9']+)*
+let regularIdentifier = ['a'-'z'] (['_' '-']? ['a'-'z' 'A'-'Z' '0'-'9']+)*
 let extensionIdentifier = '@' regularIdentifier
 let targetIdentifier = '^' regularIdentifier
 

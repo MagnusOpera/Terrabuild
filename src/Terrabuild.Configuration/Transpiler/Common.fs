@@ -76,3 +76,14 @@ let toExtension (block: Block) =
       ExtensionBlock.Script = script
       ExtensionBlock.Defaults = defaults } 
 
+let toLocals (block: Block) =
+    block
+    |> checkNoNestedBlocks
+    |> ignore
+
+    let variables = block.Attributes
+                    |> List.map (fun a -> (a.Name, a.Value))
+                    |> Map.ofList
+    variables
+
+

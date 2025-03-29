@@ -5,19 +5,22 @@ open Common
 open AST.HCL
 open AST.Common
 open AST.Workspace
+open Collections
 
 type WorkspaceBuilder =
     { Workspace: WorkspaceBlock option
       Targets: Map<string, TargetBlock>
-      Configurations: Map<string, ConfigurationBlock>
+      Variables: Map<string, Expr option>
+      Locals: Map<string, Expr>
       Extensions: Map<string, ExtensionBlock> }
 
 
-let (|Workspace|Target|Configuration|Extension|UnknownBlock|) (block: Block) =
+let (|Workspace|Target|Variable|Locals|Extension|UnknownBlock|) (block: Block) =
     match block.Resource, block.Name with
     | "workspace", None -> Workspace
     | "target", Some name -> Target name
-    | "configuration", Some name -> Configuration name
+    | "variable", Some name -> Variable name
+    | "locals", None -> Locals
     | "extension", Some name -> Extension name
     | _ -> UnknownBlock
 
@@ -55,16 +58,27 @@ let toTarget (block: Block) =
       TargetBlock.Rebuild = rebuild }
 
     
-let toConfiguration (block: Block) =
+let toVariable (block: Block) =
+    block
+    |> checkAllowedAttributes ["default"; "description"]
+    |> checkNoNestedBlocks
+    |> ignore
+
+    let value = block |> tryFindAttribute "default"
+    let description = block |> tryFindAttribute "description"
+    value
+
+
+let toLocals (block: Block) =
     block
     |> checkNoNestedBlocks
     |> ignore
 
-    let variables = block.Attributes
-                    |> List.map (fun a -> (a.Name, a.Value))
-                    |> Map.ofList
-    
-    { ConfigurationBlock.Variables = variables }
+    let locals =
+        block.Attributes
+        |> List.map (fun a -> (a.Name, a.Value))
+        |> Map.ofList
+    locals
 
 
 let transpile (blocks: Block list) =
@@ -79,7 +93,8 @@ let transpile (blocks: Block list) =
 
             { WorkspaceFile.Workspace = workspace
               WorkspaceFile.Targets = builder.Targets
-              WorkspaceFile.Configurations = builder.Configurations
+              WorkspaceFile.Variables = builder.Variables
+              WorkspaceFile.Locals = builder.Locals
               WorkspaceFile.Extensions = builder.Extensions }
 
         | block::blocks ->
@@ -94,10 +109,17 @@ let transpile (blocks: Block list) =
                 let target = toTarget block
                 buildWorkspace blocks { builder with Targets = builder.Targets |> Map.add name target }
 
-            | Configuration name ->
-                if builder.Configurations.ContainsKey name then raiseParseError $"Duplicate configuration: {name}"
-                let configuration = toConfiguration block
-                buildWorkspace blocks { builder with Configurations = builder.Configurations |> Map.add name configuration }
+            | Variable name ->
+                if builder.Variables.ContainsKey name then raiseParseError $"Duplicate variable: ${name}"
+                let variable = toVariable block
+                buildWorkspace blocks { builder with Variables = builder.Variables |> Map.add name variable }
+
+            | Locals ->
+                let locals = toLocals block
+                locals
+                |> Map.iter (fun name _ ->
+                    if builder.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+                buildWorkspace blocks { builder with Locals = builder.Locals |> Map.addMap locals }
 
             | Extension name ->
                 if builder.Extensions.ContainsKey name then raiseParseError $"Duplicate extension: {name}"
@@ -109,7 +131,8 @@ let transpile (blocks: Block list) =
     let builder =
         { Workspace = None
           Targets = Map.empty
-          Configurations = Map.empty
+          Variables = Map.empty
+          Locals = Map.empty
           Extensions = Map.empty }
     buildWorkspace blocks builder
 

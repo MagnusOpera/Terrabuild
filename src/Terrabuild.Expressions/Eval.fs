@@ -7,13 +7,13 @@ type EvaluationContext =
     { WorkspaceDir: string option
       ProjectDir: string option
       Versions: Map<string, string>
-      Variables: Map<string, Value> }
+      Data: Map<string, Value> }
 with
     static member Empty =
         { WorkspaceDir = None
           ProjectDir = None
           Versions = Map.empty
-          Variables = Map.empty }
+          Data = Map.empty }
 
 let rec eval (context: EvaluationContext) (expr: Expr) =
     let valueToString v =
@@ -32,7 +32,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
         | Expr.Number num -> Value.Number num
         | Expr.Variable var ->
             // if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
-            match context.Variables |> Map.tryFind var with
+            match context.Data |> Map.tryFind var with
             | Some value -> value
             | None -> raiseSymbolError $"Variable '{var}' is not defined"
         | Expr.Map map ->
