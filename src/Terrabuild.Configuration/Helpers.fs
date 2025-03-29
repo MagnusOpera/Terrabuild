@@ -19,14 +19,23 @@ let parseExpressionIdentifier = function
     | "nothing" -> Expr.Nothing
     | s -> Expr.Variable s
 
-let parseResourceName = function
-    | String.Regex "(@?[a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
-    | s -> raiseParseError $"Invalid resource name: {s}"
+let (|RegularIdentifier|ExtensionIdentifier|TargetIdentifier|) (value: string) =
+    match value[0] with
+    | '@' -> ExtensionIdentifier
+    | '^' -> TargetIdentifier
+    | _ -> RegularIdentifier
 
-let parseResourceIdentifier = function
-    | String.Regex "(@?[a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
-    | s -> raiseParseError $"Invalid resource identifier: {s}"
+let parseResourceName s =
+    match s with
+    | ExtensionIdentifier | RegularIdentifier -> s
+    | _ -> raiseParseError $"Invalid resource name: {s}"
 
-let parseAttributeName = function
-    | String.Regex "([a-z](?:[_-]?[a-z0-9]+)*)" [identifier] -> identifier
+let parseResourceIdentifier s =
+    match s with
+    | ExtensionIdentifier | RegularIdentifier -> s
+    | _ -> raiseParseError $"Invalid resource identifier: {s}"
+
+let parseAttributeName s =
+    match s with
+    | RegularIdentifier -> s
     | s -> raiseParseError $"Invalid attribute name: {s}"

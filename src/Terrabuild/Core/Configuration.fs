@@ -399,11 +399,12 @@ let read (options: ConfigOptions.Options) =
 
                 for (KeyValue(name, localExpr)) in projectDef.Locals do
                     let localName = $"local.{name}"
-                    let deps =
-                        Dependencies.find localExpr
+                    let deps = Dependencies.find localExpr
+                    let signalDeps =
+                        deps
                         |> Seq.map (fun dep -> localsHub.GetSignal<Value> dep :> ISignal)
                         |> Array.ofSeq
-                    localsHub.Subscribe localName deps (fun () ->
+                    localsHub.Subscribe localName signalDeps (fun () ->
                         let value = Eval.eval evaluationContext localExpr
                         let localMap =
                             match evaluationContext.Data["local"] with
