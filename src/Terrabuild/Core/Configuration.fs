@@ -368,62 +368,63 @@ let read (options: ConfigOptions.Options) =
             projectDef.Targets
             |> Map.map (fun targetName target ->
 
-                let mutable evaluationContext =
-                    let actionVariables =
-                        Map [ "project", Value.String projectId
-                              "target" , Value.String targetName
-                              "hash", Value.String projectHash ]
-                    let actionVariables =
-                        evaluationContext.Data["terrabuild"] |> Eval.asMap
-                        |> Map.addMap actionVariables
-                        |>  Value.Map
+                let evaluationContext =
+                    let mutable evaluationContext =
+                        let actionVariables =
+                            Map [ "project", Value.String projectId
+                                  "target" , Value.String targetName
+                                  "hash", Value.String projectHash ]
+                        let actionVariables =
+                            evaluationContext.Data["terrabuild"] |> Eval.asMap
+                            |> Map.addMap actionVariables
+                            |>  Value.Map
 
-                    { evaluationContext with
-                        Eval.ProjectDir = Some projectDir
-                        Eval.Versions = versions
-                        Eval.Data = evaluationContext.Data |> Map.add "terrabuild" actionVariables |> Map.add "local" Value.EmptyMap }
+                        { evaluationContext with
+                            Eval.ProjectDir = Some projectDir
+                            Eval.Versions = versions
+                            Eval.Data = evaluationContext.Data |> Map.add "terrabuild" actionVariables |> Map.add "local" Value.EmptyMap }
 
-                // build the values
-                let localsHub = Hub.Create(1)
+                    // build the values
+                    let localsHub = Hub.Create(1)
 
-                // bootstrap
-                for (KeyValue(scopeName, scopeValue)) in evaluationContext.Data do
-                    match scopeValue with
-                    | Value.Map map ->
-                        for (KeyValue(name, value)) in map do
-                            let varName = $"{scopeName}.{name}"
-                            localsHub.Subscribe varName Array.empty (fun () ->
-                                let varSignal = localsHub.GetSignal<Value> varName
-                                varSignal.Value <- value)
-                    | _ -> raiseBugError "Unexpected scope content"
+                    // bootstrap
+                    for (KeyValue(scopeName, scopeValue)) in evaluationContext.Data do
+                        match scopeValue with
+                        | Value.Map map ->
+                            for (KeyValue(name, value)) in map do
+                                let varName = $"{scopeName}.{name}"
+                                localsHub.Subscribe varName Array.empty (fun () ->
+                                    let varSignal = localsHub.GetSignal<Value> varName
+                                    varSignal.Value <- value)
+                        | _ -> raiseBugError "Unexpected scope content"
 
-                for (KeyValue(name, localExpr)) in projectDef.Locals do
-                    let localName = $"local.{name}"
-                    let deps = Dependencies.find localExpr
-                    let signalDeps =
-                        deps
-                        |> Seq.map (fun dep -> localsHub.GetSignal<Value> dep :> ISignal)
-                        |> Array.ofSeq
-                    localsHub.Subscribe localName signalDeps (fun () ->
-                        let value = Eval.eval evaluationContext localExpr
-                        let localMap =
-                            match evaluationContext.Data["local"] with
-                            | Value.Map map ->
-                                map |> Map.add name value
-                            | _ -> raiseBugError "Unexpected scope content"
+                    for (KeyValue(name, localExpr)) in projectDef.Locals do
+                        let localName = $"local.{name}"
+                        let deps = Dependencies.find localExpr
+                        let signalDeps =
+                            deps
+                            |> Seq.map (fun dep -> localsHub.GetSignal<Value> dep :> ISignal)
+                            |> Array.ofSeq
+                        localsHub.Subscribe localName signalDeps (fun () ->
+                            let value = Eval.eval evaluationContext localExpr
+                            let localMap =
+                                match evaluationContext.Data["local"] with
+                                | Value.Map map ->
+                                    map |> Map.add name value
+                                | _ -> raiseBugError "Unexpected scope content"
 
-                        evaluationContext <- { evaluationContext with Data = evaluationContext.Data |> Map.add "local" (Value.Map localMap) }
+                            evaluationContext <- { evaluationContext with Data = evaluationContext.Data |> Map.add "local" (Value.Map localMap) }
 
-                        let localSignal = localsHub.GetSignal<Value> localName
-                        localSignal.Value <- value)
+                            let localSignal = localsHub.GetSignal<Value> localName
+                            localSignal.Value <- value)
 
-                match localsHub.WaitCompletion() with
-                | Status.Ok -> ()
-                | Status.UnfulfilledSubscription (subscription, signals) ->
-                    let unraisedSignals = signals |> String.join ","
-                    raiseInvalidArg $"Failed to evaluate '{subscription}': a local value with the name '{unraisedSignals}' has not been declared."
-                | Status.SubscriptionError exn ->
-                    forwardExternalError("Failed to evaluate locals", exn)
+                    match localsHub.WaitCompletion() with
+                    | Status.Ok -> evaluationContext
+                    | Status.UnfulfilledSubscription (subscription, signals) ->
+                        let unraisedSignals = signals |> String.join ","
+                        raiseInvalidArg $"Failed to evaluate '{subscription}': a local value with the name '{unraisedSignals}' has not been declared."
+                    | Status.SubscriptionError exn ->
+                        forwardExternalError("Failed to evaluate locals", exn)
 
                 // use value from project target
                 // otherwise use workspace target
