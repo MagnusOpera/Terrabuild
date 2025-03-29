@@ -1,17 +1,17 @@
 
 target build {
-  depends_on = [^build]
+  depends_on = [ target.^build ]
 }
 
 target publish {
-  depends_on = [build]
+  depends_on = [ target.build ]
 }
 
 target docker {
-  depends_on = [ publish
-                 ^publish ]
+  depends_on = [ target.publish
+                 target.^publish ]
 }
 
 target push {
-  depends_on = [docker]
+  depends_on = [ target.docker ]
 }

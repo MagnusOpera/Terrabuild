@@ -16,22 +16,22 @@ configuration prod {
 }
 
 target build {
-    depends_on = [ "^build" ]
+    depends_on = [ target.^build ]
 }
 
 target test {
-    depends_on = [ "build" ]
+    depends_on = [ target.build ]
 }
 
 target dist {
-    depends_on = [ "build" ]
+    depends_on = [ target.build ]
 }
 
 target publish {
-    depends_on = [ "dist" ]
+    depends_on = [ target.dist ]
 }
 
-extension @dotnet {
+extension dotnet {
     container = "mcr.microsoft.com/dotnet/sdk:9.0.202"
     variables = [
         "DOTNET_SKIP_FIRST_TIME_EXPERIENCE"
