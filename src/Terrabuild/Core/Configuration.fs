@@ -421,7 +421,7 @@ let read (options: ConfigOptions.Options) =
                 | Status.Ok -> ()
                 | Status.UnfulfilledSubscription (subscription, signals) ->
                     let unraisedSignals = signals |> String.join ","
-                    raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check for circular dependencies on locals."
+                    raiseInvalidArg $"Failed to evaluate '{subscription}': a local value with the name '{unraisedSignals}' has not been declared."
                 | Status.SubscriptionError exn ->
                     forwardExternalError("Failed to evaluate locals", exn)
 
