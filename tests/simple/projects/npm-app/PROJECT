@@ -1,5 +1,5 @@
 
-project @npm {
+project @npm npm_app {
     labels = [ "app" ]
 }
 

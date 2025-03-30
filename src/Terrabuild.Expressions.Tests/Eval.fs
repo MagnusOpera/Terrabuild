@@ -114,19 +114,6 @@ let lowerString() =
     result |> should equal expected
 
 [<Test>]
-let version() =
-    let expected = Value.String "1234"
-
-    let context = { evaluationContext
-                    with Versions = Map [ "TOTO", "1234"
-                                          "TITI", "56789A" ] }
-
-    printfn $"{context.ProjectDir}"
-
-    let result = eval context (Expr.Function (Function.Version, [ Expr.String "../toto"]))
-    result |> should equal expected
-
-[<Test>]
 let formatList() =
     let expected = Value.String "\\o/THIS42ISAtrueTEMPLATEtiti"
 

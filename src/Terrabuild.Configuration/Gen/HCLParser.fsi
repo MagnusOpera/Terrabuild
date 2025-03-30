@@ -71,6 +71,8 @@ type nonTerminalId =
     | NONTERM_Block
     | NONTERM_BlockContent
     | NONTERM_Expr
+    | NONTERM_Data
+    | NONTERM_DataIdentifier
     | NONTERM_Function
     | NONTERM_ResourceName
     | NONTERM_ResourceIdentifier

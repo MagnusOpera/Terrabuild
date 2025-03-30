@@ -73,24 +73,6 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.And, [Value.Bool left; Value.Bool right] -> Value.Bool (left && right)
                 | Function.Or, [Value.Bool left; Value.Bool right] -> Value.Bool (left || right)
 
-                | Function.Version, [Value.String projectPath] ->
-                    let projectDir =
-                        match context.ProjectDir with
-                        | Some projectDir -> projectDir
-                        | _ -> raiseInvalidArg $"'version' function can only be used in the context of a project."
-
-                    let workspaceDir =
-                        match context.WorkspaceDir with
-                        | Some workspaceDir -> workspaceDir
-                        | _ -> raiseInvalidArg $"'version' function can only be used in the context of a project."
-
-                    let projectId =
-                        FS.workspaceRelative workspaceDir projectDir projectPath
-                        |> String.toUpper
-                    match context.Versions |> Map.tryFind projectId with
-                    | Some version -> Value.String version
-                    | _ -> raiseSymbolError $"Unknown project reference '{projectPath}'"
-
                 | Function.ToString, [value] -> valueToString value |> Value.String
 
                 | Function.Format, [Value.String template; Value.Map values] ->

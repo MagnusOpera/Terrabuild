@@ -305,13 +305,13 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 |> Seq.map (fun awaitedProjectId ->
                     schedule awaitedProjectId
                     hub.GetSignal<DateTime> awaitedProjectId)
-                |> Array.ofSeq
+                |> List.ofSeq
 
             let onAllSignaled () =
                 try
                     let maxCompletionChildren =
                         match awaitedDependencies with
-                        | [| |] -> DateTime.MinValue
+                        | [ ] -> DateTime.MinValue
                         | _ -> awaitedDependencies |> Seq.maxBy (fun dep -> dep.Value) |> (fun dep -> dep.Value)
 
                     let buildRequest, completionStatus = processNode maxCompletionChildren node
@@ -333,7 +333,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
                         reraise()
 
-            let awaitedSignals = awaitedDependencies |> Array.map (fun entry -> entry :> ISignal)
+            let awaitedSignals = awaitedDependencies |> List.map (fun entry -> entry :> ISignal)
             hub.Subscribe nodeId awaitedSignals onAllSignaled
 
     graph.RootNodes |> Seq.iter schedule

@@ -6,8 +6,9 @@ open AST.Common
 [<RequireQualifiedAccess>]
 type ProjectBlock =
     { Init: string option
+      Id: string option
+      DependsOn: Expr option
       Dependencies: Expr option
-      Links: Expr option
       Outputs: Expr option
       Ignores: Expr option
       Includes: Expr option

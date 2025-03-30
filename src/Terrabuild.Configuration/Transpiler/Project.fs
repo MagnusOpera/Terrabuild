@@ -6,6 +6,7 @@ open Errors
 open Terrabuild.Expressions
 open Common
 open Collections
+open Helpers
 
 
 type ProjectBuilder =
@@ -26,12 +27,12 @@ let (|Project|Extension|Target|Locals|UnknownBlock|) (block: Block) =
 
 let toProject (block: Block) =
     block
-    |> checkAllowedAttributes ["dependencies"; "links"; "outputs"; "ignores"; "includes"; "labels"]
+    |> checkAllowedAttributes ["depends_on"; "dependencies"; "links"; "outputs"; "ignores"; "includes"; "labels"]
     |> checkNoNestedBlocks
     |> ignore
 
+    let dependsOn = block |> tryFindAttribute "depends_on"
     let dependencies = block |> tryFindAttribute "dependencies"
-    let links = block |> tryFindAttribute "links"
     let outputs = block |> tryFindAttribute "outputs"
     let ignores = block |> tryFindAttribute "ignores"
     let includes = block |> tryFindAttribute "includes"
@@ -41,8 +42,9 @@ let toProject (block: Block) =
         |> Option.defaultValue Set.empty
 
     { ProjectBlock.Init = block.Name
+      ProjectBlock.Id = block.Id
+      ProjectBlock.DependsOn = dependsOn
       ProjectBlock.Dependencies = dependencies
-      ProjectBlock.Links = links
       ProjectBlock.Outputs = outputs
       ProjectBlock.Ignores = ignores
       ProjectBlock.Includes = includes
@@ -96,8 +98,9 @@ let transpile (blocks: Block list) =
             let project =
                 match builder.Project with
                 | None -> { ProjectBlock.Init = None
+                            ProjectBlock.Id = None
+                            ProjectBlock.DependsOn = None
                             ProjectBlock.Dependencies = None
-                            ProjectBlock.Links = None
                             ProjectBlock.Outputs = None
                             ProjectBlock.Ignores = None
                             ProjectBlock.Includes = None

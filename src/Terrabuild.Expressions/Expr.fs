@@ -10,7 +10,6 @@ type Function =
     | Lower
     | Replace
     | Count
-    | Version
     | Format
     | ToString
     | Item

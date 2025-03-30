@@ -39,7 +39,7 @@ let ``Variable inside list dependencies``() =
 
 [<Test>]
 let ``field dependencies``() =
-    let expr = Expr.Function (Function.Item, [Expr.Variable "var"; Expr.String "toto"])
+    let expr = Expr.Function (Function.Item, [Expr.Variable "var.toto"; Expr.String "titi"])
     let expected = Set [ "var.toto" ]
 
     let deps = Dependencies.find expr
@@ -47,7 +47,7 @@ let ``field dependencies``() =
 
 [<Test>]
 let ``maybe field dependencies``() =
-    let expr = Expr.Function (Function.TryItem, [Expr.Variable "var"; Expr.String "toto"])
+    let expr = Expr.Function (Function.TryItem, [Expr.Variable "var.toto"; Expr.String "titi"])
     let expected = Set [ "var.toto" ]
 
     let deps = Dependencies.find expr
@@ -63,8 +63,8 @@ let ``function dependencies``() =
 
 [<Test>]
 let ``function of field dependencies``() =
-    let expr = Expr.Function (Function.Plus, [Expr.Function (Function.Item, [Expr.Variable "var"; Expr.String "toto"])
-                                              Expr.Function (Function.Item, [Expr.Variable "local"; Expr.String "titi"])])
+    let expr = Expr.Function (Function.Plus, [Expr.Function (Function.Item, [Expr.Variable "var.toto"; Expr.String "tutu"])
+                                              Expr.Function (Function.Item, [Expr.Variable "local.titi"; Expr.String "tutu"])])
     let expected = Set ["var.toto"; "local.titi"]
 
     let deps = Dependencies.find expr

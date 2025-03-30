@@ -35,6 +35,7 @@ type Target = {
 
 [<RequireQualifiedAccess>]
 type Project = {
+    Id: string option
     Name: string
     Hash: string
     Dependencies: string set
@@ -62,8 +63,9 @@ type private LazyScript = Lazy<Terrabuild.Scripting.Script>
 
 [<RequireQualifiedAccess>]
 type private LoadedProject = {
+    Id: string option
+    DependsOn: string set
     Dependencies: string set
-    Links: string set
     Includes: string set
     Ignores: string set
     Outputs: string set
@@ -135,23 +137,21 @@ let read (options: ConfigOptions.Options) =
         | _ -> Value.Nothing
 
     let terrabuildVars =
-        [ "configuration", Value.String options.Configuration
-          "branch_or_tag", Value.String options.BranchOrTag 
-          "head_commit", Value.String options.HeadCommit.Sha
-          "retry", Value.Bool options.Retry 
-          "force", Value.Bool options.Force 
-          "ci", Value.Bool options.Run.IsSome 
-          "debug", Value.Bool options.Debug 
-          "tag", tagValue 
-          "note", noteValue ]
-        |> Map  
-
-
+        Map [ "terrabuild.configuration", Value.String options.Configuration
+              "terrabuild.branch_or_tag", Value.String options.BranchOrTag 
+              "terrabuild.head_commit", Value.String options.HeadCommit.Sha
+              "terrabuild.retry", Value.Bool options.Retry 
+              "terrabuild.force", Value.Bool options.Force 
+              "terrabuild.ci", Value.Bool options.Run.IsSome 
+              "terrabuild.debug", Value.Bool options.Debug 
+              "terrabuild.tag", tagValue 
+              "terrabuild.note", noteValue ]
+ 
     let evaluationContext =
         { Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
           Eval.EvaluationContext.ProjectDir = None
           Eval.EvaluationContext.Versions = Map.empty
-          Eval.EvaluationContext.Data = Map [ "terrabuild", Value.Map terrabuildVars ] }
+          Eval.EvaluationContext.Data = terrabuildVars }
 
 
     // bind variables
@@ -187,8 +187,10 @@ let read (options: ConfigOptions.Options) =
             match value with
             | Some expr -> expr
             | _ -> raiseInvalidArg $"Variable {name} is not initialized")
+        |> Seq.map (fun (KeyValue(name, expr)) -> $"var.{name}", expr)
+        |> Map.ofSeq
 
-    let evaluationContext = { evaluationContext with Data = evaluationContext.Data |> Map.add "var" (Value.Map variables) }
+    let evaluationContext = { evaluationContext with Data = evaluationContext.Data |> Map.addMap variables }
 
 
 
@@ -224,7 +226,6 @@ let read (options: ConfigOptions.Options) =
     let loadProjectDef projectId =
         let projectDir = FS.combinePath options.Workspace projectId
         let projectFile = FS.combinePath projectDir "PROJECT"
-        let slashedProjectId = $"{projectId}/"
 
         Log.Debug("Loading project definition {ProjectId}", projectId)
 
@@ -277,10 +278,11 @@ let read (options: ConfigOptions.Options) =
             |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
             |> Option.defaultValue Set.empty
 
+        let projectId = projectConfig.Project.Id
+        let projectDependsOn = projectConfig.Project.DependsOn |> evalAsStringSet
         let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
         let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
         let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
-        let projectLinks = projectConfig.Project.Links |> evalAsStringSet
         let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
         let labels = projectConfig.Project.Labels
 
@@ -289,7 +291,6 @@ let read (options: ConfigOptions.Options) =
             with Ignores = projectInfo.Ignores + projectIgnores
                  Outputs = projectInfo.Outputs + projectOutputs
                  Dependencies = projectInfo.Dependencies + projectDependencies
-                 Links = projectInfo.Links + projectLinks
                  Includes = projectInfo.Includes + projectIncludes }
 
         let projectOutputs = projectInfo.Outputs
@@ -298,11 +299,6 @@ let read (options: ConfigOptions.Options) =
         let projectDependencies =
             projectInfo.Dependencies
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
-        let projectLinks =
-            projectInfo.Links
-            |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
-            |> Set.filter (fun dep -> dep |> String.startsWith slashedProjectId |> not)
-
         let projectTargets = projectConfig.Targets
 
         let includes =
@@ -317,8 +313,9 @@ let read (options: ConfigOptions.Options) =
                 if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
             workspaceConfig.Locals |> Map.addMap projectConfig.Locals
 
-        { LoadedProject.Dependencies = projectDependencies
-          LoadedProject.Links = projectLinks
+        { LoadedProject.Id = projectId
+          LoadedProject.DependsOn = projectDependsOn
+          LoadedProject.Dependencies = projectDependencies
           LoadedProject.Includes = includes
           LoadedProject.Ignores = projectIgnores
           LoadedProject.Outputs = projectOutputs
@@ -330,7 +327,7 @@ let read (options: ConfigOptions.Options) =
 
 
     // this is the final stage: create targets and create the project
-    let finalizeProject projectDir (projectDef: LoadedProject) (projectReferences: Map<string, Project>) =
+    let finalizeProject projectDir (projectDef: LoadedProject) (dependsOnProjets: Map<string, Project>) =
         let projectId = projectDir |> String.toUpper
         let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
@@ -347,8 +344,8 @@ let read (options: ConfigOptions.Options) =
 
         let dependenciesHash =
             let versionDependencies =
-                projectReferences
-                |> Map.filter (fun projectId _ -> (Set.contains projectId projectDef.Dependencies) || (Set.contains projectId projectDef.Links))
+                dependsOnProjets
+                |> Map.filter (fun projectId _ -> Set.contains projectId projectDef.Dependencies)
                 |> Map.map (fun _ depProj -> depProj.Hash)
 
             versionDependencies.Values
@@ -356,7 +353,7 @@ let read (options: ConfigOptions.Options) =
             |> Hash.sha256strings
 
         let versions = 
-            projectReferences
+            dependsOnProjets
             |> Map.map (fun _ depProj -> depProj.Hash)
 
         // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
@@ -370,33 +367,34 @@ let read (options: ConfigOptions.Options) =
 
                 let evaluationContext =
                     let mutable evaluationContext =
-                        let actionVariables =
-                            Map [ "project", Value.String projectId
-                                  "target" , Value.String targetName
-                                  "hash", Value.String projectHash ]
-                        let actionVariables =
-                            evaluationContext.Data["terrabuild"] |> Eval.asMap
-                            |> Map.addMap actionVariables
-                            |>  Value.Map
+                        let terrabuildProjectVars =
+                            Map [ "terrabuild.project", Value.String projectId
+                                  "terrabuild.target" , Value.String targetName
+                                  "terrabuild.hash", Value.String projectHash ]
+
+                        let projectVars =
+                            dependsOnProjets
+                            |> Seq.choose (fun (KeyValue(id, project)) ->
+                                project.Id |> Option.map (fun id ->
+                                    $"project.{id}", Value.Map (Map ["version", Value.String project.Hash])))
+                            |> Map.ofSeq
 
                         { evaluationContext with
                             Eval.ProjectDir = Some projectDir
                             Eval.Versions = versions
-                            Eval.Data = evaluationContext.Data |> Map.add "terrabuild" actionVariables |> Map.add "local" Value.EmptyMap }
+                            Eval.Data =
+                                evaluationContext.Data
+                                |> Map.addMap terrabuildProjectVars
+                                |> Map.addMap projectVars }
 
                     // build the values
                     let localsHub = Hub.Create(1)
 
                     // bootstrap
-                    for (KeyValue(scopeName, scopeValue)) in evaluationContext.Data do
-                        match scopeValue with
-                        | Value.Map map ->
-                            for (KeyValue(name, value)) in map do
-                                let varName = $"{scopeName}.{name}"
-                                localsHub.Subscribe varName Array.empty (fun () ->
-                                    let varSignal = localsHub.GetSignal<Value> varName
-                                    varSignal.Value <- value)
-                        | _ -> raiseBugError "Unexpected scope content"
+                    for (KeyValue(name, value)) in evaluationContext.Data do
+                        localsHub.Subscribe name [] (fun () ->
+                            let varSignal = localsHub.GetSignal<Value> name
+                            varSignal.Value <- value)
 
                     for (KeyValue(name, localExpr)) in projectDef.Locals do
                         let localName = $"local.{name}"
@@ -404,19 +402,12 @@ let read (options: ConfigOptions.Options) =
                         let signalDeps =
                             deps
                             |> Seq.map (fun dep -> localsHub.GetSignal<Value> dep :> ISignal)
-                            |> Array.ofSeq
+                            |> List.ofSeq
                         localsHub.Subscribe localName signalDeps (fun () ->
-                            let value = Eval.eval evaluationContext localExpr
-                            let localMap =
-                                match evaluationContext.Data["local"] with
-                                | Value.Map map ->
-                                    map |> Map.add name value
-                                | _ -> raiseBugError "Unexpected scope content"
-
-                            evaluationContext <- { evaluationContext with Data = evaluationContext.Data |> Map.add "local" (Value.Map localMap) }
-
+                            let localValue = Eval.eval evaluationContext localExpr
+                            evaluationContext <- { evaluationContext with Data = evaluationContext.Data |> Map.add localName localValue }
                             let localSignal = localsHub.GetSignal<Value> localName
-                            localSignal.Value <- value)
+                            localSignal.Value <- localValue)
 
                     match localsHub.WaitCompletion() with
                     | Status.Ok -> evaluationContext
@@ -565,7 +556,8 @@ let read (options: ConfigOptions.Options) =
 
         let projectDependencies = projectDef.Dependencies |> Set.map String.toUpper
 
-        { Project.Name = projectDir
+        { Project.Id = projectDef.Id
+          Project.Name = projectDir
           Project.Hash = projectHash
           Project.Dependencies = projectDependencies
           Project.Files = files
@@ -578,42 +570,62 @@ let read (options: ConfigOptions.Options) =
         let workspaceIgnores = workspaceConfig.Workspace.Ignores |> Option.defaultValue Set.empty
         let scanFolder = scanFolders options.Workspace workspaceIgnores
         let projectLoading = ConcurrentDictionary<string, bool>()
-        let projects = ConcurrentDictionary<string, Project>()
+        let projectIds = ConcurrentDictionary<string, string>()
+        let projectPathIds = ConcurrentDictionary<string, Project>()
         let hub = Hub.Create(options.MaxConcurrency)
 
         let rec loadProject projectDir =
-            let projectId = projectDir |> String.toUpper
-            if projectLoading.ContainsKey projectId |> not then
-                projectLoading.TryAdd(projectId, true) |> ignore
+            let projectPathId = projectDir |> String.toUpper
+            if projectLoading.ContainsKey projectPathId |> not then
+                projectLoading.TryAdd(projectPathId, true) |> ignore
 
                 // load project and force loading all dependencies as well
                 let loadedProject = loadProjectDef projectDir
+                match loadedProject.Id with
+                | Some projectId ->
+                    if projectIds.TryAdd(projectId, projectDir) |> not then
+                        raiseSymbolError $"Project id '{projectId}' is already defined in project '{projectIds[projectId]}'"
+                | _ -> ()
+
                 for dependency in loadedProject.Dependencies do
                     loadProject dependency
 
                 // parallel load of projects
-                hub.Subscribe projectDir Array.empty (fun () ->
+                hub.Subscribe projectDir [] (fun () ->
                     // await dependencies to be loaded
-                    let awaitedProjects =
-                        (loadedProject.Dependencies + loadedProject.Links)
+                    let projectPathSignals =
+                        loadedProject.Dependencies
                         |> Set.map String.toUpper
                         |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
-                        |> Array.ofSeq
+                        |> List.ofSeq
 
-                    let awaitedSignals = awaitedProjects |> Array.map (fun entry -> entry :> ISignal)
+                    let dependsOnSignals =
+                        loadedProject.DependsOn
+                        |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
+                        |> List.ofSeq
+
+                    let awaitedProjectSignals = projectPathSignals @ dependsOnSignals
+                    let awaitedSignals = awaitedProjectSignals |> List.map (fun entry -> entry :> ISignal)
                     hub.Subscribe projectDir awaitedSignals (fun () ->
                         // build task & code & notify
-                        let projectDependencies = 
-                            awaitedProjects
+                        let dependsOnProjects = 
+                            awaitedProjectSignals
                             |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value)
                             |> Map.ofSeq
 
-                        let project = finalizeProject projectDir loadedProject projectDependencies
-                        projects.TryAdd(projectId, project) |> ignore
+                        let project = finalizeProject projectDir loadedProject dependsOnProjects
+                        projectPathIds.TryAdd(projectPathId, project) |> ignore
 
-                        let loadedProjectSignal = hub.GetSignal<Project> projectId
-                        loadedProjectSignal.Value <- project)
-                )
+                        Log.Debug($"Signaling projectPath '{projectPathId}")
+                        let loadedProjectPathIdSignal = hub.GetSignal<Project> projectPathId
+                        loadedProjectPathIdSignal.Value <- project
+
+                        match loadedProject.Id with
+                        | Some projectId ->
+                            Log.Debug($"Signaling projectId '{projectId}")
+                            let loadedProjectIdSignal = hub.GetSignal<Project> projectId
+                            loadedProjectIdSignal.Value <- project
+                        | _ -> ()))
 
         let rec findDependencies isRoot dir =
             if isRoot || scanFolder  dir then
@@ -621,7 +633,10 @@ let read (options: ConfigOptions.Options) =
                 match projectFile with
                 | FS.File file ->
                     let projectFile = file |> FS.parentDirectory |> FS.relativePath options.Workspace
-                    loadProject projectFile
+                    try
+                        loadProject projectFile
+                    with
+                    | exn -> forwardExternalError($"Error while parsing project '{projectFile}'", exn)
                 | _ ->
                     for subdir in dir |> IO.enumerateDirs do
                         findDependencies false subdir
@@ -630,7 +645,7 @@ let read (options: ConfigOptions.Options) =
         let status = hub.WaitCompletion()
         match status with
         | Status.Ok ->
-            projects |> Map.ofDict
+            projectPathIds |> Map.ofDict
         | Status.UnfulfilledSubscription (subscription, signals) ->
             let unraisedSignals = signals |> String.join ","
             raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check for circular dependencies."

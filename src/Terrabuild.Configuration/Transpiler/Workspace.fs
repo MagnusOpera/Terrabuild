@@ -6,6 +6,7 @@ open AST.HCL
 open AST.Common
 open AST.Workspace
 open Collections
+open Helpers
 
 type WorkspaceBuilder =
     { Workspace: WorkspaceBlock option

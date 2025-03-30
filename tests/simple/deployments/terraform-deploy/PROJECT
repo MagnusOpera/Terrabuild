@@ -1,15 +1,15 @@
 
 project @terraform {
-    dependencies = [ "/projects/dotnet-app"
-                     "../../projects/npm-app" ]
+    depends_on = [ "dotnet_app"
+                   "npm_app" ]
     ignores = [ "deploy.log" ]
     labels = [ "infra" ]
 }
 
 target build {
     @terraform plan { 
-        variables = { dotnet_app_version: version("/projects/dotnet-app")
-                     npm_app_version: version("../../projects/npm-app") }
+        variables = { dotnet_app_version: project.dotnet_app.version
+                     npm_app_version: project.npm_app.version }
     }
 }
 

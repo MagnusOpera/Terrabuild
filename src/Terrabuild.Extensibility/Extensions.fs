@@ -13,7 +13,6 @@ type ProjectInfo = {
     Outputs: Set<string>
     Ignores: Set<string>
     Dependencies: Set<string>
-    Links: Set<string>
     Includes: Set<string>
 }
 with
@@ -21,7 +20,6 @@ with
         Outputs = Set.empty
         Ignores = Set.empty
         Dependencies = Set.empty
-        Links = Set.empty
         Includes = Set [ "**/*" ]
     }
 

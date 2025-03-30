@@ -20,12 +20,14 @@ with
 type [<RequireQualifiedAccess>] Block =
     { Resource: string
       Name: string option
+      Id: string option
       Attributes: Attribute list
       Blocks: Block list }
 with
-    static member Build resource name (attributes, blocks) =
+    static member Build resource name id (attributes, blocks) =
         { Block.Resource = resource
           Block.Name = name
+          Block.Id = id
           Block.Attributes = attributes
           Block.Blocks = blocks }
 

@@ -35,7 +35,7 @@ configuration dummy { }
 
 configuration default {
     secret = map.toto == "prod" ? 1234 : 5678
-    secret2 = list.2
+    secret2 = var.list.2
     secret3 = !false + !true
     secret4 = format("1", 2, toto, true, nothing)
     secret5 = tostring(40 + 1 + 2)
@@ -48,8 +48,8 @@ configuration default {
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
   defaults {
-    configuration1 = map.toto
-    configuration2 = map.?titi
+    configuration1 = var.map.toto
+    configuration2 = var.map.?titi
     configuration3 = replace("toto titi", "toto", "titi")
   }
 }

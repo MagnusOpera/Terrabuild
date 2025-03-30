@@ -1,4 +1,4 @@
-module Helpers
+module AST.Helpers
 open Terrabuild.Expressions
 open Errors
 
@@ -8,7 +8,6 @@ let parseFunction expr = function
     | "lower" -> Expr.Function (Function.Lower, expr)
     | "replace" -> Expr.Function (Function.Replace, expr)
     | "count" -> Expr.Function (Function.Count, expr)
-    | "version" -> Expr.Function (Function.Version, expr)
     | "format" -> Expr.Function (Function.Format, expr)
     | "tostring" -> Expr.Function (Function.ToString, expr)
     | s -> raiseParseError $"Unknown function: {s}"
@@ -39,3 +38,8 @@ let parseAttributeName s =
     match s with
     | RegularIdentifier -> s
     | s -> raiseParseError $"Invalid attribute name: {s}"
+
+let parseRegularIdentifier s =
+    match s with
+    | RegularIdentifier -> s
+    | s -> raiseParseError $"Invalid identifier name: {s}"

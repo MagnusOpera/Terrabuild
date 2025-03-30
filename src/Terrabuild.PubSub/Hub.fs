@@ -92,11 +92,11 @@ type private Signal<'T>(name, eventQueue: IEventQueue) as this =
             with get () = lock this (fun () -> 
                 match raised with
                 | Some raised -> raised
-                | _ -> failwith "Signal is not raised")
+                | _ -> failwith "Signal '{(this :> ISignal).Name}' is not raised")
 
             and set value = lock this (fun () ->
                 match raised with
-                | Some _ -> failwith "Signal is already raised"
+                | Some _ -> failwith $"Signal '{(this :> ISignal).Name}' is already raised"
                 | _ -> 
                     let rec notify() =
                         match subscribers.TryDequeue() with
@@ -109,7 +109,7 @@ type private Signal<'T>(name, eventQueue: IEventQueue) as this =
                     notify())
 
 
-type private Subscription(label:string, signal: ISignal<Unit>, signals: ISignal array) as this =
+type private Subscription(label:string, signal: ISignal<Unit>, signals: ISignal list) as this =
     let mutable count = signals.Length
 
     do
@@ -137,7 +137,7 @@ type Status =
 
 type IHub =
     abstract GetSignal<'T>: name:string -> ISignal<'T>
-    abstract Subscribe: label:string -> signals:ISignal array -> handler:SignalCompleted -> unit
+    abstract Subscribe: label:string -> signals:ISignal list -> handler:SignalCompleted -> unit
     abstract WaitCompletion: unit -> Status
 
 
