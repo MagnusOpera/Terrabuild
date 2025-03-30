@@ -334,7 +334,7 @@ let read (options: ConfigOptions.Options) =
 
 
     // this is the final stage: create targets and create the project
-    let finalizeProject projectDir (projectDef: LoadedProject) (dependsOnProjets: Map<string, Project>) =
+    let finalizeProject projectDir (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
         let projectId = projectDir |> String.toUpper
         let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
@@ -351,7 +351,7 @@ let read (options: ConfigOptions.Options) =
 
         let dependenciesHash =
             let versionDependencies =
-                dependsOnProjets
+                projectDependencies
                 |> Map.filter (fun projectId _ -> Set.contains projectId projectDef.Dependencies)
                 |> Map.map (fun _ depProj -> depProj.Hash)
 
@@ -360,7 +360,7 @@ let read (options: ConfigOptions.Options) =
             |> Hash.sha256strings
 
         let versions = 
-            dependsOnProjets
+            projectDependencies
             |> Map.map (fun _ depProj -> depProj.Hash)
 
         // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
@@ -380,8 +380,8 @@ let read (options: ConfigOptions.Options) =
                                   "terrabuild.hash", Value.String projectHash ]
 
                         let projectVars =
-                            dependsOnProjets
-                            |> Seq.choose (fun (KeyValue(id, project)) ->
+                            projectDependencies
+                            |> Seq.choose (fun (KeyValue(_, project)) ->
                                 project.Id |> Option.map (fun id ->
                                     $"project.{id}", Value.Map (Map ["version", Value.String project.Hash])))
                             |> Map.ofSeq
@@ -561,7 +561,7 @@ let read (options: ConfigOptions.Options) =
 
         let files = files |> Set.map (FS.relativePath projectDir)
 
-        let projectDependencies = projectDef.Dependencies |> Set.map String.toUpper
+        let projectDependencies = projectDependencies.Keys |> Seq.map String.toUpper |> Set.ofSeq
 
         { Project.Id = projectDef.Id
           Project.Name = projectDir
@@ -617,7 +617,7 @@ let read (options: ConfigOptions.Options) =
                         // build task & code & notify
                         let dependsOnProjects = 
                             awaitedProjectSignals
-                            |> Seq.map (fun projectDependency -> projectDependency.Name, projectDependency.Value)
+                            |> Seq.map (fun projectDependency -> projectDependency.Value.Name, projectDependency.Value)
                             |> Map.ofSeq
 
                         let project = finalizeProject projectDir loadedProject dependsOnProjects
