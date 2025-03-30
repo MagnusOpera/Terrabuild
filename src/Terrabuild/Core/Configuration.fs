@@ -101,31 +101,136 @@ let (|Bool|Number|String|) (value: string) =
         | _ -> String value
 
 
-let read (options: ConfigOptions.Options) =
-    $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
 
-    if options.Force then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
-    else
-        if options.Retry then
-            $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
+// this is the first stage: load project and mostly get dependencies references
+let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext extensions scripts projectId =
+    let projectDir = FS.combinePath options.Workspace projectId
+    let projectFile = FS.combinePath projectDir "PROJECT"
 
-    if options.WhatIf then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} whatif mode requested" |> Terminal.writeLine
+    Log.Debug("Loading project definition {ProjectId}", projectId)
 
-    options.Run
-    |> Option.iter (fun run -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {run.Name}" |> Terminal.writeLine)
+    let projectConfig =
+        match projectFile with
+        | FS.File projectFile ->
+            let projectContent = File.ReadAllText projectFile
+            try
+                FrontEnd.Project.parse projectContent
+            with exn ->
+                raiseParserError($"Failed to read PROJECT configuration '{projectId}'", exn)
+        | _ ->
+            raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 
-    let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
-    let workspaceConfig =
-        try
-            FrontEnd.Workspace.parse workspaceContent
-        with exn ->
-            raiseParserError("Failed to read WORKSPACE configuration file", exn)
+    let extensions = extensions |> Map.addMap projectConfig.Extensions
+
+    let projectScripts =
+        projectConfig.Extensions
+        |> Map.map (fun _ ext ->
+            ext.Script
+            |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+            |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+
+    let scripts =
+        scripts
+        |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
+
+    let projectInfo =
+        match projectConfig.Project.Init with
+        | Some init ->
+            let parseContext = 
+                let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
+                                Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
+                                Terrabuild.Extensibility.ExtensionContext.CI = options.Run.IsSome }
+                Value.Map (Map [ "context", Value.Object context ])
+
+            let result =
+                Extensions.getScript init scripts
+                |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
+
+            match result with
+            | Extensions.Success result -> result
+            | Extensions.ScriptNotFound -> raiseSymbolError $"Script {init} was not found"
+            | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
+            | Extensions.ErrorTarget exn -> forwardExternalError($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
+        | _ -> ProjectInfo.Default
+
+    let evalAsStringSet expr =
+        expr
+        |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+        |> Option.defaultValue Set.empty
+
+    let dependsOn =
+        // collect dependencies for all the project
+        // NOTE we are discarding local dependencies as they are local and processed later on
+        Dependencies.reflectionFind projectConfig
+        |> Set.union projectConfig.Project.DependsOn
+        |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
+
+    let projectId = projectConfig.Project.Id
+    let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
+    let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
+    let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
+    let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
+    let labels = projectConfig.Project.Labels
+
+    let projectInfo = {
+        projectInfo with
+            Ignores = projectInfo.Ignores + projectIgnores
+            Outputs = projectInfo.Outputs + projectOutputs
+            Dependencies = projectInfo.Dependencies + projectDependencies
+            Includes = projectInfo.Includes + projectIncludes }
+
+    let projectOutputs = projectInfo.Outputs
+    let projectIgnores = projectInfo.Ignores
+
+    // convert relative dependencies to absolute dependencies respective to workspaceDirectory
+    let projectDependencies =
+        projectInfo.Dependencies
+        |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
+
+    let projectTargets =
+        projectConfig.Targets
+        |> Map.map (fun targetName targetBlock ->
+            let workspaceTarget = workspaceConfig.Targets |> Map.tryFind targetName
+            let rebuild =
+                match targetBlock.Rebuild with
+                | Some expr -> Some expr
+                | _ -> workspaceTarget |> Option.bind _.Rebuild
+            let dependsOn =
+                match targetBlock.DependsOn with
+                | Some dependsOn -> Some dependsOn
+                | _ -> workspaceTarget |> Option.bind _.DependsOn
+
+            { targetBlock with 
+                Rebuild = rebuild
+                DependsOn = dependsOn }
+        )
+
+    let includes =
+        projectScripts
+        |> Seq.choose (fun (KeyValue(_, script)) -> script)
+        |> Set.ofSeq
+        |> Set.union projectInfo.Includes
+
+    let locals =
+        workspaceConfig.Locals
+        |> Map.iter (fun name _ ->
+            if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+        workspaceConfig.Locals |> Map.addMap projectConfig.Locals
+
+    { LoadedProject.Id = projectId
+      LoadedProject.DependsOn = dependsOn
+      LoadedProject.Dependencies = projectDependencies
+      LoadedProject.Includes = includes
+      LoadedProject.Ignores = projectIgnores
+      LoadedProject.Outputs = projectOutputs
+      LoadedProject.Targets = projectTargets
+      LoadedProject.Labels = labels
+      LoadedProject.Extensions = extensions
+      LoadedProject.Scripts = scripts
+      LoadedProject.Locals = locals }
 
 
-
-
+let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) =
     let tagValue = 
         match options.Tag with
         | Some tag -> Value.String tag
@@ -190,389 +295,287 @@ let read (options: ConfigOptions.Options) =
         |> Seq.map (fun (KeyValue(name, expr)) -> $"var.{name}", expr)
         |> Map.ofSeq
 
-    let evaluationContext = { evaluationContext with Data = evaluationContext.Data |> Map.addMap variables }
+    { evaluationContext with
+        Data = evaluationContext.Data |> Map.addMap variables }
 
 
+let private buildScripts (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext =
+    // load system extensions
+    let sysScripts =
+        Extensions.systemExtensions
+        |> Map.map (fun _ _ -> None)
+        |> Map.map Extensions.lazyLoadScript
 
-    let extensions, scripts =
-        // load system extensions
-        let sysScripts =
-            Extensions.systemExtensions
-            |> Map.map (fun _ _ -> None)
-            |> Map.map Extensions.lazyLoadScript
-
-        // load user extension
-        let usrScripts =
-            workspaceConfig.Extensions
-            |> Map.map (fun _ ext ->
-                let script =
-                    ext.Script
-                    |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-                match script with
-                | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
-                | _ -> None)
-            |> Map.map Extensions.lazyLoadScript
-
-        let extensions =
-            Extensions.systemExtensions
-            |> Map.addMap workspaceConfig.Extensions
-
-        let scripts = sysScripts |> Map.addMap usrScripts
-
-        extensions, scripts
-
-
-    // this is the first stage: load project and mostly get dependencies references
-    let loadProjectDef projectId =
-        let projectDir = FS.combinePath options.Workspace projectId
-        let projectFile = FS.combinePath projectDir "PROJECT"
-
-        Log.Debug("Loading project definition {ProjectId}", projectId)
-
-        let projectConfig =
-            match projectFile with
-            | FS.File projectFile ->
-                let projectContent = File.ReadAllText projectFile
-                try
-                    FrontEnd.Project.parse projectContent
-                with exn ->
-                    raiseParserError($"Failed to read PROJECT configuration '{projectId}'", exn)
-            | _ ->
-                raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
-
-        let extensions = extensions |> Map.addMap projectConfig.Extensions
-
-        let projectScripts =
-            projectConfig.Extensions
-            |> Map.map (fun _ ext ->
+    // load user extension
+    let usrScripts =
+        workspaceConfig.Extensions
+        |> Map.map (fun _ ext ->
+            let script =
                 ext.Script
                 |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-                |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+            match script with
+            | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
+            | _ -> None)
+        |> Map.map Extensions.lazyLoadScript
 
-        let scripts =
-            scripts
-            |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
-
-        let projectInfo =
-            match projectConfig.Project.Init with
-            | Some init ->
-                let parseContext = 
-                    let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
-                                    Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
-                                    Terrabuild.Extensibility.ExtensionContext.CI = options.Run.IsSome }
-                    Value.Map (Map [ "context", Value.Object context ])
-
-                let result =
-                    Extensions.getScript init scripts
-                    |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
-
-                match result with
-                | Extensions.Success result -> result
-                | Extensions.ScriptNotFound -> raiseSymbolError $"Script {init} was not found"
-                | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-                | Extensions.ErrorTarget exn -> forwardExternalError($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
-            | _ -> ProjectInfo.Default
-
-        let evalAsStringSet expr =
-            expr
-            |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
-            |> Option.defaultValue Set.empty
-
-        let dependsOn =
-            // collect dependencies for all the project
-            // NOTE we are discarding local dependencies as they are local and processed later on
-            Dependencies.reflectionFind projectConfig
-            |> Set.union projectConfig.Project.DependsOn
-            |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
-
-        let projectId = projectConfig.Project.Id
-        let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
-        let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
-        let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
-        let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
-        let labels = projectConfig.Project.Labels
-
-        let projectInfo = {
-            projectInfo
-            with Ignores = projectInfo.Ignores + projectIgnores
-                 Outputs = projectInfo.Outputs + projectOutputs
-                 Dependencies = projectInfo.Dependencies + projectDependencies
-                 Includes = projectInfo.Includes + projectIncludes }
-
-        let projectOutputs = projectInfo.Outputs
-        let projectIgnores = projectInfo.Ignores
-
-        // convert relative dependencies to absolute dependencies respective to workspaceDirectory
-        let projectDependencies =
-            projectInfo.Dependencies
-            |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
-
-        let projectTargets =
-            projectConfig.Targets
-            |> Map.map (fun targetName targetBlock ->
-                let workspaceTarget = workspaceConfig.Targets |> Map.tryFind targetName
-                let rebuild =
-                    match targetBlock.Rebuild with
-                    | Some expr -> Some expr
-                    | _ -> workspaceTarget |> Option.bind _.Rebuild
-                let dependsOn =
-                    match targetBlock.DependsOn with
-                    | Some dependsOn -> Some dependsOn
-                    | _ -> workspaceTarget |> Option.bind _.DependsOn
-
-                { targetBlock with 
-                    Rebuild = rebuild
-                    DependsOn = dependsOn }
-            )
-
-        let includes =
-            projectScripts
-            |> Seq.choose (fun (KeyValue(_, script)) -> script)
-            |> Set.ofSeq
-            |> Set.union projectInfo.Includes
-
-        let locals =
-            workspaceConfig.Locals
-            |> Map.iter (fun name _ ->
-                if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
-            workspaceConfig.Locals |> Map.addMap projectConfig.Locals
-
-        { LoadedProject.Id = projectId
-          LoadedProject.DependsOn = dependsOn
-          LoadedProject.Dependencies = projectDependencies
-          LoadedProject.Includes = includes
-          LoadedProject.Ignores = projectIgnores
-          LoadedProject.Outputs = projectOutputs
-          LoadedProject.Targets = projectTargets
-          LoadedProject.Labels = labels
-          LoadedProject.Extensions = extensions
-          LoadedProject.Scripts = scripts
-          LoadedProject.Locals = locals }
+    let scripts = sysScripts |> Map.addMap usrScripts
+    scripts
 
 
-    // this is the final stage: create targets and create the project
-    let finalizeProject projectDir (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
-        let projectId = projectDir |> String.toUpper
-        let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
-        // get dependencies on files
-        let files =
-            projectDir
-            |> IO.enumerateFilesBut projectDef.Includes (projectDef.Outputs + projectDef.Ignores + tbFiles)
-            |> Set
 
-        let filesHash =
-            files
-            |> Seq.sort
-            |> Hash.sha256files
+// this is the final stage: create targets and create the project
+let private finalizeProject projectDir evaluationContext (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
+    let projectId = projectDir |> String.toUpper
+    let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
-        let dependenciesHash =
-            let versionDependencies =
-                projectDependencies
-                |> Map.filter (fun projectId _ -> Set.contains projectId projectDef.Dependencies)
-                |> Map.map (fun _ depProj -> depProj.Hash)
+    // get dependencies on files
+    let files =
+        projectDir
+        |> IO.enumerateFilesBut projectDef.Includes (projectDef.Outputs + projectDef.Ignores + tbFiles)
+        |> Set
 
-            versionDependencies.Values
-            |> Seq.sort
-            |> Hash.sha256strings
+    let filesHash =
+        files
+        |> Seq.sort
+        |> Hash.sha256files
 
-        let versions = 
+    let dependenciesHash =
+        let versionDependencies =
             projectDependencies
+            |> Map.filter (fun projectId _ -> Set.contains projectId projectDef.Dependencies)
             |> Map.map (fun _ depProj -> depProj.Hash)
 
-        // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
-        let projectHash =
-            [ projectId; filesHash; dependenciesHash ]
-            |> Hash.sha256strings
+        versionDependencies.Values
+        |> Seq.sort
+        |> Hash.sha256strings
 
-        let projectSteps =
-            projectDef.Targets
-            |> Map.map (fun targetName target ->
+    let versions = 
+        projectDependencies
+        |> Map.map (fun _ depProj -> depProj.Hash)
 
-                let evaluationContext =
-                    let mutable evaluationContext =
-                        let terrabuildProjectVars =
-                            Map [ "terrabuild.project", Value.String projectId
-                                  "terrabuild.target" , Value.String targetName
-                                  "terrabuild.hash", Value.String projectHash ]
+    // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
+    let projectHash =
+        [ projectId; filesHash; dependenciesHash ]
+        |> Hash.sha256strings
 
-                        let projectVars =
-                            projectDependencies
-                            |> Seq.choose (fun (KeyValue(_, project)) ->
-                                project.Id |> Option.map (fun id ->
-                                    $"project.{id}", Value.Map (Map ["version", Value.String project.Hash])))
-                            |> Map.ofSeq
+    let projectSteps =
+        projectDef.Targets
+        |> Map.map (fun targetName target ->
 
-                        { evaluationContext with
-                            Eval.ProjectDir = Some projectDir
-                            Eval.Versions = versions
-                            Eval.Data =
-                                evaluationContext.Data
-                                |> Map.addMap terrabuildProjectVars
-                                |> Map.addMap projectVars }
+            let evaluationContext =
+                let mutable evaluationContext =
+                    let terrabuildProjectVars =
+                        Map [ "terrabuild.project", Value.String projectId
+                              "terrabuild.target" , Value.String targetName
+                              "terrabuild.hash", Value.String projectHash ]
 
-                    // build the values
-                    let localsHub = Hub.Create(1)
+                    let projectVars =
+                        projectDependencies
+                        |> Seq.choose (fun (KeyValue(_, project)) ->
+                            project.Id |> Option.map (fun id ->
+                                $"project.{id}", Value.Map (Map ["version", Value.String project.Hash])))
+                        |> Map.ofSeq
 
-                    // bootstrap
-                    for (KeyValue(name, value)) in evaluationContext.Data do
-                        localsHub.Subscribe name [] (fun () ->
-                            let varSignal = localsHub.GetSignal<Value> name
-                            varSignal.Value <- value)
+                    { evaluationContext with
+                        Eval.ProjectDir = Some projectDir
+                        Eval.Versions = versions
+                        Eval.Data =
+                            evaluationContext.Data
+                            |> Map.addMap terrabuildProjectVars
+                            |> Map.addMap projectVars }
 
-                    for (KeyValue(name, localExpr)) in projectDef.Locals do
-                        let localName = $"local.{name}"
-                        let deps = Dependencies.find localExpr
-                        let signalDeps =
-                            deps
-                            |> Seq.map (fun dep -> localsHub.GetSignal<Value> dep :> ISignal)
-                            |> List.ofSeq
-                        localsHub.Subscribe localName signalDeps (fun () ->
-                            let localValue = Eval.eval evaluationContext localExpr
-                            evaluationContext <- { evaluationContext with Data = evaluationContext.Data |> Map.add localName localValue }
-                            let localSignal = localsHub.GetSignal<Value> localName
-                            localSignal.Value <- localValue)
+                // build the values
+                let localsHub = Hub.Create(1)
 
-                    match localsHub.WaitCompletion() with
-                    | Status.Ok -> evaluationContext
-                    | Status.UnfulfilledSubscription (subscription, signals) ->
-                        let unraisedSignals = signals |> String.join ","
-                        raiseInvalidArg $"Failed to evaluate '{subscription}': a local value with the name '{unraisedSignals}' has not been declared."
-                    | Status.SubscriptionError exn ->
-                        forwardExternalError("Failed to evaluate locals", exn)
+                // bootstrap
+                for (KeyValue(name, value)) in evaluationContext.Data do
+                    localsHub.Subscribe name [] (fun () ->
+                        let varSignal = localsHub.GetSignal<Value> name
+                        varSignal.Value <- value)
 
-                // use value from project target
-                // otherwise use workspace target
-                // defaults to allow caching
-                let rebuild = 
-                    target.Rebuild
-                    |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
-                    |> Option.defaultValue false
+                for (KeyValue(name, localExpr)) in projectDef.Locals do
+                    let localName = $"local.{name}"
+                    let deps = Dependencies.find localExpr
+                    let signalDeps =
+                        deps
+                        |> Seq.map (fun dep -> localsHub.GetSignal<Value> dep :> ISignal)
+                        |> List.ofSeq
+                    localsHub.Subscribe localName signalDeps (fun () ->
+                        let localValue = Eval.eval evaluationContext localExpr
+                        evaluationContext <- { evaluationContext with Data = evaluationContext.Data |> Map.add localName localValue }
+                        let localSignal = localsHub.GetSignal<Value> localName
+                        localSignal.Value <- localValue)
 
-                let targetOperations =
-                    target.Steps
-                    |> List.fold (fun actions step ->
-                        let extension = 
-                            match projectDef.Extensions |> Map.tryFind step.Extension with
-                            | Some extension -> extension
-                            | _ -> raiseSymbolError $"Extension {step.Extension} is not defined"
+                match localsHub.WaitCompletion() with
+                | Status.Ok -> evaluationContext
+                | Status.UnfulfilledSubscription (subscription, signals) ->
+                    let unraisedSignals = signals |> String.join ","
+                    raiseInvalidArg $"Failed to evaluate '{subscription}': a local value with the name '{unraisedSignals}' has not been declared."
+                | Status.SubscriptionError exn ->
+                    forwardExternalError("Failed to evaluate locals", exn)
 
-                        let context =
-                            extension.Defaults |> Option.defaultValue Map.empty
-                            |> Map.addMap step.Parameters
-                            |> Expr.Map
-                            |> Eval.eval evaluationContext
+            // use value from project target
+            // otherwise use workspace target
+            // defaults to allow caching
+            let rebuild = 
+                target.Rebuild
+                |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
+                |> Option.defaultValue false
 
-                        let container =
-                            match extension.Container with
-                            | Some container ->
-                                match Eval.eval evaluationContext container with
-                                | Value.String container -> Some container
-                                | Value.Nothing -> None
-                                | _ -> raiseTypeError "container must evaluate to a string"
-                            | _ -> None
+            let targetOperations =
+                target.Steps
+                |> List.fold (fun actions step ->
+                    let extension = 
+                        match projectDef.Extensions |> Map.tryFind step.Extension with
+                        | Some extension -> extension
+                        | _ -> raiseSymbolError $"Extension {step.Extension} is not defined"
 
-                        let platform =
-                            match extension.Platform with
-                            | Some platform ->
-                                match Eval.eval evaluationContext platform with
-                                | Value.String platform -> Some platform
-                                | Value.Nothing -> None
-                                | _ -> raiseTypeError "container must evaluate to a string"
-                            | _ -> None
+                    let context =
+                        extension.Defaults |> Option.defaultValue Map.empty
+                        |> Map.addMap step.Parameters
+                        |> Expr.Map
+                        |> Eval.eval evaluationContext
 
-                        let script =
-                            match Extensions.getScript step.Extension projectDef.Scripts with
-                            | Some script -> script
-                            | _ -> raiseSymbolError $"Extension {step.Extension} is not defined"
+                    let container =
+                        match extension.Container with
+                        | Some container ->
+                            match Eval.eval evaluationContext container with
+                            | Value.String container -> Some container
+                            | Value.Nothing -> None
+                            | _ -> raiseTypeError "container must evaluate to a string"
+                        | _ -> None
 
-                        let extVariables =
-                            extension.Variables
-                            |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
-                            |> Option.defaultValue Set.empty
+                    let platform =
+                        match extension.Platform with
+                        | Some platform ->
+                            match Eval.eval evaluationContext platform with
+                            | Value.String platform -> Some platform
+                            | Value.Nothing -> None
+                            | _ -> raiseTypeError "container must evaluate to a string"
+                        | _ -> None
 
-                        let hash =
-                            let containerInfos = 
-                                match container with
-                                | Some container -> [ container ] @ List.ofSeq extVariables
-                                | _ -> []
+                    let script =
+                        match Extensions.getScript step.Extension projectDef.Scripts with
+                        | Some script -> script
+                        | _ -> raiseSymbolError $"Extension {step.Extension} is not defined"
 
-                            let platformInfos = 
-                                match platform with
-                                // TODO: why extVariables ??? seems useless
-                                | Some platform -> [ platform ] @ List.ofSeq extVariables
-                                | _ -> []
-
-                            [ step.Extension; step.Command ] @ containerInfos @ platformInfos
-                            |> Hash.sha256strings
-
-                        let targetContext = {
-                            TargetOperation.Hash = hash
-                            TargetOperation.Container = container
-                            TargetOperation.Platform = platform
-                            TargetOperation.ContainerVariables = extVariables
-                            TargetOperation.Extension = step.Extension
-                            TargetOperation.Command = step.Command
-                            TargetOperation.Script = script
-                            TargetOperation.Context = context
-                        }
-
-                        let actions = actions @ [ targetContext ]
-                        actions
-                    ) []
-
-                let dependsOn = target.DependsOn |> Option.defaultValue Set.empty
-
-                let outputs =
-                    let targetOutputs =
-                        target.Outputs
+                    let extVariables =
+                        extension.Variables
                         |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
-                    match targetOutputs with
-                    | Some outputs -> outputs
-                    | _ -> projectDef.Outputs
+                        |> Option.defaultValue Set.empty
 
-                let hash =
-                    targetOperations
-                    |> List.map (fun ope -> ope.Hash)
-                    |> Hash.sha256strings
+                    let hash =
+                        let containerInfos = 
+                            match container with
+                            | Some container -> [ container ] @ List.ofSeq extVariables
+                            | _ -> []
 
+                        let platformInfos = 
+                            match platform with
+                            // TODO: why extVariables ??? seems useless
+                            | Some platform -> [ platform ] @ List.ofSeq extVariables
+                            | _ -> []
+
+                        [ step.Extension; step.Command ] @ containerInfos @ platformInfos
+                        |> Hash.sha256strings
+
+                    let targetContext = {
+                        TargetOperation.Hash = hash
+                        TargetOperation.Container = container
+                        TargetOperation.Platform = platform
+                        TargetOperation.ContainerVariables = extVariables
+                        TargetOperation.Extension = step.Extension
+                        TargetOperation.Command = step.Command
+                        TargetOperation.Script = script
+                        TargetOperation.Context = context
+                    }
+
+                    let actions = actions @ [ targetContext ]
+                    actions
+                ) []
+
+            let dependsOn = target.DependsOn |> Option.defaultValue Set.empty
+
+            let outputs =
+                let targetOutputs =
+                    target.Outputs
+                    |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+                match targetOutputs with
+                | Some outputs -> outputs
+                | _ -> projectDef.Outputs
+
+            let hash =
+                targetOperations
+                |> List.map (fun ope -> ope.Hash)
+                |> Hash.sha256strings
+
+            let targetCache =
                 let targetCache =
-                    let targetCache =
-                        target.Cache
-                        |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-                    match targetCache with
-                    | Some "never" -> Some Cacheability.Never
-                    | Some "local" -> Some Cacheability.Local
-                    | Some "remote" -> Some Cacheability.Remote
-                    | Some "always" -> Some Cacheability.Always
-                    | None -> None
-                    | _ -> raiseParseError "invalid cache value"
+                    target.Cache
+                    |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                match targetCache with
+                | Some "never" -> Some Cacheability.Never
+                | Some "local" -> Some Cacheability.Local
+                | Some "remote" -> Some Cacheability.Remote
+                | Some "always" -> Some Cacheability.Always
+                | None -> None
+                | _ -> raiseParseError "invalid cache value"
 
-                let target = {
-                    Target.Hash = hash
-                    Target.Rebuild = rebuild
-                    Target.DependsOn = dependsOn
-                    Target.Cache = targetCache
-                    Target.Outputs = outputs
-                    Target.Operations = targetOperations
-                }
+            let target = {
+                Target.Hash = hash
+                Target.Rebuild = rebuild
+                Target.DependsOn = dependsOn
+                Target.Cache = targetCache
+                Target.Outputs = outputs
+                Target.Operations = targetOperations
+            }
 
-                target
-            )
+            target
+        )
 
-        let files = files |> Set.map (FS.relativePath projectDir)
+    let files = files |> Set.map (FS.relativePath projectDir)
 
-        let projectDependencies = projectDependencies.Keys |> Seq.map String.toUpper |> Set.ofSeq
+    let projectDependencies = projectDependencies.Keys |> Seq.map String.toUpper |> Set.ofSeq
 
-        { Project.Id = projectDef.Id
-          Project.Name = projectDir
-          Project.Hash = projectHash
-          Project.Dependencies = projectDependencies
-          Project.Files = files
-          Project.Targets = projectSteps
-          Project.Labels = projectDef.Labels }
+    { Project.Id = projectDef.Id
+      Project.Name = projectDir
+      Project.Hash = projectHash
+      Project.Dependencies = projectDependencies
+      Project.Files = files
+      Project.Targets = projectSteps
+      Project.Labels = projectDef.Labels }
 
 
+
+
+let read (options: ConfigOptions.Options) =
+    $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
+
+    if options.Force then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
+    else
+        if options.Retry then
+            $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
+
+    if options.WhatIf then
+        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} whatif mode requested" |> Terminal.writeLine
+
+    options.Run
+    |> Option.iter (fun run -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {run.Name}" |> Terminal.writeLine)
+
+    let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
+    let workspaceConfig =
+        try
+            FrontEnd.Workspace.parse workspaceContent
+        with exn ->
+            raiseParserError("Failed to read WORKSPACE configuration file", exn)
+
+    let evaluationContext = buildEvaluationContext options workspaceConfig
+
+    let scripts = buildScripts options workspaceConfig evaluationContext
+
+    let extensions = Extensions.systemExtensions |> Map.addMap workspaceConfig.Extensions
 
     let searchProjectsAndApply() =
         let workspaceIgnores = workspaceConfig.Workspace.Ignores |> Option.defaultValue Set.empty
@@ -588,7 +591,7 @@ let read (options: ConfigOptions.Options) =
                 projectLoading.TryAdd(projectPathId, true) |> ignore
 
                 // load project and force loading all dependencies as well
-                let loadedProject = loadProjectDef projectDir
+                let loadedProject = loadProjectDef options workspaceConfig evaluationContext extensions scripts projectDir
                 match loadedProject.Id with
                 | Some projectId ->
                     if projectIds.TryAdd(projectId, projectDir) |> not then
@@ -622,7 +625,7 @@ let read (options: ConfigOptions.Options) =
                                 |> Seq.map (fun projectDependency -> projectDependency.Value.Name, projectDependency.Value)
                                 |> Map.ofSeq
 
-                            let project = finalizeProject projectDir loadedProject dependsOnProjects
+                            let project = finalizeProject projectDir evaluationContext loadedProject dependsOnProjects
                             projectPathIds.TryAdd(projectPathId, project) |> ignore
 
                             Log.Debug($"Signaling projectPath '{projectPathId}")
