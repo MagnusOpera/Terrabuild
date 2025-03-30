@@ -69,3 +69,35 @@ let ``function of field dependencies``() =
 
     let deps = Dependencies.find expr
     deps |> shouldEqual expected
+
+
+
+
+
+
+type SubBlock =
+    { SubBlockExpr: Expr }
+
+type TestBlock =
+    { SimpleExpr: Expr
+      OptExpr: Expr option
+      MapOfExpr: Map<string, Expr>
+      OptMapOfExpr: Map<string, Expr> option
+      OptMapOfSubBlock: Map<string, SubBlock>
+      Content: string }
+
+[<Test>]
+let ``reflection find dependencies`` () =
+    let value =
+        { SimpleExpr = Expr.Variable "var.config"
+          OptExpr = Some (Expr.Variable "local.name")
+          MapOfExpr = Map [ "toto", Expr.Variable "var.toto" ]
+          OptMapOfExpr = Some (Map [ "titi", Expr.Variable "var.titi" ])
+          OptMapOfSubBlock = Map [ "titi", { SubBlockExpr = Expr.Variable "target.block" } ]
+          Content = "toto" }
+
+    let expected = Set ["var.config"; "local.name"; "var.toto"; "var.titi"; "target.block" ]
+
+    value
+    |> reflectionFind
+    |> shouldEqual expected

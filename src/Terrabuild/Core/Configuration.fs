@@ -283,9 +283,7 @@ let read (options: ConfigOptions.Options) =
             // NOTE we are discarding local dependencies as they are local and processed later on
             Dependencies.reflectionFind projectConfig
             |> Set.union projectConfig.Project.DependsOn
-            |> Set.choose (fun dep ->
-                if dep.StartsWith("local.") then None
-                else Some dep)
+            |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
 
         let projectId = projectConfig.Project.Id
         let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
@@ -615,25 +613,27 @@ let read (options: ConfigOptions.Options) =
                     let awaitedProjectSignals = projectPathSignals @ dependsOnSignals
                     let awaitedSignals = awaitedProjectSignals |> List.map (fun entry -> entry :> ISignal)
                     hub.Subscribe projectDir awaitedSignals (fun () ->
-                        // build task & code & notify
-                        let dependsOnProjects = 
-                            awaitedProjectSignals
-                            |> Seq.map (fun projectDependency -> projectDependency.Value.Name, projectDependency.Value)
-                            |> Map.ofSeq
+                        try
+                            // build task & code & notify
+                            let dependsOnProjects = 
+                                awaitedProjectSignals
+                                |> Seq.map (fun projectDependency -> projectDependency.Value.Name, projectDependency.Value)
+                                |> Map.ofSeq
 
-                        let project = finalizeProject projectDir loadedProject dependsOnProjects
-                        projectPathIds.TryAdd(projectPathId, project) |> ignore
+                            let project = finalizeProject projectDir loadedProject dependsOnProjects
+                            projectPathIds.TryAdd(projectPathId, project) |> ignore
 
-                        Log.Debug($"Signaling projectPath '{projectPathId}")
-                        let loadedProjectPathIdSignal = hub.GetSignal<Project> projectPathId
-                        loadedProjectPathIdSignal.Value <- project
+                            Log.Debug($"Signaling projectPath '{projectPathId}")
+                            let loadedProjectPathIdSignal = hub.GetSignal<Project> projectPathId
+                            loadedProjectPathIdSignal.Value <- project
 
-                        match loadedProject.Id with
-                        | Some projectId ->
-                            Log.Debug($"Signaling projectId '{projectId}")
-                            let loadedProjectIdSignal = hub.GetSignal<Project> $"project.{projectId}"
-                            loadedProjectIdSignal.Value <- project
-                        | _ -> ()))
+                            match loadedProject.Id with
+                            | Some projectId ->
+                                Log.Debug($"Signaling projectId '{projectId}")
+                                let loadedProjectIdSignal = hub.GetSignal<Project> $"project.{projectId}"
+                                loadedProjectIdSignal.Value <- project
+                            | _ -> ()
+                        with exn -> forwardExternalError($"Error while parsing project '{projectDir}'", exn)))
 
         let rec findDependencies isRoot dir =
             if isRoot || scanFolder  dir then
@@ -643,8 +643,7 @@ let read (options: ConfigOptions.Options) =
                     let projectFile = file |> FS.parentDirectory |> FS.relativePath options.Workspace
                     try
                         loadProject projectFile
-                    with
-                    | exn -> forwardExternalError($"Error while parsing project '{projectFile}'", exn)
+                    with exn -> forwardExternalError($"Error while parsing project '{projectFile}'", exn)
                 | _ ->
                     for subdir in dir |> IO.enumerateDirs do
                         findDependencies false subdir

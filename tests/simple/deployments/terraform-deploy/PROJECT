@@ -1,7 +1,5 @@
 
 project @terraform {
-    depends_on = [ project.dotnet_app
-                   project.npm_app ]
     ignores = [ "deploy.log" ]
     labels = [ "infra" ]
 }

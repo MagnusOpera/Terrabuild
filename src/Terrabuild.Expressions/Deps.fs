@@ -1,6 +1,7 @@
 module Terrabuild.Expressions.Dependencies
+open System.Collections.Generic
 open Terrabuild.Expressions
-open Microsoft.FSharp.Reflection
+open FSharp.Reflection
 
 
 let rec find (expr: Expr) =
@@ -27,24 +28,37 @@ let rec findArrayOfDependencies (expr: Expr) =
     | _ -> Errors.raiseInvalidArg "Array of dependencies expected"
 
 
+let private fsmapTy = typedefof<Map<string, _>>
+let private fsoptionTy = typedefof<option<_>>
+let private fskvpTy = typedefof<KeyValuePair<string, _>>
 let reflectionFind (o: obj) =
-    let rec reflectionFind (o: obj) =
+
+    let rec reflectionFind (theObject: obj) =
         seq {
-            match o with
+            match theObject with
+            | null -> ()
+            | :? System.Collections.IEnumerable as enumerable ->
+                for so in enumerable do
+                    yield! reflectionFind so
             | :? Expr as expr -> yield find expr
-            | :? Option<Expr> as expr ->
-                match expr with
-                | Some expr -> yield find expr
-                | _ -> ()
-            | :? Map<string, Expr> as map -> yield! map.Values |> Seq.map find
-            | :? Option<Map<string, Expr>> as map ->
-                match map with
-                | Some map -> yield! map.Values |> Seq.map find
-                | _ -> ()
-            | _ when FSharpType.IsRecord(o.GetType()) ->
-                    let fields = FSharpValue.GetRecordFields(o)
-                    for field in fields do yield! reflectionFind field
-            | _ -> ()
-        } 
-        
+            | _ ->
+                let ty = theObject.GetType()
+                if ty.IsGenericType then
+                    let tyDef = ty.GetGenericTypeDefinition()
+                    if tyDef = fsmapTy then
+                        let valuesProperty = ty.GetProperty("Values")
+                        let values = valuesProperty.GetValue(theObject)
+                        yield! reflectionFind values
+                    elif tyDef = fsoptionTy then
+                        let value = ty.GetProperty("Value").GetValue(theObject, null)
+                        yield! reflectionFind value
+                    elif tyDef = fskvpTy then
+                        let value = ty.GetProperty("Value").GetValue(theObject, null)
+                        yield! reflectionFind value
+                elif FSharpType.IsRecord(ty, false) then
+                    let fields = FSharpType.GetRecordFields(ty) |> Array.map (fun propInfo -> propInfo.GetValue(theObject, null))
+                    for field in fields do
+                        yield! reflectionFind field
+        }
+
     o |> reflectionFind |> Seq.fold (fun acc s -> acc + s) Set.empty
