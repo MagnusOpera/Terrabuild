@@ -1,5 +1,6 @@
 module Terrabuild.Expressions.Dependencies
 open Terrabuild.Expressions
+open Microsoft.FSharp.Reflection
 
 
 let rec find (expr: Expr) =
@@ -12,3 +13,27 @@ let rec find (expr: Expr) =
         | _ -> varUsed
 
     eval Set.empty expr
+
+
+
+let reflectionFind (o: obj) =
+    let rec reflectionFind (o: obj) =
+        seq {
+            match o with
+            | :? Expr as expr -> yield find expr
+            | :? Option<Expr> as expr ->
+                match expr with
+                | Some expr -> yield find expr
+                | _ -> ()
+            | :? Map<string, Expr> as map -> yield! map.Values |> Seq.map find
+            | :? Option<Map<string, Expr>> as map ->
+                match map with
+                | Some map -> yield! map.Values |> Seq.map find
+                | _ -> ()
+            | _ when FSharpType.IsRecord(o.GetType()) ->
+                    let fields = FSharpValue.GetRecordFields(o)
+                    for field in fields do yield! reflectionFind field
+            | _ -> ()
+        } 
+        
+    o |> reflectionFind |> Seq.fold (fun acc s -> acc + s) Set.empty

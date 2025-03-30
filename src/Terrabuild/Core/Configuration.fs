@@ -278,8 +278,8 @@ let read (options: ConfigOptions.Options) =
             |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
             |> Option.defaultValue Set.empty
 
+        let dependsOn = Dependencies.reflectionFind projectConfig
         let projectId = projectConfig.Project.Id
-        let projectDependsOn = projectConfig.Project.DependsOn |> evalAsStringSet
         let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
         let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
         let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
@@ -314,7 +314,7 @@ let read (options: ConfigOptions.Options) =
             workspaceConfig.Locals |> Map.addMap projectConfig.Locals
 
         { LoadedProject.Id = projectId
-          LoadedProject.DependsOn = projectDependsOn
+          LoadedProject.DependsOn = dependsOn
           LoadedProject.Dependencies = projectDependencies
           LoadedProject.Includes = includes
           LoadedProject.Ignores = projectIgnores
@@ -623,7 +623,7 @@ let read (options: ConfigOptions.Options) =
                         match loadedProject.Id with
                         | Some projectId ->
                             Log.Debug($"Signaling projectId '{projectId}")
-                            let loadedProjectIdSignal = hub.GetSignal<Project> projectId
+                            let loadedProjectIdSignal = hub.GetSignal<Project> $"project.{projectId}"
                             loadedProjectIdSignal.Value <- project
                         | _ -> ()))
 

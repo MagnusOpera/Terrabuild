@@ -19,11 +19,11 @@
     </Choose>
 
   <ItemGroup>
+    <Compile Include="AST/Helpers.fs" />
     <Compile Include="AST/HCL.fs" />
     <Compile Include="AST/Common.fs" />
     <Compile Include="AST/Project.fs" />
     <Compile Include="AST/Workspace.fs" />
-    <Compile Include="AST/Helpers.fs" />
 
     <Compile Include="Gen/HCLParser.fsi" />
     <Compile Include="Gen/HCLParser.fs" />
