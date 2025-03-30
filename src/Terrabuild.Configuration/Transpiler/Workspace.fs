@@ -56,7 +56,7 @@ let toTarget (block: Block) =
             dependsOn |> Set.map (fun dependency ->
                 match dependency with
                 | String.Regex "^target\.(.*)$" [dependency] -> dependency
-                | _ -> raiseInvalidArg $"Unexpected dependency '{dependency}"))
+                | _ -> raiseInvalidArg $"Invalid target dependency '{dependency}'"))
     let rebuild = block |> tryFindAttribute "rebuild"
 
     { TargetBlock.DependsOn = dependsOn

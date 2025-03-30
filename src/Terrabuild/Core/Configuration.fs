@@ -301,11 +301,29 @@ let read (options: ConfigOptions.Options) =
 
         let projectOutputs = projectInfo.Outputs
         let projectIgnores = projectInfo.Ignores
+
         // convert relative dependencies to absolute dependencies respective to workspaceDirectory
         let projectDependencies =
             projectInfo.Dependencies
             |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
-        let projectTargets = projectConfig.Targets
+
+        let projectTargets =
+            projectConfig.Targets
+            |> Map.map (fun targetName targetBlock ->
+                let workspaceTarget = workspaceConfig.Targets |> Map.tryFind targetName
+                let rebuild =
+                    match targetBlock.Rebuild with
+                    | Some expr -> Some expr
+                    | _ -> workspaceTarget |> Option.bind _.Rebuild
+                let dependsOn =
+                    match targetBlock.DependsOn with
+                    | Some dependsOn -> Some dependsOn
+                    | _ -> workspaceTarget |> Option.bind _.DependsOn
+
+                { targetBlock with 
+                    Rebuild = rebuild
+                    DependsOn = dependsOn }
+            )
 
         let includes =
             projectScripts
@@ -426,15 +444,8 @@ let read (options: ConfigOptions.Options) =
                 // use value from project target
                 // otherwise use workspace target
                 // defaults to allow caching
-                let rebuild =
-                    let rebuild =
-                        match target.Rebuild with
-                        | Some rebuild -> Some rebuild
-                        | _ ->
-                            workspaceConfig.Targets
-                            |> Map.tryFind targetName
-                            |> Option.bind _.Rebuild
-                    rebuild
+                let rebuild = 
+                    target.Rebuild
                     |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
                     |> Option.defaultValue false
 
@@ -510,16 +521,7 @@ let read (options: ConfigOptions.Options) =
                         actions
                     ) []
 
-                // use value from project target
-                // otherwise use workspace target
-                // defaults to no dependencies
-                let dependsOn =
-                    target.DependsOn
-                    |> Option.defaultWith (fun () ->
-                        workspaceConfig.Targets
-                        |> Map.tryFind targetName
-                        |> Option.bind (fun target -> target.DependsOn)
-                        |> Option.defaultValue Set.empty)
+                let dependsOn = target.DependsOn |> Option.defaultValue Set.empty
 
                 let outputs =
                     let targetOutputs =
