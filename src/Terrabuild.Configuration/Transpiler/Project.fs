@@ -31,7 +31,11 @@ let toProject (block: Block) =
     |> checkNoNestedBlocks
     |> ignore
 
-    let dependsOn = block |> tryFindAttribute "depends_on"
+    let dependsOn =
+        block
+        |> tryFindAttribute "depends_on"
+        |> Option.map Dependencies.findArrayOfDependencies
+        |> Option.defaultValue Set.empty
     let dependencies = block |> tryFindAttribute "dependencies"
     let outputs = block |> tryFindAttribute "outputs"
     let ignores = block |> tryFindAttribute "ignores"
@@ -60,7 +64,12 @@ let toTarget (block: Block) =
     let outputs = block |> tryFindAttribute "outputs"
     let dependsOn =
         block |> tryFindAttribute "depends_on"
-        |> Option.bind (Eval.asStringSetOption << simpleEval)
+        |> Option.map Dependencies.findArrayOfDependencies
+        |> Option.map (fun dependsOn ->
+            dependsOn |> Set.map (fun dependency ->
+                match dependency with
+                | String.Regex "^target\.(.*)$" [dependency] -> dependency
+                | _ -> raiseInvalidArg $"Unexpected dependency '{dependency}"))
     let cache = block |> tryFindAttribute "cache"
     let steps =
         block.Blocks
@@ -99,7 +108,7 @@ let transpile (blocks: Block list) =
                 match builder.Project with
                 | None -> { ProjectBlock.Init = None
                             ProjectBlock.Id = None
-                            ProjectBlock.DependsOn = None
+                            ProjectBlock.DependsOn = Set.empty
                             ProjectBlock.Dependencies = None
                             ProjectBlock.Outputs = None
                             ProjectBlock.Ignores = None

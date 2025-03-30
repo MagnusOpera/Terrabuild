@@ -15,6 +15,17 @@ let rec find (expr: Expr) =
     eval Set.empty expr
 
 
+let rec findArrayOfDependencies (expr: Expr) =
+
+    let rec eval (varUsed: Set<string>) (expr: Expr) =
+        match expr with
+        | Expr.Variable var -> varUsed |> Set.add var
+        | _ -> Errors.raiseInvalidArg "Array of dependencies expected"
+
+    match expr with
+    | Expr.List list -> list |> List.fold (fun varUsed v -> varUsed + eval varUsed v) Set.empty
+    | _ -> Errors.raiseInvalidArg "Array of dependencies expected"
+
 
 let reflectionFind (o: obj) =
     let rec reflectionFind (o: obj) =

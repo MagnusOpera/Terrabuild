@@ -50,9 +50,13 @@ let toTarget (block: Block) =
     |> ignore
 
     let dependsOn =
-        block |> tryFindAttribute "depends_on" 
-        |> Option.bind (Eval.asStringSetOption << simpleEval)
-        |> Option.defaultValue Set.empty
+        block |> tryFindAttribute "depends_on"
+        |> Option.map Dependencies.findArrayOfDependencies
+        |> Option.map (fun dependsOn ->
+            dependsOn |> Set.map (fun dependency ->
+                match dependency with
+                | String.Regex "^target\.(.*)$" [dependency] -> dependency
+                | _ -> raiseInvalidArg $"Unexpected dependency '{dependency}"))
     let rebuild = block |> tryFindAttribute "rebuild"
 
     { TargetBlock.DependsOn = dependsOn

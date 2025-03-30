@@ -43,3 +43,8 @@ let parseRegularIdentifier s =
     match s with
     | RegularIdentifier -> s
     | s -> raiseParseError $"Invalid identifier name: {s}"
+
+let parseIdentifier s =
+    match s with
+    | TargetIdentifier | RegularIdentifier -> s
+    | _ -> raiseParseError $"Invalid resource identifier: {s}"

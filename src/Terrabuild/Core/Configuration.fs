@@ -282,6 +282,7 @@ let read (options: ConfigOptions.Options) =
             // collect dependencies for all the project
             // NOTE we are discarding local dependencies as they are local and processed later on
             Dependencies.reflectionFind projectConfig
+            |> Set.union projectConfig.Project.DependsOn
             |> Set.choose (fun dep ->
                 if dep.StartsWith("local.") then None
                 else Some dep)
@@ -519,7 +520,7 @@ let read (options: ConfigOptions.Options) =
                     |> Option.defaultWith (fun () ->
                         workspaceConfig.Targets
                         |> Map.tryFind targetName
-                        |> Option.map (fun target -> target.DependsOn)
+                        |> Option.bind (fun target -> target.DependsOn)
                         |> Option.defaultValue Set.empty)
 
                 let outputs =
@@ -676,7 +677,7 @@ let read (options: ConfigOptions.Options) =
 
     let targets =
         workspaceConfig.Targets
-        |> Map.map (fun _ target -> target.DependsOn)
+        |> Map.map (fun _ target -> target.DependsOn |> Option.defaultValue Set.empty)
 
     { Workspace.Id = workspaceId
       Workspace.SelectedProjects = selectedProjects

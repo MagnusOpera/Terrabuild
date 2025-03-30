@@ -10,19 +10,19 @@ locals {
 }
 
 target build {
-    depends_on = [ "^build" ]
+    depends_on = [ target.^build ]
 }
 
 target test {
-    depends_on = [ "build" ]
+    depends_on = [ target.build ]
 }
 
 target dist {
-    depends_on = [ "build" ]
+    depends_on = [ target.build ]
 }
 
 target publish {
-    depends_on = [ "dist" ]
+    depends_on = [ target.dist ]
 }
 
 extension dotnet {
