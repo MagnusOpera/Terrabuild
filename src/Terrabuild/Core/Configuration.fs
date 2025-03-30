@@ -278,7 +278,14 @@ let read (options: ConfigOptions.Options) =
             |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
             |> Option.defaultValue Set.empty
 
-        let dependsOn = Dependencies.reflectionFind projectConfig
+        let dependsOn =
+            // collect dependencies for all the project
+            // NOTE we are discarding local dependencies as they are local and processed later on
+            Dependencies.reflectionFind projectConfig
+            |> Set.choose (fun dep ->
+                if dep.StartsWith("local.") then None
+                else Some dep)
+
         let projectId = projectConfig.Project.Id
         let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
         let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
