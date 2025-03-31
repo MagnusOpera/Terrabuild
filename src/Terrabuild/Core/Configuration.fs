@@ -580,15 +580,12 @@ let read (options: ConfigOptions.Options) =
         let scanFolder = scanFolders options.Workspace workspaceIgnores
         let projectLoading = ConcurrentDictionary<string, bool>()
         let projectIds = ConcurrentDictionary<string, string>()
-        let projectPathIds = ConcurrentDictionary<string, Project>()
+        let projects = ConcurrentDictionary<string, Project>()
         let hub = Hub.Create(options.MaxConcurrency)
 
         let rec loadProject projectDir =
             let projectPathId = projectDir |> String.toUpper
-
-            if projectLoading.ContainsKey projectPathId |> not then
-                projectLoading.TryAdd(projectPathId, true) |> ignore
-
+            if projectLoading.TryAdd(projectPathId, true) then
                 // parallel load of projects
                 hub.Subscribe projectDir [] (fun () ->
                     let loadedProject =
@@ -632,7 +629,7 @@ let read (options: ConfigOptions.Options) =
                                 |> Map.ofSeq
 
                             let project = finalizeProject projectDir evaluationContext loadedProject dependsOnProjects
-                            projectPathIds.TryAdd(projectPathId, project) |> ignore
+                            if projects.TryAdd(projectPathId, project) |> not then raiseBugError "Unexpected error"
 
                             Log.Debug($"Signaling projectPath '{projectPathId}")
                             let loadedProjectPathIdSignal = hub.GetSignal<Project> projectPathId
@@ -663,7 +660,7 @@ let read (options: ConfigOptions.Options) =
         let status = hub.WaitCompletion()
         match status with
         | Status.Ok ->
-            projectPathIds |> Map.ofDict
+            projects |> Map.ofDict
         | Status.UnfulfilledSubscription (subscription, signals) ->
             let unraisedSignals = signals |> String.join ","
             raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check for circular dependencies."
