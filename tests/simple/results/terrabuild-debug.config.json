@@ -73,7 +73,7 @@
                       ],
                       "npm_app_version": [
                         "string",
-                        "0D8792C892CC3E051906367CBD59557BED46861274C8320D1DC0CC8DC29FC61A"
+                        "DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD"
                       ]
                     }
                   ],
@@ -170,7 +170,7 @@
     },
     "LIBRARIES/NPM-LIB": {
       "name": "libraries/npm-lib",
-      "hash": "8175042D97F5AE6113CBFEFC25D7DEEE3022320ABDF6F48A63CAB4B90811796B",
+      "hash": "9DF26231958CB70A14CE912591FCD9BE456FFE8BBAB2A56EEF1D904EA57E5BDF",
       "dependencies": [],
       "files": [
         "package-lock.json",
@@ -445,7 +445,7 @@
     "PROJECTS/NPM-APP": {
       "id": "npm_app",
       "name": "projects/npm-app",
-      "hash": "0D8792C892CC3E051906367CBD59557BED46861274C8320D1DC0CC8DC29FC61A",
+      "hash": "DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD",
       "dependencies": [
         "LIBRARIES/NPM-LIB",
         "PROJECTS/NPM-APP/PRIVATE-NPM-LIB"

@@ -35,7 +35,7 @@
                     ],
                     "npm_app_version": [
                       "string",
-                      "0D8792C892CC3E051906367CBD59557BED46861274C8320D1DC0CC8DC29FC61A"
+                      "DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD"
                     ]
                   }
                 ],
@@ -56,7 +56,7 @@
         "*.planfile"
       ],
       "projectHash": "9EC6C3232028C098085052766313F5789DE2A40C2EF98A2D15E86D8F9615CFF2",
-      "targetHash": "EEF2B1EF386F0828A9AE1E59D4803A6D1E855B466BF3EA3CFC48E520D6907C7C",
+      "targetHash": "B3A283DA4429181A8A93A8AEC8543B89F7AC9CE499587170A81E68FEDA9D5D8A",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -80,7 +80,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=23702A4C65CA7DA9CD8B91AC8439F17465A95DB5537C09E77B2411B2A5DAA7D3\u0022 -var=\u0022npm_app_version=0D8792C892CC3E051906367CBD59557BED46861274C8320D1DC0CC8DC29FC61A\u0022"
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=23702A4C65CA7DA9CD8B91AC8439F17465A95DB5537C09E77B2411B2A5DAA7D3\u0022 -var=\u0022npm_app_version=DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD\u0022"
         }
       ],
       "cache": 0,
@@ -184,8 +184,8 @@
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "8175042D97F5AE6113CBFEFC25D7DEEE3022320ABDF6F48A63CAB4B90811796B",
-      "targetHash": "5FE597649129B381AC30145322693B123902505541847C7022A0FE57EF229D5A",
+      "projectHash": "9DF26231958CB70A14CE912591FCD9BE456FFE8BBAB2A56EEF1D904EA57E5BDF",
+      "targetHash": "D9A3BA11EEAA2C6AE8C27F7B2C78A10193E24DE4AE3D35FE098EFE4F0F4759D8",
       "operations": [
         {
           "container": "node:20",
@@ -492,8 +492,8 @@
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "0D8792C892CC3E051906367CBD59557BED46861274C8320D1DC0CC8DC29FC61A",
-      "targetHash": "BB4C6299B1F1288679A8B3037BF71107866B6B32D8EE1D54D0841733D4235B2B",
+      "projectHash": "DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD",
+      "targetHash": "7BAAF65CCCDA3AD4285E23763541AD67CD325228BCA4B04A06699083DC693021",
       "operations": [
         {
           "container": "node:20",
