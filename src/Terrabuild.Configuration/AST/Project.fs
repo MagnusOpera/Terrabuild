@@ -7,7 +7,7 @@ open AST.Common
 type ProjectBlock =
     { Init: string option
       Id: string option
-      DependsOn: Set<string>
+      DependsOn: Set<string> option
       Dependencies: Expr option
       Outputs: Expr option
       Ignores: Expr option

@@ -113,10 +113,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         match projectFile with
         | FS.File projectFile ->
             let projectContent = File.ReadAllText projectFile
-            try
-                FrontEnd.Project.parse projectContent
-            with exn ->
-                raiseParserError($"Failed to read PROJECT configuration '{projectId}'", exn)
+            FrontEnd.Project.parse projectContent
         | _ ->
             raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 
@@ -160,9 +157,9 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
     let dependsOn =
         // collect dependencies for all the project
-        // NOTE we are discarding local dependencies as they are local and processed later on
-        Dependencies.reflectionFind projectConfig
-        |> Set.union projectConfig.Project.DependsOn
+        // NOTE we are keeping only project dependencies as we want to construct project graph
+        projectConfig.Project.DependsOn |> Option.defaultValue Set.empty
+        |> Set.union (Dependencies.reflectionFind projectConfig)
         |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
 
     let projectId = projectConfig.Project.Id
@@ -202,8 +199,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
             { targetBlock with 
                 Rebuild = rebuild
-                DependsOn = dependsOn }
-        )
+                DependsOn = dependsOn })
 
     let includes =
         projectScripts
@@ -211,6 +207,8 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         |> Set.ofSeq
         |> Set.union projectInfo.Includes
 
+    // enrich workspace locals with project locals
+    // NOTE we are checking for duplicated fields as this is an error
     let locals =
         workspaceConfig.Locals
         |> Map.iter (fun name _ ->
@@ -587,22 +585,30 @@ let read (options: ConfigOptions.Options) =
 
         let rec loadProject projectDir =
             let projectPathId = projectDir |> String.toUpper
+
             if projectLoading.ContainsKey projectPathId |> not then
                 projectLoading.TryAdd(projectPathId, true) |> ignore
 
-                // load project and force loading all dependencies as well
-                let loadedProject = loadProjectDef options workspaceConfig evaluationContext extensions scripts projectDir
-                match loadedProject.Id with
-                | Some projectId ->
-                    if projectIds.TryAdd(projectId, projectDir) |> not then
-                        raiseSymbolError $"Project id '{projectId}' is already defined in project '{projectIds[projectId]}'"
-                | _ -> ()
-
-                for dependency in loadedProject.Dependencies do
-                    loadProject dependency
-
                 // parallel load of projects
                 hub.Subscribe projectDir [] (fun () ->
+                    let loadedProject =
+                        try
+                            // load project and force loading all dependencies as well
+                            let loadedProject = loadProjectDef options workspaceConfig evaluationContext extensions scripts projectDir
+                            match loadedProject.Id with
+                            | Some projectId ->
+                                if projectIds.TryAdd(projectId, projectDir) |> not then
+                                    raiseSymbolError $"Project id '{projectId}' is already defined in project '{projectIds[projectId]}'"
+                            | _ -> ()
+
+                            loadedProject
+                        with exn ->
+                            raiseParserError($"Failed to read PROJECT configuration '{projectDir}'", exn)
+
+                    // immediately load all dependencies
+                    for dependency in loadedProject.Dependencies do
+                        loadProject dependency
+
                     // await dependencies to be loaded
                     let projectPathSignals =
                         loadedProject.Dependencies

@@ -3,9 +3,10 @@ module internal Lexer.HCL
 open Parser.HCL  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 open System.Text
-open Errors/// Rule token
-val token: lexbuf: LexBuffer<char> -> token
+open Errors
+open System.Collections.Generic/// Rule token
+val token: lexerMode: obj -> lexbuf: LexBuffer<char> -> token
 /// Rule singleLineComment
-val singleLineComment: lexbuf: LexBuffer<char> -> token
+val singleLineComment: lexerMode: obj -> lexbuf: LexBuffer<char> -> token
 /// Rule interpolatedString
-val interpolatedString: acc: StringBuilder -> lexbuf: LexBuffer<char> -> token
+val interpolatedString: acc: StringBuilder -> lexerMode: obj -> lexbuf: LexBuffer<char> -> token

@@ -3,14 +3,18 @@ module FrontEnd.HCL
 open FSharp.Text.Lexing
 open Errors
 open System.Text
+open System.Collections.Generic
 
-let parse txt = 
+
+let parse txt =
+    let lexerMode = Stack([Lexer.HCL.LexerMode.Default])
+
     let switchableLexer (lexbuff: LexBuffer<char>) =
-        let mode = Lexer.HCL.lexerMode.Peek()
+        let mode = lexerMode |> Lexer.HCL.peek
         let lexer = 
             match mode with
-            | Lexer.HCL.LexerMode.Default -> Lexer.HCL.token
-            | Lexer.HCL.LexerMode.String -> Lexer.HCL.interpolatedString (StringBuilder())
+            | Lexer.HCL.LexerMode.Default -> Lexer.HCL.token lexerMode
+            | Lexer.HCL.LexerMode.String -> Lexer.HCL.interpolatedString (StringBuilder()) lexerMode
 
         let token = lexer lexbuff
         // printfn $"### SwitchableLexer  mode: {mode}  token: {token}"

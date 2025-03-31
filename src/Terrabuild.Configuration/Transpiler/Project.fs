@@ -35,7 +35,11 @@ let toProject (block: Block) =
         block
         |> tryFindAttribute "depends_on"
         |> Option.map Dependencies.findArrayOfDependencies
-        |> Option.defaultValue Set.empty
+        |> Option.map (fun dependsOn ->
+            dependsOn |> Set.map (fun dependency ->
+                match dependency with
+                | String.Regex "^target\.(.*)$" [dependency] -> dependency
+                | _ -> raiseInvalidArg $"Invalid target dependency '{dependency}'"))
     let dependencies = block |> tryFindAttribute "dependencies"
     let outputs = block |> tryFindAttribute "outputs"
     let ignores = block |> tryFindAttribute "ignores"
@@ -108,7 +112,7 @@ let transpile (blocks: Block list) =
                 match builder.Project with
                 | None -> { ProjectBlock.Init = None
                             ProjectBlock.Id = None
-                            ProjectBlock.DependsOn = Set.empty
+                            ProjectBlock.DependsOn = None
                             ProjectBlock.Dependencies = None
                             ProjectBlock.Outputs = None
                             ProjectBlock.Ignores = None

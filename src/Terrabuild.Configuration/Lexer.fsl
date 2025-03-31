@@ -5,6 +5,7 @@ open Parser.HCL  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 open System.Text
 open Errors
+open System.Collections.Generic
 
 let lexeme = LexBuffer<_>.LexemeString
 
@@ -12,12 +13,16 @@ let mkIdentifier lexbuf =
     let s = lexbuf |> lexeme  |> string
     s.Replace("`", "").Replace(" ", "").Replace(":", "").Replace("$", "")
 
+
+
 [<RequireQualifiedAccess>]
 type LexerMode =
     | Default
     | String
 
-let lexerMode = System.Collections.Generic.Stack([LexerMode.Default])
+let peek (lexerMode: Stack<LexerMode>) = lexerMode.Peek()
+let push mode (lexerMode: Stack<LexerMode>) = lexerMode.Push(mode)
+let pop (lexerMode: Stack<LexerMode>) = lexerMode.Pop()
 
 
 }
@@ -37,22 +42,22 @@ let newline = '\n' | '\r' '\n'
 
 
 
-rule token = parse
+rule token lexerMode = parse
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }
     | ".?" { DOT_QUESTION }
     | "." { DOT }
     | ":" { COLON }
     | "{" {
-        let mode = lexerMode.Peek()
-        lexerMode.Push(LexerMode.Default)
+        let mode = lexerMode |> peek
+        lexerMode |> push LexerMode.Default
         match mode with
         | LexerMode.String -> STRING_START
         | _ -> LBRACE
     }
     | "}" {
-        lexerMode.Pop() |> ignore
-        match lexerMode.Peek() with
+        lexerMode |> pop |> ignore
+        match lexerMode |> peek with
         | LexerMode.Default -> RBRACE
         | _ -> EXPRESSION_END
     }
@@ -69,9 +74,9 @@ rule token = parse
     | "!" { BANG }
     | "&" { AND }
     | "|" { OR }
-    | "#" { singleLineComment lexbuf }
+    | "#" { singleLineComment lexerMode lexbuf }
     | '"' {
-        lexerMode.Push(LexerMode.String)
+        lexerMode |> push LexerMode.String
         STRING_START
     }
 
@@ -83,39 +88,39 @@ rule token = parse
         NUMBER (s)
     }
 
-    | whitespace { token lexbuf }
-    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | whitespace { token lexerMode lexbuf }
+    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexerMode lexbuf }
     | eof { EOF }
     | _ { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
 
-and singleLineComment = parse
-    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+and singleLineComment lexerMode = parse
+    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexerMode lexbuf }
     | eof { EOF }
-    | _ { singleLineComment lexbuf }
+    | _ { singleLineComment lexerMode lexbuf }
 
-and interpolatedString (acc: StringBuilder) = parse
+and interpolatedString (acc: StringBuilder) lexerMode = parse
     | newline { raiseParseError "newline encountered in string" }
     | "\"\"" {
         acc.Append("\"") |> ignore
-        interpolatedString acc lexbuf
+        interpolatedString acc lexerMode lexbuf
     }
     | "{{" {
         acc.Append("{") |> ignore
-        interpolatedString acc lexbuf
+        interpolatedString acc lexerMode lexbuf
     }
     | "}}" {
         acc.Append("}") |> ignore
-        interpolatedString acc lexbuf
+        interpolatedString acc lexerMode lexbuf
     }
     | '"' {
-        lexerMode.Pop() |> ignore
+        lexerMode |> pop |> ignore
         STRING_END (acc.ToString())
     }
     | "${" {
-        lexerMode.Push(LexerMode.Default)
+        lexerMode |> push LexerMode.Default
         EXPRESSION_START (acc.ToString())
     }
     | _ {
         lexbuf |> lexeme |> acc.Append |> ignore
-        interpolatedString acc lexbuf
+        interpolatedString acc lexerMode lexbuf
     }
