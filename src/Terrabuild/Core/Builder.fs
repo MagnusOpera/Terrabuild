@@ -18,6 +18,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
     let processedNodes = ConcurrentDictionary<string, bool>()
     let allNodes = ConcurrentDictionary<string, Node>()
+    let node2children = ConcurrentDictionary<string, Set<string>>()
 
     // first check all targets exist in WORKSPACE
     match options.Targets |> Seq.tryFind (fun targetName -> configuration.Targets |> Map.containsKey targetName |> not) with
@@ -43,19 +44,17 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
             let dependsOns = buildDependsOn + projDependsOn
 
             // apply on each dependency
-            let children, hasInternalDependencies =
+            let inChildren, outChildren =
                 dependsOns
-                |> Set.fold (fun (acc, hasInternalDependencies) dependsOn ->
-                    let childDependencies, hasInternalDependencies =
-                        match dependsOn with
-                        | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
-                            projectConfig.Dependencies |> Set.collect (buildTarget parentDependsOn), hasInternalDependencies
-                        | _ ->
-                            buildTarget dependsOn project, true
-                    acc + childDependencies, hasInternalDependencies) (Set.empty, false)
+                |> Set.fold (fun (accInChildren, accOutChildren) dependsOn ->
+                    match dependsOn with
+                    | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
+                        accInChildren, accOutChildren + projectConfig.Dependencies |> Set.collect (buildTarget parentDependsOn)
+                    | _ ->
+                        accInChildren + buildTarget dependsOn project, accOutChildren) (Set.empty, Set.empty)
 
             // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
-            let isLeaf = hasInternalDependencies |> not
+            let isLeaf = inChildren |> Set.isEmpty
 
             // only generate computation node - that is node that generate something
             // barrier nodes are just discarded and dependencies lift level up
@@ -105,6 +104,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                     ops
                     |> List.map Json.Serialize
 
+                let children = inChildren + outChildren
                 let hashContent = opsCmds @ [
                     yield projectConfig.Hash
                     yield target.Hash
@@ -140,13 +140,15 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                 if allNodes.TryAdd(nodeId, node) |> not then raiseBugError "Unexpected graph building race"
                 Set.singleton nodeId
             | _ ->
-                children
+                outChildren
 
-        if processedNodes.TryAdd(nodeId, true) then processNode()
+        if processedNodes.TryAdd(nodeId, true) then
+            let children = processNode()
+            if node2children.TryAdd(nodeId, children) |> not then raiseBugError "Unexpected graph building race"
+            Log.Debug($"Node {nodeId} has children: {children}")
+            children
         else
-            match allNodes.TryGetValue(nodeId) with
-            | true, _ -> Set.singleton nodeId
-            | _ -> Set.empty
+            node2children[nodeId]
 
     let rootNodes =
         configuration.SelectedProjects
