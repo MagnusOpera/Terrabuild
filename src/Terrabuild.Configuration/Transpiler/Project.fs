@@ -27,7 +27,7 @@ let (|Project|Extension|Target|Locals|UnknownBlock|) (block: Block) =
 
 let toProject (block: Block) =
     block
-    |> checkAllowedAttributes ["depends_on"; "dependencies"; "links"; "outputs"; "ignores"; "includes"; "labels"]
+    |> checkAllowedAttributes ["depends_on"; "dependencies"; "outputs"; "ignores"; "includes"; "labels"]
     |> checkNoNestedBlocks
     |> ignore
 
