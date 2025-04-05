@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions:
+  contents: write
+  actions: write
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,4 +27,4 @@ jobs:
           draft-drop: true
           draft-drop-count: 2
         env:
-          GITHUB_TOKEN: ${{ secrets.MAGNUSOPERA_CONTENT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
