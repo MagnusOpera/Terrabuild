@@ -162,7 +162,6 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         |> Set.union (Dependencies.reflectionFind projectConfig)
         |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
 
-    let projectId = projectConfig.Project.Id
     let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
     let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
     let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
@@ -215,7 +214,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
             if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
         workspaceConfig.Locals |> Map.addMap projectConfig.Locals
 
-    { LoadedProject.Id = projectId
+    { LoadedProject.Id = projectConfig.Project.Id
       LoadedProject.DependsOn = dependsOn
       LoadedProject.Dependencies = projectDependencies
       LoadedProject.Includes = includes
