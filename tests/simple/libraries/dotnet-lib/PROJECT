@@ -2,5 +2,5 @@
 project @dotnet { }
 
 target build {
-  @dotnet build { configuration: $configuration }
+  @dotnet build { configuration = local.configuration }
 }

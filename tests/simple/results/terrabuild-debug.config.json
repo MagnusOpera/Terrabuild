@@ -12,51 +12,21 @@
     "PROJECTS/RUST-APP"
   ],
   "targets": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "deploy": {
-      "dependsOn": [
-        "push"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "dist": {
-      "dependsOn": [
-        "build"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "docker": {
-      "dependsOn": [
-        "dist"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "push": {
-      "dependsOn": [
-        "docker"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    }
+    "build": [
+      "^build"
+    ],
+    "deploy": [
+      "push"
+    ],
+    "dist": [
+      "build"
+    ],
+    "docker": [
+      "dist"
+    ],
+    "push": [
+      "docker"
+    ]
   },
   "projects": {
     "DEPLOYMENTS/TERRAFORM-DEPLOY": {
@@ -99,11 +69,11 @@
                     {
                       "dotnet_app_version": [
                         "string",
-                        "CA867B371D864086BCC266C5186F00A45412A15D2F95ABF3046FDA371A851B45"
+                        "23702A4C65CA7DA9CD8B91AC8439F17465A95DB5537C09E77B2411B2A5DAA7D3"
                       ],
                       "npm_app_version": [
                         "string",
-                        "D5C34CD09DE457A98F7F7486D177587753CECB9C1CF351EF857B0A7B6ACBA459"
+                        "DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD"
                       ]
                     }
                   ],
@@ -200,7 +170,7 @@
     },
     "LIBRARIES/NPM-LIB": {
       "name": "libraries/npm-lib",
-      "hash": "8175042D97F5AE6113CBFEFC25D7DEEE3022320ABDF6F48A63CAB4B90811796B",
+      "hash": "9DF26231958CB70A14CE912591FCD9BE456FFE8BBAB2A56EEF1D904EA57E5BDF",
       "dependencies": [],
       "files": [
         "package-lock.json",
@@ -277,8 +247,9 @@
       "labels": []
     },
     "PROJECTS/DOTNET-APP": {
+      "id": "dotnet_app",
       "name": "projects/dotnet-app",
-      "hash": "CA867B371D864086BCC266C5186F00A45412A15D2F95ABF3046FDA371A851B45",
+      "hash": "23702A4C65CA7DA9CD8B91AC8439F17465A95DB5537C09E77B2411B2A5DAA7D3",
       "dependencies": [
         "LIBRARIES/DOTNET-LIB"
       ],
@@ -409,7 +380,7 @@
     },
     "PROJECTS/MAKE-APP": {
       "name": "projects/make-app",
-      "hash": "F5FA23FEA48BD50A8F9C28F899E35EC01A87ECA33637953DAE5E2FDDF2F17314",
+      "hash": "12B2C6E8544EB3FD70899ED9B85AE0D141C678CCFC0C777F67E1D7799C99D6C6",
       "dependencies": [
         "LIBRARIES/SHELL-LIB"
       ],
@@ -472,8 +443,9 @@
       ]
     },
     "PROJECTS/NPM-APP": {
+      "id": "npm_app",
       "name": "projects/npm-app",
-      "hash": "D5C34CD09DE457A98F7F7486D177587753CECB9C1CF351EF857B0A7B6ACBA459",
+      "hash": "DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD",
       "dependencies": [
         "LIBRARIES/NPM-LIB",
         "PROJECTS/NPM-APP/PRIVATE-NPM-LIB"

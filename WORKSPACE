@@ -3,35 +3,29 @@ workspace {
     id = "c91ea014-00c7-8bd1-1c05-656a6d327ce7"
 }
 
-configuration {
-    `configuration` = "Debug"
-}
 
-configuration dev {
-    `configuration` = "Release"
-}
-
-configuration prod {
-    `configuration` = "Release"
+locals {
+    isProd = terrabuild.configuration == "prod"
+    configuration = local.isProd ? "Release" : "Debug"
 }
 
 target build {
-    depends_on = [^build]
+    depends_on = [ target.^build ]
 }
 
 target test {
-    depends_on = [build]
+    depends_on = [ target.build ]
 }
 
 target dist {
-    depends_on = [build]
+    depends_on = [ target.build ]
 }
 
 target publish {
-    depends_on = [dist]
+    depends_on = [ target.dist ]
 }
 
-extension @dotnet {
+extension dotnet {
     container = "mcr.microsoft.com/dotnet/sdk:9.0.202"
     variables = [
         "DOTNET_SKIP_FIRST_TIME_EXPERIENCE"
@@ -54,6 +48,6 @@ extension @dotnet {
         "JB_SPACE_API_URL"
     ]
     defaults {
-        `configuration` = $configuration
+        configuration = local.configuration
     }
 }

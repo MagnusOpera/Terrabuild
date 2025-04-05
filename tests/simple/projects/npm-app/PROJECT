@@ -1,9 +1,9 @@
 
-project @npm {
+project @npm npm_app {
     labels = [ "app" ]
 }
 
 target build {
-#    @npm `version` { arguments: $npm_version }
+#    @npm version { arguments = local.npm_version }
     @npm build { }
 }

@@ -2,43 +2,41 @@
 workspace {
 }
 
-configuration {
-    `configuration` = "Debug"
+
+
+locals {
+    isProd = terrabuild.configuration == "Debug"
+    configuration = local.isProd ? "Release" : "Debug"
     secret_message = "tagada"
     npm_version = "1.0.0"
-    `workspace` = "default"
-}
-
-configuration release {
-    `configuration` = "Release"
-    `workspace` = "default"
+    workspace = "default"
 }
 
 target build {
-  depends_on = [ ^build ]
+  depends_on = [ target.^build ]
 }
 
 target dist {
-  depends_on = [ build ]
+  depends_on = [ target.build ]
 }
 
 target docker {
-  depends_on = [ dist ]
+  depends_on = [ target.dist ]
 }
 
 target push {
-  depends_on = [ docker ]
+  depends_on = [ target.docker ]
 }
 
 target deploy {
-  depends_on = [ push ]
+  depends_on = [ target.push ]
 }
 
 extension @dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:9.0.202"
   platform = "linux/amd64"
   defaults {
-    `configuration` = $configuration
+    configuration = local.configuration
   }
 }
 
@@ -46,7 +44,7 @@ extension @terraform {
   container = "hashicorp/terraform:1.10"
   platform = "linux/amd64"
   defaults {
-    `workspace` = $workspace
+    workspace = local.workspace
   }
 }
 

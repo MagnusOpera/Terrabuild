@@ -5,43 +5,19 @@
     "C"
   ],
   "targets": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "docker": {
-      "dependsOn": [
-        "^publish",
-        "publish"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "publish": {
-      "dependsOn": [
-        "build"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    },
-    "push": {
-      "dependsOn": [
-        "docker"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    }
+    "build": [
+      "^build"
+    ],
+    "docker": [
+      "^publish",
+      "publish"
+    ],
+    "publish": [
+      "build"
+    ],
+    "push": [
+      "docker"
+    ]
   },
   "projects": {
     "A": {

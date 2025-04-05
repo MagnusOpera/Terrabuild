@@ -419,3 +419,4 @@ terrabuild-debug.md
 .nuget
 .mono
 *.zip
+*.fsyacc.output

@@ -3,5 +3,5 @@ project @dotnet {
 }
 
 target build {
-    @dotnet build
+    @dotnet build { }
 }

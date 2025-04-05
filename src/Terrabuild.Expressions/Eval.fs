@@ -3,12 +3,17 @@ open Terrabuild.Expressions
 open Errors
 open Collections
 
-type EvaluationContext = {
-    WorkspaceDir: string
-    ProjectDir: string option
-    Versions: Map<string, string>
-    Variables: Map<string, Value>
-}
+type EvaluationContext =
+    { WorkspaceDir: string option
+      ProjectDir: string option
+      Versions: Map<string, string>
+      Data: Map<string, Value> }
+with
+    static member Empty =
+        { WorkspaceDir = None
+          ProjectDir = None
+          Versions = Map.empty
+          Data = Map.empty }
 
 let rec eval (context: EvaluationContext) (expr: Expr) =
     let valueToString v =
@@ -27,7 +32,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
         | Expr.Number num -> Value.Number num
         | Expr.Variable var ->
             // if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
-            match context.Variables |> Map.tryFind var with
+            match context.Data |> Map.tryFind var with
             | Some value -> value
             | None -> raiseSymbolError $"Variable '{var}' is not defined"
         | Expr.Map map ->
@@ -67,19 +72,6 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
 
                 | Function.And, [Value.Bool left; Value.Bool right] -> Value.Bool (left && right)
                 | Function.Or, [Value.Bool left; Value.Bool right] -> Value.Bool (left || right)
-
-                | Function.Version, [Value.String projectPath] ->
-                    let projectDir =
-                        match context.ProjectDir with
-                        | Some projectDir -> projectDir
-                        | _ -> raiseInvalidArg $"'version' function can only be used in the context of a project."
-
-                    let projectId =
-                        FS.workspaceRelative context.WorkspaceDir projectDir projectPath
-                        |> String.toUpper
-                    match context.Versions |> Map.tryFind projectId with
-                    | Some version -> Value.String version
-                    | _ -> raiseSymbolError $"Unknown project reference '{projectPath}'"
 
                 | Function.ToString, [value] -> valueToString value |> Value.String
 
@@ -179,11 +171,23 @@ let asBoolOption = function
     | Value.Nothing -> None
     | _ -> raiseTypeError "Failed to convert"
 
-let evalAsStringSet (context: EvaluationContext) (exprs: Expr seq) =
-    exprs
-    |> Seq.map (fun expr -> eval context expr)
-    |> Seq.map (fun value ->
-        match value with
-        | Value.String s -> s
-        | _ -> raiseTypeError "Failed to convert")
-    |> Set.ofSeq
+let asStringSetOption = function
+    | Value.List list ->
+        list
+        |> List.map (fun value ->
+            match value with
+            | Value.String s -> s
+            | _ -> raiseTypeError "Failed to convert")
+        |> Set.ofList
+        |> Some
+    | _ -> raiseTypeError "Failed to convert"
+
+let mapAdd newMap oldMap =
+    match oldMap, newMap with
+    | Value.Map oldMap, Value.Map newMap ->
+        oldMap |> Map.addMap newMap |> Value.Map
+    | _ -> raiseTypeError "Failed to add map: invalid types"
+
+let asMap = function
+    | Value.Map map -> map
+    | _ -> raiseTypeError "Failed to convert"

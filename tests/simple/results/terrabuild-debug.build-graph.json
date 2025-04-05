@@ -31,11 +31,11 @@
                   {
                     "dotnet_app_version": [
                       "string",
-                      "CA867B371D864086BCC266C5186F00A45412A15D2F95ABF3046FDA371A851B45"
+                      "23702A4C65CA7DA9CD8B91AC8439F17465A95DB5537C09E77B2411B2A5DAA7D3"
                     ],
                     "npm_app_version": [
                       "string",
-                      "D5C34CD09DE457A98F7F7486D177587753CECB9C1CF351EF857B0A7B6ACBA459"
+                      "DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD"
                     ]
                   }
                 ],
@@ -56,7 +56,7 @@
         "*.planfile"
       ],
       "projectHash": "9EC6C3232028C098085052766313F5789DE2A40C2EF98A2D15E86D8F9615CFF2",
-      "targetHash": "E8C701FFF3904D918306608242B7D3D0949ADACB0187D25593A4AE74A44EF052",
+      "targetHash": "B3A283DA4429181A8A93A8AEC8543B89F7AC9CE499587170A81E68FEDA9D5D8A",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -80,7 +80,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=CA867B371D864086BCC266C5186F00A45412A15D2F95ABF3046FDA371A851B45\u0022 -var=\u0022npm_app_version=D5C34CD09DE457A98F7F7486D177587753CECB9C1CF351EF857B0A7B6ACBA459\u0022"
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=23702A4C65CA7DA9CD8B91AC8439F17465A95DB5537C09E77B2411B2A5DAA7D3\u0022 -var=\u0022npm_app_version=DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD\u0022"
         }
       ],
       "cache": 0,
@@ -184,8 +184,8 @@
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "8175042D97F5AE6113CBFEFC25D7DEEE3022320ABDF6F48A63CAB4B90811796B",
-      "targetHash": "5FE597649129B381AC30145322693B123902505541847C7022A0FE57EF229D5A",
+      "projectHash": "9DF26231958CB70A14CE912591FCD9BE456FFE8BBAB2A56EEF1D904EA57E5BDF",
+      "targetHash": "D9A3BA11EEAA2C6AE8C27F7B2C78A10193E24DE4AE3D35FE098EFE4F0F4759D8",
       "operations": [
         {
           "container": "node:20",
@@ -304,8 +304,8 @@
         "obj/*.props",
         "obj/*.targets"
       ],
-      "projectHash": "CA867B371D864086BCC266C5186F00A45412A15D2F95ABF3046FDA371A851B45",
-      "targetHash": "F59852D9EEFDECB50F174B007572C80E8F4A24A44167B60384164D930A0B7610",
+      "projectHash": "23702A4C65CA7DA9CD8B91AC8439F17465A95DB5537C09E77B2411B2A5DAA7D3",
+      "targetHash": "5A17200F32ABE3113BCB96958F646244F7D022FE56D5B9552622468E29BBB354",
       "operations": [
         {
           "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
@@ -379,8 +379,8 @@
       "outputs": [
         "dist"
       ],
-      "projectHash": "F5FA23FEA48BD50A8F9C28F899E35EC01A87ECA33637953DAE5E2FDDF2F17314",
-      "targetHash": "6230F7A971DD0050B858067AF3FD259737D81D9075A3CA97AC87278C67BA032F",
+      "projectHash": "12B2C6E8544EB3FD70899ED9B85AE0D141C678CCFC0C777F67E1D7799C99D6C6",
+      "targetHash": "E3570989BDAD7E78B7C4E2E1359C69C6BCF7CEF637FC240BF418FBB3D43E7F19",
       "operations": [
         {
           "containerVariables": [],
@@ -492,8 +492,8 @@
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "D5C34CD09DE457A98F7F7486D177587753CECB9C1CF351EF857B0A7B6ACBA459",
-      "targetHash": "BF8CCDC9DBF10235455D36E30FF81B4E1464639259C991ADFECE94EB9ACB0121",
+      "projectHash": "DD007616F74E2F9005A16568572B172FDCB8F9A824C8E61E3FF43FB05D6909FD",
+      "targetHash": "7BAAF65CCCDA3AD4285E23763541AD67CD325228BCA4B04A06699083DC693021",
       "operations": [
         {
           "container": "node:20",

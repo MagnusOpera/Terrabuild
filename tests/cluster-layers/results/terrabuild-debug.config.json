@@ -9,15 +9,9 @@
     "G"
   ],
   "targets": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "rebuild": [
-        "bool",
-        false
-      ]
-    }
+    "build": [
+      "^build"
+    ]
   },
   "projects": {
     "A": {

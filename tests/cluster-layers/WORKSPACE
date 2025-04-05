@@ -1,5 +1,5 @@
 target build {
-    depends_on = [ ^build ]
+    depends_on = [ target.^build ]
 }
 
 extension @dotnet {

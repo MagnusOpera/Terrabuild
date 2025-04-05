@@ -16,18 +16,18 @@ target dist {
   rebuild = true
 }
 
-target dummy
+target dummy { }
 
 configuration release {
-  `configuration` = "Release"
+  configuration = "Release"
 }
 
-configuration dummy
+configuration dummy { }
 
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
   defaults {
-    `configuration` = $configuration
+    configuration = configuration
   }
 }
 

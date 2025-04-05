@@ -58,3 +58,10 @@ let getErrorArea (ex: Exception) =
         | _ -> area
 
     getErrorArea ErrorArea.Bug ex
+
+
+let tryRun ferr faction =
+    try
+        faction()
+    with
+        exn -> ferr exn

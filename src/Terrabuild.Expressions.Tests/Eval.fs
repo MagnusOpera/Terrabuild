@@ -1,13 +1,13 @@
-module Terrabuild.Expressions.Tests
+module Terrabuild.Expressions.Eval.Tests
 
 open NUnit.Framework
 open FsUnit
-open Eval
+open Terrabuild.Expressions
 
 let private evaluationContext = {
-    Eval.EvaluationContext.WorkspaceDir = TestContext.CurrentContext.WorkDirectory
+    Eval.EvaluationContext.WorkspaceDir = Some TestContext.CurrentContext.WorkDirectory
     Eval.EvaluationContext.ProjectDir = FS.combinePath TestContext.CurrentContext.WorkDirectory "project-path" |> Some
-    Eval.EvaluationContext.Variables = Map.empty
+    Eval.EvaluationContext.Data = Map.empty
     Eval.EvaluationContext.Versions = Map.empty
 }
 
@@ -34,21 +34,21 @@ let valueBool() =
 [<Test>]
 let valueMap() =
     let expected = Value.Map (Map ["hello", Value.String "world"])
-    let context = { evaluationContext with Variables = Map ["toto", Value.String "world"] }
+    let context = { evaluationContext with Data = Map ["toto", Value.String "world"] }
     let result = eval context (Expr.Map (Map ["hello", Expr.Variable "toto"]))
     result |> should equal expected
 
 [<Test>]
 let valueList() =
     let expected = Value.List [Value.String "hello"; Value.String "world"]
-    let context = { evaluationContext with Variables = Map ["toto", Value.String "world"] }
+    let context = { evaluationContext with Data = Map ["toto", Value.String "world"] }
     let result = eval context (Expr.List [Expr.String "hello"; Expr.Variable "toto"])
     result |> should equal expected
 
 [<Test>]
 let valueVariable() =
     let expected = Value.String "titi"
-    let context = { evaluationContext with Variables = Map ["toto", Value.String "titi"] }
+    let context = { evaluationContext with Data = Map ["toto", Value.String "titi"] }
     let result = eval context (Expr.Variable "toto")
     result |> should equal expected
 
@@ -114,24 +114,11 @@ let lowerString() =
     result |> should equal expected
 
 [<Test>]
-let version() =
-    let expected = Value.String "1234"
-
-    let context = { evaluationContext
-                    with Versions = Map [ "TOTO", "1234"
-                                          "TITI", "56789A" ] }
-
-    printfn $"{context.ProjectDir}"
-
-    let result = eval context (Expr.Function (Function.Version, [ Expr.String "../toto"]))
-    result |> should equal expected
-
-[<Test>]
 let formatList() =
     let expected = Value.String "\\o/THIS42ISAtrueTEMPLATEtiti"
 
     let context = { evaluationContext
-                    with Variables = Map ["toto", Value.String "\\o/"] }
+                    with Data = Map ["toto", Value.String "\\o/"] }
 
     // format("{0}THIS{1}IS{2}A{3}TEMPLATE{4}", $toto, 42, nothing, true, "titi")
     let result =
@@ -149,10 +136,10 @@ let formatMap() =
     let expected = Value.String "THIS\\o/IS42ATEMPLATEtrue"
 
     let context = { evaluationContext
-                    with Variables = Map ["args", Value.Map (Map [ "string", Value.String "\\o/"
-                                                                   "number", Value.Number 42
-                                                                   "nothing", Value.Nothing
-                                                                   "bool", Value.Bool true ]) ] }
+                    with Data = Map ["args", Value.Map (Map [ "string", Value.String "\\o/"
+                                                              "number", Value.Number 42
+                                                              "nothing", Value.Nothing
+                                                              "bool", Value.Bool true ]) ] }
  
     // format("THIS{string}IS{number}A{nothing}TEMPLATE{bool}", $args)
     let result =
@@ -167,7 +154,7 @@ let listItem() =
     let expected = Value.Number 42
 
     let context = { evaluationContext
-                    with Variables = Map [ 
+                    with Data = Map [ 
                         "tagada", Value.List [ Value.String "toto"; Value.Number 42 ]
                     ] }
 
@@ -180,7 +167,7 @@ let listTryItem() =
     let expected = Value.Nothing
 
     let context = { evaluationContext
-                    with Variables = Map [ 
+                    with Data = Map [ 
                         "tagada", Value.List [ Value.String "toto"; Value.Number 42 ]
                     ] }
 
@@ -193,7 +180,7 @@ let mapItem() =
     let expected = Value.Number 42
 
     let context = { evaluationContext
-                    with Variables = Map [ 
+                    with Data = Map [ 
                         "tagada", Value.Map (Map [ "toto", Value.Number 42 ])
                     ] }
 
@@ -206,7 +193,7 @@ let mapTryItem() =
     let expected = Value.Nothing
 
     let context = { evaluationContext
-                    with Variables = Map [ 
+                    with Data = Map [ 
                         "tagada", Value.Map (Map [ "toto", Value.Number 42 ])
                     ] }
 
