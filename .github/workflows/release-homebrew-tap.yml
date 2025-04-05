@@ -37,7 +37,7 @@ on:
 
 env:
   TERRABUILD_VERSION: ${{ inputs.version }}
-  GITHUB_TOKEN: ${{ secrets.GIT_PAT }}
+  GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_PAT }}
 
 jobs:
   update-homebrew-tap:
@@ -54,7 +54,7 @@ jobs:
         with:
           repository: magnusopera/homebrew-tap
           path: homebrew-tap
-          token: ${{ secrets.GIT_PAT }}
+          token: ${{ secrets.HOMEBREW_TAP_PAT }}
       - name: Update Homebrew Tap
         run: |
           set -euo pipefail
