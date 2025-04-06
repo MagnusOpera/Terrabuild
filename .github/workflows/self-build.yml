@@ -44,7 +44,7 @@ jobs:
       - name: Login to Space
         run: |
           terrabuild version
-          terrabuild login --workspace edd11090a41b0291301431d0 --token ${{ secrets.TERRABUILD_TOKEN }}
+          terrabuild login --workspace "edd11090a41b0291301431d0" --token ${{ secrets.TERRABUILD_TOKEN }}
 
       - name: Build
         run: |
