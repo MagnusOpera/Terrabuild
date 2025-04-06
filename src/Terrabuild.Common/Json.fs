@@ -18,4 +18,6 @@ let Serialize (value: obj) =
     JsonSerializer.Serialize(value, settings)
 
 let Deserialize<'t> (json: string) =
-    JsonSerializer.Deserialize<'t>(json, settings)
+    match JsonSerializer.Deserialize<'t>(json, settings) with
+    | null -> Errors.raiseBugError $"Failed to deserialize JSON: {json}"
+    | value -> value

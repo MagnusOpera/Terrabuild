@@ -91,7 +91,7 @@ rule token lexerMode = parse
     | whitespace { token lexerMode lexbuf }
     | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexerMode lexbuf }
     | eof { EOF }
-    | _ { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
+    | _ { Errors.raiseParseError $"unrecognized input: '{lexeme lexbuf}'" }
 
 and singleLineComment lexerMode = parse
     | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexerMode lexbuf }

@@ -175,7 +175,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
         let projectDirectory =
             match node.Project with
             | FS.Directory projectDirectory -> projectDirectory
-            | FS.File projectFile -> FS.parentDirectory projectFile
+            | FS.File projectFile -> projectFile |> FS.parentDirectory |> Option.get
             | _ -> "."
 
         let buildNode() =

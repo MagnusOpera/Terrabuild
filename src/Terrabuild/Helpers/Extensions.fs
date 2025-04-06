@@ -22,7 +22,12 @@ let systemExtensions =
 
 // NOTE: when app in package as a single file, Terrabuild.Assembly can't be found...
 //       this means native deployments are not supported ¯\_(ツ)_/¯
-let terrabuildDir = Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> FS.parentDirectory
+let terrabuildDir : string =
+    match Diagnostics.Process.GetCurrentProcess().MainModule with
+    | NonNull mainModule -> mainModule.FileName |> FS.parentDirectory |> Option.get
+    | _ -> raiseBugError "Unable to get the current process main module"
+
+//  Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> FS.parentDirectory
 let terrabuildExtensibility =
     let path = FS.combinePath terrabuildDir "Terrabuild.Extensibility.dll"
     path
@@ -55,7 +60,10 @@ let invokeScriptMethod<'r> (method: string) (args: Value) (script: Script option
                 try
                     Success (invocable.Invoke<'r> args)
                 with
-                | :? Reflection.TargetInvocationException as exn -> ErrorTarget exn.InnerException
+                | :? Reflection.TargetInvocationException as exn ->
+                    match exn.InnerException with
+                    | NonNull innerExn -> ErrorTarget innerExn
+                    | _ -> ErrorTarget exn
                 | exn -> ErrorTarget exn
             | None ->
                 match method with

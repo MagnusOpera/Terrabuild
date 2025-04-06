@@ -38,15 +38,15 @@ module GitHubEventReader =
 
 
 type GitHub() =
-    let refName = "GITHUB_REF_NAME" |> envVar |> Option.toObj
-    let refType = "GITHUB_REF_TYPE" |> envVar |> Option.toObj
-    let stepSummary = "GITHUB_STEP_SUMMARY" |> envVar |> Option.toObj
-    let runId = "GITHUB_RUN_ID" |> envVar |> Option.toObj
-    let repository = "GITHUB_REPOSITORY" |> envVar |> Option.toObj
-    let runAttempt = "GITHUB_RUN_ATTEMPT" |> envVar  |> Option.toObj |> int
+    let refName = "GITHUB_REF_NAME" |> envVar |> Option.get
+    let refType = "GITHUB_REF_TYPE" |> envVar |> Option.get
+    let stepSummary = "GITHUB_STEP_SUMMARY" |> envVar |> Option.get
+    let runId = "GITHUB_RUN_ID" |> envVar |> Option.get
+    let repository = "GITHUB_REPOSITORY" |> envVar |> Option.get
+    let runAttempt = "GITHUB_RUN_ATTEMPT" |> envVar  |> Option.get |> int
     let commitLog = currentDir() |> Git.getCommitLog
     let commit = commitLog.Head
-    let otherCommits = "GITHUB_EVENT_PATH" |> envVar  |> Option.toObj |> GitHubEventReader.findOtherCommits |> List.ofSeq
+    let otherCommits = "GITHUB_EVENT_PATH" |> envVar  |> Option.get |> GitHubEventReader.findOtherCommits |> List.ofSeq
 
     static member Detect() =
         "GITHUB_ACTION" |> envVar |> Option.isSome

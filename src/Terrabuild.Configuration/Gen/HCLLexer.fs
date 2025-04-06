@@ -336,7 +336,7 @@ and token lexerMode lexbuf =
           )
   | 28 -> ( 
 # 94 "Lexer.fsl"
-                         failwithf "unrecognized input: '%s'" <| lexeme lexbuf 
+                         Errors.raiseParseError $"unrecognized input: '{lexeme lexbuf}'" 
 # 340 "Gen/HCLLexer.fs"
           )
   | _ -> failwith "token"

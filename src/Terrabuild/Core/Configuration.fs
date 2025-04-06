@@ -644,7 +644,7 @@ let read (options: ConfigOptions.Options) =
                 let projectFile = FS.combinePath dir "PROJECT" 
                 match projectFile with
                 | FS.File file ->
-                    let projectFile = file |> FS.parentDirectory |> FS.relativePath options.Workspace
+                    let projectFile = file |> FS.parentDirectory |> Option.get |> FS.relativePath options.Workspace
                     try
                         loadProject projectFile
                     with exn -> forwardExternalError($"Error while parsing project '{projectFile}'", exn)

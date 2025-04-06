@@ -59,7 +59,7 @@ let private summaryFilename = "summary.json"
 let private originFilename = "origin"
 
 let createTerrabuildProfile() =
-    let tbDir = FS.combinePath (Environment.GetEnvironmentVariable("HOME")) ".terrabuild"
+    let tbDir = FS.combinePath ("HOME" |> Environment.envVar |> Option.get) ".terrabuild"
     IO.createDirectory tbDir
     tbDir
 

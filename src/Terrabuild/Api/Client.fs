@@ -12,11 +12,12 @@ module private Http =
         let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.prod.magnusopera.io/terrabuild")
         Uri(baseUrl)
 
-    let private request<'req, 'resp> method headers (path: string) (request: 'req): 'resp =
+    let private request<'req, 'resp when 'req : not struct> method headers (path: string) (request: 'req): 'resp =
         let url = Uri($"{apiUrl}{path}").ToString()
         let body =
-            if typeof<'req> <> typeof<Unit> then request |> Json.Serialize |> TextRequest |> Some
-            else None
+            match request |> box with
+            | NonNull request -> request |> Json.Serialize |> TextRequest |> Some
+            | _ -> None
 
         try
             let response = Http.RequestString(url = url, headers = headers, ?body = body, httpMethod = method)
@@ -41,8 +42,8 @@ module private Http =
             else
                 forwardExternalError($"Api failed with error {errorCode}.", exn)
 
-    let get<'req, 'resp> = request<'req, 'resp> HttpMethod.Get
-    let post<'req, 'resp> = request<'req, 'resp> HttpMethod.Post
+    let get<'req, 'resp when 'req: not struct> = request<'req, 'resp> HttpMethod.Get
+    let post<'req, 'resp when 'req: not struct> = request<'req, 'resp> HttpMethod.Post
 
 
 module private Auth =

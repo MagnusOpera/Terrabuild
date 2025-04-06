@@ -26,7 +26,9 @@ let getTempFilename () =
     Path.GetTempFileName()
 
 let getFilename (path: string) =
-    Path.GetFileName(path)
+    match Path.GetFileName(path) with
+    | NonNull filename -> filename
+    | Null -> Errors.raiseBugError $"Path '{path}' does not have a filename"
 
 let exists path =
     Path.Exists(path)
@@ -64,7 +66,7 @@ let copyFiles (targetDir: string) (baseDir: string) (entries: string list) =
     for entry in entries do
         let relative = FS.relativePath baseDir entry
         let target = FS.combinePath targetDir relative
-        let targetDir = FS.parentDirectory target
+        let targetDir = FS.parentDirectory target |> Option.get
         Directory.CreateDirectory targetDir |> ignore
         File.Copy(entry, target, true)
     if entries |> List.isEmpty then None

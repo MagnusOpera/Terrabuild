@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Terrabuild.Common/Terrabuild.Common.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Hub.fs" />
   </ItemGroup>
 

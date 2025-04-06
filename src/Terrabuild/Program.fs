@@ -44,9 +44,7 @@ let rec findWorkspace dir =
     if FS.combinePath dir "WORKSPACE" |> IO.exists then
         Some dir
     else
-        match FS.parentDirectory dir with
-        | null -> None
-        | parentDir -> findWorkspace parentDir
+        dir |> FS.parentDirectory |> Option.bind findWorkspace
 
 let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseResults<TerrabuildArgs>) =
     let debug = result.Contains(TerrabuildArgs.Debug)
@@ -279,9 +277,9 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
 
     let version () =
         let version =
-            Assembly.GetExecutingAssembly()
-                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                    .InformationalVersion
+            match Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>() with
+            | null -> "0.0.0"
+            | fileVersion -> fileVersion.InformationalVersion
         printfn $"Terrabuild v{version}"
         0
  

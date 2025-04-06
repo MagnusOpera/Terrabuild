@@ -92,11 +92,11 @@ type private Signal<'T>(name, eventQueue: IEventQueue) as this =
             with get () = lock this (fun () -> 
                 match raised with
                 | Some raised -> raised
-                | _ -> failwith "Signal '{(this :> ISignal).Name}' is not raised")
+                | _ -> Errors.raiseBugError "Signal '{(this :> ISignal).Name}' is not raised")
 
             and set value = lock this (fun () ->
                 match raised with
-                | Some _ -> failwith $"Signal '{(this :> ISignal).Name}' is already raised"
+                | Some _ -> Errors.raiseBugError $"Signal '{(this :> ISignal).Name}' is already raised"
                 | _ -> 
                     let rec notify() =
                         match subscribers.TryDequeue() with
@@ -152,7 +152,7 @@ type Hub(maxConcurrency) =
             let signal = signals.GetOrAdd(name, getOrAdd)
             match signal with
             | :? Signal<'T> as signal -> signal
-            | _ -> failwith "Unexpected Signal type"
+            | _ -> Errors.raiseBugError "Unexpected Signal type"
 
         member _.Subscribe label signals handler =
             let name = Guid.NewGuid().ToString()

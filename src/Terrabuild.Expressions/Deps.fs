@@ -33,32 +33,41 @@ let private fsoptionTy = typedefof<option<_>>
 let private fskvpTy = typedefof<KeyValuePair<string, _>>
 let reflectionFind (o: obj) =
 
-    let rec reflectionFind (theObject: obj) =
+    let rec reflectionFind (theObject: obj | null) =
         seq {
             match theObject with
-            | null -> ()
             | :? System.Collections.IEnumerable as enumerable ->
                 for so in enumerable do
                     yield! reflectionFind so
             | :? Expr as expr -> yield find expr
-            | _ ->
+            | NonNull theObject ->
                 let ty = theObject.GetType()
                 if ty.IsGenericType then
                     let tyDef = ty.GetGenericTypeDefinition()
                     if tyDef = fsmapTy then
                         let valuesProperty = ty.GetProperty("Values")
-                        let values = valuesProperty.GetValue(theObject)
-                        yield! reflectionFind values
+                        match valuesProperty with
+                        | NonNull valuesProperty ->
+                            let values = valuesProperty.GetValue(theObject)
+                            yield! reflectionFind values
+                        | _ -> ()
                     elif tyDef = fsoptionTy then
-                        let value = ty.GetProperty("Value").GetValue(theObject, null)
-                        yield! reflectionFind value
+                        match ty.GetProperty("Value") with
+                        | NonNull valueProperty ->
+                            let value = valueProperty.GetValue(theObject, null)
+                            yield! reflectionFind value
+                        | _ -> ()
                     elif tyDef = fskvpTy then
-                        let value = ty.GetProperty("Value").GetValue(theObject, null)
-                        yield! reflectionFind value
+                        match ty.GetProperty("Value") with
+                        | NonNull valueProperty ->
+                            let value = valueProperty.GetValue(theObject, null)
+                            yield! reflectionFind value
+                        | _ -> ()
                 elif FSharpType.IsRecord(ty, false) then
                     let fields = FSharpType.GetRecordFields(ty) |> Array.map (fun propInfo -> propInfo.GetValue(theObject, null))
                     for field in fields do
                         yield! reflectionFind field
+            | _ -> ()
         }
 
     o |> reflectionFind |> Seq.fold (fun acc s -> acc + s) Set.empty
