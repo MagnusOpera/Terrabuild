@@ -3,21 +3,21 @@ name: 🦄 Self Build
 on:
   workflow_dispatch:
     inputs:
-      force:
-        type: boolean
-        description: force build
       version:
         type: string
         description: version
         default: latest
-      retry:
-        type: boolean
-        description: retry failed tasks
-        default: false
       prerelease:
         type: boolean
         description: use Terrabuild prerelease
         default: false
+      retry:
+        type: boolean
+        description: retry failed tasks
+        default: false
+      force:
+        type: boolean
+        description: force build
 
 env:
   TERRABUILD_API_URL: https://api.dev.magnusopera.io
