@@ -1,5 +1,4 @@
 name: 🦄 Self Build
-run-name: "${{ github.name }} ${{ inputs.retry == true && 'retry' || '' }} ${{ inputs.force == true && 'force' || '' }}"
 
 on:
   workflow_dispatch:
@@ -11,15 +10,17 @@ on:
         type: string
         description: version
         default: latest
+      retry:
+        type: boolean
+        description: retry failed tasks
+        default: false
+      prerelease:
+        type: boolean
+        description: use Terrabuild prerelease
+        default: false
 
 env:
   TERRABUILD_API_URL: https://api.dev.magnusopera.io
-
-permissions:
-  contents: read
-  packages: write    
-  actions: read
-  checks: write
 
 jobs:
   build:
@@ -33,38 +34,25 @@ jobs:
       - name: Cloning repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.202
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Install Terrabuild
-        uses: jaxxstorm/action-install-gh-release@v1.12.0
+        uses: magnusopera/action-install-gh-release@feature/prerelease
         with:
-          token: ${{ secrets.MAGNUSOPERA_CONTENT_TOKEN }}
           repo: magnusopera/terrabuild
-          platform: linux
           tag: ${{ inputs.version }}
+          prerelease: ${{ inputs.prerelease }}
 
       - name: Login to Space
-        run: terrabuild login --space magnusopera/terrabuild --token ${{ secrets.TERRABUILD_TOKEN }}
+        run: |
+          terrabuild version
+          terrabuild login --space magnusopera/terrabuild --token ${{ secrets.TERRABUILD_TOKEN }}
 
       - name: Build
         run: |
-          echo 'Building ${{ github.ref }}'
-          terrabuild version
           terrabuild run build test \
             --log --debug \
-            -w src \
             -c "dev" \
             ${{ github.event.inputs.force == 'true' && '--force' || '' }} \
+            ${{ inputs.retry == true && '--retry' || '' }} \
             ${{ github.run_attempt > 1 && '--retry' || '' }}
 
       - name: Upload Terrabuild Logs
@@ -74,9 +62,9 @@ jobs:
           name: terrabuild-dev-self-build-${{ github.sha }}
           path: |
             terrabuild-debug.*
-            ~/.terrabuild/buildcache/**/status
-            ~/.terrabuild/buildcache/**/summary.json
-            ~/.terrabuild/buildcache/**/*.log
+            ~/.terrabuild/cache/**/status
+            ~/.terrabuild/cache/**/summary.json
+            ~/.terrabuild/cache/**/*.log
 
       - name: Create Test Report
         uses: magnusopera/test-reporter@main
