@@ -19,5 +19,5 @@ let Serialize (value: obj) =
 
 let Deserialize<'t> (json: string) =
     match JsonSerializer.Deserialize<'t>(json, settings) with
-    | null -> failwithf "Failed to deserialize JSON: %s" json
+    | null -> Errors.raiseBugError $"Failed to deserialize JSON: {json}"
     | value -> value

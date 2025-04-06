@@ -25,7 +25,7 @@ let systemExtensions =
 let terrabuildDir : string =
     match Diagnostics.Process.GetCurrentProcess().MainModule with
     | NonNull mainModule -> mainModule.FileName |> FS.parentDirectory |> Option.get
-    | _ -> failwith "Unable to get the current process main module"
+    | _ -> raiseBugError "Unable to get the current process main module"
 
 //  Diagnostics.Process.GetCurrentProcess().MainModule.FileName |> FS.parentDirectory
 let terrabuildExtensibility =

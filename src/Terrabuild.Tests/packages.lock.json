@@ -1390,7 +1390,8 @@
         "type": "Project",
         "dependencies": {
           "FSharp.Core": "[9.0.201, )",
-          "System.Text.Json": "[9.0.0, )"
+          "System.Text.Json": "[9.0.0, )",
+          "Terrabuild.Common": "[1.0.0, )"
         }
       },
       "terrabuild.scripting": {

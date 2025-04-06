@@ -143,7 +143,7 @@ let unsignaled_subscription1_is_error() =
     triggered2 |> should equal false
     value1.Value |> should equal 42
     value2.Value |> should equal "tralala"
-    (fun () -> value3.Value |> ignore) |> should throw typeof<Exception>
+    (fun () -> value3.Value |> ignore) |> should throw typeof<Errors.TerrabuildException>
 
 
 [<Test>]
@@ -184,7 +184,7 @@ let unsignaled_subscription2_is_error() =
     triggered1 |> should equal true
     triggered2 |> should equal false
     value1.Value |> should equal 42
-    (fun () -> value3.Value |> ignore) |> should throw typeof<Exception>
+    (fun () -> value3.Value |> ignore) |> should throw typeof<Errors.TerrabuildException>
 
 
 
@@ -193,7 +193,7 @@ let computed_must_match_type() =
     let hub = Hub.Create(1)
 
     let value1 = hub.GetSignal<int>("computed1")
-    (fun () -> hub.GetSignal<string>("computed1") |> ignore) |> should throw typeof<Exception>
+    (fun () -> hub.GetSignal<string>("computed1") |> ignore) |> should throw typeof<Errors.TerrabuildException>
 
     let computed2 = hub.GetSignal<string>("computed2")
-    (fun () -> hub.GetSignal<int>("computed2") |> ignore) |> should throw typeof<Exception>
+    (fun () -> hub.GetSignal<int>("computed2") |> ignore) |> should throw typeof<Errors.TerrabuildException>
