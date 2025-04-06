@@ -35,7 +35,7 @@ jobs:
       - name: Build Self
         run: |
           echo "# Self Build" >> $GITHUB_STEP_SUMMARY
-          make self env=dev terrabuild=$PWD/.out/dotnet/terrabuild
+          make self config=Release terrabuild=$PWD/.out/dotnet/terrabuild
 
       - name: Self Integration Tests
         run: make smoke-tests terrabuild=$PWD/.out/dotnet/terrabuild

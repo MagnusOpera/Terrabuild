@@ -303,8 +303,8 @@ let main _ =
 #if RELEASE
     let sentryDsn =
         match "TERRABUILD_SENTRY_DSN" |> envVar with
-        | null -> "https://9d7ab9713b1dfca7abe4437bcd73718a@o4508921459834880.ingest.de.sentry.io/4508921463898192"
-        | dsn -> dsn
+        | Some dsn -> dsn
+        | _ -> "https://9d7ab9713b1dfca7abe4437bcd73718a@o4508921459834880.ingest.de.sentry.io/4508921463898192"
 
     // Sentry can be disabled (empty DSN)
     if String.IsNullOrWhiteSpace(sentryDsn) |> not then
