@@ -9,6 +9,7 @@ type ErrorArea =
     | InvalidArg
     | External
     | Bug
+    | Auth
 
 type TerrabuildException(msg, area, ?innerException: Exception) =
     inherit Exception(msg, innerException |> Option.toObj)
@@ -38,6 +39,9 @@ let raiseExternalError(msg) =
 
 let forwardExternalError(msg, innerException) =
     TerrabuildException(msg, ErrorArea.External, innerException) |> raise
+
+let raiseAuthError(msg, innerException) =
+    TerrabuildException(msg, ErrorArea.Auth, innerException) |> raise
 
 
 let rec dumpKnownException (ex: Exception | null) =
