@@ -106,7 +106,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
         $"| Total Cost | {cost} |" |> append
         $"| Total Gain | {gain} |" |> append
         if options.WhatIf |> not then
-            $"| Duration | {summary.EndedAt - summary.StartedAt} |" |> append
+            $"| Duration | {summary.EndedAt - options.StartedAt} |" |> append
 
         "" |> append
 
