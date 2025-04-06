@@ -6,16 +6,20 @@ let checkAuthError msg f  =
     try
         f()
     with
-        | ex ->
-            let errorCode =
-                match ex.InnerException with
-                | :? WebException as innerEx ->
-                    match innerEx.Response with
-                    | :? HttpWebResponse as hwr -> hwr.StatusCode.ToString()
-                    | _ -> ex.Message
-                | _ -> ex.Message
+    | exn ->
+        let errorCode =
+            match exn.InnerException with
+            | :? WebException as innerEx ->
+                match innerEx.Response with
+                | :? HttpWebResponse as hwr -> hwr.StatusCode.ToString()
+                | _ -> exn.Message
+            | _ -> exn.Message
 
-            forwardExternalError($"{errorCode}: {msg}.", ex)
+        match errorCode with
+        | "401" -> raiseAuthError($"Unauthorized access.", exn)
+        | "403" -> raiseAuthError($"Forbidden access.", exn)
+        | "500" -> forwardExternalError($"Internal server error.", exn)
+        | _ -> forwardExternalError($"Api failed with error {errorCode}.", exn)
 
 
 let create workspaceId token options =

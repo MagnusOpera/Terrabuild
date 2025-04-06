@@ -8,6 +8,8 @@ module private Http =
     open Serilog
     open System.Net
     open Errors
+
+
     let apiUrl =
         let baseUrl = DotNetEnv.Env.GetString("TERRABUILD_API_URL", "https://api.prod.magnusopera.io/terrabuild")
         Uri(baseUrl)
@@ -37,10 +39,11 @@ module private Http =
                     | _ -> exn.Message
                 | _ -> exn.Message
 
-            if errorCode = "422" then
-                forwardExternalError($"Storage limit exceeded, please check your subscription.", exn)
-            else
-                forwardExternalError($"Api failed with error {errorCode}.", exn)
+            match errorCode with
+            | "401" -> raiseAuthError($"Unauthorized access", exn)
+            | "403" -> raiseAuthError($"Forbidden access", exn)
+            | _ -> forwardExternalError($"Api failed with error {errorCode}.", exn)
+
 
     let get<'req, 'resp when 'req: not struct> = request<'req, 'resp> HttpMethod.Get
     let post<'req, 'resp when 'req: not struct> = request<'req, 'resp> HttpMethod.Post
