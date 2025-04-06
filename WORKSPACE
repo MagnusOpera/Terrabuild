@@ -5,7 +5,7 @@ workspace {
 
 
 locals {
-    isProd = terrabuild.configuration == "prod"
+    isProd = terrabuild.configuration == "Release"
     configuration = local.isProd ? "Release" : "Debug"
 }
 

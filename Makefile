@@ -1,16 +1,9 @@
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
-config ?= default
-env ?= default
-terrabuild ?= dotnet run --project $(ROOT_DIR)src/Terrabuild -c $(buildconfig) --
+config ?= Debug
+terrabuild ?= dotnet run --project $(ROOT_DIR)src/Terrabuild -c $(config) --
 refresh ?= false
 version ?= 0.0.0
-
-ifeq ($(config), default)
-	buildconfig = Debug
-else
-	buildconfig = $(config)
-endif
 
 current_dir = $(shell pwd)
 
@@ -27,13 +20,13 @@ current_dir = $(shell pwd)
 #
 
 build:
-	dotnet build -c $(buildconfig) terrabuild.sln
+	dotnet build -c $(config) terrabuild.sln
 
 test:
 	dotnet test terrabuild.sln
 
 parser:
-	dotnet build -c $(buildconfig) /p:DefineConstants="GENERATE_PARSER"
+	dotnet build -c $(config) /p:DefineConstants="GENERATE_PARSER"
 
 clean:
 	-rm terrabuild-debug.*
@@ -58,35 +51,35 @@ usage:
 #
 
 publish:
-	dotnet publish -c $(buildconfig) -p:Version=$(version) -o $(PWD)/.out/dotnet src/Terrabuild
-	dotnet pack -c $(buildconfig) -p:Version=$(version) -o .out
+	dotnet publish -c $(config) -p:Version=$(version) -o $(PWD)/.out/dotnet src/Terrabuild
+	dotnet pack -c $(config) -p:Version=$(version) -o .out
 
 publish-darwin:
-	dotnet publish -c $(buildconfig) -r osx-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/darwin/x64 src/Terrabuild
-	dotnet publish -c $(buildconfig) -r osx-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/darwin/arm64 src/Terrabuild
+	dotnet publish -c $(config) -r osx-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/darwin/x64 src/Terrabuild
+	dotnet publish -c $(config) -r osx-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/darwin/arm64 src/Terrabuild
 
 publish-linux:
-	dotnet publish -c $(buildconfig) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/linux/x64 src/Terrabuild
-	dotnet publish -c $(buildconfig) -r linux-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/linux/arm64 src/Terrabuild
+	dotnet publish -c $(config) -r linux-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/linux/x64 src/Terrabuild
+	dotnet publish -c $(config) -r linux-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/linux/arm64 src/Terrabuild
 
 publish-windows:
-	dotnet publish -c $(buildconfig) -r win-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/windows/x64 src/Terrabuild
-	dotnet publish -c $(buildconfig) -r win-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/windows/arm64 src/Terrabuild
+	dotnet publish -c $(config) -r win-x64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/windows/x64 src/Terrabuild
+	dotnet publish -c $(config) -r win-arm64 -p:PublishSingleFile=true --self-contained -p:Version=$(version) -o $(PWD)/.out/windows/arm64 src/Terrabuild
 
 publish-all: clean publish publish-darwin publish-linux publish-windows
 
 docs:
-	dotnet build src/Terrabuild.Extensions -c $(buildconfig) /p:GenerateDocumentationFile=true
-	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(buildconfig)/net9.0/Terrabuild.Extensions.xml ../terrabuild.io/content/docs/extensions
+	dotnet build src/Terrabuild.Extensions -c $(config) /p:GenerateDocumentationFile=true
+	dotnet run --project tools/DocGen -- src/Terrabuild.Extensions/bin/$(config)/net9.0/Terrabuild.Extensions.xml ../terrabuild.io/content/docs/extensions
 
 self: clean publish
-	$(terrabuild) run build test dist --configuration $(env) --retry --debug --log --local-only
+	$(terrabuild) run build test dist --configuration $(config) --retry --debug --log --local-only
 
 logs:
-	$(terrabuild) logs build test dist --configuration $(env) --debug --log --local-only
+	$(terrabuild) logs build test dist --configuration $(config) --debug --log --local-only
 
 terrabuild:
-	terrabuild run build test dist --configuration $(env) --retry --debug --log --local-only
+	terrabuild run build test dist --configuration $(config) --retry --debug --log --local-only
 
 
 #

@@ -50,7 +50,7 @@ jobs:
         run: |
           terrabuild run build test \
             --log --debug \
-            -c "dev" \
+            -c "Release" \
             ${{ inputs.force == 'true' && '--force' || '' }} \
             ${{ inputs.retry == true && '--retry' || '' }}
 
