@@ -20,7 +20,7 @@ on:
         description: force build
 
 env:
-  TERRABUILD_API_URL: https://api.dev.magnusopera.io
+  TERRABUILD_API_URL: https://api.dev.magnusopera.io/terrabuild
 
 jobs:
   build:
