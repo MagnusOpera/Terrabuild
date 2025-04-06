@@ -17,10 +17,6 @@ jobs:
   regression-test:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      packages: write    
-
     steps:
       - name: Cloning repository
         uses: actions/checkout@v4
