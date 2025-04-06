@@ -8,10 +8,10 @@ open Errors
 [<CLIMutable>]
 type Package = {
     [<JsonPropertyName("dependencies")>]
-    Dependencies: Dictionary<string, string>
+    Dependencies: Dictionary<string, string> option
 
     [<JsonPropertyName("devDependencies")>]
-    DevDependencies: Dictionary<string, string>
+    DevDependencies: Dictionary<string, string> option
 }
 
 let findProjectFile (directory: string) =
@@ -25,19 +25,23 @@ let findProjectFile (directory: string) =
 
 let findDependencies (projectFile: string) =
     let json = IO.readTextFile projectFile
-    let package = JsonSerializer.Deserialize<Package>(json)
+    let package = Json.Deserialize<Package> json
 
     let dependencies = seq {
-        if package.Dependencies|> isNull |> not then
-            for (KeyValue(_, value)) in package.Dependencies do
+        match package.Dependencies with
+        | Some dependencies ->
+            for (KeyValue(_, value)) in dependencies do
                 match value with
                 | String.Regex "^file:(.*)$" [project] -> yield project
                 | _ -> ()
+        | _ -> ()
 
-        if package.DevDependencies|> isNull |> not then
-            for (KeyValue(_, value)) in package.DevDependencies do
+        match package.DevDependencies with
+        | Some dependencies ->
+            for (KeyValue(_, value)) in dependencies do
                 match value with
                 | String.Regex "^file:(.*)$" [project] -> yield project
                 | _ -> ()
+        | _ -> ()
     }
     Set dependencies

@@ -17,7 +17,7 @@ let relativePath fromDir toDir =
     Path.GetRelativePath(fromDir, toDir)
 
 let parentDirectory (path: string) =
-    Path.GetDirectoryName(path)
+    Path.GetDirectoryName(path) |> Option.ofObj
 
 let (|File|Directory|None|) entry =
     if File.Exists(entry) then File entry

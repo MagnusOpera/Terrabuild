@@ -57,10 +57,10 @@ let private defaultMethod (ty: Type) = ty.GetMethod("Default")
 let private cache = System.Collections.Concurrent.ConcurrentDictionary<Type, TypeKind>()
 let getKind ty = cache.GetOrAdd(ty, matchType)
 
-let private readCache = System.Collections.Concurrent.ConcurrentDictionary<Type, MethodInfo>()
+let private readCache = System.Collections.Concurrent.ConcurrentDictionary<Type, MethodInfo | null>()
 let getRead ty = readCache.GetOrAdd(ty, readMethod)
 
-let private defaultCache = System.Collections.Concurrent.ConcurrentDictionary<Type, MethodInfo>()
+let private defaultCache = System.Collections.Concurrent.ConcurrentDictionary<Type, MethodInfo | null>()
 let getDefault ty = defaultCache.GetOrAdd(ty, defaultMethod)
 
 

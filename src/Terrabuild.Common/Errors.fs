@@ -11,7 +11,7 @@ type ErrorArea =
     | Bug
 
 type TerrabuildException(msg, area, ?innerException: Exception) =
-    inherit Exception(msg, innerException |> Option.defaultValue null)
+    inherit Exception(msg, innerException |> Option.toObj)
     member _.Area: ErrorArea = area
 
 
@@ -40,7 +40,7 @@ let forwardExternalError(msg, innerException) =
     TerrabuildException(msg, ErrorArea.External, innerException) |> raise
 
 
-let rec dumpKnownException (ex: Exception) =
+let rec dumpKnownException (ex: Exception | null) =
     seq {
         match ex with
         | :? TerrabuildException as ex ->
@@ -51,7 +51,7 @@ let rec dumpKnownException (ex: Exception) =
     }
 
 let getErrorArea (ex: Exception) =
-    let rec getErrorArea (area: ErrorArea) (ex: Exception) =
+    let rec getErrorArea (area: ErrorArea) (ex: Exception | null) =
         match ex with
         | :? TerrabuildException as ex -> getErrorArea ex.Area ex.InnerException
         | null -> area

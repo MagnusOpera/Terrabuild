@@ -39,9 +39,10 @@ module DotnetHelpers =
         let refs =
             xdoc.Descendants() 
             |> Seq.filter (fun x -> x.Name.LocalName = "ProjectReference")
-            |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string)
+            |> Seq.map (fun x -> !> x.Attribute(NsNone + "Include") : string | null)
+            |> Seq.choose Option.ofObj
             |> Seq.map (fun x -> x.Replace("\\", "/"))
-            |> Seq.map Path.GetDirectoryName
+            |> Seq.map (Option.get << FS.parentDirectory)
             |> Seq.distinct
             |> List.ofSeq
         Set refs 

@@ -128,7 +128,7 @@ let rec findProjectInDir dir =
     }
 
 
-let toLower s = s.ToString().ToLowerInvariant()
+let toLower s = $"{s}".ToLowerInvariant()
 let toExtension (pt: ExtensionType) = pt |> toLower
 
 let genWorkspace (extensions: ExtensionType set) =

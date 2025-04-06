@@ -41,7 +41,7 @@ type Scripting() =
         | None -> "None"
 
 let getMethod name =
-    let method = typeof<Scripting>.GetMethod(name)
+    let method = typeof<Scripting>.GetMethod(name) |> nonNull
     method
 
 [<Test>]

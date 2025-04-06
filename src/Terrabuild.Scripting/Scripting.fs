@@ -29,7 +29,7 @@ type Invocable(method: MethodInfo) =
         let someCase = cases |> Array.find (fun case -> case.Name = "Some")
         FSharp.Reflection.FSharpValue.MakeUnion(someCase, [| value |])
 
-    let rec mapParameter (value: Value) (name: string) (prmType: Type): obj =
+    let rec mapParameter (value: Value) (name: string) (prmType: Type) =
         match value with
         | Value.Nothing ->
             if prmType.IsGenericType && prmType.GetGenericTypeDefinition() = typedefof<Option<_>> then convertToNone prmType
@@ -68,7 +68,7 @@ type Invocable(method: MethodInfo) =
                     | Some idx -> 
                         let field = fields[idx]
                         let value = mapParameter value field.Name field.PropertyType
-                        fieldValues[idx] <- true, value
+                        fieldValues[idx] <- true, (value |> box)
                 let ctorValues =
                     fieldValues
                     |> Array.mapi (fun idx (initialized, value) -> 
@@ -79,29 +79,30 @@ type Invocable(method: MethodInfo) =
                             value) 
                 ctor(ctorValues)
             | TypeHelpers.TypeKind.FsMap ->
-                let values = map |> Map.map (fun name value -> mapParameter value name typeof<string> :?> string)
+                let values = map |> Map.map (fun name value -> mapParameter value name typeof<string> |> nonNull :?> string)
                 values
             | TypeHelpers.TypeKind.FsOption ->
-                let values = map |> Map.map (fun name value -> mapParameter value name typeof<string> :?> string)
+                let values = map |> Map.map (fun name value -> mapParameter value name typeof<string> |> nonNull :?> string)
                 convertToSome prmType values
             | tpe -> raiseSymbolError $"Can't assign default value to parameter '{name}' with type '{tpe}'"
 
         | Value.List list ->
             match TypeHelpers.getKind prmType with
             | TypeHelpers.TypeKind.FsList ->
-                let values = list |> List.map (fun value -> mapParameter value name typeof<string> :?> string)
+                let values = list |> List.map (fun value -> mapParameter value name typeof<string> |> nonNull :?> string)
                 values
             | TypeHelpers.TypeKind.FsOption -> 
-                let values = list |> List.map (fun value -> mapParameter value name typeof<string> :?> string)
+                let values = list |> List.map (fun value -> mapParameter value name typeof<string> |> nonNull :?> string)
                 convertToSome prmType values
             | tpe -> raiseTypeError $"Can't assign default value to parameter '{name}' with type '{tpe}'"
 
     let mapParameters (map: Map<string, Value>) (prms: ParameterInfo array) =
         prms
         |> Array.map (fun prm ->
-            match map |> Map.tryFind prm.Name with
-            | None -> mapParameter Value.Nothing prm.Name prm.ParameterType
-            | Some value -> mapParameter value prm.Name prm.ParameterType) 
+            let prmName = prm.Name |> nonNull
+            match map |> Map.tryFind prmName with
+            | None -> mapParameter Value.Nothing prmName prm.ParameterType
+            | Some value -> mapParameter value prmName prm.ParameterType) 
 
     let buildArgs (value: Value) =
         match value with
