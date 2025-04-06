@@ -4,12 +4,6 @@ project @dotnet {
                "dotnet"]
 }
 
-extension @docker {
-  defaults {
-    image = "ghcr.io/magnusopera/terrabuild"
-  }
-}
-
 target build {
     @dotnet build { version = terrabuild.tag }
 }
