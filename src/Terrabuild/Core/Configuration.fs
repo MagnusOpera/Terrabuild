@@ -466,7 +466,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                         let containerDeps =
                             match container with
                             | Some container ->
-                                let lstVariables = extVariables |> Seq.choose Environment.getEnvVar |> List.ofSeq
+                                let lstVariables = extVariables |> Seq.choose Environment.envVar |> List.ofSeq
                                 let lstPlatform = platform |> Option.map (fun p -> [ p ]) |> Option.defaultValue []
                                 container :: lstVariables @ lstPlatform
                             | _ -> []
