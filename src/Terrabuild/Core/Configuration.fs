@@ -463,18 +463,15 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                         |> Option.defaultValue Set.empty
 
                     let hash =
-                        let containerInfos = 
+                        let containerDeps =
                             match container with
-                            | Some container -> [ container ] @ List.ofSeq extVariables
+                            | Some container ->
+                                let lstVariables = List.ofSeq extVariables
+                                let lstPlatform = platform |> Option.map (fun p -> [ p ]) |> Option.defaultValue []
+                                container :: lstVariables @ lstPlatform
                             | _ -> []
 
-                        let platformInfos = 
-                            match platform with
-                            // TODO: why extVariables ??? seems useless
-                            | Some platform -> [ platform ] @ List.ofSeq extVariables
-                            | _ -> []
-
-                        [ step.Extension; step.Command ] @ containerInfos @ platformInfos
+                        [ step.Extension; step.Command ] @ containerDeps
                         |> Hash.sha256strings
 
                     let targetContext = {
