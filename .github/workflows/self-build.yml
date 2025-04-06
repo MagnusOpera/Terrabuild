@@ -51,9 +51,8 @@ jobs:
           terrabuild run build test \
             --log --debug \
             -c "dev" \
-            ${{ github.event.inputs.force == 'true' && '--force' || '' }} \
-            ${{ inputs.retry == true && '--retry' || '' }} \
-            ${{ github.run_attempt > 1 && '--retry' || '' }}
+            ${{ inputs.force == 'true' && '--force' || '' }} \
+            ${{ inputs.retry == true && '--retry' || '' }}
 
       - name: Upload Terrabuild Logs
         uses: actions/upload-artifact@v4
