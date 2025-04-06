@@ -33,8 +33,6 @@ type Summary = {
     BranchOrTag: string
     StartedAt: DateTime
     EndedAt: DateTime
-    TotalDuration: TimeSpan
-    BuildDuration: TimeSpan
     IsSuccess: bool
     Targets: string set
     Nodes: Map<string, NodeInfo>
@@ -152,6 +150,7 @@ type Restorable(action: unit -> unit, dependencies: Restorable list) =
 
 
 let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
+    let startedAt = DateTime.UtcNow
     let targets = options.Targets |> String.join " "
     $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
 
@@ -351,11 +350,6 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     let headCommit = options.HeadCommit
     let branchOrTag = options.BranchOrTag
 
-    let startedAt = options.StartedAt
-    let endedAt = DateTime.UtcNow
-    let buildDuration = endedAt - startedAt
-    let totalDuration = endedAt - startedAt
-
     let nodeStatus =
         let getDependencyStatus _ (node: GraphDef.Node) =
             match nodeResults.TryGetValue node.Id with
@@ -378,9 +372,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     let buildInfo = { Summary.Commit = headCommit.Sha
                       Summary.BranchOrTag = branchOrTag
                       Summary.StartedAt = startedAt
-                      Summary.EndedAt = endedAt
-                      Summary.BuildDuration = buildDuration
-                      Summary.TotalDuration = totalDuration
+                      Summary.EndedAt = DateTime.UtcNow
                       Summary.IsSuccess = isSuccess
                       Summary.Targets = options.Targets
                       Summary.Nodes = nodeStatus }
@@ -395,6 +387,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
 
 let loadSummary (options: ConfigOptions.Options) (cache: Cache.ICache) (graph: GraphDef.Graph) =
+    let startedAt = DateTime.UtcNow
     let allowRemoteCache = options.LocalOnly |> not
 
     let nodeStatus =
@@ -425,17 +418,11 @@ let loadSummary (options: ConfigOptions.Options) (cache: Cache.ICache) (graph: G
     let headCommit = options.HeadCommit
     let branchOrTag = options.BranchOrTag
 
-    let startedAt = options.StartedAt
     let endedAt = DateTime.UtcNow
-    let buildDuration = endedAt - startedAt
-    let totalDuration = endedAt - startedAt
-
     let buildInfo = { Summary.Commit = headCommit.Sha
                       Summary.BranchOrTag = branchOrTag
                       Summary.StartedAt = startedAt
                       Summary.EndedAt = endedAt
-                      Summary.BuildDuration = buildDuration
-                      Summary.TotalDuration = totalDuration
                       Summary.IsSuccess = isSuccess
                       Summary.Targets = options.Targets
                       Summary.Nodes = nodeStatus }

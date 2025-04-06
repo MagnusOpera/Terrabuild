@@ -103,8 +103,10 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
                     else cost, gain + duration
                 | _ -> cost, gain
             ) (TimeSpan.Zero, TimeSpan.Zero)
-        $"| Cost | {cost} |" |> append
-        $"| Gain | {gain} |" |> append
+        $"| Total Cost | {cost} |" |> append
+        $"| Total Gain | {gain} |" |> append
+        if options.WhatIf |> not then
+            $"| Duration | {summary.EndedAt - summary.StartedAt} |" |> append
 
         "" |> append
 

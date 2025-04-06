@@ -145,7 +145,8 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             let result =
                 if summary.IsSuccess then Ansi.Emojis.happy
                 else Ansi.Emojis.sad
-            $"{result} Completed in {summary.TotalDuration}" |> Terminal.writeLine
+            let duration = DateTime.UtcNow - options.StartedAt
+            $"{result} Completed in {duration}" |> Terminal.writeLine
 
         if summary.IsSuccess then 0
         else 5

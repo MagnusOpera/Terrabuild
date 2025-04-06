@@ -75,6 +75,9 @@ docs:
 self: clean publish
 	$(terrabuild) run build test dist --configuration $(config) --retry --debug --log --local-only
 
+self-logs:
+	$(terrabuild) logs build test dist --configuration $(config) --debug --log --local-only
+
 logs:
 	$(terrabuild) logs build test dist --configuration $(config) --debug --log --local-only
 
