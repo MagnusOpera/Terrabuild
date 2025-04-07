@@ -1,6 +1,6 @@
-module Transpiler.Common
-open AST.HCL
-open AST.Common
+module private Terrabuild.Configuration.Transpiler.Common
+open Terrabuild.Lang.AST
+open Terrabuild.Configuration.AST
 open Helpers
 
 let toExtension (block: Block) =

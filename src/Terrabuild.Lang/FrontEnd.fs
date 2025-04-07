@@ -1,4 +1,4 @@
-module FrontEnd.HCL
+module Terrabuild.Lang.FrontEnd
 
 open FSharp.Text.Lexing
 open Errors
@@ -7,14 +7,14 @@ open System.Collections.Generic
 
 
 let parse txt =
-    let lexerMode = Stack([Lexer.HCL.LexerMode.Default])
+    let lexerMode = Stack([Lexer.LexerMode.Default])
 
     let switchableLexer (lexbuff: LexBuffer<char>) =
-        let mode = lexerMode |> Lexer.HCL.peek
+        let mode = lexerMode |> Lexer.peek
         let lexer = 
             match mode with
-            | Lexer.HCL.LexerMode.Default -> Lexer.HCL.token lexerMode
-            | Lexer.HCL.LexerMode.String -> Lexer.HCL.interpolatedString (StringBuilder()) lexerMode
+            | Lexer.LexerMode.Default -> Lexer.token lexerMode
+            | Lexer.LexerMode.String -> Lexer.interpolatedString (StringBuilder()) lexerMode
 
         let token = lexer lexbuff
         // printfn $"### SwitchableLexer  mode: {mode}  token: {token}"
@@ -22,7 +22,7 @@ let parse txt =
 
     let lexbuf = LexBuffer<_>.FromString txt
     try
-        Parser.HCL.File switchableLexer lexbuf
+        Parser.File switchableLexer lexbuf
     with
     | :? TerrabuildException as exn ->
         let err = sprintf "Parse error at (%d,%d)"

@@ -1,10 +1,10 @@
-module internal Lexer.HCL
+module internal Terrabuild.Lang.Lexer
 
 # 1 "Lexer.fsl"
  
 // module Lexer
 
-open Parser.HCL  // we need the terminal tokens from the Parser
+open Terrabuild.Lang.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 open System.Text
 open Errors
@@ -29,7 +29,7 @@ let pop (lexerMode: Stack<LexerMode>) = lexerMode.Pop()
 
 
 
-# 32 "Gen/HCLLexer.fs"
+# 32 "Gen/Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -180,27 +180,27 @@ and token lexerMode lexbuf =
   | 0 -> ( 
 # 46 "Lexer.fsl"
                             DOUBLE_QUESTION 
-# 183 "Gen/HCLLexer.fs"
+# 183 "Gen/Lexer.fs"
           )
   | 1 -> ( 
 # 47 "Lexer.fsl"
                            QUESTION 
-# 188 "Gen/HCLLexer.fs"
+# 188 "Gen/Lexer.fs"
           )
   | 2 -> ( 
 # 48 "Lexer.fsl"
                             DOT_QUESTION 
-# 193 "Gen/HCLLexer.fs"
+# 193 "Gen/Lexer.fs"
           )
   | 3 -> ( 
 # 49 "Lexer.fsl"
                            DOT 
-# 198 "Gen/HCLLexer.fs"
+# 198 "Gen/Lexer.fs"
           )
   | 4 -> ( 
 # 50 "Lexer.fsl"
                            COLON 
-# 203 "Gen/HCLLexer.fs"
+# 203 "Gen/Lexer.fs"
           )
   | 5 -> ( 
 # 51 "Lexer.fsl"
@@ -211,7 +211,7 @@ and token lexerMode lexbuf =
                        | LexerMode.String -> STRING_START
                        | _ -> LBRACE
                    
-# 214 "Gen/HCLLexer.fs"
+# 214 "Gen/Lexer.fs"
           )
   | 6 -> ( 
 # 58 "Lexer.fsl"
@@ -221,77 +221,77 @@ and token lexerMode lexbuf =
                        | LexerMode.Default -> RBRACE
                        | _ -> EXPRESSION_END
                    
-# 224 "Gen/HCLLexer.fs"
+# 224 "Gen/Lexer.fs"
           )
   | 7 -> ( 
 # 64 "Lexer.fsl"
                            LSQBRACKET 
-# 229 "Gen/HCLLexer.fs"
+# 229 "Gen/Lexer.fs"
           )
   | 8 -> ( 
 # 65 "Lexer.fsl"
                            RSQBRACKET 
-# 234 "Gen/HCLLexer.fs"
+# 234 "Gen/Lexer.fs"
           )
   | 9 -> ( 
 # 66 "Lexer.fsl"
                            LPAREN 
-# 239 "Gen/HCLLexer.fs"
+# 239 "Gen/Lexer.fs"
           )
   | 10 -> ( 
 # 67 "Lexer.fsl"
                            RPAREN 
-# 244 "Gen/HCLLexer.fs"
+# 244 "Gen/Lexer.fs"
           )
   | 11 -> ( 
 # 68 "Lexer.fsl"
                             DOUBLE_EQUAL 
-# 249 "Gen/HCLLexer.fs"
+# 249 "Gen/Lexer.fs"
           )
   | 12 -> ( 
 # 69 "Lexer.fsl"
                            EQUAL 
-# 254 "Gen/HCLLexer.fs"
+# 254 "Gen/Lexer.fs"
           )
   | 13 -> ( 
 # 70 "Lexer.fsl"
                             NOT_EQUAL 
-# 259 "Gen/HCLLexer.fs"
+# 259 "Gen/Lexer.fs"
           )
   | 14 -> ( 
 # 71 "Lexer.fsl"
                            COMMA 
-# 264 "Gen/HCLLexer.fs"
+# 264 "Gen/Lexer.fs"
           )
   | 15 -> ( 
 # 72 "Lexer.fsl"
                            MINUS 
-# 269 "Gen/HCLLexer.fs"
+# 269 "Gen/Lexer.fs"
           )
   | 16 -> ( 
 # 73 "Lexer.fsl"
                            PLUS 
-# 274 "Gen/HCLLexer.fs"
+# 274 "Gen/Lexer.fs"
           )
   | 17 -> ( 
 # 74 "Lexer.fsl"
                            BANG 
-# 279 "Gen/HCLLexer.fs"
+# 279 "Gen/Lexer.fs"
           )
   | 18 -> ( 
 # 75 "Lexer.fsl"
                            AND 
-# 284 "Gen/HCLLexer.fs"
+# 284 "Gen/Lexer.fs"
           )
   | 19 -> ( 
 # 76 "Lexer.fsl"
                            OR 
-# 289 "Gen/HCLLexer.fs"
+# 289 "Gen/Lexer.fs"
           )
   | 20 -> ( 
 # 77 "Lexer.fsl"
                            singleLineComment lexerMode lexbuf 
-# 294 "Gen/HCLLexer.fs"
+# 294 "Gen/Lexer.fs"
           )
   | 21 -> ( 
 # 78 "Lexer.fsl"
@@ -299,17 +299,17 @@ and token lexerMode lexbuf =
                        lexerMode |> push LexerMode.String
                        STRING_START
                    
-# 302 "Gen/HCLLexer.fs"
+# 302 "Gen/Lexer.fs"
           )
   | 22 -> ( 
 # 83 "Lexer.fsl"
                                   lexbuf |> mkIdentifier |> IDENTIFIER 
-# 307 "Gen/HCLLexer.fs"
+# 307 "Gen/Lexer.fs"
           )
   | 23 -> ( 
 # 84 "Lexer.fsl"
                                      lexbuf |> mkIdentifier |> KEY 
-# 312 "Gen/HCLLexer.fs"
+# 312 "Gen/Lexer.fs"
           )
   | 24 -> ( 
 # 86 "Lexer.fsl"
@@ -317,27 +317,27 @@ and token lexerMode lexbuf =
                        let s = lexeme lexbuf |> int
                        NUMBER (s)
                    
-# 320 "Gen/HCLLexer.fs"
+# 320 "Gen/Lexer.fs"
           )
   | 25 -> ( 
 # 91 "Lexer.fsl"
                                   token lexerMode lexbuf 
-# 325 "Gen/HCLLexer.fs"
+# 325 "Gen/Lexer.fs"
           )
   | 26 -> ( 
 # 92 "Lexer.fsl"
                                lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexerMode lexbuf 
-# 330 "Gen/HCLLexer.fs"
+# 330 "Gen/Lexer.fs"
           )
   | 27 -> ( 
 # 93 "Lexer.fsl"
                            EOF 
-# 335 "Gen/HCLLexer.fs"
+# 335 "Gen/Lexer.fs"
           )
   | 28 -> ( 
 # 94 "Lexer.fsl"
                          Errors.raiseParseError $"unrecognized input: '{lexeme lexbuf}'" 
-# 340 "Gen/HCLLexer.fs"
+# 340 "Gen/Lexer.fs"
           )
   | _ -> failwith "token"
 // Rule singleLineComment
@@ -346,17 +346,17 @@ and singleLineComment lexerMode lexbuf =
   | 0 -> ( 
 # 97 "Lexer.fsl"
                                lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexerMode lexbuf 
-# 349 "Gen/HCLLexer.fs"
+# 349 "Gen/Lexer.fs"
           )
   | 1 -> ( 
 # 98 "Lexer.fsl"
                            EOF 
-# 354 "Gen/HCLLexer.fs"
+# 354 "Gen/Lexer.fs"
           )
   | 2 -> ( 
 # 99 "Lexer.fsl"
                          singleLineComment lexerMode lexbuf 
-# 359 "Gen/HCLLexer.fs"
+# 359 "Gen/Lexer.fs"
           )
   | _ -> failwith "singleLineComment"
 // Rule interpolatedString
@@ -365,7 +365,7 @@ and interpolatedString (acc: StringBuilder) lexerMode lexbuf =
   | 0 -> ( 
 # 102 "Lexer.fsl"
                                raiseParseError "newline encountered in string" 
-# 368 "Gen/HCLLexer.fs"
+# 368 "Gen/Lexer.fs"
           )
   | 1 -> ( 
 # 103 "Lexer.fsl"
@@ -373,7 +373,7 @@ and interpolatedString (acc: StringBuilder) lexerMode lexbuf =
                        acc.Append("\"") |> ignore
                        interpolatedString acc lexerMode lexbuf
                    
-# 376 "Gen/HCLLexer.fs"
+# 376 "Gen/Lexer.fs"
           )
   | 2 -> ( 
 # 107 "Lexer.fsl"
@@ -381,7 +381,7 @@ and interpolatedString (acc: StringBuilder) lexerMode lexbuf =
                        acc.Append("{") |> ignore
                        interpolatedString acc lexerMode lexbuf
                    
-# 384 "Gen/HCLLexer.fs"
+# 384 "Gen/Lexer.fs"
           )
   | 3 -> ( 
 # 111 "Lexer.fsl"
@@ -389,7 +389,7 @@ and interpolatedString (acc: StringBuilder) lexerMode lexbuf =
                        acc.Append("}") |> ignore
                        interpolatedString acc lexerMode lexbuf
                    
-# 392 "Gen/HCLLexer.fs"
+# 392 "Gen/Lexer.fs"
           )
   | 4 -> ( 
 # 115 "Lexer.fsl"
@@ -397,7 +397,7 @@ and interpolatedString (acc: StringBuilder) lexerMode lexbuf =
                        lexerMode |> pop |> ignore
                        STRING_END (acc.ToString())
                    
-# 400 "Gen/HCLLexer.fs"
+# 400 "Gen/Lexer.fs"
           )
   | 5 -> ( 
 # 119 "Lexer.fsl"
@@ -405,7 +405,7 @@ and interpolatedString (acc: StringBuilder) lexerMode lexbuf =
                        lexerMode |> push LexerMode.Default
                        EXPRESSION_START (acc.ToString())
                    
-# 408 "Gen/HCLLexer.fs"
+# 408 "Gen/Lexer.fs"
           )
   | 6 -> ( 
 # 123 "Lexer.fsl"
@@ -413,8 +413,8 @@ and interpolatedString (acc: StringBuilder) lexerMode lexbuf =
                        lexbuf |> lexeme |> acc.Append |> ignore
                        interpolatedString acc lexerMode lexbuf
                    
-# 416 "Gen/HCLLexer.fs"
+# 416 "Gen/Lexer.fs"
           )
   | _ -> failwith "interpolatedString"
 
-# 3000000 "Gen/HCLLexer.fs"
+# 3000000 "Gen/Lexer.fs"

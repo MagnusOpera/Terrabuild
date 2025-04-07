@@ -1357,9 +1357,9 @@
         "type": "Project",
         "dependencies": {
           "FSharp.Core": "[9.0.201, )",
-          "FsLexYacc": "[11.3.0, )",
           "System.Text.Json": "[9.0.0, )",
-          "Terrabuild.Expressions": "[1.0.0, )"
+          "Terrabuild.Expressions": "[1.0.0, )",
+          "Terrabuild.Lang": "[1.0.0, )"
         }
       },
       "terrabuild.expressions": {
@@ -1384,6 +1384,16 @@
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )",
           "Terrabuild.Extensibility": "[1.0.0, )"
+        }
+      },
+      "Terrabuild.Lang": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[9.0.201, )",
+          "FsLexYacc": "[11.3.0, )",
+          "System.Text.Json": "[9.0.0, )",
+          "Terrabuild.Common": "[1.0.0, )",
+          "Terrabuild.Expressions": "[1.0.0, )"
         }
       },
       "terrabuild.pubsub": {

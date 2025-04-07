@@ -2,49 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <Nullable>disable</Nullable>
   </PropertyGroup>
 
-    <Choose>
-        <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch(
-                         $(DefineConstants), '^(.*;)*GENERATE_PARSER(;.*)*$'))">
-            <ItemGroup>
-                <FsYacc Include="Parser.fsy">
-                    <OtherFlags>-v --internal --module Parser.HCL -o Gen/HCLParser.fs</OtherFlags>
-                </FsYacc>
-                <FsLex Include="Lexer.fsl">
-                    <OtherFlags>--internal --module Lexer.HCL --unicode -o Gen/HCLLexer.fs</OtherFlags>
-                </FsLex>
-            </ItemGroup>
-        </When>
-    </Choose>
-
   <ItemGroup>
-    <Compile Include="AST/Helpers.fs" />
-    <Compile Include="AST/HCL.fs" />
     <Compile Include="AST/Common.fs" />
     <Compile Include="AST/Project.fs" />
     <Compile Include="AST/Workspace.fs" />
-
-    <Compile Include="Gen/HCLParser.fsi" />
-    <Compile Include="Gen/HCLParser.fs" />
-    <Compile Include="Gen/HCLLexer.fs" />
 
     <Compile Include="Transpiler/Helpers.fs" />
     <Compile Include="Transpiler/Common.fs" />
     <Compile Include="Transpiler/Workspace.fs" />
     <Compile Include="Transpiler/Project.fs" />
 
-    <Compile Include="FrontEnd/HCL.fs" />
     <Compile Include="FrontEnd/Project.fs" />
     <Compile Include="FrontEnd/Workspace.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FsLexYacc" Version="11.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="../Terrabuild.Lang/Terrabuild.Lang.fsproj" />
     <ProjectReference Include="../Terrabuild.Expressions/Terrabuild.Expressions.fsproj" />
   </ItemGroup>
 

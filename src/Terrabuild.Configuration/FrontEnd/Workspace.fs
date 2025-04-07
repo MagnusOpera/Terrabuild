@@ -1,5 +1,5 @@
-module FrontEnd.Workspace
+module Terrabuild.Configuration.FrontEnd.Workspace
 
 let parse txt =
-    let hcl = HCL.parse txt
-    Transpiler.Workspace.transpile hcl.Blocks
+    let ast = Terrabuild.Lang.FrontEnd.parse txt
+    Terrabuild.Configuration.Transpiler.Workspace.transpile ast.Blocks

@@ -1,7 +1,7 @@
-module Transpiler.Project
-open AST.HCL
-open AST.Common
-open AST.Project
+module Terrabuild.Configuration.Transpiler.Project
+open Terrabuild.Lang.AST
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.Project
 open Errors
 open Terrabuild.Expressions
 open Common

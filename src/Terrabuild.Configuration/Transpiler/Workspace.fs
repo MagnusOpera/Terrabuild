@@ -1,10 +1,10 @@
-module Transpiler.Workspace
+module Terrabuild.Configuration.Transpiler.Workspace
 open Errors
 open Terrabuild.Expressions
 open Common
-open AST.HCL
-open AST.Common
-open AST.Workspace
+open Terrabuild.Lang.AST
+open Terrabuild.Configuration.AST
+open Terrabuild.Configuration.AST.Workspace
 open Collections
 open Helpers
 
