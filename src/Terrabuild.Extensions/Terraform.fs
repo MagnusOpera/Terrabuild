@@ -47,7 +47,7 @@ type Terraform() =
             match config with
             | Some config -> $" -backend-config={config}"
             | _ -> ""
-        let ops = [ shellOp "terraform" $"init{config}" ]
+        let ops = [ shellOp "terraform" $"init -reconfigure{config}" ]
         execRequest Cacheability.Always ops
 
 
@@ -80,11 +80,15 @@ type Terraform() =
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
-    static member plan (context: ActionContext) (workspace: string option) (variables: Map<string, string>) =
+    static member plan (context: ActionContext) (config: string option) (workspace: string option) (variables: Map<string, string>) =
         let vars = variables |> Seq.fold (fun acc (KeyValue(key, value)) -> acc + $" -var=\"{key}={value}\"") ""
+        let config =
+            match config with
+            | Some config -> $" -backend-config={config}"
+            | _ -> ""
 
         let ops = [
-            shellOp "terraform" "init"
+            shellOp "terraform" $"init -reconfigure{config}"
             
             match workspace with
             | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
@@ -102,9 +106,14 @@ type Terraform() =
     /// * apply plan
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
-    static member apply (context: ActionContext) (workspace: string option) =
+    static member apply (context: ActionContext) (config: string option) (workspace: string option) =
+        let config =
+            match config with
+            | Some config -> $" -backend-config={config}"
+            | _ -> ""
+
         let ops = [
-            shellOp "terraform" "init"
+            shellOp "terraform" $"init -reconfigure{config}"
             
             match workspace with
             | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
