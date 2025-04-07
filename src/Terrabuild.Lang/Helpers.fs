@@ -1,4 +1,4 @@
-module Helpers
+module private Terrabuild.Lang.Helpers
 open Terrabuild.Expressions
 open Errors
 
