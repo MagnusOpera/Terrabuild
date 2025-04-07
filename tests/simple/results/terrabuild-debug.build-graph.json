@@ -56,7 +56,7 @@
         "*.planfile"
       ],
       "projectHash": "9EC6C3232028C098085052766313F5789DE2A40C2EF98A2D15E86D8F9615CFF2",
-      "targetHash": "B3A283DA4429181A8A93A8AEC8543B89F7AC9CE499587170A81E68FEDA9D5D8A",
+      "targetHash": "3B194397843BD7FAB4A8695F7894A8C057C896D2AFB944CEF2833DB97BE8EFB1",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -64,7 +64,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "init"
+          "arguments": "init -reconfigure"
         },
         {
           "container": "hashicorp/terraform:1.10",
