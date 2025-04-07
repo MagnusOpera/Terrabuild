@@ -111,14 +111,25 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     Log.Debug("Loading project definition {ProjectId}", projectId)
 
     let projectConfig =
-        match projectFile with
-        | FS.File projectFile ->
-            let projectContent = File.ReadAllText projectFile
-            Terrabuild.Configuration.FrontEnd.Project.parse projectContent
-        | _ ->
-            raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
+        let projectConfig =
+            match projectFile with
+            | FS.File projectFile ->
+                let projectContent = File.ReadAllText projectFile
+                FrontEnd.Project.parse projectContent
+            | _ ->
+                raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 
-    let extensions = extensions |> Map.addMap projectConfig.Extensions
+        // enrich workspace locals with project locals
+        // NOTE we are checking for duplicated fields as this is an error
+        let locals =
+            workspaceConfig.Locals
+            |> Map.iter (fun name _ ->
+                if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+            workspaceConfig.Locals |> Map.addMap projectConfig.Locals
+
+        { projectConfig with
+            Extensions = extensions |> Map.addMap projectConfig.Extensions
+            Locals = locals}
 
     let projectScripts =
         projectConfig.Extensions
@@ -159,8 +170,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     let dependsOn =
         // collect dependencies for all the project
         // NOTE we are keeping only project dependencies as we want to construct project graph
-        projectConfig.Project.DependsOn |> Option.defaultValue Set.empty
-        |> Set.union (Dependencies.reflectionFind projectConfig)
+        Dependencies.reflectionFind projectConfig
         |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
 
     let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
@@ -169,8 +179,8 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
     let labels = projectConfig.Project.Labels
 
-    let projectInfo = {
-        projectInfo with
+    let projectInfo =
+        { projectInfo with
             Ignores = projectInfo.Ignores + projectIgnores
             Outputs = projectInfo.Outputs + projectOutputs
             Dependencies = projectInfo.Dependencies + projectDependencies
@@ -207,13 +217,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         |> Set.ofSeq
         |> Set.union projectInfo.Includes
 
-    // enrich workspace locals with project locals
-    // NOTE we are checking for duplicated fields as this is an error
-    let locals =
-        workspaceConfig.Locals
-        |> Map.iter (fun name _ ->
-            if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
-        workspaceConfig.Locals |> Map.addMap projectConfig.Locals
+    let locals = projectConfig.Locals
 
     { LoadedProject.Id = projectConfig.Project.Id
       LoadedProject.DependsOn = dependsOn
@@ -562,7 +566,7 @@ let read (options: ConfigOptions.Options) =
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
-            Terrabuild.Configuration.FrontEnd.Workspace.parse workspaceContent
+            FrontEnd.Workspace.parse workspaceContent
         with exn ->
             raiseParserError("Failed to read WORKSPACE configuration file", exn)
 
