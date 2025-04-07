@@ -48,10 +48,11 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                 dependsOns
                 |> Set.fold (fun (accInChildren, accOutChildren) dependsOn ->
                     match dependsOn with
-                    | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
+                    | String.Regex "^target\.\^(.+)$" [ parentDependsOn ] ->
                         accInChildren, accOutChildren + projectConfig.Dependencies |> Set.collect (buildTarget parentDependsOn)
-                    | _ ->
-                        accInChildren + buildTarget dependsOn project, accOutChildren) (Set.empty, Set.empty)
+                    | String.Regex "^target\.(.+)$" [ dependsOn ] ->
+                        accInChildren + buildTarget dependsOn project, accOutChildren
+                    | _ -> raiseBugError "Invalid target dependency format") (Set.empty, Set.empty)
 
             // NOTE: a node is considered a leaf (within this project only) if the target has no internal dependencies detected
             let isLeaf = inChildren |> Set.isEmpty

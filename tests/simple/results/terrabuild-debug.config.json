@@ -13,19 +13,19 @@
   ],
   "targets": {
     "build": [
-      "^build"
+      "target.^build"
     ],
     "deploy": [
-      "push"
+      "target.push"
     ],
     "dist": [
-      "build"
+      "target.build"
     ],
     "docker": [
-      "dist"
+      "target.dist"
     ],
     "push": [
-      "docker"
+      "target.docker"
     ]
   },
   "projects": {
@@ -47,7 +47,7 @@
           "hash": "339771D0416B0DE57F074F35A58947EC4DF21B15E79871D2231F33753B48C98E",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "*.planfile"
@@ -90,7 +90,7 @@
           "hash": "9024EC87B1F492B8125D95C6A80AEBB627F102F67167B86230F4767A3AB8C3C1",
           "rebuild": false,
           "dependsOn": [
-            "push"
+            "target.push"
           ],
           "outputs": [
             "*.planfile"
@@ -134,7 +134,7 @@
           "hash": "80456575F34E04D1425875BF90F22EBAB1F3D70EC046398D85B2E66FE96E3FED",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/*.binlog",
@@ -185,7 +185,7 @@
           "hash": "A16A69B69BAAD8E5F7446EDA76618622CBB09F32BB4E2CBCFA87748838A6BF30",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/dist/"
@@ -221,7 +221,7 @@
           "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [],
           "operations": [
@@ -264,7 +264,7 @@
           "hash": "80456575F34E04D1425875BF90F22EBAB1F3D70EC046398D85B2E66FE96E3FED",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/*.binlog",
@@ -299,7 +299,7 @@
           "hash": "490913BE8F9E3EDDB6106E0FCEF40BA44D2714E82FE78D6F52111B5DE21316FF",
           "rebuild": false,
           "dependsOn": [
-            "build"
+            "target.build"
           ],
           "outputs": [
             "**/*.binlog",
@@ -334,7 +334,7 @@
           "hash": "284192E5967E8DFA22895ABD89017A46E3516D76DEAE8AFE28318C78921D8A23",
           "rebuild": false,
           "dependsOn": [
-            "dist"
+            "target.dist"
           ],
           "outputs": [
             "**/*.binlog",
@@ -392,7 +392,7 @@
           "hash": "C6337486788B3103E3C2737C5C465A151569678B0F79EDBAF65D6409D1FDDCB4",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "dist"
@@ -475,7 +475,7 @@
           "hash": "A16A69B69BAAD8E5F7446EDA76618622CBB09F32BB4E2CBCFA87748838A6BF30",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/dist/"
@@ -518,7 +518,7 @@
           "hash": "A16A69B69BAAD8E5F7446EDA76618622CBB09F32BB4E2CBCFA87748838A6BF30",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/dist/"
@@ -557,7 +557,7 @@
           "hash": "368590893C4C4CB86F11CE435BED211B8E67BBAA776E88A26BA9786A25B48841",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [],
           "operations": [
@@ -606,7 +606,7 @@
           "hash": "5F97E6095B871F9045214CFE08ABC4C8E778379ACCA4D34A94079C508D24D5C4",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "target/debug/",
