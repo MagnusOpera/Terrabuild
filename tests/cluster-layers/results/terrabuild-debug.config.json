@@ -10,7 +10,7 @@
   ],
   "targets": {
     "build": [
-      "^build"
+      "target.^build"
     ]
   },
   "projects": {
@@ -27,7 +27,7 @@
           "hash": "34215119A4D68DB3B1137C90704FFA326799B219AE86B2DE93A123F6FEDCF68B",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/*.binlog",
@@ -84,7 +84,7 @@
           "hash": "34215119A4D68DB3B1137C90704FFA326799B219AE86B2DE93A123F6FEDCF68B",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/*.binlog",
@@ -144,7 +144,7 @@
           "hash": "E970FB6D3CCDCEE5AB6C4BAAB40D38439BDA75E6635D1B81F9A9DF7AFA6286C4",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/dist/"
@@ -198,7 +198,7 @@
           "hash": "F9B0B5708DFC227889BB22353D3EC4D1C1A57C07439470229E286568F031D11A",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/*.binlog",
@@ -241,7 +241,7 @@
           "hash": "F9B0B5708DFC227889BB22353D3EC4D1C1A57C07439470229E286568F031D11A",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/*.binlog",
@@ -285,7 +285,7 @@
           "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/dist/"
@@ -323,7 +323,7 @@
           "hash": "8F9422FFE2A136EC80F0C31D42C172CA05826D7DAFBB18BBCE27B1719A82AE1E",
           "rebuild": false,
           "dependsOn": [
-            "^build"
+            "target.^build"
           ],
           "outputs": [
             "**/dist/"
