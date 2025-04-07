@@ -38,8 +38,8 @@ let toProject (block: Block) =
         |> Option.map (fun dependsOn ->
             dependsOn |> Set.map (fun dependency ->
                 match dependency with
-                | String.Regex "^target\.(.*)$" [dependency] -> dependency
-                | _ -> raiseInvalidArg $"Invalid target dependency '{dependency}'"))
+                | String.Regex "^project\.(.*)$" [dependency] -> dependency
+                | _ -> raiseInvalidArg $"Invalid project dependency '{dependency}'"))
     let dependencies = block |> tryFindAttribute "dependencies"
     let outputs = block |> tryFindAttribute "outputs"
     let ignores = block |> tryFindAttribute "ignores"
