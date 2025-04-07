@@ -37,9 +37,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.PubSub.Tests", "
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Tests", "src\Terrabuild.Tests\Terrabuild.Tests.fsproj", "{29F6CE22-5D22-4DE2-BBE0-7E9EE989A49F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.HCL", "src\Terrabuild.HCL\Terrabuild.HCL.fsproj", "{9A082AD9-9E0E-4D2D-A64C-12ABEEDA2508}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Lang", "src\Terrabuild.Lang\Terrabuild.Lang.fsproj", "{9A082AD9-9E0E-4D2D-A64C-12ABEEDA2508}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.HCL.Tests", "src\Terrabuild.HCL.Tests\Terrabuild.HCL.Tests.fsproj", "{859ACB96-6A72-4089-B426-E816AC88DFC3}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Terrabuild.Lang.Tests", "src\Terrabuild.Lang.Tests\Terrabuild.Lang.Tests.fsproj", "{859ACB96-6A72-4089-B426-E816AC88DFC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

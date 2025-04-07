@@ -1,5 +1,5 @@
 module Transpiler.Common
-open Terrabuild.HCL.AST
+open Terrabuild.Lang.AST
 open AST.Common
 open Helpers
 

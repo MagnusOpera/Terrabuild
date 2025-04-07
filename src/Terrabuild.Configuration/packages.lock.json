@@ -62,7 +62,7 @@
           "Terrabuild.Common": "[1.0.0, )"
         }
       },
-      "terrabuild.hcl": {
+      "Terrabuild.Lang": {
         "type": "Project",
         "dependencies": {
           "FSharp.Core": "[9.0.201, )",

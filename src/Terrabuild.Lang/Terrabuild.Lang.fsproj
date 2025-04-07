@@ -11,10 +11,10 @@
                          $(DefineConstants), '^(.*;)*GENERATE_PARSER(;.*)*$'))">
             <ItemGroup>
                 <FsYacc Include="Parser.fsy">
-                    <OtherFlags>-v --internal --module Terrabuild.HCL.Parser -o Gen/Parser.fs</OtherFlags>
+                    <OtherFlags>-v --internal --module Terrabuild.Lang.Parser -o Gen/Parser.fs</OtherFlags>
                 </FsYacc>
                 <FsLex Include="Lexer.fsl">
-                    <OtherFlags>--internal --module Terrabuild.HCL.Lexer --unicode -o Gen/Lexer.fs</OtherFlags>
+                    <OtherFlags>--internal --module Terrabuild.Lang.Lexer --unicode -o Gen/Lexer.fs</OtherFlags>
                 </FsLex>
             </ItemGroup>
         </When>

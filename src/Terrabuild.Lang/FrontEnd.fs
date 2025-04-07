@@ -1,4 +1,4 @@
-module Terrabuild.HCL.FrontEnd
+module Terrabuild.Lang.FrontEnd
 
 open FSharp.Text.Lexing
 open Errors

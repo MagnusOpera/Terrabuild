@@ -1,7 +1,7 @@
 module Transpiler.Helpers
 open Terrabuild.Expressions
 open Errors
-open Terrabuild.HCL.AST
+open Terrabuild.Lang.AST
 
 let checkNoId (block: Block) =
     match block.Id with

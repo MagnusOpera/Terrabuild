@@ -1,5 +1,4 @@
-module Terrabuild.HCL.Tests.HCL
-open Terrabuild.HCL
+module Terrabuild.Lang.Tests
 
 open System.IO
 open NUnit.Framework

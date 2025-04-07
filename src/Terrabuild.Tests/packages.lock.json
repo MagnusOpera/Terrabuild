@@ -1359,7 +1359,7 @@
           "FSharp.Core": "[9.0.201, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Expressions": "[1.0.0, )",
-          "Terrabuild.HCL": "[1.0.0, )"
+          "Terrabuild.Lang": "[1.0.0, )"
         }
       },
       "terrabuild.expressions": {
@@ -1386,7 +1386,7 @@
           "Terrabuild.Extensibility": "[1.0.0, )"
         }
       },
-      "terrabuild.hcl": {
+      "Terrabuild.Lang": {
         "type": "Project",
         "dependencies": {
           "FSharp.Core": "[9.0.201, )",

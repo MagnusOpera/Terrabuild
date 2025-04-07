@@ -2,7 +2,7 @@ module Transpiler.Workspace
 open Errors
 open Terrabuild.Expressions
 open Common
-open Terrabuild.HCL.AST
+open Terrabuild.Lang.AST
 open AST.Common
 open AST.Workspace
 open Collections
