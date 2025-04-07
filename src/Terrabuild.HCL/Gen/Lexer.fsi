@@ -1,6 +1,6 @@
-module internal Lexer.HCL
+module internal Terrabuild.HCL.Lexer
 
-open Parser.HCL  // we need the terminal tokens from the Parser
+open Terrabuild.HCL.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
 open System.Text
 open Errors

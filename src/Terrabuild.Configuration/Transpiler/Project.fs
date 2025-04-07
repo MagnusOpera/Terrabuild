@@ -1,5 +1,5 @@
 module Transpiler.Project
-open AST.HCL
+open Terrabuild.HCL.AST
 open AST.Common
 open AST.Project
 open Errors

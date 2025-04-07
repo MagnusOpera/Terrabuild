@@ -1,4 +1,4 @@
-module AST.Helpers
+module Helpers
 open Terrabuild.Expressions
 open Errors
 

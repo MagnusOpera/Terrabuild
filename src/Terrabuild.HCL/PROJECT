@@ -1,0 +1,6 @@
+
+project @dotnet { }
+
+target build {
+    @dotnet build { }
+}

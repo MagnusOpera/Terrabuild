@@ -8,6 +8,16 @@
         "resolved": "9.0.201",
         "contentHash": "Ozq4T0ISTkqTYJ035XW/JkdDDaXofbykvfyVwkjLSqaDZ/4uNXfpf92cjcMI9lf9CxWqmlWHScViPh/4AvnWcw=="
       },
+      "FsLexYacc": {
+        "type": "Direct",
+        "requested": "[11.3.0, )",
+        "resolved": "11.3.0",
+        "contentHash": "v0Q3/c0tizN8vRZ72Tdo+OKU767Yjul0wRJgG1/W15H4tK/9qHne/mylw/gTEIC8FV2zgiDlAudhQpdZXYG3IA==",
+        "dependencies": {
+          "FSharp.Core": "4.6.2",
+          "FsLexYacc.Runtime": "11.3.0"
+        }
+      },
       "System.Text.Json": {
         "type": "Direct",
         "requested": "[9.0.0, )",
@@ -21,15 +31,6 @@
         "dependencies": {
           "FSharp.Core": "4.7.0",
           "System.Text.Json": "6.0.0"
-        }
-      },
-      "FsLexYacc": {
-        "type": "Transitive",
-        "resolved": "11.3.0",
-        "contentHash": "v0Q3/c0tizN8vRZ72Tdo+OKU767Yjul0wRJgG1/W15H4tK/9qHne/mylw/gTEIC8FV2zgiDlAudhQpdZXYG3IA==",
-        "dependencies": {
-          "FSharp.Core": "4.6.2",
-          "FsLexYacc.Runtime": "11.3.0"
         }
       },
       "FsLexYacc.Runtime": {
@@ -60,16 +61,6 @@
           "FSharp.Core": "[9.0.201, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )"
-        }
-      },
-      "terrabuild.hcl": {
-        "type": "Project",
-        "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
-          "FsLexYacc": "[11.3.0, )",
-          "System.Text.Json": "[9.0.0, )",
-          "Terrabuild.Common": "[1.0.0, )",
-          "Terrabuild.Expressions": "[1.0.0, )"
         }
       }
     },
