@@ -1,4 +1,4 @@
-namespace AST.Common
+namespace Terrabuild.Configuration.AST
 open Terrabuild.Expressions
 
 type ExtensionBlock =

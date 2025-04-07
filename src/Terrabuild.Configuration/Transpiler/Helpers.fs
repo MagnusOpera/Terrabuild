@@ -1,4 +1,4 @@
-module Transpiler.Helpers
+module private Terrabuild.Configuration.Transpiler.Helpers
 open Terrabuild.Expressions
 open Errors
 open Terrabuild.Lang.AST

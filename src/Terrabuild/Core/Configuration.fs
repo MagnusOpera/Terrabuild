@@ -9,6 +9,7 @@ open Errors
 open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
 open Serilog
+open Terrabuild.Configuration
 
 [<RequireQualifiedAccess>]
 type TargetOperation = {
@@ -71,7 +72,7 @@ type private LoadedProject = {
     Outputs: string set
     Targets: Map<string, AST.Project.TargetBlock>
     Labels: string set
-    Extensions: Map<string, AST.Common.ExtensionBlock>
+    Extensions: Map<string, AST.ExtensionBlock>
     Scripts: Map<string, LazyScript>
     Locals: Map<string, Expr>
 }
