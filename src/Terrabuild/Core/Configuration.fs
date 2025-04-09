@@ -110,8 +110,8 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
     Log.Debug("Loading project definition {ProjectId}", projectId)
 
-    let mutable projectConfig =
-        let projectConfig =
+    let dependsOn, projectConfig =
+        let mutable projectConfig =
             match projectFile with
             | FS.File projectFile ->
                 let projectContent = File.ReadAllText projectFile
@@ -125,32 +125,53 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         |> Map.iter (fun name _ ->
             if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
 
-        projectConfig
+        // add required extensions
+        let mutable requiredExtensions =
+            projectConfig.Targets
+            |> Seq.collect (fun (KeyValue(_, target)) ->
+                target.Steps
+                |> List.map (fun step -> step.Extension))
+            |> Set.ofSeq
+        match projectConfig.Project.Init with
+        | Some init -> requiredExtensions <- requiredExtensions |> Set.add init
+        | _ -> ()
 
-        // { projectConfig with
-        //     Extensions = extensions |> Map.addMap projectConfig.Extensions
-        //     Locals = locals}
+        for extName in requiredExtensions do
+            match projectConfig.Extensions |> Map.tryFind extName with
+            | None ->
+                match workspaceConfig.Extensions |> Map.tryFind extName with
+                | Some ext -> projectConfig <- { projectConfig with Extensions = projectConfig.Extensions |> Map.add extName ext }
+                | _ -> raiseSymbolError $"Extension '{extName}' is not defined"
+            | _ -> ()
 
-    // let projectScripts =
-    //     projectConfig.Extensions
-    //     |> Map.map (fun _ ext ->
-    //         ext.Script
-    //         |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-    //         |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+        // add locals and project dependencies
+        let dependencies = Dependencies.reflectionFind projectConfig
+        let mutable dependsOn = Set.empty
+        for dependency in dependencies do
+            match dependency with
+            | String.Regex "^project\.(.+)$" [projectName] -> dependsOn <- dependsOn |> Set.add dependency
+            | String.Regex "^local\.(.+)$" [localName] ->
+                match projectConfig.Locals |> Map.tryFind localName with
+                | None ->
+                    match workspaceConfig.Locals |> Map.tryFind localName with
+                    | Some local -> projectConfig <- { projectConfig with Locals = projectConfig.Locals |> Map.add dependency local }
+                    | _ -> raiseSymbolError "Local '{dependency}' is not defined"
+                | _ -> ()
+            | _ -> ()
+        dependsOn, projectConfig
 
-    // let scripts =
-    //     scripts
-    //     |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
 
-    let dependencies = Dependencies.reflectionFind projectConfig
-    let mutable dependsOn = Set.empty
-    for dependency in dependencies do
-        if dependency.StartsWith("project.") then
-            dependsOn <- dependsOn |> Set.add dependency
-        elif dependency.StartsWith("local.") && projectConfig.Locals |> Map.containsKey dependency |> not then
-            match workspaceConfig.Locals |> Map.tryFind dependency with
-            | Some local -> projectConfig <- { projectConfig with Locals = projectConfig.Locals |> Map.add dependency local }
-            | _ -> raiseSymbolError "Local '{dependency}' is not defined"
+    let projectScripts =
+        projectConfig.Extensions
+        |> Map.map (fun _ ext ->
+            ext.Script
+            |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+            |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+
+    let scripts =
+        scripts
+        |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
+
 
     let projectInfo =
         match projectConfig.Project.Init with
