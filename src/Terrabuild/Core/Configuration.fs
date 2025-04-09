@@ -110,7 +110,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
     Log.Debug("Loading project definition {ProjectId}", projectId)
 
-    let dependsOn, projectConfig =
+    let projectConfig =
         let mutable projectConfig =
             match projectFile with
             | FS.File projectFile ->
@@ -146,10 +146,11 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
         // add locals and project dependencies
         let dependencies = Dependencies.reflectionFind projectConfig
-        let mutable dependsOn = Set.empty
+        let mutable dependsOn = projectConfig.Project.DependsOn |> Option.defaultValue Set.empty
         for dependency in dependencies do
             match dependency with
-            | String.Regex "^project\.(.+)$" [projectName] -> dependsOn <- dependsOn |> Set.add dependency
+            | String.Regex "^project\.(.+)$" [projectName] ->
+                dependsOn <- dependsOn |> Set.add dependency
             | String.Regex "^local\.(.+)$" [localName] ->
                 match projectConfig.Locals |> Map.tryFind localName with
                 | None ->
@@ -158,7 +159,9 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
                     | _ -> raiseSymbolError "Local '{dependency}' is not defined"
                 | _ -> ()
             | _ -> ()
-        dependsOn, projectConfig
+
+        projectConfig <- { projectConfig with Project.DependsOn = Some dependsOn }
+        projectConfig
 
 
     let projectScripts =
@@ -244,11 +247,12 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
     let locals = projectConfig.Locals
 
+    let dependsOn = projectConfig.Project.DependsOn
     Log.Debug($"Project '{projectId}' depends on '{dependsOn}")    
     Log.Debug($"Project '{projectId}' has dependencies '{projectDependencies}")    
 
     { LoadedProject.Id = projectConfig.Project.Id
-      LoadedProject.DependsOn = dependsOn
+      LoadedProject.DependsOn = dependsOn.Value
       LoadedProject.Dependencies = projectDependencies
       LoadedProject.Includes = includes
       LoadedProject.Ignores = projectIgnores
