@@ -154,7 +154,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
                 match projectConfig.Locals |> Map.tryFind localName with
                 | None ->
                     match workspaceConfig.Locals |> Map.tryFind localName with
-                    | Some local -> projectConfig <- { projectConfig with Locals = projectConfig.Locals |> Map.add dependency local }
+                    | Some local -> projectConfig <- { projectConfig with Locals = projectConfig.Locals |> Map.add localName local }
                     | _ -> raiseSymbolError "Local '{dependency}' is not defined"
                 | _ -> ()
             | _ -> ()
