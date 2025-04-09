@@ -7,7 +7,7 @@ open Terrabuild.Expressions
 type ProjectBlock =
     { Init: string option
       Id: string option
-      DependsOn: Set<string> option
+      DependsOn: Set<string>
       Dependencies: Expr option
       Outputs: Expr option
       Ignores: Expr option

@@ -51,7 +51,7 @@ let toProject (block: Block) =
 
     { ProjectBlock.Init = block.Name
       ProjectBlock.Id = block.Id
-      ProjectBlock.DependsOn = dependsOn
+      ProjectBlock.DependsOn = dependsOn |> Option.defaultValue Set.empty
       ProjectBlock.Dependencies = dependencies
       ProjectBlock.Outputs = outputs
       ProjectBlock.Ignores = ignores
@@ -112,7 +112,7 @@ let transpile (blocks: Block list) =
                 match builder.Project with
                 | None -> { ProjectBlock.Init = None
                             ProjectBlock.Id = None
-                            ProjectBlock.DependsOn = None
+                            ProjectBlock.DependsOn = Set.empty
                             ProjectBlock.Dependencies = None
                             ProjectBlock.Outputs = None
                             ProjectBlock.Ignores = None

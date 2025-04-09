@@ -119,23 +119,20 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
             | _ ->
                 raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 
-        // enrich workspace locals with project locals
-        // NOTE we are checking for duplicated fields as this is an error
+        // checking for duplicated fields as this is an error
         workspaceConfig.Locals
         |> Map.iter (fun name _ ->
             if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
 
         // add required extensions
-        let mutable requiredExtensions =
-            projectConfig.Targets
-            |> Seq.collect (fun (KeyValue(_, target)) ->
-                target.Steps
-                |> List.map (fun step -> step.Extension))
-            |> Set.ofSeq
-        match projectConfig.Project.Init with
-        | Some init -> requiredExtensions <- requiredExtensions |> Set.add init
-        | _ -> ()
-
+        let requiredExtensions =
+            let stepExts =
+                projectConfig.Targets
+                |> Seq.collect (fun (KeyValue(_, target)) -> target.Steps |> List.map (fun step -> step.Extension))
+                |> Set.ofSeq
+            match projectConfig.Project.Init with
+            | Some init -> stepExts |> Set.add init
+            | _ -> stepExts
         for extName in requiredExtensions do
             match projectConfig.Extensions |> Map.tryFind extName with
             | None ->
@@ -146,11 +143,10 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
         // add locals and project dependencies
         let dependencies = Dependencies.reflectionFind projectConfig
-        let mutable dependsOn = projectConfig.Project.DependsOn |> Option.defaultValue Set.empty
         for dependency in dependencies do
             match dependency with
-            | String.Regex "^project\.(.+)$" [projectName] ->
-                dependsOn <- dependsOn |> Set.add dependency
+            | String.Regex "^project\.(.+)$" [_] ->
+                projectConfig <- { projectConfig with Project.DependsOn = projectConfig.Project.DependsOn |> Set.add dependency }
             | String.Regex "^local\.(.+)$" [localName] ->
                 match projectConfig.Locals |> Map.tryFind localName with
                 | None ->
@@ -159,8 +155,6 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
                     | _ -> raiseSymbolError "Local '{dependency}' is not defined"
                 | _ -> ()
             | _ -> ()
-
-        projectConfig <- { projectConfig with Project.DependsOn = Some dependsOn }
         projectConfig
 
 
@@ -252,7 +246,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     Log.Debug($"Project '{projectId}' has dependencies '{projectDependencies}")    
 
     { LoadedProject.Id = projectConfig.Project.Id
-      LoadedProject.DependsOn = dependsOn.Value
+      LoadedProject.DependsOn = dependsOn
       LoadedProject.Dependencies = projectDependencies
       LoadedProject.Includes = includes
       LoadedProject.Ignores = projectIgnores
