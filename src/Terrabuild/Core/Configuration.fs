@@ -110,7 +110,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
     Log.Debug("Loading project definition {ProjectId}", projectId)
 
-    let projectConfig =
+    let mutable projectConfig =
         let projectConfig =
             match projectFile with
             | FS.File projectFile ->
@@ -121,26 +121,36 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
         // enrich workspace locals with project locals
         // NOTE we are checking for duplicated fields as this is an error
-        let locals =
-            workspaceConfig.Locals
-            |> Map.iter (fun name _ ->
-                if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
-            workspaceConfig.Locals |> Map.addMap projectConfig.Locals
+        workspaceConfig.Locals
+        |> Map.iter (fun name _ ->
+            if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
 
-        { projectConfig with
-            Extensions = extensions |> Map.addMap projectConfig.Extensions
-            Locals = locals}
+        projectConfig
 
-    let projectScripts =
-        projectConfig.Extensions
-        |> Map.map (fun _ ext ->
-            ext.Script
-            |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-            |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+        // { projectConfig with
+        //     Extensions = extensions |> Map.addMap projectConfig.Extensions
+        //     Locals = locals}
 
-    let scripts =
-        scripts
-        |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
+    // let projectScripts =
+    //     projectConfig.Extensions
+    //     |> Map.map (fun _ ext ->
+    //         ext.Script
+    //         |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+    //         |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+
+    // let scripts =
+    //     scripts
+    //     |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
+
+    let dependencies = Dependencies.reflectionFind projectConfig
+    let mutable dependsOn = Set.empty
+    for dependency in dependencies do
+        if dependency.StartsWith("project.") then
+            dependsOn <- dependsOn |> Set.add dependency
+        elif dependency.StartsWith("local.") && projectConfig.Locals |> Map.containsKey dependency |> not then
+            match workspaceConfig.Locals |> Map.tryFind dependency with
+            | Some local -> projectConfig <- { projectConfig with Locals = projectConfig.Locals |> Map.add dependency local }
+            | _ -> raiseSymbolError "Local '{dependency}' is not defined"
 
     let projectInfo =
         match projectConfig.Project.Init with
@@ -166,12 +176,6 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         expr
         |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
         |> Option.defaultValue Set.empty
-
-    let dependsOn =
-        // collect dependencies for all the project
-        // NOTE we are keeping only project dependencies as we want to construct project graph
-        Dependencies.reflectionFind projectConfig
-        |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
 
     let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
     let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
@@ -218,6 +222,9 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         |> Set.union projectInfo.Includes
 
     let locals = projectConfig.Locals
+
+    Log.Debug($"Project '{projectId}' depends on '{dependsOn}")    
+    Log.Debug($"Project '{projectId}' has dependencies '{projectDependencies}")    
 
     { LoadedProject.Id = projectConfig.Project.Id
       LoadedProject.DependsOn = dependsOn
