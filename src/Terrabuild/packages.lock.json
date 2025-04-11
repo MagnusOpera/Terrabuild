@@ -37,9 +37,9 @@
       },
       "FSharp.Core": {
         "type": "Direct",
-        "requested": "[9.0.201, )",
-        "resolved": "9.0.201",
-        "contentHash": "Ozq4T0ISTkqTYJ035XW/JkdDDaXofbykvfyVwkjLSqaDZ/4uNXfpf92cjcMI9lf9CxWqmlWHScViPh/4AvnWcw=="
+        "requested": "[9.0.202, )",
+        "resolved": "9.0.202",
+        "contentHash": "p8iGT2PeRL9q0ZIQ3ZhmRMRs4+b5Xaf9SSYKOt/+tDtznMQhHovYWaD1491RvBz8rnxcesAISbrkrjI1/4TUtw=="
       },
       "FSharp.Data": {
         "type": "Direct",
@@ -69,9 +69,9 @@
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[5.4.0, )",
-        "resolved": "5.4.0",
-        "contentHash": "fXjF+bn7uOSPjrALfY+GQGhaeXFXfAX8XrSWeUJOek/hhIss1hhi/l2AJPefjVdaNWyb1muJAdUUZnBofZjlvw=="
+        "requested": "[5.5.1, )",
+        "resolved": "5.5.1",
+        "contentHash": "p93BeSvZrbs/Y+bHShFv3MV6lGCJ/H+A1OFLylMhv8ADWvkz4P7NTEJ2m1JUEKd6kaY69PP06mxVQROgTm3qhA=="
       },
       "Serilog.Sinks.File": {
         "type": "Direct",
@@ -114,10 +114,10 @@
       },
       "FSharp.Compiler.Service": {
         "type": "Transitive",
-        "resolved": "43.9.201",
-        "contentHash": "9aiiJqQykETSSKwwWnItUXTYPsNWNHTIz8vNR0J1vVZXT4CcVQUGebiXZpJXv01UoRpvNBNdIGUViZI5RhccaQ==",
+        "resolved": "43.9.202",
+        "contentHash": "E66wiogMms6201AV4asUsrOrw1yx4HSVwyOzpqhR7rp+tWNZ476o+h7ICrjSVHzaEWUX4vGtjTOked4bVtd5UQ==",
         "dependencies": {
-          "FSharp.Core": "[9.0.201]",
+          "FSharp.Core": "[9.0.202]",
           "System.Buffers": "4.6.0",
           "System.Collections.Immutable": "8.0.0",
           "System.Diagnostics.DiagnosticSource": "8.0.0",
@@ -237,8 +237,8 @@
       },
       "Microsoft.Extensions.FileSystemGlobbing": {
         "type": "Transitive",
-        "resolved": "9.0.3",
-        "contentHash": "Rec77KHk4iNpFznHi5/6wF3MlUDcKqg26t8gRYbUm1PSukZ4B6mrXpZsJSNOiwyhhQVkjYbaoZxi5XJgRQ5lFg=="
+        "resolved": "9.0.4",
+        "contentHash": "05Lh2ItSk4mzTdDWATW9nEcSybwprN8Tz42Fs5B+jwdXUpauktdAQUI1Am4sUQi2C63E5hvQp8gXvfwfg9mQGQ=="
       },
       "Microsoft.Extensions.Primitives": {
         "type": "Transitive",
@@ -1221,16 +1221,16 @@
       "terrabuild.common": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "FSharp.SystemTextJson": "[1.3.13, )",
-          "Microsoft.Extensions.FileSystemGlobbing": "[9.0.3, )",
+          "Microsoft.Extensions.FileSystemGlobbing": "[9.0.4, )",
           "System.Text.Json": "[9.0.0, )"
         }
       },
       "terrabuild.configuration": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Expressions": "[1.0.0, )",
           "Terrabuild.Lang": "[1.0.0, )"
@@ -1239,7 +1239,7 @@
       "terrabuild.expressions": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )"
         }
@@ -1247,23 +1247,23 @@
       "terrabuild.extensibility": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "System.Text.Json": "[9.0.0, )"
         }
       },
       "terrabuild.extensions": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )",
           "Terrabuild.Extensibility": "[1.0.0, )"
         }
       },
-      "Terrabuild.Lang": {
+      "terrabuild.lang": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "FsLexYacc": "[11.3.0, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )",
@@ -1273,7 +1273,7 @@
       "terrabuild.pubsub": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )"
         }
@@ -1281,8 +1281,8 @@
       "terrabuild.scripting": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Compiler.Service": "[43.9.201, )",
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Compiler.Service": "[43.9.202, )",
+          "FSharp.Core": "[9.0.202, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Expressions": "[1.0.0, )"
         }

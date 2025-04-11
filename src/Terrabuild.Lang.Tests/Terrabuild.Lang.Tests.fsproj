@@ -2,14 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <GenerateProgramFile>false</GenerateProgramFile>
+    <OutputType>Exe</OutputType>
+    <!-- <EnableNUnitRunner>true</EnableNUnitRunner> -->
+    <!-- <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> -->
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Lang.fs" />
     <!-- <Compile Include="Project.fs" />
     <Compile Include="Workspace.fs" /> -->
-    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <GenerateProgramFile>false</GenerateProgramFile>
+    <OutputType>Exe</OutputType>
+    <!-- <EnableNUnitRunner>true</EnableNUnitRunner> -->
+    <!-- <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> -->
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="SourceControls/GitHub.fs" />
     <Compile Include="Core/Configuration.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
