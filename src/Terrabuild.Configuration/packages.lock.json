@@ -4,9 +4,9 @@
     "net9.0": {
       "FSharp.Core": {
         "type": "Direct",
-        "requested": "[9.0.201, )",
-        "resolved": "9.0.201",
-        "contentHash": "Ozq4T0ISTkqTYJ035XW/JkdDDaXofbykvfyVwkjLSqaDZ/4uNXfpf92cjcMI9lf9CxWqmlWHScViPh/4AvnWcw=="
+        "requested": "[9.0.202, )",
+        "resolved": "9.0.202",
+        "contentHash": "p8iGT2PeRL9q0ZIQ3ZhmRMRs4+b5Xaf9SSYKOt/+tDtznMQhHovYWaD1491RvBz8rnxcesAISbrkrjI1/4TUtw=="
       },
       "System.Text.Json": {
         "type": "Direct",
@@ -42,30 +42,30 @@
       },
       "Microsoft.Extensions.FileSystemGlobbing": {
         "type": "Transitive",
-        "resolved": "9.0.3",
-        "contentHash": "Rec77KHk4iNpFznHi5/6wF3MlUDcKqg26t8gRYbUm1PSukZ4B6mrXpZsJSNOiwyhhQVkjYbaoZxi5XJgRQ5lFg=="
+        "resolved": "9.0.4",
+        "contentHash": "05Lh2ItSk4mzTdDWATW9nEcSybwprN8Tz42Fs5B+jwdXUpauktdAQUI1Am4sUQi2C63E5hvQp8gXvfwfg9mQGQ=="
       },
       "terrabuild.common": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "FSharp.SystemTextJson": "[1.3.13, )",
-          "Microsoft.Extensions.FileSystemGlobbing": "[9.0.3, )",
+          "Microsoft.Extensions.FileSystemGlobbing": "[9.0.4, )",
           "System.Text.Json": "[9.0.0, )"
         }
       },
       "terrabuild.expressions": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )"
         }
       },
-      "Terrabuild.Lang": {
+      "terrabuild.lang": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[9.0.201, )",
+          "FSharp.Core": "[9.0.202, )",
           "FsLexYacc": "[11.3.0, )",
           "System.Text.Json": "[9.0.0, )",
           "Terrabuild.Common": "[1.0.0, )",

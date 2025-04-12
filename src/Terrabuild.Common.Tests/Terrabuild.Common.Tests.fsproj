@@ -2,7 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <GenerateProgramFile>false</GenerateProgramFile>
+    <OutputType>Exe</OutputType>
+    <!-- <EnableNUnitRunner>true</EnableNUnitRunner> -->
+    <!-- <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +13,6 @@
     <Compile Include="Collections.fs" />
     <Compile Include="Hash.fs" />
     <Compile Include="String.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
