@@ -745,19 +745,16 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
 
 
 
-type ResourceType =
-    | ProjectPath of string
-    | ProjectId of string
-    | Variable of string
-    | Local of string
-    | Extension of string
+
 
 type ConfigurationLoaderProtocol =
-    | FindProjects of options:ConfigOptions.Options * AsyncReplyChannel<Exception>
+    | FindProjects
     | LoadProject of projectDir:string
-    | Await of resource:ResourceType
+    | AwaitProjectId of projectId:string
+    | AwaitProjectPath of absolutePath:string
     | ProjectCompleted of project:Project
     | ProjectFailed of projectDir:string * exn:Exception
+    | Exit
 
 
 
@@ -769,41 +766,51 @@ type ConfigurationLoaderProtocol =
 
 
 
-let handler (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) =
+
+
+let handler (options: ConfigOptions.Options) (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) =
+
+    let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
+    let workspaceConfig =
+        try
+            FrontEnd.Workspace.parse workspaceContent
+        with exn ->
+            raiseParserError("Failed to read WORKSPACE configuration file", exn)
 
     let findProjects (options: ConfigOptions.Options) =
-        let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
-        let workspaceConfig =
-            try
-                FrontEnd.Workspace.parse workspaceContent
-            with exn ->
-                raiseParserError("Failed to read WORKSPACE configuration file", exn)
-
         let rec findProject (dir: string) =
-            seq {
-                let projectFile = FS.combinePath dir "PROJECT"
-                match projectFile with
-                | FS.File projectFile ->
-                    projectFile |> LoadProject |> inbox.Post
-                | _ ->
-                    let folders = IO.enumerateDirs dir
-                    for folder in folders do
-                        yield! findProject folder }
+            let projectFile = FS.combinePath dir "PROJECT"
+            match projectFile with
+            | FS.File projectFile ->
+                projectFile |> LoadProject |> inbox.Post
+            | _ ->
+                let folders = IO.enumerateDirs dir
+                for folder in folders do
+                    findProject folder
  
-        let projects = findProject options.Workspace
-        projects
+        findProject options.Workspace
+
+    let loadProject (projectDir: string) = ()
+
+    let awaitProjectId projectId =
+
+
+
 
 
 
     let rec messageLoop () = async {
+        let mutable continueHandler = true
         match! inbox.Receive() with
-        | FindProjects (options, channel) -> channel.Reply(null)
+        | FindProjects -> findProjects options
         | LoadProject (projectDir) -> ()
-        | Await (resource) -> ()
+        | AwaitProjectId (projectId) -> ()
+        | AwaitProjectPath (absolutePath) -> ()
         | ProjectCompleted (project) -> ()
         | ProjectFailed (projectDir, exn) -> ()
+        | Exit -> continueHandler <- false
 
-        return! messageLoop ()
+        if continueHandler then return! messageLoop ()
     }
 
     messageLoop()
