@@ -763,7 +763,7 @@ type ConfigurationLoaderProtocol =
 
 
 
-
+// discover projects in the workspace and ask the agent to load them individually
 let findProjects (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) (options: ConfigOptions.Options) =
     let rec findProject (dir: string) =
         let projectFile = FS.combinePath dir "PROJECT"
@@ -777,15 +777,20 @@ let findProjects (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) (options
 
     findProject options.Workspace
 
-
+// a project expressed a dependency on another project id (not a path - but a user defined id)
+// this is a signal that will be triggered when the project is loaded
 let awaitProjectId (hub: IHub) (projectId: string) (promise: AsyncReplyChannel<Project>) =
     let signal = hub.GetSignal<Project> $"project.{projectId}"
     signal.Subscribe (fun () -> promise.Reply signal.Value)
 
+// a project expressed a dependency on another project path
+// this is a signal that will be triggered when the project is loaded
 let awaitProjectPath (hub: IHub) (absolutePath: string) (promise: AsyncReplyChannel<Project>) =
     let signal = hub.GetSignal<Project> absolutePath
     signal.Subscribe (fun () -> promise.Reply signal.Value)
 
+// a project was loaded and is now available
+// ensure both the project path and project id signals are updated
 let projectCompleted (hub: IHub) (project: Project) =
     let signal = hub.GetSignal<Project> project.Name
     signal.Value <- project
@@ -794,13 +799,15 @@ let projectCompleted (hub: IHub) (project: Project) =
         let signal = hub.GetSignal<Project> $"project.{id}"
         signal.Value <- project)
 
-
+// load a project definition up to completion
+// if the project requires other projects to be loaded - it will ask the agent to load them - blocking style
+// and the loader will continue then
 let loadProject (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext scripts (absolutePath: string) =
     let projectDir = FS.combinePath options.Workspace absolutePath
     let projectFile = FS.combinePath projectDir "PROJECT"
     Log.Debug("Loading project definition {ProjectDir}", projectDir)
 
-    let mutable projectConfig =
+    let projectConfig =
         match projectFile with
         | FS.File projectFile ->
             let projectContent = File.ReadAllText projectFile
@@ -808,38 +815,133 @@ let loadProject (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) (options:
         | _ ->
             raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 
-    // check for duplicated fields as this is an error
+    // project locals can't override workspace locals
     workspaceConfig.Locals
     |> Map.iter (fun name _ ->
         if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
 
     // add required extensions
-    let requiredExtensions =
-        let stepExts =
-            projectConfig.Targets
-            |> Seq.collect (fun (KeyValue(_, target)) -> target.Steps |> List.map (fun step -> step.Extension))
-            |> Set.ofSeq
-        match projectConfig.Project.Init with
-        | Some init -> stepExts |> Set.add init
-        | _ -> stepExts
-    for extName in requiredExtensions do
-        match projectConfig.Extensions |> Map.tryFind extName with
-        | None ->
-            match workspaceConfig.Extensions |> Map.tryFind extName with
-            | Some ext -> projectConfig <- { projectConfig with Extensions = projectConfig.Extensions |> Map.add extName ext }
-            | _ -> raiseSymbolError $"Extension '{extName}' is not defined"
-        | _ -> ()
+    let projectExtensions =
+        let requiredExtensions =
+            let stepExts =
+                projectConfig.Targets
+                |> Seq.collect (fun (KeyValue(_, target)) -> target.Steps |> List.map (fun step -> step.Extension))
+                |> Set.ofSeq
+            match projectConfig.Project.Init with
+            | Some init -> stepExts |> Set.add init
+            | _ -> stepExts
+
+        workspaceConfig.Extensions
+        |> Map.addMap projectConfig.Extensions
+        |> Map.filter (fun extName _ -> requiredExtensions |> Set.contains extName)
 
     let projectScripts =
-        projectConfig.Extensions
-        |> Map.map (fun _ ext ->
-            ext.Script
-            |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-            |> Option.map (FS.workspaceRelative options.Workspace projectDir))
-
-    let scripts =
+        let declaredExtensions =
+            projectExtensions
+            |> Map.map (fun _ ext ->
+                ext.Script
+                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                |> Option.map (FS.workspaceRelative options.Workspace projectDir))
         scripts
-        |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
+        |> Map.addMap (declaredExtensions |> Map.map Extensions.lazyLoadScript)
+
+    let projectDefaults =
+        match projectConfig.Project.Init with
+        | Some init ->
+            let parseContext = 
+                let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
+                                Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
+                                Terrabuild.Extensibility.ExtensionContext.CI = options.Run.IsSome }
+                Value.Map (Map [ "context", Value.Object context ])
+
+            let result =
+                Extensions.getScript init projectScripts
+                |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
+
+            match result with
+            | Extensions.Success result -> result
+            | Extensions.ScriptNotFound -> raiseSymbolError $"Script {init} was not found"
+            | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
+            | Extensions.ErrorTarget exn -> forwardExternalError($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
+        | _ -> ProjectInfo.Default
+
+    let evalAsStringSet expr =
+        expr
+        |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+        |> Option.defaultValue Set.empty
+
+    let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
+    let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
+    let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
+    let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
+    let projectLabels = projectConfig.Project.Labels
+
+    let projectInfo =
+        { projectDefaults with
+            Ignores = projectDefaults.Ignores + projectIgnores
+            Outputs = projectDefaults.Outputs + projectOutputs
+            Dependencies = projectDefaults.Dependencies + projectDependencies
+            Includes = projectDefaults.Includes + projectIncludes }
+
+    let projectOutputs = projectInfo.Outputs
+    let projectIgnores = projectInfo.Ignores
+
+    // convert relative dependencies to absolute dependencies respective to workspaceDirectory
+    let projectDependencies =
+        projectInfo.Dependencies
+        |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
+
+    let projectTargets =
+        projectConfig.Targets
+        |> Map.map (fun targetName targetBlock ->
+            let workspaceTarget = workspaceConfig.Targets |> Map.tryFind targetName
+            let rebuild =
+                match targetBlock.Rebuild with
+                | Some expr -> Some expr
+                | _ -> workspaceTarget |> Option.bind _.Rebuild
+            let dependsOn =
+                match targetBlock.DependsOn with
+                | Some dependsOn -> Some dependsOn
+                | _ -> workspaceTarget |> Option.bind _.DependsOn
+
+            { targetBlock with 
+                Rebuild = rebuild
+                DependsOn = dependsOn })
+
+    let projectId = projectConfig.Project.Id
+    let projectLocals = projectConfig.Locals
+    let projectDependsOn = projectConfig.Project.DependsOn
+
+
+    // first get all dependencies
+    let projectDependencies =
+        projectDependencies
+        |> Seq.map (fun dep ->
+            let projectId = dep |> FS.workspaceRelative options.Workspace projectDir |> String.toUpper
+            let project = projectId |> inbox.PostAndReply (fun reply -> AwaitProjectId (projectId, reply))
+
+
+            let projectPath = projectId |> projectIds.TryGetValue
+            match projectPath with
+            | true, projectPath -> projectPath
+            | _ -> raiseSymbolError $"Project '{projectId}' not found")    
+
+
+
+
+    let projectDef =
+        { LoadedProject.Id = projectId
+          LoadedProject.DependsOn = projectDependsOn
+          LoadedProject.Dependencies = projectDependencies
+          LoadedProject.Includes = projectIncludes
+          LoadedProject.Ignores = projectIgnores
+          LoadedProject.Outputs = projectOutputs
+          LoadedProject.Targets = projectTargets
+          LoadedProject.Labels = projectLabels
+          LoadedProject.Extensions = projectExtensions
+          LoadedProject.Scripts = projectScripts
+          LoadedProject.Locals = projectLocals }
+  
 
     ()
 
