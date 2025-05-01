@@ -250,27 +250,27 @@ type private LoadedProject = {
 
 
 
-// let private buildScripts (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext =
-//     // load system extensions
-//     let sysScripts =
-//         Extensions.systemExtensions
-//         |> Map.map (fun _ _ -> None)
-//         |> Map.map Extensions.lazyLoadScript
+let private buildScripts (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext =
+    // load system extensions
+    let sysScripts =
+        Extensions.systemExtensions
+        |> Map.map (fun _ _ -> None)
+        |> Map.map Extensions.lazyLoadScript
 
-//     // load user extension
-//     let usrScripts =
-//         workspaceConfig.Extensions
-//         |> Map.map (fun _ ext ->
-//             let script =
-//                 ext.Script
-//                 |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-//             match script with
-//             | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
-//             | _ -> None)
-//         |> Map.map Extensions.lazyLoadScript
+    // load user extension
+    let usrScripts =
+        workspaceConfig.Extensions
+        |> Map.map (fun _ ext ->
+            let script =
+                ext.Script
+                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+            match script with
+            | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
+            | _ -> None)
+        |> Map.map Extensions.lazyLoadScript
 
-//     let scripts = sysScripts |> Map.addMap usrScripts
-//     scripts
+    let scripts = sysScripts |> Map.addMap usrScripts
+    scripts
 
 
 
@@ -750,8 +750,8 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
 type ConfigurationLoaderProtocol =
     | FindProjects
     | LoadProject of projectDir:string
-    | AwaitProjectId of projectId:string
-    | AwaitProjectPath of absolutePath:string
+    | AwaitProjectId of projectId:string * reply:AsyncReplyChannel<Project>
+    | AwaitProjectPath of absolutePath:string * reply:AsyncReplyChannel<Project>
     | ProjectCompleted of project:Project
     | ProjectFailed of projectDir:string * exn:Exception
     | Exit
@@ -764,12 +764,87 @@ type ConfigurationLoaderProtocol =
 
 
 
+let findProjects (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) (options: ConfigOptions.Options) =
+    let rec findProject (dir: string) =
+        let projectFile = FS.combinePath dir "PROJECT"
+        match projectFile with
+        | FS.File projectFile ->
+            projectFile |> LoadProject |> inbox.Post
+        | _ ->
+            let folders = IO.enumerateDirs dir
+            for folder in folders do
+                findProject folder
+
+    findProject options.Workspace
 
 
+let awaitProjectId (hub: IHub) (projectId: string) (promise: AsyncReplyChannel<Project>) =
+    let signal = hub.GetSignal<Project> $"project.{projectId}"
+    signal.Subscribe (fun () -> promise.Reply signal.Value)
+
+let awaitProjectPath (hub: IHub) (absolutePath: string) (promise: AsyncReplyChannel<Project>) =
+    let signal = hub.GetSignal<Project> absolutePath
+    signal.Subscribe (fun () -> promise.Reply signal.Value)
+
+let projectCompleted (hub: IHub) (project: Project) =
+    let signal = hub.GetSignal<Project> project.Name
+    signal.Value <- project
+
+    project.Id |> Option.iter (fun id ->
+        let signal = hub.GetSignal<Project> $"project.{id}"
+        signal.Value <- project)
 
 
-let handler (options: ConfigOptions.Options) (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) =
+let loadProject (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext scripts (absolutePath: string) =
+    let projectDir = FS.combinePath options.Workspace absolutePath
+    let projectFile = FS.combinePath projectDir "PROJECT"
+    Log.Debug("Loading project definition {ProjectDir}", projectDir)
 
+    let mutable projectConfig =
+        match projectFile with
+        | FS.File projectFile ->
+            let projectContent = File.ReadAllText projectFile
+            FrontEnd.Project.parse projectContent
+        | _ ->
+            raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
+
+    // check for duplicated fields as this is an error
+    workspaceConfig.Locals
+    |> Map.iter (fun name _ ->
+        if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+
+    // add required extensions
+    let requiredExtensions =
+        let stepExts =
+            projectConfig.Targets
+            |> Seq.collect (fun (KeyValue(_, target)) -> target.Steps |> List.map (fun step -> step.Extension))
+            |> Set.ofSeq
+        match projectConfig.Project.Init with
+        | Some init -> stepExts |> Set.add init
+        | _ -> stepExts
+    for extName in requiredExtensions do
+        match projectConfig.Extensions |> Map.tryFind extName with
+        | None ->
+            match workspaceConfig.Extensions |> Map.tryFind extName with
+            | Some ext -> projectConfig <- { projectConfig with Extensions = projectConfig.Extensions |> Map.add extName ext }
+            | _ -> raiseSymbolError $"Extension '{extName}' is not defined"
+        | _ -> ()
+
+    let projectScripts =
+        projectConfig.Extensions
+        |> Map.map (fun _ ext ->
+            ext.Script
+            |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+            |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+
+    let scripts =
+        scripts
+        |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
+
+    ()
+
+
+let handler (hub: IHub) (options: ConfigOptions.Options) (inbox: MailboxProcessor<ConfigurationLoaderProtocol>) =
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
         try
@@ -777,36 +852,20 @@ let handler (options: ConfigOptions.Options) (inbox: MailboxProcessor<Configurat
         with exn ->
             raiseParserError("Failed to read WORKSPACE configuration file", exn)
 
-    let findProjects (options: ConfigOptions.Options) =
-        let rec findProject (dir: string) =
-            let projectFile = FS.combinePath dir "PROJECT"
-            match projectFile with
-            | FS.File projectFile ->
-                projectFile |> LoadProject |> inbox.Post
-            | _ ->
-                let folders = IO.enumerateDirs dir
-                for folder in folders do
-                    findProject folder
- 
-        findProject options.Workspace
+    let evaluationContext = buildEvaluationContext options workspaceConfig
 
-    let loadProject (projectDir: string) = ()
-
-    let awaitProjectId projectId =
-
-
-
-
+    let scripts = buildScripts options workspaceConfig evaluationContext
 
 
     let rec messageLoop () = async {
         let mutable continueHandler = true
         match! inbox.Receive() with
-        | FindProjects -> findProjects options
-        | LoadProject (projectDir) -> ()
-        | AwaitProjectId (projectId) -> ()
-        | AwaitProjectPath (absolutePath) -> ()
-        | ProjectCompleted (project) -> ()
+        | FindProjects -> findProjects inbox options
+        | LoadProject absolutePath ->
+            loadProject inbox options workspaceConfig evaluationContext scripts absolutePath
+        | AwaitProjectId (projectId, reply) -> awaitProjectId hub projectId reply
+        | AwaitProjectPath (absolutePath, reply) -> awaitProjectPath hub absolutePath reply
+        | ProjectCompleted project -> projectCompleted hub project
         | ProjectFailed (projectDir, exn) -> ()
         | Exit -> continueHandler <- false
 
@@ -840,5 +899,8 @@ let read (options: ConfigOptions.Options) =
     // let extensions = Extensions.systemExtensions |> Map.addMap workspaceConfig.Extensions
 
 
-    let agent = MailboxProcessor.Start(handler)
-    let response = agent.PostAndReply (fun replyChanel -> FindProjects (workspaceConfig, replyChanel))
+    let hub = Hub.Create options.MaxConcurrency
+
+
+    let agent = MailboxProcessor.Start(handler hub options)
+    
