@@ -118,18 +118,18 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         | _ ->
             raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
 
-    let extensions = extensions |> Map.addMap projectConfig.Extensions
+    let projectExtensions = extensions |> Map.addMap projectConfig.Extensions
 
-    let projectScripts =
-        projectConfig.Extensions
-        |> Map.map (fun _ ext ->
-            ext.Script
-            |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-            |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+    let projectExtensionScripts =
+        let declaredScripts =
+            projectConfig.Extensions
+            |> Map.map (fun _ ext ->
+                ext.Script
+                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                |> Option.map (FS.workspaceRelative options.Workspace projectDir))
 
-    let scripts =
         scripts
-        |> Map.addMap (projectScripts |> Map.map Extensions.lazyLoadScript)
+        |> Map.addMap (declaredScripts |> Map.map Extensions.lazyLoadScript)
 
     let projectInfo =
         match projectConfig.Project.Init with
@@ -141,7 +141,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
                 Value.Map (Map [ "context", Value.Object context ])
 
             let result =
-                Extensions.getScript init scripts
+                Extensions.getScript init projectExtensionScripts
                 |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
 
             match result with
@@ -167,7 +167,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
     let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
     let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
-    let labels = projectConfig.Project.Labels
+    let projectLabels = projectConfig.Project.Labels
 
     let projectInfo = {
         projectInfo with
@@ -201,11 +201,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
                 Rebuild = rebuild
                 DependsOn = dependsOn })
 
-    let includes =
-        projectScripts
-        |> Seq.choose (fun (KeyValue(_, script)) -> script)
-        |> Set.ofSeq
-        |> Set.union projectInfo.Includes
+    let projectIncludes = projectInfo.Includes
 
     // enrich workspace locals with project locals
     // NOTE we are checking for duplicated fields as this is an error
@@ -218,13 +214,13 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     { LoadedProject.Id = projectConfig.Project.Id
       LoadedProject.DependsOn = dependsOn
       LoadedProject.Dependencies = projectDependencies
-      LoadedProject.Includes = includes
+      LoadedProject.Includes = projectIncludes
       LoadedProject.Ignores = projectIgnores
       LoadedProject.Outputs = projectOutputs
       LoadedProject.Targets = projectTargets
-      LoadedProject.Labels = labels
-      LoadedProject.Extensions = extensions
-      LoadedProject.Scripts = scripts
+      LoadedProject.Labels = projectLabels
+      LoadedProject.Extensions = projectExtensions
+      LoadedProject.Scripts = projectExtensionScripts
       LoadedProject.Locals = locals }
 
 
