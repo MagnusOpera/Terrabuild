@@ -65,6 +65,7 @@ type private LazyScript = Lazy<Terrabuild.Scripting.Script>
 [<RequireQualifiedAccess>]
 type private LoadedProject = {
     Id: string option
+    Name: string
     DependsOn: string set
     Dependencies: string set
     Includes: string set
@@ -76,6 +77,15 @@ type private LoadedProject = {
     Scripts: Map<string, LazyScript>
     Locals: Map<string, Expr>
 }
+
+
+
+
+type IWorkspaceService =
+    abstract member GetProjectById: string -> Project
+    abstract member GetProjectByPath: string -> Project
+    abstract member Completed: Project -> unit
+
 
 
 let scanFolders root (ignores: Set<string>) =
@@ -102,126 +112,6 @@ let (|Bool|Number|String|) (value: string) =
         | _ -> String value
 
 
-
-// this is the first stage: load project and mostly get dependencies references
-let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext extensions scripts projectId =
-    let projectDir = FS.combinePath options.Workspace projectId
-    let projectFile = FS.combinePath projectDir "PROJECT"
-
-    Log.Debug("Loading project definition {ProjectId}", projectId)
-
-    let projectConfig =
-        match projectFile with
-        | FS.File projectFile ->
-            let projectContent = File.ReadAllText projectFile
-            Terrabuild.Configuration.FrontEnd.Project.parse projectContent
-        | _ ->
-            raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
-
-    let projectExtensions = extensions |> Map.addMap projectConfig.Extensions
-
-    let projectExtensionScripts =
-        let declaredScripts =
-            projectConfig.Extensions
-            |> Map.map (fun _ ext ->
-                ext.Script
-                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-                |> Option.map (FS.workspaceRelative options.Workspace projectDir))
-
-        scripts
-        |> Map.addMap (declaredScripts |> Map.map Extensions.lazyLoadScript)
-
-    let projectInfo =
-        match projectConfig.Project.Init with
-        | Some init ->
-            let parseContext = 
-                let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
-                                Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
-                                Terrabuild.Extensibility.ExtensionContext.CI = options.Run.IsSome }
-                Value.Map (Map [ "context", Value.Object context ])
-
-            let result =
-                Extensions.getScript init projectExtensionScripts
-                |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
-
-            match result with
-            | Extensions.Success result -> result
-            | Extensions.ScriptNotFound -> raiseSymbolError $"Script {init} was not found"
-            | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
-            | Extensions.ErrorTarget exn -> forwardExternalError($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
-        | _ -> ProjectInfo.Default
-
-    let evalAsStringSet expr =
-        expr
-        |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
-        |> Option.defaultValue Set.empty
-
-    let dependsOn =
-        // collect dependencies for all the project
-        // NOTE we are keeping only project dependencies as we want to construct project graph
-        projectConfig.Project.DependsOn |> Option.defaultValue Set.empty
-        |> Set.union (Dependencies.reflectionFind projectConfig)
-        |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
-
-    let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
-    let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
-    let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
-    let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
-    let projectLabels = projectConfig.Project.Labels
-
-    let projectInfo = {
-        projectInfo with
-            Ignores = projectInfo.Ignores + projectIgnores
-            Outputs = projectInfo.Outputs + projectOutputs
-            Dependencies = projectInfo.Dependencies + projectDependencies
-            Includes = projectInfo.Includes + projectIncludes }
-
-    let projectOutputs = projectInfo.Outputs
-    let projectIgnores = projectInfo.Ignores
-
-    // convert relative dependencies to absolute dependencies respective to workspaceDirectory
-    let projectDependencies =
-        projectInfo.Dependencies
-        |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
-
-    let projectTargets =
-        projectConfig.Targets
-        |> Map.map (fun targetName targetBlock ->
-            let workspaceTarget = workspaceConfig.Targets |> Map.tryFind targetName
-            let rebuild =
-                match targetBlock.Rebuild with
-                | Some expr -> Some expr
-                | _ -> workspaceTarget |> Option.bind _.Rebuild
-            let dependsOn =
-                match targetBlock.DependsOn with
-                | Some dependsOn -> Some dependsOn
-                | _ -> workspaceTarget |> Option.bind _.DependsOn
-
-            { targetBlock with 
-                Rebuild = rebuild
-                DependsOn = dependsOn })
-
-    let projectIncludes = projectInfo.Includes
-
-    // enrich workspace locals with project locals
-    // NOTE we are checking for duplicated fields as this is an error
-    let locals =
-        workspaceConfig.Locals
-        |> Map.iter (fun name _ ->
-            if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
-        workspaceConfig.Locals |> Map.addMap projectConfig.Locals
-
-    { LoadedProject.Id = projectConfig.Project.Id
-      LoadedProject.DependsOn = dependsOn
-      LoadedProject.Dependencies = projectDependencies
-      LoadedProject.Includes = projectIncludes
-      LoadedProject.Ignores = projectIgnores
-      LoadedProject.Outputs = projectOutputs
-      LoadedProject.Targets = projectTargets
-      LoadedProject.Labels = projectLabels
-      LoadedProject.Extensions = projectExtensions
-      LoadedProject.Scripts = projectExtensionScripts
-      LoadedProject.Locals = locals }
 
 
 let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) =
@@ -314,6 +204,7 @@ let private buildScripts (options: ConfigOptions.Options) (workspaceConfig: AST.
 
     let scripts = sysScripts |> Map.addMap usrScripts
     scripts
+
 
 
 
@@ -540,6 +431,238 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
 
 
+// this is the first stage: load project and mostly get dependencies references
+let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext extensions scripts projectPath =
+    let projectDir = FS.combinePath options.Workspace projectPath
+    let projectFile = FS.combinePath projectDir "PROJECT"
+
+    Log.Debug("Loading project definition {ProjectId}", projectPath)
+
+    let projectConfig =
+        match projectFile with
+        | FS.File projectFile ->
+            let projectContent = File.ReadAllText projectFile
+            Terrabuild.Configuration.FrontEnd.Project.parse projectContent
+        | _ ->
+            raiseInvalidArg $"No PROJECT found in directory '{projectFile}'"
+
+    let projectExtensions = extensions |> Map.addMap projectConfig.Extensions
+
+    let projectExtensionScripts =
+        let declaredScripts =
+            projectConfig.Extensions
+            |> Map.map (fun _ ext ->
+                ext.Script
+                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                |> Option.map (FS.workspaceRelative options.Workspace projectDir))
+
+        scripts
+        |> Map.addMap (declaredScripts |> Map.map Extensions.lazyLoadScript)
+
+    let projectInfo =
+        match projectConfig.Project.Init with
+        | Some init ->
+            let parseContext = 
+                let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
+                                Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
+                                Terrabuild.Extensibility.ExtensionContext.CI = options.Run.IsSome }
+                Value.Map (Map [ "context", Value.Object context ])
+
+            let result =
+                Extensions.getScript init projectExtensionScripts
+                |> Extensions.invokeScriptMethod<ProjectInfo> "__defaults__" parseContext
+
+            match result with
+            | Extensions.Success result -> result
+            | Extensions.ScriptNotFound -> raiseSymbolError $"Script {init} was not found"
+            | Extensions.TargetNotFound -> ProjectInfo.Default // NOTE: if __defaults__ is not found - this will silently use default configuration, probably emit warning
+            | Extensions.ErrorTarget exn -> forwardExternalError($"Invocation failure of command '__defaults__' for extension '{init}'", exn)
+        | _ -> ProjectInfo.Default
+
+    let evalAsStringSet expr =
+        expr
+        |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+        |> Option.defaultValue Set.empty
+
+    let dependsOn =
+        // collect dependencies for all the project
+        // NOTE we are keeping only project dependencies as we want to construct project graph
+        projectConfig.Project.DependsOn |> Option.defaultValue Set.empty
+        |> Set.union (Dependencies.reflectionFind projectConfig)
+        |> Set.choose (fun dep -> if dep.StartsWith("project.") then Some dep else None)
+
+    let projectIgnores = projectConfig.Project.Ignores |> evalAsStringSet
+    let projectOutputs = projectConfig.Project.Outputs |> evalAsStringSet
+    let projectDependencies = projectConfig.Project.Dependencies |> evalAsStringSet
+    let projectIncludes = projectConfig.Project.Includes |> evalAsStringSet
+    let projectLabels = projectConfig.Project.Labels
+
+    let projectInfo = {
+        projectInfo with
+            Ignores = projectInfo.Ignores + projectIgnores
+            Outputs = projectInfo.Outputs + projectOutputs
+            Dependencies = projectInfo.Dependencies + projectDependencies
+            Includes = projectInfo.Includes + projectIncludes }
+
+    let projectOutputs = projectInfo.Outputs
+    let projectIgnores = projectInfo.Ignores
+
+    // convert relative dependencies to absolute dependencies respective to workspaceDirectory
+    let projectDependencies =
+        projectInfo.Dependencies
+        |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
+
+    let projectTargets =
+        projectConfig.Targets
+        |> Map.map (fun targetName targetBlock ->
+            let workspaceTarget = workspaceConfig.Targets |> Map.tryFind targetName
+            let rebuild =
+                match targetBlock.Rebuild with
+                | Some expr -> Some expr
+                | _ -> workspaceTarget |> Option.bind _.Rebuild
+            let dependsOn =
+                match targetBlock.DependsOn with
+                | Some dependsOn -> Some dependsOn
+                | _ -> workspaceTarget |> Option.bind _.DependsOn
+
+            { targetBlock with 
+                Rebuild = rebuild
+                DependsOn = dependsOn })
+
+    let projectIncludes = projectInfo.Includes
+
+    // enrich workspace locals with project locals
+    // NOTE we are checking for duplicated fields as this is an error
+    let locals =
+        workspaceConfig.Locals
+        |> Map.iter (fun name _ ->
+            if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+        workspaceConfig.Locals |> Map.addMap projectConfig.Locals
+
+    { LoadedProject.Id = projectConfig.Project.Id
+      LoadedProject.Name = projectPath
+      LoadedProject.DependsOn = dependsOn
+      LoadedProject.Dependencies = projectDependencies
+      LoadedProject.Includes = projectIncludes
+      LoadedProject.Ignores = projectIgnores
+      LoadedProject.Outputs = projectOutputs
+      LoadedProject.Targets = projectTargets
+      LoadedProject.Labels = projectLabels
+      LoadedProject.Extensions = projectExtensions
+      LoadedProject.Scripts = projectExtensionScripts
+      LoadedProject.Locals = locals }
+
+
+
+
+
+
+type Protocol =
+    | LoadProject of projectPath:string
+    | ProjectLoaded of project:Project
+    | GetProjectById of projectId:string * AsyncReplyChannel<Project>
+    | GetProjectByPath of projectPath:string * AsyncReplyChannel<Project>
+    | Exit
+
+
+
+type WorkspaceLoader(options: ConfigOptions.Options) =
+
+    let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
+    let workspaceConfig =
+        try
+            FrontEnd.Workspace.parse workspaceContent
+        with exn ->
+            raiseParserError("Failed to read WORKSPACE configuration file", exn)
+
+    let evaluationContext = buildEvaluationContext options workspaceConfig
+
+    let scripts = buildScripts options workspaceConfig evaluationContext
+
+    let extensions = Extensions.systemExtensions |> Map.addMap workspaceConfig.Extensions
+
+    let hub = Hub.Create options.MaxConcurrency
+
+    let projectLoading = ConcurrentDictionary<string, bool>()
+    let projectIds = ConcurrentDictionary<string, string>()
+    let projects = ConcurrentDictionary<string, Project>()
+
+    let agent =
+        let handler (inbox: MailboxProcessor<Protocol>) =
+            let rec messageLoop () = async {
+                let! msg = inbox.Receive()
+                match msg with
+                // load project asynchronously if not already loaded
+                | LoadProject projectPath ->
+                    let projectName = projectPath |> String.toUpper
+                    if projectLoading.TryAdd(projectName, true) then
+                        async {
+                            let projectDef = loadProjectDef options workspaceConfig evaluationContext extensions scripts projectPath
+                            let project = finalizeProject projectPath evaluationContext projectDef
+                            project |> ignore
+                        } |> Async.StartImmediate
+                // project is loaded
+                | ProjectLoaded project ->
+                    if projects.TryAdd(project.Name, project) |> not then raiseBugError "Unexpected error"
+                    let signal = hub.GetSignal<Project> project.Name
+                    signal.Value <- project
+                    project.Id |> Option.iter (fun id ->
+                        if projectIds.TryAdd(id, project.Name) |> not then
+                            raiseSymbolError $"Project id '{id}' is already defined in project '{projectIds[id]}'"
+                        let signal = hub.GetSignal<Project> $"project.{id}"
+                        signal.Value <- project)
+                | GetProjectById (projectId, reply) ->
+                    let signal = hub.GetSignal<Project> projectId
+                    hub.Subscribe projectId [signal] (fun () -> reply.Reply signal.Value)
+                | GetProjectByPath (projectPath, reply) ->
+                    let projectPath = projectPath |> String.toUpper
+                    let signal = hub.GetSignal<Project> projectPath
+                    hub.Subscribe projectPath [signal] (fun () -> reply.Reply signal.Value)
+                | Exit -> ()
+
+                if msg <> Exit then return! messageLoop ()
+            }
+            messageLoop()
+        MailboxProcessor.Start(handler)
+
+    do
+        // scan folders to discover projects
+        let rec findProjects (dir: string) =
+            let projectFile = FS.combinePath dir "PROJECT"
+            match projectFile with
+            | FS.File projectFile -> projectFile |> LoadProject |> agent.Post
+            | _ -> dir |> IO.enumerateDirs |> Seq.iter findProjects
+        findProjects options.Workspace
+
+
+    member _.WaitCompletion() =
+        let status = hub.WaitCompletion()
+        agent.Post Exit
+
+        match status with
+        | Status.Ok -> ()
+        | Status.UnfulfilledSubscription (subscription, signals) ->
+            let unraisedSignals = signals |> String.join ","
+            raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check for circular dependencies."
+        | Status.SubscriptionError exn ->
+            forwardExternalError("Failed to load configuration", exn)
+
+    member _.Projects = projects
+
+    member _.WorkspaceConfig = workspaceConfig
+
+    interface IWorkspaceService with
+        member _.GetProjectById projectId =
+            agent.PostAndReply (fun reply -> GetProjectById (projectId, reply))
+
+        member _.GetProjectByPath projectPath =
+            agent.PostAndReply (fun reply -> GetProjectByPath (projectPath, reply))
+
+        member _.Completed project =
+            agent.Post (ProjectLoaded project)
+
+
+
 let read (options: ConfigOptions.Options) =
     $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
 
@@ -555,113 +678,12 @@ let read (options: ConfigOptions.Options) =
     options.Run
     |> Option.iter (fun run -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {run.Name}" |> Terminal.writeLine)
 
-    let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
-    let workspaceConfig =
-        try
-            Terrabuild.Configuration.FrontEnd.Workspace.parse workspaceContent
-        with exn ->
-            raiseParserError("Failed to read WORKSPACE configuration file", exn)
 
-    let evaluationContext = buildEvaluationContext options workspaceConfig
+    let workspaceLoader = WorkspaceLoader(options)
+    workspaceLoader.WaitCompletion()
 
-    let scripts = buildScripts options workspaceConfig evaluationContext
-
-    let extensions = Extensions.systemExtensions |> Map.addMap workspaceConfig.Extensions
-
-    let searchProjectsAndApply() =
-        let workspaceIgnores = workspaceConfig.Workspace.Ignores |> Option.defaultValue Set.empty
-        let scanFolder = scanFolders options.Workspace workspaceIgnores
-        let projectLoading = ConcurrentDictionary<string, bool>()
-        let projectIds = ConcurrentDictionary<string, string>()
-        let projects = ConcurrentDictionary<string, Project>()
-        let hub = Hub.Create(options.MaxConcurrency)
-
-        let rec loadProject projectDir =
-            let projectPathId = projectDir |> String.toUpper
-            if projectLoading.TryAdd(projectPathId, true) then
-                // parallel load of projects
-                hub.Subscribe projectDir [] (fun () ->
-                    let loadedProject =
-                        try
-                            // load project and force loading all dependencies as well
-                            let loadedProject = loadProjectDef options workspaceConfig evaluationContext extensions scripts projectDir
-                            match loadedProject.Id with
-                            | Some projectId ->
-                                if projectIds.TryAdd(projectId, projectDir) |> not then
-                                    raiseSymbolError $"Project id '{projectId}' is already defined in project '{projectIds[projectId]}'"
-                            | _ -> ()
-
-                            loadedProject
-                        with exn ->
-                            raiseParserError($"Failed to read PROJECT configuration '{projectDir}'", exn)
-
-                    // immediately load all dependencies
-                    for dependency in loadedProject.Dependencies do
-                        loadProject dependency
-
-                    // await dependencies to be loaded
-                    let projectPathSignals =
-                        loadedProject.Dependencies
-                        |> Set.map String.toUpper
-                        |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
-                        |> List.ofSeq
-
-                    let dependsOnSignals =
-                        loadedProject.DependsOn
-                        |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
-                        |> List.ofSeq
-
-                    let awaitedProjectSignals = projectPathSignals @ dependsOnSignals
-                    let awaitedSignals = awaitedProjectSignals |> List.map (fun entry -> entry :> ISignal)
-                    hub.Subscribe projectDir awaitedSignals (fun () ->
-                        try
-                            // build task & code & notify
-                            let dependsOnProjects = 
-                                awaitedProjectSignals
-                                |> Seq.map (fun projectDependency -> projectDependency.Value.Name, projectDependency.Value)
-                                |> Map.ofSeq
-
-                            let project = finalizeProject projectDir evaluationContext loadedProject dependsOnProjects
-                            if projects.TryAdd(projectPathId, project) |> not then raiseBugError "Unexpected error"
-
-                            Log.Debug($"Signaling projectPath '{projectPathId}")
-                            let loadedProjectPathIdSignal = hub.GetSignal<Project> projectPathId
-                            loadedProjectPathIdSignal.Value <- project
-
-                            match loadedProject.Id with
-                            | Some projectId ->
-                                Log.Debug($"Signaling projectId '{projectId}")
-                                let loadedProjectIdSignal = hub.GetSignal<Project> $"project.{projectId}"
-                                loadedProjectIdSignal.Value <- project
-                            | _ -> ()
-                        with exn -> forwardExternalError($"Error while parsing project '{projectDir}'", exn)))
-
-        let rec findDependencies isRoot dir =
-            if isRoot || scanFolder  dir then
-                let projectFile = FS.combinePath dir "PROJECT" 
-                match projectFile with
-                | FS.File file ->
-                    let projectFile = file |> FS.parentDirectory |> Option.get |> FS.relativePath options.Workspace
-                    try
-                        loadProject projectFile
-                    with exn -> forwardExternalError($"Error while parsing project '{projectFile}'", exn)
-                | _ ->
-                    for subdir in dir |> IO.enumerateDirs do
-                        findDependencies false subdir
-
-        findDependencies true options.Workspace
-        let status = hub.WaitCompletion()
-        match status with
-        | Status.Ok ->
-            projects |> Map.ofDict
-        | Status.UnfulfilledSubscription (subscription, signals) ->
-            let unraisedSignals = signals |> String.join ","
-            raiseInvalidArg $"Project '{subscription}' has pending operations on '{unraisedSignals}'. Check for circular dependencies."
-        | Status.SubscriptionError exn ->
-            forwardExternalError("Failed to load configuration", exn)
-
-
-    let projects = searchProjectsAndApply()
+    let projects = workspaceLoader.Projects
+    let workspaceConfig = workspaceLoader.WorkspaceConfig
 
     // select dependencies with labels if any
     let selectedProjects =
