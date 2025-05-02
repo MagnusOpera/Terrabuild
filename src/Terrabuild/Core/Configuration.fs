@@ -37,7 +37,7 @@ type Target = {
 [<RequireQualifiedAccess>]
 type Project = {
     Id: string option
-    Name: string
+    Path: string
     Hash: string
     Dependencies: string set
     Files: string set
@@ -63,20 +63,19 @@ type Workspace = {
 type private LazyScript = Lazy<Terrabuild.Scripting.Script>
 
 [<RequireQualifiedAccess>]
-type private LoadedProject = {
-    Id: string option
-    Name: string
-    DependsOn: string set
-    Dependencies: string set
-    Includes: string set
-    Ignores: string set
-    Outputs: string set
-    Targets: Map<string, AST.Project.TargetBlock>
-    Labels: string set
-    Extensions: Map<string, AST.ExtensionBlock>
-    Scripts: Map<string, LazyScript>
-    Locals: Map<string, Expr>
-}
+type private LoadedProject =
+    { Id: string option
+      Path: string
+      DependsOn: string set
+      Dependencies: string set
+      Includes: string set
+      Ignores: string set
+      Outputs: string set
+      Targets: Map<string, AST.Project.TargetBlock>
+      Labels: string set
+      Extensions: Map<string, AST.ExtensionBlock>
+      Scripts: Map<string, LazyScript>
+      Locals: Map<string, Expr> }
 
 
 
@@ -210,13 +209,18 @@ let private buildScripts (options: ConfigOptions.Options) (workspaceConfig: AST.
 
 
 // this is the final stage: create targets and create the project
-let private finalizeProject projectDir evaluationContext (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
-    let projectId = projectDir |> String.toUpper
+let private finalizeProject evaluationContext (projectDef: LoadedProject) (workspaceService: IWorkspaceService) =
+    let projectId = projectDef.Path |> String.toUpper
     let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
+
+    let projectDependencies =
+        projectDef.DependsOn
+        |> Seq.map (fun dependency -> dependency, workspaceService.GetProjectByPath dependency)
+        |> Map.ofSeq
 
     // get dependencies on files
     let files =
-        projectDir
+        projectDef.Path
         |> IO.enumerateFilesBut projectDef.Includes (projectDef.Outputs + projectDef.Ignores + tbFiles)
         |> Set
 
@@ -263,7 +267,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                         |> Map.ofSeq
 
                     { evaluationContext with
-                        Eval.ProjectDir = Some projectDir
+                        Eval.ProjectDir = Some projectDef.Path
                         Eval.Versions = versions
                         Eval.Data =
                             evaluationContext.Data
@@ -416,18 +420,19 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
             target
         )
 
-    let files = files |> Set.map (FS.relativePath projectDir)
+    let files = files |> Set.map (FS.relativePath projectDef.Path)
 
     let projectDependencies = projectDependencies.Keys |> Seq.map String.toUpper |> Set.ofSeq
 
-    { Project.Id = projectDef.Id
-      Project.Name = projectDir
-      Project.Hash = projectHash
-      Project.Dependencies = projectDependencies
-      Project.Files = files
-      Project.Targets = projectSteps
-      Project.Labels = projectDef.Labels }
-
+    let project =
+        { Project.Id = projectDef.Id
+          Project.Path = projectDef.Path
+          Project.Hash = projectHash
+          Project.Dependencies = projectDependencies
+          Project.Files = files
+          Project.Targets = projectSteps
+          Project.Labels = projectDef.Labels }
+    workspaceService.Completed project
 
 
 
@@ -539,19 +544,20 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
             if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
         workspaceConfig.Locals |> Map.addMap projectConfig.Locals
 
-    { LoadedProject.Id = projectConfig.Project.Id
-      LoadedProject.Name = projectPath
-      LoadedProject.DependsOn = dependsOn
-      LoadedProject.Dependencies = projectDependencies
-      LoadedProject.Includes = projectIncludes
-      LoadedProject.Ignores = projectIgnores
-      LoadedProject.Outputs = projectOutputs
-      LoadedProject.Targets = projectTargets
-      LoadedProject.Labels = projectLabels
-      LoadedProject.Extensions = projectExtensions
-      LoadedProject.Scripts = projectExtensionScripts
-      LoadedProject.Locals = locals }
-
+    let loadedProject =
+        { LoadedProject.Id = projectConfig.Project.Id
+          LoadedProject.Path = projectPath
+          LoadedProject.DependsOn = dependsOn
+          LoadedProject.Dependencies = projectDependencies
+          LoadedProject.Includes = projectIncludes
+          LoadedProject.Ignores = projectIgnores
+          LoadedProject.Outputs = projectOutputs
+          LoadedProject.Targets = projectTargets
+          LoadedProject.Labels = projectLabels
+          LoadedProject.Extensions = projectExtensions
+          LoadedProject.Scripts = projectExtensionScripts
+          LoadedProject.Locals = locals }
+    loadedProject
 
 
 
@@ -566,7 +572,7 @@ type Protocol =
 
 
 
-type WorkspaceLoader(options: ConfigOptions.Options) =
+type WorkspaceLoader(options: ConfigOptions.Options) as this =
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
@@ -598,16 +604,16 @@ type WorkspaceLoader(options: ConfigOptions.Options) =
                     if projectLoading.TryAdd(projectName, true) then
                         async {
                             let projectDef = loadProjectDef options workspaceConfig evaluationContext extensions scripts projectPath
-                            let project = finalizeProject projectPath evaluationContext projectDef
+                            let project = finalizeProject evaluationContext projectDef this
                             project |> ignore
                         } |> Async.StartImmediate
                 // project is loaded
                 | ProjectLoaded project ->
-                    if projects.TryAdd(project.Name, project) |> not then raiseBugError "Unexpected error"
-                    let signal = hub.GetSignal<Project> project.Name
+                    if projects.TryAdd(project.Path, project) |> not then raiseBugError "Unexpected error"
+                    let signal = hub.GetSignal<Project> project.Path
                     signal.Value <- project
                     project.Id |> Option.iter (fun id ->
-                        if projectIds.TryAdd(id, project.Name) |> not then
+                        if projectIds.TryAdd(id, project.Path) |> not then
                             raiseSymbolError $"Project id '{id}' is already defined in project '{projectIds[id]}'"
                         let signal = hub.GetSignal<Project> $"project.{id}"
                         signal.Value <- project)
