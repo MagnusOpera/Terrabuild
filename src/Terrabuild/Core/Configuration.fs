@@ -153,6 +153,8 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
             | String value, _ -> Value.String value
             | _ -> raiseTypeError $"Value '{value}' can't be converted to variable {name}"
 
+        let varResolver name = raiseSymbolError $"Variable {name} is not defined"
+
         workspaceConfig.Variables
         |> Map.map (fun name expr ->
             // find dependencies for expression - it must have *no* dependencies for evaluation
@@ -162,7 +164,7 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
                 | Some expr ->
                     let deps = Dependencies.find expr
                     if deps <> Set.empty then raiseInvalidArg "Default value for variable {name} must have no dependencies"
-                    expr |> Eval.eval evaluationContext |> Some
+                    expr |> Eval.eval varResolver evaluationContext |> Some
 
             let value =
                 match $"TB_VAR_{name}" |> Environment.GetEnvironmentVariable with
@@ -189,13 +191,15 @@ let private buildScripts (options: ConfigOptions.Options) (workspaceConfig: AST.
         |> Map.map (fun _ _ -> None)
         |> Map.map Extensions.lazyLoadScript
 
+    let varResolver name = raiseSymbolError $"Variable {name} is not defined"
+
     // load user extension
     let usrScripts =
         workspaceConfig.Extensions
         |> Map.map (fun _ ext ->
             let script =
                 ext.Script
-                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                |> Option.bind (Eval.asStringOption << Eval.eval varResolver evaluationContext)
             match script with
             | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
             | _ -> None)
@@ -248,6 +252,10 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
         [ projectId; filesHash; dependenciesHash ]
         |> Hash.sha256strings
 
+    let varResolver varName =
+        let project = workspaceService.GetProjectById varName
+        [ "version", Value.String project.Hash ] |> Map.ofSeq |> Value.Map
+
     let projectSteps =
         projectDef.Targets
         |> Map.map (fun targetName target ->
@@ -291,7 +299,7 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
                         |> Seq.map (fun dep -> localsHub.GetSignal<Value> dep :> ISignal)
                         |> List.ofSeq
                     localsHub.Subscribe localName signalDeps (fun () ->
-                        let localValue = Eval.eval evaluationContext localExpr
+                        let localValue = Eval.eval varResolver evaluationContext localExpr
                         evaluationContext <- { evaluationContext with Data = evaluationContext.Data |> Map.add localName localValue }
                         let localSignal = localsHub.GetSignal<Value> localName
                         localSignal.Value <- localValue)
@@ -309,7 +317,7 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
             // defaults to allow caching
             let rebuild = 
                 target.Rebuild
-                |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
+                |> Option.bind (Eval.asBoolOption << Eval.eval varResolver evaluationContext)
                 |> Option.defaultValue false
 
             let targetOperations =
@@ -324,12 +332,12 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
                         extension.Defaults |> Option.defaultValue Map.empty
                         |> Map.addMap step.Parameters
                         |> Expr.Map
-                        |> Eval.eval evaluationContext
+                        |> Eval.eval varResolver evaluationContext
 
                     let container =
                         match extension.Container with
                         | Some container ->
-                            match Eval.eval evaluationContext container with
+                            match Eval.eval varResolver evaluationContext container with
                             | Value.String container -> Some container
                             | Value.Nothing -> None
                             | _ -> raiseTypeError "container must evaluate to a string"
@@ -338,7 +346,7 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
                     let platform =
                         match extension.Platform with
                         | Some platform ->
-                            match Eval.eval evaluationContext platform with
+                            match Eval.eval varResolver evaluationContext platform with
                             | Value.String platform -> Some platform
                             | Value.Nothing -> None
                             | _ -> raiseTypeError "container must evaluate to a string"
@@ -351,7 +359,7 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
 
                     let extVariables =
                         extension.Variables
-                        |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+                        |> Option.bind (Eval.asStringSetOption << Eval.eval varResolver evaluationContext)
                         |> Option.defaultValue Set.empty
 
                     let hash =
@@ -386,7 +394,7 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
             let outputs =
                 let targetOutputs =
                     target.Outputs
-                    |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+                    |> Option.bind (Eval.asStringSetOption << Eval.eval varResolver evaluationContext)
                 match targetOutputs with
                 | Some outputs -> outputs
                 | _ -> projectDef.Outputs
@@ -399,7 +407,7 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
             let targetCache =
                 let targetCache =
                     target.Cache
-                    |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                    |> Option.bind (Eval.asStringOption << Eval.eval varResolver evaluationContext)
                 match targetCache with
                 | Some "never" -> Some Cacheability.Never
                 | Some "local" -> Some Cacheability.Local
@@ -437,11 +445,15 @@ let private finalizeProject evaluationContext (projectDef: LoadedProject) (works
 
 
 // this is the first stage: load project and mostly get dependencies references
-let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext extensions scripts projectPath =
+let private loadProjectDef (options: ConfigOptions.Options) (workspaceService: IWorkspaceService) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext extensions scripts projectPath =
     let projectDir = FS.combinePath options.Workspace projectPath
     let projectFile = FS.combinePath projectDir "PROJECT"
 
     Log.Debug("Loading project definition {ProjectId}", projectPath)
+
+    let varResolver varName =
+        let project = workspaceService.GetProjectById varName
+        [ "version", Value.String project.Hash ] |> Map.ofSeq |> Value.Map
 
     let projectConfig =
         match projectFile with
@@ -458,7 +470,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
             projectConfig.Extensions
             |> Map.map (fun _ ext ->
                 ext.Script
-                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+                |> Option.bind (Eval.asStringOption << Eval.eval varResolver evaluationContext)
                 |> Option.map (FS.workspaceRelative options.Workspace projectDir))
 
         scripts
@@ -486,7 +498,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
     let evalAsStringSet expr =
         expr
-        |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
+        |> Option.bind (Eval.asStringSetOption << Eval.eval varResolver evaluationContext)
         |> Option.defaultValue Set.empty
 
     let dependsOn =
@@ -603,7 +615,7 @@ type WorkspaceLoader(options: ConfigOptions.Options) as this =
                     let projectName = projectPath |> String.toUpper
                     if projectLoading.TryAdd(projectName, true) then
                         async {
-                            let projectDef = loadProjectDef options workspaceConfig evaluationContext extensions scripts projectPath
+                            let projectDef = loadProjectDef options this workspaceConfig evaluationContext extensions scripts projectPath
                             let project = finalizeProject evaluationContext projectDef this
                             project |> ignore
                         } |> Async.StartImmediate

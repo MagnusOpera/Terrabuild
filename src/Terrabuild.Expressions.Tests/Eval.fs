@@ -12,6 +12,9 @@ let private evaluationContext = {
 }
 
 
+let eval =
+    Eval.eval (fun _ -> failwith "unexpected")
+
 
 [<Test>]
 let valueNothing() =

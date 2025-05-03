@@ -47,4 +47,4 @@ let valueOrDefault (defaultValue: Expr) (attribute: Attribute option) =
     | Some attribute -> attribute.Value
     | None -> defaultValue
 
-let simpleEval = Eval.eval Eval.EvaluationContext.Empty
+let simpleEval = Eval.eval (fun _ -> failwith "unexpected") Eval.EvaluationContext.Empty

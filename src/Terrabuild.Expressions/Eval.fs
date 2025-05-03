@@ -15,7 +15,7 @@ with
           Versions = Map.empty
           Data = Map.empty }
 
-let rec eval (context: EvaluationContext) (expr: Expr) =
+let rec eval variableResolver (context: EvaluationContext) (expr: Expr) =
     let valueToString v =
         match v with
         | Value.Nothing -> ""
@@ -34,7 +34,7 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
             // if varUsed |> Set.contains var then TerrabuildException.Raise($"Variable {var} has circular definition")
             match context.Data |> Map.tryFind var with
             | Some value -> value
-            | None -> raiseSymbolError $"Variable '{var}' is not defined"
+            | None -> variableResolver var
         | Expr.Map map ->
             let values = map |> Map.fold (fun map k v ->
                 let mv = eval v
