@@ -103,7 +103,102 @@ let (|Bool|Number|String|) (value: string) =
 
 
 
-// this is the first stage: load project and mostly get dependencies references
+let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) =
+    let tagValue = 
+        match options.Tag with
+        | Some tag -> Value.String tag
+        | _ -> Value.Nothing
+
+    let noteValue =
+        match options.Note with
+        | Some note -> Value.String note
+        | _ -> Value.Nothing
+
+    let terrabuildVars =
+        Map [ "terrabuild.configuration", Value.String options.Configuration
+              "terrabuild.branch_or_tag", Value.String options.BranchOrTag 
+              "terrabuild.head_commit", Value.String options.HeadCommit.Sha
+              "terrabuild.retry", Value.Bool options.Retry 
+              "terrabuild.force", Value.Bool options.Force 
+              "terrabuild.ci", Value.Bool options.Run.IsSome 
+              "terrabuild.debug", Value.Bool options.Debug 
+              "terrabuild.tag", tagValue 
+              "terrabuild.note", noteValue ]
+ 
+    let evaluationContext =
+        { Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
+          Eval.EvaluationContext.ProjectDir = None
+          Eval.EvaluationContext.Versions = Map.empty
+          Eval.EvaluationContext.Data = terrabuildVars }
+
+
+    // bind variables
+    let variables =
+        let convertToVarType (name: string) (defaultValue: Value option) (value: string) =
+            match value, defaultValue with
+            | Bool value, Some (Value.Bool _) -> Value.Bool value
+            | Bool value, None -> Value.Bool value
+            | Number value, Some (Value.Number _) -> Value.Number value
+            | Number value, None -> Value.Number value
+            | String value, _ -> Value.String value
+            | _ -> raiseTypeError $"Value '{value}' can't be converted to variable {name}"
+
+        workspaceConfig.Variables
+        |> Map.map (fun name expr ->
+            // find dependencies for expression - it must have *no* dependencies for evaluation
+            let defaultValue =
+                match expr with
+                | None -> None
+                | Some expr ->
+                    let deps = Dependencies.find expr
+                    if deps <> Set.empty then raiseInvalidArg "Default value for variable {name} must have no dependencies"
+                    expr |> Eval.eval evaluationContext |> Some
+
+            let value =
+                match $"TB_VAR_{name}" |> Environment.GetEnvironmentVariable with
+                | null ->
+                    match options.Variables |> Map.tryFind name with
+                    | None -> defaultValue
+                    | Some value -> convertToVarType name defaultValue value |> Some
+                | value -> convertToVarType name defaultValue value |> Some
+
+            match value with
+            | Some expr -> expr
+            | _ -> raiseInvalidArg $"Variable {name} is not initialized")
+        |> Seq.map (fun (KeyValue(name, expr)) -> $"var.{name}", expr)
+        |> Map.ofSeq
+
+    { evaluationContext with
+        Data = evaluationContext.Data |> Map.addMap variables }
+
+
+let private buildScripts (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext =
+    // load system extensions
+    let sysScripts =
+        Extensions.systemExtensions
+        |> Map.map (fun _ _ -> None)
+        |> Map.map Extensions.lazyLoadScript
+
+    // load user extension
+    let usrScripts =
+        workspaceConfig.Extensions
+        |> Map.map (fun _ ext ->
+            let script =
+                ext.Script
+                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
+            match script with
+            | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
+            | _ -> None)
+        |> Map.map Extensions.lazyLoadScript
+
+    let scripts = sysScripts |> Map.addMap usrScripts
+    scripts
+
+
+
+
+
+// this is the first stage: load project and get dependencies references
 let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext extensions scripts projectId =
     let projectDir = FS.combinePath options.Workspace projectId
     let projectFile = FS.combinePath projectDir "PROJECT"
@@ -226,99 +321,6 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
       LoadedProject.Extensions = extensions
       LoadedProject.Scripts = scripts
       LoadedProject.Locals = locals }
-
-
-let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) =
-    let tagValue = 
-        match options.Tag with
-        | Some tag -> Value.String tag
-        | _ -> Value.Nothing
-
-    let noteValue =
-        match options.Note with
-        | Some note -> Value.String note
-        | _ -> Value.Nothing
-
-    let terrabuildVars =
-        Map [ "terrabuild.configuration", Value.String options.Configuration
-              "terrabuild.branch_or_tag", Value.String options.BranchOrTag 
-              "terrabuild.head_commit", Value.String options.HeadCommit.Sha
-              "terrabuild.retry", Value.Bool options.Retry 
-              "terrabuild.force", Value.Bool options.Force 
-              "terrabuild.ci", Value.Bool options.Run.IsSome 
-              "terrabuild.debug", Value.Bool options.Debug 
-              "terrabuild.tag", tagValue 
-              "terrabuild.note", noteValue ]
- 
-    let evaluationContext =
-        { Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
-          Eval.EvaluationContext.ProjectDir = None
-          Eval.EvaluationContext.Versions = Map.empty
-          Eval.EvaluationContext.Data = terrabuildVars }
-
-
-    // bind variables
-    let variables =
-        let convertToVarType (name: string) (defaultValue: Value option) (value: string) =
-            match value, defaultValue with
-            | Bool value, Some (Value.Bool _) -> Value.Bool value
-            | Bool value, None -> Value.Bool value
-            | Number value, Some (Value.Number _) -> Value.Number value
-            | Number value, None -> Value.Number value
-            | String value, _ -> Value.String value
-            | _ -> raiseTypeError $"Value '{value}' can't be converted to variable {name}"
-
-        workspaceConfig.Variables
-        |> Map.map (fun name expr ->
-            // find dependencies for expression - it must have *no* dependencies for evaluation
-            let defaultValue =
-                match expr with
-                | None -> None
-                | Some expr ->
-                    let deps = Dependencies.find expr
-                    if deps <> Set.empty then raiseInvalidArg "Default value for variable {name} must have no dependencies"
-                    expr |> Eval.eval evaluationContext |> Some
-
-            let value =
-                match $"TB_VAR_{name}" |> Environment.GetEnvironmentVariable with
-                | null ->
-                    match options.Variables |> Map.tryFind name with
-                    | None -> defaultValue
-                    | Some value -> convertToVarType name defaultValue value |> Some
-                | value -> convertToVarType name defaultValue value |> Some
-
-            match value with
-            | Some expr -> expr
-            | _ -> raiseInvalidArg $"Variable {name} is not initialized")
-        |> Seq.map (fun (KeyValue(name, expr)) -> $"var.{name}", expr)
-        |> Map.ofSeq
-
-    { evaluationContext with
-        Data = evaluationContext.Data |> Map.addMap variables }
-
-
-let private buildScripts (options: ConfigOptions.Options) (workspaceConfig: AST.Workspace.WorkspaceFile) evaluationContext =
-    // load system extensions
-    let sysScripts =
-        Extensions.systemExtensions
-        |> Map.map (fun _ _ -> None)
-        |> Map.map Extensions.lazyLoadScript
-
-    // load user extension
-    let usrScripts =
-        workspaceConfig.Extensions
-        |> Map.map (fun _ ext ->
-            let script =
-                ext.Script
-                |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
-            match script with
-            | Some script -> script |> FS.workspaceRelative options.Workspace "" |> Some
-            | _ -> None)
-        |> Map.map Extensions.lazyLoadScript
-
-    let scripts = sysScripts |> Map.addMap usrScripts
-    scripts
-
 
 
 
