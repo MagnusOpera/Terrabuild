@@ -8,8 +8,6 @@ let parseFunction expr = function
     | "lower" -> Expr.Function (Function.Lower, expr)
     | "replace" -> Expr.Function (Function.Replace, expr)
     | "count" -> Expr.Function (Function.Count, expr)
-    | "format" -> Expr.Function (Function.Format, expr)
-    | "tostring" -> Expr.Function (Function.ToString, expr)
     | s -> raiseParseError $"Unknown function: {s}"
 
 let parseExpressionIdentifier = function

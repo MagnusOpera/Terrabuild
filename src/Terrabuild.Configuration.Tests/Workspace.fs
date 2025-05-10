@@ -96,13 +96,6 @@ let parseWorkspace2() =
                                                    "secret3", Expr.Function (Function.Plus, [
                                                        Expr.Function (Function.Not, [ Expr.Bool false ])
                                                        Expr.Function (Function.Not, [ Expr.Bool true ]) ])
-                                                   "secret4", Expr.Function (Function.Format, [
-                                                       Expr.String "1"
-                                                       Expr.Number 2
-                                                       Expr.Variable "toto"
-                                                       Expr.Bool true
-                                                       Expr.Nothing ])
-                                                   "secret5", Expr.Function (Function.ToString, [Expr.Function (Function.Plus, [Expr.Function (Function.Plus, [Expr.Number 40; Expr.Number 1]); Expr.Number 2])])
                                                    "secret6", Expr.Function (Function.Or, [ Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false])
                                                                                             Expr.Bool true ])
                                                    "secret7", Expr.Function (Function.Format,
