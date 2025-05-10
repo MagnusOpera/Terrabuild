@@ -1,0 +1,64 @@
+
+workspace {
+}
+
+
+
+locals {
+    isProd = terrabuild.configuration == "Debug"
+    configuration = local.isProd ? "Release" : "Debug"
+    secret_message = "tagada"
+    npm_version = "1.0.0"
+    workspace = "default"
+}
+
+target build {
+  depends_on = [ target.^build ]
+}
+
+target dist {
+  depends_on = [ target.build ]
+}
+
+target docker {
+  depends_on = [ target.dist ]
+}
+
+target push {
+  depends_on = [ target.docker ]
+}
+
+target deploy {
+  depends_on = [ target.push ]
+}
+
+extension @dotnet {
+  container = "mcr.microsoft.com/dotnet/sdk:9.0.202"
+  platform = "linux/amd64"
+  defaults {
+    configuration = local.configuration
+  }
+}
+
+extension @terraform {
+  container = "hashicorp/terraform:1.10"
+  platform = "linux/amd64"
+  defaults {
+    workspace = local.workspace
+  }
+}
+
+extension @cargo {
+  container = "rust:1.81.0-slim"
+  platform = "linux/amd64"
+}
+
+extension @npm {
+  container = "node:20"
+  platform = "linux/amd64"
+}
+
+extension @openapi {
+  container = "openapitools/openapi-generator-cli:v7.10.0"
+  platform = "linux/amd64"
+}

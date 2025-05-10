@@ -130,6 +130,10 @@ test-cluster-layers:
 test-invalid-args:
 	$(terrabuild) run build -w tests/cluster-layers --force --qewdiqoudhqioeudhqi
 
+test-build-basic:
+	$(terrabuild) run build -w tests/basic --force --debug --log
+
+
 #      _______..___  ___.   ______    __  ___  _______    .___________. _______     _______.___________.    _______.
 #     /       ||   \/   |  /  __  \  |  |/  / |   ____|   |           ||   ____|   /       |           |   /       |
 #    |   (----`|  \  /  | |  |  |  | |  '  /  |  |__      `---|  |----`|  |__     |   (----`---|  |----`  |   (----`

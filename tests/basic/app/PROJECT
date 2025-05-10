@@ -1,0 +1,9 @@
+
+project @shell app {
+    outputs = [ "dist" ]
+    labels = [ "app" ]
+}
+
+target build {
+    @shell echo { arguments = "building app with lib version: ${project.lib.version}" }
+}

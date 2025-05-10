@@ -648,7 +648,18 @@ type WorkspaceLoader(options: ConfigOptions.Options) as this =
         let rec findProjects (dir: string) =
             let projectFile = FS.combinePath dir "PROJECT"
             match projectFile with
-            | FS.File projectFile -> projectFile |> LoadProject |> agent.Post
+            | FS.File _ ->
+                let projectPath = FS.relativePath options.Workspace dir
+                let projectName = projectPath |> String.toUpper
+                if projectLoading.TryAdd(projectName, true) then
+                    let signal = hub.GetSignal<Project> $"load.{projectName}"
+                    hub.Subscribe signal.Name [] (fun () ->
+                        let projectDef = loadProjectDef options this workspaceConfig evaluationContext extensions scripts projectPath
+                        let project = finalizeProject evaluationContext projectDef this
+                        project |> ignore)
+
+
+                projectPath |> LoadProject |> agent.Post
             | _ -> dir |> IO.enumerateDirs |> Seq.iter findProjects
         findProjects options.Workspace
 
