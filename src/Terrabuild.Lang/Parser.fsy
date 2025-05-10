@@ -30,7 +30,7 @@ let debugPrint s = ignore s
 %token LPAREN RPAREN
 %token EQUAL DOUBLE_EQUAL NOT_EQUAL
 %token COMMA
-%token MINUS PLUS
+%token MINUS PLUS MULT DIV
 %token DOUBLE_QUESTION QUESTION COLON BANG AND OR
 %token EOF
 
@@ -42,6 +42,7 @@ let debugPrint s = ignore s
 %left DOUBLE_QUESTION
 %left DOUBLE_EQUAL NOT_EQUAL
 %left MINUS PLUS
+%left MULT DIV
 %left OR AND
 %left DOT DOT_QUESTION
 %right BANG
@@ -92,6 +93,8 @@ Expr:
     | Expr NOT_EQUAL Expr { Expr.Function (Function.NotEqual, [$1; $3]) }
     | Expr PLUS Expr { Expr.Function (Function.Plus, [$1; $3]) }
     | Expr MINUS Expr { Expr.Function (Function.Minus, [$1; $3]) }
+    | Expr MULT Expr { Expr.Function (Function.Mult, [$1; $3]) }
+    | Expr DIV Expr { Expr.Function (Function.Div, [$1; $3]) }
     | Expr AND Expr { Expr.Function (Function.And, [$1; $3]) }
     | Expr OR Expr { Expr.Function (Function.Or, [$1; $3]) }
     | Expr DOUBLE_QUESTION Expr { Expr.Function (Function.Coalesce, [$1; $3]) }

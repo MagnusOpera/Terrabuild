@@ -10,6 +10,8 @@ type token =
   | OR
   | MINUS
   | PLUS
+  | MULT
+  | DIV
   | COMMA
   | EQUAL
   | DOUBLE_EQUAL
@@ -40,6 +42,8 @@ type tokenId =
     | TOKEN_OR
     | TOKEN_MINUS
     | TOKEN_PLUS
+    | TOKEN_MULT
+    | TOKEN_DIV
     | TOKEN_COMMA
     | TOKEN_EQUAL
     | TOKEN_DOUBLE_EQUAL

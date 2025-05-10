@@ -5,6 +5,8 @@ open System
 type Function =
     | Plus
     | Minus
+    | Mult
+    | Div
     | Trim
     | Upper
     | Lower
