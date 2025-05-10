@@ -60,6 +60,9 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Plus, [Value.Number left; Value.Number right] -> Value.Number (left + right)
                 | Function.Minus, [Value.Number left; Value.Number right] -> Value.Number (left - right)
 
+                | Function.Mult, [Value.Number left; Value.Number right] -> Value.Number (left * right)
+                | Function.Div, [Value.Number left; Value.Number right] -> Value.Number (left / right)
+
                 | Function.Plus, [Value.Map left; Value.Map right] -> Value.Map (left |> Map.addMap right)
                 | Function.Count, [Value.Map map] -> Value.Number map.Count
 

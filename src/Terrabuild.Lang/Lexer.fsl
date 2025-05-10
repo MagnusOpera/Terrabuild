@@ -71,6 +71,8 @@ rule token lexerMode = parse
     | "," { COMMA }
     | "-" { MINUS }
     | "+" { PLUS }
+    | "*" { MULT }
+    | "/" { DIV }
     | "!" { BANG }
     | "&" { AND }
     | "|" { OR }
