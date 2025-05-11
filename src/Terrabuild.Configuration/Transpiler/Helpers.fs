@@ -6,27 +6,21 @@ open Terrabuild.Lang.AST
 let checkNoId (block: Block) =
     match block.Id with
     | None -> block
-    | Some _ -> raiseParseError "id is not allowed"
-
-let checkNoAttributes (block: Block) =
-    if block.Attributes <> [] then raiseParseError "attributes are not allowed"
-    block
+    | Some id -> raiseParseError $"unexpected id '{id}'"
 
 let checkAllowedAttributes (allowed: string list) (block: Block) =
     block.Attributes
     |> List.iter (fun a ->
-        if not (allowed |> List.contains a.Name) then raiseParseError $"Unexpected attribute: {a.Name}")
-    block
-
-let checkNoNestedBlocks (block: Block) =
-    if block.Blocks <> [] then raiseParseError "nested blocks are not allowed"
+        if not (allowed |> List.contains a.Name) then raiseParseError $"unexpected attribute '{a.Name}'")
     block
 
 let checkAllowedNestedBlocks (allowed: string list) (block: Block) =
     block.Blocks
     |> List.iter (fun b ->
-        if not (allowed |> List.contains b.Resource) then raiseParseError $"Unexpected block: {b.Resource}")
+        if not (allowed |> List.contains b.Resource) then raiseParseError $"unexpected nested block '{b.Resource}'")
     block
+
+let checkNoNestedBlocks = checkAllowedNestedBlocks []
 
 let tryFindAttribute (name: string) (block: Block) =
     block.Attributes

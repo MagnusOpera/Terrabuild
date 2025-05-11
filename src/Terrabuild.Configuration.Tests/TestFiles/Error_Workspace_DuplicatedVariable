@@ -1,0 +1,9 @@
+variable configuration {
+    description = "var description"
+    default = 42
+}
+
+
+variable configuration {
+    description = "var description"
+}

@@ -1,0 +1,5 @@
+extension @dotnet {
+  defaults { # comment at end of line
+    toto { }
+  }
+}

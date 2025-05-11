@@ -133,12 +133,12 @@ let transpile (blocks: Block list) =
                 buildProject blocks { builder with Project = Some project }
 
             | Extension name ->
-                if builder.Extensions.ContainsKey name then raiseParseError $"Duplicate extension: {name}"
+                if builder.Extensions.ContainsKey name then raiseParseError $"duplicated extension '{name}'"
                 let extension = toExtension block
                 buildProject blocks { builder with Extensions = builder.Extensions |> Map.add name extension }
 
             | Target name ->
-                if builder.Targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
+                if builder.Targets.ContainsKey name then raiseParseError $"duplicated target '{name}'"
                 let target = toTarget block
                 buildProject blocks { builder with Targets = builder.Targets |> Map.add name target }
 
@@ -146,10 +146,10 @@ let transpile (blocks: Block list) =
                 let locals = toLocals block
                 locals
                 |> Map.iter (fun name _ ->
-                    if builder.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+                    if builder.Locals |> Map.containsKey name then raiseParseError $"duplicated local '{name}'")
                 buildProject blocks { builder with Locals = builder.Locals |> Map.addMap locals }
 
-            | UnknownBlock -> raiseParseError $"unexpected block: {block.Resource}"
+            | UnknownBlock -> raiseParseError $"unexpected block '{block.Resource}'"
 
     let builder =
         { Project = None
