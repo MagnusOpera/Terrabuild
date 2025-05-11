@@ -10,7 +10,7 @@ extension @docker {
   variables = [ "ARM_TENANT_ID" ]
 
   defaults {
-    configuration = configuration
+    configuration = local.configuration
     image = "ghcr.io/magnusopera/dotnet-app"
   }
 }
@@ -29,7 +29,7 @@ project @dotnet {
 }
 
 target build {
-  depends_on = [ dist ]
+  depends_on = [ target.dist ]
 
   @dotnet build { }
 }
@@ -43,9 +43,9 @@ target docker {
   rebuild = false
   cache = "always"
 
-  @shell echo { arguments = trim("building project1 " + configuration) }
+  @shell echo { arguments = trim("building project1 " + local.configuration) }
   @docker build { arguments = { config: "Release" my-variable: 42 } }
-  @npm version { arguments = npm_version
+  @npm version { arguments = local.npm_version
                  version = "1.0.0" }
 }
 

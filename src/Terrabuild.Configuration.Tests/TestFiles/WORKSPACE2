@@ -4,44 +4,17 @@ workspace {
 }
 
 target build { # comment at end of line
-  depends_on = [ ^build ]
+  depends_on = [ target.^build ]
 }
 
 # comment in the middle of the file
 
 target dist {
-  depends_on = [ build ]
+  depends_on = [ target.build ]
   rebuild = true
 }
 
 target dummy { }
-
-configuration release {
-  configuration = "Release"
-
-  map = {
-      toto: 42
-      titi: "tagada"
-  }
-
-  list = [ 1
-          2+3
-          "tutu"
-          nothing ?? 42
-          42 != "toto" ]
-}
-
-configuration dummy { }
-
-configuration default {
-    secret = map.toto == "prod" ? 1234 : 5678
-    secret2 = var.list.2
-    secret3 = !false + !true
-    secret6 = true & false | true
-    secret7 = "hello ${ name + "toto" } x ${ 42 } {{^}}"
-    secret8 = "{{ Hello ""!"" }}"
-    my-variable = 42
-}
 
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
