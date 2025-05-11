@@ -244,7 +244,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
         let initProjectInfo =
             projectConfig.Project.Initializers
-            |> List.fold (fun projectInfo init ->
+            |> Set.fold (fun projectInfo init ->
                 let parseContext = 
                     let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
                                     Terrabuild.Extensibility.ExtensionContext.Directory = projectDir

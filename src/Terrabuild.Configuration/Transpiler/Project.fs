@@ -45,12 +45,14 @@ let toProject (block: Block) =
     let includes = block |> tryFindAttribute "includes"
 
     let initializers =
-        block.Blocks |> List.map (fun block ->
+        block.Blocks
+        |> List.map (fun block ->
             block
             |> checkNoId
             |> ignore
-            block.Resource
-        )
+            block.Resource)
+        |> Set.ofList
+    if initializers.Count <> block.Blocks.Length then raiseInvalidArg $"Duplicated initializers detected"
 
     let labels =
         block |> tryFindAttribute "labels"
@@ -119,7 +121,7 @@ let transpile (blocks: Block list) =
             let project =
                 match builder.Project with
                 | None -> { ProjectBlock.Id = None
-                            ProjectBlock.Initializers = []
+                            ProjectBlock.Initializers = Set.empty
                             ProjectBlock.DependsOn = None
                             ProjectBlock.Dependencies = None
                             ProjectBlock.Outputs = None
