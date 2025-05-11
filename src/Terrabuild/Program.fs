@@ -25,7 +25,7 @@ type RunTargetOptions = {
     StartedAt: DateTime
     IsLog: bool
     Targets: string set
-    Configuration: string
+    Configuration: string option
     Note: string option
     Tag: string option
     Labels: string set option
@@ -166,7 +166,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | Some ws -> ws
                 | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let targets = runArgs.GetResult(RunArgs.Target) |> Seq.map String.toLower
-        let configuration = runArgs.TryGetResult(RunArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
+        let configuration = runArgs.TryGetResult(RunArgs.Configuration)
         let note = runArgs.TryGetResult(RunArgs.Note)
         let labels = runArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = runArgs.GetResults(RunArgs.Variable) |> Map
@@ -207,7 +207,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 match currentDir() |> findWorkspace with
                 | Some ws -> ws
                 | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
-        let configuration = serveArgs.TryGetResult(ServeArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
+        let configuration = serveArgs.TryGetResult(ServeArgs.Configuration)
         let labels = serveArgs.TryGetResult(ServeArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = serveArgs.GetResults(ServeArgs.Variable) |> Map
         let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
@@ -237,7 +237,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 match currentDir() |> findWorkspace with
                 | Some ws -> ws
                 | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
-        let configuration = logsArgs.TryGetResult(LogsArgs.Configuration) |> Option.defaultValue "default" |> String.toLower
+        let configuration = logsArgs.TryGetResult(LogsArgs.Configuration)
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Map
 

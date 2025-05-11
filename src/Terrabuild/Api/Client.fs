@@ -88,7 +88,7 @@ module private Build =
 
     [<RequireQualifiedAccess>]
     type BuildContextInput =
-        { Configuration: string
+        { Configuration: string option
           Note: string option
           Tag: string option
           Targets: string seq
