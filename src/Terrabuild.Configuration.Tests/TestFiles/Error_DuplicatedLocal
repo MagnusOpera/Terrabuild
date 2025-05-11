@@ -1,0 +1,8 @@
+locals {
+    app_name = "terrabuild"
+}
+
+locals {
+    app_name = "terrabuild"
+}
+

@@ -110,12 +110,12 @@ let transpile (blocks: Block list) =
                 buildWorkspace blocks { builder with Workspace = Some workspace }
 
             | Target name ->
-                if builder.Targets.ContainsKey name then raiseParseError $"Duplicate target: {name}"
+                if builder.Targets.ContainsKey name then raiseParseError $"duplicated target '{name}'"
                 let target = toTarget block
                 buildWorkspace blocks { builder with Targets = builder.Targets |> Map.add name target }
 
             | Variable name ->
-                if builder.Variables.ContainsKey name then raiseParseError $"Duplicate variable: ${name}"
+                if builder.Variables.ContainsKey name then raiseParseError $"duplicated variable '{name}'"
                 let variable = toVariable block
                 buildWorkspace blocks { builder with Variables = builder.Variables |> Map.add name variable }
 
@@ -123,15 +123,15 @@ let transpile (blocks: Block list) =
                 let locals = toLocals block
                 locals
                 |> Map.iter (fun name _ ->
-                    if builder.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+                    if builder.Locals |> Map.containsKey name then raiseParseError $"duplicated local '{name}'")
                 buildWorkspace blocks { builder with Locals = builder.Locals |> Map.addMap locals }
 
             | Extension name ->
-                if builder.Extensions.ContainsKey name then raiseParseError $"Duplicate extension: {name}"
+                if builder.Extensions.ContainsKey name then raiseParseError $"duplicated extension '{name}'"
                 let extension = toExtension block
                 buildWorkspace blocks { builder with Extensions = builder.Extensions |> Map.add name extension }
 
-            | UnknownBlock -> raiseParseError $"unexpected block: {block.Resource}"
+            | UnknownBlock -> raiseParseError $"unexpected block '{block.Resource}'"
 
     let builder =
         { Workspace = None

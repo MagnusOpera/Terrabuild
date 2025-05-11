@@ -1,0 +1,11 @@
+extension @dotnet {
+  defaults { # comment at end of line
+    configuration = var.configuration
+  }
+}
+
+extension @dotnet {
+  defaults { # comment at end of line
+    configuration = var.configuration
+  }
+}

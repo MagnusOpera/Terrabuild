@@ -52,7 +52,7 @@ let parseWorkspace() =
                                            "npmext", extNpm ] }
 
 
-    let content = File.ReadAllText("TestFiles/WORKSPACE")
+    let content = File.ReadAllText("TestFiles/Success_WORKSPACE")
     let workspace = Terrabuild.Configuration.FrontEnd.Workspace.parse content
 
     workspace
@@ -96,8 +96,49 @@ let parseWorkspace2() =
                                            "docker", extDocker ] }
 
 
-    let content = File.ReadAllText("TestFiles/WORKSPACE2")
+    let content = File.ReadAllText("TestFiles/Success_WORKSPACE2")
     let workspace = Terrabuild.Configuration.FrontEnd.Workspace.parse content
 
     workspace
     |> should equal expectedWorkspace
+
+
+[<Test>]
+let unexpectedAttributeIsError() =
+    let content = File.ReadAllText("TestFiles/Error_UnexpectedAttribute")
+    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "unexpected attribute 'tagada'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let unexpectedBlockIsError() =
+    let content = File.ReadAllText("TestFiles/Error_UnexpectedBlock")
+    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "unexpected block 'tagada'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let unexpectedNestedBlockIsError() =
+    let content = File.ReadAllText("TestFiles/Error_UnexpectedNestedBlock")
+    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "unexpected nested block 'toto'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let duplicatedExtensionIsError() =
+    let content = File.ReadAllText("TestFiles/Error_DuplicatedExtension")
+    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "duplicated extension '@dotnet'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let duplicatedTargetIsError() =
+    let content = File.ReadAllText("TestFiles/Error_Workspace_DuplicatedTarget")
+    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "duplicated target 'build'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let duplicatedLocalIsError() =
+    let content = File.ReadAllText("TestFiles/Error_DuplicatedLocal")
+    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "duplicated local 'app_name'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let duplicatedVariableIsError() =
+    let content = File.ReadAllText("TestFiles/Error_Workspace_DuplicatedVariable")
+    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "duplicated variable 'configuration'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let unexpectedIdIsError() =
+    let content = File.ReadAllText("TestFiles/Error_UnexpectedId")
+    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "unexpected id 'toto'") typeof<Errors.TerrabuildException>

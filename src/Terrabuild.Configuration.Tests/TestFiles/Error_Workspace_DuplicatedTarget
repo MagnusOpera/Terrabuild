@@ -1,0 +1,7 @@
+target build {
+  depends_on = [ target.dist ]
+}
+
+target build {
+  depends_on = [ ]
+}

@@ -1,0 +1,11 @@
+target build {
+  depends_on = [ target.dist ]
+
+  @dotnet build { }
+}
+
+target build {
+  depends_on = [ target.dist ]
+
+  @dotnet build { }
+}

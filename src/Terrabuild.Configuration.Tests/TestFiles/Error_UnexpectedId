@@ -1,0 +1,6 @@
+extension dotnet toto {
+  container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
+  defaults {
+    configuration = local.configuration
+  }
+}
