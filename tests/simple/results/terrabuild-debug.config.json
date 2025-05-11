@@ -73,7 +73,7 @@
                       ],
                       "npm_app_version": [
                         "string",
-                        "460EBB85CE15CAE557B86BF1B6D8A03EA812E004415BC8A64FEF5C4611A7661A"
+                        "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75"
                       ]
                     }
                   ],
@@ -445,7 +445,7 @@
     "projects/npm-app": {
       "id": "npm_app",
       "name": "projects/npm-app",
-      "hash": "460EBB85CE15CAE557B86BF1B6D8A03EA812E004415BC8A64FEF5C4611A7661A",
+      "hash": "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75",
       "dependencies": [
         "libraries/npm-lib",
         "projects/npm-app/private-npm-lib"

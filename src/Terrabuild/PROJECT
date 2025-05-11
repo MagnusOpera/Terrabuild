@@ -1,7 +1,9 @@
 
-project @dotnet {
+project {
     labels = [ "app"
                "dotnet"]
+
+    @dotnet { }
 }
 
 target build {

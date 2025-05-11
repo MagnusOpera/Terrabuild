@@ -1,7 +1,9 @@
 
-project @terraform {
+project {
     ignores = [ "deploy.log" ]
-    labels = [ "infra" ]
+    labels = ["infra"]
+    
+    @terraform { }
 }
 
 target build {

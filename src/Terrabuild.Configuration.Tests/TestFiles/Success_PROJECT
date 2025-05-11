@@ -21,11 +21,13 @@ extension dummy {
 
 # comment in the middle of the file
 
-project @dotnet {
+project id {
   dependencies = [ "../../libraries/shell-lib" ]
   outputs = [ "dist" ]
   labels = [ "app"
              "dotnet" ]
+
+  @dotnet { }
 }
 
 target build {

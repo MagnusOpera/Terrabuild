@@ -1,5 +1,7 @@
-project @dotnet {
+project {
     dependencies = [ "/C" ]
+
+    @dotnet { }
 }
 
 target build {

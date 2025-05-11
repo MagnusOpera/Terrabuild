@@ -14,7 +14,7 @@ let parseProject() =
     let expectedProject =
         let project =
             { ProjectBlock.Init = Some "@dotnet"
-              ProjectBlock.Id = None
+              ProjectBlock.Id = Some "id"
               ProjectBlock.DependsOn = None
               ProjectBlock.Dependencies = Expr.List [ Expr.String "../../libraries/shell-lib" ] |> Some
               ProjectBlock.Outputs = Expr.List [ Expr.String "dist" ] |> Some
@@ -164,8 +164,3 @@ let duplicatedTargetIsError() =
 let duplicatedLocalIsError() =
     let content = File.ReadAllText("TestFiles/Error_DuplicatedLocal")
     (fun () -> Terrabuild.Configuration.FrontEnd.Project.parse content |> ignore) |> should (throwWithMessage "duplicated local 'app_name'") typeof<Errors.TerrabuildException>
-
-[<Test>]
-let unexpectedIdIsError() =
-    let content = File.ReadAllText("TestFiles/Error_UnexpectedId")
-    (fun () -> Terrabuild.Configuration.FrontEnd.Project.parse content |> ignore) |> should (throwWithMessage "unexpected id 'toto'") typeof<Errors.TerrabuildException>

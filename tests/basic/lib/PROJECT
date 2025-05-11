@@ -1,4 +1,6 @@
-project @shell lib { }
+project lib {
+    @shell { }
+}
 
 locals {
     a = 42

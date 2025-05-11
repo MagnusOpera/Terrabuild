@@ -17,7 +17,7 @@ type WorkspaceBuilder =
 
 
 let (|Workspace|Target|Variable|Locals|Extension|UnknownBlock|) (block: Block) =
-    match block.Resource, block.Name with
+    match block.Resource, block.Id with
     | "workspace", None -> Workspace
     | "target", Some name -> Target name
     | "variable", Some name -> Variable name

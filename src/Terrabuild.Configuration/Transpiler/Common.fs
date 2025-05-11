@@ -5,7 +5,6 @@ open Helpers
 
 let toExtension (block: Block) =
     block
-    |> checkNoId
     |> checkAllowedAttributes ["container"; "platform"; "variables"; "script"; "defaults"]
     |> checkAllowedNestedBlocks ["defaults"]
     |> ignore

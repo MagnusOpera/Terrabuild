@@ -137,8 +137,3 @@ let duplicatedLocalIsError() =
 let duplicatedVariableIsError() =
     let content = File.ReadAllText("TestFiles/Error_Workspace_DuplicatedVariable")
     (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "duplicated variable 'configuration'") typeof<Errors.TerrabuildException>
-
-[<Test>]
-let unexpectedIdIsError() =
-    let content = File.ReadAllText("TestFiles/Error_UnexpectedId")
-    (fun () -> Terrabuild.Configuration.FrontEnd.Workspace.parse content |> ignore) |> should (throwWithMessage "unexpected id 'toto'") typeof<Errors.TerrabuildException>

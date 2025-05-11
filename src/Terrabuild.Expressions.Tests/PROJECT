@@ -1,5 +1,7 @@
 
-project @dotnet { }
+project {
+    @dotnet { }
+}
 
 target build {
     @dotnet build { }
