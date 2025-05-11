@@ -40,15 +40,14 @@ type Extension = {
 
 let targetConfigs =
     Map [
-        Target.Build, [ "^build" ]
-        Target.Publish, [ "build" ]
-        Target.Deploy, [ "publish" ]
+        Target.Build, [ "target.^build" ]
+        Target.Publish, [ "target.build" ]
+        Target.Deploy, [ "target.publish" ]
     ]
 
-let envConfigs =
+let localConfigs =
     Map [
-        "default", Map [ "configuration", "Debug" ]
-        "release", Map [ "configuration", "Release" ]
+        "config", "terrabuild.configuration ? \"Debug\" : \"Release\""
     ]
 
 
@@ -67,11 +66,11 @@ let extMarkers = [
 let extConfigs =
     Map [ 
         ExtensionType.Dotnet, { Container = None //Some "mcr.microsoft.com/dotnet/sdk:8.0"
-                                Defaults = Map [ "configuration", "$configuration" ]
+                                Defaults = Map [ "configuration", "local.config" ]
                                 Actions = Map [ Target.Build, [ "build"; "publish" ] ] }
 
         ExtensionType.Gradle, { Container = None //Some "gradle:jdk21"
-                                Defaults = Map [ "configuration", "$configuration" ]
+                                Defaults = Map [ "configuration", "local.configuration" ]
                                 Actions = Map [ Target.Build, [ "build" ]] }
 
         ExtensionType.Npm, { Container = None //Some "node:20"
@@ -83,8 +82,8 @@ let extConfigs =
                               Actions = Map [ Target.Build, [ "build" ] ] }
 
         ExtensionType.Docker, { Container = None //Some "docker:25.0"
-                                Defaults = Map [ "image", "\"ghcr.io/example/\" + $terrabuild_project"
-                                                 "arguments", "{ configuration: $configuration }" ]
+                                Defaults = Map [ "image", "\"ghcr.io/example/${ terrabuild.project }\""
+                                                 "arguments", "{ configuration: local.config }" ]
                                 Actions = Map [ Target.Build, [ "build" ]
                                                 Target.Publish, [ "push" ] ] }
 
@@ -94,7 +93,7 @@ let extConfigs =
                                                    Target.Deploy, [ "apply" ] ] }
 
         ExtensionType.Cargo, { Container = None // Some "rust:1.79.0"
-                               Defaults = Map [ "profile", "$configuration" ]
+                               Defaults = Map [ "profile", "local.configuration" ]
                                Actions = Map [ Target.Build, [ "build" ]] }
     ]
 
@@ -140,15 +139,11 @@ let genWorkspace (extensions: ExtensionType set) =
             $"  depends_on = [ {listDependsOn} ]"
             "}"
 
-        for (KeyValue(env, variables)) in envConfigs do
-            ""
-            $"configuration {env} {{"
-            if variables.Count > 0 then
-                "  variables = {"
-                for (KeyValue(name, value)) in variables do
-                    $"    {name}: \"{value}\""
-                "  }"
-            "}"
+        ""
+        $"locals {{"
+        for (KeyValue(env, value)) in localConfigs do
+            $"  {env} = {value}"
+        "}"
 
         for extension in extensions do
             let config = extConfigs |> Map.find extension
@@ -164,9 +159,9 @@ let genWorkspace (extensions: ExtensionType set) =
                 | _ -> ()
 
                 if variables <> Map.empty then
-                    "  defaults = {"
+                    "  defaults {"
                     for (KeyValue(key, value)) in variables do
-                        $"    {key}: {value}"
+                        $"    {key} = {value}"
                     "  }"
 
                 "}"
@@ -185,7 +180,7 @@ let genProject (project: Project) =
             let exts = others |> Seq.map toExtension |> String.join " "
             yield $"# WARNING: other project types detected: {exts}"
         | _ -> ()
-        yield $"project @{project.Type |> toExtension}"
+        yield $"project @{project.Type |> toExtension} {{ }}"
 
         // generate targets
         let allTargets =
@@ -202,7 +197,7 @@ let genProject (project: Project) =
             yield ""
             yield $"target {targetType |> toLower} {{"
             for (projType, cmd) in cmds do
-                yield $"    @{projType |> toExtension} {cmd}"
+                yield $"    @{projType |> toExtension} {cmd} {{ }}"
             yield "}"
     }
 
