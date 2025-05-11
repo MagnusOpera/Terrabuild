@@ -1,4 +1,4 @@
-module Terrabuild.Parser.Tests.Workspace
+module Terrabuild.Configuration.Tests.Workspace
 open System.IO
 open NUnit.Framework
 open FsUnit
@@ -12,10 +12,10 @@ open Terrabuild.Expressions
 let parseWorkspace() =
     let expectedWorkspace =
         let targetBuild = 
-            { TargetBlock.DependsOn = Set [ "^build" ] |> Some
-              TargetBlock.Rebuild = Expr.Bool false |> Some }
+            { TargetBlock.DependsOn = Set [ "target.^build" ] |> Some
+              TargetBlock.Rebuild = None }
         let targetDist =
-            { TargetBlock.DependsOn = Set [ "build" ] |> Some
+            { TargetBlock.DependsOn = Set [ "target.build" ] |> Some
               TargetBlock.Rebuild = Expr.Bool true |> Some }
         let targetDummy =
             { TargetBlock.DependsOn = None
@@ -26,7 +26,7 @@ let parseWorkspace() =
               Platform = None
               Variables = None
               Script = None
-              Defaults = Map [ "configuration", Expr.Variable "configuration" ] |> Some }
+              Defaults = Map [ "configuration", Expr.Variable "local.configuration" ] |> Some }
         let extDocker =
             { Container = None
               Platform = None
@@ -62,10 +62,10 @@ let parseWorkspace() =
 let parseWorkspace2() =
     let expectedWorkspace =
         let targetBuild = 
-            { TargetBlock.DependsOn = Set [ "^build" ] |> Some
-              TargetBlock.Rebuild = Expr.Bool false |> Some }
+            { TargetBlock.DependsOn = Set [ "target.^build" ] |> Some
+              TargetBlock.Rebuild = None }
         let targetDist =
-            { TargetBlock.DependsOn = Set [ "build" ] |> Some
+            { TargetBlock.DependsOn = Set [ "target.build" ] |> Some
               TargetBlock.Rebuild = Expr.Bool true |> Some }
         let targetDummy =
             { TargetBlock.DependsOn = None
@@ -76,8 +76,8 @@ let parseWorkspace2() =
               Platform = None
               Variables = None
               Script = None
-              Defaults = Map [ "configuration1", Expr.Function (Function.Item, [Expr.Variable "map"; Expr.String "toto"])
-                               "configuration2", Expr.Function (Function.TryItem, [Expr.Variable "map"; Expr.String "titi"])
+              Defaults = Map [ "configuration1", Expr.Function (Function.Item, [Expr.Variable "var.map"; Expr.String "toto"])
+                               "configuration2", Expr.Function (Function.TryItem, [Expr.Variable "var.map"; Expr.String "titi"])
                                "configuration3", Expr.Function (Function.Replace, [Expr.String "toto titi"; Expr.String "toto"; Expr.String "titi"]) ] |> Some }
         let extDocker =
             { Container = None

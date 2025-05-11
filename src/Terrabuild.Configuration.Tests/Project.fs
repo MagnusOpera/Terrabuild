@@ -27,13 +27,13 @@ let parseProject() =
               Platform = None
               Variables = None
               Script = None
-              Defaults = Map [ "configuration", Expr.Variable "configuration" ] |> Some }        
+              Defaults = Map [ "configuration", Expr.Variable "var.configuration" ] |> Some }        
         let extDocker =
             { Container = None
               Platform = None
               Variables = Expr.List [ Expr.String "ARM_TENANT_ID" ] |> Some
               Script = None
-              Defaults = Map [ "configuration", Expr.Variable "configuration"
+              Defaults = Map [ "configuration", Expr.Variable "local.configuration"
                                "image", Expr.String "ghcr.io/magnusopera/dotnet-app" ] |> Some }
         let extDummy =
             { Container = None
@@ -43,7 +43,7 @@ let parseProject() =
               Defaults = None }
 
         let targetBuild = 
-            { TargetBlock.DependsOn = Set [ "dist" ] |> Some
+            { TargetBlock.DependsOn = Set [ "target.dist" ] |> Some
               TargetBlock.Rebuild = None
               TargetBlock.Outputs = None
               TargetBlock.Cache = None
@@ -64,12 +64,12 @@ let parseProject() =
                                       Parameters = Map [ "arguments", Expr.Function (Function.Trim,
                                                                                      [ Expr.Function (Function.Plus,
                                                                                                       [ Expr.String "building project1 "
-                                                                                                        Expr.Variable "configuration" ]) ]) ] }
+                                                                                                        Expr.Variable "local.configuration" ]) ]) ] }
                                     { Extension = "@docker"; Command = "build"
                                       Parameters = Map [ "arguments", Expr.Map (Map [ "config", Expr.String "Release"
                                                                                       "my-variable", Expr.Number 42 ]) ] }
                                     { Extension = "@npm"; Command = "version"
-                                      Parameters = Map [ "arguments", Expr.Variable "npm_version"
+                                      Parameters = Map [ "arguments", Expr.Variable "local.npm_version"
                                                          "version", Expr.String "1.0.0" ] } ] }
 
         { ProjectFile.Extensions = Map [ "@dotnet", extDotnet
@@ -111,7 +111,7 @@ let parseProject2() =
             { TargetBlock.Rebuild = Expr.Bool true |> Some
               TargetBlock.Outputs = Expr.List [ Expr.Function (Function.Format,
                                                                [ Expr.String "{0}{1}"
-                                                                 Expr.Variable "wildcard"
+                                                                 Expr.Variable "local.wildcard"
                                                                  Expr.String ".dll" ])] |> Some
               TargetBlock.DependsOn = None
               TargetBlock.Cache = None
@@ -120,7 +120,7 @@ let parseProject2() =
         let locals = 
             Map [ "app_name", Expr.Function (Function.Plus, 
                                              [ Expr.String "terrabuild"
-                                               Expr.Variable "terrabuild_project" ]) ]
+                                               Expr.Variable "local.terrabuild_project" ]) ]
 
         { ProjectFile.Extensions = Map [ "@dotnet", extDotnet ]
           ProjectFile.Project = project
