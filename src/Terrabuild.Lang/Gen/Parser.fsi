@@ -82,7 +82,7 @@ type nonTerminalId =
     | NONTERM_ResourceIdentifier
     | NONTERM_AttributeName
     | NONTERM_ExprIndex
-    | NONTERM_ExprIdentifier
+    | NONTERM_ExprLiteral
     | NONTERM_String
     | NONTERM_InterpolatedString
     | NONTERM_InterpolatedStringExpression

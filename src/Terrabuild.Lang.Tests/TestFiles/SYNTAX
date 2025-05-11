@@ -10,7 +10,7 @@ toplevelblock {
   }
 
   innerblockWithType type {
-    inner-attribute = -20
+    inner-attribute = -20 # negative number
   }
 }
 
@@ -28,8 +28,11 @@ locals {
           b: 666}
   list = [ "a"
            "b" ]
-  bool_true = true
-  bool_false = false
+  literal_bool_true = true
+  literal_bool_false = false
+  literal_nothing = nothing
+
+  interpolated_string = "toto ${local.var + 42}"
 
   data = var.titi
   data_index = var.toto.42
@@ -43,8 +46,21 @@ locals {
   bool_or = true | false
   bool_not = !false
 
-  attr_math_expr = 1 + 42*2 + 4/4
-  bool_expr = 1 + 42 == 42 + 1
+  expr_math_op = 1 + 42*2 + 4/4 - 3
+  expr_bool_op = 1 + 42 == 42 + 1 == false
+  coalesce_op = nothing ?? "toto"
+  ternary_op = true ? "titi" : "toto"
+
+  function_trim = trim()
+  function_upper = upper()
+  function_lower = lower()
+  function_replace = replace()
+  function_count = count()
+
+  function_arity0 = trim()
+  function_arity1 = trim("titi")
+  function_arity2 = trim("titi", 42)
+  function_arity3 = trim("titi", 42, false)
 }
 
 

@@ -10,11 +10,11 @@ let parseFunction expr = function
     | "count" -> Expr.Function (Function.Count, expr)
     | s -> raiseParseError $"Unknown function: {s}"
 
-let parseExpressionIdentifier = function
+let parseExpressionLiteral = function
     | "true" -> Expr.Bool true
     | "false" -> Expr.Bool false
     | "nothing" -> Expr.Nothing
-    | s -> Expr.Variable s
+    | s -> raiseParseError $"Unknown literal: {s}"
 
 let (|RegularIdentifier|ExtensionIdentifier|TargetIdentifier|) (value: string) =
     match value[0] with
