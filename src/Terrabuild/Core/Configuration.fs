@@ -326,7 +326,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
 // this is the final stage: create targets and create the project
 let private finalizeProject projectDir evaluationContext (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
-    let projectId = projectDir |> String.toUpper
+    let projectId = projectDir |> String.toLower
     let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
     // get dependencies on files
@@ -533,7 +533,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
     let files = files |> Set.map (FS.relativePath projectDir)
 
-    let projectDependencies = projectDependencies.Keys |> Seq.map String.toUpper |> Set.ofSeq
+    let projectDependencies = projectDependencies.Keys |> Seq.map String.toLower |> Set.ofSeq
 
     { Project.Id = projectDef.Id
       Project.Name = projectDir
@@ -583,7 +583,7 @@ let read (options: ConfigOptions.Options) =
         let hub = Hub.Create(options.MaxConcurrency)
 
         let rec loadProject projectDir =
-            let projectPathId = projectDir |> String.toUpper
+            let projectPathId = projectDir |> String.toLower
             if projectLoading.TryAdd(projectPathId, true) then
                 // parallel load of projects
                 hub.Subscribe projectDir [] (fun () ->
@@ -608,7 +608,7 @@ let read (options: ConfigOptions.Options) =
                     // await dependencies to be loaded
                     let projectPathSignals =
                         loadedProject.Dependencies
-                        |> Set.map String.toUpper
+                        |> Set.map String.toLower
                         |> Seq.map (fun awaitedProjectId -> hub.GetSignal<Project> awaitedProjectId)
                         |> List.ofSeq
 
