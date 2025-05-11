@@ -5,8 +5,8 @@ open Terrabuild.Expressions
 
 [<RequireQualifiedAccess>]
 type ProjectBlock =
-    { Init: string option
-      Id: string option
+    { Id: string option
+      Initializers: string list
       DependsOn: Set<string> option
       Dependencies: Expr option
       Outputs: Expr option

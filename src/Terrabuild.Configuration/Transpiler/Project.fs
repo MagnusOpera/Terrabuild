@@ -44,22 +44,20 @@ let toProject (block: Block) =
     let ignores = block |> tryFindAttribute "ignores"
     let includes = block |> tryFindAttribute "includes"
 
-    let init =
-        match block.Blocks with
-        | [] -> None
-        | [ singleBlock ] ->
-            singleBlock
+    let initializers =
+        block.Blocks |> List.map (fun block ->
+            block
             |> checkNoId
             |> ignore
-            Some singleBlock.Resource
-        | _ :: snd :: _ -> raiseInvalidArg $"Invalid initializer found '{snd.Resource}'"
+            block.Resource
+        )
 
     let labels =
         block |> tryFindAttribute "labels"
         |> Option.bind (Eval.asStringSetOption << simpleEval)
         |> Option.defaultValue Set.empty
 
-    { ProjectBlock.Init = init
+    { ProjectBlock.Initializers = initializers
       ProjectBlock.Id = block.Id
       ProjectBlock.DependsOn = dependsOn
       ProjectBlock.Dependencies = dependencies
@@ -120,8 +118,8 @@ let transpile (blocks: Block list) =
         | [] ->
             let project =
                 match builder.Project with
-                | None -> { ProjectBlock.Init = None
-                            ProjectBlock.Id = None
+                | None -> { ProjectBlock.Id = None
+                            ProjectBlock.Initializers = []
                             ProjectBlock.DependsOn = None
                             ProjectBlock.Dependencies = None
                             ProjectBlock.Outputs = None
