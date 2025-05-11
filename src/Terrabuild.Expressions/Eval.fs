@@ -69,29 +69,16 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Plus, [Value.List left; Value.List right] -> Value.List (left @ right)
                 | Function.Count, [Value.List list] -> Value.Number list.Length
 
-                | Function.Not, [Value.Nothing] -> Value.Bool true
-                | Function.Not, [Value.Bool bool] -> Value.Bool (not bool)
-                | Function.Not, [_] -> Value.Bool false
+                | Function.Not, [value] ->
+                    match value with
+                    | Value.Bool false -> Value.Bool true
+                    | Value.Nothing -> Value.Bool true
+                    | _ -> Value.Bool false
 
                 | Function.And, [Value.Bool left; Value.Bool right] -> Value.Bool (left && right)
                 | Function.Or, [Value.Bool left; Value.Bool right] -> Value.Bool (left || right)
 
                 | Function.ToString, [value] -> valueToString value |> Value.String
-
-                | Function.Format, [Value.String template; Value.Map values] ->
-                    let rec replaceAll template =
-                        match template with
-                        | String.Regex "{([^}]+)}" [name] ->
-                            let value =
-                                match values |> Map.tryFind name with
-                                | Some value -> valueToString value
-                                | _ -> raiseSymbolError $"Field {name} does not exist"
-                            template
-                            |> String.replace $"{{{name}}}" value
-                            |> replaceAll
-                        | _ -> template
-
-                    replaceAll template |> Value.String
 
                 | Function.Format, Value.String template :: values ->
                     let values = values |> List.map valueToString
