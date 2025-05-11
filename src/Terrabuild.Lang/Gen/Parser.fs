@@ -104,7 +104,7 @@ type nonTerminalId =
     | NONTERM_ResourceIdentifier
     | NONTERM_AttributeName
     | NONTERM_ExprIndex
-    | NONTERM_ExprIdentifier
+    | NONTERM_ExprLiteral
     | NONTERM_String
     | NONTERM_InterpolatedString
     | NONTERM_InterpolatedStringExpression
@@ -234,7 +234,7 @@ let prodIdxToNonTerminal (prodIdx:int) =
     | 40 -> NONTERM_AttributeName 
     | 41 -> NONTERM_ExprIndex 
     | 42 -> NONTERM_ExprIndex 
-    | 43 -> NONTERM_ExprIdentifier 
+    | 43 -> NONTERM_ExprLiteral 
     | 44 -> NONTERM_String 
     | 45 -> NONTERM_InterpolatedString 
     | 46 -> NONTERM_InterpolatedString 
@@ -541,12 +541,12 @@ let _fsyacc_reductions = lazy [|
                  : 'gentype_Expr));
 # 542 "Gen/Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> 'gentype_ExprIdentifier in
+            let _1 = parseState.GetInput(1) :?> 'gentype_ExprLiteral in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
 # 86 "Parser.fsy"
-                                            _1 
+                                         _1 
                    )
 # 86 "Parser.fsy"
                  : 'gentype_Expr));
@@ -759,7 +759,7 @@ let _fsyacc_reductions = lazy [|
                    (
 # 110 "Parser.fsy"
                                                        
-                             Expr.Variable $"{_1 |> parseRegularIdentifier}.{_3 |> parseIdentifier}"
+                             Expr.Variable $"{_1 |> parseScopeIdentifier}.{_3 |> parseIdentifier}"
                          
                    )
 # 110 "Parser.fsy"
@@ -838,10 +838,10 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 131 "Parser.fsy"
-                                        parseExpressionIdentifier _1 
+                                        parseExpressionLiteral _1 
                    )
 # 131 "Parser.fsy"
-                 : 'gentype_ExprIdentifier));
+                 : 'gentype_ExprLiteral));
 # 845 "Gen/Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> string in

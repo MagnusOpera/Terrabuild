@@ -1,0 +1,70 @@
+# comment at top of file
+
+
+toplevelblock {
+  attribute1 = "42"
+  attribute2 = local.value
+
+  innerblock {
+    innerattribute = 666
+  }
+
+  innerblockWithType type {
+    inner-attribute = -20 # negative number
+  }
+}
+
+other_block_with_type type {
+}
+
+other_block_with_type_name type name {
+}
+
+locals {
+  string = "toto"
+  number = 42
+  negative_number = -42
+  map = { a: 42
+          b: 666}
+  list = [ "a"
+           "b" ]
+  literal_bool_true = true
+  literal_bool_false = false
+  literal_nothing = nothing
+
+  interpolated_string = "toto ${local.var + 42}"
+
+  data = var.titi
+  data_index = var.toto.42
+  data_maybe_index = var.toto.?42
+  data_index_name = var.toto.field
+  data_maybe_index_name = var.toto.?field
+
+  bool_equal = 42 == 666
+  bool_not_equal = 42 != 666
+  bool_and = true & false
+  bool_or = true | false
+  bool_not = !false
+
+  expr_math_op = 1 + 42*2 + 4/4 - 3
+  expr_bool_op = 1 + 42 == 42 + 1 == false
+  coalesce_op = nothing ?? "toto"
+  ternary_op = true ? "titi" : "toto"
+
+  function_trim = trim()
+  function_upper = upper()
+  function_lower = lower()
+  function_replace = replace()
+  function_count = count()
+
+  function_arity0 = trim()
+  function_arity1 = trim("titi")
+  function_arity2 = trim("titi", 42)
+  function_arity3 = trim("titi", 42, false)
+}
+
+
+# multiple comments at the end
+# multiple comments at the end
+
+# multiple comments at the end

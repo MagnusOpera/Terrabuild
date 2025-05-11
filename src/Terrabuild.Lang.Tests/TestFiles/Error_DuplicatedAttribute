@@ -1,0 +1,4 @@
+duplicated_attribute_in_block {
+  attribute1 = "42"
+  attribute1 = local.value
+}

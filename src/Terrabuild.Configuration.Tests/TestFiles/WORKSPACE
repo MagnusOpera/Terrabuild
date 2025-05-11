@@ -6,28 +6,22 @@ workspace {
 }
 
 target build { # comment at end of line
-  depends_on = [ ^build ]
+  depends_on = [ target.^build ]
 }
 
 # comment in the middle of the file
 
 target dist {
-  depends_on = [ build ]
+  depends_on = [ target.build ]
   rebuild = true
 }
 
 target dummy { }
 
-configuration release {
-  configuration = "Release"
-}
-
-configuration dummy { }
-
 extension dotnet {
   container = "mcr.microsoft.com/dotnet/sdk:8.0.101"
   defaults {
-    configuration = configuration
+    configuration = local.configuration
   }
 }
 

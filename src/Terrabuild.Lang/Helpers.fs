@@ -8,13 +8,13 @@ let parseFunction expr = function
     | "lower" -> Expr.Function (Function.Lower, expr)
     | "replace" -> Expr.Function (Function.Replace, expr)
     | "count" -> Expr.Function (Function.Count, expr)
-    | s -> raiseParseError $"Unknown function: {s}"
+    | s -> raiseParseError $"unknown function '{s}'"
 
-let parseExpressionIdentifier = function
+let parseExpressionLiteral = function
     | "true" -> Expr.Bool true
     | "false" -> Expr.Bool false
     | "nothing" -> Expr.Nothing
-    | s -> Expr.Variable s
+    | s -> raiseParseError $"unknown literal '{s}'"
 
 let (|RegularIdentifier|ExtensionIdentifier|TargetIdentifier|) (value: string) =
     match value[0] with
@@ -25,24 +25,24 @@ let (|RegularIdentifier|ExtensionIdentifier|TargetIdentifier|) (value: string) =
 let parseResourceName s =
     match s with
     | ExtensionIdentifier | RegularIdentifier -> s
-    | _ -> raiseParseError $"Invalid resource name: {s}"
+    | _ -> raiseParseError $"invalid resource name '{s}'"
 
 let parseResourceIdentifier s =
     match s with
     | ExtensionIdentifier | RegularIdentifier -> s
-    | _ -> raiseParseError $"Invalid resource identifier: {s}"
+    | _ -> raiseParseError $"invalid resource identifier '{s}'"
 
 let parseAttributeName s =
     match s with
     | RegularIdentifier -> s
-    | s -> raiseParseError $"Invalid attribute name: {s}"
+    | s -> raiseParseError $"invalid attribute name '{s}'"
 
-let parseRegularIdentifier s =
+let parseScopeIdentifier s =
     match s with
     | RegularIdentifier -> s
-    | s -> raiseParseError $"Invalid identifier name: {s}"
+    | s -> raiseParseError $"invalid scope identifier '{s}'"
 
 let parseIdentifier s =
     match s with
     | TargetIdentifier | RegularIdentifier -> s
-    | _ -> raiseParseError $"Invalid resource identifier: {s}"
+    | _ -> raiseParseError $"invalid resource identifier '{s}'"
