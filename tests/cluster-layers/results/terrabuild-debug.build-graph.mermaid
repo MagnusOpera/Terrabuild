@@ -2,31 +2,31 @@ flowchart TD
 classDef build stroke:red,stroke-width:3px
 classDef restore stroke:orange,stroke-width:3px
 classDef ignore stroke:black,stroke-width:3px
-A:build("A
+a:build("A
 build ")
-B:build("B
+b:build("B
 build ")
-C:build("C
+c:build("C
 build ")
-D:build("D
+d:build("D
 build ")
-E:build("E
+e:build("E
 build ")
-F:build("F
+f:build("F
 build ")
-G:build("G
+g:build("G
 build ")
-class A:build ignore
-class B:build ignore
-C:build --> A:build
-C:build --> B:build
-class C:build ignore
-D:build --> C:build
-class D:build ignore
-E:build --> C:build
-class E:build ignore
-F:build --> D:build
-F:build --> E:build
-class F:build ignore
-G:build --> C:build
-class G:build ignore
+class a:build ignore
+class b:build ignore
+c:build --> a:build
+c:build --> b:build
+class c:build ignore
+d:build --> c:build
+class d:build ignore
+e:build --> c:build
+class e:build ignore
+f:build --> d:build
+f:build --> e:build
+class f:build ignore
+g:build --> c:build
+class g:build ignore

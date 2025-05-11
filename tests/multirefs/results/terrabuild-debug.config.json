@@ -1,8 +1,8 @@
 {
   "selectedProjects": [
-    "A",
-    "B",
-    "C"
+    "a",
+    "b",
+    "c"
   ],
   "targets": {
     "build": [
@@ -20,12 +20,12 @@
     ]
   },
   "projects": {
-    "A": {
+    "a": {
       "name": "A",
-      "hash": "765E269DCF725F998FEAF36185644037E2620A1D99ED0634F9D88098FD046B54",
+      "hash": "A7A0CD9E85C9D7AA20838EBF01C91953701319318395EC276A797D66F9AB084D",
       "dependencies": [
-        "B",
-        "C"
+        "b",
+        "c"
       ],
       "files": [],
       "targets": {
@@ -58,11 +58,11 @@
       },
       "labels": []
     },
-    "B": {
+    "b": {
       "name": "B",
-      "hash": "4B3D703A03868D9124E4DF7F60CA5BE420D0A4C0188A9FE46C87F8A8C4E077DC",
+      "hash": "93C4F757BAF84BE922E6F30EBA5A726573E0028C76082652B062DD5EE775EB39",
       "dependencies": [
-        "C"
+        "c"
       ],
       "files": [],
       "targets": {
@@ -95,9 +95,9 @@
       },
       "labels": []
     },
-    "C": {
+    "c": {
       "name": "C",
-      "hash": "286D4F1687911376819B5BF9CB07BD4B7DCF72844399A26EB2235596F5D65ABB",
+      "hash": "D2FFA5DCF08258EA5851EDC06944F88D7C19865C3DF17E09693D7F640B4514FC",
       "dependencies": [],
       "files": [],
       "targets": {
