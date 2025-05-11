@@ -43,7 +43,7 @@ let parseProject() =
               Defaults = None }
 
         let targetBuild = 
-            { TargetBlock.DependsOn = Set [ "target.dist" ] |> Some
+            { TargetBlock.DependsOn = Set [ "dist" ] |> Some
               TargetBlock.Rebuild = None
               TargetBlock.Outputs = None
               TargetBlock.Cache = None

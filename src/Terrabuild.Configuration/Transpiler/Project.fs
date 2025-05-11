@@ -72,7 +72,7 @@ let toTarget (block: Block) =
         |> Option.map (fun dependsOn ->
             dependsOn |> Set.map (fun dependency ->
                 match dependency with
-                | String.Regex "^target\.(.*)$" [_] -> dependency
+                | String.Regex "^target\.(.*)$" [targetIdentifier] -> targetIdentifier
                 | _ -> raiseInvalidArg $"Invalid target dependency '{dependency}'"))
     let cache = block |> tryFindAttribute "cache"
     let steps =
