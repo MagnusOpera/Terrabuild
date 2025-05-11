@@ -210,11 +210,13 @@ let writeExtension extensionDir (extension: Extension) =
                 $"## Project Initializer"
                 init.Summary
                 "```"
-                $"project @{extension.Name} {{ }}"
+                $"project {{"
+                $"  @{extension.Name} {{ }}"
+                "}"
                 "```"
                 "Equivalent to:"
                 "```"
-                $"project @{extension.Name} {{"
+                $"project {{"
                 for prm in init.Parameters do
                     $"    {prm.Name} = {prm.Example}"
                 "}"
