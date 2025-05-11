@@ -6,7 +6,7 @@ open NUnit.Framework
 open FsUnit
 
 [<Test>]
-let checkSyntax() =
+let checkValidSyntax() =
     let expected = 
         { File.Blocks =
             [ { Block.Resource = "toplevelblock"
@@ -106,3 +106,19 @@ let checkSyntax() =
     let file = FrontEnd.parse content
 
     file |> should equal expected
+
+
+[<Test>]
+let duplicatedAttributeIsError() =
+    let content = File.ReadAllText("TestFiles/DUPLICATED_ATTRIBUTE")
+    (fun () -> FrontEnd.parse content |> ignore) |> should throw typeof<Errors.TerrabuildException>
+
+[<Test>]
+let unknownFunctionIsError() =
+    let content = File.ReadAllText("TestFiles/UNKNOWN_FUNCTION")
+    (fun () -> FrontEnd.parse content |> ignore) |> should throw typeof<Errors.TerrabuildException>
+
+[<Test>]
+let invalidLiteralIsError() =
+    let content = File.ReadAllText("TestFiles/INVALID_LITERAL")
+    (fun () -> FrontEnd.parse content |> ignore) |> should throw typeof<Errors.TerrabuildException>
