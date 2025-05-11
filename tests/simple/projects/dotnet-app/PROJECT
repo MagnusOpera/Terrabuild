@@ -6,12 +6,14 @@ extension @docker {
     }
 }
 
-project @dotnet dotnet_app {
+project dotnet_app {
     labels = [ "app"
                "dotnet" ]
 
     includes = [ "**/*"
                  "../shared-folder/**/*" ]
+
+    @dotnet { }
 }
 
 target build {

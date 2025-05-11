@@ -1,6 +1,8 @@
 
-project @npm npm_app {
+project npm_app {
     labels = [ "app" ]
+
+    @npm { }
 }
 
 target build {

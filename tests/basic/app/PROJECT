@@ -1,7 +1,9 @@
 
-project @shell app {
+project app {
     outputs = [ "dist" ]
     labels = [ "app" ]
+
+    @shell { }
 }
 
 target build {

@@ -10,32 +10,22 @@ let checkValidSyntax() =
     let expected = 
         { File.Blocks =
             [ { Block.Resource = "toplevelblock"
-                Block.Name = None
                 Block.Id = None
                 Block.Attributes = [ { Attribute.Name = "attribute1"; Attribute.Value = Expr.String "42" }
                                      { Attribute.Name = "attribute2"; Attribute.Value = Expr.Variable "local.value" }]
                 Block.Blocks = [ { Block.Resource = "innerblock"
-                                   Block.Name = None
                                    Block.Id = None
                                    Block.Attributes = [ { Attribute.Name = "innerattribute"; Value = Expr.Number 666 }]
                                    Block.Blocks = [] }
                                  { Block.Resource = "innerblockWithType"
-                                   Block.Name = Some "type"
-                                   Block.Id = None
+                                   Block.Id = Some "type"
                                    Block.Attributes = [ { Attribute.Name = "inner-attribute"; Attribute.Value = Expr.Number -20 }]
                                    Block.Blocks = [] } ] }
               { Block.Resource = "other_block_with_type"
-                Block.Name = Some "type"
-                Block.Id = None
-                Block.Attributes = []
-                Block.Blocks = [] }
-              { Block.Resource = "other_block_with_type_name"
-                Block.Name = Some "type"
-                Block.Id = Some "name"
+                Block.Id = Some "type"
                 Block.Attributes = []
                 Block.Blocks = [] }
               { Block.Resource = "locals"
-                Block.Name = None
                 Block.Id = None
                 Block.Attributes = [ { Attribute.Name = "string"; Attribute.Value = Expr.String "toto" }
                                      { Attribute.Name = "number"; Attribute.Value = Expr.Number 42 }

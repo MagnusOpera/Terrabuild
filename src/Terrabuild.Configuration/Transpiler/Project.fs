@@ -17,7 +17,7 @@ type ProjectBuilder =
 
 
 let (|Project|Extension|Target|Locals|UnknownBlock|) (block: Block) =
-    match block.Resource, block.Name with
+    match block.Resource, block.Id with
     | "project", _ -> Project
     | "extension", Some name -> Extension name
     | "target", Some name -> Target name
@@ -28,7 +28,6 @@ let (|Project|Extension|Target|Locals|UnknownBlock|) (block: Block) =
 let toProject (block: Block) =
     block
     |> checkAllowedAttributes ["depends_on"; "dependencies"; "outputs"; "ignores"; "includes"; "labels"]
-    |> checkNoNestedBlocks
     |> ignore
 
     let dependsOn =
@@ -44,12 +43,23 @@ let toProject (block: Block) =
     let outputs = block |> tryFindAttribute "outputs"
     let ignores = block |> tryFindAttribute "ignores"
     let includes = block |> tryFindAttribute "includes"
+
+    let init =
+        match block.Blocks with
+        | [] -> None
+        | [ singleBlock ] ->
+            singleBlock
+            |> checkNoId
+            |> ignore
+            Some singleBlock.Resource
+        | _ :: snd :: _ -> raiseInvalidArg $"Invalid initializer found '{snd.Resource}'"
+
     let labels =
         block |> tryFindAttribute "labels"
         |> Option.bind (Eval.asStringSetOption << simpleEval)
         |> Option.defaultValue Set.empty
 
-    { ProjectBlock.Init = block.Name
+    { ProjectBlock.Init = init
       ProjectBlock.Id = block.Id
       ProjectBlock.DependsOn = dependsOn
       ProjectBlock.Dependencies = dependencies
@@ -83,7 +93,7 @@ let toTarget (block: Block) =
             |> ignore
 
             let command =
-                match step.Name with
+                match step.Id with
                 | Some name -> name
                 | _ ->raiseParseError "command is not declared"
 

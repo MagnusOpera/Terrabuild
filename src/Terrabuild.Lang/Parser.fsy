@@ -67,9 +67,8 @@ Blocks:
     | Blocks Block { $1 @ [$2] }
 
 Block:
-    | ResourceName LBRACE BlockContent RBRACE { Block.Build $1 None None $3 }
-    | ResourceName ResourceIdentifier LBRACE BlockContent RBRACE { Block.Build $1 (Some $2) None $4 }
-    | ResourceName ResourceIdentifier ResourceIdentifier LBRACE BlockContent RBRACE { Block.Build $1 (Some $2) (Some $3) $5 }
+    | ResourceName LBRACE BlockContent RBRACE { Block.Build $1 None $3 }
+    | ResourceName ResourceIdentifier LBRACE BlockContent RBRACE { Block.Build $1 (Some $2) $4 }
 
 BlockContent:
     | /* empty */ { ([], []) }

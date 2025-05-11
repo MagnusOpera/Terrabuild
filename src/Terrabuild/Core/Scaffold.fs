@@ -180,7 +180,9 @@ let genProject (project: Project) =
             let exts = others |> Seq.map toExtension |> String.join " "
             yield $"# WARNING: other project types detected: {exts}"
         | _ -> ()
-        yield $"project @{project.Type |> toExtension} {{ }}"
+        yield $"project {{"
+        yield $"  @{project.Type |> toExtension} {{ }}"
+        yield "}"
 
         // generate targets
         let allTargets =

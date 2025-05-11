@@ -1,5 +1,7 @@
-project @npm {
+project {
     dependencies = [ "/C" ]
+
+    @npm { }
 }
 
 target build {

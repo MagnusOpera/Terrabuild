@@ -17,9 +17,6 @@ toplevelblock {
 other_block_with_type type {
 }
 
-other_block_with_type_name type name {
-}
-
 locals {
   string = "toto"
   number = 42

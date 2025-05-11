@@ -1,6 +1,8 @@
 
-project @openapi {
+project {
     ignores = [ "src" ]
+
+    @openapi { }
 }
 
 target build {
