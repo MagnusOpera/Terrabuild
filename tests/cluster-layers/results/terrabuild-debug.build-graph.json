@@ -1,7 +1,7 @@
 {
   "nodes": {
-    "A:build": {
-      "id": "A:build",
+    "a:build": {
+      "id": "a:build",
       "label": "build A",
       "project": "A",
       "target": "build",
@@ -59,8 +59,8 @@
         "obj/*.props",
         "obj/*.targets"
       ],
-      "projectHash": "52081ACBA3AA68292E895F52D30A4916AE5F3742E44A04C119BE8F0A52DE570F",
-      "targetHash": "D8DEC18750F10925D4195A45D6C525B81CCB0FA24FAA34C110C81CC4F8C69A93",
+      "projectHash": "CE24C7D4BBCA45AE8BB4AACDA925C35DD828536AFAF55FB15271EB0F1FA52EAA",
+      "targetHash": "7F4F41AF9FA397254C40EB6907544AC81E0CA90C3A353E80E3AEC2A4A97A0D28",
       "operations": [
         {
           "containerVariables": [],
@@ -79,8 +79,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "B:build": {
-      "id": "B:build",
+    "b:build": {
+      "id": "b:build",
       "label": "build B",
       "project": "B",
       "target": "build",
@@ -138,8 +138,8 @@
         "obj/*.props",
         "obj/*.targets"
       ],
-      "projectHash": "C20F11FEA849AD53AA0FDD982A60BEB1143A591B8E3B0CDB16C1CE8D39392772",
-      "targetHash": "4D1493F16D06B75B8B09E8971E4E841E3FEA3B9130002AF7AFDCAF75F7104D72",
+      "projectHash": "C54887690548A58E1E6220C83D97E3239943F79A4C51A0DFC7087DE52F57577A",
+      "targetHash": "EE4A62E9FCBBD1ECAE945B72FB7E336589EB5EC73EA206ED24FF54387A5F9A6F",
       "operations": [
         {
           "containerVariables": [],
@@ -158,8 +158,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "C:build": {
-      "id": "C:build",
+    "c:build": {
+      "id": "c:build",
       "label": "build C",
       "project": "C",
       "target": "build",
@@ -204,14 +204,14 @@
         ]
       },
       "dependencies": [
-        "A:build",
-        "B:build"
+        "a:build",
+        "b:build"
       ],
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "3295C61A42D31221DCB491823FD21EF9A8921B5375720F3EF8DA74ED8F4BF1EC",
-      "targetHash": "62BB93F413DDB58C1A1FDAF5D7EFC3BDE3DE063BB5031BE0B3B61B5F73AA2110",
+      "projectHash": "76C8F07B90D3785DD412BAF3BBCBD4B054084FA4B952DFE658A8073B15BA19C1",
+      "targetHash": "6A335C2FE73A7CD4AC03C736B96CA79F64B6F7094E61602002B28EBFD481BAA9",
       "operations": [
         {
           "containerVariables": [],
@@ -237,8 +237,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "D:build": {
-      "id": "D:build",
+    "d:build": {
+      "id": "d:build",
       "label": "build D",
       "project": "D",
       "target": "build",
@@ -272,7 +272,7 @@
         ]
       },
       "dependencies": [
-        "C:build"
+        "c:build"
       ],
       "outputs": [
         "**/*.binlog",
@@ -282,8 +282,8 @@
         "obj/*.props",
         "obj/*.targets"
       ],
-      "projectHash": "C61CB06CD3C39E1F35C4DC1774DE930DA6851583D98A4F13969456FB388FCD5C",
-      "targetHash": "3F90179516FA77F8FECF93EFDA21E26FD955622A200380867F51FFA6E3CE2AB8",
+      "projectHash": "81597327F78177AB91ED77989DF8373BF7138BDE82CB6D59BA1C5BD9994BE255",
+      "targetHash": "6639FBC11232548212176FC8BC8815757E843A3C62794CCE0DAFB7A08A421E89",
       "operations": [
         {
           "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
@@ -296,8 +296,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "E:build": {
-      "id": "E:build",
+    "e:build": {
+      "id": "e:build",
       "label": "build E",
       "project": "E",
       "target": "build",
@@ -331,7 +331,7 @@
         ]
       },
       "dependencies": [
-        "C:build"
+        "c:build"
       ],
       "outputs": [
         "**/*.binlog",
@@ -341,8 +341,8 @@
         "obj/*.props",
         "obj/*.targets"
       ],
-      "projectHash": "E1B52088E5FFFCCA0576241731FD4E4F7851EFE8522816F30BB7D8187ABF1034",
-      "targetHash": "ADC07397B1FF458DD75BD92006AB4ED259973098C4D113EDA1F1D467738B2585",
+      "projectHash": "D9ADE2A1821B9D2BBBB534435F6FF3CA40296AD7BFEED2094FD0460B9DCCB98C",
+      "targetHash": "BCD8B8692D9A6C899E3C78F5072A5A7379FFE6BE7C533BF3E5B705F4E5112B68",
       "operations": [
         {
           "container": "mcr.microsoft.com/dotnet/sdk:9.0.202",
@@ -355,8 +355,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "F:build": {
-      "id": "F:build",
+    "f:build": {
+      "id": "f:build",
       "label": "build F",
       "project": "F",
       "target": "build",
@@ -385,14 +385,14 @@
         ]
       },
       "dependencies": [
-        "D:build",
-        "E:build"
+        "d:build",
+        "e:build"
       ],
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "7DF5934D6DBA702F44818A40C3AB95F17E489524DFD3CC6AFC9B9D0EF5C83AE0",
-      "targetHash": "33FAFE091FF06A8483852F07AA7569EADFDB8CAEB537FC2EAA18D6510C0751C7",
+      "projectHash": "84D7C7DEABFE38F3471D9D74526A46F2344BA0C7A641CFDA3C43E16DC10DCB3D",
+      "targetHash": "A6E9060BA547A76A9A76102F0E6EAE166A80474F6BAD6F5E4B9B9815118D991A",
       "operations": [
         {
           "container": "node:20",
@@ -412,8 +412,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "G:build": {
-      "id": "G:build",
+    "g:build": {
+      "id": "g:build",
       "label": "build G",
       "project": "G",
       "target": "build",
@@ -442,13 +442,13 @@
         ]
       },
       "dependencies": [
-        "C:build"
+        "c:build"
       ],
       "outputs": [
         "**/dist/"
       ],
-      "projectHash": "FE7CDDB9279D6FFF57CCA9D71303D9D954C2B90E93EEE27097689FBF8AA676AD",
-      "targetHash": "5C293E557BC3A8CD4CE168D76ACCB2BDF16C72C9CAC2D04438E921C3445DADAA",
+      "projectHash": "03ABE717383A7C29E355225594E80D4C9F531BE8F0C5DBAA9C3F7E43C8847761",
+      "targetHash": "51885C023279E6E8CC9C7A5D871737B17303B69130F8B6E540AC8B3CD99A4F7F",
       "operations": [
         {
           "container": "node:20",
@@ -470,12 +470,12 @@
     }
   },
   "rootNodes": [
-    "A:build",
-    "B:build",
-    "C:build",
-    "D:build",
-    "E:build",
-    "F:build",
-    "G:build"
+    "a:build",
+    "b:build",
+    "c:build",
+    "d:build",
+    "e:build",
+    "f:build",
+    "g:build"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "nodes": {
-    "A:build": {
-      "id": "A:build",
+    "a:build": {
+      "id": "a:build",
       "label": "build A",
       "project": "A",
       "target": "build",
@@ -32,12 +32,12 @@
         ]
       },
       "dependencies": [
-        "B:build",
-        "C:build"
+        "b:build",
+        "c:build"
       ],
       "outputs": [],
-      "projectHash": "765E269DCF725F998FEAF36185644037E2620A1D99ED0634F9D88098FD046B54",
-      "targetHash": "B93C454E3197586FF1F031EEDDBCEFAFD74A467E34BC347C544705F1E3EF5D24",
+      "projectHash": "A7A0CD9E85C9D7AA20838EBF01C91953701319318395EC276A797D66F9AB084D",
+      "targetHash": "3EB30967E6F5042C8EA8D3964DE0F7A4567A73F95FAF5DAC629DC8019DD1A019",
       "operations": [
         {
           "containerVariables": [],
@@ -49,8 +49,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "B:build": {
-      "id": "B:build",
+    "b:build": {
+      "id": "b:build",
       "label": "build B",
       "project": "B",
       "target": "build",
@@ -81,11 +81,11 @@
         ]
       },
       "dependencies": [
-        "C:build"
+        "c:build"
       ],
       "outputs": [],
-      "projectHash": "4B3D703A03868D9124E4DF7F60CA5BE420D0A4C0188A9FE46C87F8A8C4E077DC",
-      "targetHash": "4AD2EBF77405A3014C6496B68B1D22094A971EFC9062E2F08DA956637098F77E",
+      "projectHash": "93C4F757BAF84BE922E6F30EBA5A726573E0028C76082652B062DD5EE775EB39",
+      "targetHash": "D125099B08E5BF4C36420EC4D60FD67A1E9DF54111B327C54418EC5A2B485B16",
       "operations": [
         {
           "containerVariables": [],
@@ -97,8 +97,8 @@
       "cache": 0,
       "isLeaf": true
     },
-    "C:build": {
-      "id": "C:build",
+    "c:build": {
+      "id": "c:build",
       "label": "build C",
       "project": "C",
       "target": "build",
@@ -130,8 +130,8 @@
       },
       "dependencies": [],
       "outputs": [],
-      "projectHash": "286D4F1687911376819B5BF9CB07BD4B7DCF72844399A26EB2235596F5D65ABB",
-      "targetHash": "6995A8396B7255EA9AA7EA3BE640AEC47736D64ADAC86556DB8FC194BC701B1E",
+      "projectHash": "D2FFA5DCF08258EA5851EDC06944F88D7C19865C3DF17E09693D7F640B4514FC",
+      "targetHash": "C927B4F547ED385B29830942364D68FBFE0EA2FE2D7865F440A221919B287C88",
       "operations": [
         {
           "containerVariables": [],
@@ -145,8 +145,8 @@
     }
   },
   "rootNodes": [
-    "A:build",
-    "B:build",
-    "C:build"
+    "a:build",
+    "b:build",
+    "c:build"
   ]
 }
