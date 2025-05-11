@@ -141,7 +141,7 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
             | Number value, Some (Value.Number _) -> Value.Number value
             | Number value, None -> Value.Number value
             | String value, _ -> Value.String value
-            | _ -> raiseTypeError $"Value '{value}' can't be converted to variable {name}"
+            | _ -> raiseTypeError $"Value '{value}' can't be converted to variable '{name}'"
 
         workspaceConfig.Variables
         |> Map.map (fun name expr ->
@@ -151,7 +151,7 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
                 | None -> None
                 | Some expr ->
                     let deps = Dependencies.find expr
-                    if deps <> Set.empty then raiseInvalidArg "Default value for variable {name} must have no dependencies"
+                    if deps <> Set.empty then raiseInvalidArg "Default value for variable '{name}' must have no dependencies"
                     expr |> Eval.eval evaluationContext |> Some
 
             let value =
