@@ -119,7 +119,7 @@ let writeCommand extensionDir (command: Command) (batchCommand: Command option) 
 
             "```"
             match command.Parameters with
-            | [] -> $"@{extension.Name} {name}"
+            | [] -> $"@{extension.Name} {name} {{ }}"
             | prms ->
                 $"@{extension.Name} {name} {{"
                 for prm in prms do
@@ -127,7 +127,7 @@ let writeCommand extensionDir (command: Command) (batchCommand: Command option) 
                     | "context" -> ()
                     | _ ->
                         if prm.Name <> "__dispatch__" then
-                            $"    {prm.Name}: {prm.Example}"
+                            $"    {prm.Name} = {prm.Example}"
                 "}"
             "```"
 
@@ -151,13 +151,13 @@ let writeCommand extensionDir (command: Command) (batchCommand: Command option) 
 
                 "```"
                 match batchCommand.Parameters with
-                | [] -> $"@{extension.Name} {name}"
+                | [] -> $"@{extension.Name} {name} {{ }}"
                 | prms ->
                     $"@{extension.Name} {name} {{"
                     for prm in prms do
                         match prm.Name with
                         | "context" -> ()
-                        | _ -> $"    {prm.Name}: {prm.Example}"
+                        | _ -> $"    {prm.Name} = {prm.Example}"
                     "}"
                 "```"
 
@@ -210,13 +210,13 @@ let writeExtension extensionDir (extension: Extension) =
                 $"## Project Initializer"
                 init.Summary
                 "```"
-                $"project @{extension.Name}"
+                $"project @{extension.Name} {{ }}"
                 "```"
                 "Equivalent to:"
                 "```"
                 $"project @{extension.Name} {{"
                 for prm in init.Parameters do
-                    $"    {prm.Name}: {prm.Example}"
+                    $"    {prm.Name} = {prm.Example}"
                 "}"
                 "```"
 

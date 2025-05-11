@@ -95,7 +95,7 @@ type Dotnet() =
     /// <param name="configuration" example="&quot;Release&quot;">Configuration to use to build project. Default is `Debug`.</param>
     /// <param name="parallel" example="1">Max worker processes to build the project.</param>
     /// <param name="log" example="true">Enable binlog for the build.</param>
-    /// <param name="arguments" example="--no-incremental">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;--no-incremental&quot;">Arguments for command.</param>
     static member build (context: ActionContext) (configuration: string option) (``parallel``: int option) (log: bool option) (version: string option) (arguments: string option) =
         let configuration =
             configuration
@@ -130,7 +130,7 @@ type Dotnet() =
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration for pack command.</param>
     /// <param name="version" example="&quot;1.0.0&quot;">Version for pack command.</param>
-    /// <param name="arguments" example="--include-symbols">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;--include-symbols&quot;">Arguments for command.</param>
     static member pack (context: ActionContext) (configuration: string option) (version: string option) (arguments: string option)=
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let version = version |> Option.defaultValue "0.0.0"
@@ -149,7 +149,7 @@ type Dotnet() =
     /// <param name="runtime" example="&quot;linux-x64&quot;">Runtime for publish.</param>
     /// <param name="trim" example="true">Instruct to trim published project.</param>
     /// <param name="single" example="true">Instruct to publish project as self-contained.</param>
-    /// <param name="arguments" example="--version-suffix beta">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;--version-suffix beta&quot;">Arguments for command.</param>
     static member publish (context: ActionContext) (configuration: string option) (runtime: string option) (trim: bool option) (single: bool option) (arguments: string option) =
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
 
@@ -177,7 +177,7 @@ type Dotnet() =
     /// Restore packages.
     /// </summary>
     /// <param name="projectfile" example="&quot;project.fsproj&quot;">Force usage of project file for publish.</param>
-    /// <param name="arguments" example="--no-dependencies">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;--no-dependencies&quot;">Arguments for command.</param>
     static member restore (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
@@ -190,7 +190,7 @@ type Dotnet() =
     /// </summary>
     /// <param name="configuration" example="&quot;Release&quot;">Configuration for publish command.</param>
     /// <param name="filter" example="&quot;TestCategory!=integration&quot;">Run selected unit tests.</param>
-    /// <param name="arguments" example="--blame-hang">Arguments for command.</param>
+    /// <param name="arguments" example="&quot;--blame-hang&quot;">Arguments for command.</param>
     static member test (context: ActionContext) (configuration: string option) (filter: string option) (arguments: string option) =
         let configuration = configuration |> Option.defaultValue DotnetHelpers.defaultConfiguration
         let filter = filter |> Option.map (fun filter -> $" --filter \"{filter}\"") |> Option.defaultValue ""
