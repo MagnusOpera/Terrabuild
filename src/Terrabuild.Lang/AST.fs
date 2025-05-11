@@ -32,7 +32,7 @@ with
           Block.Blocks = blocks }
 
 
-type File =
+type [<RequireQualifiedAccess>] File =
     { Blocks: Block list }
 with
     static member Build blocks =
