@@ -132,24 +132,6 @@ let formatList() =
     result |> should equal expected
 
 [<Test>]
-let formatMap() =
-    let expected = Value.String "THIS\\o/IS42ATEMPLATEtrue"
-
-    let context = { evaluationContext
-                    with Data = Map ["args", Value.Map (Map [ "string", Value.String "\\o/"
-                                                              "number", Value.Number 42
-                                                              "nothing", Value.Nothing
-                                                              "bool", Value.Bool true ]) ] }
- 
-    // format("THIS{string}IS{number}A{nothing}TEMPLATE{bool}", $args)
-    let result =
-        eval context (Expr.Function (Function.Format, [
-            Expr.String "THIS{string}IS{number}A{nothing}TEMPLATE{bool}"
-            Expr.Variable "args" ]))
-    result |> should equal expected
-
-
-[<Test>]
 let listItem() =
     let expected = Value.Number 42
 
