@@ -1,0 +1,54 @@
+# comment at top of file
+
+
+toplevelblock {
+  attribute1 = "42"
+  attribute2 = local.value
+
+  innerblock {
+    innerattribute = 666
+  }
+
+  innerblockWithType type {
+    inner-attribute = -20
+  }
+}
+
+other_block_with_type type {
+}
+
+other_block_with_type_name type name {
+}
+
+locals {
+  string = "toto"
+  number = 42
+  negative_number = -42
+  map = { a: 42
+          b: 666}
+  list = [ "a"
+           "b" ]
+  bool_true = true
+  bool_false = false
+
+  data = var.titi
+  data_index = var.toto.42
+  data_maybe_index = var.toto.?42
+  data_index_name = var.toto.field
+  data_maybe_index_name = var.toto.?field
+
+  bool_equal = 42 == 666
+  bool_not_equal = 42 != 666
+  bool_and = true & false
+  bool_or = true | false
+  bool_not = !false
+
+  attr_math_expr = 1 + 42*2 + 4/4
+  bool_expr = 1 + 42 == 42 + 1
+}
+
+
+# multiple comments at the end
+# multiple comments at the end
+
+# multiple comments at the end

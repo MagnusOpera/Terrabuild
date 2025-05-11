@@ -4,6 +4,12 @@ open System.IO
 open NUnit.Framework
 
 [<Test>]
+let checkSyntax() =
+    let content = File.ReadAllText("TestFiles/SYNTAX")
+    let file = FrontEnd.parse content
+    printfn $"{file}"
+
+[<Test>]
 let parseProject() =
     let content = File.ReadAllText("TestFiles/PROJECT")
     let file = FrontEnd.parse content
