@@ -25,8 +25,7 @@ class Terrabuild${TERRABUILD_SUFFIX} < Formula
   end
 
   conflicts_with "terrabuild"
-  conflicts_with "terrabuild-alpha"
-  conflicts_with "terrabuild-beta"
+  conflicts_with "terrabuild-next"
 
   def install
     bin.install "terrabuild"
