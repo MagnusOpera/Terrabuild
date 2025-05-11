@@ -132,14 +132,18 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | Some value -> value
                     | _ -> Value.Nothing
 
-                | Function.Coalesce, list ->
-                    match list |> List.tryFind (fun i -> i <> Value.Nothing) with
-                    | Some value -> value
-                    | _ -> raiseInvalidArg $"Failed to find value"
+                | Function.Coalesce, [leftValue; rightValue] ->
+                    match leftValue with
+                    | Value.Nothing -> rightValue
+                    | _ -> leftValue
                 
-                | Function.Ternary, [Value.Bool condition; trueValue; falseValue] ->
-                    if condition then trueValue
-                    else falseValue
+                | Function.Ternary, [condition; trueValue; falseValue] ->
+                    let isFalsy =
+                        match condition with
+                        | Value.Bool false -> true
+                        | Value.Nothing -> true
+                        | _ -> false
+                    if isFalsy then falseValue else trueValue
 
                 | Function.Equal, [left; right] ->
                     Value.Bool (left = right)
