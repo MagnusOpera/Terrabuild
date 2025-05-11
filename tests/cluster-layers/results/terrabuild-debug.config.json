@@ -1,12 +1,12 @@
 {
   "selectedProjects": [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G"
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g"
   ],
   "targets": {
     "build": [
@@ -14,9 +14,9 @@
     ]
   },
   "projects": {
-    "A": {
+    "a": {
       "name": "A",
-      "hash": "52081ACBA3AA68292E895F52D30A4916AE5F3742E44A04C119BE8F0A52DE570F",
+      "hash": "CE24C7D4BBCA45AE8BB4AACDA925C35DD828536AFAF55FB15271EB0F1FA52EAA",
       "dependencies": [],
       "files": [
         "A.csproj",
@@ -71,9 +71,9 @@
       },
       "labels": []
     },
-    "B": {
+    "b": {
       "name": "B",
-      "hash": "C20F11FEA849AD53AA0FDD982A60BEB1143A591B8E3B0CDB16C1CE8D39392772",
+      "hash": "C54887690548A58E1E6220C83D97E3239943F79A4C51A0DFC7087DE52F57577A",
       "dependencies": [],
       "files": [
         "B.csproj",
@@ -128,12 +128,12 @@
       },
       "labels": []
     },
-    "C": {
+    "c": {
       "name": "C",
-      "hash": "3295C61A42D31221DCB491823FD21EF9A8921B5375720F3EF8DA74ED8F4BF1EC",
+      "hash": "76C8F07B90D3785DD412BAF3BBCBD4B054084FA4B952DFE658A8073B15BA19C1",
       "dependencies": [
-        "A",
-        "B"
+        "a",
+        "b"
       ],
       "files": [
         "package-lock.json",
@@ -183,11 +183,11 @@
       },
       "labels": []
     },
-    "D": {
+    "d": {
       "name": "D",
-      "hash": "C61CB06CD3C39E1F35C4DC1774DE930DA6851583D98A4F13969456FB388FCD5C",
+      "hash": "81597327F78177AB91ED77989DF8373BF7138BDE82CB6D59BA1C5BD9994BE255",
       "dependencies": [
-        "C"
+        "c"
       ],
       "files": [
         "D.csproj",
@@ -226,11 +226,11 @@
       },
       "labels": []
     },
-    "E": {
+    "e": {
       "name": "E",
-      "hash": "E1B52088E5FFFCCA0576241731FD4E4F7851EFE8522816F30BB7D8187ABF1034",
+      "hash": "D9ADE2A1821B9D2BBBB534435F6FF3CA40296AD7BFEED2094FD0460B9DCCB98C",
       "dependencies": [
-        "C"
+        "c"
       ],
       "files": [
         "E.csproj",
@@ -269,12 +269,12 @@
       },
       "labels": []
     },
-    "F": {
+    "f": {
       "name": "F",
-      "hash": "7DF5934D6DBA702F44818A40C3AB95F17E489524DFD3CC6AFC9B9D0EF5C83AE0",
+      "hash": "84D7C7DEABFE38F3471D9D74526A46F2344BA0C7A641CFDA3C43E16DC10DCB3D",
       "dependencies": [
-        "D",
-        "E"
+        "d",
+        "e"
       ],
       "files": [
         "package-lock.json",
@@ -308,11 +308,11 @@
       },
       "labels": []
     },
-    "G": {
+    "g": {
       "name": "G",
-      "hash": "FE7CDDB9279D6FFF57CCA9D71303D9D954C2B90E93EEE27097689FBF8AA676AD",
+      "hash": "03ABE717383A7C29E355225594E80D4C9F531BE8F0C5DBAA9C3F7E43C8847761",
       "dependencies": [
-        "C"
+        "c"
       ],
       "files": [
         "package-lock.json",
