@@ -14,7 +14,7 @@ type Options = {
     LocalOnly: bool
     StartedAt: DateTime
     Targets: string set
-    Configuration: string
+    Configuration: string option
     LogTypes: Contracts.LogType list
     Note: string option
     Tag: string option
