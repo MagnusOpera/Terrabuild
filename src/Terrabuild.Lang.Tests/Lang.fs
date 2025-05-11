@@ -102,7 +102,7 @@ let checkValidSyntax() =
                                      { Attribute.Name = "function_arity3"; Value = Expr.Function (Function.Trim, [Expr.String "titi"; Expr.Number 42; Expr.Bool false]) }]
                 Blocks = [] }] }
 
-    let content = File.ReadAllText("TestFiles/SYNTAX")
+    let content = File.ReadAllText("TestFiles/Success_Syntax")
     let file = FrontEnd.parse content
 
     file |> should equal expected
@@ -110,15 +110,40 @@ let checkValidSyntax() =
 
 [<Test>]
 let duplicatedAttributeIsError() =
-    let content = File.ReadAllText("TestFiles/DUPLICATED_ATTRIBUTE")
-    (fun () -> FrontEnd.parse content |> ignore) |> should throw typeof<Errors.TerrabuildException>
+    let content = File.ReadAllText("TestFiles/Error_DuplicatedAttribute")
+    (fun () -> FrontEnd.parse content |> ignore) |> should (throwWithMessage "Parse error at (4,1): duplicated attribute 'attribute1'") typeof<Errors.TerrabuildException>
 
 [<Test>]
 let unknownFunctionIsError() =
-    let content = File.ReadAllText("TestFiles/UNKNOWN_FUNCTION")
-    (fun () -> FrontEnd.parse content |> ignore) |> should throw typeof<Errors.TerrabuildException>
+    let content = File.ReadAllText("TestFiles/Error_UnknownFunction")
+    (fun () -> FrontEnd.parse content |> ignore) |> should (throwWithMessage "Parse error at (2,26): unknown function 'tagada'") typeof<Errors.TerrabuildException>
 
 [<Test>]
-let invalidLiteralIsError() =
-    let content = File.ReadAllText("TestFiles/INVALID_LITERAL")
-    (fun () -> FrontEnd.parse content |> ignore) |> should throw typeof<Errors.TerrabuildException>
+let unknownLiteralIsError() =
+    let content = File.ReadAllText("TestFiles/Error_UnknownLiteral")
+    (fun () -> FrontEnd.parse content |> ignore) |> should (throwWithMessage "Parse error at (3,1): unknown literal 'tagada'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let invalidResourceName() =
+    let content = File.ReadAllText("TestFiles/Error_InvalidResourceName")
+    (fun () -> FrontEnd.parse content |> ignore) |> should (throwWithMessage "Parse error at (1,1): invalid resource name '^toto'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let invalidResourceIdentifier() =
+    let content = File.ReadAllText("TestFiles/Error_InvalidResourceIdentifier")
+    (fun () -> FrontEnd.parse content |> ignore) |> should (throwWithMessage "Parse error at (1,31): invalid resource identifier '^toto'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let invalidAttributeName() =
+    let content = File.ReadAllText("TestFiles/Error_InvalidAttributeName")
+    (fun () -> FrontEnd.parse content |> ignore) |> should (throwWithMessage "Parse error at (2,15): invalid attribute name '^attribute1'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let invalidScopeIdentifier() =
+    let content = File.ReadAllText("TestFiles/Error_InvalidScopeIdentifier")
+    (fun () -> FrontEnd.parse content |> ignore) |> should (throwWithMessage "Parse error at (2,22): invalid scope identifier '^toto'") typeof<Errors.TerrabuildException>
+
+[<Test>]
+let invalidScopedIdentifier() =
+    let content = File.ReadAllText("TestFiles/Error_InvalidScopedIdentifier")
+    (fun () -> FrontEnd.parse content |> ignore) |> should (throwWithMessage "Parse error at (2,21): invalid resource identifier '@value'") typeof<Errors.TerrabuildException>

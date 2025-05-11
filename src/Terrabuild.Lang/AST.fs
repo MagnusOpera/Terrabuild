@@ -12,7 +12,7 @@ with
 
     static member Append (attributes: Attribute list) (attribute: Attribute) =
         if attributes |> List.exists (fun a -> a.Name = attribute.Name) then
-            Errors.raiseParseError $"Duplicate attribute: {attribute.Name}"
+            Errors.raiseParseError $"duplicated attribute '{attribute.Name}'"
         else
             attributes @ [attribute]
 

@@ -108,7 +108,7 @@ Data:
 
 DataIdentifier:
     | IDENTIFIER DOT IDENTIFIER { 
-        Expr.Variable $"{$1 |> parseRegularIdentifier}.{$3 |> parseIdentifier}"
+        Expr.Variable $"{$1 |> parseScopeIdentifier}.{$3 |> parseIdentifier}"
     }
 
 Function:

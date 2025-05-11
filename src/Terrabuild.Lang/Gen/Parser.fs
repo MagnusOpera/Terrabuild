@@ -759,7 +759,7 @@ let _fsyacc_reductions = lazy [|
                    (
 # 110 "Parser.fsy"
                                                        
-                             Expr.Variable $"{_1 |> parseRegularIdentifier}.{_3 |> parseIdentifier}"
+                             Expr.Variable $"{_1 |> parseScopeIdentifier}.{_3 |> parseIdentifier}"
                          
                    )
 # 110 "Parser.fsy"
