@@ -314,7 +314,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     let locals =
         workspaceConfig.Locals
         |> Map.iter (fun name _ ->
-            if projectConfig.Locals |> Map.containsKey name then raiseParseError $"Duplicated local: {name}")
+            if projectConfig.Locals |> Map.containsKey name then raiseParseError $"duplicated local '{name}'")
         workspaceConfig.Locals |> Map.addMap projectConfig.Locals
 
     { LoadedProject.Id = projectConfig.Project.Id
@@ -418,7 +418,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                 | Status.Ok -> evaluationContext
                 | Status.UnfulfilledSubscription (subscription, signals) ->
                     let unraisedSignals = signals |> String.join ","
-                    raiseInvalidArg $"Failed to evaluate '{subscription}': a local value with the name '{unraisedSignals}' has not been declared."
+                    raiseInvalidArg $"Failed to evaluate '{subscription}': local value '{unraisedSignals}' is not declared."
                 | Status.SubscriptionError exn ->
                     forwardExternalError("Failed to evaluate locals", exn)
 
