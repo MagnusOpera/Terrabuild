@@ -366,8 +366,11 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
         |> Map.choose getDependencyStatus
 
     let isSuccess =
-        graph.Nodes.Count = nodeStatus.Count
-        && nodeStatus |> Map.forall (fun _ nodeInfo -> match nodeInfo.Status with | TaskStatus.Success _ -> true | _ -> false)
+        graph.RootNodes
+        |> Set.forall (fun nodeId ->
+            match nodeStatus |> Map.tryFind nodeId with
+            | Some info -> info.Status.IsSuccess
+            | _ -> false)
 
     let buildInfo = { Summary.Commit = headCommit.Sha
                       Summary.BranchOrTag = branchOrTag
@@ -412,8 +415,11 @@ let loadSummary (options: ConfigOptions.Options) (cache: Cache.ICache) (graph: G
         |> Map.choose getDependencyStatus
 
     let isSuccess =
-        graph.Nodes.Count = nodeStatus.Count
-        && nodeStatus |> Map.forall (fun _ nodeInfo -> match nodeInfo.Status with | TaskStatus.Success _ -> true | _ -> false)
+        graph.RootNodes
+        |> Set.forall (fun nodeId ->
+            match nodeStatus |> Map.tryFind nodeId with
+            | Some info -> info.Status.IsSuccess
+            | _ -> false)
 
     let headCommit = options.HeadCommit
     let branchOrTag = options.BranchOrTag
