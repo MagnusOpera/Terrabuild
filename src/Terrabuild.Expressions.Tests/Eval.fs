@@ -8,7 +8,6 @@ let private evaluationContext = {
     Eval.EvaluationContext.WorkspaceDir = Some TestContext.CurrentContext.WorkDirectory
     Eval.EvaluationContext.ProjectDir = FS.combinePath TestContext.CurrentContext.WorkDirectory "project-path" |> Some
     Eval.EvaluationContext.Data = Map.empty
-    Eval.EvaluationContext.Versions = Map.empty
 }
 
 

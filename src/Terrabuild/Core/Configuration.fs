@@ -132,7 +132,6 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
     let evaluationContext =
         { Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
           Eval.EvaluationContext.ProjectDir = None
-          Eval.EvaluationContext.Versions = Map.empty
           Eval.EvaluationContext.Data = terrabuildVars }
 
 
@@ -357,14 +356,28 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
         |> Seq.sort
         |> Hash.sha256strings
 
-    let versions = 
-        projectDependencies
-        |> Map.map (fun _ depProj -> depProj.Hash)
-
     // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
     let projectHash =
         [ projectId; filesHash; dependenciesHash ]
         |> Hash.sha256strings
+
+    let evaluationContext = 
+        let terrabuildProjectVars =
+            Map [ if projectDef.Id.IsSome then "terrabuild.project", Value.String projectDef.Id.Value
+                  "terrabuild.version", Value.String projectHash ]
+  
+        let projectVars =
+            projectDependencies
+            |> Seq.choose (fun (KeyValue(_, project)) ->
+                project.Id |> Option.map (fun id ->
+                    $"project.{id}", Value.Map (Map ["version", Value.String project.Hash])))
+            |> Map.ofSeq
+
+        { evaluationContext with
+            Eval.Data =
+                evaluationContext.Data
+                |> Map.addMap terrabuildProjectVars
+                |> Map.addMap projectVars }
 
     let projectSteps =
         projectDef.Targets
@@ -372,25 +385,14 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
             let evaluationContext =
                 let mutable evaluationContext =
-                    let terrabuildProjectVars =
-                        Map [ "terrabuild.project", Value.String projectId
-                              "terrabuild.target" , Value.String targetName
-                              "terrabuild.version", Value.String projectHash ]
-
-                    let projectVars =
-                        projectDependencies
-                        |> Seq.choose (fun (KeyValue(_, project)) ->
-                            project.Id |> Option.map (fun id ->
-                                $"project.{id}", Value.Map (Map ["version", Value.String project.Hash])))
-                        |> Map.ofSeq
+                    let terrabuildTargetVars =
+                        Map [ "terrabuild.target" , Value.String targetName ]
 
                     { evaluationContext with
                         Eval.ProjectDir = Some projectDir
-                        Eval.Versions = versions
                         Eval.Data =
                             evaluationContext.Data
-                            |> Map.addMap terrabuildProjectVars
-                            |> Map.addMap projectVars }
+                            |> Map.addMap terrabuildTargetVars }
 
                 // build the values
                 let localsHub = Hub.Create(1)

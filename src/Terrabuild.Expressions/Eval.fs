@@ -6,13 +6,11 @@ open Collections
 type EvaluationContext =
     { WorkspaceDir: string option
       ProjectDir: string option
-      Versions: Map<string, string>
       Data: Map<string, Value> }
 with
     static member Empty =
         { WorkspaceDir = None
           ProjectDir = None
-          Versions = Map.empty
           Data = Map.empty }
 
 let rec eval (context: EvaluationContext) (expr: Expr) =
