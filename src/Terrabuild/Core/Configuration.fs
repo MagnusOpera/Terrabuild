@@ -332,7 +332,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 
 // this is the final stage: create targets and create the project
 let private finalizeProject projectDir evaluationContext (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
-    let projectDirId = projectDir |> String.toLower
+    let projectId = projectDir |> String.toLower
     let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
     // get dependencies on files
@@ -358,7 +358,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
     // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
     let projectHash =
-        [ projectDirId; filesHash; dependenciesHash ]
+        [ projectId; filesHash; dependenciesHash ]
         |> Hash.sha256strings
 
     let evaluationContext = 
