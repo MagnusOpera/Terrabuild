@@ -363,9 +363,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
     let evaluationContext = 
         let terrabuildProjectVars =
-            Map [ match projectDef.Id with
-                  | Some projectId -> "terrabuild.project", Value.String projectId
-                  | _ -> ()
+            Map [ if projectDef.Id.IsSome then "terrabuild.project", Value.String projectDef.Id.Value
                   "terrabuild.version", Value.String projectHash ]
   
         let projectVars =
