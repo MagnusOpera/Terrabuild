@@ -375,7 +375,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                     let terrabuildProjectVars =
                         Map [ "terrabuild.project", Value.String projectId
                               "terrabuild.target" , Value.String targetName
-                              "terrabuild.hash", Value.String projectHash ]
+                              "terrabuild.version", Value.String projectHash ]
 
                     let projectVars =
                         projectDependencies
