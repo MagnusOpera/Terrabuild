@@ -10,6 +10,7 @@ open Terrabuild.PubSub
 open Microsoft.Extensions.FileSystemGlobbing
 open Serilog
 open Terrabuild.Configuration
+open System.Runtime.InteropServices
 
 [<RequireQualifiedAccess>]
 type TargetOperation = {
@@ -115,6 +116,17 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
         | _ -> Value.Nothing
 
     let terrabuildVars =
+        let platform =
+            if RuntimeInformation.IsOSPlatform(OSPlatform.OSX) then Value.String "darwin"
+            elif RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then Value.String "windows"
+            elif RuntimeInformation.IsOSPlatform(OSPlatform.Linux) then Value.String "linux"
+            else Value.Nothing
+        
+        let architecture =
+            if RuntimeInformation.OSArchitecture = Architecture.Arm64 then Value.String "arm64"
+            elif RuntimeInformation.OSArchitecture = Architecture.X64 then Value.String "amd64"
+            else Value.Nothing
+
         let configValue =
             match options.Configuration with
             | Some config -> Value.String config
@@ -127,7 +139,9 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
               "terrabuild.ci", Value.Bool options.Run.IsSome 
               "terrabuild.debug", Value.Bool options.Debug 
               "terrabuild.tag", tagValue 
-              "terrabuild.note", noteValue ]
+              "terrabuild.note", noteValue
+              "terrabuild.platform", platform 
+              "terrabuild.architecture", architecture ]
  
     let evaluationContext =
         { Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
