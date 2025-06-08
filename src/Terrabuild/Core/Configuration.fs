@@ -116,7 +116,7 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
         | _ -> Value.Nothing
 
     let terrabuildVars =
-        let platform =
+        let os =
             if RuntimeInformation.IsOSPlatform(OSPlatform.OSX) then Value.String "darwin"
             elif RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then Value.String "windows"
             elif RuntimeInformation.IsOSPlatform(OSPlatform.Linux) then Value.String "linux"
@@ -140,8 +140,8 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
               "terrabuild.debug", Value.Bool options.Debug 
               "terrabuild.tag", tagValue 
               "terrabuild.note", noteValue
-              "terrabuild.platform", platform 
-              "terrabuild.architecture", architecture ]
+              "terrabuild.os", os 
+              "terrabuild.arch", architecture ]
  
     let evaluationContext =
         { Eval.EvaluationContext.WorkspaceDir = Some options.Workspace
