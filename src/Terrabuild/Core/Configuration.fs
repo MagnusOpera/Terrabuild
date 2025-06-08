@@ -556,15 +556,19 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
 
 let read (options: ConfigOptions.Options) =
-    let warningConfig = [
-        if options.Force then "force"
-        elif options.Retry then "retry"
-        if options.WhatIf then "whatif" ] |> String.join(" ")
-    if options.Configuration |> Option.isSome then
-        $"{Ansi.Emojis.info} Using configuration [{options.Configuration.Value}]" |> Terminal.writeLine
-    if warningConfig |> String.IsNullOrWhiteSpace |> not then
-        $"{Ansi.Emojis.warning} Build flags [{warningConfig}]" |> Terminal.writeLine
-
+    let configInfos =
+        let warningConfig = [
+            if options.Force then "force"
+            elif options.Retry then "retry"
+            if options.WhatIf then "whatif" ] |> String.join(" ")    
+        [
+            if options.Configuration.IsSome then $"Configuration {options.Configuration.Value}"
+            if warningConfig |> String.IsNullOrWhiteSpace |> not then $"Build flags [{warningConfig}]"
+            if options.Run.IsSome then $"Source control {options.Run.Value.Name}"
+        ]
+    if configInfos <> [] then
+        $"{Ansi.Emojis.info} Informations" |> Terminal.writeLine
+        configInfos |> List.iter (fun configInfo -> $" {Ansi.Styles.green}{Ansi.Emojis.arrow}{Ansi.Styles.reset} {configInfo}" |> Terminal.writeLine)
 
     options.Run
     |> Option.iter (fun run -> $"{Ansi.Emojis.octopus} Source control is {run.Name}" |> Terminal.writeLine)
