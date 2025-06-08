@@ -556,19 +556,18 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
 
 let read (options: ConfigOptions.Options) =
-    $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
+    let warningConfig = [
+        if options.Force then "force"
+        elif options.Retry then "retry"
+        if options.WhatIf then "whatif" ] |> String.join(" ")
+    if options.Configuration |> Option.isSome then
+        $"{Ansi.Emojis.info} Using configuration [{options.Configuration.Value}]" |> Terminal.writeLine
+    if warningConfig |> String.IsNullOrWhiteSpace |> not then
+        $"{Ansi.Emojis.warning} Build flags [{warningConfig}]" |> Terminal.writeLine
 
-    if options.Force then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
-    else
-        if options.Retry then
-            $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
-
-    if options.WhatIf then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} whatif mode requested" |> Terminal.writeLine
 
     options.Run
-    |> Option.iter (fun run -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {run.Name}" |> Terminal.writeLine)
+    |> Option.iter (fun run -> $"{Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {run.Name}" |> Terminal.writeLine)
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
