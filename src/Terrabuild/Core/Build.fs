@@ -151,10 +151,7 @@ type Restorable(action: unit -> unit, dependencies: Restorable list) =
 
 let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.IApiClient option) (notification: IBuildNotification) (graph: GraphDef.Graph) =
     let startedAt = DateTime.UtcNow
-    let targets = options.Targets |> String.join " "
-    $"{Ansi.Emojis.rocket} Running targets [{targets}]" |> Terminal.writeLine
-
-    $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} {graph.Nodes.Count} tasks to build" |> Terminal.writeLine
+    $"{Ansi.Emojis.rocket} Processing tasks" |> Terminal.writeLine
 
     notification.BuildStarted graph
     api |> Option.iter (fun api -> api.StartBuild())
