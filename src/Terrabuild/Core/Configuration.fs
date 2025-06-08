@@ -556,19 +556,22 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
 
 let read (options: ConfigOptions.Options) =
-    $"{Ansi.Emojis.box} Reading {options.Configuration} configuration" |> Terminal.writeLine
-
-    if options.Force then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} force build requested" |> Terminal.writeLine
-    else
-        if options.Retry then
-            $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} retry build requested" |> Terminal.writeLine
-
-    if options.WhatIf then
-        $" {Ansi.Styles.yellow}{Ansi.Emojis.bang}{Ansi.Styles.reset} whatif mode requested" |> Terminal.writeLine
-
-    options.Run
-    |> Option.iter (fun run -> $" {Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {run.Name}" |> Terminal.writeLine)
+    let configInfos =
+        let targets = options.Targets |> String.join " "
+        let labels = options.Labels |> Option.map (fun labels -> labels |> String.join " ")
+        let warningConfig = [
+            if options.Force then "force"
+            elif options.Retry then "retry"
+            if options.WhatIf then "whatif" ] |> String.join(" ")    
+        [
+            if warningConfig |> String.IsNullOrWhiteSpace |> not then $"Build flags [{warningConfig}]"
+            if options.Run.IsSome then $"Source control {options.Run.Value.Name}"
+            if options.Configuration.IsSome then $"Configuration {options.Configuration.Value}"
+            $"Targets [{targets}]"
+            if labels.IsSome then $"Labels [{labels}]"
+        ]
+    $"{Ansi.Emojis.gear} Settings" |> Terminal.writeLine
+    configInfos |> List.iter (fun configInfo -> $" {Ansi.Styles.green}{Ansi.Emojis.arrow}{Ansi.Styles.reset} {configInfo}" |> Terminal.writeLine)
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =
