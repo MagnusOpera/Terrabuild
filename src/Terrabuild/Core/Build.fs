@@ -16,6 +16,7 @@ type TaskRequest =
 type TaskStatus =
     | Success of completionDate:DateTime
     | Failure of completionDate:DateTime * message:string
+    | Pending
 
 [<RequireQualifiedAccess>]
 type NodeInfo = {
@@ -291,10 +292,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             TaskRequest.Build, buildNode()
 
 
-    let scheduledNodes = Concurrent.ConcurrentDictionary<string, bool>()
     let hub = Hub.Create(options.MaxConcurrency)
     let rec schedule nodeId =
-        if scheduledNodes.TryAdd(nodeId, true) then
+        if nodeResults.TryAdd(nodeId, (TaskRequest.Build, TaskStatus.Pending)) then
             let node = graph.Nodes[nodeId]
             let nodeComputed = hub.GetSignal<DateTime> nodeId
 
@@ -315,7 +315,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
                     let buildRequest, completionStatus = processNode maxCompletionChildren node
                     Log.Debug("{NodeId} completed request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
-                    nodeResults.TryAdd(node.Id, (buildRequest, completionStatus)) |> ignore
+                    nodeResults[node.Id] <- (buildRequest, completionStatus)
 
                     match completionStatus with
                     | TaskStatus.Success completionDate ->
@@ -327,7 +327,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     exn ->
                         Log.Fatal(exn, "{NodeId} unexpected failure while building", node.Id)
 
-                        nodeResults.TryAdd(node.Id, (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))) |> ignore
+                        nodeResults[node.Id] <- (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))
                         notification.NodeCompleted node TaskRequest.Build false
 
                         reraise()

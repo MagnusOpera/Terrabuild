@@ -7,7 +7,8 @@ module Iconography =
     let restore_ko = Ansi.Emojis.pretzel
     let build_ok = Ansi.Emojis.green_checkmark
     let build_ko = Ansi.Emojis.red_cross
-    let task_pending = Ansi.Emojis.bang_mark
+    let task_pending = Ansi.Emojis.construction
+    let task_unknown = Ansi.Emojis.bang_mark
 
 
 let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (graph: GraphDef.Graph) (summary: Build.Summary) =
@@ -35,7 +36,8 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
                 | Build.TaskRequest.Restore, Build.TaskStatus.Failure _ -> Iconography.restore_ko
                 | Build.TaskRequest.Build, Build.TaskStatus.Success _ -> Iconography.build_ok
                 | Build.TaskRequest.Build, Build.TaskStatus.Failure _ -> Iconography.build_ko
-            | _ -> Iconography.task_pending
+                | _ -> Iconography.task_pending
+            | _ -> Iconography.task_unknown
 
         let dumpMarkdown (node: GraphDef.Node) =
             let header =
@@ -213,7 +215,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
         fun nodes -> options.LogTypes |> List.iter (dump nodes)
 
     let sortedNodes =
-        graph.Nodes
+        summary.Nodes |> Map.map (fun nodeId _ -> graph.Nodes[nodeId])
         |> Seq.map (fun (KeyValue(_, node)) -> node)
         |> Seq.sortBy (fun node ->
             match summary.Nodes |> Map.tryFind node.Id with
@@ -221,6 +223,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
                 match nodeInfo.Status with
                 | Build.TaskStatus.Success completionDate -> completionDate
                 | Build.TaskStatus.Failure (completionDate, _) -> completionDate
+                | _ -> DateTime.MaxValue
             | _ -> DateTime.MaxValue)
         |> List.ofSeq
 
