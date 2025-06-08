@@ -20,7 +20,7 @@ let render (getStatus: GetStatus option) (getOrigin: GetOrigin option) (graph: G
                 |> Option.map (fun getNodeStatus -> getNodeStatus node)
                 |> Option.defaultValue ""
 
-            $"{node.Id}(\"{node.Project}\n{node.Target} {status}\")"
+            $"{node.Id}(\"<b>{node.Target}</b> {status}\n{node.Project}\")"
 
         for (KeyValue(_, node)) in graph.Nodes do
             for dependency in node.Dependencies do
