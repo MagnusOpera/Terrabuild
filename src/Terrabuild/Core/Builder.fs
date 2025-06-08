@@ -162,7 +162,8 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
     let buildDuration = endedAt - startedAt
     Log.Debug("Graph Build: {duration}", buildDuration)
 
-    $" {Ansi.Styles.green}{Ansi.Emojis.arrow}{Ansi.Styles.reset} {allNodes.Count} tasks" |> Terminal.writeLine
+    $" {Ansi.Styles.green}{Ansi.Emojis.arrow}{Ansi.Styles.reset} {allNodes.Count} nodes" |> Terminal.writeLine
+    $" {Ansi.Styles.green}{Ansi.Emojis.arrow}{Ansi.Styles.reset} {rootNodes.Count} root nodes" |> Terminal.writeLine
 
     { Graph.Nodes = allNodes |> Map.ofDict
       Graph.RootNodes = rootNodes }
