@@ -2,26 +2,26 @@ flowchart TD
 classDef build stroke:red,stroke-width:3px
 classDef restore stroke:orange,stroke-width:3px
 classDef ignore stroke:black,stroke-width:3px
-deployments/terraform-deploy:build("deployments/terraform-deploy
-build ")
-libraries/dotnet-lib:build("libraries/dotnet-lib
-build ")
-libraries/npm-lib:build("libraries/npm-lib
-build ")
-libraries/shell-lib:build("libraries/shell-lib
-build ")
-projects/dotnet-app:build("projects/dotnet-app
-build ")
-projects/make-app:build("projects/make-app
-build ")
-projects/npm-app/private-npm-lib:build("projects/npm-app/private-npm-lib
-build ")
-projects/npm-app:build("projects/npm-app
-build ")
-projects/open-api:build("projects/open-api
-build ")
-projects/rust-app:build("projects/rust-app
-build ")
+deployments/terraform-deploy:build("<b>build</b> 
+deployments/terraform-deploy")
+libraries/dotnet-lib:build("<b>build</b> 
+libraries/dotnet-lib")
+libraries/npm-lib:build("<b>build</b> 
+libraries/npm-lib")
+libraries/shell-lib:build("<b>build</b> 
+libraries/shell-lib")
+projects/dotnet-app:build("<b>build</b> 
+projects/dotnet-app")
+projects/make-app:build("<b>build</b> 
+projects/make-app")
+projects/npm-app/private-npm-lib:build("<b>build</b> 
+projects/npm-app/private-npm-lib")
+projects/npm-app:build("<b>build</b> 
+projects/npm-app")
+projects/open-api:build("<b>build</b> 
+projects/open-api")
+projects/rust-app:build("<b>build</b> 
+projects/rust-app")
 deployments/terraform-deploy:build --> projects/dotnet-app:build
 deployments/terraform-deploy:build --> projects/npm-app:build
 class deployments/terraform-deploy:build ignore
