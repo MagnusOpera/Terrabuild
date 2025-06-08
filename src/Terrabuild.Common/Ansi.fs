@@ -11,7 +11,6 @@ let cursorHome = "\r"
 let csi (x: int) = $"{CSI}{x}m"
 
 module Emojis =
-    let info = "ℹ️"
     let crossmark = "✘"
     let checkmark = "✔"
     let party = "🎉"
