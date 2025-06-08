@@ -567,7 +567,7 @@ let read (options: ConfigOptions.Options) =
 
 
     options.Run
-    |> Option.iter (fun run -> $"{Ansi.Styles.green}{Ansi.Emojis.checkmark}{Ansi.Styles.reset} source control is {run.Name}" |> Terminal.writeLine)
+    |> Option.iter (fun run -> $"{Ansi.Emojis.octopus} Source control is {run.Name}" |> Terminal.writeLine)
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
     let workspaceConfig =

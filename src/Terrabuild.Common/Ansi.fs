@@ -52,6 +52,7 @@ module Emojis =
     let coffee = "☕️"
     let construction = "🚧"
     let tombstone = "🪦"
+    let octopus = "🐙"
 
 module Styles =
     let reset = csi 0
