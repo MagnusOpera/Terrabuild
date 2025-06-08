@@ -31,7 +31,7 @@ module Emojis =
     let poop = "💩"
     let skull = "☠️"
     let noentry = "⛔️"
-    let cyclone = "🌀"
+    let cyclone = ""
     let prohibited = "🚫"
     let gear = "⚙️"
     let clockwise = "↻"
@@ -52,7 +52,7 @@ module Emojis =
     let coffee = "☕️"
     let construction = "🚧"
     let tombstone = "🪦"
-    let octopus = "🐙"
+    let unicorn = "🦄"
 
 module Styles =
     let reset = csi 0
