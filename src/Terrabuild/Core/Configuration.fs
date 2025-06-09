@@ -582,7 +582,7 @@ let read (options: ConfigOptions.Options) =
             if options.Run.IsSome then $"Source control {options.Run.Value.Name}"
             if options.Configuration.IsSome then $"Configuration {options.Configuration.Value}"
             $"Targets [{targets}]"
-            if labels.IsSome then $"Labels [{labels}]"
+            if labels.IsSome then $"Labels [{labels.Value}]"
         ]
     $"{Ansi.Emojis.gear} Settings" |> Terminal.writeLine
     configInfos |> List.iter (fun configInfo -> $" {Ansi.Styles.green}{Ansi.Emojis.arrow}{Ansi.Styles.reset} {configInfo}" |> Terminal.writeLine)
