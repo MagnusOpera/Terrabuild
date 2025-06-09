@@ -23,6 +23,7 @@ type LogsArgs =
     | [<ExactlyOnce; MainCommand; First>] Target of target:string list
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
+    | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-lo")>] Local_Only
@@ -33,6 +34,7 @@ with
             | Target _ -> "Specify build target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Configuration _ -> "Configuration to use."
+            | Environment _ -> "Environment to use."
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
             | Local_Only -> "Use local cache only."
@@ -42,6 +44,7 @@ type RunArgs =
     | [<ExactlyOnce; MainCommand; First>] Target of target:string list
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
+    | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
     | [<Unique; AltCommandLine("-p")>] Parallel of max:int
@@ -59,6 +62,7 @@ with
             | Target _ -> "Specify build target."
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Configuration _ -> "Configuration to use."
+            | Environment _ -> "Environment to use."
             | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
@@ -74,6 +78,7 @@ with
 type ServeArgs =
     | [<Unique; AltCommandLine("-w")>] Workspace of path:string
     | [<Unique; AltCommandLine("-c")>] Configuration of name:string
+    | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
 with
@@ -82,6 +87,7 @@ with
             match this with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Configuration _ -> "Configuration to use."
+            | Environment _ -> "Environment to use."
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
 

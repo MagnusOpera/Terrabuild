@@ -26,6 +26,7 @@ type RunTargetOptions = {
     IsLog: bool
     Targets: string set
     Configuration: string option
+    Environment: string option
     Note: string option
     Tag: string option
     Labels: string set option
@@ -90,6 +91,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.Targets = options.Targets
             ConfigOptions.Options.LogTypes = sourceControl.LogTypes
             ConfigOptions.Options.Configuration = options.Configuration
+            ConfigOptions.Options.Environment = options.Environment
             ConfigOptions.Options.Note = options.Note
             ConfigOptions.Options.Tag = options.Tag
             ConfigOptions.Options.Labels = options.Labels
@@ -167,6 +169,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let targets = runArgs.GetResult(RunArgs.Target) |> Seq.map String.toLower
         let configuration = runArgs.TryGetResult(RunArgs.Configuration)
+        let environment = runArgs.TryGetResult(RunArgs.Environment)
         let note = runArgs.TryGetResult(RunArgs.Note)
         let labels = runArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = runArgs.GetResults(RunArgs.Variable) |> Map
@@ -192,6 +195,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Targets = Set targets
                         RunTargetOptions.LocalOnly = localOnly
                         RunTargetOptions.Configuration = configuration
+                        RunTargetOptions.Environment = environment
                         RunTargetOptions.Note = note
                         RunTargetOptions.Tag = tag
                         RunTargetOptions.Labels = labels
@@ -208,6 +212,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | Some ws -> ws
                 | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let configuration = serveArgs.TryGetResult(ServeArgs.Configuration)
+        let environment = serveArgs.TryGetResult(ServeArgs.Environment)
         let labels = serveArgs.TryGetResult(ServeArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = serveArgs.GetResults(ServeArgs.Variable) |> Map
         let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
@@ -221,6 +226,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Targets = Set [ "serve" ]
                         RunTargetOptions.LocalOnly = true
                         RunTargetOptions.Configuration = configuration
+                        RunTargetOptions.Environment = environment
                         RunTargetOptions.Note = None
                         RunTargetOptions.Tag = None
                         RunTargetOptions.Labels = labels
@@ -238,6 +244,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                 | Some ws -> ws
                 | _ -> raiseInvalidArg "Can't find workspace root directory. Check you are in a workspace."
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration)
+        let environment = logsArgs.TryGetResult(LogsArgs.Environment)
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Map
 
@@ -252,6 +259,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Targets = Set targets
                         RunTargetOptions.LocalOnly = true 
                         RunTargetOptions.Configuration = configuration
+                        RunTargetOptions.Environment = environment
                         RunTargetOptions.Note = None
                         RunTargetOptions.Tag = None
                         RunTargetOptions.Labels = labels

@@ -89,6 +89,7 @@ module private Build =
     [<RequireQualifiedAccess>]
     type BuildContextInput =
         { Configuration: string option
+          Environment: string option
           Note: string option
           Tag: string option
           Targets: string seq
@@ -198,6 +199,7 @@ type Client(workspaceId: string, token: string, options: ConfigOptions.Options) 
 
             let context = {
                 Build.BuildContextInput.Configuration = options.Configuration
+                Build.BuildContextInput.Environment = options.Environment
                 Build.BuildContextInput.Note = options.Note
                 Build.BuildContextInput.Tag = options.Tag
                 Build.BuildContextInput.Targets = options.Targets

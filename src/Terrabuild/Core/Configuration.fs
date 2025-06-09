@@ -131,7 +131,14 @@ let private buildEvaluationContext (options: ConfigOptions.Options) (workspaceCo
             match options.Configuration with
             | Some config -> Value.String config
             | _ -> Value.Nothing
+
+        let envValue =
+            match options.Environment with
+            | Some env -> Value.String env
+            | _ -> Value.Nothing
+
         Map [ "terrabuild.configuration", configValue
+              "terrabuild.environment", envValue
               "terrabuild.branch_or_tag", Value.String options.BranchOrTag 
               "terrabuild.head_commit", Value.String options.HeadCommit.Sha
               "terrabuild.retry", Value.Bool options.Retry 
