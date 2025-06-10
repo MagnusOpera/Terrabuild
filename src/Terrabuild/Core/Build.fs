@@ -293,6 +293,18 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     let rec schedule nodeId =
         if nodeResults.TryAdd(nodeId, (TaskRequest.Build, TaskStatus.Pending)) then
             let node = graph.Nodes[nodeId]
+
+            let shouldReallySchedule =
+                if force then true
+                elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
+                    let cacheEntryId = GraphDef.buildCacheKey node
+                    match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
+                    | Some (_, summary) ->
+                        if retry && not summary.IsSuccessful then true
+                        else false
+                    | _ -> true
+                else true
+
             let nodeComputed = hub.GetSignal<DateTime> nodeId
 
             // await dependencies
