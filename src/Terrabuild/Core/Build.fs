@@ -166,8 +166,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     let nodeResults = Concurrent.ConcurrentDictionary<string, TaskRequest * TaskStatus>()
     let restorables = Concurrent.ConcurrentDictionary<string, Restorable>()
 
-    let processNode (maxCompletionChildren: DateTime) (node: GraphDef.Node) =
-        let cacheEntryId = GraphDef.buildCacheKey node
+    let processNode (node: GraphDef.Node) =
+        let startedAt = DateTime.UtcNow
+        notification.NodeBuilding node
 
         let projectDirectory =
             match node.Project with
@@ -175,162 +176,144 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             | FS.File projectFile -> projectFile |> FS.parentDirectory |> Option.get
             | _ -> "."
 
-        let buildNode() =
-            let startedAt = DateTime.UtcNow
+        // restore lazy dependencies
+        node.Dependencies
+        |> Seq.iter (fun nodeId ->
+            match restorables.TryGetValue nodeId with
+            | true, restorable -> restorable.Restore()
+            | _ -> ())
 
-            notification.NodeBuilding node
+        let beforeFiles =
+            if node.IsLeaf then IO.Snapshot.Empty
+            else IO.createSnapshot node.Outputs projectDirectory
 
-            // restore lazy dependencies
-            node.Dependencies
-            |> Seq.iter (fun nodeId ->
-                match restorables.TryGetValue nodeId with
-                | true, restorable -> restorable.Restore()
-                | _ -> ())
+        let cacheEntryId = GraphDef.buildCacheKey node
+        let cacheEntry = cache.GetEntry true cacheEntryId
+        let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
 
-            let beforeFiles =
-                if node.IsLeaf then IO.Snapshot.Empty
-                else IO.createSnapshot node.Outputs projectDirectory
+        // keep only new or modified files
+        let afterFiles = IO.createSnapshot node.Outputs projectDirectory
+        let newFiles = afterFiles - beforeFiles
+        let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
 
-            let cacheEntry = cache.GetEntry true cacheEntryId
-            let lastStatusCode, stepLogs = execCommands node cacheEntry options projectDirectory homeDir tmpDir
+        let successful = lastStatusCode = 0
+        let endedAt = DateTime.UtcNow
+        let summary = { Cache.TargetSummary.Project = node.Project
+                        Cache.TargetSummary.Target = node.Target
+                        Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
+                        Cache.TargetSummary.Outputs = outputs
+                        Cache.TargetSummary.IsSuccessful = successful
+                        Cache.TargetSummary.StartedAt = startedAt
+                        Cache.TargetSummary.EndedAt = endedAt
+                        Cache.TargetSummary.Duration = endedAt - startedAt
+                        Cache.TargetSummary.Cache = node.Cache }
 
-            // keep only new or modified files
-            let afterFiles = IO.createSnapshot node.Outputs projectDirectory
-            let newFiles = afterFiles - beforeFiles
-            let outputs = IO.copyFiles cacheEntry.Outputs projectDirectory newFiles
+        notification.NodeUploading node
 
-            let successful = lastStatusCode = 0
-            let endedAt = DateTime.UtcNow
-            let summary = { Cache.TargetSummary.Project = node.Project
-                            Cache.TargetSummary.Target = node.Target
-                            Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
-                            Cache.TargetSummary.Outputs = outputs
-                            Cache.TargetSummary.IsSuccessful = successful
-                            Cache.TargetSummary.StartedAt = startedAt
-                            Cache.TargetSummary.EndedAt = endedAt
-                            Cache.TargetSummary.Duration = endedAt - startedAt
-                            Cache.TargetSummary.Cache = node.Cache }
+        // create an archive with new files
+        Log.Debug("{NodeId}: Building '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+        let files = cacheEntry.Complete summary
+        api |> Option.iter (fun api -> api.AddArtifact node.Project node.Target node.ProjectHash node.TargetHash files successful)
 
-            notification.NodeUploading node
-
-            // create an archive with new files
-            Log.Debug("{NodeId}: Building '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
-            let files = cacheEntry.Complete summary
-            api |> Option.iter (fun api -> api.AddArtifact node.Project node.Target node.ProjectHash node.TargetHash files successful)
-
-            match lastStatusCode with
-            | 0 -> TaskStatus.Success endedAt
-            | _ -> TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
-
-        let restoreNode () =
-            notification.NodeScheduled node
-            let cacheEntryId = GraphDef.buildCacheKey node
-            match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
-            | Some (_, summary) ->
-                let dependencies =
-                    node.Dependencies
-                    |> Seq.choose (fun nodeId -> 
-                        match restorables.TryGetValue nodeId with
-                        | true, restorable -> Some restorable
-                        | _ -> None)
-                    |> List.ofSeq
-
-                let callback() =
-                    notification.NodeDownloading node
-                    match cache.TryGetSummary allowRemoteCache cacheEntryId with
-                    | Some summary ->
-                        Log.Debug("{NodeId} restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
-                        match summary.Outputs with
-                        | Some outputs ->
-                            let files = IO.enumerateFiles outputs
-                            IO.copyFiles projectDirectory outputs files |> ignore
-                            api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
-                        | _ -> ()
-                        notification.NodeCompleted node TaskRequest.Restore true
-                    | _ ->
-                        notification.NodeCompleted node TaskRequest.Restore false
-                        raiseBugError $"Unable to download build output for {cacheEntryId} for node {node.Id}"
-
-                let restorable = Restorable(callback, dependencies)
-                restorables.TryAdd(node.Id, restorable) |> ignore
-                if summary.IsSuccessful then TaskStatus.Success summary.EndedAt
-                else TaskStatus.Failure (summary.EndedAt, $"Restored node {node.Id} with a build in failure state")
-            | _ ->
-                TaskStatus.Failure (DateTime.UtcNow, $"Unable to download build output for {cacheEntryId} for node {node.Id}")
-
-        if force then
-            Log.Debug("{NodeId} must rebuild because force build requested", node.Id)
-            TaskRequest.Build, buildNode()
-
-        elif maxCompletionChildren = DateTime.MaxValue then
-            Log.Debug("{NodeId} must rebuild because child is rebuilding", node.Id)
-            TaskRequest.Build, buildNode()
-
-        elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
-            let cacheEntryId = GraphDef.buildCacheKey node
-            match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
-            | Some (_, summary) ->
-                Log.Debug("{NodeId} has existing build summary", node.Id)
-
-                // task is failed and retry requested
-                if retry && not summary.IsSuccessful then
-                    Log.Debug("{NodeId} must rebuild because node is failed and retry requested", node.Id)
-                    TaskRequest.Build, buildNode()
-
-                // task is cached
-                else
-                    Log.Debug("{NodeId} is marked as used", node.Id)
-                    TaskRequest.Restore, restoreNode()
-            | _ ->
-                Log.Debug("{NodeId} must be build since no summary and required", node.Id)
-                TaskRequest.Build, buildNode()
-        else
-            Log.Debug("{NodeId} is not cacheable", node.Id)
-            TaskRequest.Build, buildNode()
+        match lastStatusCode with
+        | 0 -> TaskStatus.Success endedAt
+        | _ -> TaskStatus.Failure (DateTime.UtcNow, $"{node.Id} failed with exit code {lastStatusCode}")
 
 
     let hub = Hub.Create(options.MaxConcurrency)
     let rec schedule nodeId =
         if nodeResults.TryAdd(nodeId, (TaskRequest.Build, TaskStatus.Pending)) then
             let node = graph.Nodes[nodeId]
+            notification.NodeScheduled node
+
+            let projectDirectory =
+                match node.Project with
+                | FS.Directory projectDirectory -> projectDirectory
+                | FS.File projectFile -> projectFile |> FS.parentDirectory |> Option.get
+                | _ -> "."
+
+            let completionStatus =
+                if force then None
+                else
+                    let cacheEntryId = GraphDef.buildCacheKey node
+                    match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
+                    | Some (_, summary) ->
+                        if retry && not summary.IsSuccessful then None
+                        else 
+                            let dependencies =
+                                node.Dependencies
+                                |> Seq.choose (fun nodeId -> 
+                                    match restorables.TryGetValue nodeId with
+                                    | true, restorable -> Some restorable
+                                    | _ -> None)
+                                |> List.ofSeq
+
+                            let callback() =
+                                notification.NodeDownloading node
+                                match cache.TryGetSummary allowRemoteCache cacheEntryId with
+                                | Some summary ->
+                                    Log.Debug("{NodeId} restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                                    match summary.Outputs with
+                                    | Some outputs ->
+                                        let files = IO.enumerateFiles outputs
+                                        IO.copyFiles projectDirectory outputs files |> ignore
+                                        api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
+                                    | _ -> ()
+                                    notification.NodeCompleted node TaskRequest.Restore true
+                                | _ ->
+                                    notification.NodeCompleted node TaskRequest.Restore false
+                                    raiseBugError $"Unable to download build output for {cacheEntryId} for node {node.Id}"
+
+                            let restorable = Restorable(callback, dependencies)
+                            restorables.TryAdd(node.Id, restorable) |> ignore
+                            if summary.IsSuccessful then TaskStatus.Success summary.EndedAt |> Some
+                            else TaskStatus.Failure (summary.EndedAt, $"Restored node {node.Id} with a build in failure state") |> Some                   
+                    | _ -> None
+
             let nodeComputed = hub.GetSignal<DateTime> nodeId
+            match completionStatus with
+            | Some completionStatus ->
+                nodeResults[node.Id] <- (TaskRequest.Restore, completionStatus)
+                match completionStatus with
+                | TaskStatus.Success completionDate ->
+                    notification.NodeCompleted node TaskRequest.Restore true
+                    nodeComputed.Value <- completionDate
+                | TaskStatus.Failure (completionDate, _) ->
+                    notification.NodeCompleted node TaskRequest.Restore false
+                    nodeComputed.Value <- completionDate
+                | _ -> raiseBugError "Unexpected pending state"
+            | _ ->
+                // await dependencies
+                let awaitedDependencies =
+                    node.Dependencies
+                    |> Seq.map (fun awaitedProjectId ->
+                        schedule awaitedProjectId
+                        hub.GetSignal<DateTime> awaitedProjectId)
+                    |> List.ofSeq
 
-            // await dependencies
-            let awaitedDependencies =
-                node.Dependencies
-                |> Seq.map (fun awaitedProjectId ->
-                    schedule awaitedProjectId
-                    hub.GetSignal<DateTime> awaitedProjectId)
-                |> List.ofSeq
+                let onAllSignaled () =
+                    try
+                        let buildRequest, completionStatus = TaskRequest.Build, processNode node
+                        Log.Debug("{NodeId} completed request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
+                        nodeResults[node.Id] <- (buildRequest, completionStatus)
 
-            let onAllSignaled () =
-                try
-                    let maxCompletionChildren =
-                        match awaitedDependencies with
-                        | [ ] -> DateTime.MinValue
-                        | _ -> awaitedDependencies |> Seq.maxBy (fun dep -> dep.Value) |> (fun dep -> dep.Value)
+                        match completionStatus with
+                        | TaskStatus.Success completionDate ->
+                            nodeComputed.Value <- completionDate
+                            notification.NodeCompleted node buildRequest true
+                        | _ ->
+                            notification.NodeCompleted node buildRequest false
+                    with
+                        exn ->
+                            Log.Fatal(exn, "{NodeId} unexpected failure while building", node.Id)
 
-                    let buildRequest, completionStatus = processNode maxCompletionChildren node
-                    Log.Debug("{NodeId} completed request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
-                    nodeResults[node.Id] <- (buildRequest, completionStatus)
+                            nodeResults[node.Id] <- (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))
+                            notification.NodeCompleted node TaskRequest.Build false
 
-                    match completionStatus with
-                    | TaskStatus.Success completionDate ->
-                        nodeComputed.Value <- completionDate
-                        notification.NodeCompleted node buildRequest true
-                    | _ ->
-                        notification.NodeCompleted node buildRequest false
-                with
-                    exn ->
-                        Log.Fatal(exn, "{NodeId} unexpected failure while building", node.Id)
+                            reraise()
 
-                        nodeResults[node.Id] <- (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))
-                        notification.NodeCompleted node TaskRequest.Build false
-
-                        reraise()
-
-            let awaitedSignals = awaitedDependencies |> List.map (fun entry -> entry :> ISignal)
-            hub.Subscribe nodeId awaitedSignals onAllSignaled
+                let awaitedSignals = awaitedDependencies |> List.map (fun entry -> entry :> ISignal)
+                hub.Subscribe nodeId awaitedSignals onAllSignaled
 
     graph.RootNodes |> Seq.iter schedule
 
