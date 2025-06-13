@@ -293,56 +293,69 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
     let rec schedule nodeId =
         if nodeResults.TryAdd(nodeId, (TaskRequest.Build, TaskStatus.Pending)) then
             let node = graph.Nodes[nodeId]
+            notification.NodeScheduled node
 
-            let shouldReallySchedule =
-                if force then true
-                elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
+            let completionStatus =
+                if force then None
+                else
                     let cacheEntryId = GraphDef.buildCacheKey node
                     match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
                     | Some (_, summary) ->
-                        if retry && not summary.IsSuccessful then true
-                        else false
-                    | _ -> true
-                else true
+                        if retry && not summary.IsSuccessful then None
+                        elif summary.IsSuccessful then TaskStatus.Success summary.EndedAt |> Some
+                        else TaskStatus.Failure (summary.EndedAt, $"Restored node {node.Id} with a build in failure state") |> Some
+                    | _ -> None
 
             let nodeComputed = hub.GetSignal<DateTime> nodeId
+            match completionStatus with
+            | Some completionStatus ->
+                nodeResults[node.Id] <- (TaskRequest.Restore, completionStatus)
+                match completionStatus with
+                | TaskStatus.Success completionDate ->
+                    notification.NodeCompleted node TaskRequest.Restore true
+                    nodeComputed.Value <- completionDate
+                | TaskStatus.Failure (completionDate, _) ->
+                    notification.NodeCompleted node TaskRequest.Restore false
+                    nodeComputed.Value <- completionDate
+                | _ -> raiseBugError "Unexpected pending state"
+            | _ ->
+                // await dependencies
+                let awaitedDependencies =
+                    node.Dependencies
+                    |> Seq.map (fun awaitedProjectId ->
+                        schedule awaitedProjectId
+                        hub.GetSignal<DateTime> awaitedProjectId)
+                    |> List.ofSeq
 
-            // await dependencies
-            let awaitedDependencies =
-                node.Dependencies
-                |> Seq.map (fun awaitedProjectId ->
-                    schedule awaitedProjectId
-                    hub.GetSignal<DateTime> awaitedProjectId)
-                |> List.ofSeq
+                let onAllSignaled () =
+                    try
+                        let maxCompletionChildren =
+                            match awaitedDependencies with
+                            | [ ] -> DateTime.MinValue
+                            | _ -> awaitedDependencies |> Seq.maxBy (fun dep -> dep.Value) |> (fun dep -> dep.Value)
 
-            let onAllSignaled () =
-                try
-                    let maxCompletionChildren =
-                        match awaitedDependencies with
-                        | [ ] -> DateTime.MinValue
-                        | _ -> awaitedDependencies |> Seq.maxBy (fun dep -> dep.Value) |> (fun dep -> dep.Value)
+                        let buildRequest, completionStatus = processNode maxCompletionChildren node
+                        Log.Debug("{NodeId} completed request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
+                        nodeResults[node.Id] <- (buildRequest, completionStatus)
 
-                    let buildRequest, completionStatus = processNode maxCompletionChildren node
-                    Log.Debug("{NodeId} completed request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
-                    nodeResults[node.Id] <- (buildRequest, completionStatus)
+                        match completionStatus with
+                        | TaskStatus.Success completionDate ->
+                            nodeComputed.Value <- completionDate
+                            notification.NodeCompleted node buildRequest true
+                        | _ ->
+                            notification.NodeCompleted node buildRequest false
+                    with
+                        exn ->
+                            Log.Fatal(exn, "{NodeId} unexpected failure while building", node.Id)
 
-                    match completionStatus with
-                    | TaskStatus.Success completionDate ->
-                        nodeComputed.Value <- completionDate
-                        notification.NodeCompleted node buildRequest true
-                    | _ ->
-                        notification.NodeCompleted node buildRequest false
-                with
-                    exn ->
-                        Log.Fatal(exn, "{NodeId} unexpected failure while building", node.Id)
+                            nodeResults[node.Id] <- (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))
+                            notification.NodeCompleted node TaskRequest.Build false
 
-                        nodeResults[node.Id] <- (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))
-                        notification.NodeCompleted node TaskRequest.Build false
+                            reraise()
 
-                        reraise()
+                let awaitedSignals = awaitedDependencies |> List.map (fun entry -> entry :> ISignal)
+                hub.Subscribe nodeId awaitedSignals onAllSignaled
 
-            let awaitedSignals = awaitedDependencies |> List.map (fun entry -> entry :> ISignal)
-            hub.Subscribe nodeId awaitedSignals onAllSignaled
 
     graph.RootNodes |> Seq.iter schedule
 
