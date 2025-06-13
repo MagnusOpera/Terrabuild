@@ -181,8 +181,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             notification.NodeBuilding node
 
             // restore lazy dependencies
-            node.Dependencies
-            |> Seq.iter (fun nodeId ->
+            node.Dependencies |> Seq.iter (fun nodeId ->
                 match restorables.TryGetValue nodeId with
                 | true, restorable -> restorable.Restore()
                 | _ -> ())
@@ -228,8 +227,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
             | Some (_, summary) ->
                 let dependencies =
-                    node.Dependencies
-                    |> Seq.choose (fun nodeId -> 
+                    node.Dependencies |> Seq.choose (fun nodeId -> 
                         match restorables.TryGetValue nodeId with
                         | true, restorable -> Some restorable
                         | _ -> None)
@@ -297,8 +295,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
             // await dependencies
             let awaitedDependencies =
-                node.Dependencies
-                |> Seq.map (fun awaitedProjectId ->
+                node.Dependencies |> Seq.map (fun awaitedProjectId ->
                     schedule awaitedProjectId
                     hub.GetSignal<DateTime> awaitedProjectId)
                 |> List.ofSeq
@@ -314,19 +311,18 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     Log.Debug("{NodeId} completed request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
                     nodeResults[node.Id] <- (buildRequest, completionStatus)
 
-                    match completionStatus with
-                    | TaskStatus.Success completionDate ->
-                        nodeComputed.Value <- completionDate
-                        notification.NodeCompleted node buildRequest true
-                    | _ ->
-                        notification.NodeCompleted node buildRequest false
+                    let success, completionDate =
+                        match completionStatus with
+                        | TaskStatus.Success completionDate -> true, completionDate
+                        | TaskStatus.Failure (completionDate, _) -> false, completionDate
+                        | _ -> raiseBugError "Unexpected pending state"
+                    notification.NodeCompleted node buildRequest success
+                    if success then nodeComputed.Value <- completionDate
                 with
                     exn ->
                         Log.Fatal(exn, "{NodeId} unexpected failure while building", node.Id)
-
                         nodeResults[node.Id] <- (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))
                         notification.NodeCompleted node TaskRequest.Build false
-
                         reraise()
 
             let awaitedSignals = awaitedDependencies |> List.map (fun entry -> entry :> ISignal)
