@@ -35,7 +35,7 @@ type Terraform() =
         let arguments = $"{context.Command} {arguments}"
 
         let ops = [ shellOp "terraform" arguments ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)
 
 
     /// <summary weight="1">
@@ -48,7 +48,7 @@ type Terraform() =
             | Some config -> $" -backend-config={config}"
             | _ -> ""
         let ops = [ shellOp "terraform" $"init -reconfigure{config}" ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)
 
 
     /// <summary weight="2" title="Generate plan file.">
@@ -69,7 +69,7 @@ type Terraform() =
 
             shellOp "terraform" "validate"
         ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)
 
 
     /// <summary weight="3" title="Generate plan file.">
@@ -96,7 +96,7 @@ type Terraform() =
 
             shellOp "terraform" $"plan -out=terrabuild.planfile{vars}"
         ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)
   
 
     /// <summary weight="4" title="Apply plan file.">
@@ -121,5 +121,4 @@ type Terraform() =
 
             shellOp "terraform" "apply -input=false terrabuild.planfile"
         ]
-        execRequest Cacheability.Always ops
-  
+        execRequest(Cacheability.Always, ops, true)

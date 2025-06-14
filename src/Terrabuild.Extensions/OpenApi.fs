@@ -17,4 +17,4 @@ type OpenApi() =
         let ops = [
             shellOp "docker-entrypoint.sh" args
         ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)

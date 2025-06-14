@@ -50,6 +50,7 @@ type ShellOperations = ShellOperation list
 type ActionExecutionRequest = {
     Cache: Cacheability
     Operations: ShellOperations
+    SideEffect: bool
 }
 
 
@@ -57,6 +58,7 @@ let shellOp cmd args =
     { ShellOperation.Command = cmd
       ShellOperation.Arguments = args }
 
-let execRequest cache ops =
+let execRequest (cache, ops, sideEffect) =
     { ActionExecutionRequest.Cache = cache 
-      ActionExecutionRequest.Operations = ops }
+      ActionExecutionRequest.Operations = ops
+      ActionExecutionRequest.SideEffect = sideEffect }
