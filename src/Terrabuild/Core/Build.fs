@@ -251,7 +251,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                                 notification.NodeDownloading node
                                 match cache.TryGetSummary allowRemoteCache cacheEntryId with
                                 | Some summary ->
-                                    Log.Debug("{NodeId} restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                                    Log.Debug("{NodeId} restoring '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
                                     match summary.Outputs with
                                     | Some outputs ->
                                         let files = IO.enumerateFiles outputs
@@ -267,6 +267,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                                 let restorable = Restorable(callback, dependencies)
                                 restorables.TryAdd(node.Id, restorable) |> ignore
                             else
+                                Log.Debug("{NodeId} skipping restore unmanaged '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
                                 notification.NodeCompleted node TaskRequest.Restore true
                             if summary.IsSuccessful then TaskStatus.Success summary.EndedAt |> Some
                             else TaskStatus.Failure (summary.EndedAt, $"Restored node {node.Id} with a build in failure state") |> Some
