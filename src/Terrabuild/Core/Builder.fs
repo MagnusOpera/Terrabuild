@@ -121,6 +121,10 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
                 let managed = target.Managed |> Option.defaultValue true
 
+                let targetOutput =
+                    if managed then target.Outputs
+                    else Set.empty
+
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {projectConfig.Name}"
                              
@@ -132,7 +136,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                              Node.Managed = managed
 
                              Node.Dependencies = children
-                             Node.Outputs = target.Outputs
+                             Node.Outputs = targetOutput
 
                              Node.ProjectHash = projectConfig.Hash
                              Node.TargetHash = hash
