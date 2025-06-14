@@ -238,7 +238,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         notification.NodeDownloading node
                         match cache.TryGetSummary allowRemoteCache cacheEntryId with
                         | Some summary ->
-                            Log.Debug("{NodeId} restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                            Log.Debug("{NodeId} restoring '{Project}/{Target}' from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
                             match summary.Outputs with
                             | Some outputs ->
                                 let files = IO.enumerateFiles outputs
@@ -249,6 +249,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         | _ ->
                             notification.NodeCompleted node TaskRequest.Restore false
                             raiseBugError $"Unable to download build output for {cacheEntryId} for node {node.Id}"
+                    else
+                        Log.Debug("{NodeId} skipping restore '{Project}/{Target}' from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
 
                 let restorable = Restorable(callback, dependencies)
                 restorables.TryAdd(node.Id, restorable) |> ignore
