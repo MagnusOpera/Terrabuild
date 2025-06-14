@@ -76,8 +76,9 @@
           "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "b:build": {
@@ -156,8 +157,9 @@
           "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "c:build": {
@@ -236,8 +238,9 @@
           "arguments": "run build -- "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "d:build": {
@@ -296,8 +299,9 @@
           "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "e:build": {
@@ -356,8 +360,9 @@
           "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "f:build": {
@@ -414,8 +419,9 @@
           "arguments": "run build -- "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "g:build": {
@@ -471,8 +477,9 @@
           "arguments": "run build -- "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     }
   },

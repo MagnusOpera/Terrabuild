@@ -233,7 +233,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 | _ -> "."
 
             let completionStatus =
-                if force then None
+                if force || node.Rebuild then None
                 else
                     let cacheEntryId = GraphDef.buildCacheKey node
                     match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
