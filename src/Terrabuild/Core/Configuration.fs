@@ -241,8 +241,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     let extensions = extensions |> Map.addMap projectConfig.Extensions
 
     let projectScripts =
-        projectConfig.Extensions
-        |> Map.map (fun _ ext ->
+        projectConfig.Extensions |> Map.map (fun _ ext ->
             ext.Script
             |> Option.bind (Eval.asStringOption << Eval.eval evaluationContext)
             |> Option.map (FS.workspaceRelative options.Workspace projectDir))
@@ -264,8 +263,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
               ProjectInfo.Includes = projectConfig.Project.Includes |> evalAsStringSet }
 
         let initProjectInfo =
-            projectConfig.Project.Initializers
-            |> Set.fold (fun projectInfo init ->
+            projectConfig.Project.Initializers |> Set.fold (fun projectInfo init ->
                 let parseContext = 
                     let context = { Terrabuild.Extensibility.ExtensionContext.Debug = options.Debug
                                     Terrabuild.Extensibility.ExtensionContext.Directory = projectDir
@@ -308,8 +306,8 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
         |> Set.map (fun dep -> FS.workspaceRelative options.Workspace projectDir dep)
 
     let projectTargets =
-        projectConfig.Targets
-        |> Map.map (fun targetName targetBlock ->
+        // apply target override
+        projectConfig.Targets |> Map.map (fun targetName targetBlock ->
             let workspaceTarget = workspaceConfig.Targets |> Map.tryFind targetName
             let rebuild =
                 match targetBlock.Rebuild with
@@ -319,10 +317,15 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
                 match targetBlock.DependsOn with
                 | Some dependsOn -> Some dependsOn
                 | _ -> workspaceTarget |> Option.bind _.DependsOn
+            let managed =
+                match targetBlock.Managed with
+                | Some managed -> Some managed
+                | _ -> workspaceTarget |> Option.bind _.Managed
 
             { targetBlock with 
                 Rebuild = rebuild
-                DependsOn = dependsOn })
+                DependsOn = dependsOn
+                Managed = managed })
 
     let includes =
         projectScripts
@@ -333,8 +336,7 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
     // enrich workspace locals with project locals
     // NOTE we are checking for duplicated fields as this is an error
     let locals =
-        workspaceConfig.Locals
-        |> Map.iter (fun name _ ->
+        workspaceConfig.Locals |> Map.iter (fun name _ ->
             if projectConfig.Locals |> Map.containsKey name then raiseParseError $"duplicated local '{name}'")
         workspaceConfig.Locals |> Map.addMap projectConfig.Locals
 
@@ -389,8 +391,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                   "terrabuild.version", Value.String projectHash ]
   
         let projectVars =
-            projectDependencies
-            |> Seq.choose (fun (KeyValue(_, project)) ->
+            projectDependencies |> Seq.choose (fun (KeyValue(_, project)) ->
                 project.Id |> Option.map (fun id ->
                     $"project.{id}", Value.Map (Map ["version", Value.String project.Hash])))
             |> Map.ofSeq
@@ -402,9 +403,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                 |> Map.addMap projectVars }
 
     let projectSteps =
-        projectDef.Targets
-        |> Map.map (fun targetName target ->
-
+        projectDef.Targets |> Map.map (fun targetName target ->
             let evaluationContext =
                 let mutable evaluationContext =
                     let terrabuildTargetVars =
@@ -449,14 +448,13 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
             // use value from project target
             // otherwise use workspace target
             // defaults to allow caching
-            let rebuild = 
+            let targetRebuild = 
                 target.Rebuild
                 |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
                 |> Option.defaultValue false
 
             let targetOperations =
-                target.Steps
-                |> List.fold (fun actions step ->
+                target.Steps |> List.fold (fun actions step ->
                     let extension = 
                         match projectDef.Extensions |> Map.tryFind step.Extension with
                         | Some extension -> extension
@@ -523,20 +521,19 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                     actions
                 ) []
 
-            let dependsOn = target.DependsOn |> Option.defaultValue Set.empty
+            let targetDependsOn = target.DependsOn |> Option.defaultValue Set.empty
 
-            let outputs =
+            let targetManaged =
+                target.Managed
+                |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
+
+            let targetOutputs =
                 let targetOutputs =
                     target.Outputs
                     |> Option.bind (Eval.asStringSetOption << Eval.eval evaluationContext)
                 match targetOutputs with
                 | Some outputs -> outputs
                 | _ -> projectDef.Outputs
-
-            let hash =
-                targetOperations
-                |> List.map (fun ope -> ope.Hash)
-                |> Hash.sha256strings
 
             let targetCache =
                 let targetCache =
@@ -550,19 +547,19 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                 | None -> None
                 | _ -> raiseParseError "invalid cache value"
 
-            let targetManaged =
-                target.Managed
-                |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
+            let targetHash =
+                targetOperations
+                |> List.map (fun ope -> ope.Hash)
+                |> Hash.sha256strings
 
-            let target = {
-                Target.Hash = hash
-                Target.Rebuild = rebuild
-                Target.DependsOn = dependsOn
-                Target.Cache = targetCache
-                Target.Managed = targetManaged
-                Target.Outputs = outputs
-                Target.Operations = targetOperations
-            }
+            let target =
+                { Target.Hash = targetHash
+                  Target.Rebuild = targetRebuild
+                  Target.DependsOn = targetDependsOn
+                  Target.Cache = targetCache
+                  Target.Managed = targetManaged
+                  Target.Outputs = targetOutputs
+                  Target.Operations = targetOperations }
 
             target
         )
