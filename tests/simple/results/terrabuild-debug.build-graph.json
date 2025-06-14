@@ -83,8 +83,9 @@
           "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA\u0022 -var=\u0022npm_app_version=74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75\u0022"
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "libraries/dotnet-lib:build": {
@@ -148,8 +149,9 @@
           "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "libraries/npm-lib:build": {
@@ -206,8 +208,9 @@
           "arguments": "run build -- "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "libraries/shell-lib:build": {
@@ -253,8 +256,9 @@
           "arguments": "building library1"
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "projects/dotnet-app:build": {
@@ -320,8 +324,9 @@
           "arguments": "build --no-dependencies --configuration Debug    "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "projects/make-app:build": {
@@ -400,8 +405,9 @@
           "arguments": "build secret=\u0022tagada\u0022"
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "projects/npm-app/private-npm-lib:build": {
@@ -458,8 +464,9 @@
           "arguments": "run build -- "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "projects/npm-app:build": {
@@ -519,8 +526,9 @@
           "arguments": "run build -- "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "projects/open-api:build": {
@@ -578,8 +586,9 @@
           "arguments": "generate -i api.json -g typescript-axios -o src"
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "projects/rust-app:build": {
@@ -630,8 +639,9 @@
           "arguments": "build --profile dev "
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     }
   },

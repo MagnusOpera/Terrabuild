@@ -46,8 +46,9 @@
           "arguments": "building A"
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "b:build": {
@@ -95,8 +96,9 @@
           "arguments": "building B"
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     },
     "c:build": {
@@ -142,8 +144,9 @@
           "arguments": "building C"
         }
       ],
-      "cache": 0,
+      "cache": 3,
       "managed": true,
+      "rebuild": false,
       "isLeaf": true
     }
   },
