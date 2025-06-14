@@ -54,11 +54,11 @@ type ActionExecutionRequest = {
 }
 
 
-let shellOp cmd args = 
+let shellOp(cmd, args) = 
     { ShellOperation.Command = cmd
       ShellOperation.Arguments = args }
 
-let execRequest (cache, ops, sideEffect) =
+let execRequest(cache, ops, sideEffect) =
     { ActionExecutionRequest.Cache = cache 
       ActionExecutionRequest.Operations = ops
       ActionExecutionRequest.SideEffect = sideEffect }

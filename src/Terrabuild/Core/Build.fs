@@ -239,7 +239,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
                     | Some (_, summary) ->
                         if retry && not summary.IsSuccessful then None
-                        else 
+                        else
                             let dependencies =
                                 node.Dependencies |> Seq.choose (fun nodeId -> 
                                     match restorables.TryGetValue nodeId with
@@ -249,24 +249,26 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
                             let callback() =
                                 notification.NodeDownloading node
-                                match cache.TryGetSummary allowRemoteCache cacheEntryId with
-                                | Some summary ->
-                                    Log.Debug("{NodeId} restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
-                                    match summary.Outputs with
-                                    | Some outputs ->
-                                        let files = IO.enumerateFiles outputs
-                                        IO.copyFiles projectDirectory outputs files |> ignore
-                                        api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
-                                    | _ -> ()
-                                    notification.NodeCompleted node TaskRequest.Restore true
-                                | _ ->
-                                    notification.NodeCompleted node TaskRequest.Restore false
-                                    raiseBugError $"Unable to download build output for {cacheEntryId} for node {node.Id}"
+                                // only download artifact if it's fully managed
+                                if node.Managed then
+                                    match cache.TryGetSummary allowRemoteCache cacheEntryId with
+                                    | Some summary ->
+                                        Log.Debug("{NodeId} restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                                        match summary.Outputs with
+                                        | Some outputs ->
+                                            let files = IO.enumerateFiles outputs
+                                            IO.copyFiles projectDirectory outputs files |> ignore
+                                            api |> Option.iter (fun api -> api.UseArtifact node.ProjectHash node.TargetHash)
+                                        | _ -> ()
+                                        notification.NodeCompleted node TaskRequest.Restore true
+                                    | _ ->
+                                        notification.NodeCompleted node TaskRequest.Restore false
+                                        raiseBugError $"Unable to download build output for {cacheEntryId} for node {node.Id}"
 
                             let restorable = Restorable(callback, dependencies)
                             restorables.TryAdd(node.Id, restorable) |> ignore
                             if summary.IsSuccessful then TaskStatus.Success summary.EndedAt |> Some
-                            else TaskStatus.Failure (summary.EndedAt, $"Restored node {node.Id} with a build in failure state") |> Some                   
+                            else TaskStatus.Failure (summary.EndedAt, $"Restored node {node.Id} with a build in failure state") |> Some
                     | _ -> None
 
             let nodeComputed = hub.GetSignal<DateTime> nodeId

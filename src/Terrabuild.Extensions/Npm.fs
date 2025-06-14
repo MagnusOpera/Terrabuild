@@ -34,7 +34,7 @@ type Npm() =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "npm" $"{cmd} {arguments}"
+            shellOp("npm", $"{cmd} {arguments}")
         ]
         execRequest(Cacheability.Always, ops, false)
 
@@ -44,7 +44,7 @@ type Npm() =
     /// </summary>
     static member install (context: ActionContext) (force: bool option)=
         let force = if force = Some true then " --force" else ""
-        let ops = [ shellOp "npm" $"ci{force}" ]
+        let ops = [ shellOp("npm", $"ci{force}") ]
         execRequest(Cacheability.Always, ops, false)
 
 
@@ -56,8 +56,8 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "npm" "ci"
-            shellOp "npm" $"run build -- {args}"   
+            shellOp("npm", "ci")
+            shellOp("npm", $"run build -- {args}")   
         ]
         execRequest(Cacheability.Always, ops, false)
 
@@ -70,8 +70,8 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "npm" "ci"
-            shellOp "npm" $"run test -- {args}"   
+            shellOp("npm", "ci")
+            shellOp("npm", $"run test -- {args}")   
         ]
         execRequest(Cacheability.Always, ops, false)
 
@@ -83,6 +83,6 @@ type Npm() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "npm" $"run {command} -- {args}"
+            shellOp("npm", $"run {command} -- {args}")
         ]
         execRequest(Cacheability.Always, ops, false)

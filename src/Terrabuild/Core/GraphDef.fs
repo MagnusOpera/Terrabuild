@@ -27,7 +27,7 @@ type Node = {
     TargetHash: string
     Operations: ContaineredShellOperation list
     Cache: Terrabuild.Extensibility.Cacheability
-    SideEffect: bool
+    Managed: bool
 
     // tell if a node is leaf (that is no dependencies in same project)
     IsLeaf: bool

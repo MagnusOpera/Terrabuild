@@ -34,8 +34,8 @@ type Terraform() =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
 
-        let ops = [ shellOp "terraform" arguments ]
-        execRequest(Cacheability.Always, ops, false)
+        let ops = [ shellOp("terraform", arguments) ]
+        execRequest(Cacheability.Always, ops, true)
 
 
     /// <summary weight="1">
@@ -47,7 +47,7 @@ type Terraform() =
             match config with
             | Some config -> $" -backend-config={config}"
             | _ -> ""
-        let ops = [ shellOp "terraform" $"init -reconfigure{config}" ]
+        let ops = [ shellOp("terraform", $"init -reconfigure{config}") ]
         execRequest(Cacheability.Always, ops, false)
 
 
@@ -61,13 +61,13 @@ type Terraform() =
     /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
     static member validate (context: ActionContext) (workspace: string option) =
         let ops = [
-            shellOp "terraform" "init"
+            shellOp("terraform", "init")
             
             match workspace with
-            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | Some workspace -> shellOp("terraform", $"workspace select {workspace}")
             | _ -> ()
 
-            shellOp "terraform" "validate"
+            shellOp("terraform", "validate")
         ]
         execRequest(Cacheability.Always, ops, false)
 
@@ -88,13 +88,13 @@ type Terraform() =
             | _ -> ""
 
         let ops = [
-            shellOp "terraform" $"init -reconfigure{config}"
+            shellOp("terraform", $"init -reconfigure{config}")
             
             match workspace with
-            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | Some workspace -> shellOp("terraform", $"workspace select {workspace}")
             | _ -> ()
 
-            shellOp "terraform" $"plan -out=terrabuild.planfile{vars}"
+            shellOp("terraform", $"plan -out=terrabuild.planfile{vars}")
         ]
         execRequest(Cacheability.Always, ops, false)
   
@@ -113,12 +113,12 @@ type Terraform() =
             | _ -> ""
 
         let ops = [
-            shellOp "terraform" $"init -reconfigure{config}"
+            shellOp("terraform", $"init -reconfigure{config}")
             
             match workspace with
-            | Some workspace -> shellOp "terraform" $"workspace select {workspace}"
+            | Some workspace -> shellOp("terraform", $"workspace select {workspace}")
             | _ -> ()
 
-            shellOp "terraform" "apply -input=false terrabuild.planfile"
+            shellOp("terraform", "apply -input=false terrabuild.planfile")
         ]
         execRequest(Cacheability.Always, ops, true)

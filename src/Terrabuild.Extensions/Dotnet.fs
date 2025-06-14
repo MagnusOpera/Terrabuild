@@ -82,7 +82,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
 
-        let ops = [ shellOp "dotnet" arguments ]
+        let ops = [ shellOp("dotnet", arguments) ]
         execRequest(Cacheability.Always, ops, false)
 
 
@@ -116,7 +116,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "dotnet" $"build --no-dependencies --configuration {configuration} {logger} {maxcpucount} {version} {arguments}"
+            shellOp("dotnet", $"build --no-dependencies --configuration {configuration} {logger} {maxcpucount} {version} {arguments}")
         ]
 
         execRequest(Cacheability.Always, ops, false)
@@ -134,7 +134,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "dotnet" $"pack --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}"
+            shellOp("dotnet", $"pack --no-build --configuration {configuration} /p:Version={version} /p:TargetsForTfmSpecificContentInPackage= {arguments}")
         ]
 
         execRequest(Cacheability.Always, ops, false)
@@ -165,7 +165,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "dotnet" $"publish --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}"
+            shellOp("dotnet", $"publish --no-dependencies --configuration {configuration} {runtime} {trim} {single} {arguments}")
         ]
 
         execRequest(Cacheability.Always, ops, false)
@@ -178,7 +178,7 @@ type Dotnet() =
     static member restore (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
-        let ops = [ shellOp "dotnet" $"restore {arguments}" ]
+        let ops = [ shellOp( "dotnet", $"restore {arguments}") ]
         execRequest(Cacheability.Local, ops, false)
 
 
@@ -194,7 +194,7 @@ type Dotnet() =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "dotnet" $"test --no-build --configuration {configuration} {filter} {arguments}"
+            shellOp("dotnet", $"test --no-build --configuration {configuration} {filter} {arguments}")
         ]
 
         execRequest(Cacheability.Local, ops, false)

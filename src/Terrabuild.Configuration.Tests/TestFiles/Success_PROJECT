@@ -37,6 +37,7 @@ target build {
 }
 
 target dist {
+  managed = false
   @dotnet build { }
   @dotnet publish { }
 }

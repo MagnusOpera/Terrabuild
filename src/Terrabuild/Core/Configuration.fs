@@ -31,6 +31,7 @@ type Target = {
     DependsOn: string set
     Outputs: string set
     Cache: Cacheability option
+    Managed: bool option
     Operations: TargetOperation list
 }
 
@@ -549,11 +550,16 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
                 | None -> None
                 | _ -> raiseParseError "invalid cache value"
 
+            let targetManaged =
+                target.Managed
+                |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
+
             let target = {
                 Target.Hash = hash
                 Target.Rebuild = rebuild
                 Target.DependsOn = dependsOn
                 Target.Cache = targetCache
+                Target.Managed = targetManaged
                 Target.Outputs = outputs
                 Target.Operations = targetOperations
             }
