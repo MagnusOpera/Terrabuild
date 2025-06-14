@@ -58,8 +58,7 @@ let private containerInfos = Concurrent.ConcurrentDictionary<string, string>()
 
 
 let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) projectDirectory homeDir tmpDir =
-    node.Operations
-    |> List.map (fun operation ->
+    node.Operations |> List.map (fun operation ->
         let metaCommand = operation.MetaCommand
         match options.ContainerTool, operation.Container with
         | Some cmd, Some container ->
@@ -124,15 +123,16 @@ let execCommands (node: GraphDef.Node) (cacheEntry: Cache.IEntry) (options: Conf
         cmdLastEndedAt <- DateTime.UtcNow
         let endedAt = cmdLastEndedAt
         let duration = endedAt - startedAt
-        let stepLog = { Cache.OperationSummary.MetaCommand = metaCommand
-                        Cache.OperationSummary.Command = cmd
-                        Cache.OperationSummary.Arguments = args
-                        Cache.OperationSummary.Container = container
-                        Cache.OperationSummary.StartedAt = startedAt
-                        Cache.OperationSummary.EndedAt = endedAt
-                        Cache.OperationSummary.Duration = duration
-                        Cache.OperationSummary.Log = logFile
-                        Cache.OperationSummary.ExitCode = exitCode }
+        let stepLog =
+            { Cache.OperationSummary.MetaCommand = metaCommand
+              Cache.OperationSummary.Command = cmd
+              Cache.OperationSummary.Arguments = args
+              Cache.OperationSummary.Container = container
+              Cache.OperationSummary.StartedAt = startedAt
+              Cache.OperationSummary.EndedAt = endedAt
+              Cache.OperationSummary.Duration = duration
+              Cache.OperationSummary.Log = logFile
+              Cache.OperationSummary.ExitCode = exitCode }
         stepLog |> stepLogs.Add
 
         lastStatusCode <- exitCode
@@ -177,8 +177,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             | _ -> "."
 
         // restore lazy dependencies
-        node.Dependencies
-        |> Seq.iter (fun nodeId ->
+        node.Dependencies |> Seq.iter (fun nodeId ->
             match restorables.TryGetValue nodeId with
             | true, restorable -> restorable.Restore()
             | _ -> ())
@@ -198,16 +197,17 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
 
         let successful = lastStatusCode = 0
         let endedAt = DateTime.UtcNow
-        let summary = { Cache.TargetSummary.Project = node.Project
-                        Cache.TargetSummary.Target = node.Target
-                        Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
-                        Cache.TargetSummary.Outputs = outputs
-                        Cache.TargetSummary.IsSuccessful = successful
-                        Cache.TargetSummary.StartedAt = startedAt
-                        Cache.TargetSummary.EndedAt = endedAt
-                        Cache.TargetSummary.Duration = endedAt - startedAt
-                        Cache.TargetSummary.Cache = node.Cache }
-
+        let summary =
+            { Cache.TargetSummary.Project = node.Project
+              Cache.TargetSummary.Target = node.Target
+              Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
+              Cache.TargetSummary.Outputs = outputs
+              Cache.TargetSummary.IsSuccessful = successful
+              Cache.TargetSummary.StartedAt = startedAt
+              Cache.TargetSummary.EndedAt = endedAt
+              Cache.TargetSummary.Duration = endedAt - startedAt
+              Cache.TargetSummary.Cache = node.Cache }
+  
         notification.NodeUploading node
 
         // create an archive with new files
@@ -241,8 +241,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         if retry && not summary.IsSuccessful then None
                         else 
                             let dependencies =
-                                node.Dependencies
-                                |> Seq.choose (fun nodeId -> 
+                                node.Dependencies |> Seq.choose (fun nodeId -> 
                                     match restorables.TryGetValue nodeId with
                                     | true, restorable -> Some restorable
                                     | _ -> None)
@@ -273,44 +272,41 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             let nodeComputed = hub.GetSignal<DateTime> nodeId
             match completionStatus with
             | Some completionStatus ->
+                Log.Debug("{NodeId} completed restore request with status {Status}", node.Id, completionStatus)
                 nodeResults[node.Id] <- (TaskRequest.Restore, completionStatus)
-                match completionStatus with
-                | TaskStatus.Success completionDate ->
-                    notification.NodeCompleted node TaskRequest.Restore true
-                    nodeComputed.Value <- completionDate
-                | TaskStatus.Failure (completionDate, _) ->
-                    notification.NodeCompleted node TaskRequest.Restore false
-                    nodeComputed.Value <- completionDate
-                | _ -> raiseBugError "Unexpected pending state"
+                let success, completionDate =
+                    match completionStatus with
+                    | TaskStatus.Success completionDate -> true, completionDate
+                    | TaskStatus.Failure (completionDate, _) -> false, completionDate
+                    | _ -> raiseBugError "Unexpected pending state"
+                notification.NodeCompleted node TaskRequest.Restore success
+                if success then nodeComputed.Value <- completionDate
             | _ ->
                 // await dependencies
                 let awaitedDependencies =
-                    node.Dependencies
-                    |> Seq.map (fun awaitedProjectId ->
+                    node.Dependencies |> Seq.map (fun awaitedProjectId ->
                         schedule awaitedProjectId
                         hub.GetSignal<DateTime> awaitedProjectId)
                     |> List.ofSeq
 
                 let onAllSignaled () =
                     try
-                        let buildRequest, completionStatus = TaskRequest.Build, processNode node
-                        Log.Debug("{NodeId} completed request {Request} with status {Status}", node.Id, buildRequest, completionStatus)
-                        nodeResults[node.Id] <- (buildRequest, completionStatus)
-
-                        match completionStatus with
-                        | TaskStatus.Success completionDate ->
-                            nodeComputed.Value <- completionDate
-                            notification.NodeCompleted node buildRequest true
-                        | _ ->
-                            notification.NodeCompleted node buildRequest false
+                        let completionStatus = processNode node
+                        Log.Debug("{NodeId} completed build request with status {Status}", node.Id, completionStatus)
+                        nodeResults[node.Id] <- (TaskRequest.Build, completionStatus)
+                        let success, completionDate =
+                            match completionStatus with
+                            | TaskStatus.Success completionDate -> true, completionDate
+                            | TaskStatus.Failure (completionDate, _) -> false, completionDate
+                            | _ -> raiseBugError "Unexpected pending state"
+                        notification.NodeCompleted node TaskRequest.Build success
+                        if success then nodeComputed.Value <- completionDate
                     with
-                        exn ->
-                            Log.Fatal(exn, "{NodeId} unexpected failure while building", node.Id)
-
-                            nodeResults[node.Id] <- (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))
-                            notification.NodeCompleted node TaskRequest.Build false
-
-                            reraise()
+                    | exn ->
+                        Log.Fatal(exn, "{NodeId} failed on build request", node.Id)
+                        nodeResults[node.Id] <- (TaskRequest.Build, TaskStatus.Failure (DateTime.UtcNow, exn.Message))
+                        notification.NodeCompleted node TaskRequest.Build false
+                        reraise()
 
                 let awaitedSignals = awaitedDependencies |> List.map (fun entry -> entry :> ISignal)
                 hub.Subscribe nodeId awaitedSignals onAllSignaled
@@ -346,19 +342,19 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
         |> Map.choose getDependencyStatus
 
     let isSuccess =
-        graph.RootNodes
-        |> Set.forall (fun nodeId ->
+        graph.RootNodes |> Set.forall (fun nodeId ->
             match nodeStatus |> Map.tryFind nodeId with
             | Some info -> info.Status.IsSuccess
             | _ -> false)
 
-    let buildInfo = { Summary.Commit = headCommit.Sha
-                      Summary.BranchOrTag = branchOrTag
-                      Summary.StartedAt = startedAt
-                      Summary.EndedAt = DateTime.UtcNow
-                      Summary.IsSuccess = isSuccess
-                      Summary.Targets = options.Targets
-                      Summary.Nodes = nodeStatus }
+    let buildInfo =
+        { Summary.Commit = headCommit.Sha
+          Summary.BranchOrTag = branchOrTag
+          Summary.StartedAt = startedAt
+          Summary.EndedAt = DateTime.UtcNow
+          Summary.IsSuccess = isSuccess
+          Summary.Targets = options.Targets
+          Summary.Nodes = nodeStatus }
 
     notification.BuildCompleted buildInfo
     api |> Option.iter (fun api -> api.CompleteBuild buildInfo.IsSuccess)
@@ -390,13 +386,10 @@ let loadSummary (options: ConfigOptions.Options) (cache: Cache.ICache) (graph: G
                   NodeInfo.TargetHash = node.TargetHash } |> Some
             | _ -> None
 
-
-        graph.Nodes
-        |> Map.choose getDependencyStatus
+        graph.Nodes |> Map.choose getDependencyStatus
 
     let isSuccess =
-        graph.RootNodes
-        |> Set.forall (fun nodeId ->
+        graph.RootNodes |> Set.forall (fun nodeId ->
             match nodeStatus |> Map.tryFind nodeId with
             | Some info -> info.Status.IsSuccess
             | _ -> false)
