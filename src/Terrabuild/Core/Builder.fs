@@ -61,9 +61,9 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
             // barrier nodes are just discarded and dependencies lift level up
             match projectConfig.Targets |> Map.tryFind targetName with
             | Some target ->
-                let cache, ops =
+                let cache, sideEffect, ops =
                     target.Operations
-                    |> List.fold (fun (cache, ops) operation ->
+                    |> List.fold (fun (cache, sideEffect, ops) operation ->
                         let optContext = {
                             Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                             Terrabuild.Extensibility.ActionContext.CI = options.Run.IsSome
@@ -98,8 +98,9 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                                 ContaineredShellOperation.Arguments = shellOperation.Arguments })
 
                         let cache = cache &&& executionRequest.Cache
-                        cache, ops @ newops
-                    ) (Cacheability.Always, [])
+                        let sideEffect = sideEffect && executionRequest.SideEffect
+                        cache, sideEffect, ops @ newops
+                    ) (Cacheability.Always, false, [])
 
                 let opsCmds =
                     ops
@@ -129,6 +130,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                              Node.ConfigurationTarget = target
                              Node.Operations = ops
                              Node.Cache = cache
+                             Node.SideEffect = sideEffect
 
                              Node.Dependencies = children
                              Node.Outputs = target.Outputs
