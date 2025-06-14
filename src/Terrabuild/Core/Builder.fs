@@ -99,9 +99,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                         cache, sideEffect, ops @ newops
                     ) (Cacheability.Always, false, [])
 
-                let opsCmds =
-                    ops
-                    |> List.map Json.Serialize
+                let opsCmds = ops |> List.map Json.Serialize
 
                 let children = inChildren + outChildren
                 let hashContent = opsCmds @ [
@@ -115,33 +113,36 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                 Log.Debug($"Node {nodeId} has ProjectHash {projectConfig.Hash} and TargetHash {hash}")
 
                 let cache = 
-                    if options.Force then Cacheability.Never
-                    elif options.LocalOnly then Cacheability.Local
+                    if options.LocalOnly then Cacheability.Local
                     else target.Cache |> Option.defaultValue cache
 
                 let managed = target.Managed |> Option.defaultValue true
+
+                let rebuild = target.Rebuild
 
                 let targetOutput =
                     if managed then target.Outputs
                     else Set.empty
 
-                let node = { Node.Id = nodeId
-                             Node.Label = $"{targetName} {projectConfig.Name}"
-                             
-                             Node.Project = projectConfig.Name
-                             Node.Target = targetName
-                             Node.ConfigurationTarget = target
-                             Node.Operations = ops
-                             Node.Cache = cache
-                             Node.Managed = managed
+                let node =
+                    { Node.Id = nodeId
+                      Node.Label = $"{targetName} {projectConfig.Name}"
 
-                             Node.Dependencies = children
-                             Node.Outputs = targetOutput
+                      Node.Project = projectConfig.Name
+                      Node.Target = targetName
+                      Node.ConfigurationTarget = target
+                      Node.Operations = ops
+                      Node.Cache = cache
+                      Node.Managed = managed
+                      Node.Rebuild = rebuild
 
-                             Node.ProjectHash = projectConfig.Hash
-                             Node.TargetHash = hash
+                      Node.Dependencies = children
+                      Node.Outputs = targetOutput
 
-                             Node.IsLeaf = isLeaf }
+                      Node.ProjectHash = projectConfig.Hash
+                      Node.TargetHash = hash
+
+                      Node.IsLeaf = isLeaf }
 
                 if allNodes.TryAdd(nodeId, node) |> not then raiseBugError "Unexpected graph building race"
                 Set.singleton nodeId
