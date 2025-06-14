@@ -248,9 +248,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                                 |> List.ofSeq
 
                             let callback() =
-                                notification.NodeDownloading node
-                                // only download artifact if it's fully managed
                                 if node.Managed then
+                                    notification.NodeDownloading node
                                     match cache.TryGetSummary allowRemoteCache cacheEntryId with
                                     | Some summary ->
                                         Log.Debug("{NodeId} restoring '{Project}/{Target}' from cache from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
@@ -264,6 +263,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                                     | _ ->
                                         notification.NodeCompleted node TaskRequest.Restore false
                                         raiseBugError $"Unable to download build output for {cacheEntryId} for node {node.Id}"
+                                else
+                                    notification.NodeCompleted node TaskRequest.Restore true
 
                             let restorable = Restorable(callback, dependencies)
                             restorables.TryAdd(node.Id, restorable) |> ignore
