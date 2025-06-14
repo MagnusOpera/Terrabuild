@@ -77,6 +77,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "b:build": {
@@ -156,6 +157,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "c:build": {
@@ -235,6 +237,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "d:build": {
@@ -294,6 +297,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "e:build": {
@@ -353,6 +357,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "f:build": {
@@ -410,6 +415,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "g:build": {
@@ -466,6 +472,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     }
   },

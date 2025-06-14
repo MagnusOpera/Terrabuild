@@ -15,6 +15,6 @@ type OpenApi() =
         let args = $"generate -i {input} -g {generator} -o {output}"
 
         let ops = [
-            shellOp "docker-entrypoint.sh" args
+            shellOp("docker-entrypoint.sh", args)
         ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)

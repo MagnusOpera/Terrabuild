@@ -84,6 +84,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "libraries/dotnet-lib:build": {
@@ -148,6 +149,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "libraries/npm-lib:build": {
@@ -205,6 +207,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "libraries/shell-lib:build": {
@@ -251,6 +254,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "projects/dotnet-app:build": {
@@ -317,6 +321,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "projects/make-app:build": {
@@ -396,6 +401,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "projects/npm-app/private-npm-lib:build": {
@@ -453,6 +459,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "projects/npm-app:build": {
@@ -513,6 +520,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "projects/open-api:build": {
@@ -571,6 +579,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     },
     "projects/rust-app:build": {
@@ -622,6 +631,7 @@
         }
       ],
       "cache": 0,
+      "managed": true,
       "isLeaf": true
     }
   },

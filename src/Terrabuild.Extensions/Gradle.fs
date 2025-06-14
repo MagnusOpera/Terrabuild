@@ -30,8 +30,8 @@ type Gradle() =
         let arguments = arguments |> Option.defaultValue ""
         let arguments = $"{context.Command} {arguments}"
 
-        let ops = [ shellOp "gradle" arguments ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp("gradle", arguments) ]
+        execRequest(Cacheability.Always, ops, false)
 
 
     /// <summary>
@@ -41,6 +41,5 @@ type Gradle() =
     static member build (context: ActionContext) (configuration: string option) =
         let configuration = configuration |> Option.defaultValue GradleHelpers.defaultConfiguration
 
-        let ops = [ shellOp "gradlew" $"assemble{configuration}" ]
-
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp("gradlew", $"assemble{configuration}") ]
+        execRequest(Cacheability.Always, ops, false)

@@ -45,8 +45,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
             // apply on each dependency
             let inChildren, outChildren =
-                dependsOns
-                |> Set.fold (fun (accInChildren, accOutChildren) dependsOn ->
+                dependsOns |> Set.fold (fun (accInChildren, accOutChildren) dependsOn ->
                     match dependsOn with
                     | String.Regex "^\^(.+)$" [ parentDependsOn ] ->
                         accInChildren, accOutChildren + projectConfig.Dependencies |> Set.collect (buildTarget parentDependsOn)
@@ -61,9 +60,8 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
             // barrier nodes are just discarded and dependencies lift level up
             match projectConfig.Targets |> Map.tryFind targetName with
             | Some target ->
-                let cache, ops =
-                    target.Operations
-                    |> List.fold (fun (cache, ops) operation ->
+                let cache, sideEffect, ops =
+                    target.Operations |> List.fold (fun (cache, sideEffect, ops) operation ->
                         let optContext = {
                             Terrabuild.Extensibility.ActionContext.Debug = options.Debug
                             Terrabuild.Extensibility.ActionContext.CI = options.Run.IsSome
@@ -88,8 +86,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                             | _ -> raiseExternalError $"{hash}: Failed to get shell operation (extension error)"
 
                         let newops =
-                            executionRequest.Operations
-                            |> List.map (fun shellOperation -> {
+                            executionRequest.Operations |> List.map (fun shellOperation -> {
                                 ContaineredShellOperation.Container = operation.Container
                                 ContaineredShellOperation.ContainerPlatform = operation.Platform
                                 ContaineredShellOperation.ContainerVariables = operation.ContainerVariables
@@ -98,8 +95,9 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                                 ContaineredShellOperation.Arguments = shellOperation.Arguments })
 
                         let cache = cache &&& executionRequest.Cache
-                        cache, ops @ newops
-                    ) (Cacheability.Always, [])
+                        let sideEffect = sideEffect || executionRequest.SideEffect
+                        cache, sideEffect, ops @ newops
+                    ) (Cacheability.Always, false, [])
 
                 let opsCmds =
                     ops
@@ -121,6 +119,12 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                     elif options.LocalOnly then Cacheability.Local
                     else target.Cache |> Option.defaultValue cache
 
+                let managed = target.Managed |> Option.defaultValue true
+
+                let targetOutput =
+                    if managed then target.Outputs
+                    else Set.empty
+
                 let node = { Node.Id = nodeId
                              Node.Label = $"{targetName} {projectConfig.Name}"
                              
@@ -129,9 +133,10 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                              Node.ConfigurationTarget = target
                              Node.Operations = ops
                              Node.Cache = cache
+                             Node.Managed = managed
 
                              Node.Dependencies = children
-                             Node.Outputs = target.Outputs
+                             Node.Outputs = targetOutput
 
                              Node.ProjectHash = projectConfig.Hash
                              Node.TargetHash = hash
@@ -152,10 +157,9 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
             node2children[nodeId]
 
     let rootNodes =
-        configuration.SelectedProjects
-        |> Seq.collect (fun dependency -> options.Targets
-                                          |> Seq.collect (fun target ->
-                                            buildTarget target dependency))
+        configuration.SelectedProjects |> Seq.collect (fun dependency -> 
+            options.Targets |> Seq.collect (fun target ->
+                buildTarget target dependency))
         |> Set
 
     let endedAt = DateTime.UtcNow

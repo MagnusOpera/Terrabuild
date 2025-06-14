@@ -32,9 +32,9 @@ type Yarn() =
         let cmd = context.Command
 
         let ops = [
-            shellOp "yarn" $"{cmd} -- {arguments}"   
+            shellOp("yarn", $"{cmd} -- {arguments}")   
         ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)
 
 
     /// <summary>
@@ -47,8 +47,8 @@ type Yarn() =
             | Some true -> " --ignore-engines"
             | _ -> ""
 
-        let ops = [ shellOp "yarn" $"install --frozen-lockfile{ignoreEngines}" ]
-        execRequest Cacheability.Always ops
+        let ops = [ shellOp("yarn", $"install --frozen-lockfile{ignoreEngines}") ]
+        execRequest(Cacheability.Always, ops, false)
 
 
     /// <summary>
@@ -64,10 +64,10 @@ type Yarn() =
             | _ -> ""
 
         let ops = [
-            shellOp "yarn" $"install --frozen-lockfile{ignoreEngines}"
-            shellOp "yarn" $"build -- {args}"   
+            shellOp("yarn", $"install --frozen-lockfile{ignoreEngines}")
+            shellOp("yarn", $"build -- {args}")
         ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)
 
 
     /// <summary>
@@ -83,10 +83,10 @@ type Yarn() =
             | _ -> ""
 
         let ops = [
-            shellOp "yarn" $"install --frozen-lockfile{ignoreEngines}"
-            shellOp "yarn" $"test -- {args}"   
+            shellOp("yarn", $"install --frozen-lockfile{ignoreEngines}")
+            shellOp("yarn", $"test -- {args}")
         ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)
 
     /// <summary>
     /// Run `run` script.
@@ -96,6 +96,6 @@ type Yarn() =
         let args = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp "yarn" $"{command} -- {args}"
+            shellOp("yarn", $"{command} -- {args}")
         ]
-        execRequest Cacheability.Always ops
+        execRequest(Cacheability.Always, ops, false)
