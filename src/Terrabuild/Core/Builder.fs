@@ -118,7 +118,7 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
                 let managed = target.Managed |> Option.defaultValue true
 
-                let rebuild = target.Rebuild
+                let rebuild = options.Force || target.Rebuild
 
                 let targetOutput =
                     if managed then target.Outputs

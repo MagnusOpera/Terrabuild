@@ -48,7 +48,7 @@
       ],
       "cache": 3,
       "managed": true,
-      "rebuild": false,
+      "rebuild": true,
       "isLeaf": true
     },
     "b:build": {
@@ -98,7 +98,7 @@
       ],
       "cache": 3,
       "managed": true,
-      "rebuild": false,
+      "rebuild": true,
       "isLeaf": true
     },
     "c:build": {
@@ -146,7 +146,7 @@
       ],
       "cache": 3,
       "managed": true,
-      "rebuild": false,
+      "rebuild": true,
       "isLeaf": true
     }
   },
