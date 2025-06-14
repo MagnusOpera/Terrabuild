@@ -261,10 +261,6 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             Log.Debug("{NodeId} must rebuild because force requested", node.Id)
             TaskRequest.Build, buildNode()
 
-        elif maxCompletionChildren = DateTime.MaxValue then
-            Log.Debug("{NodeId} must rebuild because child is rebuilding", node.Id)
-            TaskRequest.Build, buildNode()
-
         elif node.Cache <> Terrabuild.Extensibility.Cacheability.Never then
             let cacheEntryId = GraphDef.buildCacheKey node
             match cache.TryGetSummaryOnly allowRemoteCache cacheEntryId with
@@ -274,6 +270,11 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 // task is failed and retry requested
                 if retry && not summary.IsSuccessful then
                     Log.Debug("{NodeId} must rebuild because node is failed and retry requested", node.Id)
+                    TaskRequest.Build, buildNode()
+
+                // task is older than children
+                elif summary.EndedAt <= maxCompletionChildren then
+                    Log.Debug("{NodeId} must rebuild because child is rebuilding", node.Id)
                     TaskRequest.Build, buildNode()
 
                 // task is cached
