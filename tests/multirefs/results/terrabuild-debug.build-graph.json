@@ -3,7 +3,7 @@
     "a:build": {
       "id": "a:build",
       "label": "build A",
-      "project": "A",
+      "projectDir": "A",
       "target": "build",
       "configurationTarget": {
         "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
@@ -54,7 +54,7 @@
     "b:build": {
       "id": "b:build",
       "label": "build B",
-      "project": "B",
+      "projectDir": "B",
       "target": "build",
       "configurationTarget": {
         "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
@@ -104,7 +104,7 @@
     "c:build": {
       "id": "c:build",
       "label": "build C",
-      "project": "C",
+      "projectDir": "C",
       "target": "build",
       "configurationTarget": {
         "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",

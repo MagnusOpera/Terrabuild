@@ -39,7 +39,7 @@ type Target = {
 [<RequireQualifiedAccess>]
 type Project = {
     Id: string option
-    Name: string
+    Directory: string
     Hash: string
     Dependencies: string set
     Files: string set
@@ -569,7 +569,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
     let projectDependencies = projectDependencies.Keys |> Seq.map String.toLower |> Set.ofSeq
 
     { Project.Id = projectDef.Id
-      Project.Name = projectDir
+      Project.Directory = projectDir
       Project.Hash = projectHash
       Project.Dependencies = projectDependencies
       Project.Files = files
@@ -660,7 +660,7 @@ let read (options: ConfigOptions.Options) =
                             // build task & code & notify
                             let dependsOnProjects = 
                                 awaitedProjectSignals
-                                |> Seq.map (fun projectDependency -> projectDependency.Value.Name, projectDependency.Value)
+                                |> Seq.map (fun projectDependency -> projectDependency.Value.Directory, projectDependency.Value)
                                 |> Map.ofSeq
 
                             let project = finalizeProject projectDir evaluationContext loadedProject dependsOnProjects

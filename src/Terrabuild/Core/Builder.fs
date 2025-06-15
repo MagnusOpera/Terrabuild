@@ -126,9 +126,10 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
 
                 let node =
                     { Node.Id = nodeId
-                      Node.Label = $"{targetName} {projectConfig.Name}"
+                      Node.Label = $"{targetName} {projectConfig.Directory}"
 
-                      Node.Project = projectConfig.Name
+                      Node.ProjectId = projectConfig.Id
+                      Node.ProjectDir = projectConfig.Directory
                       Node.Target = targetName
                       Node.ConfigurationTarget = target
                       Node.Operations = ops

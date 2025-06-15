@@ -16,7 +16,8 @@ type Node = {
     Id: string
     Label: string
 
-    Project: string
+    ProjectId: string option
+    ProjectDir: string
     Target: string
     ConfigurationTarget: Configuration.Target
 

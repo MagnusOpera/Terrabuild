@@ -15,7 +15,7 @@
   },
   "projects": {
     "a": {
-      "name": "A",
+      "directory": "A",
       "hash": "CE24C7D4BBCA45AE8BB4AACDA925C35DD828536AFAF55FB15271EB0F1FA52EAA",
       "dependencies": [],
       "files": [
@@ -72,7 +72,7 @@
       "labels": []
     },
     "b": {
-      "name": "B",
+      "directory": "B",
       "hash": "C54887690548A58E1E6220C83D97E3239943F79A4C51A0DFC7087DE52F57577A",
       "dependencies": [],
       "files": [
@@ -129,7 +129,7 @@
       "labels": []
     },
     "c": {
-      "name": "C",
+      "directory": "C",
       "hash": "76C8F07B90D3785DD412BAF3BBCBD4B054084FA4B952DFE658A8073B15BA19C1",
       "dependencies": [
         "a",
@@ -184,7 +184,7 @@
       "labels": []
     },
     "d": {
-      "name": "D",
+      "directory": "D",
       "hash": "81597327F78177AB91ED77989DF8373BF7138BDE82CB6D59BA1C5BD9994BE255",
       "dependencies": [
         "c"
@@ -227,7 +227,7 @@
       "labels": []
     },
     "e": {
-      "name": "E",
+      "directory": "E",
       "hash": "D9ADE2A1821B9D2BBBB534435F6FF3CA40296AD7BFEED2094FD0460B9DCCB98C",
       "dependencies": [
         "c"
@@ -270,7 +270,7 @@
       "labels": []
     },
     "f": {
-      "name": "F",
+      "directory": "F",
       "hash": "84D7C7DEABFE38F3471D9D74526A46F2344BA0C7A641CFDA3C43E16DC10DCB3D",
       "dependencies": [
         "d",
@@ -309,7 +309,7 @@
       "labels": []
     },
     "g": {
-      "name": "G",
+      "directory": "G",
       "hash": "03ABE717383A7C29E355225594E80D4C9F531BE8F0C5DBAA9C3F7E43C8847761",
       "dependencies": [
         "c"
