@@ -83,7 +83,7 @@ let parseWorkspace2() =
               Variables = None
               Script = None
               Defaults = Map [ "configuration1", Expr.Function (Function.Item, [Expr.Variable "var.map"; Expr.String "toto"])
-                               "configuration2", Expr.Function (Function.TryItem, [Expr.Variable "var.map"; Expr.String "titi"])
+                               "configuration2", Expr.Function (Function.Item, [Expr.Variable "var.map"; Expr.String "titi"])
                                "configuration3", Expr.Function (Function.Replace, [Expr.String "toto titi"; Expr.String "toto"; Expr.String "titi"]) ] |> Some }
         let extDocker =
             { Container = None

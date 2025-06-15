@@ -43,9 +43,9 @@ let newline = '\n' | '\r' '\n'
 
 
 rule token lexerMode = parse
+    | ".[" { DOT_LSQBRACKET }
     | "??" { DOUBLE_QUESTION }
     | "?" { QUESTION }
-    | ".?" { DOT_QUESTION }
     | "." { DOT }
     | ":" { COLON }
     | "{" {

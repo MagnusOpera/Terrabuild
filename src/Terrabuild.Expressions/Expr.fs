@@ -15,7 +15,6 @@ type Function =
     | Format
     | ToString
     | Item
-    | TryItem
     | Coalesce
     | Ternary
     | Equal

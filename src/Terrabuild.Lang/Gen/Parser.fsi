@@ -19,9 +19,9 @@ type token =
   | LPAREN
   | RPAREN
   | DOT
-  | DOT_QUESTION
   | LSQBRACKET
   | RSQBRACKET
+  | DOT_LSQBRACKET
   | LBRACE
   | RBRACE
   | NUMBER of (int)
@@ -51,9 +51,9 @@ type tokenId =
     | TOKEN_LPAREN
     | TOKEN_RPAREN
     | TOKEN_DOT
-    | TOKEN_DOT_QUESTION
     | TOKEN_LSQBRACKET
     | TOKEN_RSQBRACKET
+    | TOKEN_DOT_LSQBRACKET
     | TOKEN_LBRACE
     | TOKEN_RBRACE
     | TOKEN_NUMBER
@@ -74,9 +74,9 @@ type nonTerminalId =
     | NONTERM_Blocks
     | NONTERM_Block
     | NONTERM_BlockContent
+    | NONTERM_ExprSource
     | NONTERM_Expr
-    | NONTERM_Data
-    | NONTERM_DataIdentifier
+    | NONTERM_Variable
     | NONTERM_Function
     | NONTERM_ResourceName
     | NONTERM_ResourceIdentifier
