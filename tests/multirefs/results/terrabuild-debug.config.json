@@ -21,7 +21,7 @@
   },
   "projects": {
     "a": {
-      "name": "A",
+      "directory": "A",
       "hash": "A7A0CD9E85C9D7AA20838EBF01C91953701319318395EC276A797D66F9AB084D",
       "dependencies": [
         "b",
@@ -59,7 +59,7 @@
       "labels": []
     },
     "b": {
-      "name": "B",
+      "directory": "B",
       "hash": "93C4F757BAF84BE922E6F30EBA5A726573E0028C76082652B062DD5EE775EB39",
       "dependencies": [
         "c"
@@ -96,7 +96,7 @@
       "labels": []
     },
     "c": {
-      "name": "C",
+      "directory": "C",
       "hash": "D2FFA5DCF08258EA5851EDC06944F88D7C19865C3DF17E09693D7F640B4514FC",
       "dependencies": [],
       "files": [],

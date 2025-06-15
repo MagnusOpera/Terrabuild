@@ -30,7 +30,7 @@
   },
   "projects": {
     "deployments/terraform-deploy": {
-      "name": "deployments/terraform-deploy",
+      "directory": "deployments/terraform-deploy",
       "hash": "F3A9EB6371CB5CF5D4ADECED49CC38E177DC187DAFAC17255FA360AA0C015802",
       "dependencies": [
         "projects/dotnet-app",
@@ -122,7 +122,7 @@
       ]
     },
     "libraries/dotnet-lib": {
-      "name": "libraries/dotnet-lib",
+      "directory": "libraries/dotnet-lib",
       "hash": "4E90121393E74B43D6B727A9F23E3AE10385E7E39F1FBD240CE10180651F6851",
       "dependencies": [],
       "files": [
@@ -169,7 +169,7 @@
       "labels": []
     },
     "libraries/npm-lib": {
-      "name": "libraries/npm-lib",
+      "directory": "libraries/npm-lib",
       "hash": "F4DD078C2E78A370777DB3CEB8B90CC3D86F67EB49F30FFB4E9543CAB45CAB54",
       "dependencies": [],
       "files": [
@@ -212,7 +212,7 @@
       ]
     },
     "libraries/shell-lib": {
-      "name": "libraries/shell-lib",
+      "directory": "libraries/shell-lib",
       "hash": "90DBBB67F0EB0EEBCC7BEB1929682796805120FF8AE0C26C7FF742190F9A469A",
       "dependencies": [],
       "files": [],
@@ -248,7 +248,7 @@
     },
     "projects/dotnet-app": {
       "id": "dotnet_app",
-      "name": "projects/dotnet-app",
+      "directory": "projects/dotnet-app",
       "hash": "B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA",
       "dependencies": [
         "libraries/dotnet-lib"
@@ -379,7 +379,7 @@
       ]
     },
     "projects/make-app": {
-      "name": "projects/make-app",
+      "directory": "projects/make-app",
       "hash": "A5BD059BA569E96AFE6AEC3BA05C405B454A3483F1A702D11CA978F318516307",
       "dependencies": [
         "libraries/shell-lib"
@@ -444,7 +444,7 @@
     },
     "projects/npm-app": {
       "id": "npm_app",
-      "name": "projects/npm-app",
+      "directory": "projects/npm-app",
       "hash": "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75",
       "dependencies": [
         "libraries/npm-lib",
@@ -502,7 +502,7 @@
       ]
     },
     "projects/npm-app/private-npm-lib": {
-      "name": "projects/npm-app/private-npm-lib",
+      "directory": "projects/npm-app/private-npm-lib",
       "hash": "F951BD1663475053E1F9C97DDA08EA553E21951BC053419D362126A2B6A4C83C",
       "dependencies": [],
       "files": [
@@ -545,7 +545,7 @@
       ]
     },
     "projects/open-api": {
-      "name": "projects/open-api",
+      "directory": "projects/open-api",
       "hash": "B638983BF2E75B9D5787C0082FE7E5BFA726B4B4815F48EE7482E1051275209A",
       "dependencies": [],
       "files": [
@@ -593,7 +593,7 @@
       "labels": []
     },
     "projects/rust-app": {
-      "name": "projects/rust-app",
+      "directory": "projects/rust-app",
       "hash": "ABBB61CBAB614EB12FDCBC22A5549A851128357CCA09CB57D74A2D2390E4A043",
       "dependencies": [],
       "files": [

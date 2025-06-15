@@ -169,7 +169,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
         let cacheEntryId = GraphDef.buildCacheKey node
 
         let projectDirectory =
-            match node.Project with
+            match node.ProjectDir with
             | FS.Directory projectDirectory -> projectDirectory
             | FS.File projectFile -> projectFile |> FS.parentDirectory |> Option.get
             | _ -> "."
@@ -200,7 +200,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             let successful = lastStatusCode = 0
             let endedAt = DateTime.UtcNow
             let summary =
-                { Cache.TargetSummary.Project = node.Project
+                { Cache.TargetSummary.Project = node.ProjectDir
                   Cache.TargetSummary.Target = node.Target
                   Cache.TargetSummary.Operations = [ stepLogs |> List.ofSeq ]
                   Cache.TargetSummary.Outputs = outputs
@@ -213,9 +213,9 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             notification.NodeUploading node
 
             // create an archive with new files
-            Log.Debug("{NodeId}: Building '{Project}/{Target}' with {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+            Log.Debug("{NodeId}: Building '{Project}/{Target}' with {Hash}", node.Id, node.ProjectDir, node.Target, node.TargetHash)
             let files = cacheEntry.Complete summary
-            api |> Option.iter (fun api -> api.AddArtifact node.Project node.Target node.ProjectHash node.TargetHash files successful)
+            api |> Option.iter (fun api -> api.AddArtifact node.ProjectDir node.Target node.ProjectHash node.TargetHash files successful)
 
             match lastStatusCode with
             | 0 -> TaskStatus.Success endedAt
@@ -237,7 +237,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     notification.NodeDownloading node
                     match cache.TryGetSummary allowRemoteCache cacheEntryId with
                     | Some summary ->
-                        Log.Debug("{NodeId} restoring '{Project}/{Target}' from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                        Log.Debug("{NodeId} restoring '{Project}/{Target}' from {Hash}", node.Id, node.ProjectDir, node.Target, node.TargetHash)
                         match summary.Outputs with
                         | Some outputs ->
                             let files = IO.enumerateFiles outputs
@@ -253,7 +253,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                     let restorable = Restorable(callback, dependencies)
                     restorables.TryAdd(node.Id, restorable) |> ignore
                 else
-                    Log.Debug("{NodeId} skipping restore '{Project}/{Target}' from {Hash}", node.Id, node.Project, node.Target, node.TargetHash)
+                    Log.Debug("{NodeId} skipping restore '{Project}/{Target}' from {Hash}", node.Id, node.ProjectDir, node.Target, node.TargetHash)
                 if summary.IsSuccessful then TaskStatus.Success summary.EndedAt
                 else TaskStatus.Failure (summary.EndedAt, $"Restored node {node.Id} with a build in failure state")
             | _ ->
@@ -353,7 +353,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
             | true, (request, status) ->
                 { NodeInfo.Request = request
                   NodeInfo.Status = status
-                  NodeInfo.Project = node.Project
+                  NodeInfo.Project = node.ProjectDir
                   NodeInfo.Target = node.Target
                   NodeInfo.ProjectHash = node.ProjectHash
                   NodeInfo.TargetHash = node.TargetHash } |> Some
@@ -401,7 +401,7 @@ let loadSummary (options: ConfigOptions.Options) (cache: Cache.ICache) (graph: G
 
                 { NodeInfo.Request = TaskRequest.Restore
                   NodeInfo.Status = status
-                  NodeInfo.Project = node.Project
+                  NodeInfo.Project = node.ProjectDir
                   NodeInfo.Target = node.Target
                   NodeInfo.ProjectHash = node.ProjectHash
                   NodeInfo.TargetHash = node.TargetHash } |> Some

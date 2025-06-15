@@ -65,7 +65,7 @@ type BuildNotification() =
                 return! messageLoop ()
 
             | PrinterProtocol.NodeCompleted (node, status, success) ->
-                let label = $"{node.Label} {node.Project}"
+                let label = $"{node.Label} {node.ProjectDir}"
                 renderer.Complete node.TargetHash label success (status = Build.TaskRequest.Restore)
                 scheduleUpdate ()
                 return! messageLoop ()
