@@ -33,9 +33,8 @@ locals {
 
   data = var.titi
   data_index = var.toto.42
-  data_maybe_index = var.toto.?42
   data_index_name = var.toto.field
-  data_maybe_index_name = var.toto.?field
+  data_item = var.toto.["field"]
 
   bool_equal = 42 == 666
   bool_not_equal = 42 != 666

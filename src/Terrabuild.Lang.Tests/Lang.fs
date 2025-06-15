@@ -45,9 +45,9 @@ let checkValidSyntax() =
                                                                                                                                                [Expr.Variable "local.var"; Expr.Number 42])])]) }
                                      { Attribute.Name = "data"; Value = Expr.Variable "var.titi" }
                                      { Attribute.Name = "data_index"; Value = Expr.Function (Function.Item, [Expr.Variable "var.toto"; Expr.Number 42]) }
-                                     { Attribute.Name = "data_maybe_index"; Value = Expr.Function (Function.TryItem, [Expr.Variable "var.toto"; Expr.Number 42]) }
                                      { Attribute.Name = "data_index_name"; Value = Expr.Function (Function.Item, [Expr.Variable "var.toto"; Expr.String "field"]) }
-                                     { Attribute.Name = "data_maybe_index_name"; Value = Expr.Function (Function.TryItem, [Expr.Variable "var.toto"; Expr.String "field"]) }
+                                     { Attribute.Name = "data_item"; Value = Expr.Function (Function.Item, [Expr.Variable "var.toto"; Expr.String "field"]) }
+
                                      { Attribute.Name = "bool_equal"; Value = Expr.Function (Function.Equal, [Expr.Number 42; Expr.Number 666]) }
                                      { Attribute.Name = "bool_not_equal"; Attribute.Value = Expr.Function (Function.NotEqual, [Expr.Number 42; Expr.Number 666]) }
                                      { Attribute.Name = "bool_and"; Value = Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false]) }
