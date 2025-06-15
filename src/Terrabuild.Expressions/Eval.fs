@@ -107,16 +107,6 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | Some value -> value
                     | _ -> raiseInvalidArg $"Out of range index {index}"
 
-                | Function.TryItem, [Value.Map map; Value.String key] ->
-                    match map |> Map.tryFind key with
-                    | Some value -> value
-                    | _ -> Value.Nothing
-
-                | Function.TryItem, [Value.List list; Value.Number index] ->
-                    match list |> List.tryItem index with
-                    | Some value -> value
-                    | _ -> Value.Nothing
-
                 | Function.Coalesce, [leftValue; rightValue] ->
                     match leftValue with
                     | Value.Nothing -> rightValue

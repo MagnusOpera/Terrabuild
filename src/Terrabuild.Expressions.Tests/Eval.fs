@@ -144,19 +144,6 @@ let listItem() =
     result |> should equal expected
 
 [<Test>]
-let listTryItem() =
-    let expected = Value.Nothing
-
-    let context = { evaluationContext
-                    with Data = Map [ 
-                        "tagada", Value.List [ Value.String "toto"; Value.Number 42 ]
-                    ] }
-
-    let result =
-        eval context (Expr.Function (Function.TryItem, [ Expr.Variable "tagada"; Expr.Number 3]))
-    result |> should equal expected
-
-[<Test>]
 let mapItem() =
     let expected = Value.Number 42
 
@@ -167,19 +154,6 @@ let mapItem() =
 
     let result =
         eval context (Expr.Function (Function.Item, [ Expr.Variable "tagada"; Expr.String "toto" ]))
-    result |> should equal expected
-
-[<Test>]
-let mapTryItem() =
-    let expected = Value.Nothing
-
-    let context = { evaluationContext
-                    with Data = Map [ 
-                        "tagada", Value.Map (Map [ "toto", Value.Number 42 ])
-                    ] }
-
-    let result =
-        eval context (Expr.Function (Function.TryItem, [ Expr.Variable "tagada"; Expr.String "titi" ]))
     result |> should equal expected
 
 [<Test>]

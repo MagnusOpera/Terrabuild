@@ -46,14 +46,6 @@ let ``field dependencies``() =
     deps |> shouldEqual expected
 
 [<Test>]
-let ``maybe field dependencies``() =
-    let expr = Expr.Function (Function.TryItem, [Expr.Variable "var.toto"; Expr.String "titi"])
-    let expected = Set [ "var.toto" ]
-
-    let deps = Dependencies.find expr
-    deps |> shouldEqual expected
-
-[<Test>]
 let ``function dependencies``() =
     let expr = Expr.Function (Function.Plus, [Expr.Variable "toto"; Expr.Variable "titi"])
     let expected = Set [ "toto"; "titi" ]
