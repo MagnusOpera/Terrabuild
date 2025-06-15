@@ -35,18 +35,17 @@ let debugPrint s = ignore s
 %token EOF
 
 // associativity and precedences
-%right LSQBRACKET
-%left RSQBRACKET
+%left COMMA
 %left COLON
 %right QUESTION
-%left DOUBLE_QUESTION
+%right DOUBLE_QUESTION
+%left OR
+%left AND
 %left DOUBLE_EQUAL NOT_EQUAL
 %left MINUS PLUS
 %left MULT DIV
-%left OR AND
 %left DOT
 %right BANG
-%left COMMA
 
 %type <Terrabuild.Lang.AST.File> File
 %% 
