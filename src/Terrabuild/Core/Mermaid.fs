@@ -10,8 +10,7 @@ type GetOrigin = Node -> Build.TaskRequest option
 
 
 let scaleToPastel (value: int) : int =
-    // Map from [0, 255] to [160, 240]
-    160 + (value * (240 - 160) / 255)
+    100 + (value * (240 - 100) / 255)
 
 let pastelColorFromHash (md5hash: string) : string =
     if md5hash.Length < 6 then
@@ -26,9 +25,9 @@ let pastelColorFromHash (md5hash: string) : string =
 let render (getStatus: GetStatus option) (getOrigin: GetOrigin option) (graph: Graph) =
     let mermaid = [
         "flowchart TD"
-        $"classDef build stroke:red,stroke-width:3px"
-        $"classDef restore stroke:orange,stroke-width:3px"
-        $"classDef ignore stroke:black,stroke-width:3px"
+        $"classDef build fill:red"
+        $"classDef restore fill:orange"
+        $"classDef ignore fill:smoke"
 
         for (KeyValue(_, node)) in graph.Nodes do
             let status =
@@ -56,7 +55,7 @@ let render (getStatus: GetStatus option) (getOrigin: GetOrigin option) (graph: G
             | Some Build.TaskRequest.Restore -> $"class {node.Id} restore"
             | _ -> $"class {node.Id} ignore"
             let color = node.ProjectDir |> Hash.md5 |> pastelColorFromHash 
-            $"style {node.Id} fill:{color}"
+            $"style {node.Id} stroke:{color},stroke-width:3px"
     ]
 
     mermaid
