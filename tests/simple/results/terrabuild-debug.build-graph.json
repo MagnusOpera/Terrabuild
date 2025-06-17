@@ -35,7 +35,7 @@
                     ],
                     "npm_app_version": [
                       "string",
-                      "99DCCE67DB790AD34CF438BCA86679E0AFCBBE9FCB0B05A24E2530E5B66D3EA9"
+                      "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75"
                     ]
                   }
                 ],
@@ -56,7 +56,7 @@
         "*.planfile"
       ],
       "projectHash": "F3A9EB6371CB5CF5D4ADECED49CC38E177DC187DAFAC17255FA360AA0C015802",
-      "targetHash": "8FF5038144A87CA6DD310602B0BB75AF1842F72F3625247367F188445663FE14",
+      "targetHash": "4244626C988CCA75084A256235732A373E0F16DF24EE17F252CB4F81B3B4ABA7",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -80,7 +80,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA\u0022 -var=\u0022npm_app_version=99DCCE67DB790AD34CF438BCA86679E0AFCBBE9FCB0B05A24E2530E5B66D3EA9\u0022"
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA\u0022 -var=\u0022npm_app_version=74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75\u0022"
         }
       ],
       "cache": 3,
@@ -508,8 +508,8 @@
       "outputs": [
         "dist/"
       ],
-      "projectHash": "99DCCE67DB790AD34CF438BCA86679E0AFCBBE9FCB0B05A24E2530E5B66D3EA9",
-      "targetHash": "0BB89CC6E9FC01C6F5F129F5EC7AB8BD13729C3C0C83E9676A7DCCBCABD2C1D5",
+      "projectHash": "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75",
+      "targetHash": "99731F62106C1C582C538F000C24F39606E41351B99F132BEC9F93309EFCB7FE",
       "operations": [
         {
           "container": "node:20",
