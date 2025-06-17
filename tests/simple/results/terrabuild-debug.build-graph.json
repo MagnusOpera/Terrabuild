@@ -35,7 +35,7 @@
                     ],
                     "npm_app_version": [
                       "string",
-                      "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75"
+                      "99DCCE67DB790AD34CF438BCA86679E0AFCBBE9FCB0B05A24E2530E5B66D3EA9"
                     ]
                   }
                 ],
@@ -56,7 +56,7 @@
         "*.planfile"
       ],
       "projectHash": "F3A9EB6371CB5CF5D4ADECED49CC38E177DC187DAFAC17255FA360AA0C015802",
-      "targetHash": "4244626C988CCA75084A256235732A373E0F16DF24EE17F252CB4F81B3B4ABA7",
+      "targetHash": "8FF5038144A87CA6DD310602B0BB75AF1842F72F3625247367F188445663FE14",
       "operations": [
         {
           "container": "hashicorp/terraform:1.10",
@@ -80,7 +80,7 @@
           "containerVariables": [],
           "metaCommand": "@terraform plan",
           "command": "terraform",
-          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA\u0022 -var=\u0022npm_app_version=74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75\u0022"
+          "arguments": "plan -out=terrabuild.planfile -var=\u0022dotnet_app_version=B498617AEF0C2FECAD324FC46DA9E3477254472AAE763F9312A6175F8C2AADBA\u0022 -var=\u0022npm_app_version=99DCCE67DB790AD34CF438BCA86679E0AFCBBE9FCB0B05A24E2530E5B66D3EA9\u0022"
         }
       ],
       "cache": 3,
@@ -166,7 +166,7 @@
           "^build"
         ],
         "outputs": [
-          "**/dist/"
+          "dist/"
         ],
         "operations": [
           {
@@ -186,7 +186,7 @@
       },
       "dependencies": [],
       "outputs": [
-        "**/dist/"
+        "dist/"
       ],
       "projectHash": "F4DD078C2E78A370777DB3CEB8B90CC3D86F67EB49F30FFB4E9543CAB45CAB54",
       "targetHash": "FE804799B4E9719528C4F14C591DAAAE7A27C83B11EA20FA9F77953D3F37745A",
@@ -423,7 +423,7 @@
           "^build"
         ],
         "outputs": [
-          "**/dist/"
+          "dist/"
         ],
         "operations": [
           {
@@ -443,7 +443,7 @@
       },
       "dependencies": [],
       "outputs": [
-        "**/dist/"
+        "dist/"
       ],
       "projectHash": "F951BD1663475053E1F9C97DDA08EA553E21951BC053419D362126A2B6A4C83C",
       "targetHash": "9253BBB223D3C6C83E7A9F4570EE523469161AF85DC76A80BC18562B22458024",
@@ -483,7 +483,7 @@
           "^build"
         ],
         "outputs": [
-          "**/dist/"
+          "dist/"
         ],
         "operations": [
           {
@@ -506,10 +506,10 @@
         "projects/npm-app/private-npm-lib:build"
       ],
       "outputs": [
-        "**/dist/"
+        "dist/"
       ],
-      "projectHash": "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75",
-      "targetHash": "99731F62106C1C582C538F000C24F39606E41351B99F132BEC9F93309EFCB7FE",
+      "projectHash": "99DCCE67DB790AD34CF438BCA86679E0AFCBBE9FCB0B05A24E2530E5B66D3EA9",
+      "targetHash": "0BB89CC6E9FC01C6F5F129F5EC7AB8BD13729C3C0C83E9676A7DCCBCABD2C1D5",
       "operations": [
         {
           "container": "node:20",
