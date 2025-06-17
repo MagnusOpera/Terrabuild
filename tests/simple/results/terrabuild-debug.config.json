@@ -7,7 +7,6 @@
     "projects/dotnet-app",
     "projects/make-app",
     "projects/npm-app",
-    "projects/npm-app/private-npm-lib",
     "projects/open-api",
     "projects/rust-app"
   ],
@@ -73,7 +72,7 @@
                       ],
                       "npm_app_version": [
                         "string",
-                        "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75"
+                        "1B7ABE7A26394E15D908FA851308DDA706641DB50D2225C3FF398241A305BACF"
                       ]
                     }
                   ],
@@ -445,72 +444,21 @@
     "projects/npm-app": {
       "id": "npm_app",
       "directory": "projects/npm-app",
-      "hash": "74131A036F3F33EEEE26AA20561FCF050301FD2E0FE03B62F4CC878AEC169E75",
+      "hash": "1B7ABE7A26394E15D908FA851308DDA706641DB50D2225C3FF398241A305BACF",
       "dependencies": [
-        "libraries/npm-lib",
-        "projects/npm-app/private-npm-lib"
+        "libraries/npm-lib"
       ],
       "files": [
         ".gitignore",
         "index.html",
         "package-lock.json",
         "package.json",
-        "private-npm-lib/PROJECT",
-        "private-npm-lib/package-lock.json",
-        "private-npm-lib/package.json",
-        "private-npm-lib/src/index.ts",
-        "private-npm-lib/src/logger.ts",
-        "private-npm-lib/src/say-hello.ts",
-        "private-npm-lib/tsconfig.json",
         "public/vite.svg",
         "src/counter.ts",
         "src/main.ts",
         "src/style.css",
         "src/typescript.svg",
         "src/vite-env.d.ts",
-        "tsconfig.json"
-      ],
-      "targets": {
-        "build": {
-          "hash": "A16A69B69BAAD8E5F7446EDA76618622CBB09F32BB4E2CBCFA87748838A6BF30",
-          "rebuild": false,
-          "dependsOn": [
-            "^build"
-          ],
-          "outputs": [
-            "dist/"
-          ],
-          "operations": [
-            {
-              "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
-              "container": "node:20",
-              "platform": "linux/amd64",
-              "containerVariables": [],
-              "extension": "@npm",
-              "command": "build",
-              "script": {},
-              "context": [
-                "map",
-                {}
-              ]
-            }
-          ]
-        }
-      },
-      "labels": [
-        "app"
-      ]
-    },
-    "projects/npm-app/private-npm-lib": {
-      "directory": "projects/npm-app/private-npm-lib",
-      "hash": "F951BD1663475053E1F9C97DDA08EA553E21951BC053419D362126A2B6A4C83C",
-      "dependencies": [],
-      "files": [
-        "package-lock.json",
-        "package.json",
-        "src/index.ts",
-        "src/logger.ts",
-        "src/say-hello.ts",
         "tsconfig.json"
       ],
       "targets": {
