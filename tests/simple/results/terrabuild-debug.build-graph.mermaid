@@ -14,8 +14,6 @@ projects/dotnet-app:build("<b>build dotnet_app</b>
 projects/dotnet-app")
 projects/make-app:build("<b>build</b> 
 projects/make-app")
-projects/npm-app/private-npm-lib:build("<b>build</b> 
-projects/npm-app/private-npm-lib")
 projects/npm-app:build("<b>build npm_app</b> 
 projects/npm-app")
 projects/open-api:build("<b>build</b> 
@@ -32,9 +30,7 @@ projects/dotnet-app:build --> libraries/dotnet-lib:build
 class projects/dotnet-app:build ignore
 projects/make-app:build --> libraries/shell-lib:build
 class projects/make-app:build ignore
-class projects/npm-app/private-npm-lib:build ignore
 projects/npm-app:build --> libraries/npm-lib:build
-projects/npm-app:build --> projects/npm-app/private-npm-lib:build
 class projects/npm-app:build ignore
 class projects/open-api:build ignore
 class projects/rust-app:build ignore
