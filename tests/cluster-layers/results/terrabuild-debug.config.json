@@ -147,7 +147,7 @@
             "^build"
           ],
           "outputs": [
-            "dist/"
+            "dist/**"
           ],
           "operations": [
             {
@@ -288,7 +288,7 @@
             "^build"
           ],
           "outputs": [
-            "dist/"
+            "dist/**"
           ],
           "operations": [
             {
@@ -326,7 +326,7 @@
             "^build"
           ],
           "outputs": [
-            "dist/"
+            "dist/**"
           ],
           "operations": [
             {

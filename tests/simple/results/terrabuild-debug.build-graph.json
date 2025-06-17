@@ -166,7 +166,7 @@
           "^build"
         ],
         "outputs": [
-          "dist/"
+          "dist/**"
         ],
         "operations": [
           {
@@ -186,7 +186,7 @@
       },
       "dependencies": [],
       "outputs": [
-        "dist/"
+        "dist/**"
       ],
       "projectHash": "F4DD078C2E78A370777DB3CEB8B90CC3D86F67EB49F30FFB4E9543CAB45CAB54",
       "targetHash": "FE804799B4E9719528C4F14C591DAAAE7A27C83B11EA20FA9F77953D3F37745A",
@@ -424,7 +424,7 @@
           "^build"
         ],
         "outputs": [
-          "dist/"
+          "dist/**"
         ],
         "operations": [
           {
@@ -446,7 +446,7 @@
         "libraries/npm-lib:build"
       ],
       "outputs": [
-        "dist/"
+        "dist/**"
       ],
       "projectHash": "1B7ABE7A26394E15D908FA851308DDA706641DB50D2225C3FF398241A305BACF",
       "targetHash": "4AE03B095900F1958621B684BC5655D10B72F2DBF97ED5A8242A47543FA03F53",
