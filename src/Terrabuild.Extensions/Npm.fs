@@ -18,7 +18,7 @@ type Npm() =
             let dependencies = projectFile |> NpmHelpers.findDependencies 
             let projectInfo = 
                 { ProjectInfo.Default
-                  with Ignores = Set [ "**/node_modules/**" ]
+                  with Ignores = Set [ "node_modules/**" ]
                        Outputs = Set [ "dist/**" ]
                        Dependencies = dependencies }
             projectInfo
