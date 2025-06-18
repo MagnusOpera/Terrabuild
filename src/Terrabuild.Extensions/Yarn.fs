@@ -10,8 +10,8 @@ type Yarn() =
     /// <summary>
     /// Provides default values.
     /// </summary>
-    /// <param name="ignores" example="[ &quot;node_modules/&quot; ]">Default values.</param>
-    /// <param name="outputs" example="[ &quot;dist/&quot; ]">Default values.</param>
+    /// <param name="ignores" example="[ &quot;node_modules/**&quot; ]">Default values.</param>
+    /// <param name="outputs" example="[ &quot;dist/**&quot; ]">Default values.</param>
     static member __defaults__(context: ExtensionContext) =
         let projectFile = NpmHelpers.findProjectFile context.Directory
         let dependencies = projectFile |> NpmHelpers.findDependencies 
