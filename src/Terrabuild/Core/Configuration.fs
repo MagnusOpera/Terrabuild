@@ -594,7 +594,7 @@ let read (options: ConfigOptions.Options) =
             $"Targets [{targets}]"
             if labels.IsSome then $"Labels [{labels.Value}]"
         ]
-    $"{Ansi.Emojis.gear} Settings" |> Terminal.writeLine
+    $"{Ansi.Emojis.unicorn} Settings" |> Terminal.writeLine
     configInfos |> List.iter (fun configInfo -> $" {Ansi.Styles.green}{Ansi.Emojis.arrow}{Ansi.Styles.reset} {configInfo}" |> Terminal.writeLine)
 
     let workspaceContent = FS.combinePath options.Workspace "WORKSPACE" |> File.ReadAllText
