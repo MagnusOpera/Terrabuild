@@ -26,7 +26,8 @@ type LogsArgs =
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
-    | [<Unique; AltCommandLine("-lo")>] Local_Only
+    | [<Unique; AltCommandLine("-p")>] Project of projects:string list
+    | [<Unique>] Local_Only
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -37,6 +38,7 @@ with
             | Environment _ -> "Environment to use."
             | Variable _ -> "Set variable."
             | Label _-> "Select projects based on labels."
+            | Project _ -> "Select projets base on id."
             | Local_Only -> "Use local cache only."
 
 [<RequireQualifiedAccess>]
@@ -47,14 +49,15 @@ type RunArgs =
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
-    | [<Unique; AltCommandLine("-p")>] Parallel of max:int
+    | [<Unique; AltCommandLine("-p")>] Project of projects:string list
     | [<Unique; AltCommandLine("-f")>] Force
     | [<Unique; AltCommandLine("-r")>] Retry
-    | [<Unique; AltCommandLine("-lo")>] Local_Only
-    | [<Unique; AltCommandLine("-n")>] Note of note:string
-    | [<Unique; AltCommandLine("-t")>] Tag of tag:string
-    | [<Unique; AltCommandLine("-ct")>] Container_Tool of tool:ContainerTool
-    | [<Unique; Inherit>] WhatIf
+    | [<Unique>] Parallel of max:int
+    | [<Unique>] Local_Only
+    | [<Unique>] Note of note:string
+    | [<Unique>] Tag of tag:string
+    | [<Unique>] Container of tool:ContainerTool
+    | [<Unique; Inherit>] What_If
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -63,16 +66,17 @@ with
             | Workspace _ -> "Root of workspace. If not specified, current directory is used."
             | Configuration _ -> "Configuration to use."
             | Environment _ -> "Environment to use."
-            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Variable _ -> "Set variable."
-            | Label _-> "Select projects based on labels."
+            | Label _ -> "Select projects based on labels."
+            | Project _ -> "Select projets base on id."
             | Force -> "Ignore cache when building target."
             | Retry -> "Retry failed task."
+            | Parallel _ -> "Max parallel build concurrency (default to number of processors)."
             | Local_Only -> "Use local cache only."
             | Note _ -> "Note for the build."
             | Tag _ -> "Tag for build."
-            | Container_Tool _ -> "Container Tool to use (docker or podman)."
-            | WhatIf -> "Prepare the action but do not apply."
+            | Container _ -> "Container Tool to use (docker or podman)."
+            | What_If -> "Prepare the action but do not apply."
 
 [<RequireQualifiedAccess>]
 type ServeArgs =
@@ -81,6 +85,7 @@ type ServeArgs =
     | [<Unique; AltCommandLine("-e")>] Environment of name:string
     | [<EqualsAssignment; AltCommandLine("-v")>] Variable of variable:string * value:string
     | [<Unique; AltCommandLine("-l")>] Label of labels:string list
+    | [<Unique; AltCommandLine("-p")>] Project of projects:string list
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -89,7 +94,8 @@ with
             | Configuration _ -> "Configuration to use."
             | Environment _ -> "Environment to use."
             | Variable _ -> "Set variable."
-            | Label _-> "Select projects based on labels."
+            | Label _ -> "Select projects based on labels."
+            | Project _ -> "Select projets base on id."
 
 
 [<RequireQualifiedAccess>]
