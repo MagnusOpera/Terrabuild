@@ -706,14 +706,21 @@ let read (options: ConfigOptions.Options) =
     let projects = searchProjectsAndApply()
 
     // select dependencies with labels if any
-    let selectedProjects =
+    let projectSelection =
         match options.Labels with
-        | Some labels ->
-            projects
-            |> Seq.choose (fun (KeyValue(dependency, config)) ->
-                if Set.intersect config.Labels labels <> Set.empty then Some dependency else None)
-        | _ -> projects.Keys
-        |> Set
+        | Some labels -> projects |> Map.filter (fun _ config -> Set.intersect config.Labels labels <> Set.empty)
+        | _ -> projects
+
+    // select dependencies with id if any
+    let projectSelection =
+        match options.Projects with
+        | Some projects -> projectSelection |> Map.filter (fun _ config ->
+            match config.Id with
+            | Some id -> projects |> Set.contains id
+            | _ -> false)
+        | _ -> projects
+
+    let selectedProjects = projectSelection |> Map.keys |> Set
 
     let workspaceId = workspaceConfig.Workspace.Id
 

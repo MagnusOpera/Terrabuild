@@ -166,12 +166,12 @@ endef
 # $(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --log)
 
 smoke-test-cluster-layers:
-	$(call run_integration_test, tests/cluster-layers, run build --force --debug -p 2 --log --container-tool docker)
+	$(call run_integration_test, tests/cluster-layers, run build --force --debug --parallel 2 --log --container docker)
 
 smoke-test-multirefs:
-	$(call run_integration_test, tests/multirefs, run build --force --debug -p 2 --log --container-tool docker)
+	$(call run_integration_test, tests/multirefs, run build --force --debug --parallel 2 --log --container docker)
 
 smoke-test-simple:
-	$(call run_integration_test, tests/simple, run build --force --debug -p 2 --log --container-tool docker)
+	$(call run_integration_test, tests/simple, run build --force --debug --parallel 2 --log --container docker)
 
 smoke-tests: smoke-test-cluster-layers smoke-test-multirefs smoke-test-simple

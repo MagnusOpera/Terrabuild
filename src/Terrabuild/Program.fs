@@ -30,6 +30,7 @@ type RunTargetOptions = {
     Note: string option
     Tag: string option
     Labels: string set option
+    Projects: string set option
     Variables: Map<string, string>
     ContainerTool: string option
 }
@@ -95,6 +96,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
             ConfigOptions.Options.Note = options.Note
             ConfigOptions.Options.Tag = options.Tag
             ConfigOptions.Options.Labels = options.Labels
+            ConfigOptions.Options.Projects = options.Projects
             ConfigOptions.Options.Variables = options.Variables
             ConfigOptions.Options.ContainerTool = options.ContainerTool
             ConfigOptions.Options.HeadCommit = sourceControl.HeadCommit
@@ -172,13 +174,14 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let environment = runArgs.TryGetResult(RunArgs.Environment)
         let note = runArgs.TryGetResult(RunArgs.Note)
         let labels = runArgs.TryGetResult(RunArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
+        let projects = runArgs.TryGetResult(RunArgs.Project) |> Option.map (fun projects -> projects |> Seq.map String.toLower |> Set)
         let variables = runArgs.GetResults(RunArgs.Variable) |> Map
         let maxConcurrency = runArgs.GetResult(RunArgs.Parallel, defaultValue = Environment.ProcessorCount/2) |> max 1
         let localOnly = runArgs.Contains(RunArgs.Local_Only)
         let tag = runArgs.TryGetResult(RunArgs.Tag)
-        let whatIf = runArgs.Contains(RunArgs.WhatIf)
+        let whatIf = runArgs.Contains(RunArgs.What_If)
         let containerTool =
-            match runArgs.TryGetResult(RunArgs.Container_Tool) with
+            match runArgs.TryGetResult(RunArgs.Container) with
             | Some ContainerTool.Docker -> Some "docker"
             | Some ContainerTool.Podman -> Some "podman"
             | Some ContainerTool.None -> None
@@ -199,6 +202,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Note = note
                         RunTargetOptions.Tag = tag
                         RunTargetOptions.Labels = labels
+                        RunTargetOptions.Projects = projects
                         RunTargetOptions.Variables = variables
                         RunTargetOptions.ContainerTool = containerTool }
         runTarget options
@@ -214,6 +218,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let configuration = serveArgs.TryGetResult(ServeArgs.Configuration)
         let environment = serveArgs.TryGetResult(ServeArgs.Environment)
         let labels = serveArgs.TryGetResult(ServeArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
+        let projects = serveArgs.TryGetResult(ServeArgs.Project) |> Option.map (fun projects -> projects |> Seq.map String.toLower |> Set)
         let variables = serveArgs.GetResults(ServeArgs.Variable) |> Map
         let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
                         RunTargetOptions.WhatIf = false
@@ -230,6 +235,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Note = None
                         RunTargetOptions.Tag = None
                         RunTargetOptions.Labels = labels
+                        RunTargetOptions.Projects = projects
                         RunTargetOptions.Variables = variables
                         RunTargetOptions.ContainerTool = None }
         runTarget options
@@ -246,6 +252,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
         let configuration = logsArgs.TryGetResult(LogsArgs.Configuration)
         let environment = logsArgs.TryGetResult(LogsArgs.Environment)
         let labels = logsArgs.TryGetResult(LogsArgs.Label) |> Option.map (fun labels -> labels |> Seq.map String.toLower |> Set)
+        let projects = logsArgs.TryGetResult(LogsArgs.Project) |> Option.map (fun projects -> projects |> Seq.map String.toLower |> Set)
         let variables = logsArgs.GetResults(LogsArgs.Variable) |> Map
 
         let options = { RunTargetOptions.Workspace = wsDir |> FS.fullPath
@@ -263,6 +270,7 @@ let processCommandLine (parser: ArgumentParser<TerrabuildArgs>) (result: ParseRe
                         RunTargetOptions.Note = None
                         RunTargetOptions.Tag = None
                         RunTargetOptions.Labels = labels
+                        RunTargetOptions.Projects = projects
                         RunTargetOptions.Variables = variables
                         RunTargetOptions.ContainerTool = None }
         runTarget options

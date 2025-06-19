@@ -20,6 +20,7 @@ type Options = {
     Note: string option
     Tag: string option
     Labels: string set option
+    Projects: string set option
     Variables: Map<string, string>
     ContainerTool: string option
 
