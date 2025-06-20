@@ -22,7 +22,7 @@ type OpenApi() =
                 let args = properties |> Seq.map (fun kvp -> $"{kvp.Key}={kvp.Value}") |> String.concat ","
                 $"--additional-properties={args}"
 
-        let args = $"generate -i {input} -g {generator} -o {output} {props}"
+        let args = $"generate -i {input} -g {generator} -o {output}{props}"
 
         let ops = [
             shellOp("docker-entrypoint.sh", args)
