@@ -9,8 +9,12 @@ open Terrabuild.Extensibility
 type OpenApi() =
 
     /// <summary>
-    /// Generate using `openapi-generator-cli`.
+    /// Generate api client using `openapi-generator-cli`.
     /// </summary>
+    /// <param name="generator" required="true" example="&quot;typescript-axios&quot;">Use provided generator.</param>
+    /// <param name="input" required="true" example="&quot;src/api.json&quot;">Relative path to api json file</param>
+    /// <param name="output" required="true" example="&quot;src/api/client&quot;">Relative output path.</param>
+    /// <param name="properties" example="{ withoutPrefixEnums: &quot;true&quot; }">Additional properties for generator.</param> 
     static member generate (context: ActionContext) (generator: string) (input: string) (output: string) (properties: Map<string, string>) =
         let props =
             if properties |> Map.isEmpty then ""
