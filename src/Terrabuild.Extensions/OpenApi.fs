@@ -9,10 +9,20 @@ open Terrabuild.Extensibility
 type OpenApi() =
 
     /// <summary>
-    /// Generate using `openapi-generator-cli`.
+    /// Generate api client using `openapi-generator-cli`.
     /// </summary>
-    static member generate (context: ActionContext) (generator: string) (input: string) (output: string) =
-        let args = $"generate -i {input} -g {generator} -o {output}"
+    /// <param name="generator" required="true" example="&quot;typescript-axios&quot;">Use provided generator.</param>
+    /// <param name="input" required="true" example="&quot;src/api.json&quot;">Relative path to api json file</param>
+    /// <param name="output" required="true" example="&quot;src/api/client&quot;">Relative output path.</param>
+    /// <param name="properties" example="{ withoutPrefixEnums: &quot;true&quot; }">Additional properties for generator.</param> 
+    static member generate (context: ActionContext) (generator: string) (input: string) (output: string) (properties: Map<string, string>) =
+        let props =
+            if properties |> Map.isEmpty then ""
+            else
+                let args = properties |> Seq.map (fun kvp -> $"{kvp.Key}={kvp.Value}") |> String.concat ","
+                $"--additional-properties={args}"
+
+        let args = $"generate -i {input} -g {generator} -o {output}{props}"
 
         let ops = [
             shellOp("docker-entrypoint.sh", args)
