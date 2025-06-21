@@ -7,6 +7,7 @@ open Terrabuild.PubSub
 open Environment
 open Errors
 open System.Text.RegularExpressions
+open Microsoft.Extensions.FileSystemGlobbing
 
 [<RequireQualifiedAccess>]
 type TaskRequest =
@@ -92,12 +93,13 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) project
                     containerHome
 
             let envs =
-                let regexes = operation.ContainerVariables |> Seq.map Regex
+                let matcher = Matcher()
+                matcher.AddIncludePatterns(operation.ContainerVariables)
                 envVars()
                 |> Seq.choose (fun entry -> 
                     let key = entry.Key
                     let value = entry.Value
-                    if regexes |> Seq.exists (fun re -> re.IsMatch(key)) then
+                    if matcher.Match([key]).HasMatches then
                         let expandedValue = value |> expandTerrabuildHome containerHome
                         if value = expandedValue then Some $"-e {key}"
                         else Some $"-e {key}={expandedValue}"
