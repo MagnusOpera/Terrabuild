@@ -15,6 +15,6 @@ let envVars() =
     |> Map.ofSeq
 
 let expandTerrabuildHome (input: string) (terrabuildHome: string) : string =
-    // Match either $TERRABUILD_HOME or ${TERRABUILD_HOME} not followed by a letter/underscore/digit
-    let pattern = @"(?<!\w)\$(TERRABUILD_HOME)(?![\w])|\$\{TERRABUILD_HOME\}"
-    Regex.Replace(input, pattern, terrabuildHome)
+    input.Replace("$TERRABUILD_HOME", terrabuildHome)
+         .Replace("${TERRABUILD_HOME}", terrabuildHome)
+         .Replace("~", terrabuildHome)
