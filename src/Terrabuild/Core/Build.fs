@@ -93,11 +93,14 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) project
 
             let envs =
                 let regexes = operation.ContainerVariables |> Seq.map Regex
-                Environment.GetEnvironmentVariables()
-                |> Seq.cast<DictionaryEntry>
+                envVars()
                 |> Seq.choose (fun entry -> 
-                    let key = $"{entry.Key}"
-                    if regexes |> Seq.exists (fun re -> re.IsMatch(key)) then Some $"-e {key}"
+                    let key = entry.Key
+                    let value = entry.Value
+                    if regexes |> Seq.exists (fun re -> re.IsMatch(key)) then
+                        let expandedValue = $"{entry.Value}" |> expandTerrabuildHome containerHome
+                        if value <> expandedValue then Some $"{key}={expandedValue}"
+                        else Some key
                     else None)
                 |> String.join " "
             let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
