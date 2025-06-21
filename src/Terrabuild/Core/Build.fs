@@ -93,13 +93,12 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) project
 
             let envs =
                 let regexes = operation.ContainerVariables |> Seq.map Regex
-                Environment.GetEnvironmentVariables()
-                |> Seq.cast<DictionaryEntry>
+                envVars()
                 |> Seq.choose (fun entry -> 
-                    let key = $"{entry.Key}"
-                    let value = $"{entry.Value}"
+                    let key = entry.Key
+                    let value = entry.Value
                     if regexes |> Seq.exists (fun re -> re.IsMatch(key)) then
-                        let expandedValue = $"{entry.Value}" |> Environment.expandTerrabuildHome containerHome
+                        let expandedValue = $"{entry.Value}" |> expandHome containerHome
                         if value <> expandedValue then Some $"{key}={expandedValue}"
                         else Some key
                     else None)
