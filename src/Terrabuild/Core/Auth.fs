@@ -40,7 +40,11 @@ let private addAuthToken (workspaceId: string) (token: string) =
 
 
 let readAuthToken (workspaceId: string) =
-    let configFile = FS.combinePath (Cache.createTerrabuildProfile()) "config.json"
+    let configFile =
+        match Environment.envVar "TERRABUILD_CREDENTIALS" with
+        | Some path when path |> FS.fileExists -> path
+        | _ -> FS.combinePath (Cache.createTerrabuildProfile()) "config.json"
+
     let config =
         if configFile |> FS.fileExists then configFile |> IO.readTextFile |> Json.Deserialize<Configuration>
         else { Configuration.SpaceAuths = List.empty }
