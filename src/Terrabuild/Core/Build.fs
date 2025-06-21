@@ -6,6 +6,7 @@ open Serilog
 open Terrabuild.PubSub
 open Environment
 open Errors
+open System.Text.RegularExpressions
 
 [<RequireQualifiedAccess>]
 type TaskRequest =
@@ -91,8 +92,13 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) project
                     containerHome
 
             let envs =
-                operation.ContainerVariables
-                |> Seq.map (fun var -> $"-e {var}")
+                let regexes = operation.ContainerVariables |> Seq.map Regex
+                Environment.GetEnvironmentVariables()
+                |> Seq.cast<DictionaryEntry>
+                |> Seq.choose (fun entry -> 
+                    let key = $"{entry.Key}"
+                    if regexes |> Seq.exists (fun re -> re.IsMatch(key)) then Some $"-e {key}"
+                    else None)
                 |> String.join " "
             let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
             metaCommand, options.Workspace, cmd, args, operation.Container
