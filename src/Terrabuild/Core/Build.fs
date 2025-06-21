@@ -97,7 +97,11 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) project
                 |> Seq.cast<DictionaryEntry>
                 |> Seq.choose (fun entry -> 
                     let key = $"{entry.Key}"
-                    if regexes |> Seq.exists (fun re -> re.IsMatch(key)) then Some $"-e {key}"
+                    let value = $"{entry.Value}"
+                    if regexes |> Seq.exists (fun re -> re.IsMatch(key)) then
+                        let expandedValue = $"{entry.Value}" |> Environment.expandTerrabuildHome containerHome
+                        if value <> expandedValue then Some $"{key}={expandedValue}"
+                        else Some key
                     else None)
                 |> String.join " "
             let args = $"run --rm --net=host --name {node.TargetHash} --pid=host --ipc=host -v /var/run/docker.sock:/var/run/docker.sock -v {homeDir}:{containerHome} -v {tmpDir}:/tmp -v {wsDir}:/terrabuild -w /terrabuild/{projectDirectory} --entrypoint {operation.Command} {envs} {container} {operation.Arguments}"
