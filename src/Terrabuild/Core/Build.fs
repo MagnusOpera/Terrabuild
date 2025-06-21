@@ -98,7 +98,7 @@ let buildCommands (node: GraphDef.Node) (options: ConfigOptions.Options) project
                     let key = entry.Key
                     let value = entry.Value
                     if regexes |> Seq.exists (fun re -> re.IsMatch(key)) then
-                        let expandedValue = $"{entry.Value}" |> expandHome containerHome
+                        let expandedValue = $"{entry.Value}" |> expandTerrabuildHome containerHome
                         if value <> expandedValue then Some $"{key}={expandedValue}"
                         else Some key
                     else None)
