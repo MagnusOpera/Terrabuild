@@ -40,10 +40,10 @@ let debugPrint s = ignore s
 %left COLON
 %right QUESTION
 %right DOUBLE_QUESTION
-%left REGEX_MATCH
 %left OR
 %left AND
 %left DOUBLE_EQUAL NOT_EQUAL
+%left REGEX_MATCH
 %left MINUS PLUS
 %left MULT DIV
 %left DOT
