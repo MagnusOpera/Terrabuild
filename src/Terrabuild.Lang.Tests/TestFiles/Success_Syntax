@@ -38,8 +38,8 @@ locals {
 
   bool_equal = 42 == 666
   bool_not_equal = 42 != 666
-  bool_and = true & false
-  bool_or = true | false
+  bool_and = true && false
+  bool_or = true || false
   bool_not = !false
 
   regex = "prodfr" ~= "^prod.*"
