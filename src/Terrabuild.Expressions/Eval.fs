@@ -2,6 +2,7 @@
 open Terrabuild.Expressions
 open Errors
 open Collections
+open System.Text.RegularExpressions
 
 type EvaluationContext =
     { WorkspaceDir: string option
@@ -96,6 +97,9 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                         | _ -> template
 
                     replaceAll template |> Value.String
+
+                | Function.RegexMatch, [Value.String pattern; Value.String value] ->
+                    Regex(pattern).IsMatch(value) |> Value.Bool
 
                 | Function.Item, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with

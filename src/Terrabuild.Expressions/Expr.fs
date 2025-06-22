@@ -14,6 +14,7 @@ type Function =
     | Count
     | Format
     | ToString
+    | RegexMatch
     | Item
     | Coalesce
     | Ternary

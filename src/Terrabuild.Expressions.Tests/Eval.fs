@@ -131,6 +131,13 @@ let formatList() =
     result |> should equal expected
 
 [<Test>]
+let regexMatch() =
+    let resultTrue = eval evaluationContext (Expr.Function (Function.RegexMatch, [ Expr.String "^prod(.)*"; Expr.String "prodfr" ]))
+    resultTrue |> should equal (Value.Bool true)
+    let resultFalse = eval evaluationContext (Expr.Function (Function.RegexMatch, [ Expr.String "^prod(.)*"; Expr.String "dev" ]))
+    resultFalse |> should equal (Value.Bool false)
+
+[<Test>]
 let listItem() =
     let expected = Value.Number 42
 

@@ -2,6 +2,7 @@
 module internal Terrabuild.Lang.Parser
 type token = 
   | EOF
+  | REGEX_MATCH
   | DOUBLE_QUESTION
   | QUESTION
   | COLON
@@ -34,6 +35,7 @@ type token =
   | STRING of (string)
 type tokenId = 
     | TOKEN_EOF
+    | TOKEN_REGEX_MATCH
     | TOKEN_DOUBLE_QUESTION
     | TOKEN_QUESTION
     | TOKEN_COLON

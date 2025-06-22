@@ -66,6 +66,7 @@ rule token lexerMode = parse
     | "(" { LPAREN }
     | ")" { RPAREN }
     | "==" { DOUBLE_EQUAL }
+    | "~=" { REGEX_MATCH }
     | "=" { EQUAL }
     | "!=" { NOT_EQUAL }
     | "," { COMMA }

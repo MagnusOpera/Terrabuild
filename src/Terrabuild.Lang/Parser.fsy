@@ -32,6 +32,7 @@ let debugPrint s = ignore s
 %token COMMA
 %token MINUS PLUS MULT DIV
 %token DOUBLE_QUESTION QUESTION COLON BANG AND OR
+%token REGEX_MATCH
 %token EOF
 
 // associativity and precedences
@@ -39,6 +40,7 @@ let debugPrint s = ignore s
 %left COLON
 %right QUESTION
 %right DOUBLE_QUESTION
+%left REGEX_MATCH
 %left OR
 %left AND
 %left DOUBLE_EQUAL NOT_EQUAL
@@ -86,6 +88,7 @@ ExprSource:
 
 Expr:
     | ExprSource { $1 }
+    | Expr REGEX_MATCH Expr { Expr.Function (Function.RegexMatch, [$3; $1]) }
     | Expr DOUBLE_EQUAL Expr { Expr.Function (Function.Equal, [$1; $3]) }
     | Expr NOT_EQUAL Expr { Expr.Function (Function.NotEqual, [$1; $3]) }
     | Expr PLUS Expr { Expr.Function (Function.Plus, [$1; $3]) }
