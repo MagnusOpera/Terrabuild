@@ -116,10 +116,9 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | _ -> raiseInvalidArg $"Out of range index {index}"
 
                 | Function.Coalesce, [leftValue; rightValue] ->
-                    match leftValue with
-                    | Value.Nothing -> rightValue
-                    | _ -> leftValue
-                
+                    let condition = isTruthy leftValue
+                    if condition then leftValue else rightValue
+
                 | Function.Ternary, [condition; trueValue; falseValue] ->
                     let condition = isTruthy condition
                     if condition then trueValue else falseValue
