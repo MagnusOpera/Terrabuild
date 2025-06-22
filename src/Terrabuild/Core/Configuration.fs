@@ -589,8 +589,10 @@ let read (options: ConfigOptions.Options) =
             if options.WhatIf then "whatif" ] |> String.join(" ")    
         [
             if warningConfig |> String.IsNullOrWhiteSpace |> not then $"Build flags [{warningConfig}]"
+            if options.ContainerTool.IsSome then $"Container {options.ContainerTool.Value}"
             if options.Run.IsSome then $"Source control {options.Run.Value.Name}"
             if options.Configuration.IsSome then $"Configuration {options.Configuration.Value}"
+            if options.Environment.IsSome then $"Environment {options.Environment.Value}"
             $"Targets [{targets}]"
             if labels.IsSome then $"Labels [{labels.Value}]"
         ]
