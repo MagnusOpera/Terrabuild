@@ -53,6 +53,9 @@ let checkValidSyntax() =
                                      { Attribute.Name = "bool_and"; Value = Expr.Function (Function.And, [Expr.Bool true; Expr.Bool false]) }
                                      { Attribute.Name = "bool_or"; Attribute.Value = Expr.Function (Function.Or, [Expr.Bool true; Expr.Bool false]) }
                                      { Attribute.Name = "bool_not"; Attribute.Value = Expr.Function (Function.Not, [Expr.Bool false]) }
+
+                                     { Attribute.Name = "regex"; Attribute.Value = Expr.Function (Function.RegexMatch, [Expr.String "^prod.*"; Expr.String "prodfr"]) }
+
                                      { Attribute.Name = "expr_math_op"; Attribute.Value = Expr.Function(Function.Minus,
                                                                                                         [Expr.Function(Function.Plus,
                                                                                                                        [Expr.Function (Function.Plus,
