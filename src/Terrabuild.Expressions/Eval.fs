@@ -14,6 +14,12 @@ with
           ProjectDir = None
           Data = Map.empty }
 
+let isTruthy = function
+    | Value.Bool false
+    | Value.Nothing -> false
+    | _ -> true
+
+
 let rec eval (context: EvaluationContext) (expr: Expr) =
     let valueToString v =
         match v with
@@ -68,14 +74,10 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                 | Function.Plus, [Value.List left; Value.List right] -> Value.List (left @ right)
                 | Function.Count, [Value.List list] -> Value.Number list.Length
 
-                | Function.Not, [value] ->
-                    match value with
-                    | Value.Bool false -> Value.Bool true
-                    | Value.Nothing -> Value.Bool true
-                    | _ -> Value.Bool false
+                | Function.Not, [value] -> isTruthy value |> not |> Value.Bool 
 
-                | Function.And, [Value.Bool left; Value.Bool right] -> Value.Bool (left && right)
-                | Function.Or, [Value.Bool left; Value.Bool right] -> Value.Bool (left || right)
+                | Function.And, [left; right] -> Value.Bool (isTruthy left && isTruthy right)
+                | Function.Or, [left; right] -> Value.Bool (isTruthy left || isTruthy right)
 
                 | Function.ToString, [value] -> valueToString value |> Value.String
 
@@ -98,8 +100,10 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
 
                     replaceAll template |> Value.String
 
-                | Function.RegexMatch, [Value.String pattern; Value.String value] ->
-                    Regex(pattern).IsMatch(value) |> Value.Bool
+                | Function.RegexMatch, [Value.String pattern; value] ->
+                    match value with
+                    | Value.String str -> Regex(pattern).IsMatch(str) |> Value.Bool
+                    | _ -> Value.Bool false
 
                 | Function.Item, [Value.Map map; Value.String key] ->
                     match map |> Map.tryFind key with
@@ -117,12 +121,8 @@ let rec eval (context: EvaluationContext) (expr: Expr) =
                     | _ -> leftValue
                 
                 | Function.Ternary, [condition; trueValue; falseValue] ->
-                    let isFalsy =
-                        match condition with
-                        | Value.Bool false -> true
-                        | Value.Nothing -> true
-                        | _ -> false
-                    if isFalsy then falseValue else trueValue
+                    let condition = isTruthy condition
+                    if condition then trueValue else falseValue
 
                 | Function.Equal, [left; right] ->
                     Value.Bool (left = right)

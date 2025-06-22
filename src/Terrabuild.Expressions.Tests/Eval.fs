@@ -132,10 +132,14 @@ let formatList() =
 
 [<Test>]
 let regexMatch() =
-    let resultTrue = eval evaluationContext (Expr.Function (Function.RegexMatch, [ Expr.String "^prod(.)*"; Expr.String "prodfr" ]))
-    resultTrue |> should equal (Value.Bool true)
-    let resultFalse = eval evaluationContext (Expr.Function (Function.RegexMatch, [ Expr.String "^prod(.)*"; Expr.String "dev" ]))
-    resultFalse |> should equal (Value.Bool false)
+    let result = eval evaluationContext (Expr.Function (Function.RegexMatch, [ Expr.String "^prod(.)*"; Expr.String "prodfr" ]))
+    result |> should equal (Value.Bool true)
+
+    let result = eval evaluationContext (Expr.Function (Function.RegexMatch, [ Expr.String "^prod(.)*"; Expr.String "dev" ]))
+    result |> should equal (Value.Bool false)
+
+    let result = eval evaluationContext (Expr.Function (Function.RegexMatch, [ Expr.String "^prod(.)*"; Expr.Nothing ]))
+    result |> should equal (Value.Bool false)
 
 [<Test>]
 let listItem() =
@@ -201,13 +205,12 @@ let notBool() =
     let result = eval evaluationContext (Expr.Function (Function.Not, [Expr.Bool true]))
     result |> should equal (Value.Bool false)
 
-[<Test>]
-let notNothing() =
+    let result = eval evaluationContext (Expr.Function (Function.Not, [Expr.String "toto"]))
+    result |> should equal (Value.Bool false)
+
     let result = eval evaluationContext (Expr.Function (Function.Not, [Expr.Nothing]))
     result |> should equal (Value.Bool true)
 
-[<Test>]
-let notAnything() =
     let result = eval evaluationContext (Expr.Function (Function.Not, [Expr.Number 42]))
     result |> should equal (Value.Bool false)
 
@@ -229,6 +232,10 @@ let andBool() =
     let result = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool true; Expr.Bool true]))
     result |> should equal expected
 
+    let expected = Value.Bool false
+    let result = eval evaluationContext (Expr.Function (Function.And, [Expr.Bool true; Expr.Nothing]))
+    result |> should equal expected
+
 [<Test>]
 let orBool() =
     let expected = Value.Bool false
@@ -245,4 +252,8 @@ let orBool() =
 
     let expected = Value.Bool true
     let result = eval evaluationContext (Expr.Function (Function.Or, [Expr.Bool true; Expr.Bool true]))
+    result |> should equal expected
+
+    let expected = Value.Bool true
+    let result = eval evaluationContext (Expr.Function (Function.Or, [Expr.Nothing; Expr.Bool true]))
     result |> should equal expected
