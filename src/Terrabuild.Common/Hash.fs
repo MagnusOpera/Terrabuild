@@ -9,7 +9,7 @@ let sha256files files =
 
     let computeFileSha file =
         let sha256 = SHA256.Create()
-        use hFile = File.Open(file, FileMode.Open)
+        use hFile = File.OpenRead(file)
         hFile |> sha256.ComputeHash |> ms.Write
 
     files |> Seq.iter computeFileSha
