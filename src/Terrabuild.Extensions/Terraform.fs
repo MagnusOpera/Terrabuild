@@ -73,6 +73,7 @@ type Terraform() =
     /// * run plan
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
+    /// <param name="config" example="&quot;backend.prod.config&quot;">Set configuration for init.</param>
     /// <param name="create" example="true">Create workspace if it does not exist.</param>
     /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
     static member plan (context: ActionContext) (config: string option) (workspace: string option) (create: bool option) (variables: Map<string, string>) =
@@ -106,6 +107,7 @@ type Terraform() =
     /// * apply plan
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
+    /// <param name="config" example="&quot;backend.prod.config&quot;">Set configuration for init.</param>
     static member apply (context: ActionContext) (config: string option) (workspace: string option) =
         let config =
             match config with
@@ -120,5 +122,30 @@ type Terraform() =
             | _ -> ()
 
             shellOp("terraform", "apply -input=false terrabuild.planfile")
+        ]
+        execRequest(Cacheability.Always, ops, true)
+
+    /// <summary weight="4" title="Destroy the deployment.">
+    /// Destroy the deployment:
+    /// * initialize Terraform
+    /// * select workspace
+    /// * destroy
+    /// </summary>
+    /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
+    /// <param name="config" example="&quot;backend.prod.config&quot;">Set configuration for init.</param>
+    static member destroy (context: ActionContext) (config: string option) (workspace: string option) =
+        let config =
+            match config with
+            | Some config -> $" -backend-config={config}"
+            | _ -> ""
+
+        let ops = [
+            shellOp("terraform", $"init -reconfigure{config}")
+            
+            match workspace with
+            | Some workspace -> shellOp("terraform", $"workspace select {workspace}")
+            | _ -> ()
+
+            shellOp("terraform", "destroy -input=false")
         ]
         execRequest(Cacheability.Always, ops, true)
