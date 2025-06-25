@@ -133,7 +133,9 @@ type Terraform() =
     /// </summary>
     /// <param name="workspace" example="&quot;dev&quot;">Workspace to use. Use `default` if not provided.</param>
     /// <param name="config" example="&quot;backend.prod.config&quot;">Set configuration for init.</param>
-    static member destroy (context: ActionContext) (config: string option) (workspace: string option) =
+    /// <param name="variables" example="{ configuration: &quot;Release&quot; }">Variables for plan (see Terraform [Variables](https://developer.hashicorp.com/terraform/language/values/variables#variables-on-the-command-line)).</param> 
+    static member destroy (context: ActionContext) (config: string option) (workspace: string option) (variables: Map<string, string>) =
+        let vars = variables |> Seq.fold (fun acc (KeyValue(key, value)) -> acc + $" -var=\"{key}={value}\"") ""
         let config =
             match config with
             | Some config -> $" -backend-config={config}"
@@ -146,6 +148,6 @@ type Terraform() =
             | Some workspace -> shellOp("terraform", $"workspace select {workspace}")
             | _ -> ()
 
-            shellOp("terraform", "destroy -input=false")
+            shellOp("terraform", $"destroy -input=false{vars}")
         ]
         execRequest(Cacheability.Always, ops, true)
