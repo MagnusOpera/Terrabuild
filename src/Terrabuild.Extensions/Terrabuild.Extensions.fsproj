@@ -13,6 +13,7 @@
     <Compile Include="Gradle.fs" />
     <Compile Include="Make.fs" />
     <Compile Include="Npm.fs" />
+    <Compile Include="Npx.fs" />
     <Compile Include="Null.fs" />
     <Compile Include="Shell.fs" />
     <Compile Include="OpenApi.fs" />

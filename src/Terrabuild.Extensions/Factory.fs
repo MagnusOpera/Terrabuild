@@ -10,6 +10,7 @@ let systemScripts =
         "@gradle", typeof<Gradle>
         "@make", typeof<Make>
         "@npm", typeof<Npm>
+        "@npx", typeof<Npx>
         "@null", typeof<Null>
         "@shell", typeof<Shell>
         "@openapi", typeof<OpenApi>
