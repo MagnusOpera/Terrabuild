@@ -15,6 +15,6 @@ type Npx() =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp("npm", $"--yes {arguments}")
+            shellOp("npx", $"--yes {arguments}")
         ]
         execRequest(Cacheability.Always, ops, false)
