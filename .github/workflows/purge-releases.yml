@@ -21,9 +21,9 @@ jobs:
           release-drop: false
           release-keep-count: 0
           release-drop-tag: false
-          pre-release-drop: true
+          pre-release-drop: true  
           pre-release-keep-count: 2
-          pre-release-drop-tag: true
+          pre-release-drop-tag: false
           draft-drop: true
           draft-drop-count: 2
         env:
