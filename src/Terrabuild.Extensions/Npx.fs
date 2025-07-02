@@ -11,11 +11,10 @@ type Npx() =
     /// Run an npx command.
     /// </summary>
     /// <param name="arguments" example="&quot;hello-world-npm&quot;">Arguments to pass to npx.</param> 
-    static member __dispatch__ (context: ActionContext) (arguments: string option) =
-        let cmd = context.Command
+    static member run (context: ActionContext) (arguments: string option) =
         let arguments = arguments |> Option.defaultValue ""
 
         let ops = [
-            shellOp("npm", $"--yes {cmd} {arguments}")
+            shellOp("npm", $"--yes {arguments}")
         ]
         execRequest(Cacheability.Always, ops, false)
