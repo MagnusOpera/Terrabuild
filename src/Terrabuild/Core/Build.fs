@@ -263,6 +263,8 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                 if node.Managed then
                     let restorable = Restorable(callback, dependencies)
                     restorables.TryAdd(node.Id, restorable) |> ignore
+                    // invoke callback immediately if node must be restored
+                    if node.Restore then restorable.Restore()
                 else
                     Log.Debug("{NodeId} skipping restore '{Project}/{Target}' from {Hash}", node.Id, node.ProjectDir, node.Target, node.TargetHash)
                 if summary.IsSuccessful then TaskStatus.Success summary.EndedAt

@@ -19,6 +19,8 @@
           "obj/*.props",
           "obj/*.targets"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -79,6 +81,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "b:build": {
@@ -100,6 +103,8 @@
           "obj/*.props",
           "obj/*.targets"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -160,6 +165,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "c:build": {
@@ -176,6 +182,8 @@
         "outputs": [
           "dist/**"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -241,6 +249,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "d:build": {
@@ -262,6 +271,8 @@
           "obj/*.props",
           "obj/*.targets"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "FD3560333C686B049DD524191E409F2B96EE93A6A0E1BA65FF540BE80CE66074",
@@ -302,6 +313,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "e:build": {
@@ -323,6 +335,8 @@
           "obj/*.props",
           "obj/*.targets"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "FD3560333C686B049DD524191E409F2B96EE93A6A0E1BA65FF540BE80CE66074",
@@ -363,6 +377,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "f:build": {
@@ -379,6 +394,8 @@
         "outputs": [
           "dist/**"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
@@ -422,6 +439,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "g:build": {
@@ -438,6 +456,8 @@
         "outputs": [
           "dist/**"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "8054CA404BB10F07A0DA6A96755B6F1D19373B6DAB213FFAB5905269575E74E3",
@@ -480,6 +500,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     }
   },
