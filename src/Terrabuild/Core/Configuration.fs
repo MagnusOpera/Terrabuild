@@ -386,7 +386,10 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
     // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
     let projectHash =
-        [ projectId; filesHash; dependenciesHash ] @ sortedFiles
+        let relativeSortedFiles = 
+            sortedFiles
+            |> List.map (fun file -> FS.relativePath projectDir file)
+        [ projectId; filesHash; dependenciesHash ] @ relativeSortedFiles
         |> Hash.sha256strings
 
     let evaluationContext = 

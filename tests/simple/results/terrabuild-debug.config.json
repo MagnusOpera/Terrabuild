@@ -30,7 +30,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "directory": "deployments/terraform-deploy",
-      "hash": "7C048D5C4D7BCCC786B7D064232A18081BB4CBC40B82A5F6264F0C20548D214F",
+      "hash": "A4D2ADC02146478FC7783DB850DC17C4FE7DF452015C22A43F091A3B2A824901",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
@@ -68,11 +68,11 @@
                     {
                       "dotnet_app_version": [
                         "string",
-                        "EC0E944BE068D2B0643FE567A8F8CD3AFA2DCF65ECA9E06735883CC430C7A94A"
+                        "D52CC41EF867517BDAFE24D275F1BBBFC306AE1F67D388592B1C538E9D64B22C"
                       ],
                       "npm_app_version": [
                         "string",
-                        "6957ECAD021FBBF1E73BCCC54532806920195AB32CDA12790BB59E5B9CE2F5E5"
+                        "8316952329CA00E8972DD4269B8E4B50D631A33F687066EC093F5D9F368F8671"
                       ]
                     }
                   ],
@@ -122,7 +122,7 @@
     },
     "libraries/dotnet-lib": {
       "directory": "libraries/dotnet-lib",
-      "hash": "B20EC7414D6FF2B4E96F1A07C93DDA43CB194A152022775598C0ECEC500A2F59",
+      "hash": "BF7922FF2B67E20B593DC0C08FC7F7B6EF86030135170EF88D2BCDFA9E882B0E",
       "dependencies": [],
       "files": [
         "Class1.cs",
@@ -169,7 +169,7 @@
     },
     "libraries/npm-lib": {
       "directory": "libraries/npm-lib",
-      "hash": "A22A9EBDD9AB9C044075E43AB828C807600886DBB9024EE52EEF38BDC8E295D1",
+      "hash": "D16557EFAA0682B8ACFEE2C0A5A8E3121F7D0D5682BEABA14FF093182F1BF989",
       "dependencies": [],
       "files": [
         "package-lock.json",
@@ -248,7 +248,7 @@
     "projects/dotnet-app": {
       "id": "dotnet_app",
       "directory": "projects/dotnet-app",
-      "hash": "EC0E944BE068D2B0643FE567A8F8CD3AFA2DCF65ECA9E06735883CC430C7A94A",
+      "hash": "D52CC41EF867517BDAFE24D275F1BBBFC306AE1F67D388592B1C538E9D64B22C",
       "dependencies": [
         "libraries/dotnet-lib"
       ],
@@ -379,7 +379,7 @@
     },
     "projects/make-app": {
       "directory": "projects/make-app",
-      "hash": "C7C63CA608701AD7766143C3B4360D2A2662A7B9694A6B992345B91E1B732D34",
+      "hash": "6CCDE372BCED5FE1097546A2BA8B13939406310F4C70933E086FAE969B0EF4C1",
       "dependencies": [
         "libraries/shell-lib"
       ],
@@ -444,7 +444,7 @@
     "projects/npm-app": {
       "id": "npm_app",
       "directory": "projects/npm-app",
-      "hash": "6957ECAD021FBBF1E73BCCC54532806920195AB32CDA12790BB59E5B9CE2F5E5",
+      "hash": "8316952329CA00E8972DD4269B8E4B50D631A33F687066EC093F5D9F368F8671",
       "dependencies": [
         "libraries/npm-lib"
       ],
@@ -494,7 +494,7 @@
     },
     "projects/open-api": {
       "directory": "projects/open-api",
-      "hash": "87370DE74F5087BF26DED10A282D76B567B8A6CF33EEBBBD1602B5E979606795",
+      "hash": "D1412C5559BB61F034C55A9579AB659E25CAA42543754D8723163FA32EFEFDB0",
       "dependencies": [],
       "files": [
         ".gitignore",
@@ -542,7 +542,7 @@
     },
     "projects/rust-app": {
       "directory": "projects/rust-app",
-      "hash": "98578F1D1270D7AF9A0B011D04C56CD3E8CA7FC487AD9F979E02E2AF27262CA6",
+      "hash": "7A703D835BF13AAFE8CCC30E28CA81DB062F68CD3C0CA70EDB64A3DFED481042",
       "dependencies": [],
       "files": [
         "Cargo.lock",
