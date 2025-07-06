@@ -1,0 +1,328 @@
+{
+  "nodes": {
+    "a:build": {
+      "id": "a:build",
+      "projectId": "a",
+      "projectDir": "A",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [],
+        "managed": true,
+        "restore": false,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "build A"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "dependencies": [],
+      "outputs": [],
+      "projectHash": "93E239570E6B9FFE2C7437AD6F8DD19EC71F63DB6B04A2AEB2A47C1E4D9F7B73",
+      "targetHash": "EB43D2A3527A3358BBEBFC390C7A11DC4A44F669AA9C8881C202DD3A9BA7BDFE",
+      "operations": [
+        {
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "build A"
+        }
+      ],
+      "cache": 3,
+      "managed": true,
+      "rebuild": true,
+      "restore": false,
+      "isLeaf": true
+    },
+    "a:dist": {
+      "id": "a:dist",
+      "projectId": "a",
+      "projectDir": "A",
+      "target": "dist",
+      "configurationTarget": {
+        "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+        "rebuild": false,
+        "dependsOn": [
+          "^dist",
+          "build"
+        ],
+        "outputs": [],
+        "managed": false,
+        "restore": false,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "dist A"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "a:build"
+      ],
+      "outputs": [],
+      "projectHash": "93E239570E6B9FFE2C7437AD6F8DD19EC71F63DB6B04A2AEB2A47C1E4D9F7B73",
+      "targetHash": "A21F3F11D19299D4BEE63565C8F56BAC30A1F429EB2E62175C75893BFC6203DF",
+      "operations": [
+        {
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "dist A"
+        }
+      ],
+      "cache": 3,
+      "managed": false,
+      "rebuild": true,
+      "restore": false,
+      "isLeaf": false
+    },
+    "b:apply": {
+      "id": "b:apply",
+      "projectId": "b",
+      "projectDir": "B",
+      "target": "apply",
+      "configurationTarget": {
+        "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+        "rebuild": false,
+        "dependsOn": [
+          "^apply",
+          "plan"
+        ],
+        "outputs": [],
+        "managed": false,
+        "restore": false,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "apply B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "b:plan"
+      ],
+      "outputs": [],
+      "projectHash": "98BB71F75954058EB5CB3C977E720D125945511E98EBCE6499BC099C91C6823A",
+      "targetHash": "A24556BBEFA00BDF910930DB78F8947D624BE1478AB2D27E57772C4134DB9E91",
+      "operations": [
+        {
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "apply B"
+        }
+      ],
+      "cache": 3,
+      "managed": false,
+      "rebuild": true,
+      "restore": false,
+      "isLeaf": false
+    },
+    "b:plan": {
+      "id": "b:plan",
+      "projectId": "b",
+      "projectDir": "B",
+      "target": "plan",
+      "configurationTarget": {
+        "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+        "rebuild": false,
+        "dependsOn": [
+          "^plan",
+          "dist"
+        ],
+        "outputs": [],
+        "managed": true,
+        "restore": false,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "plan B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "a:dist"
+      ],
+      "outputs": [],
+      "projectHash": "98BB71F75954058EB5CB3C977E720D125945511E98EBCE6499BC099C91C6823A",
+      "targetHash": "CAEC409C4F85832A85F3B0DB49C5AD6370A630CB3097497BB268059F18AA42EB",
+      "operations": [
+        {
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "plan B"
+        }
+      ],
+      "cache": 3,
+      "managed": true,
+      "rebuild": true,
+      "restore": false,
+      "isLeaf": false
+    },
+    "c:build": {
+      "id": "c:build",
+      "projectId": "c",
+      "projectDir": "C",
+      "target": "build",
+      "configurationTarget": {
+        "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+        "rebuild": false,
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [],
+        "managed": true,
+        "restore": false,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "build C"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "dependencies": [],
+      "outputs": [],
+      "projectHash": "23F451E7CA600359C540B37D910F0F1135AB887915AE8BB5B31FA1E303961E2A",
+      "targetHash": "591BE34EDB2CA1D199AECEBBBEB2766BCC8C131FF34AAA1E568EF7606F31771D",
+      "operations": [
+        {
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "build C"
+        }
+      ],
+      "cache": 3,
+      "managed": true,
+      "rebuild": true,
+      "restore": false,
+      "isLeaf": true
+    },
+    "c:dist": {
+      "id": "c:dist",
+      "projectId": "c",
+      "projectDir": "C",
+      "target": "dist",
+      "configurationTarget": {
+        "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
+        "rebuild": false,
+        "dependsOn": [
+          "^dist",
+          "build"
+        ],
+        "outputs": [],
+        "managed": false,
+        "restore": false,
+        "operations": [
+          {
+            "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
+            "containerVariables": [],
+            "extension": "@shell",
+            "command": "echo",
+            "script": {},
+            "context": [
+              "map",
+              {
+                "arguments": [
+                  "string",
+                  "dist C"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "dependencies": [
+        "c:build"
+      ],
+      "outputs": [],
+      "projectHash": "23F451E7CA600359C540B37D910F0F1135AB887915AE8BB5B31FA1E303961E2A",
+      "targetHash": "E3CA8F02102A23CE154CCF32A3F0DD2D48645DF860A3D5B5DFE2E72A2EDAE759",
+      "operations": [
+        {
+          "containerVariables": [],
+          "metaCommand": "@shell echo",
+          "command": "echo",
+          "arguments": "dist C"
+        }
+      ],
+      "cache": 3,
+      "managed": false,
+      "rebuild": true,
+      "restore": false,
+      "isLeaf": false
+    }
+  },
+  "rootNodes": [
+    "a:build",
+    "b:apply",
+    "b:plan",
+    "c:build"
+  ]
+}

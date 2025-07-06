@@ -11,13 +11,24 @@
             // "args": ["run", "build", "--workspace", "tests/cluster-layers", "--force", "--debug", "-p", "1", "--whatif" ],
             // "args": ["run", "build", "--workspace", "tests/cluster-layers", "--force", "--debug", "-p", "1", "--whatif" ],
             // "args": ["run", "plan", "dist", "build", "test", "--workspace", "../insights", "--log", "-c", "dev", "--debug", "-p", "1", "--whatif" ],
-            "args": ["run", "apply", "--workspace", "../insights", "--log", "-c", "dev", "--debug", "-p", "1", "--whatif", "--retry" ],
+            // "args": ["run", "build", "test", "plan", "apply", "--log", "--debug", "--parallel", "1" ],
             // "args": [ "run", "build", "-w", "tests/basic", "--whatif", "-p", "1" ],
             // "args": ["logs", "build" ],
             // "args": ["run", "build", "-w", "tests/simple", "--debug", "-p", "1", "--force" ],
-            "cwd": "${workspaceFolder}",
+            // "cwd": "${workspaceFolder}/tests/indirect-target",
             "stopAtEntry": false,
-            "console": "internalConsole"
+            "console": "internalConsole",
+            // "env": {
+            //     "GITHUB_SHA": "1234",
+            //     "GITHUB_REF_NAME": "main",
+            //     "GITHUB_STEP_SUMMARY": "terrabuild-debug.md",
+            //     "GITHUB_REPOSITORY": "magnusopera/terrabuild",
+            //     "GITHUB_RUN_ID": "42",
+            //     "GITHUB_ACTION": "true",
+            //     "GITHUB_REF_TYPE": "branch",
+            //     "GITHUB_RUN_ATTEMPT": "1",
+            //     "GITHUB_EVENT_PATH": "../../src/Terrabuild.Tests/TestFiles/GitHub/push-event.json"
+            // }
         },
         {
             "name": "Store",
