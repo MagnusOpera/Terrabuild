@@ -260,7 +260,7 @@ let run (options: ConfigOptions.Options) (cache: Cache.ICache) (api: Contracts.I
                         notification.NodeCompleted node TaskRequest.Restore false
                         raiseBugError $"Unable to download build output for {cacheEntryId} for node {node.Id}"
 
-                if node.Managed then
+                if node.Managed || node.Restore then
                     let restorable = Restorable(callback, dependencies)
                     restorables.TryAdd(node.Id, restorable) |> ignore
                     // invoke callback immediately if node must be restored
