@@ -116,11 +116,11 @@ let build (options: ConfigOptions.Options) (configuration: Configuration.Workspa
                     if options.LocalOnly then Cacheability.Local
                     else target.Cache |> Option.defaultValue cache
 
-                let managed = target.Managed
-
-                let rebuild = options.Force || target.Rebuild
-
                 let restore = target.Restore
+
+                let managed = target.Managed || restore
+
+                let rebuild = target.Rebuild || options.Force
 
                 let targetOutput =
                     if managed then target.Outputs
