@@ -14,7 +14,6 @@ type ContaineredShellOperation = {
 [<RequireQualifiedAccess>]
 type Node = {
     Id: string
-    Label: string
 
     ProjectId: string option
     ProjectDir: string

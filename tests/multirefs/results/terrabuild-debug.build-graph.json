@@ -2,7 +2,6 @@
   "nodes": {
     "a:build": {
       "id": "a:build",
-      "label": "build A",
       "projectDir": "A",
       "target": "build",
       "configurationTarget": {
@@ -56,7 +55,6 @@
     },
     "b:build": {
       "id": "b:build",
-      "label": "build B",
       "projectDir": "B",
       "target": "build",
       "configurationTarget": {
@@ -109,7 +107,6 @@
     },
     "c:build": {
       "id": "c:build",
-      "label": "build C",
       "projectDir": "C",
       "target": "build",
       "configurationTarget": {

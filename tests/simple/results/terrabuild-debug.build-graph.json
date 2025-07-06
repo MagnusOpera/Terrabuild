@@ -2,7 +2,6 @@
   "nodes": {
     "deployments/terraform-deploy:build": {
       "id": "deployments/terraform-deploy:build",
-      "label": "build deployments/terraform-deploy",
       "projectDir": "deployments/terraform-deploy",
       "target": "build",
       "configurationTarget": {
@@ -93,7 +92,6 @@
     },
     "libraries/dotnet-lib:build": {
       "id": "libraries/dotnet-lib:build",
-      "label": "build libraries/dotnet-lib",
       "projectDir": "libraries/dotnet-lib",
       "target": "build",
       "configurationTarget": {
@@ -162,7 +160,6 @@
     },
     "libraries/npm-lib:build": {
       "id": "libraries/npm-lib:build",
-      "label": "build libraries/npm-lib",
       "projectDir": "libraries/npm-lib",
       "target": "build",
       "configurationTarget": {
@@ -224,7 +221,6 @@
     },
     "libraries/shell-lib:build": {
       "id": "libraries/shell-lib:build",
-      "label": "build libraries/shell-lib",
       "projectDir": "libraries/shell-lib",
       "target": "build",
       "configurationTarget": {
@@ -275,7 +271,6 @@
     },
     "projects/dotnet-app:build": {
       "id": "projects/dotnet-app:build",
-      "label": "build projects/dotnet-app",
       "projectId": "dotnet_app",
       "projectDir": "projects/dotnet-app",
       "target": "build",
@@ -347,7 +342,6 @@
     },
     "projects/make-app:build": {
       "id": "projects/make-app:build",
-      "label": "build projects/make-app",
       "projectDir": "projects/make-app",
       "target": "build",
       "configurationTarget": {
@@ -431,7 +425,6 @@
     },
     "projects/npm-app:build": {
       "id": "projects/npm-app:build",
-      "label": "build projects/npm-app",
       "projectId": "npm_app",
       "projectDir": "projects/npm-app",
       "target": "build",
@@ -496,7 +489,6 @@
     },
     "projects/open-api:build": {
       "id": "projects/open-api:build",
-      "label": "build projects/open-api",
       "projectDir": "projects/open-api",
       "target": "build",
       "configurationTarget": {
@@ -559,7 +551,6 @@
     },
     "projects/rust-app:build": {
       "id": "projects/rust-app:build",
-      "label": "build projects/rust-app",
       "projectDir": "projects/rust-app",
       "target": "build",
       "configurationTarget": {

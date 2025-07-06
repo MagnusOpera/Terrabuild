@@ -2,7 +2,6 @@
   "nodes": {
     "a:build": {
       "id": "a:build",
-      "label": "build A",
       "projectDir": "A",
       "target": "build",
       "configurationTarget": {
@@ -86,7 +85,6 @@
     },
     "b:build": {
       "id": "b:build",
-      "label": "build B",
       "projectDir": "B",
       "target": "build",
       "configurationTarget": {
@@ -170,7 +168,6 @@
     },
     "c:build": {
       "id": "c:build",
-      "label": "build C",
       "projectDir": "C",
       "target": "build",
       "configurationTarget": {
@@ -254,7 +251,6 @@
     },
     "d:build": {
       "id": "d:build",
-      "label": "build D",
       "projectDir": "D",
       "target": "build",
       "configurationTarget": {
@@ -318,7 +314,6 @@
     },
     "e:build": {
       "id": "e:build",
-      "label": "build E",
       "projectDir": "E",
       "target": "build",
       "configurationTarget": {
@@ -382,7 +377,6 @@
     },
     "f:build": {
       "id": "f:build",
-      "label": "build F",
       "projectDir": "F",
       "target": "build",
       "configurationTarget": {
@@ -444,7 +438,6 @@
     },
     "g:build": {
       "id": "g:build",
-      "label": "build G",
       "projectDir": "G",
       "target": "build",
       "configurationTarget": {

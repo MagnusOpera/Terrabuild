@@ -60,12 +60,12 @@ type BuildNotification() =
                     | NodeStatus.Downloading -> spinnerDownload, frequencyDownload
                     | NodeStatus.Uploading -> spinnerUpload, frequencyUpload
                     | NodeStatus.Building -> spinnerBuilding, frequencyBuilding
-                renderer.Update node.TargetHash node.Label spinner frequency
+                renderer.Update node.TargetHash $"{node.Target} {node.ProjectDir}" spinner frequency
                 scheduleUpdate ()
                 return! messageLoop ()
 
             | PrinterProtocol.NodeCompleted (node, status, success) ->
-                let label = $"{node.Label} {node.ProjectDir}"
+                let label = $"{node.Target} {node.ProjectDir}"
                 renderer.Complete node.TargetHash label success (status = Build.TaskRequest.Restore)
                 scheduleUpdate ()
                 return! messageLoop ()

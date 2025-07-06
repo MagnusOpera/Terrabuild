@@ -43,7 +43,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
             let header =
                 let statusEmoji = statusEmoji node
                 let uniqueId = stableRandomId node.Id
-                $"## <a name=\"user-content-{uniqueId}\"></a> {statusEmoji} {node.Label}"
+                $"## <a name=\"user-content-{uniqueId}\"></a> {statusEmoji} {node.Target} {node.ProjectDir}"
 
             let dumpLogs =
                 let originSummary = originSummaries[node.Id]
@@ -94,7 +94,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
                 | _ -> ""
 
             let uniqueId = stableRandomId node.Id
-            $"| {statusEmoji} [{node.Label}](#user-content-{uniqueId}) | {duration} |" |> append
+            $"| {statusEmoji} [{node.Target} {node.ProjectDir}](#user-content-{uniqueId}) | {duration} |" |> append
         )
         let (cost, gain) =
             originSummaries |> Map.fold (fun (cost, gain) _ originSummary ->
@@ -141,7 +141,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
 
     let dumpTerminal (nodes: GraphDef.Node seq) =
         let dumpTerminal (node: GraphDef.Node) =
-            let title = node.Label
+            let title = $"{node.Target} {node.ProjectDir}"
 
             let getHeaderFooter success title =
                 let color =
@@ -187,7 +187,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
             match summary with
             | Some (_, summary) ->
                 if summary.IsSuccessful |> not then
-                    $"::error title=build failed::{node.Label}" |> Terminal.writeLine
+                    $"::error title=build failed::{node.Target} {node.ProjectDir}" |> Terminal.writeLine
                     match summary.Operations |> List.tryLast with
                     | Some command ->
                         match command |> List.tryLast with
@@ -198,7 +198,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
                         | _ -> ()
                     | _ -> ()
             | None ->
-                $"::warning title=no logs::{node.Label}" |> Terminal.writeLine
+                $"::warning title=no logs::{node.Target} {node.ProjectDir}" |> Terminal.writeLine
 
         nodes
         |> Seq.filter (fun node -> summary.Nodes |> Map.containsKey node.Id)
