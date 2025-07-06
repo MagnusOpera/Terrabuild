@@ -365,9 +365,13 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
         |> IO.enumerateFilesBut projectDef.Includes (projectDef.Outputs + projectDef.Ignores + tbFiles)
         |> Set
 
-    let filesHash =
+    let sortedFiles =
         files
         |> Seq.sort
+        |> List.ofSeq
+
+    let filesHash =
+        sortedFiles
         |> Hash.sha256files
 
     let dependenciesHash =
@@ -382,7 +386,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
 
     // NOTE: this is the hash (modulo target name) used for reconcialiation across executions
     let projectHash =
-        [ projectId; filesHash; dependenciesHash ]
+        [ projectId; filesHash; dependenciesHash ] @ sortedFiles
         |> Hash.sha256strings
 
     let evaluationContext = 
