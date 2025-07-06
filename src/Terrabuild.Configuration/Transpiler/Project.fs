@@ -71,7 +71,7 @@ let toProject (block: Block) =
 
 let toTarget (block: Block) =
     block
-    |> checkAllowedAttributes ["rebuild"; "outputs"; "depends_on"; "cache"; "managed"]
+    |> checkAllowedAttributes ["rebuild"; "outputs"; "depends_on"; "cache"; "managed"; "restore"]
     |> ignore
 
     let rebuild = block |> tryFindAttribute "rebuild"
@@ -86,6 +86,7 @@ let toTarget (block: Block) =
                 | _ -> raiseInvalidArg $"Invalid target dependency '{dependency}'"))
     let cache = block |> tryFindAttribute "cache"
     let managed = block |> tryFindAttribute "managed"
+    let restore = block |> tryFindAttribute "restore"
     let steps =
         block.Blocks
         |> List.map (fun step ->
@@ -112,7 +113,8 @@ let toTarget (block: Block) =
       TargetBlock.DependsOn = dependsOn
       TargetBlock.Cache = cache
       TargetBlock.Steps = steps
-      TargetBlock.Managed = managed }
+      TargetBlock.Managed = managed
+      TargetBlock.Restore = restore }
 
 
 
