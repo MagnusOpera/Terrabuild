@@ -27,6 +27,7 @@ type TargetBlock =
       DependsOn: Set<string> option
       Cache: Expr option
       Managed: Expr option
+      Restore: Expr option
       Steps: Step list }
 
 [<RequireQualifiedAccess>]

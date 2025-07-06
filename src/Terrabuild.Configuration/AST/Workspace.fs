@@ -13,7 +13,8 @@ type WorkspaceBlock =
 type TargetBlock =
     { DependsOn: Set<string> option
       Rebuild: Expr option
-      Managed: Expr option }
+      Managed: Expr option
+      Restore: Expr option }
 
 [<RequireQualifiedAccess>]
 type WorkspaceFile =

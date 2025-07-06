@@ -45,7 +45,7 @@ let toWorkspace (block: Block) =
 
 let toTarget (block: Block) =
     block
-    |> checkAllowedAttributes ["depends_on"; "rebuild"; "managed"]
+    |> checkAllowedAttributes ["depends_on"; "rebuild"; "managed"; "restore"]
     |> checkNoNestedBlocks
     |> ignore
 
@@ -59,10 +59,11 @@ let toTarget (block: Block) =
                 | _ -> raiseInvalidArg $"Invalid target dependency '{dependency}'"))
     let rebuild = block |> tryFindAttribute "rebuild"
     let managed = block |> tryFindAttribute "managed"
-
+    let restore = block |> tryFindAttribute "restore"
     { TargetBlock.DependsOn = dependsOn
       TargetBlock.Rebuild = rebuild
-      TargetBlock.Managed = managed }
+      TargetBlock.Managed = managed
+      TargetBlock.Restore = restore }
 
     
 let toVariable (block: Block) =

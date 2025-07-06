@@ -14,6 +14,8 @@
         "outputs": [
           "*.planfile"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "A2ECFE80BD8663195DB0A044359ADE6D9F4E08C3831CED6767F4B2BF676A20DE",
@@ -86,6 +88,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "libraries/dotnet-lib:build": {
@@ -107,6 +110,8 @@
           "obj/*.props",
           "obj/*.targets"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "C420622D2E4A356A62A1B8E433375B345C91BD1E3ED5E2B6E74772F3BF839B31",
@@ -152,6 +157,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "libraries/npm-lib:build": {
@@ -168,6 +174,8 @@
         "outputs": [
           "dist/**"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -211,6 +219,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "libraries/shell-lib:build": {
@@ -225,6 +234,8 @@
           "^build"
         ],
         "outputs": [],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -259,6 +270,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "projects/dotnet-app:build": {
@@ -281,6 +293,8 @@
           "obj/*.props",
           "obj/*.targets"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "C420622D2E4A356A62A1B8E433375B345C91BD1E3ED5E2B6E74772F3BF839B31",
@@ -328,6 +342,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "projects/make-app:build": {
@@ -344,6 +359,8 @@
         "outputs": [
           "dist"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -409,6 +426,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "projects/npm-app:build": {
@@ -426,6 +444,8 @@
         "outputs": [
           "dist/**"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -471,6 +491,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "projects/open-api:build": {
@@ -485,6 +506,8 @@
           "^build"
         ],
         "outputs": [],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "50D55A43B040D7588938348660FCC1E7DC7DE5F6B1BA6BBD75E552060D6FB2AC",
@@ -531,6 +554,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     },
     "projects/rust-app:build": {
@@ -548,6 +572,8 @@
           "target/debug/",
           "target/release/"
         ],
+        "managed": true,
+        "restore": false,
         "operations": [
           {
             "hash": "72FA6B2BF806E80FDF3BFC4BFCC4CF397C740DCC43ACBD7CD4D0DABE6F22C85A",
@@ -584,6 +610,7 @@
       "cache": 3,
       "managed": true,
       "rebuild": true,
+      "restore": false,
       "isLeaf": true
     }
   },

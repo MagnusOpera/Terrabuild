@@ -51,6 +51,8 @@
           "outputs": [
             "*.planfile"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "A2ECFE80BD8663195DB0A044359ADE6D9F4E08C3831CED6767F4B2BF676A20DE",
@@ -94,6 +96,8 @@
           "outputs": [
             "*.planfile"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "1AE28706B2980A4E84699A2D289D729BE4C880376A9313AFA12C32E1520F3B20",
@@ -143,6 +147,8 @@
             "obj/*.props",
             "obj/*.targets"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "C420622D2E4A356A62A1B8E433375B345C91BD1E3ED5E2B6E74772F3BF839B31",
@@ -189,6 +195,8 @@
           "outputs": [
             "dist/**"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -223,6 +231,8 @@
             "^build"
           ],
           "outputs": [],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -273,6 +283,8 @@
             "obj/*.props",
             "obj/*.targets"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "C420622D2E4A356A62A1B8E433375B345C91BD1E3ED5E2B6E74772F3BF839B31",
@@ -308,6 +320,8 @@
             "obj/*.props",
             "obj/*.targets"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "83FFC378D8A4DE3E63A64813B19826BB598ECF58D153327B42418E1DB2483301",
@@ -343,6 +357,8 @@
             "obj/*.props",
             "obj/*.targets"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "4B539A162AEBDF8CE4C2958540E8E7E98D6678F81185F0EB540485EF7D38FD97",
@@ -396,6 +412,8 @@
           "outputs": [
             "dist"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "9A6077978162678FAB571475352B8B0AF63E6C2EED1A61094BCBDD35D8BDCCB2",
@@ -471,6 +489,8 @@
           "outputs": [
             "dist/**"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "0FDC5C8592AC168370CF0B46AC57CF266E7419D115E47BB6975CD6152C21273D",
@@ -508,6 +528,8 @@
             "^build"
           ],
           "outputs": [],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "50D55A43B040D7588938348660FCC1E7DC7DE5F6B1BA6BBD75E552060D6FB2AC",
@@ -560,6 +582,8 @@
             "target/debug/",
             "target/release/"
           ],
+          "managed": true,
+          "restore": false,
           "operations": [
             {
               "hash": "72FA6B2BF806E80FDF3BFC4BFCC4CF397C740DCC43ACBD7CD4D0DABE6F22C85A",

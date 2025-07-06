@@ -30,6 +30,7 @@ type Node = {
     Cache: Terrabuild.Extensibility.Cacheability
     Managed: bool
     Rebuild: bool
+    Restore: bool
 
     // tell if a node is leaf (that is no dependencies in same project)
     IsLeaf: bool

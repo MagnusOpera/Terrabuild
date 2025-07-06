@@ -31,7 +31,8 @@ type Target = {
     DependsOn: string set
     Outputs: string set
     Cache: Cacheability option
-    Managed: bool option
+    Managed: bool
+    Restore: bool
     Operations: TargetOperation list
 }
 
@@ -533,6 +534,12 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
             let targetManaged =
                 target.Managed
                 |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
+                |> Option.defaultValue true
+
+            let targetRestore =
+                target.Restore
+                |> Option.bind (Eval.asBoolOption << Eval.eval evaluationContext)
+                |> Option.defaultValue false
 
             let targetOutputs =
                 let targetOutputs =
@@ -562,6 +569,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
             let target =
                 { Target.Hash = targetHash
                   Target.Rebuild = targetRebuild
+                  Target.Restore = targetRestore
                   Target.DependsOn = targetDependsOn
                   Target.Cache = targetCache
                   Target.Managed = targetManaged
