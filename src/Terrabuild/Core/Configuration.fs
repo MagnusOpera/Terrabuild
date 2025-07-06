@@ -358,12 +358,11 @@ let private loadProjectDef (options: ConfigOptions.Options) (workspaceConfig: AS
 // this is the final stage: create targets and create the project
 let private finalizeProject projectDir evaluationContext (projectDef: LoadedProject) (projectDependencies: Map<string, Project>) =
     let projectId = projectDir |> String.toLower
-    let tbFiles = Set [ "WORKSPACE"; "PROJECT" ]
 
     // get dependencies on files
     let files =
         projectDir
-        |> IO.enumerateFilesBut projectDef.Includes (projectDef.Outputs + projectDef.Ignores + tbFiles)
+        |> IO.enumerateFilesBut projectDef.Includes (projectDef.Outputs + projectDef.Ignores)
         |> Set
 
     let sortedFiles =

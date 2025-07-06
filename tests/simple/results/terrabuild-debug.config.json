@@ -30,13 +30,14 @@
   "projects": {
     "deployments/terraform-deploy": {
       "directory": "deployments/terraform-deploy",
-      "hash": "A4D2ADC02146478FC7783DB850DC17C4FE7DF452015C22A43F091A3B2A824901",
+      "hash": "74DD8F173D6EAABCB39D4E41F15E8421FD1B03022551CB655E8E9501A7D510DD",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
       ],
       "files": [
         ".terraform.lock.hcl",
+        "PROJECT",
         "backend.tf",
         "test_res.tf",
         "variables.tf"
@@ -70,11 +71,11 @@
                     {
                       "dotnet_app_version": [
                         "string",
-                        "D52CC41EF867517BDAFE24D275F1BBBFC306AE1F67D388592B1C538E9D64B22C"
+                        "A6B3EFDD388EBBFEE6A8CC40CB4125F4E31189737D8AE74B87F1A363CC1E5400"
                       ],
                       "npm_app_version": [
                         "string",
-                        "8316952329CA00E8972DD4269B8E4B50D631A33F687066EC093F5D9F368F8671"
+                        "D4E260C3DCFF3605A0B2B0C53BC2EE0CAF780B385DDE9F7FCD6BBF4529A4F88B"
                       ]
                     }
                   ],
@@ -126,10 +127,11 @@
     },
     "libraries/dotnet-lib": {
       "directory": "libraries/dotnet-lib",
-      "hash": "BF7922FF2B67E20B593DC0C08FC7F7B6EF86030135170EF88D2BCDFA9E882B0E",
+      "hash": "2DCC3A4D5681DD60329704AE104430AAC29AE50AD63E193047C0EE62002FCC26",
       "dependencies": [],
       "files": [
         "Class1.cs",
+        "PROJECT",
         "dotnet-lib.csproj"
       ],
       "targets": {
@@ -175,9 +177,10 @@
     },
     "libraries/npm-lib": {
       "directory": "libraries/npm-lib",
-      "hash": "D16557EFAA0682B8ACFEE2C0A5A8E3121F7D0D5682BEABA14FF093182F1BF989",
+      "hash": "42251A3FE94834989EE0F135BEDEF76023512E5F5A0DB7D15DF0270B34802DE6",
       "dependencies": [],
       "files": [
+        "PROJECT",
         "package-lock.json",
         "package.json",
         "src/index.ts",
@@ -220,9 +223,11 @@
     },
     "libraries/shell-lib": {
       "directory": "libraries/shell-lib",
-      "hash": "90DBBB67F0EB0EEBCC7BEB1929682796805120FF8AE0C26C7FF742190F9A469A",
+      "hash": "17163E3CEBFDD94D511D906EAE915397691F2E8F0E0ECEFCF63AEF1C8EF4D0FF",
       "dependencies": [],
-      "files": [],
+      "files": [
+        "PROJECT"
+      ],
       "targets": {
         "build": {
           "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
@@ -258,13 +263,14 @@
     "projects/dotnet-app": {
       "id": "dotnet_app",
       "directory": "projects/dotnet-app",
-      "hash": "D52CC41EF867517BDAFE24D275F1BBBFC306AE1F67D388592B1C538E9D64B22C",
+      "hash": "A6B3EFDD388EBBFEE6A8CC40CB4125F4E31189737D8AE74B87F1A363CC1E5400",
       "dependencies": [
         "libraries/dotnet-lib"
       ],
       "files": [
         "../shared-folder/Terminal.cs",
         "Dockerfile",
+        "PROJECT",
         "Program.cs",
         "dotnet-app.csproj"
       ],
@@ -395,12 +401,13 @@
     },
     "projects/make-app": {
       "directory": "projects/make-app",
-      "hash": "6CCDE372BCED5FE1097546A2BA8B13939406310F4C70933E086FAE969B0EF4C1",
+      "hash": "814D331D5CFDB8D8B65F761C69352AB9D66EA0300014FB990FC9D91684A5DEA5",
       "dependencies": [
         "libraries/shell-lib"
       ],
       "files": [
-        "Makefile"
+        "Makefile",
+        "PROJECT"
       ],
       "targets": {
         "build": {
@@ -462,12 +469,13 @@
     "projects/npm-app": {
       "id": "npm_app",
       "directory": "projects/npm-app",
-      "hash": "8316952329CA00E8972DD4269B8E4B50D631A33F687066EC093F5D9F368F8671",
+      "hash": "D4E260C3DCFF3605A0B2B0C53BC2EE0CAF780B385DDE9F7FCD6BBF4529A4F88B",
       "dependencies": [
         "libraries/npm-lib"
       ],
       "files": [
         ".gitignore",
+        "PROJECT",
         "index.html",
         "package-lock.json",
         "package.json",
@@ -514,10 +522,11 @@
     },
     "projects/open-api": {
       "directory": "projects/open-api",
-      "hash": "D1412C5559BB61F034C55A9579AB659E25CAA42543754D8723163FA32EFEFDB0",
+      "hash": "40E90040BDDCC51E9F1C22C6FE649AED71E6B34C1425C8EF1CEF56924C10A468",
       "dependencies": [],
       "files": [
         ".gitignore",
+        "PROJECT",
         "api.json"
       ],
       "targets": {
@@ -564,11 +573,12 @@
     },
     "projects/rust-app": {
       "directory": "projects/rust-app",
-      "hash": "7A703D835BF13AAFE8CCC30E28CA81DB062F68CD3C0CA70EDB64A3DFED481042",
+      "hash": "128844436B36BD74060B018463FF82B5877E5ED64C6499FC7C651BED845938EA",
       "dependencies": [],
       "files": [
         "Cargo.lock",
         "Cargo.toml",
+        "PROJECT",
         "src/main.rs"
       ],
       "targets": {

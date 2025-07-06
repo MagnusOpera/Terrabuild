@@ -22,12 +22,14 @@
   "projects": {
     "a": {
       "directory": "A",
-      "hash": "A7A0CD9E85C9D7AA20838EBF01C91953701319318395EC276A797D66F9AB084D",
+      "hash": "F881857ECAB5D1A330D0DF9FC5A8FD215D783A411B0E4965FD73B228CFC63F45",
       "dependencies": [
         "b",
         "c"
       ],
-      "files": [],
+      "files": [
+        "PROJECT"
+      ],
       "targets": {
         "build": {
           "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
@@ -62,11 +64,13 @@
     },
     "b": {
       "directory": "B",
-      "hash": "93C4F757BAF84BE922E6F30EBA5A726573E0028C76082652B062DD5EE775EB39",
+      "hash": "9BD751EC513D9E50502E483A848655DF3B85F43D6455635965FFD9A02F9CE475",
       "dependencies": [
         "c"
       ],
-      "files": [],
+      "files": [
+        "PROJECT"
+      ],
       "targets": {
         "build": {
           "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
@@ -101,9 +105,11 @@
     },
     "c": {
       "directory": "C",
-      "hash": "D2FFA5DCF08258EA5851EDC06944F88D7C19865C3DF17E09693D7F640B4514FC",
+      "hash": "A65A35476A6AA51DCC6FDAE15D0DB103E9B3A055ACB8D133FD2E0801E295C18C",
       "dependencies": [],
-      "files": [],
+      "files": [
+        "PROJECT"
+      ],
       "targets": {
         "build": {
           "hash": "8B56DAA76BB451252D58A9AFF5D2E5A77D0568D8681204549E53A422C9FBDBF0",
