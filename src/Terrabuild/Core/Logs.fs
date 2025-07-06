@@ -120,7 +120,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
         let getOrigin (node: GraphDef.Node) =
             summary.Nodes |> Map.tryFind node.Id |> Option.map (fun nodeInfo -> nodeInfo.Request)
 
-        // TODO: pass build action getter
+        let graph = { graph with Nodes = nodes |> Seq.map (fun node -> node.Id, node) |> Map.ofSeq }
         let mermaid = Mermaid.render (Some getNodeStatus) (Some getOrigin) graph
         $"# Build Graph" |> append
         "```mermaid" |> append
@@ -216,8 +216,8 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
         fun nodes -> options.LogTypes |> List.iter (dump nodes)
 
     let sortedNodes =
-        summary.Nodes |> Map.map (fun nodeId _ -> graph.Nodes[nodeId])
-        |> Seq.map (fun (KeyValue(_, node)) -> node)
+        summary.Nodes
+        |> Seq.map (fun (KeyValue(nodeId, _)) -> graph.Nodes[nodeId])
         |> Seq.sortBy (fun node ->
             match summary.Nodes |> Map.tryFind node.Id with
             | Some nodeInfo ->

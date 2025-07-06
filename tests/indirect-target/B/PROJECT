@@ -1,0 +1,11 @@
+project b {
+    depends_on = [ project.a ]
+}
+
+target plan {
+    @shell echo { arguments = "plan B" }
+}
+
+target apply {
+    @shell echo { arguments = "apply B" }
+}

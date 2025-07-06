@@ -1,0 +1,31 @@
+
+# build projects
+target build {
+    depends_on = [ target.^build ]
+}
+
+# test projects
+target test {
+    depends_on = [ target.build ]
+}
+
+# generate artifacts
+target dist {
+    managed = false
+    depends_on = [ target.build
+                   target.^dist ]
+}
+
+# plan deployment
+target plan {
+    rebuild = terrabuild.retry
+    depends_on = [ target.dist
+                   target.^plan ]
+}
+
+# run deployment
+target apply {
+    managed = false
+    depends_on = [ target.plan
+                   target.^apply ]
+}
