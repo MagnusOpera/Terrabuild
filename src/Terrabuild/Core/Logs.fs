@@ -141,14 +141,14 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
 
     let dumpTerminal (nodes: GraphDef.Node seq) =
         let dumpTerminal (node: GraphDef.Node) =
-            let title = $"{node.Target} {node.ProjectDir}"
+            let label = $"{node.Target} {node.ProjectDir}"
 
-            let getHeaderFooter success title =
+            let getHeaderFooter success =
                 let color =
                     if success then $"{Ansi.Styles.green}{Ansi.Emojis.checkmark}"
                     else $"{Ansi.Styles.red}{Ansi.Emojis.crossmark}"
 
-                $"{color} {title}{Ansi.Styles.reset}", ""
+                $"{color} {label}{Ansi.Styles.reset}", ""
 
             let (logStart, logEnd), dumpLogs =
                 let cacheEntryId = GraphDef.buildCacheKey node
@@ -165,10 +165,10 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
                             )
                         )
 
-                    getHeaderFooter summary.IsSuccessful title, dumpLogs
+                    getHeaderFooter summary.IsSuccessful, dumpLogs
                 | _ ->
                     let dumpNoLog() = $"{Ansi.Styles.yellow}No logs available{Ansi.Styles.reset}" |> Terminal.writeLine
-                    getHeaderFooter false title, dumpNoLog
+                    getHeaderFooter false, dumpNoLog
 
             logStart |> Terminal.writeLine
             dumpLogs ()
@@ -181,13 +181,14 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
 
     let dumpGitHubActions (nodes: GraphDef.Node seq) =
         let dumpTerminal (node: GraphDef.Node) =
+            let label = $"{node.Target} {node.ProjectDir}"
             let cacheEntryId = GraphDef.buildCacheKey node
             let summary = cache.TryGetSummaryOnly false cacheEntryId
 
             match summary with
             | Some (_, summary) ->
                 if summary.IsSuccessful |> not then
-                    $"::error title=build failed::{node.Target} {node.ProjectDir}" |> Terminal.writeLine
+                    $"::error title=build failed::{label}" |> Terminal.writeLine
                     match summary.Operations |> List.tryLast with
                     | Some command ->
                         match command |> List.tryLast with
@@ -198,7 +199,7 @@ let dumpLogs (logId: Guid) (options: ConfigOptions.Options) (cache: ICache) (gra
                         | _ -> ()
                     | _ -> ()
             | None ->
-                $"::warning title=no logs::{node.Target} {node.ProjectDir}" |> Terminal.writeLine
+                $"::warning title=no logs::{label}" |> Terminal.writeLine
 
         nodes
         |> Seq.filter (fun node -> summary.Nodes |> Map.containsKey node.Id)
