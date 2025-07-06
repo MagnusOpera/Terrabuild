@@ -16,7 +16,7 @@
   "projects": {
     "a": {
       "directory": "A",
-      "hash": "CE24C7D4BBCA45AE8BB4AACDA925C35DD828536AFAF55FB15271EB0F1FA52EAA",
+      "hash": "9768B609581B45C5B94182F070E33EEEB9BEE7EC7C660AE33D991B884A7E58CD",
       "dependencies": [],
       "files": [
         "A.csproj",
@@ -73,7 +73,7 @@
     },
     "b": {
       "directory": "B",
-      "hash": "C54887690548A58E1E6220C83D97E3239943F79A4C51A0DFC7087DE52F57577A",
+      "hash": "AA0455154FD92FF4B2A87F1A58C300FFD8B4477B4E4E6A48FDBE564B2AE23128",
       "dependencies": [],
       "files": [
         "B.csproj",
@@ -130,7 +130,7 @@
     },
     "c": {
       "directory": "C",
-      "hash": "76C8F07B90D3785DD412BAF3BBCBD4B054084FA4B952DFE658A8073B15BA19C1",
+      "hash": "61B4361808216790136D76E2759424920908A9E9B3A6CB236885568DE29687C0",
       "dependencies": [
         "a",
         "b"
@@ -185,7 +185,7 @@
     },
     "d": {
       "directory": "D",
-      "hash": "81597327F78177AB91ED77989DF8373BF7138BDE82CB6D59BA1C5BD9994BE255",
+      "hash": "F34855F647A5C1E6C32C345FD5F96C9D3035C7F6E673137EE1581BD48C6EB211",
       "dependencies": [
         "c"
       ],
@@ -228,7 +228,7 @@
     },
     "e": {
       "directory": "E",
-      "hash": "D9ADE2A1821B9D2BBBB534435F6FF3CA40296AD7BFEED2094FD0460B9DCCB98C",
+      "hash": "2C7121C7A0F3BC964A84B694C2E0DF0208BE6A70E5BDB4642B950D9E2836FFC6",
       "dependencies": [
         "c"
       ],
@@ -271,7 +271,7 @@
     },
     "f": {
       "directory": "F",
-      "hash": "84D7C7DEABFE38F3471D9D74526A46F2344BA0C7A641CFDA3C43E16DC10DCB3D",
+      "hash": "A5FD6E4FF596B98F7675D945F5CE72A268F4820A87CA8C498BCB4BAFD95E34EA",
       "dependencies": [
         "d",
         "e"
@@ -310,7 +310,7 @@
     },
     "g": {
       "directory": "G",
-      "hash": "03ABE717383A7C29E355225594E80D4C9F531BE8F0C5DBAA9C3F7E43C8847761",
+      "hash": "23E650142A8D38D2171FEB10318F196F01970C1ACF039E69ED8C29FD163BC82A",
       "dependencies": [
         "c"
       ],
