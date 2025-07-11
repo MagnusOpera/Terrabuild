@@ -97,7 +97,7 @@
     "b": {
       "id": "b",
       "directory": "B",
-      "hash": "98BB71F75954058EB5CB3C977E720D125945511E98EBCE6499BC099C91C6823A",
+      "hash": "0D4635FF9549E163EEA450E6A2494A005BB7ED398C6B51DF80D2B527AD51415D",
       "dependencies": [
         "a"
       ],

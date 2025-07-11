@@ -375,11 +375,7 @@ let private finalizeProject projectDir evaluationContext (projectDef: LoadedProj
         |> Hash.sha256files
 
     let dependenciesHash =
-        let versionDependencies =
-            projectDependencies
-            |> Map.filter (fun projectId _ -> Set.contains projectId projectDef.Dependencies)
-            |> Map.map (fun _ depProj -> depProj.Hash)
-
+        let versionDependencies = projectDependencies |> Map.map (fun _ depProj -> depProj.Hash)
         versionDependencies.Values
         |> Seq.sort
         |> Hash.sha256strings
