@@ -30,7 +30,7 @@
   "projects": {
     "deployments/terraform-deploy": {
       "directory": "deployments/terraform-deploy",
-      "hash": "74DD8F173D6EAABCB39D4E41F15E8421FD1B03022551CB655E8E9501A7D510DD",
+      "hash": "B7CE2B2607F969D9947CD698BD24DE8883294FBB09450C29A3836B00BBA8EBFF",
       "dependencies": [
         "projects/dotnet-app",
         "projects/npm-app"
